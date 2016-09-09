@@ -25,6 +25,7 @@ import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultException;
+import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
@@ -35,7 +36,7 @@ import org.springframework.vault.support.VaultResponse;
  * @since 3.1
  * @see org.springframework.core.env.PropertiesPropertySource
  */
-public class VaultPropertySource extends EnumerablePropertySource<VaultTemplate> {
+public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
 	protected final static Logger logger = LoggerFactory.getLogger(VaultPropertySource.class);
 
@@ -47,11 +48,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultTemplate>
 	 * Create a new {@link VaultPropertySource} given a {@link VaultTemplate} and {@code path} inside of Vault. This
 	 * property source loads properties upon construction.
 	 *
-	 * @param template must not be {@literal null}.
+	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not be empty or {@literal null}.
 	 */
-	public VaultPropertySource(VaultTemplate template, String path) {
-		this(path, template, path);
+	public VaultPropertySource(VaultOperations vaultOperations, String path) {
+		this(path, vaultOperations, path);
 	}
 
 	/**
@@ -59,12 +60,12 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultTemplate>
 	 * Vault. This property source loads properties upon construction.
 	 *
 	 * @param name name of the property source, must not be {@literal null}.
-	 * @param template must not be {@literal null}.
+	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not be empty or {@literal null}.
 	 */
-	public VaultPropertySource(String name, VaultTemplate template, String path) {
+	public VaultPropertySource(String name, VaultOperations vaultOperations, String path) {
 
-		super(name, template);
+		super(name, vaultOperations);
 
 		Assert.hasText(path, "Path name must contain at least one character");
 		Assert.isTrue(!path.startsWith("/"), "Path name must not start with a slash (/)");

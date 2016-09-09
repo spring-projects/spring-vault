@@ -50,6 +50,46 @@ public class VaultEndpoint implements Serializable {
 	private String scheme = "https";
 
 	/**
+	 * Create a {@link VaultEndpoint} given a {@code host} and {@code port}.
+	 * 
+	 * @param host must not be empty or {@literal null}.
+	 * @param port must be a valid port in the range of 1-65535
+	 * @return a new {@link VaultEndpoint}.
+	 */
+	public static VaultEndpoint create(String host, int port) {
+
+		Assert.hasText(host, "Host must not be empty");
+
+		VaultEndpoint vaultEndpoint = new VaultEndpoint();
+
+		vaultEndpoint.setHost(host);
+		vaultEndpoint.setPort(port);
+
+		return vaultEndpoint;
+	}
+
+	/**
+	 * Create a {@link VaultEndpoint} given a {@link URI}.
+	 *
+	 * @param uri must contain hostname, port and scheme, must not be empty or {@literal null}.
+	 * @return a new {@link VaultEndpoint}.
+	 */
+	public static VaultEndpoint from(URI uri) {
+
+		Assert.notNull(uri, "URI must not be null");
+		Assert.hasText(uri.getScheme(), "Scheme must not be empty");
+		Assert.hasText(uri.getHost(), "Host must not be empty");
+
+		VaultEndpoint vaultEndpoint = new VaultEndpoint();
+
+		vaultEndpoint.setHost(uri.getHost());
+		vaultEndpoint.setPort(uri.getPort());
+		vaultEndpoint.setScheme(uri.getScheme());
+
+		return vaultEndpoint;
+	}
+
+	/**
 	 * @return the hostname.
 	 */
 	public String getHost() {
