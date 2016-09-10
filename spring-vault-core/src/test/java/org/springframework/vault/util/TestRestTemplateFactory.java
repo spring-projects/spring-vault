@@ -15,16 +15,20 @@
  */
 package org.springframework.vault.util;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.web.client.DefaultResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -70,11 +74,17 @@ public class TestRestTemplateFactory {
 
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 
-		RestTemplate RestTemplate = new RestTemplate();
-		RestTemplate.setErrorHandler(new DefaultResponseErrorHandler());
-		RestTemplate.setRequestFactory(requestFactory);
+		RestTemplate template = new RestTemplate();
+		template.setRequestFactory(requestFactory);
+		template.getInterceptors().add(new ClientHttpRequestInterceptor() {
+			@Override
+			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+					throws IOException {
+				return execution.execute(request, body);
+			}
+		});
 
-		return RestTemplate;
+		return template;
 	}
 
 	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {

@@ -32,7 +32,6 @@ import org.springframework.vault.core.VaultClientFactory;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Base class for Spring Vault configuration using JavaConfig.
@@ -111,10 +110,7 @@ public abstract class AbstractVaultConfiguration {
 	 */
 	@Bean
 	public VaultClient vaultClient() {
-
-		RestTemplate restTemplate = new RestTemplate(clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
-
-		return new VaultClient(restTemplate, vaultEndpoint());
+		return new VaultClient(clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(), vaultEndpoint());
 	}
 
 	/**

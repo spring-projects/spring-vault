@@ -147,7 +147,7 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		return vaultOperations.doWithVault(new VaultOperations.ClientCallback<VaultResponseEntity<String>>() {
 			@Override
 			public VaultResponseEntity<String> doWithVault(VaultClient client) {
-				return client.getForEntity("/auth/token/lookup-self", tokenResponse.getToken(), String.class);
+				return client.getForEntity("auth/token/lookup-self", tokenResponse.getToken(), String.class);
 			}
 		});
 	}

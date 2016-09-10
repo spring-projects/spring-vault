@@ -26,6 +26,11 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.client.ClientHttpRequestExecution;
+import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultTemplate;
@@ -60,6 +65,45 @@ public class VaultClient extends VaultAccessor {
 	 */
 	public VaultClient() {
 		this(new RestTemplate(), new VaultEndpoint());
+	}
+
+	/**
+	 * Creates a new {@link VaultClient} for a {@link ClientHttpRequestFactory} and {@link VaultEndpoint}.
+	 *
+	 * @param requestFactory must not be {@literal null}.
+	 * @param endpoint must not be {@literal null}.
+	 */
+	public VaultClient(ClientHttpRequestFactory requestFactory, VaultEndpoint endpoint) {
+
+		super(newRestTemplate(requestFactory));
+
+		Assert.notNull(endpoint, "VaultEndpoint must not be null");
+		this.endpoint = endpoint;
+	}
+
+	/**
+	 * Create a {@link RestTemplate} using an interceptor given a {@link ClientHttpRequestFactory}. This forces
+	 * {@link RestTemplate} to create the body representation instead of streaming the body to the TCP channel. Streaming
+	 * the body without knowing the size in advance will skip the {@link HttpHeaders#CONTENT_LENGTH} makes Vault upset.
+	 * 
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate}
+	 */
+	private static RestTemplate newRestTemplate(ClientHttpRequestFactory requestFactory) {
+
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+
+		RestTemplate restTemplate = new RestTemplate(requestFactory);
+		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
+
+			@Override
+			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
+					throws IOException {
+				return execution.execute(request, body);
+			}
+		});
+
+		return restTemplate;
 	}
 
 	/**
@@ -193,6 +237,9 @@ public class VaultClient extends VaultAccessor {
 	public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate, HttpMethod method,
 			HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
 
+		Assert.hasText(pathTemplate, "Path template must not be null or empty");
+		Assert.isTrue(!pathTemplate.startsWith("/"), "Path template must not start with a slash (/)");
+
 		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables) : getEndpoint().createUri(pathTemplate);
 
 		return exchange(uri, method, requestEntity, responseType);
@@ -219,6 +266,9 @@ public class VaultClient extends VaultAccessor {
 			HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables)
 			throws RestClientException {
 
+		Assert.hasText(pathTemplate, "Path template must not be null or empty");
+		Assert.isTrue(!pathTemplate.startsWith("/"), "Path template must not start with a slash (/)");
+
 		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables) : getEndpoint().createUri(pathTemplate);
 
 		return exchange(uri, method, requestEntity, responseType);
@@ -234,6 +284,9 @@ public class VaultClient extends VaultAccessor {
 	 * @return the {@link RestTemplateCallback} return value.
 	 */
 	public <T> T doWithRestTemplate(String pathTemplate, Map<String, ?> uriVariables, RestTemplateCallback<T> callback) {
+
+		Assert.hasText(pathTemplate, "Path template must not be null or empty");
+		Assert.isTrue(!pathTemplate.startsWith("/"), "Path template must not start with a slash (/)");
 
 		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables) : getEndpoint().createUri(pathTemplate);
 

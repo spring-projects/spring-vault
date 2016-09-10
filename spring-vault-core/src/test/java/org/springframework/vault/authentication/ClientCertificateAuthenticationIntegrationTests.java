@@ -38,7 +38,6 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication}.
@@ -76,7 +75,7 @@ public class ClientCertificateAuthenticationIntegrationTests extends Integration
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod());
-		VaultClient vaultClient = new VaultClient(new RestTemplate(clientHttpRequestFactory), new VaultEndpoint());
+		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory, new VaultEndpoint());
 
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(vaultClient);
 		VaultToken login = authentication.login();
@@ -90,7 +89,7 @@ public class ClientCertificateAuthenticationIntegrationTests extends Integration
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				Settings.createSslConfiguration());
-		VaultClient vaultClient = new VaultClient(new RestTemplate(clientHttpRequestFactory), new VaultEndpoint());
+		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory, new VaultEndpoint());
 
 		new ClientCertificateAuthentication(vaultClient).login();
 	}
