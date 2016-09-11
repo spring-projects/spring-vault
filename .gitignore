@@ -1,0 +1,15 @@
+*.iml
+*.ipr
+*.iws
+.classpath
+.idea
+.project
+.settings
+.checkstyle
+bin
+build
+out
+target
+/vault/
+/download/
+/work/

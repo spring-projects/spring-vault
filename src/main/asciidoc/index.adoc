@@ -1,0 +1,26 @@
+= Spring Vault - Reference Documentation
+Mark Paluch;
+:revnumber: {version}
+:revdate: {localdate}
+:toc:
+:toc-placement!:
+
+(C) 2016 The original authors.
+
+NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
+
+toc::[]
+
+:leveloffset: +1
+include::preface.adoc[]
+include::new-features.adoc[]
+:leveloffset: -1
+
+[[reference]]
+= Reference Documentation
+
+:leveloffset: +1
+include::reference/introduction.adoc[]
+include::reference/vault.adoc[]
+:leveloffset: -1
+

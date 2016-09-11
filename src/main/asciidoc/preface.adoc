@@ -1,0 +1,62 @@
+[[preface]]
+= Preface
+
+The Spring Vault project applies core Spring concepts to the development of solutions using Hashicorp Vault. We provide a "template" as a high-level abstraction for storing and querying documents. You will notice similarities to the REST support in the Spring Framework.
+
+This document is the reference guide for Spring Vault. It explains Vault concepts and semantics and the syntax.
+
+This section provides some basic introduction to Spring and Vault. The rest of the document refers only to Spring Vault features and assumes the user is familiar with Hashicorp Vault as well as Spring concepts.
+
+[[get-started:first-steps:spring]]
+== Knowing Spring
+Spring Vault uses Spring framework's http://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/spring-core.html[core] functionality, such as the http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/beans.html[IoC] container, http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/validation.html#core-convert[type conversion system], http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/expressions.html[expression language], http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/jmx.html[JMX integration], and portable http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/dao.html#dao-exceptions[DAO exception hierarchy]. While it is not important to know the Spring APIs, understanding the concepts behind them is. At a minimum, the idea behind IoC should be familiar for whatever IoC container you choose to use.
+
+The core functionality of the Vault support can be used directly, with no need to invoke the IoC services of the Spring Container. This is much like `RestTemplate` which can be used 'standalone' without any other services of the Spring container. To leverage all the features of Spring Vault document, such as the session support, you will need to configure some parts of the library using Spring.
+
+To learn more about Spring, you can refer to the comprehensive (and sometimes disarming) documentation that explains in detail the Spring Framework. There are a lot of articles, blog entries and books on the matter - take a look at the Spring framework http://spring.io/docs[home page ] for more information.
+
+[[get-started:first-steps:vault]]
+== Knowing Vault
+
+Security and working with secrets is a concern of every developer working with databases, user credentials or API keys. Vault steps in by providing a secure storage combined with access control, revocation, key rolling and auditing. In short: Vault is a service for securely accessing and storing  secrets. A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more.
+
+The jumping off ground for learning about Vault is www.vaultproject.io. Here is a list of useful resources:
+
+* The manual introduces Vault and contains links to getting started guides, reference documentation and tutorials.
+
+* The online shell provides a convenient way to interact with a Vault instance in combination with the online tutorial.
+
+* https://www.vaultproject.io/intro/index.html[Hashicorp Vault Introduction]
+
+* https://www.vaultproject.io/docs/index.html[Hashicorp Vault Documentation]
+
+[[requirements]]
+== Requirements
+
+Spring Vault 1.x binaries requires JDK level 6.0 and above, and http://spring.io/docs[Spring Framework] {springVersion} and above.
+
+In terms of Vault, https://www.vaultproject.io/[Vault] at least 0.5.
+
+== Additional Help Resources
+
+Learning a new framework is not always straight forward. In this section, we try to provide what we think is an easy to follow guide for starting with Spring Vault module. However, if you encounter issues or you are just looking for advice, feel free to use one of the links below:
+
+[[get-started:help]]
+=== Support
+
+There are a few support options available:
+
+[[get-started:help:community]]
+==== Community Forum
+
+Spring Vault on Stackoverflow http://stackoverflow.com/questions/tagged/spring-vault[Stackoverflow] is a tag for all Spring Vault users to share information and help each other. Note that registration is needed *only* for posting.
+
+[[get-started:help:professional]]
+==== Professional Support
+
+Professional, from-the-source support, with guaranteed response time, is available from http://pivotal.io/[Pivotal Sofware, Inc.], the company behind Spring Vault and Spring.
+
+[[get-started:up-to-date]]
+=== Following Development
+
+For information on the Spring Vault source code repository, nightly builds and snapshot artifacts please see the http://projects.spring.io/spring-vault/[Spring Vault homepage]. You can help make Spring Vault best serve the needs of the Spring community by interacting with developers through the Community on http://stackoverflow.com/questions/tagged/spring-vault[Stackoverflow]. If you encounter a bug or want to suggest an improvement, please create a ticket on the Spring Vault issue https://github.com/spring-projects/spring-vault/issues[tracker]. To stay up to date with the latest news and announcements in the Spring ecosystem, subscribe to the Spring Community http://spring.io[Portal]. Lastly, you can follow the Spring http://spring.io/blog[blog ]or the project team on Twitter (http://twitter.com/springcentral[SpringCentral]).

@@ -1,0 +1,8 @@
+[[new-features]]
+= New & Noteworthy
+
+[[new-features.1-0-0]]
+== What's new in Spring Vault 1.0
+
+* Initial Vault support.
+

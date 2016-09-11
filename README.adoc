@@ -1,0 +1,219 @@
+
+Spring Vault provides client-side support for accessing, storing and revoking secrets.
+With https://www.vaultproject.io[Hashicorp's Vault] you have a central place to manage external secret data for applications across all environments.
+Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
+
+== Features
+
+=== Spring Vault
+
+Specifically for Spring applications:
+
+* JavaConfig for Vault Client
+* https://www.vaultproject.io/docs/auth/token.html[Token], https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication,
+and https://www.vaultproject.io/docs/auth/aws-ec2.html[AWS-EC2] authentication
+
+== Quick Start
+
+*Prerequisites*
+
+To get started with Vault and this guide you need a
+*NIX-like operating systems that provides:
+
+* `wget`, `openssl` and `unzip`
+* at least Java 6 and a properly configured `JAVA_HOME` environment variable
+
+*Install Vault*
+
+----
+$ src/test/bash/install_vault.sh
+----
+
+*Create SSL certificates for Vault*
+
+----
+$ src/test/bash/create_certificates.sh
+----
+
+NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jsk`. If you want to run Spring Vault using this quickstart guide you need to configure the truststore to `file:work/keystore.jks`.
+
+*Start Vault server*
+
+----
+$ src/test/bash/local_run_vault.sh
+----
+
+Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and
+`https`.
+Vault is sealed and not initialized when starting up
+so you need to initialize it first.
+
+----
+$ export VAULT_ADDR="https://localhost:8200"
+$ export VAULT_SKIP_VERIFY=true # Don't do this for production
+$ vault init
+----
+
+You should see something like:
+
+----
+Key 1: 7149c6a2e16b8833f6eb1e76df03e47f6113a3288b3093faf5033d44f0e70fe701
+Key 2: 901c534c7988c18c20435a85213c683bdcf0efcd82e38e2893779f152978c18c02
+Key 3: 03ff3948575b1165a20c20ee7c3e6edf04f4cdbe0e82dbff5be49c63f98bc03a03
+Key 4: 216ae5cc3ddaf93ceb8e1d15bb9fc3176653f5b738f5f3d1ee00cd7dccbe926e04
+Key 5: b2898fc8130929d569c1677ee69dc5f3be57d7c4b494a6062693ce0b1c4d93d805
+Initial Root Token: 19aefa97-cccc-bbbb-aaaa-225940e63d76
+
+Vault initialized with 5 keys and a key threshold of 3. Please
+securely distribute the above keys. When the Vault is re-sealed,
+restarted, or stopped, you must provide at least 3 of these keys
+to unseal it again.
+
+Vault does not store the master key. Without at least 3 keys,
+your Vault will remain permanently sealed.
+----
+
+Vault will initialize and return a set of unsealing keys and the root token.
+Pick 3 keys and unseal Vault.
+
+----
+$ vault unseal (Key 1)
+$ vault unseal (Key 2)
+$ vault unseal (Key 3)
+----
+
+Vault is now initialized and unsealed.
+
+== Building
+
+==== Build requirements for Vault
+
+Spring Vault requires SSL certificates and a running
+Vault instance listening on `localhost:8200`. Certificates and the Vault
+setup are scripted, the scripts are located in `src/test/bash`.
+
+The following scripts need to be run prior to building the project for the tests to pass.
+
+    $ ./src/test/bash/install_vault.sh
+    $ ./src/test/bash/create_certificates.sh
+    $ ./src/test/bash/local_run_vault.sh
+
+Changes to the documentation should be made to the adocs found under `src/main/asciidoc/`
+
+=== Basic Compile and Test
+
+To build the source you will need to install JDK 1.6.
+
+Spring Vault uses Maven for most build-related activities, and you
+should be able to get off the ground quite quickly by cloning the
+project you are interested in and typing
+
+----
+$ ./mvnw install
+----
+
+NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command
+in place of `./mvnw` in the examples below. If you do that you also
+might need to add `-P spring` if your local Maven settings do not
+contain repository declarations for spring pre-release artifacts.
+
+NOTE: Be aware that you might need to increase the amount of memory
+available to Maven by setting a `MAVEN_OPTS` environment variable with
+a value like `-Xmx512m -XX:MaxPermSize=128m`. We try to cover this in
+the `.mvn` configuration, so if you find you have to do it to make a
+build succeed, please raise a ticket to get the settings added to
+source control.
+
+For hints on how to build the project look in `.travis.yml` if there
+is one. There should be a "script" and maybe "install" command. Also
+look at the "services" section to see if any services need to be
+running locally (e.g. mongo or rabbit).  Ignore the git-related bits
+that you might find in "before_install" since they're related to setting git
+credentials and you already have those.
+
+NOTE: If all else fails, build with the command from `.travis.yml` (usually
+`./mvnw install`).
+
+=== Documentation
+
+The module has a "distribute" profile, and if you switch
+that on it will try to build asciidoc sources from
+`src/main/asciidoc`.
+
+=== Working with the code
+If you don't have an IDE preference we would recommend that you use
+http://www.springsource.com/developer/sts[Spring Tools Suite] or
+http://eclipse.org[Eclipse] when working with the code. We use the
+http://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
+should also work without issue as long as they use Maven 3.3.3 or better.
+
+==== Importing into eclipse with m2eclipse
+We recommend the http://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
+eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
+marketplace".
+
+NOTE: Older versions of m2e do not support Maven 3.3, so once the
+projects are imported into Eclipse you will also need to tell
+m2eclipse to use the right profile for the projects.  If you
+see many different errors related to the POMs in the projects, check
+that you have an up to date installation.  If you can't upgrade m2e,
+add the "spring" profile to your `settings.xml`. Alternatively you can
+copy the repository settings from the "spring" profile of the parent
+pom into your `settings.xml`.
+
+==== Importing into eclipse without m2eclipse
+If you prefer not to use m2eclipse you can generate eclipse project metadata using the
+following command:
+
+[indent=0]
+----
+	$ ./mvnw eclipse:eclipse
+----
+
+The generated eclipse projects can be imported by selecting `import existing projects`
+from the `file` menu.
+
+== Contributing
+
+Spring Vault is released under the non-restrictive Apache 2.0 license,
+and follows a very standard Github development process, using Github
+tracker for issues and merging pull requests into master. If you want
+to contribute even something trivial please do not hesitate, but
+follow the guidelines below.
+
+=== Sign the Contributor License Agreement
+Before we accept a non-trivial patch or pull request we will need you to sign the
+https://cla.pivotal.io/sign/spring[Contributor License Agreement].
+Signing the contributor's agreement does not grant anyone commit rights to the main
+repository, but it does mean that we can accept your contributions, and you will get an
+author credit if we do.  Active contributors might be asked to join the core team, and
+given the ability to merge pull requests.
+
+=== Code of Conduct
+This project adheres to the Contributor Covenant https://github.com/spring-framework/spring-vault/blob/master/CODE_OF_CONDUCT.adoc[code of
+conduct]. By participating, you  are expected to uphold this code. Please report
+unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
+=== Code Conventions and Housekeeping
+None of these is essential for a pull request, but they will all help.  They can also be
+added after the original pull request but before a merge.
+
+* Use the Spring Framework code format conventions. If you use Eclipse
+  you can import formatter settings using the
+  `eclipse-code-formatter.xml` file from the
+  https://raw.githubusercontent.com/spring-framework/spring-vault/master/etc/ide/eclipse-code-formatter.xml[project]. If using IntelliJ, you can use the
+  http://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
+  Plugin] to import the same file.
+* Make sure all new `.java` files to have a Javadoc class comment with at least an
+  `@author` tag identifying you, and preferably at least a paragraph on what the class is
+  for.
+* Add the ASF license header comment to all new `.java` files (copy from existing files
+  in the project)
+* Add yourself as an `@author` to the .java files that you modify substantially (more
+  than cosmetic changes).
+* Please include unit tests.
+* If no-one else is using your branch, please rebase it against the current master (or
+  other target branch in the main project).
+* When writing a commit message please follow http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions],
+  if you are fixing an existing issue please add `Fixes gh-XXXX` at the end of the commit
+  message (where XXXX is the issue number).

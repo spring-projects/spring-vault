@@ -1,0 +1,20 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+install:
+  - mkdir -p download
+  - src/test/bash/create_certificates.sh
+  - src/test/bash/install_vault.sh
+  - src/test/bash/local_run_vault.sh &
+
+script: mvn clean verify
+
+after_script:
+  - pkill vault
+
+cache:
+  directories:
+    - '$HOME/.m2/repository'
+    - 'download'

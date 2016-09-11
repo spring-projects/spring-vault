@@ -1,0 +1,13 @@
+
+[[introduction]]
+= Introduction
+
+== Document Structure
+
+This part of the reference documentation explains the core functionality offered by Spring Vault.
+
+<<vault.core>> introduces the Vault module feature set.
+
+Spring Vault provides client-side support for accessing, storing and revoking secrets.
+With https://www.vaultproject.io[Hashicorp's Vault] you have a central place to manage external secret data for applications across all environments.
+Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
