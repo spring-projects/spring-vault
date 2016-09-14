@@ -1,3 +1,5 @@
+= Spring Vault
+
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
 With https://www.vaultproject.io[Hashicorp's Vault] you have a central place to manage external secret data for applications across all environments.

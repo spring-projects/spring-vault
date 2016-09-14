@@ -1,0 +1,112 @@
+---
+# The name of your project
+title: Spring Vault
+
+badges:
+
+  # Specify your project's twitter handle, if any. Delete if none.
+  twitter: SpringCentral
+
+  # Customize your project's badges. Delete any entries that do not apply.
+  custom:
+    - name: Source (GitHub)
+      url:  https://github.com/spring-projects/spring-vault
+      icon: github
+
+    - name: Issues (JIRA)
+      url:  https://github.com/spring-projects/spring-vault/issues
+      icon: tracking
+
+    - name: CI (Bamboo)
+      url:  https://travis-ci.org/spring-projects/spring-vault
+      icon: ci
+
+    - name: StackOverflow
+      url:  http://stackoverflow.com/questions/tagged/spring-vault
+      icon: stackoverflow
+
+
+---
+<!DOCTYPE HTML>
+<html lang="en-US">
+
+<!-- Specify the parent of this project (or delete if none) to influence the rendering of the breadcrumb -->
+{% capture parent_link %}
+[Spring Vault]({{ site.projects_site_url }}/spring-vault)
+{% endcapture %}
+
+
+{% capture billboard_description %}
+
+Spring Vault provides familiar Spring abstractions and Client support for Spring applications. It offers both low-level and
+high-level abstractions for interacting with Vault, freeing the user from infrastructural concerns.
+
+{% endcapture %}
+
+{% capture main_content %}
+
+## Features
+
+* Connection package as low-level abstraction
+* Reading, writing and deleting data from Vault with object mapping support
+
+<span id="quick-start"></span>
+
+## Quick Start
+
+{% include download_widget.md %}
+
+#### Configure VaultTemplate
+
+```java
+@Configuration
+class VaultConfiguration extends AbstractVaultConfiguration {
+
+  @Override
+  public VaultEndpoint vaultEndpoint() {
+    return new VaultEndpoint();
+  }
+
+  @Override
+  public ClientAuthentication clientAuthentication() {
+    return new TokenAuthentication("…");
+  }
+}
+```
+
+
+#### Inject and use VaultTemplate
+
+```java
+public class Example {
+
+  // inject the actual template
+  @Autowired
+  private VaultOperations operations;
+
+  public void writeSecrets(String userId, String password) {
+
+    Map<String, String> data = new HashMap<String, String>();
+    data.put("password", password);
+
+    operations.write(userId, data);
+  }
+
+  public Person readSecrets(String userId) {
+
+    VaultResponseSupport<Person> response = operations.read(userId, Person.class);
+    return response.getBody();
+    }
+}
+```
+
+{% endcapture %}
+
+{% capture related_resources %}
+
+
+{% endcapture %}
+
+
+{% include project_page.html %}
+</html>
