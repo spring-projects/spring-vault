@@ -17,6 +17,8 @@ package org.springframework.vault.support;
 
 import java.util.Map;
 
+import org.springframework.util.Assert;
+
 /**
  * Value object to bind Vault HTTP Mount API requests/responses.
  * 
@@ -30,9 +32,20 @@ public class VaultMount {
 
 	private Map<String, Object> config;
 
+	/**
+	 * Creates a new {@link VaultMount}.
+	 */
 	public VaultMount() {}
 
+	/**
+	 * Creates a new {@link VaultMount} given a {@code type}.
+	 * 
+	 * @param type must not be empty or {@literal null}.
+	 */
 	public VaultMount(String type) {
+
+		Assert.hasText(type, "Type must not be empty");
+
 		this.type = type;
 	}
 

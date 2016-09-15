@@ -60,6 +60,19 @@ public interface VaultOperations {
 	VaultTokenOperations opsForToken();
 
 	/**
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	VaultTransitOperations opsForTransit();
+
+	/**
+	 * Returns {@link VaultTransitOperations} if the transit backend is mounted on a different path than {@code transit}.
+	 * 
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	VaultTransitOperations opsForTransit(String path);
+
+	/**
 	 * Read from a secret backend. Reading data using this method is suitable for secret backends that do not require a
 	 * request body.
 	 *
@@ -102,7 +115,8 @@ public interface VaultOperations {
 	void delete(String path);
 
 	/**
-	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using {@link VaultClient} without requiring a session.
+	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using {@link VaultClient} without requiring
+	 * a session.
 	 *
 	 * @param clientCallback the request.
 	 * @return the {@link ClientCallback} return value.

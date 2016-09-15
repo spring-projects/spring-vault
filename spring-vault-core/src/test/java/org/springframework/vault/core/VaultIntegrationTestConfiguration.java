@@ -15,10 +15,8 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.DefaultSessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.AbstractVaultConfiguration;
@@ -46,28 +44,5 @@ class VaultIntegrationTestConfiguration extends AbstractVaultConfiguration {
 	@Override
 	public SslConfiguration sslConfiguration() {
 		return Settings.createSslConfiguration();
-	}
-}
-
-class test {
-
-	@Bean
-	public VaultTemplate vaultTemplate() {
-
-		VaultTemplate vaultTemplate = new VaultTemplate();
-		vaultTemplate.setSessionManager(sessionManager());
-		vaultTemplate.setVaultClientFactory(clientFactory());
-
-		return vaultTemplate;
-	}
-
-	@Bean
-	public DefaultVaultClientFactory clientFactory() {
-		return new DefaultVaultClientFactory();
-	}
-
-	@Bean
-	public DefaultSessionManager sessionManager() {
-		return new DefaultSessionManager(new TokenAuthentication("…"));
 	}
 }

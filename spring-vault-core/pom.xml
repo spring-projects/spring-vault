@@ -13,8 +13,6 @@
 	<description>Spring Vault Core Components</description>
 	<packaging>jar</packaging>
 
-	<url>http://projects.spring.io/spring-vault/</url>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>

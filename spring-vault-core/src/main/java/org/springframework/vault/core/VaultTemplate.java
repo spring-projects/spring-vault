@@ -120,13 +120,23 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 	}
 
 	@Override
+	public VaultSysOperations opsForSys() {
+		return new VaultSysTemplate(this);
+	}
+
+	@Override
 	public VaultTokenOperations opsForToken() {
 		return new VaultTokenTemplate(this);
 	}
 
 	@Override
-	public VaultSysOperations opsForSys() {
-		return new VaultSysTemplate(this);
+	public VaultTransitOperations opsForTransit() {
+		return opsForTransit("transit");
+	}
+
+	@Override
+	public VaultTransitOperations opsForTransit(String path) {
+		return new VaultTransitTemplate(this, path);
 	}
 
 	@Override
