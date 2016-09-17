@@ -17,10 +17,10 @@ package org.springframework.vault.core;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -40,6 +40,8 @@ import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -234,8 +236,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static class GetMounts implements SessionCallback<Map<String, VaultMount>> {
 
-		private static final ParameterizedTypeReference<VaultResponseSupport<Map<String, VaultMount>>> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultResponseSupport<Map<String, VaultMount>>>() {
-		};
+		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {};
 
 		private final String path;
 
@@ -246,15 +247,52 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public Map<String, VaultMount> doWithVault(VaultOperations.VaultSession session) {
 
-			VaultResponseEntity<VaultResponseSupport<Map<String, VaultMount>>> response = session.exchange(path, HttpMethod.GET, null,
-					MOUNT_TYPE_REF, Collections.<String, Object>emptyMap());
+			VaultResponseEntity<VaultMountsResponse> response = session.exchange(path, HttpMethod.GET, null, MOUNT_TYPE_REF,
+					Collections.<String, Object> emptyMap());
 
 			if (response.isSuccessful() && response.hasBody()) {
-				return response.getBody().getData();
+
+				VaultMountsResponse body = response.getBody();
+
+				if (body.getData() != null) {
+					return response.getBody().getData();
+				}
+
+				return response.getBody().getTopLevelMounts();
 			}
 
 			throw new VaultException(buildExceptionMessage(response));
 		}
+
+		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
+
+			private Map<String, VaultMount> topLevelMounts = new HashMap<String, VaultMount>();
+
+			@JsonIgnore
+			public Map<String, VaultMount> getTopLevelMounts() {
+				return topLevelMounts;
+			}
+
+			@SuppressWarnings("unchecked")
+			@JsonAnySetter
+			public void set(String name, Object value) {
+
+				if (value instanceof Map) {
+
+					Map<String, Object> map = (Map) value;
+
+					if (map.containsKey("type")) {
+
+						VaultMount vaultMount = new VaultMount((String) map.get("type"));
+						vaultMount.setDescription((String) map.get("description"));
+						vaultMount.setConfig((Map) map.get("config"));
+
+						topLevelMounts.put(name, vaultMount);
+					}
+				}
+			}
+		}
+
 	}
 
 	private static class Health implements VaultAccessor.RestTemplateCallback<VaultHealthResponse> {

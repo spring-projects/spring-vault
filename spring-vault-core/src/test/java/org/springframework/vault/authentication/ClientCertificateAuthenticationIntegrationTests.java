@@ -26,11 +26,11 @@ import java.util.Map;
 import org.assertj.core.util.Files;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.ClientOptions;
@@ -84,7 +84,8 @@ public class ClientCertificateAuthenticationIntegrationTests extends Integration
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
+	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we receive a VaultException here.
+	@Test(expected = NestedRuntimeException.class)
 	public void loginShouldFail() throws Exception {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),

@@ -127,7 +127,8 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponseEntity<String> response = lookupSelf(tokenResponse);
 
-		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		assertThat(response.getStatusCode()).isIn(/* <= Vault 0.6.0 */ HttpStatus.BAD_REQUEST,
+				/* >= Vault 0.6.1 */ HttpStatus.FORBIDDEN);
 		assertThat(response.getMessage()).isEqualTo("permission denied");
 	}
 

@@ -3,6 +3,12 @@ language: java
 jdk:
   - oraclejdk8
 
+env:
+  matrix:
+    - VAULT_VER=0.5.2
+    - VAULT_VER=0.6.0
+    - VAULT_VER=0.6.1
+
 install:
   - mkdir -p download
   - src/test/bash/create_certificates.sh

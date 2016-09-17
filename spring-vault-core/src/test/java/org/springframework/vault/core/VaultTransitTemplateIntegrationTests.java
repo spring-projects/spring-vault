@@ -24,9 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultTransitKey;
+import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.support.VaultTransitRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -108,7 +108,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			transitOperations.deleteKey("hello-world");
 			fail("Missing VaultException");
 		} catch (VaultException e) {
-			assertThat(e).hasMessageContaining("could not delete");
+			assertThat(e).hasMessageContaining("Status 400");
 		}
 	}
 
