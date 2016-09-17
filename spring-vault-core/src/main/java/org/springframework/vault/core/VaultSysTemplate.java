@@ -150,20 +150,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.doWithVault(new SessionCallback<Void>() {
-			@Override
-			public Void doWithVault(VaultOperations.VaultSession session) {
-
-				VaultResponseEntity<Map<?, ?>> response = session.exchange("sys/mounts/{mount}", HttpMethod.PUT,
-						new HttpEntity<VaultMount>(vaultMount), Map.class, Collections.singletonMap("mount", path));
-
-				if (response.isSuccessful()) {
-					return null;
-				}
-
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+		vaultOperations.write(String.format("sys/mounts/%s", path), vaultMount);
 	}
 
 	@Override
@@ -176,21 +163,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.doWithVault(new SessionCallback<Void>() {
-
-			@Override
-			public Void doWithVault(VaultOperations.VaultSession session) {
-
-				VaultResponseEntity<Map<?, ?>> response = session.exchange("sys/mounts/{mount}", HttpMethod.DELETE, null,
-						Map.class, Collections.singletonMap("mount", path));
-
-				if (response.isSuccessful()) {
-					return null;
-				}
-
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+		vaultOperations.delete(String.format("sys/mounts/%s", path));
 	}
 
 	@Override
@@ -199,20 +172,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.doWithVault(new SessionCallback<Void>() {
-			@Override
-			public Void doWithVault(VaultOperations.VaultSession session) {
-
-				VaultResponseEntity<Map<?, ?>> response = session.exchange("sys/auth/{mount}", HttpMethod.PUT,
-						new HttpEntity<VaultMount>(vaultMount), Map.class, Collections.singletonMap("mount", path));
-
-				if (response.isSuccessful()) {
-					return null;
-				}
-
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+		vaultOperations.write(String.format("sys/auth/%s", path), vaultMount);
 	}
 
 	@Override
@@ -225,21 +185,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.doWithVault(new SessionCallback<Void>() {
-
-			@Override
-			public Void doWithVault(VaultOperations.VaultSession session) {
-
-				VaultResponseEntity<Map<?, ?>> response = session.exchange("sys/auth/{mount}", HttpMethod.DELETE, null,
-						Map.class, Collections.singletonMap("mount", path));
-
-				if (response.isSuccessful()) {
-					return null;
-				}
-
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+		vaultOperations.delete(String.format("sys/auth/%s", path));
 	}
 
 	@Override
@@ -293,7 +239,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private final String path;
 
-		public GetMounts(String path) {
+		GetMounts(String path) {
 			this.path = path;
 		}
 
