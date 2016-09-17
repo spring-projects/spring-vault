@@ -29,11 +29,14 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
+ * Vault preparation utility class. This class allows preparing Vault for integration tests.
+ * 
  * @author Mark Paluch
  */
 public class PrepareVault {
 
 	private final VaultOperations vaultOperations;
+
 	private final VaultSysOperations adminOperations;
 
 	public PrepareVault(VaultOperations vaultOperations) {
@@ -105,7 +108,7 @@ public class PrepareVault {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
 
-		adminOperations.authMount(authBackend, new VaultMount(authBackend));
+		adminOperations.authMount(authBackend, VaultMount.create(authBackend));
 	}
 
 	/**
@@ -130,7 +133,7 @@ public class PrepareVault {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 
-		adminOperations.mount(secretBackend, new VaultMount(secretBackend));
+		adminOperations.mount(secretBackend, VaultMount.create(secretBackend));
 	}
 
 	/**

@@ -33,8 +33,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * AWS-EC2 login implementation. AWS-EC2 login uses the EC2 identity document and a nonce to login into Vault. AWS-EC2
- * login obtains the PKCS#7 signed EC2 identity document and generates a {@link #createNonce() nonce}.
+ * AWS-EC2 login implementation.
+ * <p>
+ * AWS-EC2 login uses the EC2 identity document and a nonce to login into Vault. AWS-EC2 login obtains the PKCS#7 signed
+ * EC2 identity document and generates a {@link #createNonce() nonce}. Instances of this class are immutable once
+ * constructed.
  *
  * @author Mark Paluch
  * @see AwsEc2AuthenticationOptions
@@ -45,8 +48,11 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	private final static Logger logger = LoggerFactory.getLogger(AwsEc2Authentication.class);
 
 	private final AwsEc2AuthenticationOptions options;
+
 	private final VaultClient vaultClient;
+
 	private final RestTemplate restTemplate;
+
 	private final AtomicReference<char[]> nonce = new AtomicReference<char[]>();
 
 	/**

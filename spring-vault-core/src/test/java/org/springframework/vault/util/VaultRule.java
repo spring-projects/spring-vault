@@ -38,6 +38,7 @@ import org.springframework.vault.support.VaultToken;
 public class VaultRule extends ExternalResource {
 
 	private final VaultEndpoint vaultEndpoint;
+
 	private final PrepareVault prepareVault;
 
 	private VaultToken token;

@@ -19,57 +19,137 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Value object to bind Vault HTTP Mount API requests/responses.
- * 
+ * <p>
+ * A {@link VaultMount} represents an auth or secret mount with its config details. Instances of this class are
+ * immutable once constructed.
+ *
  * @author Mark Paluch
+ * @see #builder()
  */
 public class VaultMount {
 
-	private String type;
-
-	private String description;
-
-	private Map<String, Object> config;
+	/**
+	 * Backend type. Can be an auth or secret backend.
+	 */
+	private final String type;
 
 	/**
-	 * Creates a new {@link VaultMount}.
+	 * Human readable description of the mount.
 	 */
-	public VaultMount() {}
+	private final String description;
+
+	/**
+	 * Additional configuration.
+	 */
+	private final Map<String, Object> config;
+
+	private VaultMount(@JsonProperty("type") String type, @JsonProperty("description") String description,
+			@JsonProperty("config") Map<String, Object> config) {
+		this.type = type;
+		this.description = description;
+		this.config = config;
+	}
 
 	/**
 	 * Creates a new {@link VaultMount} given a {@code type}.
-	 * 
-	 * @param type must not be empty or {@literal null}.
+	 *
+	 * @param type backend type, must not be empty or {@literal null}.
 	 */
-	public VaultMount(String type) {
-
-		Assert.hasText(type, "Type must not be empty");
-
-		this.type = type;
+	public static VaultMount create(String type) {
+		return builder().type(type).build();
 	}
 
+	/**
+	 * @return a new {@link VaultMountBuilder}.
+	 */
+	public static VaultMountBuilder builder() {
+		return new VaultMountBuilder();
+	}
+
+	/**
+	 * @return the backend type.
+	 */
 	public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
-		this.type = type;
-	}
-
+	/**
+	 * @return human readable description of this mount.
+	 */
 	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
+	/**
+	 * @return additional configuration details.
+	 */
 	public Map<String, Object> getConfig() {
 		return config;
 	}
 
-	public void setConfig(Map<String, Object> config) {
-		this.config = config;
+	/**
+	 * Builder to build a {@link VaultMount}.
+	 */
+	public static class VaultMountBuilder {
+
+		private String type;
+
+		private String description;
+
+		private Map<String, Object> config;
+
+		VaultMountBuilder() {}
+
+		/**
+		 * Configure the backend type.
+		 * 
+		 * @param type the backend type, must not be empty or {@literal null}.
+		 * @return {@literal this} {@link VaultMountBuilder}.
+		 */
+		public VaultMount.VaultMountBuilder type(String type) {
+
+			Assert.hasText(type, "Type must not be empty or null");
+
+			this.type = type;
+			return this;
+		}
+
+		/**
+		 * Configure a human readable description of this mount.
+		 * 
+		 * @param description a human readable description of this mount.
+		 * @return {@literal this} {@link VaultMountBuilder}.
+		 */
+		public VaultMount.VaultMountBuilder description(String description) {
+			this.description = description;
+			return this;
+		}
+
+		/**
+		 * Set additional configuration details for this mount.
+		 * 
+		 * @param config additional configuration details for this mount.
+		 * @return {@literal this} {@link VaultMountBuilder}.
+		 */
+		public VaultMount.VaultMountBuilder config(Map<String, Object> config) {
+			this.config = config;
+			return this;
+		}
+
+		/**
+		 * Builds a new {@link VaultMount} instance. Requires {@link #type(String)} to be configured.
+		 *
+		 * @return a new {@link VaultMount}.
+		 */
+		public VaultMount build() {
+
+			Assert.hasText(type, "Type must not be empty or null");
+
+			return new VaultMount(type, description, config);
+		}
 	}
 }

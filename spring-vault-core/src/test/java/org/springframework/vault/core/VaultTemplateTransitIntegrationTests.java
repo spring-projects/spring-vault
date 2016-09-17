@@ -47,7 +47,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		VaultSysOperations adminOperations = vaultOperations.opsForSys();
 
 		if (!adminOperations.getMounts().containsKey("transit/")) {
-			adminOperations.mount("transit", new VaultMount("transit"));
+			adminOperations.mount("transit", VaultMount.create("transit"));
 
 			vaultOperations.write("transit/keys/mykey", null);
 			vaultOperations.write("transit/keys/derived", Collections.singletonMap("derived", true));

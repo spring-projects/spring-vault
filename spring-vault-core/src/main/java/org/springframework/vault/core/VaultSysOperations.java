@@ -18,7 +18,7 @@ package org.springframework.vault.core;
 import java.util.Map;
 
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.support.VaultHealthResponse;
+import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
@@ -34,19 +34,23 @@ public interface VaultSysOperations {
 
 	/**
 	 * @return {@literal true} if Vault is initialized.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">GET /sys/init</a>
 	 */
 	boolean isInitialized() throws VaultException;
 
 	/**
-	 * Initializes Vault with a {@link VaultInitializationRequest}.
+	 * Initialize Vault with a {@link VaultInitializationRequest}.
 	 * 
 	 * @param vaultInitializationRequest must not be {@literal null}.
 	 * @return the {@link VaultInitializationResponse}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">PUT /sys/init</a>
 	 */
 	VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) throws VaultException;
 
 	/**
-	 * Seals vault.
+	 * Seal vault.
+	 * 
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-seal.html">PUT /sys/seal</a>
 	 */
 	void seal() throws VaultException;
 
@@ -55,11 +59,13 @@ public interface VaultSysOperations {
 	 * 
 	 * @param keyShare must not be empty and not {@literal null}.
 	 * @return the {@link VaultUnsealStatus}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">PUT /sys/unseal</a>
 	 */
 	VaultUnsealStatus unseal(String keyShare) throws VaultException;
 
 	/**
 	 * @return the {@link VaultUnsealStatus}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">GET /sys/unseal</a>
 	 */
 	VaultUnsealStatus getUnsealStatus() throws VaultException;
 
@@ -68,11 +74,13 @@ public interface VaultSysOperations {
 	 * 
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST /sys/mounts/{mount}</a>
 	 */
 	void mount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
 	 * @return {@link Map} of all secret backend {@link VaultMount mounts}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">GET /sys/mounts/</a>
 	 */
 	Map<String, VaultMount> getMounts() throws VaultException;
 
@@ -80,6 +88,7 @@ public interface VaultSysOperations {
 	 * Unmounts the secret backend mount at {@code path}.
 	 * 
 	 * @param path must not be empty or {@literal null}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE /sys/mounts/{mount}</a>
 	 */
 	void unmount(String path) throws VaultException;
 
@@ -88,11 +97,13 @@ public interface VaultSysOperations {
 	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">POST /sys/auth/{mount}</a>
 	 */
 	void authMount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
 	 * @return {@link Map} of all auth backend {@link VaultMount mounts}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">GET /sys/auth/</a>
 	 */
 	Map<String, VaultMount> getAuthMounts() throws VaultException;
 
@@ -100,11 +111,15 @@ public interface VaultSysOperations {
 	 * Unmounts the auth backend mount at {@code path}.
 	 *
 	 * @param path must not be empty or {@literal null}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">DELETE /sys/auth/{mount}</a>
 	 */
 	void authUnmount(String path) throws VaultException;
 
 	/**
-	 * @return the {@link VaultHealthResponse}.
+	 * Returns the health status of Vault.
+	 *
+	 * @return the {@link VaultHealth}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET /sys/health</a>
 	 */
-	VaultHealthResponse health() throws VaultException;
+	VaultHealth health() throws VaultException;
 }

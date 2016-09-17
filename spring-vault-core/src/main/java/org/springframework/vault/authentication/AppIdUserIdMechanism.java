@@ -17,9 +17,10 @@
 package org.springframework.vault.authentication;
 
 /**
- * Interface to obtain a UserId for AppId authentication.
+ * Interface to obtain a UserId for AppId authentication. Implementations are used by {@link AppIdAuthentication}.
  *
  * @author Mark Paluch
+ * @see AppIdAuthentication
  */
 public interface AppIdUserIdMechanism {
 

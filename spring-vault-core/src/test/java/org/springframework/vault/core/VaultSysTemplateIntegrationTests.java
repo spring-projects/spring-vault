@@ -40,6 +40,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired private VaultOperations vaultOperations;
+
 	private VaultSysOperations adminOperations;
 
 	@Before
@@ -66,9 +67,9 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			adminOperations.unmount("other");
 		}
 
-		VaultMount mount = new VaultMount("generic");
-		mount.setConfig(Collections.singletonMap("default_lease_ttl", (Object) "1h"));
-		mount.setDescription("hello, world");
+		VaultMount mount = VaultMount.builder().type("generic") //
+				.config(Collections.singletonMap("default_lease_ttl", (Object) "1h")) //
+				.description("hello, world").build();
 
 		adminOperations.mount("other", mount);
 
@@ -101,8 +102,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			adminOperations.authUnmount("other");
 		}
 
-		VaultMount mount = new VaultMount("userpass");
-		mount.setDescription("hello, world");
+		VaultMount mount = VaultMount.builder().type("userpass").description("hello, world").build();
 
 		adminOperations.authMount("other", mount);
 

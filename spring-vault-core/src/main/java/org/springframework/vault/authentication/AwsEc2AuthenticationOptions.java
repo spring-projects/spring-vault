@@ -20,8 +20,11 @@ import java.net.URI;
 import org.springframework.util.Assert;
 
 /**
- * Authentication options for {@link AwsEc2Authentication}. Authentication options provide the path, the Identity
- * Document URI and an optional role. {@link AwsEc2AuthenticationOptions} can be constructed using {@link #builder()}.
+ * Authentication options for {@link AwsEc2Authentication}.
+ * <p>
+ * Authentication options provide the path, the Identity Document URI and an optional role.
+ * {@link AwsEc2AuthenticationOptions} can be constructed using {@link #builder()}. Instances of this class are
+ * immutable once constructed.
  *
  * @author Mark Paluch
  * @see AwsEc2Authentication
@@ -40,10 +43,19 @@ public class AwsEc2AuthenticationOptions {
 	 */
 	public final static AwsEc2AuthenticationOptions DEFAULT = new AwsEc2AuthenticationOptions();
 
+	/**
+	 * Path of the aws-ec2 authentication backend mount.
+	 */
 	private final String path;
 
+	/**
+	 * {@link URI} to the AWS EC2 PKCS#7-signed identity document.
+	 */
 	private final URI identityDocumentUri;
 
+	/**
+	 * EC2 instance role name. May be {@literal null} if none.
+	 */
 	private final String role;
 
 	private AwsEc2AuthenticationOptions() {
@@ -65,21 +77,21 @@ public class AwsEc2AuthenticationOptions {
 	}
 
 	/**
-	 * @return the mount path.
+	 * @return the path of the aws-ec2 authentication backend mount.
 	 */
 	public String getPath() {
 		return path;
 	}
 
 	/**
-	 * @return the {@link URI} to the Identity Document.
+	 * @return the {@link URI} to the AWS EC2 PKCS#7-signed identity document.
 	 */
 	public URI getIdentityDocumentUri() {
 		return identityDocumentUri;
 	}
 
 	/**
-	 * @return the role, may be {@literal null}.
+	 * @return the role, may be {@literal null} if none.
 	 */
 	public String getRole() {
 		return role;
@@ -115,6 +127,7 @@ public class AwsEc2AuthenticationOptions {
 		 * @see #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI
 		 */
 		public AwsEc2AuthenticationOptionsBuilder identityDocumentUri(URI identityDocumentUri) {
+
 			this.identityDocumentUri = identityDocumentUri;
 			return this;
 		}

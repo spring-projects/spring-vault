@@ -48,7 +48,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		transitOperations = vaultOperations.opsForTransit();
 
 		if (!vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
-			vaultOperations.opsForSys().mount("transit", new VaultMount("transit"));
+			vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
 		}
 
 		try {

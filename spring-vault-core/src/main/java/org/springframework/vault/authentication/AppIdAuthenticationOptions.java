@@ -18,10 +18,13 @@ package org.springframework.vault.authentication;
 import org.springframework.util.Assert;
 
 /**
- * Authentication options for {@link AppIdAuthentication}. Authentication options provide the path, appId and a
- * {@link AppIdUserIdMechanism}. {@link AppIdAuthentication} can be constructed using {@link #builder()}.
+ * Authentication options for {@link AppIdAuthentication}.
+ * <p>
+ * Authentication options provide the path, appId and a {@link AppIdUserIdMechanism}. {@link AppIdAuthentication} can be
+ * constructed using {@link #builder()}. Instances of this class are immutable once constructed.
  * 
  * @author Mark Paluch
+ * @see AppIdAuthentication
  * @see AppIdUserIdMechanism
  * @see #builder()
  */
@@ -29,10 +32,19 @@ public class AppIdAuthenticationOptions {
 
 	public final static String DEFAULT_APPID_AUTHENTICATION_PATH = "app-id";
 
+	/**
+	 * Path of the appid authentication backend mount.
+	 */
 	private final String path;
 
+	/**
+	 * The AppId
+	 */
 	private final String appId;
 
+	/**
+	 * {@link AppIdUserIdMechanism} instance to obtain a userId.
+	 */
 	private final AppIdUserIdMechanism userIdMechanism;
 
 	private AppIdAuthenticationOptions(String path, String appId, AppIdUserIdMechanism userIdMechanism) {
@@ -76,7 +88,9 @@ public class AppIdAuthenticationOptions {
 	public static class AppIdAuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_APPID_AUTHENTICATION_PATH;
+
 		private String appId;
+
 		private AppIdUserIdMechanism userIdMechanism;
 
 		AppIdAuthenticationOptionsBuilder() {}

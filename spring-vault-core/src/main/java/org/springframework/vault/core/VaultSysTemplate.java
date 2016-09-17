@@ -31,7 +31,7 @@ import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.core.VaultOperations.ClientCallback;
 import org.springframework.vault.core.VaultOperations.SessionCallback;
-import org.springframework.vault.support.VaultHealthResponse;
+import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
@@ -191,7 +191,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	public VaultHealthResponse health() {
+	public VaultHealth health() {
 		return vaultOperations.doWithRestTemplate("sys/health", Collections.<String, Object> emptyMap(), HEALTH);
 	}
 
@@ -283,9 +283,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 					if (map.containsKey("type")) {
 
-						VaultMount vaultMount = new VaultMount((String) map.get("type"));
-						vaultMount.setDescription((String) map.get("description"));
-						vaultMount.setConfig((Map) map.get("config"));
+						VaultMount vaultMount = VaultMount.builder() //
+								.type((String) map.get("type")) //
+								.description((String) map.get("description")) //
+								.config((Map) map.get("config")).build();
 
 						topLevelMounts.put(name, vaultMount);
 					}
@@ -295,21 +296,21 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class Health implements VaultAccessor.RestTemplateCallback<VaultHealthResponse> {
+	private static class Health implements VaultAccessor.RestTemplateCallback<VaultHealth> {
 
 		@Override
-		public VaultHealthResponse doWithRestTemplate(URI uri, RestTemplate restTemplate) {
+		public VaultHealth doWithRestTemplate(URI uri, RestTemplate restTemplate) {
 
 			try {
 
-				ResponseEntity<VaultHealthResponse> healthResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
-						VaultHealthResponse.class);
+				ResponseEntity<VaultHealth> healthResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+						VaultHealth.class);
 				return healthResponse.getBody();
 			} catch (HttpStatusCodeException responseError) {
 
 				try {
 					ObjectMapper mapper = new ObjectMapper();
-					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthResponse.class);
+					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealth.class);
 				} catch (Exception jsonError) {
 					throw responseError;
 				}
