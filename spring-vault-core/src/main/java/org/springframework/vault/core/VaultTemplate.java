@@ -367,10 +367,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 		}
 
 		private HttpEntity<?> getHttpEntity(HttpEntity<?> requestEntity) {
-			HttpHeaders httpHeaders = VaultClient.createHeaders(sessionManager.getSessionToken());
 
+			HttpHeaders httpHeaders = VaultClient.createHeaders(sessionManager.getSessionToken());
 			HttpEntity<?> requestEntityToUse = requestEntity;
+
 			if (requestEntityToUse != null) {
+
+				httpHeaders.putAll(requestEntity.getHeaders());
 				requestEntityToUse = new HttpEntity<Object>(requestEntityToUse.getBody(), httpHeaders);
 			} else {
 				requestEntityToUse = new HttpEntity<Object>(httpHeaders);

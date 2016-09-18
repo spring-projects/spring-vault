@@ -15,13 +15,18 @@
  */
 package org.springframework.vault.client;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultToken;
@@ -33,10 +38,9 @@ import org.springframework.web.client.RestTemplate;
  * {@link HttpMethod HTTP methods}. {@link VaultClient} is configured with an {@link VaultEndpoint} and
  * {@link RestTemplate}. It does not maintain any session or token state. See {@link VaultTemplate} and
  * {@link org.springframework.vault.authentication.SessionManager} for authenticated and stateful Vault access.
- * <p>
  * {@link VaultClient} encapsulates base URI and path construction and uses {@link VaultAccessor} for request and error
  * handling by returning {@link VaultResponseEntity} for requests.
- * 
+ *
  * @author Mark Paluch
  * @see VaultResponseEntity
  * @see VaultTemplate
@@ -45,11 +49,13 @@ public class VaultClient extends VaultAccessor {
 
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
+	private static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+
 	private final VaultEndpoint endpoint;
 
 	/**
 	 * Creates a new {@link VaultClient} with a default a {@link RestTemplate} and {@link VaultEndpoint}.
-	 * 
+	 *
 	 * @see VaultEndpoint
 	 */
 	public VaultClient() {
@@ -99,7 +105,7 @@ public class VaultClient extends VaultAccessor {
 
 	/**
 	 * Issue a POST request using the given object to the path, and returns the response as {@link VaultResponseEntity}.
-	 * 
+	 *
 	 * @param path the path.
 	 * @param request the Object to be POSTed, may be {@code null}.
 	 * @param responseType the type of the return value
@@ -176,9 +182,8 @@ public class VaultClient extends VaultAccessor {
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and returns the
 	 * response as {@link VaultResponseEntity}.
-	 * <p>
 	 * URI Template variables are using the given URI variables, if any.
-	 * 
+	 *
 	 * @param pathTemplate the path template.
 	 * @param method the HTTP method (GET, POST, etc).
 	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}.
@@ -198,12 +203,12 @@ public class VaultClient extends VaultAccessor {
 	 * Execute the HTTP method to the given path template, writing the given request entity to the request, and returns
 	 * the response as {@link VaultResponseEntity}. The given {@link ParameterizedTypeReference} is used to pass generic
 	 * type information:
-	 * 
+	 *
 	 * <pre class="code">
 	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
 	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = client.exchange(&quot;http://example.com&quot;, HttpMethod.GET, null, myBean, null);
 	 * </pre>
-	 * 
+	 *
 	 * @param pathTemplate the path template.
 	 * @param method the HTTP method (GET, POST, etc).
 	 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}.
@@ -249,8 +254,8 @@ public class VaultClient extends VaultAccessor {
 	 *
 	 * @param pathTemplate must not be empty or {@literal null}.
 	 * @param uriVariables must not be {@literal null}.
-	 * @see org.springframework.web.util.UriComponentsBuilder
 	 * @return
+	 * @see org.springframework.web.util.UriComponentsBuilder
 	 */
 	protected URI buildUri(String pathTemplate, Map<String, ?> uriVariables) {
 
@@ -261,7 +266,7 @@ public class VaultClient extends VaultAccessor {
 
 	/**
 	 * Create {@link HttpHeaders} for a {@link VaultToken}.
-	 * 
+	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @return {@link HttpHeaders} for a {@link VaultToken}.
 	 */
@@ -272,5 +277,33 @@ public class VaultClient extends VaultAccessor {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VAULT_TOKEN, vaultToken.getToken());
 		return headers;
+	}
+
+	/**
+	 * Unwrap a wrapped response created by Vault Response Wrapping
+	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
+	 * @param responseType the type of the return value.
+	 * @return the unwrapped response.
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T unwrap(final String wrappedResponse, Class<T> responseType) {
+
+		Assert.hasText(wrappedResponse, "Wrapped response must not be empty");
+
+		try {
+			return (T) converter.read(responseType, new HttpInputMessage() {
+				@Override
+				public InputStream getBody() throws IOException {
+					return new ByteArrayInputStream(wrappedResponse.getBytes());
+				}
+
+				@Override
+				public HttpHeaders getHeaders() {
+					return new HttpHeaders();
+				}
+			});
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

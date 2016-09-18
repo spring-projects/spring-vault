@@ -381,7 +381,7 @@ and the `createUserId` method. Spring Vault will obtain the UserId
 by calling `createUserId` each time it authenticates using AppId to
 obtain a token.
 
-
+====
 [source,java]
 .MyUserIdMechanism.java
 ----
@@ -394,6 +394,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
   }
 }
 ----
+====
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
@@ -476,6 +477,120 @@ class AppConfig extends AbstractVaultConfiguration {
 ====
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
+
+=== Cubbyhole authentication
+
+Cubbyhole authentication uses Vault primitives to provide a secured authentication
+workflow. Cubbyhole authentication uses tokens as primary login method.
+An ephemeral token is used to obtain a second, login VaultToken from Vault's
+Cubbyhole secret backend. The login token is usually longer-lived and used to
+interact with Vault. The login token can be retrieved either from a wrapped
+response or from the `data` section.
+
+*Creating a wrapped token*
+
+NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create -wrap-ttl="10m"
+Key                            Value
+---                            -----
+wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
+wrapping_token_ttl:            0h10m0s
+wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
+wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
+----
+====
+
+.Wrapped token response usage
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
+                .builder()
+                .initialToken(VaultToken.of("…"))
+                .wrapped()
+                .build();
+
+        return new CubbyholeAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+*Using stored tokens*
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create
+Key                    Value
+---                    -----
+token                  f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
+token_accessor         4eee9bd9-81bb-06d6-af01-723c54a72148
+token_duration         0s
+token_renewable        false
+token_policies         [root]
+
+$ token-create -use-limit=2 -orphan -no-default-policy -policy=none
+Key                    Value
+---                    -----
+token                  895cb88b-aef4-0e33-ba65-d50007290780
+token_accessor         e84b661c-8aa8-2286-b788-f258f30c8325
+token_duration         0s
+token_renewable        false
+token_policies         [none]
+
+$ export VAULT_TOKEN=895cb88b-aef4-0e33-ba65-d50007290780
+$ vault write cubbyhole/token token=f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
+----
+====
+
+.Stored token response usage
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
+                .builder()
+                .initialToken(VaultToken.of("…"))
+                .path("cubbyhole/token")
+                .build();
+
+        return new CubbyholeAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+See also:
+
+* https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation:Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
 [[vault.client-ssl]]
 == Vault Client SSL configuration
