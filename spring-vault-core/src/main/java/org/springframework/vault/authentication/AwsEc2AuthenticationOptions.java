@@ -97,6 +97,9 @@ public class AwsEc2AuthenticationOptions {
 		return role;
 	}
 
+	/**
+	 * Builder for {@link AwsEc2AuthenticationOptionsBuilder}.
+	 */
 	public static class AwsEc2AuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;

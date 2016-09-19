@@ -20,9 +20,9 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultTransitKey;
+import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.support.VaultTransitRequest;
 

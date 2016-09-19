@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKey;
+import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.support.VaultTransitRequest;
 

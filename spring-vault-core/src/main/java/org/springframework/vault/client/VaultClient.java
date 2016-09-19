@@ -181,8 +181,7 @@ public class VaultClient extends VaultAccessor {
 
 	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and returns the
-	 * response as {@link VaultResponseEntity}.
-	 * URI Template variables are using the given URI variables, if any.
+	 * response as {@link VaultResponseEntity}. URI Template variables are using the given URI variables, if any.
 	 *
 	 * @param pathTemplate the path template.
 	 * @param method the HTTP method (GET, POST, etc).
@@ -281,6 +280,7 @@ public class VaultClient extends VaultAccessor {
 
 	/**
 	 * Unwrap a wrapped response created by Vault Response Wrapping
+	 * 
 	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
 	 * @param responseType the type of the return value.
 	 * @return the unwrapped response.
