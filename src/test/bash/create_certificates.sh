@@ -96,8 +96,10 @@ openssl pkcs12 -export -clcerts \
       -passout pass:changeit \
       -out ${CA_DIR}/client.p12
 
-${JAVA_HOME}/bin/keytool -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
-${JAVA_HOME}/bin/keytool -importkeystore \
+KEYTOOL=${JAVA_HOME}/bin/keytool
+
+${KEYTOOL} -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
+${KEYTOOL} -importkeystore \
                               -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit\
                               -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype JKS \
                               -noprompt -storepass changeit

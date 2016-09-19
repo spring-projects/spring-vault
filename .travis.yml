@@ -10,10 +10,7 @@ env:
     - VAULT_VER=0.6.1
 
 install:
-  - mkdir -p download
-  - src/test/bash/create_certificates.sh
-  - src/test/bash/install_vault.sh
-  - src/test/bash/local_run_vault.sh &
+  - src/test/bash/start.sh
 
 script: mvn clean verify
 
