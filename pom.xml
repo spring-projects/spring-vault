@@ -647,7 +647,7 @@
 									<goals>
 										<goal>single</goal>
 									</goals>
-									<phase>package</phase>
+									<phase>prepare-package</phase>
 									<configuration>
 										<descriptors>
 											<descriptor>${shared.resources}/assemblies/static-resources.xml</descriptor>
@@ -656,34 +656,20 @@
 										<appendAssemblyId>false</appendAssemblyId>
 									</configuration>
 								</execution>
-							</executions>
-						</plugin>
-
-						<plugin>
-							<groupId>org.codehaus.mojo</groupId>
-							<artifactId>wagon-maven-plugin</artifactId>
-							<configuration>
-								<fromDir>${project.build.directory}</fromDir>
-							</configuration>
-							<executions>
-
-								<!-- Distribute static resources -->
-
 								<execution>
-									<id>upload-static-resources</id>
-									<phase>deploy</phase>
+									<id>docs</id>
 									<goals>
-										<goal>upload</goal>
+										<goal>single</goal>
 									</goals>
+									<phase>package</phase>
 									<configuration>
-										<fromDir>${project.build.directory}/static-resources</fromDir>
-										<includes>**</includes>
-										<serverId>static-dot-s2</serverId>
-										<url>scp://static.springsource.org</url>
-										<toDir>
-											/var/www/domains/springsource.org/www/htdocs/autorepo/docs/${dist.id}/${project.version}
-										</toDir>
-										<optimize>true</optimize>
+										<descriptors>
+											<descriptor>src/assembly/docs.xml</descriptor>
+										</descriptors>
+										<finalName>spring-vault-${project.version}-docs</finalName>
+										<appendAssemblyId>false</appendAssemblyId>
+										<classifier>docs</classifier>
+										<attach>true</attach>
 									</configuration>
 								</execution>
 							</executions>
@@ -694,12 +680,29 @@
 							<artifactId>maven-deploy-plugin</artifactId>
 							<configuration>
 								<skip>true</skip>
+								<uniqueVersion>false</uniqueVersion>
 							</configuration>
 						</plugin>
-
 					</plugins>
 				</pluginManagement>
 			</build>
+
+			<repositories>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<url>https://repo.spring.io/libs-snapshot</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
+
+			<pluginRepositories>
+				<pluginRepository>
+					<id>spring-plugins-release</id>
+					<url>https://repo.spring.io/plugins-release</url>
+				</pluginRepository>
+			</pluginRepositories>
 		</profile>
 	</profiles>
 </project>
