@@ -1,0 +1,49 @@
+[[dependencies]]
+== Dependencies
+
+The easiest way to find compatible versions of Spring Vault dependencies is by relying on the Spring Vault BOM we ship with the compatible versions defined. In a Maven project you would declare this dependency in the `<dependencyManagement />` section of your `pom.xml`:
+
+.Using the Spring Vault BOM
+====
+[source, xml]
+----
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.vault</groupId>
+      <artifactId>spring-vault-dependencies</artifactId>
+      <version>${version}</version>
+      <scope>import</scope>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+----
+====
+
+[[dependencies.names]]
+The current version is `{version}`. The version name follows the following pattern: `$\{version\}-$\{release\}` where release can be one of the following:
+
+* `BUILD-SNAPSHOT` - current snapshots
+* `M1`, `M2` etc. - milestones
+* `RC1`, `RC2` etc. - release candidates
+* `RELEASE` - GA release
+* `SR1`, `SR2` etc. - service releases
+
+.Declaring a dependency to Spring Vault
+====
+[source, xml]
+----
+<dependencies>
+  <dependency>
+    <groupId>org.springframework.vault</groupId>
+    <artifactId>spring-vault-core</artifactId>
+  </dependency>
+<dependencies>
+----
+====
+
+[[dependencies.spring-framework]]
+=== Spring Framework
+
+The current version of Spring Vault requires Spring Framework in version {springVersion} or better. The modules might also work with an older bugfix version of that minor version. However, using the most recent version within that generation is highly recommended.

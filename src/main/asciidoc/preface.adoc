@@ -9,7 +9,8 @@ This section provides some basic introduction to Spring and Vault. The rest of t
 
 [[get-started:first-steps:spring]]
 == Knowing Spring
-Spring Vault uses Spring framework's http://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/spring-core.html[core] functionality, such as the http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/beans.html[IoC] container, http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/validation.html#core-convert[type conversion system], http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/expressions.html[expression language], http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/jmx.html[JMX integration], and portable http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/dao.html#dao-exceptions[DAO exception hierarchy]. While it is not important to know the Spring APIs, understanding the concepts behind them is. At a minimum, the idea behind IoC should be familiar for whatever IoC container you choose to use.
+
+Spring Vault uses Spring framework's http://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/spring-core.html[core] functionality, such as the http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/beans.html[IoC] container. While it is not important to know the Spring APIs, understanding the concepts behind them is. At a minimum, the idea behind IoC should be familiar for whatever IoC container you choose to use.
 
 The core functionality of the Vault support can be used directly, with no need to invoke the IoC services of the Spring Container. This is much like `RestTemplate` which can be used 'standalone' without any other services of the Spring container. To leverage all the features of Spring Vault document, such as the session support, you will need to configure some parts of the library using Spring.
 

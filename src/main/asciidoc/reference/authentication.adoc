@@ -1,0 +1,338 @@
+[[vault.core.authentication]]
+= Authentication Methods
+
+Different organizations have different requirements for security
+and authentication. Vault reflects that need by shipping multiple authentication
+methods. Spring Vault supports multiple authentications mechanisms.
+
+== Token authentication
+
+Tokens are the core method for authentication within Vault.
+Token authentication requires a static token to be provided.
+
+NOTE: Token authentication is the default authentication method.
+If a token is disclosed an unintended party, it gains access to Vault and
+can access secrets for the intended client.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new TokenAuthentication("…");
+    }
+
+    // …
+}
+----
+====
+
+See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+
+== AppId authentication
+
+Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
+authentication that consists of two hard to guess tokens. The AppId
+defaults to `spring.application.name` that is statically configured.
+The second token is the UserId which is a part determined by the application,
+usually related to the runtime environment. IP address, Mac address or a
+Docker container name are good examples. Spring Vault supports
+IP address, Mac address and static UserId's (e.g. supplied via System properties).
+The IP and Mac address are represented as Hex-encoded SHA256 hash.
+
+IP address-based UserId's use the local host's IP address.
+
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
+                .userIdMechanism(new IpAddressUserId()) //
+                .build();
+
+        return new AppIdAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+The corresponding command to generate the IP address UserId from a command line is:
+
+----
+$ echo -n 192.168.99.1 | sha256sum
+----
+
+NOTE: Including the line break of `echo` leads to a different hash value
+so make sure to include the `-n` flag.
+
+Mac address-based UserId's obtain their network device from the
+localhost-bound device. The configuration also allows specifying
+a `network-interface` hint to pick the right device. The value of
+`network-interface` is optional and can be either an interface
+name or interface index (0-based).
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
+                .userIdMechanism(new MacAddressUserId()) //
+                .build();
+
+        return new AppIdAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+The corresponding command to generate the IP address UserId from a command line is:
+
+----
+$ echo -n 0AFEDE1234AC | sha256sum
+----
+
+NOTE: The Mac address is specified uppercase and without colons.
+Including the line break of `echo` leads to a different hash value
+so make sure to include the `-n` flag.
+
+=== Custom UserId
+
+A more advanced approach lets you implementing your own `AppIdUserIdMechanism`.
+This class must be on your classpath and must implement
+the `org.springframework.vault.authentication.AppIdUserIdMechanism` interface
+and the `createUserId` method. Spring Vault will obtain the UserId
+by calling `createUserId` each time it authenticates using AppId to
+obtain a token.
+
+====
+[source,java]
+.MyUserIdMechanism.java
+----
+public class MyUserIdMechanism implements AppIdUserIdMechanism {
+
+  @Override
+  public String createUserId() {
+    String userId = ...
+    return userId;
+  }
+}
+----
+====
+
+See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
+
+== AWS-EC2 authentication
+
+The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
+auth backend provides a secure introduction mechanism
+for AWS EC2 instances, allowing automated retrieval of a Vault
+token. Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats AWS as a Trusted Third Party and uses the
+cryptographically signed dynamic metadata information that uniquely
+represents each EC2 instance.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new AwsEc2Authentication(vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+AWS-EC2 authentication enables nonce by default to follow
+the Trust On First Use (TOFU) principle. Any unintended party that
+gains access to the PKCS#7 identity metadata can authenticate
+against Vault.
+
+During the first login, Spring Vault generates a nonce
+that is stored in the auth backend aside the instance Id.
+Re-authentication requires the same nonce to be sent. Any other
+party does not have the nonce and can raise an alert in Vault for
+further investigation.
+
+The nonce is kept in memory and is lost during application restart.
+
+AWS-EC2 authentication roles are optional and default to the AMI.
+You can configure the authentication role by setting
+it in `AwsEc2AuthenticationOptions`.
+
+See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
+
+== TLS certificate authentication
+
+The `cert` auth backend allows authentication using SSL/TLS client
+certificates that are either signed by a CA or self-signed.
+
+To enable `cert` authentication you need to:
+
+1. Use SSL, see <<vault.client-ssl>>
+2. Configure a Java `Keystore` that contains the client
+certificate and the private key
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new ClientCertificateAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
+
+== Cubbyhole authentication
+
+Cubbyhole authentication uses Vault primitives to provide a secured authentication
+workflow. Cubbyhole authentication uses tokens as primary login method.
+An ephemeral token is used to obtain a second, login VaultToken from Vault's
+Cubbyhole secret backend. The login token is usually longer-lived and used to
+interact with Vault. The login token can be retrieved either from a wrapped
+response or from the `data` section.
+
+*Creating a wrapped token*
+
+NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create -wrap-ttl="10m"
+Key                            Value
+---                            -----
+wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
+wrapping_token_ttl:            0h10m0s
+wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
+wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
+----
+====
+
+.Wrapped token response usage
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
+                .builder()
+                .initialToken(VaultToken.of("…"))
+                .wrapped()
+                .build();
+
+        return new CubbyholeAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+*Using stored tokens*
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create
+Key                    Value
+---                    -----
+token                  f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
+token_accessor         4eee9bd9-81bb-06d6-af01-723c54a72148
+token_duration         0s
+token_renewable        false
+token_policies         [root]
+
+$ token-create -use-limit=2 -orphan -no-default-policy -policy=none
+Key                    Value
+---                    -----
+token                  895cb88b-aef4-0e33-ba65-d50007290780
+token_accessor         e84b661c-8aa8-2286-b788-f258f30c8325
+token_duration         0s
+token_renewable        false
+token_policies         [none]
+
+$ export VAULT_TOKEN=895cb88b-aef4-0e33-ba65-d50007290780
+$ vault write cubbyhole/token token=f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
+----
+====
+
+.Stored token response usage
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
+                .builder()
+                .initialToken(VaultToken.of("…"))
+                .path("cubbyhole/token")
+                .build();
+
+        return new CubbyholeAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+See also:
+
+* https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation:Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
