@@ -105,6 +105,13 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
 				<version>3.5.2</version>
@@ -284,31 +291,9 @@
 		</profile>
 
 		<profile>
-			<id>bootstrap</id>
-			<repositories>
-				<repository>
-					<id>repo.spring.io-milestone</id>
-					<name>Spring Framework Milestone Repository</name>
-					<url>http://repo.spring.io/libs-milestone-local</url>
-				</repository>
-				<repository>
-					<id>repo.spring.io-release</id>
-					<name>Spring Framework Release Repository</name>
-					<url>http://repo.spring.io/libs-release-local</url>
-				</repository>
-				<repository>
-					<id>repo.spring.io-snapshot</id>
-					<name>Spring Framework Maven Snapshot Repository</name>
-					<url>http://repo.spring.io/libs-snapshot-local</url>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-		</profile>
 
-		<profile>
 			<id>milestone</id>
+
 			<distributionManagement>
 				<repository>
 					<id>repo.spring.io</id>
@@ -316,10 +301,13 @@
 					<url>http://repo.spring.io/libs-milestone-local</url>
 				</repository>
 			</distributionManagement>
+
 		</profile>
 
 		<profile>
+
 			<id>central</id>
+
 			<distributionManagement>
 				<snapshotRepository>
 					<id>sonatype-nexus-snapshots</id>
@@ -332,8 +320,10 @@
 					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 				</repository>
 			</distributionManagement>
+
 			<build>
 				<plugins>
+
 					<plugin>
 						<artifactId>maven-gpg-plugin</artifactId>
 						<executions>
@@ -346,8 +336,38 @@
 							</execution>
 						</executions>
 					</plugin>
+
 				</plugins>
 			</build>
+
+		</profile>
+
+		<profile>
+
+			<!-- Profile to be run on the CI server, JARs JavaDocs -->
+
+			<id>ci</id>
+
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.3</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+
 		</profile>
 
 		<profile>
