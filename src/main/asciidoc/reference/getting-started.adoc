@@ -253,7 +253,6 @@ SslConfiguration.forTrustStore(new FileSystemResource("keystore.jks"),  <2>
 
 SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <3>
                                       "changeit")
-
 ----
 <1> Full configuration.
 <2> Configuring only trust store settings.
@@ -263,6 +262,58 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <3>
 Please note that providing `SslConfiguration` can be only
 applied when either Apache Http Components or the OkHttp client
 is on your class-path.
+
+[[vault.core.propertysupport]]
+== Vault Property Source Support
+
+Vault can be used in many different ways. One specific use-case is using Vault to store encrypted properties. Spring Vault supports Vault as property source to obtain configuration properties using Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction].
+
+=== Registering `VaultPropertySource`
+
+Spring Vault provides a `VaultPropertySource` to be used with Vault to obtain properties. It uses the nested `data` element to expose properties stored and encrypted in Vault.
+
+====
+[source,java]
+----
+ConfigurableApplicationContext ctx = new GenericApplicationContext();
+MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
+sources.addFirst(new VaultPropertySource(vaultTemplate, "secret/my-application"));
+----
+====
+
+In the code above, `VaultPropertySource` has been added with highest precedence in the search. If it contains a ´foo` property, it will be detected and returned ahead of any `foo` property in any other `PropertySource`. The `MutablePropertySources` API exposes a number of methods that allow for precise manipulation of the set of property sources.
+
+
+=== @VaultPropertySource
+
+The `@VaultPropertySource` annotation provides a convenient and declarative mechanism for adding a `PropertySource` to Spring’s `Environment`.
+
+To be used in conjunction with @Configuration classes.
+Example usage
+
+Given a Vault path `secret/my-application` containing the configuration data pair `database.password=mysecretpassword`, the following `@Configuration` class uses `@VaultPropertySource` to contribute `secret/my-application` to the `Environment`'s set of `PropertySources`.
+
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource("secret/my-application")
+public class AppConfig {
+
+    @Autowired Environment env;
+
+    @Bean
+    public TestBean testBean() {
+        TestBean testBean = new TestBean();
+        testBean.setPassword(env.getProperty("database.password"));
+        return testBean;
+    }
+}
+----
+====
+
+In certain situations, it may not be possible or practical to tightly control property source ordering when using `@VaultPropertySource` annotations. For example, if the @Configuration classes above were registered via component-scanning, the ordering is difficult to predict. In such cases - and if overriding is important - it is recommended that the user fall back to using the programmatic PropertySource API. See ConfigurableEnvironment and MutablePropertySources javadocs for details.
+
 
 [[vault.core.executioncallback]]
 == Execution callbacks

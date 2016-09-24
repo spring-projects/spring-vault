@@ -29,7 +29,7 @@ import org.springframework.vault.util.Settings;
  * @author Mark Paluch
  */
 @Configuration
-class VaultIntegrationTestConfiguration extends AbstractVaultConfiguration {
+public class VaultIntegrationTestConfiguration extends AbstractVaultConfiguration {
 
 	@Override
 	public VaultEndpoint vaultEndpoint() {
