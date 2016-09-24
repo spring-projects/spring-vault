@@ -72,7 +72,7 @@ public interface VaultTransitOperations {
 	 * of the key. To upgrade ciphertext to be encrypted with the latest version of the key, use
 	 * {@link #rewrap(String, String)}.
 	 * 
-	 * @param keyName
+	 * @param keyName must not be empty or {@literal null}.
 	 * @see #rewrap(String, String)
 	 */
 	void rotate(String keyName);

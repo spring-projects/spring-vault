@@ -117,7 +117,7 @@ public abstract class AbstractVaultConfiguration {
 	 * Creates the {@link VaultClientFactory} to be used with {@link VaultTemplate}. Uses by default
 	 * {@link DefaultVaultClientFactory} with the configured {@link #vaultClient()} instance.
 	 * 
-	 * @return
+	 * @return the {@link VaultClientFactory}.
 	 */
 	@Bean
 	public VaultClientFactory vaultClientFactory() {
@@ -127,7 +127,7 @@ public abstract class AbstractVaultConfiguration {
 	/**
 	 * Creates a {@link VaultTemplate}.
 	 * 
-	 * @return
+	 * @return the {@link VaultTemplate}.
 	 * @see #vaultClientFactory()
 	 * @see #sessionManager()
 	 */

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Value object to bind generic Vault HTTP API responses.
  *
- * @param <T>
+ * @param <T> type for {@code data} response.
  * @author Spencer Gibb
  * @author Mark Paluch
  */

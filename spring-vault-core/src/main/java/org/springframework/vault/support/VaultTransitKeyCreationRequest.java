@@ -37,10 +37,12 @@ public class VaultTransitKeyCreationRequest {
 	 * Creates a new {@link VaultTransitKeyCreationRequest} and sets {@code derived} and {@code convergentEncryption}
 	 * properties.
 	 * 
-	 * @param derived
-	 * @param convergentEncryption
+	 * @param derived {@literal true} if key derivation MUST be used.
+	 * @param convergentEncryption {@literal true} if key will support convergent encryption, where the same plaintext
+	 *          creates the same ciphertext.
 	 */
 	public VaultTransitKeyCreationRequest(boolean derived, boolean convergentEncryption) {
+
 		this.derived = derived;
 		this.convergentEncryption = convergentEncryption;
 	}

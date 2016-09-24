@@ -39,9 +39,9 @@ import org.springframework.vault.support.VaultResponseSupport;
  * {@link org.springframework.web.client.RestTemplate} level.
  *
  * @author Mark Paluch
- * @see #doWithVault(ClientCallback)
- * @see #doWithVault(SessionCallback)
- * @see #doWithRestTemplate(String, Map, RestTemplateCallback)
+ * @see VaultOperations#doWithVault(ClientCallback)
+ * @see VaultOperations#doWithVault(SessionCallback)
+ * @see VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback)
  * @see VaultClient
  * @see VaultTemplate
  * @see VaultTokenOperations
@@ -103,6 +103,7 @@ public interface VaultOperations {
 	 * Write to a secret backend.
 	 *
 	 * @param path must not be {@literal null}.
+	 * @param body the body, may be {@literal null} if absent.
 	 * @return the configuration data. May be empty but never {@literal null}.
 	 */
 	VaultResponse write(String path, Object body);

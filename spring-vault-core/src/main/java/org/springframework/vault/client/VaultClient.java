@@ -306,7 +306,7 @@ public class VaultClient extends VaultAccessor {
 	 *
 	 * @param pathTemplate must not be empty or {@literal null}.
 	 * @param uriVariables must not be {@literal null}.
-	 * @return
+	 * @return the resolved {@link URI}.
 	 * @see org.springframework.web.util.UriComponentsBuilder
 	 */
 	protected URI buildUri(String pathTemplate, Map<String, ?> uriVariables) {

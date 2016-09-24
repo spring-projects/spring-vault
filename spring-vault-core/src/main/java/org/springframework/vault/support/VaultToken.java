@@ -51,6 +51,7 @@ public class VaultToken {
 	 * Creates a new {@link VaultToken} with a {@code leaseDuration}.
 	 * 
 	 * @param token must not be {@literal null}.
+	 * @param leaseDuration the lease duration.
 	 * @return the created {@link VaultToken}
 	 */
 	public static VaultToken of(String token, long leaseDuration) {

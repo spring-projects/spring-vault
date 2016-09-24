@@ -70,6 +70,7 @@ public class SslConfiguration {
 	 *
 	 * @param trustStore resource pointing to an existing trust store, must not be {@literal null}.
 	 * @param trustStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
 	public static SslConfiguration forTrustStore(Resource trustStore, String trustStorePassword) {
@@ -85,6 +86,7 @@ public class SslConfiguration {
 	 *
 	 * @param keyStore resource pointing to an existing key store, must not be {@literal null}.
 	 * @param keyStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
 	public static SslConfiguration forKeyStore(Resource keyStore, String keyStorePassword) {
@@ -100,6 +102,9 @@ public class SslConfiguration {
 	 *
 	 * @param keyStore resource pointing to an existing keystore, must not be {@literal null}.
 	 * @param keyStorePassword may be {@literal null}.
+	 * @param trustStore resource pointing to an existing trust store, must not be {@literal null}.
+	 * @param trustStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
 	public SslConfiguration create(Resource keyStore, String keyStorePassword, Resource trustStore,

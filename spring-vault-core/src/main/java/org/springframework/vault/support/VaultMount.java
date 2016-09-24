@@ -58,6 +58,7 @@ public class VaultMount {
 	 * Creates a new {@link VaultMount} given a {@code type}.
 	 *
 	 * @param type backend type, must not be empty or {@literal null}.
+	 * @return the created {@link VaultMount}.
 	 */
 	public static VaultMount create(String type) {
 		return builder().type(type).build();

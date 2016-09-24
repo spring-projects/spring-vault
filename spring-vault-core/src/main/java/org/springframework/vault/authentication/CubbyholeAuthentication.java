@@ -34,7 +34,6 @@ import org.springframework.vault.support.VaultToken;
  * {@link VaultToken} from Vault's Cubbyhole secret backend. The login token is usually longer-lived and used to
  * interact with Vault. The login token can be retrieved either from a wrapped response or from the {@code data}
  * section.
- * <p>
  * <h2>Wrapped token response usage</h2> <strong>Create a Token</strong>
  * 
  * <pre>
