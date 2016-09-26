@@ -25,8 +25,7 @@ import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
- * Interface that specified a basic set of Vault operations, implemented by {@link VaultTemplate}. Request errors are
- * wrapped within {@link VaultException}.
+ * Interface that specifies a basic set of administrative Vault operations.
  * 
  * @author Mark Paluch
  */

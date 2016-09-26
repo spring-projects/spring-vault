@@ -73,6 +73,19 @@ public interface VaultOperations {
 	VaultTransitOperations opsForTransit(String path);
 
 	/**
+	 * @return the operations interface to interact with the Vault PKI backend.
+	 */
+	VaultPkiOperations opsForPki();
+
+	/**
+	 * Returns {@link VaultPkiOperations} if the PKI backend is mounted on a different path than {@code pki}.
+	 *
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault PKI backend.
+	 */
+	VaultPkiOperations opsForPki(String path);
+
+	/**
 	 * Read from a secret backend. Reading data using this method is suitable for secret backends that do not require a
 	 * request body.
 	 *

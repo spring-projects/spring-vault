@@ -145,7 +145,7 @@ public class PrepareVault {
 	public boolean hasSecret(String secretBackend) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
-		return adminOperations.getMounts().containsKey(secretBackend);
+		return adminOperations.getMounts().containsKey(secretBackend + "/");
 	}
 
 	public VaultOperations getVaultOperations() {

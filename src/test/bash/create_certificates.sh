@@ -46,6 +46,7 @@ openssl rsa -in ${CA_DIR}/private/localhost.key.pem \
       -passin pass:changeit
 
 chmod 400 ${CA_DIR}/private/localhost.key.pem
+chmod 400 ${CA_DIR}/private/localhost.decrypted.key.pem
 
 echo "[INFO] Generating server certificate request"
 openssl req -config ${DIR}/openssl.cnf \
@@ -96,10 +97,35 @@ openssl pkcs12 -export -clcerts \
       -passout pass:changeit \
       -out ${CA_DIR}/client.p12
 
-KEYTOOL=${JAVA_HOME}/bin/keytool
-
-${KEYTOOL} -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
-${KEYTOOL} -importkeystore \
+${JAVA_HOME}/bin/keytool -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
+${JAVA_HOME}/bin/keytool -importkeystore \
                               -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit\
                               -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype JKS \
                               -noprompt -storepass changeit
+
+echo "[INFO] Generating intermediate CA private key"
+# Less bits = less secure = faster to generate
+openssl genrsa -passout pass:changeit -aes256 -out ${CA_DIR}/private/intermediate.key.pem 2048
+
+openssl rsa -in ${CA_DIR}/private/intermediate.key.pem \
+      -out ${CA_DIR}/private/intermediate.decrypted.key.pem \
+      -passin pass:changeit
+
+chmod 400 ${CA_DIR}/private/intermediate.key.pem
+chmod 400 ${CA_DIR}/private/intermediate.decrypted.key.pem
+
+echo "[INFO] Generating intermediate certificate"
+openssl req -config ${DIR}/intermediate.cnf \
+      -key ${CA_DIR}/private/intermediate.key.pem \
+      -new -sha256 \
+      -out ${CA_DIR}/csr/intermediate.csr.pem \
+      -passin pass:changeit \
+      -subj "/C=NN/ST=Unknown/L=Unknown/O=spring-cloud-vault-config/CN=Intermediate CA Certificate"
+
+echo "[INFO] Signing intermediate certificate request"
+openssl ca -config ${DIR}/openssl.cnf \
+      -days 3650 -notext -md sha256 -extensions v3_intermediate_ca \
+      -passin pass:changeit \
+      -batch \
+      -in ${CA_DIR}/csr/intermediate.csr.pem \
+      -out ${CA_DIR}/certs/intermediate.cert.pem

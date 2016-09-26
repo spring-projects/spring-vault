@@ -140,6 +140,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 	}
 
 	@Override
+	public VaultPkiOperations opsForPki() {
+		return opsForPki("pki");
+	}
+
+	@Override
+	public VaultPkiOperations opsForPki(String path) {
+		return new VaultPkiTemplate(this, path);
+	}
+
+	@Override
 	public <T> T doWithVault(ClientCallback<T> clientCallback) {
 
 		Assert.notNull(clientCallback, "ClientCallback must not be null!");
