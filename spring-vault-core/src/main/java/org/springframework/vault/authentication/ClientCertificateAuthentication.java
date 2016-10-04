@@ -56,18 +56,15 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 
 	private VaultToken createTokenUsingTlsCertAuthentication(String path) {
 
-		VaultResponseEntity<VaultResponse> response = vaultClient.postForEntity(String.format("auth/%s/login", path),
+		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(String.format("auth/%s/login", path),
 				Collections.emptyMap(), VaultResponse.class);
 
-		if (!response.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using TLS certificates: %s", response.getMessage()));
+		if (!entity.isSuccessful()) {
+			throw new VaultException(String.format("Cannot login using TLS certificates: %s", entity.getMessage()));
 		}
-
-		VaultResponse body = response.getBody();
-		String token = (String) body.getAuth().get("client_token");
 
 		logger.debug("Login successful using TLS certificates");
 
-		return VaultToken.of(token, body.getLeaseDuration());
+		return LoginTokenUtil.from(entity.getBody().getAuth());
 	}
 }

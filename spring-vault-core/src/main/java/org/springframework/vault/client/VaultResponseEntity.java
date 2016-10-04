@@ -35,7 +35,7 @@ public class VaultResponseEntity<T> {
 
 	private final String message;
 
-	VaultResponseEntity(T body, HttpStatus statusCode, URI uri, String message) {
+	protected VaultResponseEntity(T body, HttpStatus statusCode, URI uri, String message) {
 		this.body = body;
 		this.statusCode = statusCode;
 		this.uri = uri;

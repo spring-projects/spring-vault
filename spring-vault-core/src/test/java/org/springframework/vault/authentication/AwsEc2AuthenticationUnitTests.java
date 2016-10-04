@@ -87,7 +87,7 @@ public class AwsEc2AuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST)) //
 				.andExpect(jsonPath("$.pkcs7").value("value")) //
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(vaultClient) {
 			@Override
@@ -96,9 +96,12 @@ public class AwsEc2AuthenticationUnitTests {
 			}
 		};
 
-		VaultToken vaultToken = authentication.login();
+		VaultToken login = authentication.login();
 
-		assertThat(vaultToken.getToken()).isEqualTo("my-token");
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(20);
+		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 
 	@Test(expected = VaultException.class)

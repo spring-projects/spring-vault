@@ -76,12 +76,9 @@ public class AppIdAuthentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using app-id: %s", entity.getMessage()));
 		}
 
-		VaultResponse body = entity.getBody();
-		String token = (String) body.getAuth().get("client_token");
-
 		logger.debug("Login successful using AppId authentication");
 
-		return VaultToken.of(token, body.getLeaseDuration());
+		return LoginTokenUtil.from(entity.getBody().getAuth());
 	}
 
 	private Map<String, String> getAppIdLogin(String appId, String userId) {

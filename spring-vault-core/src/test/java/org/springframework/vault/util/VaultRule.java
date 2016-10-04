@@ -70,7 +70,7 @@ public class VaultRule extends ExternalResource {
 		VaultTemplate vaultTemplate = new VaultTemplate(clientFactory, new PreparingSessionManager());
 
 		this.token = Settings.token();
-		this.prepareVault = new PrepareVault(vaultTemplate);
+		this.prepareVault = new PrepareVault(vaultClient, vaultTemplate);
 		this.vaultEndpoint = vaultEndpoint;
 	}
 

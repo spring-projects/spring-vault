@@ -158,7 +158,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		if (options.isWrappedToken()) {
 
 			VaultResponse response = vaultClient.unwrap((String) data.get("response"), VaultResponse.class);
-			return VaultToken.of((String) response.getAuth().get("client_token"));
+			return LoginTokenUtil.from(response.getAuth());
 		}
 
 		if (data == null || data.isEmpty()) {

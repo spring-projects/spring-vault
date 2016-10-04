@@ -40,8 +40,6 @@ public class ClientCertificateAuthenticationUnitTests {
 	private VaultClient vaultClient;
 	private MockRestServiceServer mockRest;
 
-	private AppIdAuthentication sut;
-
 	@Before
 	public void before() throws Exception {
 
@@ -56,12 +54,16 @@ public class ClientCertificateAuthenticationUnitTests {
 		mockRest.expect(requestTo("https://localhost:8200/v1/auth/cert/login")) //
 				.andExpect(method(HttpMethod.POST)) //
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}" + "}"));
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(vaultClient);
 
 		VaultToken login = sut.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(10);
+		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
 	@Test(expected = VaultException.class)

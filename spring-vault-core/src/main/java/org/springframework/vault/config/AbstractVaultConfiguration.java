@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.vault.config;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.DefaultSessionManager;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
@@ -56,19 +57,36 @@ public abstract class AbstractVaultConfiguration {
 	public abstract ClientAuthentication clientAuthentication();
 
 	/**
-	 * Annotate with {@link Bean} in case you want to expose a {@link SessionManager} instance to the
-	 * {@link org.springframework.context.ApplicationContext}.
+	 * Create a {@link AsyncTaskExecutor} used by {@link LifecycleAwareSessionManager}. Annotate with {@link Bean} in case
+	 * you want to expose a {@link AsyncTaskExecutor} instance to the
+	 * {@link org.springframework.context.ApplicationContext}. This might be useful to supply managed executor instances
+	 * or {@link AsyncTaskExecutor}s using a queue/pooled threads.
+	 * 
+	 * @return the {@link AsyncTaskExecutor} to use. Must not be {@literal null}.
+	 * @see AsyncTaskExecutor
+	 */
+	public AsyncTaskExecutor asyncTaskExecutor() {
+		return new SimpleAsyncTaskExecutor("spring-vault-SimpleAsyncTaskExecutor-");
+	}
+
+	/**
+	 * Construct a {@link LifecycleAwareSessionManager} using {@link #clientAuthentication()} and {@link #vaultClient()}.
+	 * This {@link SessionManager} uses {@link #asyncTaskExecutor()}.
 	 * 
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
-	 * @see DefaultSessionManager
+	 * @see LifecycleAwareSessionManager
+	 * @see #clientAuthentication()
+	 * @see #asyncTaskExecutor() ()
+	 * @see #vaultClient()
 	 */
+	@Bean
 	public SessionManager sessionManager() {
 
 		ClientAuthentication clientAuthentication = clientAuthentication();
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
-		return new DefaultSessionManager(clientAuthentication);
+		return new LifecycleAwareSessionManager(clientAuthentication, asyncTaskExecutor(), vaultClient());
 	}
 
 	/**
@@ -89,7 +107,7 @@ public abstract class AbstractVaultConfiguration {
 	}
 
 	/**
-	 * Creates a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}.
+	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}.
 	 * {@link ClientHttpRequestFactory} is not exposed as root bean because {@link ClientHttpRequestFactory} is configured
 	 * with {@link ClientOptions} and {@link SslConfiguration} which are not necessarily applicable for the whole
 	 * application.
@@ -125,7 +143,7 @@ public abstract class AbstractVaultConfiguration {
 	}
 
 	/**
-	 * Creates a {@link VaultTemplate}.
+	 * Create a {@link VaultTemplate}.
 	 * 
 	 * @return the {@link VaultTemplate}.
 	 * @see #vaultClientFactory()

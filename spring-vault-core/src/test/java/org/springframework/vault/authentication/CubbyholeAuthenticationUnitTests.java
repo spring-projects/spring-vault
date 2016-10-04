@@ -63,9 +63,11 @@ public class CubbyholeAuthenticationUnitTests {
 				.initialToken(VaultToken.of("hello")).wrapped().build();
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
-		VaultToken vaultToken = authentication.login();
 
-		assertThat(vaultToken.getToken()).isEqualTo("5e6332cf-f003-6369-8cba-5bce2330f6cc");
+		VaultToken login = authentication.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("5e6332cf-f003-6369-8cba-5bce2330f6cc");
 	}
 
 	@Test
@@ -81,9 +83,11 @@ public class CubbyholeAuthenticationUnitTests {
 				.initialToken(VaultToken.of("hello")).path("cubbyhole/token").build();
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
-		VaultToken vaultToken = authentication.login();
 
-		assertThat(vaultToken.getToken()).isEqualTo("058222ef-9ab9-ff39-f087-9d5bee64e46d");
+		VaultToken login = authentication.login();
+
+		assertThat(login).isNotInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("058222ef-9ab9-ff39-f087-9d5bee64e46d");
 	}
 
 	@Test

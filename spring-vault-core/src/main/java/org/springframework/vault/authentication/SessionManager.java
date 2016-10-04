@@ -24,7 +24,7 @@ import org.springframework.vault.support.VaultToken;
  * Implementing classes usually use {@link ClientAuthentication} to log into Vault and obtain tokens.
  * 
  * @author Mark Paluch
- * @see DefaultSessionManager
+ * @see SimpleSessionManager
  * @see ClientAuthentication
  */
 public interface SessionManager {

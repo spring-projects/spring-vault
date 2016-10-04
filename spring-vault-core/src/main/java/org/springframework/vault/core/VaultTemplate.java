@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -30,8 +31,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.DefaultSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
@@ -47,16 +48,20 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @see VaultClientFactory
  * @see SessionManager
  */
-public class VaultTemplate implements InitializingBean, VaultOperations {
+public class VaultTemplate implements InitializingBean, VaultOperations, DisposableBean {
 
 	private VaultClientFactory vaultClientFactory;
 
 	private SessionManager sessionManager;
 
+	private final boolean dedicatedSessionManager;
+
 	/**
 	 * Creates a new {@link VaultTemplate} without setting {@link VaultClientFactory} and {@link SessionManager}.
 	 */
-	public VaultTemplate() {}
+	public VaultTemplate() {
+		this.dedicatedSessionManager = false;
+	}
 
 	/**
 	 * Creates a new {@link VaultTemplate} with a {@link VaultClient} and {@link ClientAuthentication}.
@@ -70,7 +75,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
 		this.vaultClientFactory = new DefaultVaultClientFactory(vaultClient);
-		this.sessionManager = new DefaultSessionManager(clientAuthentication);
+		this.sessionManager = new SimpleSessionManager(clientAuthentication);
+		this.dedicatedSessionManager = true;
 	}
 
 	/**
@@ -86,6 +92,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 
 		this.vaultClientFactory = vaultClientFactory;
 		this.sessionManager = sessionManager;
+		this.dedicatedSessionManager = false;
 	}
 
 	/**
@@ -117,6 +124,15 @@ public class VaultTemplate implements InitializingBean, VaultOperations {
 
 		Assert.notNull(vaultClientFactory, "VaultClientFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
+	}
+
+	@Override
+	public void destroy() throws Exception {
+
+		if (dedicatedSessionManager && sessionManager instanceof DisposableBean) {
+			((DisposableBean) sessionManager).destroy();
+		}
+
 	}
 
 	@Override

@@ -65,6 +65,7 @@ public class AppIdAuthenticationUnitTests {
 		AppIdAuthentication authentication = new AppIdAuthentication(options, vaultClient);
 
 		VaultToken login = authentication.login();
+		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
 	}
 

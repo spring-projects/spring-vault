@@ -220,8 +220,8 @@ class AppConfig {
     }
 
     @Bean
-    public DefaultSessionManager sessionManager() {
-        return new DefaultSessionManager(new TokenAuthentication("…"));
+    public SimpleSessionManager sessionManager() {
+        return new SimpleSessionManager(new TokenAuthentication("…"));
     }
 }
 ----
@@ -231,6 +231,14 @@ There are several overloaded constructors of `VaultTemplate`. These are
 
 * `VaultTemplate(VaultClient, ClientAuthentication)` - takes the `VaultClient` object and client authentication
 * `VaultTemplate(VaultClientFactory, SessionManager)` - takes a client factory for resource management and a `SessionManager`.
+
+[[vault.core.template.sessionmanagement]]
+=== Session Management
+
+Spring Vault requires a `ClientAuthentication` to login and access Vault. See <<vault.core.authentication>> on details regarding authentication. Vault login should not occur on each authenticated Vault interaction but must be reused throughout a session. This aspect is handled by a `SessionManager` implementation. A `SessionManager` decides how often it obtains a token, about revocation and renewal. Spring Vault comes with two implementations:
+
+* `SimpleSessionManager`: Just obtains tokens from the supplied `ClientAuthentication` without refresh and revocation
+* `LifecycleAwareSessionManager`: This `SessionManager` schedules token renewal if a token is renewable and revoke a login token on disposal. Renewal is scheduled with an `AsyncTaskExecutor`. `LifecycleAwareSessionManager` is configured by default if using `AbstractVaultConfiguration`.
 
 [[vault.client-ssl]]
 == Vault Client SSL configuration

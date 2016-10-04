@@ -16,7 +16,7 @@
 package org.springframework.vault.authentication;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.assumeNotNull;
+import static org.junit.Assume.*;
 
 import java.util.Map;
 
@@ -91,7 +91,8 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 			authentication.login();
 			fail("Missing VaultException");
 		} catch (VaultException e) {
-			assertThat(e).hasMessageContaining("Cannot retrieve Token from cubbyhole").hasMessageContaining("permission denied");
+			assertThat(e).hasMessageContaining("Cannot retrieve Token from cubbyhole")
+					.hasMessageContaining("permission denied");
 		}
 	}
 }

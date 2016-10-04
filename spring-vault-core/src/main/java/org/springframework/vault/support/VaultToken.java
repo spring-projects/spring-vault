@@ -19,6 +19,7 @@ package org.springframework.vault.support;
 import org.springframework.util.Assert;
 
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * Value object for a Vault token.
@@ -26,39 +27,26 @@ import lombok.EqualsAndHashCode;
  * @author Mark Paluch
  */
 @EqualsAndHashCode
+@ToString(exclude = "token")
 public class VaultToken {
 
 	private final String token;
 
-	private final long leaseDuration;
+	protected VaultToken(String token) {
 
-	private VaultToken(String token, long leaseDuration) {
+		Assert.hasText(token, "Token must not be empty");
+
 		this.token = token;
-		this.leaseDuration = leaseDuration;
 	}
 
 	/**
 	 * Creates a new {@link VaultToken}.
 	 * 
-	 * @param token must not be {@literal null}.
+	 * @param token must not be empty or {@literal null}.
 	 * @return the created {@link VaultToken}
 	 */
 	public static VaultToken of(String token) {
-		return of(token, 0);
-	}
-
-	/**
-	 * Creates a new {@link VaultToken} with a {@code leaseDuration}.
-	 * 
-	 * @param token must not be {@literal null}.
-	 * @param leaseDuration the lease duration.
-	 * @return the created {@link VaultToken}
-	 */
-	public static VaultToken of(String token, long leaseDuration) {
-
-		Assert.hasText(token, "Token must not be empty");
-
-		return new VaultToken(token, leaseDuration);
+		return new VaultToken(token);
 	}
 
 	/**
@@ -66,13 +54,6 @@ public class VaultToken {
 	 */
 	public String getToken() {
 		return token;
-	}
-
-	/**
-	 * @return the lease duration. May be {@literal 0} if none.
-	 */
-	public long getLeaseDuration() {
-		return leaseDuration;
 	}
 
 }

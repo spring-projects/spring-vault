@@ -18,6 +18,7 @@ package org.springframework.vault.util;
 import java.util.Collections;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
 import org.springframework.vault.support.VaultInitializationRequest;
@@ -35,12 +36,15 @@ import org.springframework.vault.support.VaultUnsealStatus;
  */
 public class PrepareVault {
 
+	private final VaultClient vaultClient;
+
 	private final VaultOperations vaultOperations;
 
 	private final VaultSysOperations adminOperations;
 
-	public PrepareVault(VaultOperations vaultOperations) {
+	public PrepareVault(VaultClient vaultClient, VaultOperations vaultOperations) {
 
+		this.vaultClient = vaultClient;
 		this.vaultOperations = vaultOperations;
 		this.adminOperations = vaultOperations.opsForSys();
 	}
@@ -150,5 +154,9 @@ public class PrepareVault {
 
 	public VaultOperations getVaultOperations() {
 		return vaultOperations;
+	}
+
+	public VaultClient getVaultClient() {
+		return vaultClient;
 	}
 }

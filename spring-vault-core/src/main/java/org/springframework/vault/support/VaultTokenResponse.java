@@ -28,7 +28,6 @@ public class VaultTokenResponse extends VaultResponse {
 	 * @return the {@link VaultToken}.
 	 */
 	public VaultToken getToken() {
-		return VaultToken.of((String) getAuth().get("client_token"),
-				((Number) getAuth().get("lease_duration")).longValue());
+		return VaultToken.of((String) getAuth().get("client_token"));
 	}
 }

@@ -102,7 +102,6 @@ public class AwsEc2Authentication implements ClientAuthentication {
 		}
 
 		VaultResponse body = entity.getBody();
-		String token = (String) body.getAuth().get("client_token");
 
 		if (logger.isDebugEnabled()) {
 
@@ -115,7 +114,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 			}
 		}
 
-		return VaultToken.of(token, body.getLeaseDuration());
+		return LoginTokenUtil.from(entity.getBody().getAuth());
 	}
 
 	protected Map<String, String> getEc2Login() {
