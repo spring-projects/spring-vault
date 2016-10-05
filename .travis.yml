@@ -8,6 +8,7 @@ env:
     - VAULT_VER=0.5.2
     - VAULT_VER=0.6.0
     - VAULT_VER=0.6.1
+    - VAULT_VER=0.6.2
 
 install:
   - src/test/bash/start.sh

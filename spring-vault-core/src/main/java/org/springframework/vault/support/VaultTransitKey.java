@@ -28,6 +28,8 @@ public class VaultTransitKey {
 
 	@JsonProperty("cipher_mode") private String cipherMode;
 
+	@JsonProperty("type") private String type;
+
 	@JsonProperty("deletion_allowed") private boolean deletionAllowed;
 
 	private boolean derived;
@@ -94,5 +96,13 @@ public class VaultTransitKey {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }

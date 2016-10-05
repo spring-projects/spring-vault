@@ -67,7 +67,14 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		VaultTransitKey mykey = transitOperations.getKey("mykey");
 
-		assertThat(mykey.getCipherMode()).isEqualTo("aes-gcm");
+		if (mykey.getCipherMode() != null) {
+			// <= Vault 0.6.1
+			assertThat(mykey.getCipherMode()).isEqualTo("aes-gcm");
+		} else {
+			// Vault 0.6.2+
+			assertThat(mykey.getType()).startsWith("aes256-gcm");
+		}
+
 		assertThat(mykey.getName()).isEqualTo("mykey");
 		assertThat(mykey.isDeletionAllowed()).isFalse();
 		assertThat(mykey.isDerived()).isFalse();
@@ -86,7 +93,6 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		VaultTransitKey mykey = transitOperations.getKey("mykey");
 
-		assertThat(mykey.getCipherMode()).isEqualTo("aes-gcm");
 		assertThat(mykey.getName()).isEqualTo("mykey");
 		assertThat(mykey.isDeletionAllowed()).isFalse();
 		assertThat(mykey.isDerived()).isTrue();
