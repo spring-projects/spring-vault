@@ -50,7 +50,6 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 				prepare().getVaultClient());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
-
 	}
 
 	// Expect no exception to be thrown.
@@ -64,7 +63,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		tokenRequest.setTtl("1h");
 		tokenRequest.setExplicitMaxTtl("10h");
 
-		VaultToken token = tokenOperations.createOrphan(tokenRequest).getToken();
+		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(LoginToken.renewable(token.getToken(), 0));
 
@@ -105,7 +104,8 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 				VaultResponseEntity<Map> entity = session
 						.getForEntity(String.format("auth/token/lookup/%s", loginToken.getToken()), Map.class);
 
-				assertThat(entity.getStatusCode()).isIn(HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				// Compatibility across Vault versions.
+				assertThat(entity.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 				return null;
 			}
 		});
