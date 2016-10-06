@@ -15,14 +15,18 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -49,8 +53,9 @@ import org.springframework.vault.support.VaultToken;
  */
 public class LifecycleAwareSessionManager implements SessionManager, DisposableBean {
 
-	private final static Logger logger = LoggerFactory.getLogger(LifecycleAwareSessionManager.class);
 	public static final int REFRESH_PERIOD_BEFORE_EXPIRY = 5;
+
+	private final static Logger logger = LoggerFactory.getLogger(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;
 	private final VaultClient vaultClient;
@@ -104,6 +109,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	 */
 	protected boolean renewToken() {
 
+		logger.info("Renewing token");
+
 		if (token == null) {
 			getSessionToken();
 			return false;
@@ -137,7 +144,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					token = clientAuthentication.login();
 
 					if (isTokenRenewable()) {
-						scheduleRefresh();
+						scheduleRenewal();
 					}
 				}
 			}
@@ -157,9 +164,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		return false;
 	}
 
-	private void scheduleRefresh() {
+	private void scheduleRenewal() {
 
-		logger.debug("Refreshing token");
+		logger.info("Scheduling Token renewal");
 
 		LoginToken loginToken = (LoginToken) token;
 		final int seconds = NumberUtils.convertNumberToTargetClass(
@@ -171,19 +178,17 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 				try {
 					if (LifecycleAwareSessionManager.this.token != null && isTokenRenewable()) {
 						if (renewToken()) {
-							scheduleRefresh();
+							scheduleRenewal();
 						}
 					}
 				} catch (Exception e) {
-					logger.error("Cannot refresh VaultToken", e);
+					logger.error("Cannot renew VaultToken", e);
 				}
 			}
 		};
 
 		if (taskExecutor instanceof TaskScheduler) {
-
-			TaskScheduler taskScheduler = (TaskScheduler) taskExecutor;
-			taskScheduler.scheduleWithFixedDelay(task, TimeUnit.SECONDS.toMillis(seconds));
+			scheduleTask((TaskScheduler) taskExecutor, seconds, task);
 			return;
 		}
 
@@ -191,6 +196,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			@Override
 			public void run() {
 				try {
+					// TODO: Revisit this approach since it blocks a thread. Spinning up a managed
+					// TaskScheduler just for once-in-a-while token renewal seemed a bit over-sophisticated
+					// that's why we emulate a scheduler by blocking a Thread resource
 					Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
 					task.run();
 				} catch (InterruptedException e) {
@@ -200,6 +208,10 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		});
 	}
 
+	private void scheduleTask(TaskScheduler taskScheduler, int seconds, Runnable task) {
+		taskScheduler.schedule(task, new OneShotTrigger(seconds));
+	}
+
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
@@ -207,5 +219,28 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		}
 
 		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+	}
+
+	/**
+	 * This one-shot trigger creates only one execution time to trigger an execution only once.
+	 */
+	private static class OneShotTrigger implements Trigger {
+
+		private final AtomicBoolean fired = new AtomicBoolean();
+		private final int seconds;
+
+		OneShotTrigger(int seconds) {
+			this.seconds = seconds;
+		}
+
+		@Override
+		public Date nextExecutionTime(TriggerContext triggerContext) {
+
+			if (fired.compareAndSet(false, true)) {
+				return new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(seconds));
+			}
+
+			return null;
+		}
 	}
 }

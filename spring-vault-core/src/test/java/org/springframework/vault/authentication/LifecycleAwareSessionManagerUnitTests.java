@@ -29,6 +29,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultToken;
@@ -44,6 +46,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Mock private ClientAuthentication clientAuthentication;
 
 	@Mock private AsyncTaskExecutor taskExecutor;
+
+	@Mock private ThreadPoolTaskScheduler taskScheduler;
 
 	@Mock private VaultClient vaultClient;
 
@@ -148,6 +152,22 @@ public class LifecycleAwareSessionManagerUnitTests {
 		runnableCaptor.getValue().run();
 
 		verify(taskExecutor, times(2)).execute(any(Runnable.class));
+	}
+
+	@Test
+	public void shouldUseTaskScheduler() {
+
+		sessionManager = new LifecycleAwareSessionManager(clientAuthentication, taskScheduler, vaultClient);
+
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+
+		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
+
+		sessionManager.getSessionToken();
+		verify(taskScheduler).schedule(any(Runnable.class), triggerCaptor.capture());
+
+		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNotNull();
+		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNull();
 	}
 
 	@Test
