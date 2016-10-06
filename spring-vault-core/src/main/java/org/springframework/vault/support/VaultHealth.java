@@ -45,4 +45,9 @@ public interface VaultHealth {
 	 * @return the server time in seconds, UTC.
 	 */
 	int getServerTimeUtc();
+
+	/**
+	 * @return the Vault version.
+	 */
+	String getVersion();
 }

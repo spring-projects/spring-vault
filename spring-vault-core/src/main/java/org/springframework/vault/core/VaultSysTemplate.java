@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +45,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -358,14 +358,17 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private final boolean sealed;
 		private final boolean standby;
 		private final int serverTimeUtc;
+		private final String version;
 
 		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
-				@JsonProperty("standby") boolean standby, @JsonProperty("server_time_utc") int serverTimeUtc) {
+				@JsonProperty("standby") boolean standby, @JsonProperty("server_time_utc") int serverTimeUtc,
+				@JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
 			this.standby = standby;
 			this.serverTimeUtc = serverTimeUtc;
+			this.version = version;
 		}
 	}
 }
