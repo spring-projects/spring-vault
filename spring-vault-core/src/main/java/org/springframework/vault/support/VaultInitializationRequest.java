@@ -24,30 +24,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VaultInitializationRequest {
 
-	@JsonProperty("secret_shares") private int secretShares;
+	@JsonProperty("secret_shares") private final int secretShares;
 
-	@JsonProperty("secret_threshold") private int secretThreshold;
+	@JsonProperty("secret_threshold") private final int secretThreshold;
 
-	public VaultInitializationRequest() {}
-
-	public VaultInitializationRequest(int secretShares, int secretThreshold) {
+	private VaultInitializationRequest(int secretShares, int secretThreshold) {
 		this.secretShares = secretShares;
 		this.secretThreshold = secretThreshold;
 	}
 
+	/**
+	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and {@code secretThreshold}.
+	 * 
+	 * @param secretShares
+	 * @param secretThreshold
+	 * @return a new {@link VaultInitializationRequest}.
+	 */
+	public static VaultInitializationRequest create(int secretShares, int secretThreshold) {
+		return new VaultInitializationRequest(secretShares, secretThreshold);
+	}
+
+	/**
+	 * @return number of secret shares.
+	 */
 	public int getSecretShares() {
 		return secretShares;
 	}
 
-	public void setSecretShares(int secretShares) {
-		this.secretShares = secretShares;
-	}
-
+	/**
+	 * @return required number of secret shares to unseal Vault.
+	 */
 	public int getSecretThreshold() {
 		return secretThreshold;
 	}
 
-	public void setSecretThreshold(int secretThreshold) {
-		this.secretThreshold = secretThreshold;
-	}
 }

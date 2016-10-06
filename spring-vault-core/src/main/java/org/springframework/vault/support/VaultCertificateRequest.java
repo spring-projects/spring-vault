@@ -127,7 +127,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configures alternative names. Replaces previously configured alt names
+		 * Configure alternative names. Replaces previously configured alt names
 		 *
 		 * @param altNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -155,7 +155,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configures IP subject alternative names. Replaces previously configured IP subject alt names.
+		 * Configure IP subject alternative names. Replaces previously configured IP subject alt names.
 		 *
 		 * @param ipSubjectAltNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -183,7 +183,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configures a TTL.
+		 * Configure a TTL.
 		 * 
 		 * @param ttl the TTL, must be a positive number.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -197,7 +197,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configures a TTL.
+		 * Configure a TTL.
 		 *
 		 * @param ttl the TTL, must be a positive number.
 		 * @param timeUnit must not be {@literal null}
@@ -213,7 +213,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * The given common name will not be included in DNS or Email Subject Alternate Names (as appropriate). Useful if
+		 * Exclude the given common name from DNS or Email Subject Alternate Names (as appropriate). Useful if
 		 * the CN is not a hostname or email address, but is instead some human-readable identifier.
 		 * 
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -225,7 +225,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Builds a new {@link VaultCertificateRequest} instance. Requires {@link #commonName(String)} to be configured.
+		 * Build a new {@link VaultCertificateRequest} instance. Requires {@link #commonName(String)} to be configured.
 		 *
 		 * @return a new {@link VaultCertificateRequest}.
 		 */

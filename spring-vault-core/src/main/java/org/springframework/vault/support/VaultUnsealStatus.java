@@ -15,54 +15,30 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Value object to bind Vault HTTP Unseal API responses.
+ * Vault unseal status.
  * 
  * @author Mark Paluch
  */
-public class VaultUnsealStatus {
+public interface VaultUnsealStatus {
 
-	private boolean sealed;
+	/**
+	 * @return total number of existing keyshares.
+	 */
+	int getSecretShares();
 
-	@JsonProperty("t") private int secretThreshold;
+	/**
+	 * @return required number of keyshares to unseal Vault.
+	 */
+	int getSecretThreshold();
 
-	@JsonProperty("n") private int secretShares;
+	/**
+	 * @return {@literal true} if Vault is sealed.
+	 */
+	boolean isSealed();
 
-	private int progress;
-
-	public VaultUnsealStatus() {}
-
-	public int getSecretShares() {
-		return secretShares;
-	}
-
-	public void setSecretShares(int secretShares) {
-		this.secretShares = secretShares;
-	}
-
-	public int getSecretThreshold() {
-		return secretThreshold;
-	}
-
-	public void setSecretThreshold(int secretThreshold) {
-		this.secretThreshold = secretThreshold;
-	}
-
-	public boolean isSealed() {
-		return sealed;
-	}
-
-	public void setSealed(boolean sealed) {
-		this.sealed = sealed;
-	}
-
-	public int getProgress() {
-		return progress;
-	}
-
-	public void setProgress(int progress) {
-		this.progress = progress;
-	}
+	/**
+	 * @return number of remaining required keyshares to unseal Vault.
+	 */
+	int getProgress();
 }

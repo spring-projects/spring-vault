@@ -15,7 +15,8 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,10 +26,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultMount;
+import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.VaultTransitRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 
 /**
@@ -52,7 +53,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		}
 
 		try {
-			transitOperations.configureKey("mykey", new VaultTransitKeyConfiguration(true, null));
+			transitOperations.configureKey("mykey", VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		} catch (Exception e) {}
 
 		try {
@@ -67,13 +68,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		VaultTransitKey mykey = transitOperations.getKey("mykey");
 
-		if (mykey.getCipherMode() != null) {
-			// <= Vault 0.6.1
-			assertThat(mykey.getCipherMode()).isEqualTo("aes-gcm");
-		} else {
-			// Vault 0.6.2+
-			assertThat(mykey.getType()).startsWith("aes256-gcm");
-		}
+		assertThat(mykey.getType()).startsWith("aes");
 
 		assertThat(mykey.getName()).isEqualTo("mykey");
 		assertThat(mykey.isDeletionAllowed()).isFalse();
@@ -85,9 +80,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void createKeyShouldCreateKeyWithOptions() throws Exception {
 
-		VaultTransitKeyCreationRequest request = new VaultTransitKeyCreationRequest();
-		request.setConvergentEncryption(true);
-		request.setDerived(true);
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.convergentEncryption(true) //
+				.derived(true) //
+				.build();
 
 		transitOperations.createKey("mykey", request);
 
@@ -122,7 +118,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	public void deleteKeyShouldDeleteKey() throws Exception {
 
 		transitOperations.createKey("mykey");
-		transitOperations.configureKey("mykey", new VaultTransitKeyConfiguration(true, null));
+		transitOperations.configureKey("mykey", VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		transitOperations.deleteKey("mykey");
 
 		assertThat(transitOperations.getKey("mykey")).isNull();
@@ -140,11 +136,12 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void encryptShouldCreateCiphertextWithNonceAndContext() throws Exception {
 
-		transitOperations.createKey("mykey", new VaultTransitKeyCreationRequest(true, true));
+		transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitRequest transitRequest = new VaultTransitRequest();
-		transitRequest.setContext("blubb".getBytes());
-		transitRequest.setNonce("123456789012".getBytes());
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
 
 		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
 		assertThat(ciphertext).startsWith("vault:v1:");
@@ -164,11 +161,13 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void decryptShouldCreatePlaintextWithNonceAndContext() throws Exception {
 
-		transitOperations.createKey("mykey", new VaultTransitKeyCreationRequest(true, true));
+		transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitRequest transitRequest = new VaultTransitRequest();
-		transitRequest.setContext("blubb".getBytes());
-		transitRequest.setNonce("123456789012".getBytes());
+		VaultTransitContext transitRequest = VaultTransitContext.builder() //
+				.context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
 
 		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
 
@@ -192,11 +191,13 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() throws Exception {
 
-		transitOperations.createKey("mykey", new VaultTransitKeyCreationRequest(true, true));
+		transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitRequest transitRequest = new VaultTransitRequest();
-		transitRequest.setContext("blubb".getBytes());
-		transitRequest.setNonce("123456789012".getBytes());
+		VaultTransitContext transitRequest = VaultTransitContext.builder() //
+				.context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
 
 		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
 		transitOperations.rotate("mykey");

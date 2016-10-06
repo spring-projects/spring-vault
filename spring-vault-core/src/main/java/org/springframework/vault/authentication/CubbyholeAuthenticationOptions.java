@@ -95,7 +95,7 @@ public class CubbyholeAuthenticationOptions {
 		CubbyholeAuthenticationOptionsBuilder() {}
 
 		/**
-		 * Configures the initial {@link VaultToken} to access Cubbyhole.
+		 * Configure the initial {@link VaultToken} to access Cubbyhole.
 		 * 
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
@@ -109,7 +109,7 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
-		 * Configures the cubbyhole path, such as {@code cubbyhole/token}. Expects a token in the {@code data} response.
+		 * Configure the cubbyhole path, such as {@code cubbyhole/token}. Expects a token in the {@code data} response.
 		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
@@ -123,7 +123,7 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
-		 * Configures whether to use wrapped token responses.
+		 * Configure whether to use wrapped token responses.
 		 *
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
@@ -135,7 +135,7 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
-		 * Builds a new {@link CubbyholeAuthenticationOptions} instance. Requires {@link #path(String)} or
+		 * Build a new {@link CubbyholeAuthenticationOptions} instance. Requires {@link #path(String)} or
 		 * {@link #wrapped()} to be configured.
 		 * 
 		 * @return a new {@link CubbyholeAuthenticationOptions}.

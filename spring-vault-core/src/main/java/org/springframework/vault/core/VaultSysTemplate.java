@@ -16,10 +16,13 @@
 package org.springframework.vault.core;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -36,13 +39,17 @@ import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Data;
 
 /**
  * Default implementation of {@link VaultSysOperations}.
@@ -104,8 +111,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@Override
 			public VaultInitializationResponse doWithVault(VaultClient client) {
 
-				VaultResponseEntity<VaultInitializationResponse> response = client.putForEntity("sys/init",
-						vaultInitializationRequest, VaultInitializationResponse.class);
+				VaultResponseEntity<VaultInitializationResponseImpl> response = client.putForEntity("sys/init",
+						vaultInitializationRequest, VaultInitializationResponseImpl.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody();
@@ -129,8 +136,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@Override
 			public VaultUnsealStatus doWithVault(VaultClient client) {
 
-				VaultResponseEntity<VaultUnsealStatus> response = client.putForEntity("sys/unseal",
-						Collections.singletonMap("key", keyShare), VaultUnsealStatus.class);
+				VaultResponseEntity<VaultUnsealStatusImpl> response = client.putForEntity("sys/unseal",
+						Collections.singletonMap("key", keyShare), VaultUnsealStatusImpl.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody();
@@ -209,7 +216,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public VaultUnsealStatus doWithVault(VaultClient client) {
 
-			VaultResponseEntity<VaultUnsealStatus> response = client.getForEntity("sys/seal-status", VaultUnsealStatus.class);
+			VaultResponseEntity<VaultUnsealStatusImpl> response = client.getForEntity("sys/seal-status",
+					VaultUnsealStatusImpl.class);
 
 			if (response.isSuccessful() && response.hasBody()) {
 				return response.getBody();
@@ -303,18 +311,61 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			try {
 
-				ResponseEntity<VaultHealth> healthResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
-						VaultHealth.class);
+				ResponseEntity<VaultHealthImpl> healthResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
+						VaultHealthImpl.class);
 				return healthResponse.getBody();
 			} catch (HttpStatusCodeException responseError) {
 
 				try {
 					ObjectMapper mapper = new ObjectMapper();
-					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealth.class);
+					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
 				} catch (Exception jsonError) {
 					throw responseError;
 				}
 			}
+		}
+	}
+
+	@Data
+	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
+
+		private List<String> keys = new ArrayList<String>();
+
+		@JsonProperty("root_token") private String rootToken;
+
+		public VaultToken getRootToken() {
+			return VaultToken.of(rootToken);
+		}
+	}
+
+	@Data
+	static class VaultUnsealStatusImpl implements VaultUnsealStatus {
+
+		private boolean sealed;
+
+		@JsonProperty("t") private int secretThreshold;
+
+		@JsonProperty("n") private int secretShares;
+
+		private int progress;
+	}
+
+	@Data
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	static class VaultHealthImpl implements VaultHealth {
+
+		private final boolean initialized;
+		private final boolean sealed;
+		private final boolean standby;
+		private final int serverTimeUtc;
+
+		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
+				@JsonProperty("standby") boolean standby, @JsonProperty("server_time_utc") int serverTimeUtc) {
+
+			this.initialized = initialized;
+			this.sealed = sealed;
+			this.standby = standby;
+			this.serverTimeUtc = serverTimeUtc;
 		}
 	}
 }

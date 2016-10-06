@@ -109,7 +109,7 @@ public class AwsEc2AuthenticationOptions {
 		AwsEc2AuthenticationOptionsBuilder() {}
 
 		/**
-		 * Configures the mount path.
+		 * Configure the mount path.
 		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
@@ -123,7 +123,7 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 		/**
-		 * Configures the Identity Document {@link URI}.
+		 * Configure the Identity Document {@link URI}.
 		 *
 		 * @param identityDocumentUri must not be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
@@ -136,7 +136,7 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 		/**
-		 * Configures the name of the role against which the login is being attempted.If role is not specified, then the
+		 * Configure the name of the role against which the login is being attempted.If role is not specified, then the
 		 * login endpoint looks for a role bearing the name of the AMI ID of the EC2 instance that is trying to login.
 		 * 
 		 * @param role may be empty or {@literal null}.
@@ -149,7 +149,7 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 		/**
-		 * Builds a new {@link AwsEc2AuthenticationOptions} instance.
+		 * Build a new {@link AwsEc2AuthenticationOptions} instance.
 		 *
 		 * @return a new {@link AppIdAuthenticationOptions}.
 		 */

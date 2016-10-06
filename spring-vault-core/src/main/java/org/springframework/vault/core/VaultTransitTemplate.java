@@ -24,7 +24,11 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.VaultTransitRequest;
+import org.springframework.vault.support.VaultTransitContext;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -47,7 +51,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public void createKey(final String keyName) {
+	public void createKey(String keyName) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 
@@ -55,7 +59,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public void createKey(final String keyName, final VaultTransitKeyCreationRequest createKeyRequest) {
+	public void createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(createKeyRequest, "VaultTransitKeyCreationRequest must not be empty");
@@ -64,7 +68,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public void configureKey(final String keyName, final VaultTransitKeyConfiguration keyConfiguration) {
+	public void configureKey(String keyName, VaultTransitKeyConfiguration keyConfiguration) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
@@ -73,12 +77,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public VaultTransitKey getKey(final String keyName) {
+	public VaultTransitKey getKey(String keyName) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 
-		VaultResponseSupport<VaultTransitKey> result = vaultOperations.read(String.format("%s/keys/%s", path, keyName),
-				VaultTransitKey.class);
+		VaultResponseSupport<VaultTransitKeyImpl> result = vaultOperations.read(String.format("%s/keys/%s", path, keyName),
+				VaultTransitKeyImpl.class);
 
 		if (result != null) {
 			return result.getData();
@@ -118,7 +122,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public String encrypt(String keyName, byte[] plaintext, VaultTransitRequest transitRequest) {
+	public String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(plaintext, "Plain text must not be null");
@@ -152,7 +156,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public byte[] decrypt(String keyName, String ciphertext, VaultTransitRequest transitRequest) {
+	public byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.hasText(keyName, "Cipher text must not be empty");
@@ -185,7 +189,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public String rewrap(String keyName, String ciphertext, VaultTransitRequest transitRequest) {
+	public String rewrap(String keyName, String ciphertext, VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.hasText(ciphertext, "Cipher text must not be empty");
@@ -202,7 +206,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.get("ciphertext");
 	}
 
-	private void applyTransitOptions(VaultTransitRequest transitRequest, Map<String, String> request) {
+	private void applyTransitOptions(VaultTransitContext transitRequest, Map<String, String> request) {
 
 		if (transitRequest.getContext() != null) {
 			request.put("context", Base64Utils.encodeToString(transitRequest.getContext()));
@@ -211,5 +215,35 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		if (transitRequest.getNonce() != null) {
 			request.put("nonce", Base64Utils.encodeToString(transitRequest.getNonce()));
 		}
+	}
+
+	@Data
+	static class VaultTransitKeyImpl implements VaultTransitKey {
+
+		@JsonProperty("cipher_mode") private String cipherMode;
+
+		@JsonProperty("type") private String type;
+
+		@JsonProperty("deletion_allowed") private boolean deletionAllowed;
+
+		private boolean derived;
+
+		private Map<String, Long> keys;
+
+		@JsonProperty("latest_version") private boolean latestVersion;
+
+		@JsonProperty("min_decryption_version") private int minDecryptionVersion;
+
+		private String name;
+
+		public String getType() {
+
+			if (type != null) {
+				return type;
+			}
+
+			return cipherMode;
+		}
+
 	}
 }

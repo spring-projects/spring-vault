@@ -15,37 +15,22 @@
  */
 package org.springframework.vault.support;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Value object to bind Vault HTTP Initialization API responses.
+ * Vault initialization response.
  * 
  * @author Mark Paluch
  */
-public class VaultInitializationResponse {
+public interface VaultInitializationResponse {
 
-	private List<String> keys = new ArrayList<String>();
+	/**
+	 * @return {@link List} of unseal keys.
+	 */
+	List<String> getKeys();
 
-	@JsonProperty("root_token") private String rootToken;
-
-	public VaultInitializationResponse() {}
-
-	public List<String> getKeys() {
-		return keys;
-	}
-
-	public void setKeys(List<String> keys) {
-		this.keys = keys;
-	}
-
-	public String getRootToken() {
-		return rootToken;
-	}
-
-	public void setRootToken(String rootToken) {
-		this.rootToken = rootToken;
-	}
+	/**
+	 * @return the root {@link VaultToken}.
+	 */
+	VaultToken getRootToken();
 }

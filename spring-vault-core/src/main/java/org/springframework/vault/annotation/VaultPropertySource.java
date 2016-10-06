@@ -81,7 +81,7 @@ public @interface VaultPropertySource {
 	String[] value();
 
 	/**
-	 * Configures the name of the {@link org.springframework.vault.core.VaultTemplate} bean to be used with the property
+	 * Configure the name of the {@link org.springframework.vault.core.VaultTemplate} bean to be used with the property
 	 * sources.
 	 */
 	String vaultTemplateRef() default "vaultTemplate";

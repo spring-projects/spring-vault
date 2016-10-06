@@ -24,31 +24,76 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VaultTransitKeyConfiguration {
 
-	@JsonProperty("deletion_allowed") private Boolean deletionAllowed;
+	@JsonProperty("deletion_allowed") private final Boolean deletionAllowed;
 
-	@JsonProperty("latest_version") private Integer latestVersion;
+	@JsonProperty("latest_version") private final Integer latestVersion;
 
-	public VaultTransitKeyConfiguration() {
-	}
-
-	public VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion) {
+	private VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion) {
 		this.deletionAllowed = deletionAllowed;
 		this.latestVersion = latestVersion;
 	}
 
+	/**
+	 * @return a new {@link VaultTransitKeyConfigurationBuilder}.
+	 */
+	public static VaultTransitKeyConfigurationBuilder builder() {
+		return new VaultTransitKeyConfigurationBuilder();
+	}
+
+	/**
+	 * @return whether key deletion is configured
+	 */
 	public Boolean getDeletionAllowed() {
 		return deletionAllowed;
 	}
 
-	public void setDeletionAllowed(Boolean deletionAllowed) {
-		this.deletionAllowed = deletionAllowed;
-	}
-
+	/**
+	 * @return latest key version
+	 */
 	public Integer getLatestVersion() {
 		return latestVersion;
 	}
 
-	public void setLatestVersion(Integer latestVersion) {
-		this.latestVersion = latestVersion;
+	/**
+	 * Builder for {@link VaultTransitKeyConfiguration}.
+	 */
+	public static class VaultTransitKeyConfigurationBuilder {
+
+		private Boolean deletionAllowed;
+		private Integer latestVersion;
+
+		VaultTransitKeyConfigurationBuilder() {}
+
+		/**
+		 * Set whether key deletion is allowed.
+		 *
+		 * @param deletionAllowed {@literal true} if key deletion should be allowed.
+		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 */
+		public VaultTransitKeyConfigurationBuilder deletionAllowed(boolean deletionAllowed) {
+			this.deletionAllowed = deletionAllowed;
+			return this;
+		}
+
+		/**
+		 * Set the latest key version.
+		 *
+		 * @param latestVersion key version.
+		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 */
+		public VaultTransitKeyConfigurationBuilder latestVersion(int latestVersion) {
+			this.latestVersion = latestVersion;
+			return this;
+		}
+
+		/**
+		 * Build a new {@link VaultTransitKeyConfiguration} instance.
+		 *
+		 * @return a new {@link VaultTransitKeyConfiguration}.
+		 */
+		public VaultTransitKeyConfiguration build() {
+			return new VaultTransitKeyConfiguration(deletionAllowed, latestVersion);
+		}
+
 	}
 }

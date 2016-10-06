@@ -96,7 +96,7 @@ public class AppIdAuthenticationOptions {
 		AppIdAuthenticationOptionsBuilder() {}
 
 		/**
-		 * Configures the mount path.
+		 * Configure the mount path.
 		 * 
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
@@ -111,7 +111,7 @@ public class AppIdAuthenticationOptions {
 		}
 
 		/**
-		 * Configures the AppId.
+		 * Configure the AppId.
 		 *
 		 * @param appId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
@@ -125,7 +125,7 @@ public class AppIdAuthenticationOptions {
 		}
 
 		/**
-		 * Configures the {@link AppIdUserIdMechanism}.
+		 * Configure the {@link AppIdUserIdMechanism}.
 		 *
 		 * @param userIdMechanism must not be {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
@@ -139,7 +139,7 @@ public class AppIdAuthenticationOptions {
 		}
 
 		/**
-		 * Builds a new {@link AppIdAuthenticationOptions} instance. Requires {@link #userIdMechanism(AppIdUserIdMechanism)}
+		 * Build a new {@link AppIdAuthenticationOptions} instance. Requires {@link #userIdMechanism(AppIdUserIdMechanism)}
 		 * to be configured.
 		 * 
 		 * @return a new {@link AppIdAuthenticationOptions}.

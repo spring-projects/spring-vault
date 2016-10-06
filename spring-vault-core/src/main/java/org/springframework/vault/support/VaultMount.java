@@ -142,7 +142,7 @@ public class VaultMount {
 		}
 
 		/**
-		 * Builds a new {@link VaultMount} instance. Requires {@link #type(String)} to be configured.
+		 * Build a new {@link VaultMount} instance. Requires {@link #type(String)} to be configured.
 		 *
 		 * @return a new {@link VaultMount}.
 		 */
