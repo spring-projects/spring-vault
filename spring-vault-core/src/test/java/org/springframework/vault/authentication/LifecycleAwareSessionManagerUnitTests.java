@@ -106,28 +106,28 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldScheduleTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 
 		sessionManager.getSessionToken();
 
-		verify(taskExecutor).execute(any(Runnable.class), eq(5000L));
+		verify(taskExecutor).execute(any(Runnable.class));
 	}
 
 	@Test
 	public void shouldRunTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
-		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 10)),
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 5)),
 				ArgumentMatchers.any(), any(Class.class)))
 						.thenReturn(new ResponseEntity<Object>(null, HttpStatus.OK, null, null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture(), eq(5000L));
+		verify(taskExecutor).execute(runnableCaptor.capture());
 
 		runnableCaptor.getValue().run();
-		verify(vaultClient).postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 10)),
+		verify(vaultClient).postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 5)),
 				ArgumentMatchers.any(), any(Class.class));
 		verify(clientAuthentication, times(1)).login();
 	}
@@ -135,54 +135,54 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldReScheduleTokenRenewalAfterSucessfulRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
-		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 10)),
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 5)),
 				ArgumentMatchers.any(), any(Class.class)))
 						.thenReturn(new ResponseEntity<Object>(null, HttpStatus.OK, null, null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture(), eq(5000L));
+		verify(taskExecutor).execute(runnableCaptor.capture());
 
 		runnableCaptor.getValue().run();
 
-		verify(taskExecutor, times(2)).execute(any(Runnable.class), anyLong());
+		verify(taskExecutor, times(2)).execute(any(Runnable.class));
 	}
 
 	@Test
 	public void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
-		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 10)),
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(vaultClient.postForEntity(eq("auth/token/renew-self"), eq(LoginToken.renewable("login", 5)),
 				ArgumentMatchers.any(), any(Class.class)))
 						.thenReturn(new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR, null, null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture(), eq(5000L));
+		verify(taskExecutor).execute(runnableCaptor.capture());
 
 		runnableCaptor.getValue().run();
 
-		verify(taskExecutor, times(1)).execute(any(Runnable.class), anyLong());
+		verify(taskExecutor, times(1)).execute(any(Runnable.class));
 	}
 
 	@Test
 	public void shouldObtainTokenIfNoTokenAvailable() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 
 		sessionManager.renewToken();
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(LoginToken.renewable("login", 10));
+		assertThat(sessionManager.getSessionToken()).isEqualTo(LoginToken.renewable("login", 5));
 		verify(clientAuthentication, times(1)).login();
 	}
 
 	@Test
 	public void renewShouldReportFalseIfTokenRenewalFails() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 10));
+		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 		when(vaultClient.postForEntity(anyString(), any(VaultToken.class), ArgumentMatchers.any(), any(Class.class)))
 				.thenReturn(new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST, null, null));
 

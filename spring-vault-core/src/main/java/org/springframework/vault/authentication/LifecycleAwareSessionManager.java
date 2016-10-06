@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
@@ -158,11 +159,13 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	private void scheduleRefresh() {
 
+		logger.debug("Refreshing token");
+
 		LoginToken loginToken = (LoginToken) token;
-		int seconds = NumberUtils.convertNumberToTargetClass(
+		final int seconds = NumberUtils.convertNumberToTargetClass(
 				Math.max(1, loginToken.getLeaseDuration() - REFRESH_PERIOD_BEFORE_EXPIRY), Integer.class);
 
-		taskExecutor.execute(new Runnable() {
+		final Runnable task = new Runnable() {
 			@Override
 			public void run() {
 				try {
@@ -175,7 +178,26 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					logger.error("Cannot refresh VaultToken", e);
 				}
 			}
-		}, TimeUnit.SECONDS.toMillis(seconds));
+		};
+
+		if (taskExecutor instanceof TaskScheduler) {
+
+			TaskScheduler taskScheduler = (TaskScheduler) taskExecutor;
+			taskScheduler.scheduleWithFixedDelay(task, TimeUnit.SECONDS.toMillis(seconds));
+			return;
+		}
+
+		taskExecutor.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
+					task.run();
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		});
 	}
 
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
