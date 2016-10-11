@@ -143,7 +143,6 @@ public class CubbyholeAuthenticationOptions {
 		public CubbyholeAuthenticationOptions build() {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
-			Assert.hasText(path, "Path must not be empty");
 
 			return new CubbyholeAuthenticationOptions(initialToken, path, wrappedToken);
 		}

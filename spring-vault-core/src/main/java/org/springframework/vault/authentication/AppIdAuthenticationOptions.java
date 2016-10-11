@@ -146,7 +146,7 @@ public class AppIdAuthenticationOptions {
 		 */
 		public AppIdAuthenticationOptions build() {
 
-			Assert.hasText(path, "AppId must not be empty");
+			Assert.hasText(appId, "AppId must not be empty");
 			Assert.notNull(userIdMechanism, "AppIdUserIdMechanism must not be null");
 
 			return new AppIdAuthenticationOptions(path, appId, userIdMechanism);

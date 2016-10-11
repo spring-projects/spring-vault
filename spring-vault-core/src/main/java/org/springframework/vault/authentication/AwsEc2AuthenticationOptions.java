@@ -155,7 +155,6 @@ public class AwsEc2AuthenticationOptions {
 		 */
 		public AwsEc2AuthenticationOptions build() {
 
-			Assert.hasText(path, "AppId must not be empty");
 			Assert.notNull(identityDocumentUri, "IdentityDocumentUri must not be null");
 
 			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role);

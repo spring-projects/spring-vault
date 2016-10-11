@@ -32,7 +32,10 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+See also:
+
+* https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
+* https://www.vaultproject.io/docs/auth/token.html[Vault Documentation: Using the Token auth backend]
 
 [[vault.authentication.appid]]
 == AppId authentication
@@ -47,7 +50,6 @@ IP address, Mac address and static UserId's (e.g. supplied via System properties
 The IP and Mac address are represented as Hex-encoded SHA256 hash.
 
 IP address-based UserId's use the local host's IP address.
-
 
 ====
 [source,java]
@@ -96,6 +98,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
+
         AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
                 .userIdMechanism(new MacAddressUserId()) //
                 .build();
@@ -108,7 +111,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-The corresponding command to generate the IP address UserId from a command line is:
+The corresponding command to generate the Mac address UserId from a command line is:
 
 ----
 $ echo -n 0AFEDE1234AC | sha256sum
@@ -135,6 +138,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
   @Override
   public String createUserId() {
+
     String userId = ...
     return userId;
   }
@@ -229,7 +233,7 @@ AWS-EC2 authentication roles are optional and default to the AMI.
 You can configure the authentication role by setting
 it in `AwsEc2AuthenticationOptions`.
 
-See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the aws-ec2 auth backend]
+See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the AWS-EC2 auth backend]
 
 == TLS certificate authentication
 
@@ -260,7 +264,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the cert auth backend]
+See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
 == Cubbyhole authentication
 
@@ -373,5 +377,5 @@ class AppConfig extends AbstractVaultConfiguration {
 See also:
 
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
-* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation:Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
