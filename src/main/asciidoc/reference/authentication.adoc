@@ -34,6 +34,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also: https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 
+[[vault.authentication.appid]]
 == AppId authentication
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
@@ -142,6 +143,44 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 ====
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
+
+== AppRole authentication
+
+https://www.vaultproject.io/docs/auth/app-id.html[AppRole] allows machine
+authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.appid>>.
+AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
+
+Spring Vault supports AppRole authentication by providing either RoleId only
+or together with a provided SecretId (push or pull mode).
+
+RoleId and optionally SecretId must be provided to `AppRoleAuthenticationOptions`,
+Spring Vault will not look up these or create a custom SecretId.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+                .roleId("…")
+                .secretId("…")
+                .build();
+
+        return new AppRoleAuthentication(options, vaultClient());
+    }
+
+    // …
+}
+----
+====
+
+See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 
 == AWS-EC2 authentication
 
