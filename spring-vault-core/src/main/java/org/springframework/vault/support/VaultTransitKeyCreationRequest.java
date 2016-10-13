@@ -48,14 +48,27 @@ public class VaultTransitKeyCreationRequest {
 		return new VaultTransitKeyCreationRequestBuilder();
 	}
 
+	/**
+	 *
+	 * @return {@literal true} if key derivation MUST be used.
+	 */
 	public Boolean getDerived() {
 		return derived;
 	}
 
+	/**
+	 *
+	 * @return {@literal true} if convergent encryption should be used (where the same
+	 * plaintext creates the same cipher text).
+	 */
 	public Boolean getConvergentEncryption() {
 		return convergentEncryption;
 	}
 
+	/**
+	 *
+	 * @return the key type.
+	 */
 	public String getType() {
 		return type;
 	}

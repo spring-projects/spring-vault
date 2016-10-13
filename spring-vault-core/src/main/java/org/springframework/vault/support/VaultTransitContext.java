@@ -58,6 +58,7 @@ public class VaultTransitContext {
 	public static class VaultTransitRequestBuilder {
 
 		private byte[] context;
+
 		private byte[] nonce;
 
 		VaultTransitRequestBuilder() {
@@ -70,7 +71,7 @@ public class VaultTransitContext {
 		 * provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
-		public VaultTransitContext.VaultTransitRequestBuilder context(byte[] context) {
+		public VaultTransitRequestBuilder context(byte[] context) {
 			this.context = context;
 			return this;
 		}
@@ -85,7 +86,7 @@ public class VaultTransitContext {
 		 * nonce value is never reused
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
-		public VaultTransitContext.VaultTransitRequestBuilder nonce(byte[] nonce) {
+		public VaultTransitRequestBuilder nonce(byte[] nonce) {
 			this.nonce = nonce;
 			return this;
 		}

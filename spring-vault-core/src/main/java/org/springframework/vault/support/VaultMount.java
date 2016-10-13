@@ -113,7 +113,7 @@ public class VaultMount {
 		 * @param type the backend type, must not be empty or {@literal null}.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
-		public VaultMount.VaultMountBuilder type(String type) {
+		public VaultMountBuilder type(String type) {
 
 			Assert.hasText(type, "Type must not be empty or null");
 
@@ -127,7 +127,7 @@ public class VaultMount {
 		 * @param description a human readable description of this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
-		public VaultMount.VaultMountBuilder description(String description) {
+		public VaultMountBuilder description(String description) {
 			this.description = description;
 			return this;
 		}
@@ -138,7 +138,7 @@ public class VaultMount {
 		 * @param config additional configuration details for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
-		public VaultMount.VaultMountBuilder config(Map<String, Object> config) {
+		public VaultMountBuilder config(Map<String, Object> config) {
 			this.config = config;
 			return this;
 		}

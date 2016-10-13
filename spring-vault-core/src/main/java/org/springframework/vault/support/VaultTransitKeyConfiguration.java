@@ -62,6 +62,7 @@ public class VaultTransitKeyConfiguration {
 	public static class VaultTransitKeyConfigurationBuilder {
 
 		private Boolean deletionAllowed;
+
 		private Integer latestVersion;
 
 		VaultTransitKeyConfigurationBuilder() {
@@ -97,6 +98,5 @@ public class VaultTransitKeyConfiguration {
 		public VaultTransitKeyConfiguration build() {
 			return new VaultTransitKeyConfiguration(deletionAllowed, latestVersion);
 		}
-
 	}
 }

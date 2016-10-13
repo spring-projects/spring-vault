@@ -51,66 +51,130 @@ public class VaultResponseSupport<T> {
 
 	private boolean renewable;
 
+	/**
+	 *
+	 * @return authentication payload.
+	 */
 	public Map<String, Object> getAuth() {
 		return auth;
 	}
 
+	/**
+	 *
+	 * @param auth the authentication payload.
+	 */
 	public void setAuth(Map<String, Object> auth) {
 		this.auth = auth;
 	}
 
+	/**
+	 *
+	 * @return secret data.
+	 */
 	public T getData() {
 		return data;
 	}
 
+	/**
+	 *
+	 * @param data secret data.
+	 */
 	public void setData(T data) {
 		this.data = data;
 	}
 
+	/**
+	 *
+	 * @return request metadata.
+	 */
 	public Map<String, String> getMetadata() {
 		return metadata;
 	}
 
+	/**
+	 *
+	 * @param metadata request metadata.
+	 */
 	public void setMetadata(Map<String, String> metadata) {
 		this.metadata = metadata;
 	}
 
+	/**
+	 *
+	 * @return the lease duration.
+	 */
 	public long getLeaseDuration() {
 		return leaseDuration;
 	}
 
+	/**
+	 *
+	 * @param leaseDuration the lease duration.
+	 */
 	public void setLeaseDuration(long leaseDuration) {
 		this.leaseDuration = leaseDuration;
 	}
 
+	/**
+	 *
+	 * @return the lease Id.
+	 */
 	public String getLeaseId() {
 		return leaseId;
 	}
 
+	/**
+	 *
+	 * @param leaseId the lease Id.
+	 */
 	public void setLeaseId(String leaseId) {
 		this.leaseId = leaseId;
 	}
 
+	/**
+	 *
+	 * @return {@literal true} if the lease is renewable.
+	 */
 	public boolean isRenewable() {
 		return renewable;
 	}
 
+	/**
+	 *
+	 * @param renewable {@literal true} if the lease is renewable.
+	 */
 	public void setRenewable(boolean renewable) {
 		this.renewable = renewable;
 	}
 
+	/**
+	 *
+	 * @return response wrapping details.
+	 */
 	public Map<String, String> getWrapInfo() {
 		return wrapInfo;
 	}
 
+	/**
+	 *
+	 * @param wrapInfo response wrapping details.
+	 */
 	public void setWrapInfo(Map<String, String> wrapInfo) {
 		this.wrapInfo = wrapInfo;
 	}
 
+	/**
+	 *
+	 * @return the request Id.
+	 */
 	public String getRequestId() {
 		return requestId;
 	}
 
+	/**
+	 *
+	 * @param requestId the request Id.
+	 */
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
 	}

@@ -48,7 +48,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 	@Override
 	public VaultTokenResponse create() {
-		return create(new VaultTokenRequest());
+		return create(VaultTokenRequest.builder().build());
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 	@Override
 	public VaultTokenResponse createOrphan() {
-		return createOrphan(new VaultTokenRequest());
+		return createOrphan(VaultTokenRequest.builder().build());
 	}
 
 	@Override

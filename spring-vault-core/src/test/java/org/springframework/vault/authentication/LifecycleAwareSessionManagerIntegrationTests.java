@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -60,10 +61,10 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
 				.opsForToken();
 
-		VaultTokenRequest tokenRequest = new VaultTokenRequest();
-		tokenRequest.setRenewable(true);
-		tokenRequest.setTtl("1h");
-		tokenRequest.setExplicitMaxTtl("10h");
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
+				.renewable().ttl(1, TimeUnit.HOURS) //
+				.explicitMaxTtl(10, TimeUnit.HOURS) //
+				.build();
 
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 

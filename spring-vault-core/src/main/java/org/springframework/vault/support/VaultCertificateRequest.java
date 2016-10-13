@@ -130,7 +130,7 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configure alternative names. Replaces previously configured alt names
+		 * Configure alternative names. Replaces previously configured alt names.
 		 *
 		 * @param altNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -272,10 +272,12 @@ public class VaultCertificateRequest {
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {
+
 			List<E> list = new ArrayList<E>();
 			for (E item : iter) {
 				list.add(item);
 			}
+
 			return list;
 		}
 	}

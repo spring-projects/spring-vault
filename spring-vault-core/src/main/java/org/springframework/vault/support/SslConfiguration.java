@@ -59,6 +59,14 @@ public class SslConfiguration {
 	 */
 	private final String trustStorePassword;
 
+	/**
+	 * Creates a new {@link SslConfiguration}.
+	 *
+	 * @param keyStore
+	 * @param keyStorePassword
+	 * @param trustStore
+	 * @param trustStorePassword
+	 */
 	public SslConfiguration(Resource keyStore, String keyStorePassword,
 			Resource trustStore, String trustStorePassword) {
 

@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,14 +63,17 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void createTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = new VaultTokenRequest();
-		tokenRequest.setDisplayName("display");
-		tokenRequest.setExplicitMaxTtl("1h");
-		tokenRequest.setTtl("30m");
-		tokenRequest.setPolicies(Collections.singletonList("root"));
-		tokenRequest.setNumUses(2);
-		tokenRequest.setRenewable(true);
-		tokenRequest.setId("HELLO-WORLD");
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+				.displayName("display") //
+				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
+				.ttl(30 * 60) //
+				.policies(Collections.singleton("root")) //
+				.numUses(2) //
+				.renewable() //
+				.noDefaultPolicy() //
+				.noParent() //
+				.id("HELLO-WORLD") //
+				.build();
 
 		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
@@ -86,14 +90,17 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void createOrphanTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = new VaultTokenRequest();
-		tokenRequest.setDisplayName("display");
-		tokenRequest.setExplicitMaxTtl("1h");
-		tokenRequest.setTtl("30m");
-		tokenRequest.setPolicies(Collections.singletonList("root"));
-		tokenRequest.setNumUses(2);
-		tokenRequest.setRenewable(true);
-		tokenRequest.setId("HELLO-WORLD");
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+				.displayName("display") //
+				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
+				.ttl(30 * 60) //
+				.policies(Collections.singleton("root")) //
+				.numUses(2) //
+				.renewable() //
+				.noDefaultPolicy() //
+				.noParent() //
+				.id("HELLO-WORLD") //
+				.build();
 
 		VaultTokenResponse tokenResponse = tokenOperations.createOrphan(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
@@ -103,10 +110,11 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void renewShouldRenewToken() {
 
-		VaultTokenRequest tokenRequest = new VaultTokenRequest();
-		tokenRequest.setDisplayName("display");
-		tokenRequest.setExplicitMaxTtl("1h");
-		tokenRequest.setTtl("30m");
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
+				.ttl(30 * 60) //
+				.renewable() //
+				.build();
 
 		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
 		VaultTokenResponse renew = tokenOperations.renew(tokenResponse.getToken());
@@ -132,8 +140,8 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultResponseEntity<String> response = lookupSelf(tokenResponse);
 
 		assertThat(response.getStatusCode()).isIn(
-				/* <= Vault 0.6.0 */HttpStatus.BAD_REQUEST,
-				/* >= Vault 0.6.1 */HttpStatus.FORBIDDEN);
+		/* <= Vault 0.6.0 */HttpStatus.BAD_REQUEST,
+		/* >= Vault 0.6.1 */HttpStatus.FORBIDDEN);
 		assertThat(response.getMessage()).isEqualTo("permission denied");
 	}
 

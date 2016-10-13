@@ -18,6 +18,7 @@ package org.springframework.vault.util;
 import java.util.Collections;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
@@ -26,6 +27,7 @@ import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
+import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
@@ -85,15 +87,14 @@ public class PrepareVault {
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
 
-		VaultTokenRequest tokenRequest = new VaultTokenRequest();
+		VaultTokenRequestBuilder builder = VaultTokenRequest.builder().id(tokenId);
 
-		tokenRequest.setId(tokenId);
-		if (policy != null) {
-			tokenRequest.setPolicies(Collections.singletonList(policy));
+		if(StringUtils.hasText(policy)){
+			builder.withPolicy(policy);
 		}
 
 		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken().create(
-				tokenRequest);
+				builder.build());
 		return vaultTokenResponse.getToken();
 	}
 
