@@ -22,15 +22,16 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultException;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
- * Value object representing a certificate bundle consisting of a private key, the certificate and the issuer
- * certificate. Certificate and keys can be either DER or PEM encoded. DER-encoded certificates can be converted to a
- * {@link KeySpec} and {@link X509Certificate}.
+ * Value object representing a certificate bundle consisting of a private key, the
+ * certificate and the issuer certificate. Certificate and keys can be either DER or PEM
+ * encoded. DER-encoded certificates can be converted to a {@link KeySpec} and
+ * {@link X509Certificate}.
  *
  * @author Mark Paluch
  * @see #getPrivateKeySpec()
@@ -48,7 +49,8 @@ public class CertificateBundle {
 	private final String privateKey;
 
 	private CertificateBundle(@JsonProperty("serial_number") String serialNumber,
-			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
+			@JsonProperty("certificate") String certificate,
+			@JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("private_key") String privateKey) {
 
 		this.serialNumber = serialNumber;
@@ -58,7 +60,8 @@ public class CertificateBundle {
 	}
 
 	/**
-	 * Create a {@link CertificateBundle} given a private key with certificates and the serial number.
+	 * Create a {@link CertificateBundle} given a private key with certificates and the
+	 * serial number.
 	 * 
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @param certificate must not be empty or {@literal null}.
@@ -66,15 +69,16 @@ public class CertificateBundle {
 	 * @param privateKey must not be empty or {@literal null}.
 	 * @return the {@link CertificateBundle}
 	 */
-	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
-			String privateKey) {
+	public static CertificateBundle of(String serialNumber, String certificate,
+			String issuingCaCertificate, String privateKey) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 		Assert.hasText(privateKey, "Private key must not be empty");
 
-		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate, privateKey);
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
+				privateKey);
 	}
 
 	/**
@@ -106,23 +110,26 @@ public class CertificateBundle {
 	}
 
 	/**
-	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is DER-encoded.
+	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is
+	 * DER-encoded.
 	 * 
-	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate a
-	 *         {@link java.security.PrivateKey} from this {@link KeySpec}.
+	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate
+	 * a {@link java.security.PrivateKey} from this {@link KeySpec}.
 	 */
 	public KeySpec getPrivateKeySpec() {
 
 		try {
 			byte[] bytes = Base64.decode(getPrivateKey());
 			return KeystoreUtil.getRSAKeySpec(bytes);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new VaultException("Cannot create KeySpec from private key", e);
 		}
 	}
 
 	/**
-	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate is DER-encoded.
+	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate
+	 * is DER-encoded.
 	 * 
 	 * @return the {@link X509Certificate}.
 	 */
@@ -131,15 +138,18 @@ public class CertificateBundle {
 		try {
 			byte[] bytes = Base64.decode(getCertificate());
 			return KeystoreUtil.getCertificate(bytes);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new VaultException("Cannot create Certificate from certificate", e);
-		} catch (CertificateException e) {
+		}
+		catch (CertificateException e) {
 			throw new VaultException("Cannot create Certificate from certificate", e);
 		}
 	}
 
 	/**
-	 * Retrieve the issuing CA certificate as {@link X509Certificate}. Only supported if certificate is DER-encoded.
+	 * Retrieve the issuing CA certificate as {@link X509Certificate}. Only supported if
+	 * certificate is DER-encoded.
 	 *
 	 * @return the issuing CA {@link X509Certificate}.
 	 */
@@ -148,16 +158,21 @@ public class CertificateBundle {
 		try {
 			byte[] bytes = Base64.decode(getIssuingCaCertificate());
 			return KeystoreUtil.getCertificate(bytes);
-		} catch (IOException e) {
-			throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
-		} catch (CertificateException e) {
-			throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
+		}
+		catch (IOException e) {
+			throw new VaultException(
+					"Cannot create Certificate from issuing CA certificate", e);
+		}
+		catch (CertificateException e) {
+			throw new VaultException(
+					"Cannot create Certificate from issuing CA certificate", e);
 		}
 	}
 
 	/**
-	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the private key and certificate chain.
-	 * Only supported if certificate and private key are DER-encoded.
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain. Only supported if certificate and private key
+	 * are DER-encoded.
 	 * 
 	 * @param keyAlias the key alias to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
@@ -167,11 +182,13 @@ public class CertificateBundle {
 		Assert.hasText(keyAlias, "Key alias must not be empty");
 
 		try {
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), getX509Certificate(),
-					getX509IssuerCertificate());
-		} catch (GeneralSecurityException e) {
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
+					getX509Certificate(), getX509IssuerCertificate());
+		}
+		catch (GeneralSecurityException e) {
 			throw new VaultException("Cannot create KeyStore", e);
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
 	}

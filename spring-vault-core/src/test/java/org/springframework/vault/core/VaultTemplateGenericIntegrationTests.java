@@ -40,7 +40,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
-	@Autowired private VaultOperations vaultOperations;
+	@Autowired
+	private VaultOperations vaultOperations;
 
 	@Test
 	public void readShouldReturnAbsentKey() throws Exception {
@@ -69,7 +70,8 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 
 		vaultOperations.write("secret/mykey", data);
 
-		VaultResponseSupport<Person> read = vaultOperations.read("secret/mykey", Person.class);
+		VaultResponseSupport<Person> read = vaultOperations.read("secret/mykey",
+				Person.class);
 		assertThat(read).isNotNull();
 
 		Person person = read.getData();

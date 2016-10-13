@@ -33,19 +33,24 @@ public class VaultTokenRequest {
 
 	private Map<String, String> meta;
 
-	@JsonProperty("no_parent") private Boolean noParent;
+	@JsonProperty("no_parent")
+	private Boolean noParent;
 
-	@JsonProperty("no_default_policy") private Boolean noDefaultPolicy;
+	@JsonProperty("no_default_policy")
+	private Boolean noDefaultPolicy;
 
 	private Boolean renewable;
 
 	private String ttl;
 
-	@JsonProperty("explicit_max_ttl") private String explicitMaxTtl;
+	@JsonProperty("explicit_max_ttl")
+	private String explicitMaxTtl;
 
-	@JsonProperty("display_name") private String displayName;
+	@JsonProperty("display_name")
+	private String displayName;
 
-	@JsonProperty("num_uses") private Integer numUses;
+	@JsonProperty("num_uses")
+	private Integer numUses;
 
 	public String getId() {
 		return id;

@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link LoginToken}.
@@ -37,8 +37,11 @@ public class LoginTokenUnitTests {
 	@Test
 	public void toStringShouldPrintFields() {
 
-		assertThat(LoginToken.of("token").toString()).isEqualTo("LoginToken(renewable=false, leaseDuration=0)");
-		assertThat(LoginToken.of("token", 1).toString()).isEqualTo("LoginToken(renewable=false, leaseDuration=1)");
-		assertThat(LoginToken.renewable("token", 1).toString()).isEqualTo("LoginToken(renewable=true, leaseDuration=1)");
+		assertThat(LoginToken.of("token").toString()).isEqualTo(
+				"LoginToken(renewable=false, leaseDuration=0)");
+		assertThat(LoginToken.of("token", 1).toString()).isEqualTo(
+				"LoginToken(renewable=false, leaseDuration=1)");
+		assertThat(LoginToken.renewable("token", 1).toString()).isEqualTo(
+				"LoginToken(renewable=true, leaseDuration=1)");
 	}
 }

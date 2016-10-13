@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.vault.util.Settings.*;
-
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -26,6 +23,7 @@ import java.util.Map;
 import org.assertj.core.util.Files;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -39,12 +37,17 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.vault.util.Settings.createSslConfiguration;
+import static org.springframework.vault.util.Settings.findWorkDir;
+
 /**
  * Integration tests for {@link ClientCertificateAuthentication}.
  * 
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationIntegrationTests extends IntegrationTestSupport {
+public class ClientCertificateAuthenticationIntegrationTests extends
+		IntegrationTestSupport {
 
 	@Before
 	public void before() throws Exception {
@@ -53,43 +56,49 @@ public class ClientCertificateAuthenticationIntegrationTests extends Integration
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations().doWithVault(new VaultOperations.SessionCallback<Object>() {
-			@Override
-			public Object doWithVault(VaultOperations.VaultSession session) {
+		prepare().getVaultOperations().doWithVault(
+				new VaultOperations.SessionCallback<Object>() {
+					@Override
+					public Object doWithVault(VaultOperations.VaultSession session) {
 
-				File workDir = findWorkDir();
+						File workDir = findWorkDir();
 
-				String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"),
-						Charset.forName("US-ASCII"));
+						String certificate = Files.contentOf(new File(workDir,
+								"ca/certs/client.cert.pem"), Charset.forName("US-ASCII"));
 
-				session.postForEntity("auth/cert/certs/my-role", Collections.singletonMap("certificate", certificate),
-						Map.class);
+						session.postForEntity("auth/cert/certs/my-role",
+								Collections.singletonMap("certificate", certificate),
+								Map.class);
 
-				return null;
-			}
-		});
+						return null;
+					}
+				});
 	}
 
 	@Test
 	public void shouldLoginSuccessfully() throws Exception {
 
-		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
-				prepareCertAuthenticationMethod());
-		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory, new VaultEndpoint());
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(), prepareCertAuthenticationMethod());
+		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory,
+				new VaultEndpoint());
 
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(vaultClient);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				vaultClient);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we receive a VaultException here.
+	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
+	// receive a VaultException here.
 	@Test(expected = NestedRuntimeException.class)
 	public void loginShouldFail() throws Exception {
 
-		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
-				Settings.createSslConfiguration());
-		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory, new VaultEndpoint());
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(), Settings.createSslConfiguration());
+		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory,
+				new VaultEndpoint());
 
 		new ClientCertificateAuthentication(vaultClient).login();
 	}
@@ -98,9 +107,9 @@ public class ClientCertificateAuthenticationIntegrationTests extends Integration
 
 		SslConfiguration original = createSslConfiguration();
 
-		SslConfiguration sslConfiguration = new SslConfiguration(
-				new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit", original.getTrustStore(),
-				original.getTrustStorePassword());
+		SslConfiguration sslConfiguration = new SslConfiguration(new FileSystemResource(
+				new File(findWorkDir(), "client-cert.jks")), "changeit",
+				original.getTrustStore(), original.getTrustStorePassword());
 
 		return sslConfiguration;
 	}

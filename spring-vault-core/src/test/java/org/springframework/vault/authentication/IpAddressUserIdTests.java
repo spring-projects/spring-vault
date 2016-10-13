@@ -15,11 +15,11 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.regex.Pattern;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link IpAddressUserId}.
@@ -33,6 +33,7 @@ public class IpAddressUserIdTests {
 
 		String userId = new IpAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
+				Pattern.compile("[a-f]"));
 	}
 }

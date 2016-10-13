@@ -15,20 +15,21 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link VaultTemplate} using the {@code transit} backend.
@@ -39,7 +40,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
-	@Autowired private VaultOperations vaultOperations;
+	@Autowired
+	private VaultOperations vaultOperations;
 
 	@Before
 	public void before() throws Exception {
@@ -50,15 +52,18 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 			adminOperations.mount("transit", VaultMount.create("transit"));
 
 			vaultOperations.write("transit/keys/mykey", null);
-			vaultOperations.write("transit/keys/derived", Collections.singletonMap("derived", true));
+			vaultOperations.write("transit/keys/derived",
+					Collections.singletonMap("derived", true));
 		}
 	}
 
 	@Test
 	public void shouldEncrypt() throws Exception {
 
-		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext", Base64.encodeBase64String("that message is secret".getBytes())));
+		VaultResponse response = vaultOperations.write(
+				"transit/encrypt/mykey",
+				Collections.singletonMap("plaintext",
+						Base64.encodeBase64String("that message is secret".getBytes())));
 
 		assertThat((String) response.getData().get("ciphertext")).isNotEmpty();
 	}
@@ -66,12 +71,17 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldEncryptAndDecrypt() throws Exception {
 
-		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext", Base64.encodeBase64String("that message is secret".getBytes())));
+		VaultResponse response = vaultOperations.write(
+				"transit/encrypt/mykey",
+				Collections.singletonMap("plaintext",
+						Base64.encodeBase64String("that message is secret".getBytes())));
 
-		VaultResponse decrypted = vaultOperations.write("transit/decrypt/mykey",
-				Collections.singletonMap("ciphertext", response.getData().get("ciphertext")));
+		VaultResponse decrypted = vaultOperations.write(
+				"transit/decrypt/mykey",
+				Collections.singletonMap("ciphertext",
+						response.getData().get("ciphertext")));
 
-		assertThat((String) decrypted.getData().get("plaintext")).isEqualTo(Base64.encodeBase64String("that message is secret".getBytes()));
+		assertThat((String) decrypted.getData().get("plaintext")).isEqualTo(
+				Base64.encodeBase64String("that message is secret".getBytes()));
 	}
 }

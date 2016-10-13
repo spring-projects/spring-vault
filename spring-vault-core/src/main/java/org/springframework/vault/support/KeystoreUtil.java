@@ -33,16 +33,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Keystore utility to create a {@link KeyStore} containing a {@link CertificateBundle} with the certificate chain and
- * its private key.
+ * Keystore utility to create a {@link KeyStore} containing a {@link CertificateBundle}
+ * with the certificate chain and its private key.
  *
  * @author Mark Paluch
  */
 class KeystoreUtil {
 
 	/**
-	 * Creates a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate certificates} using the given
-	 * {@code keyAlias}.
+	 * Creates a {@link KeyStore} containing the {@link KeySpec} and
+	 * {@link X509Certificate certificates} using the given {@code keyAlias}.
 	 *
 	 * @param keyAlias
 	 * @param certificates
@@ -50,8 +50,8 @@ class KeystoreUtil {
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, X509Certificate... certificates)
-			throws GeneralSecurityException, IOException {
+	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec,
+			X509Certificate... certificates) throws GeneralSecurityException, IOException {
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		PrivateKey privateKey = kf.generatePrivate(privateKeySpec);
@@ -67,7 +67,8 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
-	static X509Certificate getCertificate(byte[] source) throws CertificateException, IOException {
+	static X509Certificate getCertificate(byte[] source) throws CertificateException,
+			IOException {
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
@@ -95,8 +96,8 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
-	private static List<X509Certificate> getCertificates(CertificateFactory cf, byte[] source)
-			throws CertificateException, IOException {
+	private static List<X509Certificate> getCertificates(CertificateFactory cf,
+			byte[] source) throws CertificateException, IOException {
 
 		List<X509Certificate> x509Certificates = new ArrayList<X509Certificate>();
 
@@ -162,19 +163,22 @@ class KeystoreUtil {
 		BigInteger exp2 = parser.read().getInteger();
 		BigInteger crtCoef = parser.read().getInteger();
 
-		return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2, exp1, exp2, crtCoef);
+		return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2,
+				exp1, exp2, crtCoef);
 	}
 
 	/**
-	 * A bare-minimum ASN.1 DER decoder, just having enough functions to decode PKCS#1 private keys. Especially, it
-	 * doesn't handle explicitly tagged types with an outer tag.
+	 * A bare-minimum ASN.1 DER decoder, just having enough functions to decode PKCS#1
+	 * private keys. Especially, it doesn't handle explicitly tagged types with an outer
+	 * tag.
 	 * <p/>
 	 * <p/>
-	 * This parser can only handle one layer. To parse nested constructs, get a new parser for each layer using
-	 * <code>Asn1Object.getParser()</code>.
+	 * This parser can only handle one layer. To parse nested constructs, get a new parser
+	 * for each layer using <code>Asn1Object.getParser()</code>.
 	 * <p/>
 	 * <p/>
-	 * There are many DER decoders in JRE but using them will tie this program to a specific JCE/JVM.
+	 * There are many DER decoders in JRE but using them will tie this program to a
+	 * specific JCE/JVM.
 	 */
 	private static class DerParser {
 
@@ -235,8 +239,8 @@ class KeystoreUtil {
 		}
 
 		/**
-		 * Read next object. If it's constructed, the value holds encoded content and it should be parsed by a new parser
-		 * from <code>Asn1Object.getParser</code>.
+		 * Read next object. If it's constructed, the value holds encoded content and it
+		 * should be parsed by a new parser from <code>Asn1Object.getParser</code>.
 		 *
 		 * @return A object
 		 * @throws IOException
@@ -246,7 +250,8 @@ class KeystoreUtil {
 			int tag = in.read();
 
 			if (tag == -1) {
-				throw new IllegalStateException("Invalid DER: stream too short, missing tag");
+				throw new IllegalStateException(
+						"Invalid DER: stream too short, missing tag");
 			}
 
 			int length = getLength();
@@ -254,22 +259,25 @@ class KeystoreUtil {
 			byte[] value = new byte[length];
 			int n = in.read(value);
 			if (n < length) {
-				throw new IllegalStateException("Invalid DER: stream too short, missing value");
+				throw new IllegalStateException(
+						"Invalid DER: stream too short, missing value");
 			}
 
 			return new Asn1Object(tag, length, value);
 		}
 
 		/**
-		 * Decode the length of the field. Can only support length encoding up to 4 octets.
+		 * Decode the length of the field. Can only support length encoding up to 4
+		 * octets.
 		 * <p/>
 		 * <p/>
 		 * In BER/DER encoding, length can be encoded in 2 forms,
 		 * <ul>
 		 * <li>Short form. One octet. Bit 8 has value "0" and bits 7-1 give the length.
-		 * <li>Long form. Two to 127 octets (only 4 is supported here). Bit 8 of first octet has value "1" and bits 7-1 give
-		 * the number of additional length octets. Second and following octets give the length, base 256, most significant
-		 * digit first.
+		 * <li>Long form. Two to 127 octets (only 4 is supported here). Bit 8 of first
+		 * octet has value "1" and bits 7-1 give the number of additional length octets.
+		 * Second and following octets give the length, base 256, most significant digit
+		 * first.
 		 * </ul>
 		 *
 		 * @return The length as integer
@@ -291,7 +299,8 @@ class KeystoreUtil {
 
 			// We can't handle length longer than 4 bytes
 			if (i >= 0xFF || num > 4) {
-				throw new IllegalStateException("Invalid DER: length field too big (" + i + ")");
+				throw new IllegalStateException("Invalid DER: length field too big (" + i
+						+ ")");
 			}
 
 			byte[] bytes = new byte[num];
@@ -315,7 +324,8 @@ class KeystoreUtil {
 		private final int tag;
 
 		/**
-		 * Construct a ASN.1 TLV. The TLV could be either a constructed or primitive entity.
+		 * Construct a ASN.1 TLV. The TLV could be either a constructed or primitive
+		 * entity.
 		 * <p/>
 		 * <p/>
 		 * The first byte in DER encoding is made of following fields,
@@ -327,11 +337,12 @@ class KeystoreUtil {
 		 * |  Class    | CF  |     +      Type             |
 		 * -------------------------------------------------
 		 * </pre>
+		 * 
 		 * <ul>
 		 * <li>Class: Universal, Application, Context or Private
 		 * <li>CF: Constructed flag. If 1, the field is constructed.
-		 * <li>Type: This is actually called tag in ASN.1. It indicates data type (Integer, String) or a construct
-		 * (sequence, choice, set).
+		 * <li>Type: This is actually called tag in ASN.1. It indicates data type
+		 * (Integer, String) or a construct (sequence, choice, set).
 		 * </ul>
 		 *
 		 * @param tag Tag or Identifier
@@ -369,7 +380,8 @@ class KeystoreUtil {
 		 */
 		public DerParser getParser() throws IOException {
 			if (!isConstructed()) {
-				throw new IllegalStateException("Invalid DER: can't parse primitive entity");
+				throw new IllegalStateException(
+						"Invalid DER: can't parse primitive entity");
 			}
 
 			return new DerParser(value);
@@ -401,30 +413,30 @@ class KeystoreUtil {
 
 			switch (type) {
 
-				// Not all are ISO-8859-1 but it's the closest thing
-				case DerParser.NUMERIC_STRING:
-				case DerParser.PRINTABLE_STRING:
-				case DerParser.VIDEOTEX_STRING:
-				case DerParser.IA5_STRING:
-				case DerParser.GRAPHIC_STRING:
-				case DerParser.ISO646_STRING:
-				case DerParser.GENERAL_STRING:
-					encoding = "ISO-8859-1";
-					break;
+			// Not all are ISO-8859-1 but it's the closest thing
+			case DerParser.NUMERIC_STRING:
+			case DerParser.PRINTABLE_STRING:
+			case DerParser.VIDEOTEX_STRING:
+			case DerParser.IA5_STRING:
+			case DerParser.GRAPHIC_STRING:
+			case DerParser.ISO646_STRING:
+			case DerParser.GENERAL_STRING:
+				encoding = "ISO-8859-1";
+				break;
 
-				case DerParser.BMP_STRING:
-					encoding = "UTF-16BE";
-					break;
+			case DerParser.BMP_STRING:
+				encoding = "UTF-16BE";
+				break;
 
-				case DerParser.UTF8_STRING:
-					encoding = "UTF-8";
-					break;
+			case DerParser.UTF8_STRING:
+				encoding = "UTF-8";
+				break;
 
-				case DerParser.UNIVERSAL_STRING:
-					throw new IOException("Invalid DER: can't handle UCS-4 string");
+			case DerParser.UNIVERSAL_STRING:
+				throw new IOException("Invalid DER: can't handle UCS-4 string");
 
-				default:
-					throw new IOException("Invalid DER: object is not a string");
+			default:
+				throw new IOException("Invalid DER: object is not a string");
 			}
 
 			return new String(value, encoding);

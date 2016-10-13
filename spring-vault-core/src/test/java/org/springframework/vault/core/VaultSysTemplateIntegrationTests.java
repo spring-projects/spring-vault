@@ -15,20 +15,21 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link VaultSysTemplate} through {@link VaultSysOperations}.
@@ -39,7 +40,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
-	@Autowired private VaultOperations vaultOperations;
+	@Autowired
+	private VaultOperations vaultOperations;
 
 	private VaultSysOperations adminOperations;
 
@@ -102,7 +104,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			adminOperations.authUnmount("other");
 		}
 
-		VaultMount mount = VaultMount.builder().type("userpass").description("hello, world").build();
+		VaultMount mount = VaultMount.builder().type("userpass")
+				.description("hello, world").build();
 
 		adminOperations.authMount("other", mount);
 

@@ -35,20 +35,23 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s based on
- * {@link VaultPropertySource}.
+ * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s
+ * based on {@link VaultPropertySource}.
  * <p>
- * This class registers potentially multiple property sources based on different Vault paths.
- * {@link org.springframework.vault.core.env.VaultPropertySource}s are resolved and added to
- * {@link ConfigurableEnvironment} once the bean factory is post-processed. This allows injection of Vault properties
- * and and lookup using the {@link org.springframework.core.env.Environment}.
+ * This class registers potentially multiple property sources based on different Vault
+ * paths. {@link org.springframework.vault.core.env.VaultPropertySource}s are resolved and
+ * added to {@link ConfigurableEnvironment} once the bean factory is post-processed. This
+ * allows injection of Vault properties and and lookup using the
+ * {@link org.springframework.core.env.Environment}.
  *
  * @author Mark Paluch
  */
-class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryPostProcessor {
+class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
+		BeanFactoryPostProcessor {
 
 	@Override
-	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
+			throws BeansException {
 
 		ConfigurableEnvironment env = beanFactory.getBean(ConfigurableEnvironment.class);
 		Map<String, org.springframework.vault.core.env.VaultPropertySource> beans = beanFactory
@@ -56,7 +59,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, Bea
 
 		MutablePropertySources propertySources = env.getPropertySources();
 
-		for (org.springframework.vault.core.env.VaultPropertySource vaultPropertySource : beans.values()) {
+		for (org.springframework.vault.core.env.VaultPropertySource vaultPropertySource : beans
+				.values()) {
 
 			if (propertySources.contains(vaultPropertySource.getName())) {
 				continue;
@@ -67,7 +71,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, Bea
 	}
 
 	@Override
-	public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
+	public void registerBeanDefinitions(AnnotationMetadata annotationMetadata,
+			BeanDefinitionRegistry registry) {
 
 		Assert.notNull(annotationMetadata, "AnnotationMetadata must not be null!");
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null!");
@@ -78,19 +83,22 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, Bea
 						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
 						.getBeanDefinition());
 
-		Set<AnnotationAttributes> propertySources = attributesForRepeatable(annotationMetadata,
-				VaultPropertySources.class.getName(), VaultPropertySource.class.getName());
+		Set<AnnotationAttributes> propertySources = attributesForRepeatable(
+				annotationMetadata, VaultPropertySources.class.getName(),
+				VaultPropertySource.class.getName());
 
 		int counter = 0;
 
 		for (AnnotationAttributes propertySource : propertySources) {
 
 			String[] paths = propertySource.getStringArray("value");
-			Assert.isTrue(paths.length > 0, "At least one @VaultPropertySource(value) location is required");
+			Assert.isTrue(paths.length > 0,
+					"At least one @VaultPropertySource(value) location is required");
 
 			String ref = propertySource.getString("vaultTemplateRef");
 
-			Assert.hasText(ref, "'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
+			Assert.hasText(ref,
+					"'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
 
 			for (String propertyPath : paths) {
 
@@ -106,7 +114,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, Bea
 				builder.addConstructorArgValue(propertyPath);
 				builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
-				registry.registerBeanDefinition("vaultPropertySource#" + counter, builder.getBeanDefinition());
+				registry.registerBeanDefinition("vaultPropertySource#" + counter,
+						builder.getBeanDefinition());
 
 				counter++;
 			}
@@ -114,22 +123,26 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar, Bea
 	}
 
 	@SuppressWarnings("unchecked")
-	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata, String containerClassName,
-			String annotationClassName) {
+	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
+			String containerClassName, String annotationClassName) {
 
 		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
-		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
+		addAttributesIfNotNull(result,
+				metadata.getAnnotationAttributes(annotationClassName, false));
 
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		Map<String, Object> container = metadata.getAnnotationAttributes(
+				containerClassName, false);
 		if (container != null && container.containsKey("value")) {
-			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
+			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container
+					.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);
 			}
 		}
 		return Collections.unmodifiableSet(result);
 	}
 
-	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result, Map<String, Object> attributes) {
+	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
+			Map<String, Object> attributes) {
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}

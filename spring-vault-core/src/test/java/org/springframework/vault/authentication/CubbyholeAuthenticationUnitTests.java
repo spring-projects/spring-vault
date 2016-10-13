@@ -15,12 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -29,6 +26,13 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link CubbyholeAuthentication}.
@@ -51,18 +55,24 @@ public class CubbyholeAuthenticationUnitTests {
 	@Test
 	public void shouldLoginUsingWrappedLogin() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/response")) //
-				.andExpect(method(HttpMethod.GET)) //
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\":{\"response\":\"{\\\"request_id\\\":\\\"058222ef-9ab9-ff39-f087-9d5bee64e46d\\\","
-								+ "\\\"auth\\\":{\\\"client_token\\\":\\\"5e6332cf-f003-6369-8cba-5bce2330f6cc\\\","
-								+ "\\\"accessor\\\":\\\"46b6aebb-187f-932a-26d7-4f3d86a68319\\\"}}\" } }"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/response"))
+				//
+				.andExpect(method(HttpMethod.GET))
+				//
+				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				//
+				.andRespond(
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{\"data\":{\"response\":\"{\\\"request_id\\\":\\\"058222ef-9ab9-ff39-f087-9d5bee64e46d\\\","
+										+ "\\\"auth\\\":{\\\"client_token\\\":\\\"5e6332cf-f003-6369-8cba-5bce2330f6cc\\\","
+										+ "\\\"accessor\\\":\\\"46b6aebb-187f-932a-26d7-4f3d86a68319\\\"}}\" } }"));
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("hello")).wrapped().build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 
 		VaultToken login = authentication.login();
 
@@ -75,14 +85,18 @@ public class CubbyholeAuthenticationUnitTests {
 
 		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token")) //
 				.andExpect(method(HttpMethod.GET)) //
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\":{\"mytoken\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\"} }"));
+				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				//
+				.andRespond(
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{\"data\":{\"mytoken\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\"} }"));
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("hello")).path("cubbyhole/token").build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 
 		VaultToken login = authentication.login();
 
@@ -93,20 +107,27 @@ public class CubbyholeAuthenticationUnitTests {
 	@Test
 	public void shouldFailUsingStoredLoginNoData() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token")) //
-				.andExpect(method(HttpMethod.GET)) //
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{\"data\":{} }"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token"))
+				//
+				.andExpect(method(HttpMethod.GET))
+				//
+				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				//
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{\"data\":{} }"));
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("hello")).path("cubbyhole/token").build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 
 		try {
 			authentication.login();
 			fail("Missing VaultException");
-		} catch (VaultException e) {
+		}
+		catch (VaultException e) {
 			assertThat(e).hasMessageContaining("does not contain a token");
 		}
 	}
@@ -114,20 +135,27 @@ public class CubbyholeAuthenticationUnitTests {
 	@Test
 	public void shouldFailUsingStoredMultipleEntries() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token")) //
-				.andExpect(method(HttpMethod.GET)) //
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{\"data\":{\"key1\":1, \"key2\":2} }"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token"))
+				//
+				.andExpect(method(HttpMethod.GET))
+				//
+				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				//
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{\"data\":{\"key1\":1, \"key2\":2} }"));
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("hello")).path("cubbyhole/token").build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 
 		try {
 			authentication.login();
 			fail("Missing VaultException");
-		} catch (VaultException e) {
+		}
+		catch (VaultException e) {
 			assertThat(e).hasMessageContaining("does not contain an unique token");
 		}
 	}

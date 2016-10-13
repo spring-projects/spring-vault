@@ -37,7 +37,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	private final String path;
 
 	/**
-	 * Create a new {@link VaultPkiTemplate} given {@link VaultPkiOperations} and the mount {@code path}.
+	 * Create a new {@link VaultPkiTemplate} given {@link VaultPkiOperations} and the
+	 * mount {@code path}.
 	 * 
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
@@ -52,8 +53,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	}
 
 	@Override
-	public VaultCertificateResponse issueCertificate(final String roleName, VaultCertificateRequest certificateRequest)
-			throws VaultException {
+	public VaultCertificateResponse issueCertificate(final String roleName,
+			VaultCertificateRequest certificateRequest) throws VaultException {
 
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
@@ -62,11 +63,17 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		request.put("common_name", certificateRequest.getCommonName());
 
 		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put("alt_names", StringUtils.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
+			request.put(
+					"alt_names",
+					StringUtils.collectionToDelimitedString(
+							certificateRequest.getAltNames(), ","));
 		}
 
 		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put("ip_sans", StringUtils.collectionToDelimitedString(certificateRequest.getIpSubjectAltNames(), ","));
+			request.put(
+					"ip_sans",
+					StringUtils.collectionToDelimitedString(
+							certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
 		if (certificateRequest.getTtl() != null) {
@@ -82,9 +89,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		VaultResponseEntity<VaultCertificateResponse> entity = vaultOperations
 				.doWithVault(new VaultOperations.SessionCallback<VaultResponseEntity<VaultCertificateResponse>>() {
 					@Override
-					public VaultResponseEntity<VaultCertificateResponse> doWithVault(VaultOperations.VaultSession session) {
+					public VaultResponseEntity<VaultCertificateResponse> doWithVault(
+							VaultOperations.VaultSession session) {
 
-						return session.postForEntity(String.format("%s/issue/%s", path, roleName), request,
+						return session.postForEntity(
+								String.format("%s/issue/%s", path, roleName), request,
 								VaultCertificateResponse.class);
 					}
 				});
@@ -99,9 +108,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(), response.getUri(), response.getMessage());
+			return String.format("Status %s URI %s: %s", response.getStatusCode(),
+					response.getUri(), response.getMessage());
 		}
 
-		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+		return String.format("Status %s URI %s", response.getStatusCode(),
+				response.getUri());
 	}
 }

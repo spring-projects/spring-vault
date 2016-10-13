@@ -32,7 +32,8 @@ public interface VaultTokenOperations {
 	 * Create a new token.
 	 * 
 	 * @return a {@link VaultTokenResponse}
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/create</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/create</a>
 	 */
 	VaultTokenResponse create() throws VaultException;
 
@@ -41,7 +42,8 @@ public interface VaultTokenOperations {
 	 * 
 	 * @param request must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/create</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/create</a>
 	 */
 	VaultTokenResponse create(VaultTokenRequest request) throws VaultException;
 
@@ -49,7 +51,8 @@ public interface VaultTokenOperations {
 	 * Create a new orphan token.
 	 *
 	 * @return a {@link VaultTokenResponse}
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/create-orphan</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/create-orphan</a>
 	 */
 	VaultTokenResponse createOrphan();
 
@@ -58,7 +61,8 @@ public interface VaultTokenOperations {
 	 *
 	 * @param request must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/create-orphan</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/create-orphan</a>
 	 */
 	VaultTokenResponse createOrphan(VaultTokenRequest request);
 
@@ -67,7 +71,8 @@ public interface VaultTokenOperations {
 	 * 
 	 * @param vaultToken must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/renew/{token}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/renew/{token}</a>
 	 */
 	VaultTokenResponse renew(VaultToken vaultToken);
 
@@ -75,7 +80,8 @@ public interface VaultTokenOperations {
 	 * Revoke a {@link VaultToken}.
 	 * 
 	 * @param vaultToken must not be {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/revoke/{token}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/revoke/{token}</a>
 	 */
 	void revoke(VaultToken vaultToken);
 
@@ -83,7 +89,8 @@ public interface VaultTokenOperations {
 	 * Revoke a {@link VaultToken} but not its child tokens.
 	 *
 	 * @param vaultToken must not be {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST /auth/token/revoke-orphan/{token}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
+	 * /auth/token/revoke-orphan/{token}</a>
 	 */
 	void revokeOrphan(VaultToken vaultToken);
 }

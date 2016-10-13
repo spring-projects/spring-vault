@@ -24,9 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VaultTransitKeyConfiguration {
 
-	@JsonProperty("deletion_allowed") private final Boolean deletionAllowed;
+	@JsonProperty("deletion_allowed")
+	private final Boolean deletionAllowed;
 
-	@JsonProperty("latest_version") private final Integer latestVersion;
+	@JsonProperty("latest_version")
+	private final Integer latestVersion;
 
 	private VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion) {
 		this.deletionAllowed = deletionAllowed;
@@ -62,7 +64,8 @@ public class VaultTransitKeyConfiguration {
 		private Boolean deletionAllowed;
 		private Integer latestVersion;
 
-		VaultTransitKeyConfigurationBuilder() {}
+		VaultTransitKeyConfigurationBuilder() {
+		}
 
 		/**
 		 * Set whether key deletion is allowed.

@@ -15,13 +15,12 @@
  */
 package org.springframework.vault.annotation;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +30,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.util.VaultRule;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link VaultPropertySource}.
@@ -42,11 +43,15 @@ import org.springframework.vault.util.VaultRule;
 public class VaultPropertySourceIntegrationTests {
 
 	@VaultPropertySource({ "secret/myapp", "secret/myapp/profile" })
-	static class Config extends VaultIntegrationTestConfiguration {}
+	static class Config extends VaultIntegrationTestConfiguration {
+	}
 
-	@Autowired Environment env;
-	@Autowired ApplicationContext context;
-	@Value("${myapp}") String myapp;
+	@Autowired
+	Environment env;
+	@Autowired
+	ApplicationContext context;
+	@Value("${myapp}")
+	String myapp;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -56,8 +61,10 @@ public class VaultPropertySourceIntegrationTests {
 
 		VaultOperations vaultOperations = rule.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
-		vaultOperations.write("secret/myapp/profile", Collections.singletonMap("myprofile", "myprofilevalue"));
+		vaultOperations.write("secret/myapp",
+				Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp/profile",
+				Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
 
 	@Test

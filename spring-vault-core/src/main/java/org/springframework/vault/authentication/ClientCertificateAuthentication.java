@@ -19,6 +19,7 @@ import java.util.Collections;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
@@ -33,7 +34,8 @@ import org.springframework.vault.support.VaultToken;
  */
 public class ClientCertificateAuthentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory.getLogger(ClientCertificateAuthentication.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(ClientCertificateAuthentication.class);
 
 	private final VaultClient vaultClient;
 
@@ -56,11 +58,13 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 
 	private VaultToken createTokenUsingTlsCertAuthentication(String path) {
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(String.format("auth/%s/login", path),
-				Collections.emptyMap(), VaultResponse.class);
+		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(
+				String.format("auth/%s/login", path), Collections.emptyMap(),
+				VaultResponse.class);
 
 		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using TLS certificates: %s", entity.getMessage()));
+			throw new VaultException(String.format(
+					"Cannot login using TLS certificates: %s", entity.getMessage()));
 		}
 
 		logger.debug("Login successful using TLS certificates");

@@ -33,7 +33,8 @@ public interface VaultSysOperations {
 
 	/**
 	 * @return {@literal true} if Vault is initialized.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">GET /sys/init</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">GET
+	 * /sys/init</a>
 	 */
 	boolean isInitialized() throws VaultException;
 
@@ -42,14 +43,17 @@ public interface VaultSysOperations {
 	 * 
 	 * @param vaultInitializationRequest must not be {@literal null}.
 	 * @return the {@link VaultInitializationResponse}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">PUT /sys/init</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">PUT
+	 * /sys/init</a>
 	 */
-	VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) throws VaultException;
+	VaultInitializationResponse initialize(
+			VaultInitializationRequest vaultInitializationRequest) throws VaultException;
 
 	/**
 	 * Seal vault.
 	 * 
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-seal.html">PUT /sys/seal</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-seal.html">PUT
+	 * /sys/seal</a>
 	 */
 	void seal() throws VaultException;
 
@@ -58,13 +62,15 @@ public interface VaultSysOperations {
 	 * 
 	 * @param keyShare must not be empty and not {@literal null}.
 	 * @return the {@link VaultUnsealStatus}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">PUT /sys/unseal</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">PUT
+	 * /sys/unseal</a>
 	 */
 	VaultUnsealStatus unseal(String keyShare) throws VaultException;
 
 	/**
 	 * @return the {@link VaultUnsealStatus}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">GET /sys/unseal</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">GET
+	 * /sys/unseal</a>
 	 */
 	VaultUnsealStatus getUnsealStatus() throws VaultException;
 
@@ -73,13 +79,15 @@ public interface VaultSysOperations {
 	 * 
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST /sys/mounts/{mount}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST
+	 * /sys/mounts/{mount}</a>
 	 */
 	void mount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
 	 * @return {@link Map} of all secret backend {@link VaultMount mounts}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">GET /sys/mounts/</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">GET
+	 * /sys/mounts/</a>
 	 */
 	Map<String, VaultMount> getMounts() throws VaultException;
 
@@ -87,7 +95,8 @@ public interface VaultSysOperations {
 	 * Unmounts the secret backend mount at {@code path}.
 	 * 
 	 * @param path must not be empty or {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE /sys/mounts/{mount}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE
+	 * /sys/mounts/{mount}</a>
 	 */
 	void unmount(String path) throws VaultException;
 
@@ -96,13 +105,15 @@ public interface VaultSysOperations {
 	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">POST /sys/auth/{mount}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">POST
+	 * /sys/auth/{mount}</a>
 	 */
 	void authMount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
 	 * @return {@link Map} of all auth backend {@link VaultMount mounts}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">GET /sys/auth/</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">GET
+	 * /sys/auth/</a>
 	 */
 	Map<String, VaultMount> getAuthMounts() throws VaultException;
 
@@ -110,7 +121,8 @@ public interface VaultSysOperations {
 	 * Unmounts the auth backend mount at {@code path}.
 	 *
 	 * @param path must not be empty or {@literal null}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">DELETE /sys/auth/{mount}</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">DELETE
+	 * /sys/auth/{mount}</a>
 	 */
 	void authUnmount(String path) throws VaultException;
 
@@ -118,7 +130,8 @@ public interface VaultSysOperations {
 	 * Returns the health status of Vault.
 	 *
 	 * @return the {@link VaultHealth}.
-	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET /sys/health</a>
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET
+	 * /sys/health</a>
 	 */
 	VaultHealth health() throws VaultException;
 }

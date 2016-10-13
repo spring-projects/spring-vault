@@ -69,7 +69,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return vaultOperations.doWithVault(new CreateToken("auth/token/create-orphan", request));
+		return vaultOperations.doWithVault(new CreateToken("auth/token/create-orphan",
+				request));
 	}
 
 	@Override
@@ -77,7 +78,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		return vaultOperations.doWithVault(new RenewToken(String.format("auth/token/renew/%s", vaultToken.getToken())));
+		return vaultOperations.doWithVault(new RenewToken(String.format(
+				"auth/token/renew/%s", vaultToken.getToken())));
 	}
 
 	@Override
@@ -85,7 +87,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		vaultOperations.doWithVault(new RevokeToken(String.format("auth/token/revoke/%s", vaultToken.getToken())));
+		vaultOperations.doWithVault(new RevokeToken(String.format("auth/token/revoke/%s",
+				vaultToken.getToken())));
 	}
 
 	@Override
@@ -93,16 +96,19 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		vaultOperations.doWithVault(new RevokeToken(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken())));
+		vaultOperations.doWithVault(new RevokeToken(String.format(
+				"auth/token/revoke-orphan/%s", vaultToken.getToken())));
 	}
 
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(), response.getUri(), response.getMessage());
+			return String.format("Status %s URI %s: %s", response.getStatusCode(),
+					response.getUri(), response.getMessage());
 		}
 
-		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+		return String.format("Status %s URI %s", response.getStatusCode(),
+				response.getUri());
 	}
 
 	private static class CreateToken implements SessionCallback<VaultTokenResponse> {
@@ -119,7 +125,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		@Override
 		public VaultTokenResponse doWithVault(VaultSession session) {
 
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(path, request, VaultTokenResponse.class);
+			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
+					path, request, VaultTokenResponse.class);
 
 			if (response.isSuccessful() && response.hasBody()) {
 				return response.getBody();
@@ -140,7 +147,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		@Override
 		public Void doWithVault(VaultSession session) {
 
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(path, null, VaultTokenResponse.class);
+			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
+					path, null, VaultTokenResponse.class);
 
 			if (response.isSuccessful()) {
 				return null;
@@ -161,7 +169,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		@Override
 		public VaultTokenResponse doWithVault(VaultSession session) {
 
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(path, null, VaultTokenResponse.class);
+			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
+					path, null, VaultTokenResponse.class);
 
 			if (response.isSuccessful() && response.hasBody()) {
 				return response.getBody();

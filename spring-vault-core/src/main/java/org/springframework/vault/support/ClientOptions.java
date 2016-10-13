@@ -35,8 +35,9 @@ public class ClientOptions {
 	private final int readTimeout;
 
 	/**
-	 * Creates new {@link ClientOptions} with default timeouts of {@literal 5} {@link TimeUnit#SECONDS} connection timeout
-	 * and {@literal 15} {@link TimeUnit#SECONDS} read timeout.
+	 * Creates new {@link ClientOptions} with default timeouts of {@literal 5}
+	 * {@link TimeUnit#SECONDS} connection timeout and {@literal 15}
+	 * {@link TimeUnit#SECONDS} read timeout.
 	 */
 	public ClientOptions() {
 		this((int) TimeUnit.SECONDS.toMillis(5), (int) TimeUnit.SECONDS.toMillis(15));
@@ -45,8 +46,10 @@ public class ClientOptions {
 	/**
 	 * Creates new {@link ClientOptions}.
 	 * 
-	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must be greater {@literal 0}.
-	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must be greater {@literal 0}.
+	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must
+	 * be greater {@literal 0}.
+	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must be greater
+	 * {@literal 0}.
 	 */
 	public ClientOptions(int connectionTimeout, int readTimeout) {
 		this.connectionTimeout = connectionTimeout;

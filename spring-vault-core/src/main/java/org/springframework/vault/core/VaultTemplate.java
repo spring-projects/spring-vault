@@ -33,16 +33,16 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
-import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * This class encapsulates main Vault interaction. {@link VaultTemplate} will log into Vault on initialization and use
- * the token throughout the whole lifetime.
+ * This class encapsulates main Vault interaction. {@link VaultTemplate} will log into
+ * Vault on initialization and use the token throughout the whole lifetime.
  *
  * @author Mark Paluch
  * @see VaultClientFactory
@@ -57,19 +57,22 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private final boolean dedicatedSessionManager;
 
 	/**
-	 * Creates a new {@link VaultTemplate} without setting {@link VaultClientFactory} and {@link SessionManager}.
+	 * Creates a new {@link VaultTemplate} without setting {@link VaultClientFactory} and
+	 * {@link SessionManager}.
 	 */
 	public VaultTemplate() {
 		this.dedicatedSessionManager = false;
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultClient} and {@link ClientAuthentication}.
+	 * Creates a new {@link VaultTemplate} with a {@link VaultClient} and
+	 * {@link ClientAuthentication}.
 	 *
 	 * @param vaultClient must not be {@literal null}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultClient vaultClient, ClientAuthentication clientAuthentication) {
+	public VaultTemplate(VaultClient vaultClient,
+			ClientAuthentication clientAuthentication) {
 
 		Assert.notNull(vaultClient, "VaultClientFactory must not be null");
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
@@ -80,12 +83,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultClientFactory} and {@link SessionManager}.
+	 * Creates a new {@link VaultTemplate} with a {@link VaultClientFactory} and
+	 * {@link SessionManager}.
 	 * 
 	 * @param vaultClientFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultClientFactory vaultClientFactory, SessionManager sessionManager) {
+	public VaultTemplate(VaultClientFactory vaultClientFactory,
+			SessionManager sessionManager) {
 
 		Assert.notNull(vaultClientFactory, "VaultClientFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
@@ -184,16 +189,19 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		VaultClient vaultClient = vaultClientFactory.getVaultClient();
 
-		return sessionCallback.doWithVault(new DefaultVaultSession(sessionManager, vaultClient));
+		return sessionCallback.doWithVault(new DefaultVaultSession(sessionManager,
+				vaultClient));
 	}
 
 	@Override
-	public <T> T doWithRestTemplate(String pathTemplate, Map<String, ?> uriVariables, RestTemplateCallback<T> callback) {
+	public <T> T doWithRestTemplate(String pathTemplate, Map<String, ?> uriVariables,
+			RestTemplateCallback<T> callback) {
 
 		Assert.notNull(callback, "RestTemplateCallback must not be null!");
 		Assert.state(vaultClientFactory != null, "VaultClientFactory must not be null");
 
-		return vaultClientFactory.getVaultClient().doWithRestTemplate(pathTemplate, uriVariables, callback);
+		return vaultClientFactory.getVaultClient().doWithRestTemplate(pathTemplate,
+				uriVariables, callback);
 	}
 
 	@Override
@@ -215,7 +223,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			@Override
 			public VaultResponseSupport<T> doWithVault(VaultSession session) {
 
-				VaultResponseEntity<VaultResponseSupport<T>> entity = session.exchange(path, HttpMethod.GET, null, ref, null);
+				VaultResponseEntity<VaultResponseSupport<T>> entity = session.exchange(
+						path, HttpMethod.GET, null, ref, null);
 
 				if (entity.isSuccessful() && entity.hasBody()) {
 					return entity.getBody();
@@ -235,7 +244,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		VaultListResponse read = doRead(String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
+		VaultListResponse read = doRead(
+				String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
 				VaultListResponse.class);
 		if (read == null) {
 			return Collections.emptyList();
@@ -253,7 +263,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 			@Override
 			public VaultResponse doWithVault(VaultSession session) {
-				VaultResponseEntity<VaultResponse> entity = session.postForEntity(path, body, VaultResponse.class);
+				VaultResponseEntity<VaultResponse> entity = session.postForEntity(path,
+						body, VaultResponse.class);
 
 				if (entity.isSuccessful()) {
 					if (entity.hasBody()) {
@@ -276,7 +287,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 			@Override
 			public VaultResponse doWithVault(VaultSession session) {
-				VaultResponseEntity<VaultResponse> entity = session.deleteForEntity(path, VaultResponse.class);
+				VaultResponseEntity<VaultResponse> entity = session.deleteForEntity(path,
+						VaultResponse.class);
 
 				if (entity.isSuccessful()) {
 					return null;
@@ -287,7 +299,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		});
 	}
 
-	private <T> ParameterizedTypeReference<VaultResponseSupport<T>> getTypeReference(final Class<T> responseType) {
+	private <T> ParameterizedTypeReference<VaultResponseSupport<T>> getTypeReference(
+			final Class<T> responseType) {
 		final Type supportType = new ParameterizedType() {
 
 			@Override
@@ -339,10 +352,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(), response.getUri(), response.getMessage());
+			return String.format("Status %s URI %s: %s", response.getStatusCode(),
+					response.getUri(), response.getMessage());
 		}
 
-		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+		return String.format("Status %s URI %s", response.getStatusCode(),
+				response.getUri());
 	}
 
 	private static class DefaultVaultSession implements VaultSession {
@@ -357,56 +372,73 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> getForEntity(String path, Class<T> responseType) {
-			return vaultClient.getForEntity(path, sessionManager.getSessionToken(), responseType);
+		public <T, S extends T> VaultResponseEntity<S> getForEntity(String path,
+				Class<T> responseType) {
+			return vaultClient.getForEntity(path, sessionManager.getSessionToken(),
+					responseType);
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> putForEntity(String path, Object request, Class<T> responseType) {
-			return vaultClient.putForEntity(path, sessionManager.getSessionToken(), request, responseType);
+		public <T, S extends T> VaultResponseEntity<S> putForEntity(String path,
+				Object request, Class<T> responseType) {
+			return vaultClient.putForEntity(path, sessionManager.getSessionToken(),
+					request, responseType);
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> postForEntity(String path, Object request, Class<T> responseType) {
-			return vaultClient.postForEntity(path, sessionManager.getSessionToken(), request, responseType);
+		public <T, S extends T> VaultResponseEntity<S> postForEntity(String path,
+				Object request, Class<T> responseType) {
+			return vaultClient.postForEntity(path, sessionManager.getSessionToken(),
+					request, responseType);
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> deleteForEntity(String path, Class<T> responseType) {
-			return vaultClient.deleteForEntity(path, sessionManager.getSessionToken(), responseType);
+		public <T, S extends T> VaultResponseEntity<S> deleteForEntity(String path,
+				Class<T> responseType) {
+			return vaultClient.deleteForEntity(path, sessionManager.getSessionToken(),
+					responseType);
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate, HttpMethod method,
-				HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables) {
+		public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
+				HttpMethod method, HttpEntity<?> requestEntity, Class<T> responseType,
+				Map<String, ?> uriVariables) {
 
 			HttpEntity<?> requestEntityToUse = getHttpEntity(requestEntity);
-			return vaultClient.exchange(pathTemplate, method, requestEntityToUse, responseType, uriVariables);
+			return vaultClient.exchange(pathTemplate, method, requestEntityToUse,
+					responseType, uriVariables);
 		}
 
 		@Override
-		public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate, HttpMethod method,
-				HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) {
+		public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
+				HttpMethod method, HttpEntity<?> requestEntity,
+				ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) {
 
 			HttpEntity<?> requestEntityToUse = getHttpEntity(requestEntity);
-			return vaultClient.exchange(pathTemplate, method, requestEntityToUse, responseType, uriVariables);
+			return vaultClient.exchange(pathTemplate, method, requestEntityToUse,
+					responseType, uriVariables);
 		}
 
 		private HttpEntity<?> getHttpEntity(HttpEntity<?> requestEntity) {
 
-			HttpHeaders httpHeaders = VaultClient.createHeaders(sessionManager.getSessionToken());
+			HttpHeaders httpHeaders = VaultClient.createHeaders(sessionManager
+					.getSessionToken());
 			HttpEntity<?> requestEntityToUse = requestEntity;
 
 			if (requestEntityToUse != null) {
 
 				httpHeaders.putAll(requestEntity.getHeaders());
-				requestEntityToUse = new HttpEntity<Object>(requestEntityToUse.getBody(), httpHeaders);
-			} else {
+				requestEntityToUse = new HttpEntity<Object>(requestEntityToUse.getBody(),
+						httpHeaders);
+			}
+			else {
 				requestEntityToUse = new HttpEntity<Object>(httpHeaders);
 			}
 			return requestEntityToUse;
 		}
 	}
 
-	private static class VaultListResponse extends VaultResponseSupport<Map<String, Object>> {}
+	private static class VaultListResponse extends
+			VaultResponseSupport<Map<String, Object>> {
+	}
 }

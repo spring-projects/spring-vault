@@ -15,15 +15,12 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-
 import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -32,6 +29,13 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link AwsEc2Authentication}.
@@ -54,25 +58,30 @@ public class AwsEc2AuthenticationUnitTests {
 	@Test
 	public void shouldObtainIdentityDocument() throws Exception {
 
-		mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(
+				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(vaultClient);
 
-		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
+		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world")
+				.containsKey("nonce").hasSize(2);
 	}
 
 	@Test
 	public void shouldContainRole() throws Exception {
 
-		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder().role("ami").build();
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+				.role("ami").build();
 
-		mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(
+				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(options, vaultClient, vaultClient.getRestTemplate());
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options,
+				vaultClient, vaultClient.getRestTemplate());
 
 		assertThat(authentication.getEc2Login()) //
 				.containsEntry("pkcs7", "Hello, world") //
@@ -83,11 +92,18 @@ public class AwsEc2AuthenticationUnitTests {
 	@Test
 	public void shouldLogin() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/aws-ec2/login")) //
-				.andExpect(method(HttpMethod.POST)) //
-				.andExpect(jsonPath("$.pkcs7").value("value")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/auth/aws-ec2/login"))
+				//
+				.andExpect(method(HttpMethod.POST))
+				//
+				.andExpect(jsonPath("$.pkcs7").value("value"))
+				//
+				.andRespond(
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{"
+										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
+										+ "}"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(vaultClient) {
 			@Override
@@ -107,7 +123,8 @@ public class AwsEc2AuthenticationUnitTests {
 	@Test(expected = VaultException.class)
 	public void loginShouldFailWhileObtainingIdentityDocument() throws Exception {
 
-		mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(
+				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
 		new AwsEc2Authentication(vaultClient).login();

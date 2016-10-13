@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultClient;
@@ -35,17 +36,19 @@ import org.springframework.web.client.RestTemplate;
 /**
  * AWS-EC2 login implementation.
  * <p>
- * AWS-EC2 login uses the EC2 identity document and a nonce to login into Vault. AWS-EC2 login obtains the PKCS#7 signed
- * EC2 identity document and generates a {@link #createNonce() nonce}. Instances of this class are immutable once
- * constructed.
+ * AWS-EC2 login uses the EC2 identity document and a nonce to login into Vault. AWS-EC2
+ * login obtains the PKCS#7 signed EC2 identity document and generates a
+ * {@link #createNonce() nonce}. Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @see AwsEc2AuthenticationOptions
- * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend: aws-ec2</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
+ * aws-ec2</a>
  */
 public class AwsEc2Authentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory.getLogger(AwsEc2Authentication.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(AwsEc2Authentication.class);
 
 	private final AwsEc2AuthenticationOptions options;
 
@@ -61,18 +64,21 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	 * @param vaultClient must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(VaultClient vaultClient) {
-		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient.getRestTemplate());
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient
+				.getRestTemplate());
 	}
 
 	/**
-	 * Creates a new {@link AwsEc2Authentication} specifying {@link AwsEc2AuthenticationOptions}, {@link VaultClient} and
-	 * a {@link RestTemplate}.
+	 * Creates a new {@link AwsEc2Authentication} specifying
+	 * {@link AwsEc2AuthenticationOptions}, {@link VaultClient} and a {@link RestTemplate}
+	 * .
 	 * 
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param restTemplate must not be {@literal null}.
 	 */
-	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient, RestTemplate restTemplate) {
+	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
+			VaultClient vaultClient, RestTemplate restTemplate) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultEndpoint must not be null");
@@ -95,10 +101,12 @@ public class AwsEc2Authentication implements ClientAuthentication {
 
 		Map<String, String> login = getEc2Login();
 
-		VaultResponseEntity<VaultResponse> entity = this.vaultClient.postForEntity(path, login, VaultResponse.class);
+		VaultResponseEntity<VaultResponse> entity = this.vaultClient.postForEntity(path,
+				login, VaultResponse.class);
 
 		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using AWS-EC2: %s", entity.getMessage()));
+			throw new VaultException(String.format("Cannot login using AWS-EC2: %s",
+					entity.getMessage()));
 		}
 
 		VaultResponse body = entity.getBody();
@@ -106,10 +114,13 @@ public class AwsEc2Authentication implements ClientAuthentication {
 		if (logger.isDebugEnabled()) {
 
 			if (body.getAuth().get("metadata") instanceof Map) {
-				Map<Object, Object> metadata = (Map<Object, Object>) body.getAuth().get("metadata");
-				logger.debug(String.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-						metadata.get("instance_id"), metadata.get("instance_id")));
-			} else {
+				Map<Object, Object> metadata = (Map<Object, Object>) body.getAuth().get(
+						"metadata");
+				logger.debug(String
+						.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+								metadata.get("instance_id"), metadata.get("instance_id")));
+			}
+			else {
 				logger.debug("Login successful using AWS-EC2 authentication");
 			}
 		}
@@ -132,15 +143,18 @@ public class AwsEc2Authentication implements ClientAuthentication {
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = restTemplate.getForObject(options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = restTemplate.getForObject(options.getIdentityDocumentUri(),
+					String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
 
 			return login;
-		} catch (RestClientException e) {
-			throw new VaultException(
-					String.format("Cannot obtain Identity Document from %s", options.getIdentityDocumentUri()), e);
+		}
+		catch (RestClientException e) {
+			throw new VaultException(String.format(
+					"Cannot obtain Identity Document from %s",
+					options.getIdentityDocumentUri()), e);
 		}
 	}
 

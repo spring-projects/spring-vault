@@ -35,7 +35,8 @@ public class VaultException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Creates a {@code NestedRuntimeException} with the specified detail message and nested exception.
+	 * Creates a {@code NestedRuntimeException} with the specified detail message and
+	 * nested exception.
 	 * 
 	 * @param msg the detail message
 	 * @param cause the nested exception

@@ -21,8 +21,8 @@ import org.springframework.vault.support.VaultToken;
 /**
  * Default implementation of {@link SessionManager}.
  * <p>
- * Uses a synchronized login method to log into Vault and reuse the resulting {@link VaultToken} throughout session
- * lifetime.
+ * Uses a synchronized login method to log into Vault and reuse the resulting
+ * {@link VaultToken} throughout session lifetime.
  *
  * @author Mark Paluch
  * @see ClientAuthentication

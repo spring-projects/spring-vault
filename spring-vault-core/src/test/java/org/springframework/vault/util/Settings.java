@@ -18,8 +18,8 @@ package org.springframework.vault.util;
 import java.io.File;
 
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.VaultToken;
 
 /**
  * Utility to retrieve settings during test.
@@ -35,7 +35,8 @@ public class Settings {
 
 		File workDir = findWorkDir();
 
-		return SslConfiguration.forTrustStore(new FileSystemResource(new File(workDir, "keystore.jks")), "changeit");
+		return SslConfiguration.forTrustStore(new FileSystemResource(new File(workDir,
+				"keystore.jks")), "changeit");
 	}
 
 	/**
@@ -49,8 +50,8 @@ public class Settings {
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the given {@code directory}. Search
-	 * is performed by walking the parent directories.
+	 * Find the {@code work} directory, starting at the given {@code directory}. Search is
+	 * performed by walking the parent directories.
 	 * @return the {@link File} pointing to the {@code work} directory
 	 * @throws IllegalStateException If the {@code work} directory cannot be found.
 	 */

@@ -21,9 +21,10 @@ import org.springframework.util.Assert;
 /**
  * SSL configuration.
  * <p>
- * Provides configuration for a key store and trust store for TLS certificate verification. Key store and trust store
- * may be left unconfigured if the JDK trust store contains all necessary certificates to verify TLS certificates. The
- * key store is used for Client Certificate authentication.
+ * Provides configuration for a key store and trust store for TLS certificate
+ * verification. Key store and trust store may be left unconfigured if the JDK trust store
+ * contains all necessary certificates to verify TLS certificates. The key store is used
+ * for Client Certificate authentication.
  *
  * @author Mark Paluch
  * @see Resource
@@ -35,7 +36,8 @@ public class SslConfiguration {
 	/**
 	 * Default {@link SslConfiguration} without a KeyStore/TrustStore configured.
 	 */
-	public static final SslConfiguration NONE = new SslConfiguration(null, null, null, null);
+	public static final SslConfiguration NONE = new SslConfiguration(null, null, null,
+			null);
 
 	/**
 	 * Trust store that holds certificates and private keys.
@@ -57,7 +59,8 @@ public class SslConfiguration {
 	 */
 	private final String trustStorePassword;
 
-	public SslConfiguration(Resource keyStore, String keyStorePassword, Resource trustStore, String trustStorePassword) {
+	public SslConfiguration(Resource keyStore, String keyStorePassword,
+			Resource trustStore, String trustStorePassword) {
 
 		this.keyStore = keyStore;
 		this.keyStorePassword = keyStorePassword;
@@ -68,15 +71,18 @@ public class SslConfiguration {
 	/**
 	 * Creates a new {@link SslConfiguration} for the given trust store.
 	 *
-	 * @param trustStore resource pointing to an existing trust store, must not be {@literal null}.
+	 * @param trustStore resource pointing to an existing trust store, must not be
+	 * {@literal null}.
 	 * @param trustStorePassword may be {@literal null}.
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public static SslConfiguration forTrustStore(Resource trustStore, String trustStorePassword) {
+	public static SslConfiguration forTrustStore(Resource trustStore,
+			String trustStorePassword) {
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
-		Assert.notNull(trustStore.exists(), String.format("TrustStore %s does not exist", trustStore));
+		Assert.notNull(trustStore.exists(),
+				String.format("TrustStore %s does not exist", trustStore));
 
 		return new SslConfiguration(null, null, trustStore, trustStorePassword);
 	}
@@ -84,7 +90,8 @@ public class SslConfiguration {
 	/**
 	 * Creates a new {@link SslConfiguration} for the given key store.
 	 *
-	 * @param keyStore resource pointing to an existing key store, must not be {@literal null}.
+	 * @param keyStore resource pointing to an existing key store, must not be
+	 * {@literal null}.
 	 * @param keyStorePassword may be {@literal null}.
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
@@ -92,7 +99,8 @@ public class SslConfiguration {
 	public static SslConfiguration forKeyStore(Resource keyStore, String keyStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
-		Assert.notNull(keyStore.exists(), String.format("KeyStore %s does not exist", keyStore));
+		Assert.notNull(keyStore.exists(),
+				String.format("KeyStore %s does not exist", keyStore));
 
 		return new SslConfiguration(keyStore, keyStorePassword, null, null);
 	}
@@ -100,27 +108,33 @@ public class SslConfiguration {
 	/**
 	 * Creates a new {@link SslConfiguration} for the given truststore.
 	 *
-	 * @param keyStore resource pointing to an existing keystore, must not be {@literal null}.
+	 * @param keyStore resource pointing to an existing keystore, must not be
+	 * {@literal null}.
 	 * @param keyStorePassword may be {@literal null}.
-	 * @param trustStore resource pointing to an existing trust store, must not be {@literal null}.
+	 * @param trustStore resource pointing to an existing trust store, must not be
+	 * {@literal null}.
 	 * @param trustStorePassword may be {@literal null}.
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public SslConfiguration create(Resource keyStore, String keyStorePassword, Resource trustStore,
-			String trustStorePassword) {
+	public SslConfiguration create(Resource keyStore, String keyStorePassword,
+			Resource trustStore, String trustStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
-		Assert.notNull(keyStore.exists(), String.format("KeyStore %s does not exist", trustStore));
+		Assert.notNull(keyStore.exists(),
+				String.format("KeyStore %s does not exist", trustStore));
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
-		Assert.notNull(trustStore.exists(), String.format("TrustStore %s does not exist", trustStore));
+		Assert.notNull(trustStore.exists(),
+				String.format("TrustStore %s does not exist", trustStore));
 
-		return new SslConfiguration(keyStore, keyStorePassword, trustStore, trustStorePassword);
+		return new SslConfiguration(keyStore, keyStorePassword, trustStore,
+				trustStorePassword);
 	}
 
 	/**
-	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if not configured.
+	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if
+	 * not configured.
 	 */
 	public Resource getKeyStore() {
 		return keyStore;
@@ -134,7 +148,8 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if not configured.
+	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if
+	 * not configured.
 	 */
 	public Resource getTrustStore() {
 		return trustStore;

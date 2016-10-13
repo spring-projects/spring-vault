@@ -49,12 +49,14 @@ public class VaultCertificateRequest {
 	private final Integer ttl;
 
 	/**
-	 * If {@literal true}, the given common name will not be included in DNS or Email Subject Alternate Names (as
-	 * appropriate). Useful if the CN is not a hostname or email address, but is instead some human-readable identifier.
+	 * If {@literal true}, the given common name will not be included in DNS or Email
+	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
+	 * email address, but is instead some human-readable identifier.
 	 */
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
-	VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames, Integer ttl,
+	VaultCertificateRequest(String commonName, List<String> altNames,
+			List<String> ipSubjectAltNames, Integer ttl,
 			Boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
@@ -110,7 +112,8 @@ public class VaultCertificateRequest {
 		private Integer ttl;
 		private Boolean excludeCommonNameFromSubjectAltNames;
 
-		VaultCertificateRequestBuilder() {}
+		VaultCertificateRequestBuilder() {
+		}
 
 		/**
 		 * Configure the common name.
@@ -155,12 +158,14 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Configure IP subject alternative names. Replaces previously configured IP subject alt names.
+		 * Configure IP subject alternative names. Replaces previously configured IP
+		 * subject alt names.
 		 *
 		 * @param ipSubjectAltNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
-		public VaultCertificateRequestBuilder ipSubjectAltNames(Iterable<String> ipSubjectAltNames) {
+		public VaultCertificateRequestBuilder ipSubjectAltNames(
+				Iterable<String> ipSubjectAltNames) {
 
 			Assert.notNull(ipSubjectAltNames, "IP subject alt names must not be null");
 
@@ -213,8 +218,9 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Exclude the given common name from DNS or Email Subject Alternate Names (as appropriate). Useful if
-		 * the CN is not a hostname or email address, but is instead some human-readable identifier.
+		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
+		 * appropriate). Useful if the CN is not a hostname or email address, but is
+		 * instead some human-readable identifier.
 		 * 
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
@@ -225,7 +231,8 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Build a new {@link VaultCertificateRequest} instance. Requires {@link #commonName(String)} to be configured.
+		 * Build a new {@link VaultCertificateRequest} instance. Requires
+		 * {@link #commonName(String)} to be configured.
 		 *
 		 * @return a new {@link VaultCertificateRequest}.
 		 */
@@ -235,30 +242,33 @@ public class VaultCertificateRequest {
 
 			List<String> altNames;
 			switch (this.altNames.size()) {
-				case 0:
-					altNames = java.util.Collections.emptyList();
-					break;
-				case 1:
-					altNames = java.util.Collections.singletonList(this.altNames.get(0));
-					break;
-				default:
-					altNames = java.util.Collections.unmodifiableList(new ArrayList<String>(this.altNames));
+			case 0:
+				altNames = java.util.Collections.emptyList();
+				break;
+			case 1:
+				altNames = java.util.Collections.singletonList(this.altNames.get(0));
+				break;
+			default:
+				altNames = java.util.Collections.unmodifiableList(new ArrayList<String>(
+						this.altNames));
 			}
 
 			List<String> ipSubjectAltNames;
 			switch (this.ipSubjectAltNames.size()) {
-				case 0:
-					ipSubjectAltNames = java.util.Collections.emptyList();
-					break;
-				case 1:
-					ipSubjectAltNames = java.util.Collections.singletonList(this.ipSubjectAltNames.get(0));
-					break;
-				default:
-					ipSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<String>(this.ipSubjectAltNames));
+			case 0:
+				ipSubjectAltNames = java.util.Collections.emptyList();
+				break;
+			case 1:
+				ipSubjectAltNames = java.util.Collections
+						.singletonList(this.ipSubjectAltNames.get(0));
+				break;
+			default:
+				ipSubjectAltNames = java.util.Collections
+						.unmodifiableList(new ArrayList<String>(this.ipSubjectAltNames));
 			}
 
-			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames, ttl,
-					excludeCommonNameFromSubjectAltNames);
+			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames,
+					ttl, excludeCommonNameFromSubjectAltNames);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

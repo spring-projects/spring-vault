@@ -15,13 +15,12 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ContextConfiguration;
@@ -33,6 +32,8 @@ import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Integration tests for {@link VaultTokenTemplate} through {@link VaultTokenOperations}.
  * 
@@ -42,7 +43,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
-	@Autowired private VaultOperations vaultOperations;
+	@Autowired
+	private VaultOperations vaultOperations;
 	private VaultTokenOperations tokenOperations;
 
 	@Before
@@ -70,7 +72,8 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		tokenRequest.setId("HELLO-WORLD");
 
 		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
-		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
+		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
+				tokenRequest.getId());
 	}
 
 	@Test
@@ -93,7 +96,8 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		tokenRequest.setId("HELLO-WORLD");
 
 		VaultTokenResponse tokenResponse = tokenOperations.createOrphan(tokenRequest);
-		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
+		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
+				tokenRequest.getId());
 	}
 
 	@Test
@@ -127,8 +131,9 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponseEntity<String> response = lookupSelf(tokenResponse);
 
-		assertThat(response.getStatusCode()).isIn(/* <= Vault 0.6.0 */ HttpStatus.BAD_REQUEST,
-				/* >= Vault 0.6.1 */ HttpStatus.FORBIDDEN);
+		assertThat(response.getStatusCode()).isIn(
+				/* <= Vault 0.6.0 */HttpStatus.BAD_REQUEST,
+				/* >= Vault 0.6.1 */HttpStatus.FORBIDDEN);
 		assertThat(response.getMessage()).isEqualTo("permission denied");
 	}
 
@@ -144,11 +149,13 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 	private VaultResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
-		return vaultOperations.doWithVault(new VaultOperations.ClientCallback<VaultResponseEntity<String>>() {
-			@Override
-			public VaultResponseEntity<String> doWithVault(VaultClient client) {
-				return client.getForEntity("auth/token/lookup-self", tokenResponse.getToken(), String.class);
-			}
-		});
+		return vaultOperations
+				.doWithVault(new VaultOperations.ClientCallback<VaultResponseEntity<String>>() {
+					@Override
+					public VaultResponseEntity<String> doWithVault(VaultClient client) {
+						return client.getForEntity("auth/token/lookup-self",
+								tokenResponse.getToken(), String.class);
+					}
+				});
 	}
 }

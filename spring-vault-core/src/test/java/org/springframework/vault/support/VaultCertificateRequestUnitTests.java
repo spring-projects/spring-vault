@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.support;
 
-import static org.assertj.core.api.Assertions.*;
-
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link VaultCertificateRequest}.
@@ -34,7 +34,8 @@ public class VaultCertificateRequestUnitTests {
 	@Test
 	public void shouldBuildRequestWithCommonName() throws Exception {
 
-		VaultCertificateRequest request = VaultCertificateRequest.builder().commonName("hello.com").build();
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+				.commonName("hello.com").build();
 
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 	}

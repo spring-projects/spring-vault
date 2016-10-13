@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.core.env;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -25,8 +22,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultPropertySource}.
@@ -36,7 +37,8 @@ import org.springframework.vault.support.VaultResponse;
 @RunWith(MockitoJUnitRunner.class)
 public class VaultPropertySourceUnitTests {
 
-	@Mock VaultTemplate vaultTemplate;
+	@Mock
+	VaultTemplate vaultTemplate;
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldRejectEmptyPath() throws Exception {
@@ -54,7 +56,8 @@ public class VaultPropertySourceUnitTests {
 
 		prepareResponse();
 
-		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello", vaultTemplate, "secret/myapp");
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
+				vaultTemplate, "secret/myapp");
 
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo("1");
@@ -65,7 +68,8 @@ public class VaultPropertySourceUnitTests {
 
 		prepareResponse();
 
-		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello", vaultTemplate, "secret/myapp");
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
+				vaultTemplate, "secret/myapp");
 
 		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer");
 	}

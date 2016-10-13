@@ -15,12 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -29,6 +26,13 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link AppRoleAuthentication}.
@@ -51,16 +55,22 @@ public class AppRoleAuthenticationUnitTests {
 	@Test
 	public void loginShouldObtainToken() throws Exception {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId("hello") //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId("hello") //
 				.secretId("world") //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login")) //
-				.andExpect(method(HttpMethod.POST)) //
-				.andExpect(jsonPath("$.role_id").value("hello")) //
-				.andExpect(jsonPath("$.secret_id").value("world")) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login"))
+				//
+				.andExpect(method(HttpMethod.POST))
+				//
+				.andExpect(jsonPath("$.role_id").value("hello"))
+				//
+				.andExpect(jsonPath("$.secret_id").value("world"))
+				//
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		AppRoleAuthentication sut = new AppRoleAuthentication(options, vaultClient);
 
@@ -73,15 +83,24 @@ public class AppRoleAuthenticationUnitTests {
 	@Test
 	public void loginShouldObtainTokenWithoutSecretId() throws Exception {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId("hello") //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId("hello") //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login")) //
-				.andExpect(method(HttpMethod.POST)) //
-				.andExpect(jsonPath("$.role_id").value("hello")) //
-				.andExpect(jsonPath("$.secret_id").doesNotExist()) //
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}" + "}"));
+		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login"))
+				//
+				.andExpect(method(HttpMethod.POST))
+				//
+				.andExpect(jsonPath("$.role_id").value("hello"))
+				//
+				.andExpect(jsonPath("$.secret_id").doesNotExist())
+				//
+				.andRespond(
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{"
+										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+										+ "}"));
 
 		AppRoleAuthentication sut = new AppRoleAuthentication(options, vaultClient);
 
@@ -96,7 +115,8 @@ public class AppRoleAuthenticationUnitTests {
 	@Test(expected = VaultException.class)
 	public void loginShouldFail() throws Exception {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId("hello") //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId("hello") //
 				.build();
 
 		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login")) //

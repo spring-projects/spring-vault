@@ -21,7 +21,8 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Default implementation of {@link VaultClientFactory}. Returns the provided {@link VaultClient}.
+ * Default implementation of {@link VaultClientFactory}. Returns the provided
+ * {@link VaultClient}.
  *
  * @author Mark Paluch
  */
@@ -30,7 +31,8 @@ public class DefaultVaultClientFactory implements VaultClientFactory {
 	private final VaultClient vaultClient;
 
 	/**
-	 * Creates a new {@link DefaultVaultClientFactory} returning always the same {@link VaultClient}.
+	 * Creates a new {@link DefaultVaultClientFactory} returning always the same
+	 * {@link VaultClient}.
 	 * 
 	 * @param vaultClient must not be {@literal null}.
 	 */
@@ -42,8 +44,8 @@ public class DefaultVaultClientFactory implements VaultClientFactory {
 	}
 
 	/**
-	 * Creates a new {@link DefaultVaultClientFactory} using a default {@link VaultClient} and {@link VaultEndpoint}. Will
-	 * use Vault at {@code https://localhost:8200} .
+	 * Creates a new {@link DefaultVaultClientFactory} using a default {@link VaultClient}
+	 * and {@link VaultEndpoint}. Will use Vault at {@code https://localhost:8200} .
 	 * 
 	 * @see VaultClient
 	 * @see VaultEndpoint

@@ -25,19 +25,20 @@ package org.springframework.vault.support;
 public interface VaultHealth {
 
 	/**
-	 * @return {@literal true} if the Vault instance is initialized, otherwise {@literal false}.
+	 * @return {@literal true} if the Vault instance is initialized, otherwise
+	 * {@literal false}.
 	 */
 	boolean isInitialized();
 
 	/**
-	 * @return {@literal true} if the Vault instance is sealed, otherwise {@literal false} if the Vault instance is
-	 *         unsealed.
+	 * @return {@literal true} if the Vault instance is sealed, otherwise {@literal false}
+	 * if the Vault instance is unsealed.
 	 */
 	boolean isSealed();
 
 	/**
-	 * @return {@literal true} if the Vault instance is in standby mode, otherwise {@literal false} if the Vault instance
-	 *         is active.
+	 * @return {@literal true} if the Vault instance is in standby mode, otherwise
+	 * {@literal false} if the Vault instance is active.
 	 */
 	boolean isStandby();
 

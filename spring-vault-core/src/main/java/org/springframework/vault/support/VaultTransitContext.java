@@ -60,12 +60,14 @@ public class VaultTransitContext {
 		private byte[] context;
 		private byte[] nonce;
 
-		VaultTransitRequestBuilder() {}
+		VaultTransitRequestBuilder() {
+		}
 
 		/**
 		 * Configure a key derivation context for the {@code transit} operation.
 		 * 
-		 * @param context key derivation context, provided as a binary data. Must be provided if derivation is enabled.
+		 * @param context key derivation context, provided as a binary data. Must be
+		 * provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitContext.VaultTransitRequestBuilder context(byte[] context) {
@@ -74,11 +76,13 @@ public class VaultTransitContext {
 		}
 
 		/**
-		 * Configure the nonce value for a {@code transit} operation. Must be provided if convergent encryption is enabled
-		 * for this key and the key was generated with Vault 0.6.1. Not required for keys created in 0.6.2+.
+		 * Configure the nonce value for a {@code transit} operation. Must be provided if
+		 * convergent encryption is enabled for this key and the key was generated with
+		 * Vault 0.6.1. Not required for keys created in 0.6.2+.
 		 * 
-		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must ensure that for any given context
-		 *          (and thus, any given encryption key) this nonce value is never reused
+		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must
+		 * ensure that for any given context (and thus, any given encryption key) this
+		 * nonce value is never reused
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitContext.VaultTransitRequestBuilder nonce(byte[] nonce) {

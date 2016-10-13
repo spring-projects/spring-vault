@@ -15,18 +15,17 @@
  */
 package org.springframework.vault.support;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link CertificateBundle}.
@@ -40,10 +39,11 @@ public class CertificateBundleUnitTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void before() throws Exception {
-		Map<String, String> data = new ObjectMapper().readValue(getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = new ObjectMapper().readValue(
+				getClass().getResource("/certificate.json"), Map.class);
 
-		certificateBundle = CertificateBundle.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"),
-				data.get("private_key"));
+		certificateBundle = CertificateBundle.of(data.get("serial_number"),
+				data.get("certificate"), data.get("issuing_ca"), data.get("private_key"));
 	}
 
 	@Test
@@ -61,7 +61,8 @@ public class CertificateBundleUnitTests {
 
 		X509Certificate x509Certificate = certificateBundle.getX509Certificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo("CN=hello.example.com");
+		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo(
+				"CN=hello.example.com");
 	}
 
 	@Test
@@ -69,7 +70,8 @@ public class CertificateBundleUnitTests {
 
 		X509Certificate x509Certificate = certificateBundle.getX509IssuerCertificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).startsWith("CN=Intermediate CA Certificate");
+		assertThat(x509Certificate.getSubjectDN().getName()).startsWith(
+				"CN=Intermediate CA Certificate");
 	}
 
 	@Test

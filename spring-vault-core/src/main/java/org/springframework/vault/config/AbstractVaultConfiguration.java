@@ -44,12 +44,14 @@ import org.springframework.vault.support.SslConfiguration;
 public abstract class AbstractVaultConfiguration {
 
 	/**
-	 * @return Vault endpoint coordinates for HTTP/HTTPS communication, must not be {@literal null}.
+	 * @return Vault endpoint coordinates for HTTP/HTTPS communication, must not be
+	 * {@literal null}.
 	 */
 	public abstract VaultEndpoint vaultEndpoint();
 
 	/**
-	 * Annotate with {@link Bean} in case you want to expose a {@link ClientAuthentication} instance to the
+	 * Annotate with {@link Bean} in case you want to expose a
+	 * {@link ClientAuthentication} instance to the
 	 * {@link org.springframework.context.ApplicationContext}.
 	 * 
 	 * @return the {@link ClientAuthentication} to use. Must not be {@literal null}.
@@ -57,10 +59,11 @@ public abstract class AbstractVaultConfiguration {
 	public abstract ClientAuthentication clientAuthentication();
 
 	/**
-	 * Create a {@link AsyncTaskExecutor} used by {@link LifecycleAwareSessionManager}. Annotate with {@link Bean} in case
-	 * you want to expose a {@link AsyncTaskExecutor} instance to the
-	 * {@link org.springframework.context.ApplicationContext}. This might be useful to supply managed executor instances
-	 * or {@link AsyncTaskExecutor}s using a queue/pooled threads.
+	 * Create a {@link AsyncTaskExecutor} used by {@link LifecycleAwareSessionManager}.
+	 * Annotate with {@link Bean} in case you want to expose a {@link AsyncTaskExecutor}
+	 * instance to the {@link org.springframework.context.ApplicationContext}. This might
+	 * be useful to supply managed executor instances or {@link AsyncTaskExecutor}s using
+	 * a queue/pooled threads.
 	 * 
 	 * @return the {@link AsyncTaskExecutor} to use. Must not be {@literal null}.
 	 * @see AsyncTaskExecutor
@@ -70,8 +73,9 @@ public abstract class AbstractVaultConfiguration {
 	}
 
 	/**
-	 * Construct a {@link LifecycleAwareSessionManager} using {@link #clientAuthentication()} and {@link #vaultClient()}.
-	 * This {@link SessionManager} uses {@link #asyncTaskExecutor()}.
+	 * Construct a {@link LifecycleAwareSessionManager} using
+	 * {@link #clientAuthentication()} and {@link #vaultClient()}. This
+	 * {@link SessionManager} uses {@link #asyncTaskExecutor()}.
 	 * 
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
@@ -86,7 +90,8 @@ public abstract class AbstractVaultConfiguration {
 		ClientAuthentication clientAuthentication = clientAuthentication();
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
-		return new LifecycleAwareSessionManager(clientAuthentication, asyncTaskExecutor(), vaultClient());
+		return new LifecycleAwareSessionManager(clientAuthentication,
+				asyncTaskExecutor(), vaultClient());
 	}
 
 	/**
@@ -107,18 +112,21 @@ public abstract class AbstractVaultConfiguration {
 	}
 
 	/**
-	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}.
-	 * {@link ClientHttpRequestFactory} is not exposed as root bean because {@link ClientHttpRequestFactory} is configured
-	 * with {@link ClientOptions} and {@link SslConfiguration} which are not necessarily applicable for the whole
+	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}
+	 * . {@link ClientHttpRequestFactory} is not exposed as root bean because
+	 * {@link ClientHttpRequestFactory} is configured with {@link ClientOptions} and
+	 * {@link SslConfiguration} which are not necessarily applicable for the whole
 	 * application.
 	 * 
-	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory} instance.
+	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
+	 * instance.
 	 * @see #clientOptions()
 	 * @see #sslConfiguration()
 	 */
 	@Bean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(clientOptions(), sslConfiguration()));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
+				clientOptions(), sslConfiguration()));
 	}
 
 	/**
@@ -128,12 +136,14 @@ public abstract class AbstractVaultConfiguration {
 	 */
 	@Bean
 	public VaultClient vaultClient() {
-		return new VaultClient(clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(), vaultEndpoint());
+		return new VaultClient(clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), vaultEndpoint());
 	}
 
 	/**
-	 * Creates the {@link VaultClientFactory} to be used with {@link VaultTemplate}. Uses by default
-	 * {@link DefaultVaultClientFactory} with the configured {@link #vaultClient()} instance.
+	 * Creates the {@link VaultClientFactory} to be used with {@link VaultTemplate}. Uses
+	 * by default {@link DefaultVaultClientFactory} with the configured
+	 * {@link #vaultClient()} instance.
 	 * 
 	 * @return the {@link VaultClientFactory}.
 	 */

@@ -21,6 +21,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import org.junit.rules.ExternalResource;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.VaultClient;
@@ -54,7 +55,8 @@ public class VaultRule extends ExternalResource {
 	}
 
 	/**
-	 * Create a new {@link VaultRule} with the given {@link SslConfiguration} and {@link VaultEndpoint}.
+	 * Create a new {@link VaultRule} with the given {@link SslConfiguration} and
+	 * {@link VaultEndpoint}.
 	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
@@ -64,10 +66,13 @@ public class VaultRule extends ExternalResource {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(sslConfiguration), vaultEndpoint);
-		DefaultVaultClientFactory clientFactory = new DefaultVaultClientFactory(vaultClient);
+		VaultClient vaultClient = new VaultClient(
+				TestRestTemplateFactory.create(sslConfiguration), vaultEndpoint);
+		DefaultVaultClientFactory clientFactory = new DefaultVaultClientFactory(
+				vaultClient);
 
-		VaultTemplate vaultTemplate = new VaultTemplate(clientFactory, new PreparingSessionManager());
+		VaultTemplate vaultTemplate = new VaultTemplate(clientFactory,
+				new PreparingSessionManager());
 
 		this.token = Settings.token();
 		this.prepareVault = new PrepareVault(vaultClient, vaultTemplate);
@@ -82,18 +87,24 @@ public class VaultRule extends ExternalResource {
 
 			socket = new Socket();
 
-			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), vaultEndpoint.getPort()));
+			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
+					vaultEndpoint.getPort()));
 			socket.close();
 
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			throw new IllegalStateException(
-					String.format("Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+					String.format(
+							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
 							vaultEndpoint.getPort(), getClass().getSimpleName()));
-		} finally {
+		}
+		finally {
 			if (socket != null) {
 				try {
 					socket.close();
-				} catch (IOException e) {}
+				}
+				catch (IOException e) {
+				}
 			}
 		}
 

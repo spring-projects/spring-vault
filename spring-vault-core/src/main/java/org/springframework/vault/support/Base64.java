@@ -16,7 +16,8 @@
 package org.springframework.vault.support;
 
 class Base64 {
-	private Base64() {}
+	private Base64() {
+	}
 
 	public static byte[] decode(String in) {
 		// Ignore trailing '=' padding and whitespace from the input.
@@ -28,7 +29,8 @@ class Base64 {
 			}
 		}
 
-		// If the input includes whitespace, this output array will be longer than necessary.
+		// If the input includes whitespace, this output array will be longer than
+		// necessary.
 		byte[] out = new byte[(int) (limit * 6L / 8L)];
 		int outCount = 0;
 		int inCount = 0;
@@ -43,23 +45,29 @@ class Base64 {
 				// A 65 0
 				// Z 90 25 (ASCII - 65)
 				bits = c - 65;
-			} else if (c >= 'a' && c <= 'z') {
+			}
+			else if (c >= 'a' && c <= 'z') {
 				// char ASCII value
 				// a 97 26
 				// z 122 51 (ASCII - 71)
 				bits = c - 71;
-			} else if (c >= '0' && c <= '9') {
+			}
+			else if (c >= '0' && c <= '9') {
 				// char ASCII value
 				// 0 48 52
 				// 9 57 61 (ASCII + 4)
 				bits = c + 4;
-			} else if (c == '+' || c == '-') {
+			}
+			else if (c == '+' || c == '-') {
 				bits = 62;
-			} else if (c == '/' || c == '_') {
+			}
+			else if (c == '/' || c == '_') {
 				bits = 63;
-			} else if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
+			}
+			else if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {
 				continue;
-			} else {
+			}
+			else {
 				return null;
 			}
 
@@ -79,11 +87,13 @@ class Base64 {
 		if (lastWordChars == 1) {
 			// We read 1 char followed by "===". But 6 bits is a truncated byte! Fail.
 			return null;
-		} else if (lastWordChars == 2) {
+		}
+		else if (lastWordChars == 2) {
 			// We read 2 chars followed by "==". Emit 1 byte with 8 of those 12 bits.
 			word = word << 12;
 			out[outCount++] = (byte) (word >> 16);
-		} else if (lastWordChars == 3) {
+		}
+		else if (lastWordChars == 3) {
 			// We read 3 chars, followed by "=". Emit 2 bytes for 16 of those 18 bits.
 			word = word << 6;
 			out[outCount++] = (byte) (word >> 16);

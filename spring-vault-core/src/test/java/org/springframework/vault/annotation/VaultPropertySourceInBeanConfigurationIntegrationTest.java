@@ -15,13 +15,14 @@
  */
 package org.springframework.vault.annotation;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -31,8 +32,7 @@ import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.util.VaultRule;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link VaultPropertySource}.
@@ -52,7 +52,8 @@ public class VaultPropertySourceInBeanConfigurationIntegrationTest {
 		}
 	}
 
-	@Autowired ClientClass clientClass;
+	@Autowired
+	ClientClass clientClass;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -62,7 +63,8 @@ public class VaultPropertySourceInBeanConfigurationIntegrationTest {
 
 		VaultOperations vaultOperations = rule.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp",
+				Collections.singletonMap("myapp", "myvalue"));
 	}
 
 	@Test

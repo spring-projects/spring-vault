@@ -22,6 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -42,14 +49,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.Data;
 
 /**
  * Default implementation of {@link VaultSysOperations}.
@@ -90,7 +89,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@Override
 			public Boolean doWithVault(VaultClient client) {
 
-				VaultResponseEntity<Map<String, Boolean>> response = client.getForEntity("sys/init", Map.class);
+				VaultResponseEntity<Map<String, Boolean>> response = client.getForEntity(
+						"sys/init", Map.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody().get("initialized");
@@ -102,25 +102,28 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	public VaultInitializationResponse initialize(final VaultInitializationRequest vaultInitializationRequest) {
+	public VaultInitializationResponse initialize(
+			final VaultInitializationRequest vaultInitializationRequest) {
 
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
-		return vaultOperations.doWithVault(new ClientCallback<VaultInitializationResponse>() {
+		return vaultOperations
+				.doWithVault(new ClientCallback<VaultInitializationResponse>() {
 
-			@Override
-			public VaultInitializationResponse doWithVault(VaultClient client) {
+					@Override
+					public VaultInitializationResponse doWithVault(VaultClient client) {
 
-				VaultResponseEntity<VaultInitializationResponseImpl> response = client.putForEntity("sys/init",
-						vaultInitializationRequest, VaultInitializationResponseImpl.class);
+						VaultResponseEntity<VaultInitializationResponseImpl> response = client
+								.putForEntity("sys/init", vaultInitializationRequest,
+										VaultInitializationResponseImpl.class);
 
-				if (response.isSuccessful() && response.hasBody()) {
-					return response.getBody();
-				}
+						if (response.isSuccessful() && response.hasBody()) {
+							return response.getBody();
+						}
 
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+						throw new VaultException(buildExceptionMessage(response));
+					}
+				});
 	}
 
 	@Override
@@ -136,8 +139,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@Override
 			public VaultUnsealStatus doWithVault(VaultClient client) {
 
-				VaultResponseEntity<VaultUnsealStatusImpl> response = client.putForEntity("sys/unseal",
-						Collections.singletonMap("key", keyShare), VaultUnsealStatusImpl.class);
+				VaultResponseEntity<VaultUnsealStatusImpl> response = client
+						.putForEntity("sys/unseal",
+								Collections.singletonMap("key", keyShare),
+								VaultUnsealStatusImpl.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody();
@@ -176,7 +181,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	public void authMount(final String path, final VaultMount vaultMount) throws VaultException {
+	public void authMount(final String path, final VaultMount vaultMount)
+			throws VaultException {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
@@ -199,16 +205,19 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultHealth health() {
-		return vaultOperations.doWithRestTemplate("sys/health", Collections.<String, Object> emptyMap(), HEALTH);
+		return vaultOperations.doWithRestTemplate("sys/health",
+				Collections.<String, Object>emptyMap(), HEALTH);
 	}
 
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(), response.getUri(), response.getMessage());
+			return String.format("Status %s URI %s: %s", response.getStatusCode(),
+					response.getUri(), response.getMessage());
 		}
 
-		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+		return String.format("Status %s URI %s", response.getStatusCode(),
+				response.getUri());
 	}
 
 	private static class GetUnsealStatus implements ClientCallback<VaultUnsealStatus> {
@@ -216,8 +225,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public VaultUnsealStatus doWithVault(VaultClient client) {
 
-			VaultResponseEntity<VaultUnsealStatusImpl> response = client.getForEntity("sys/seal-status",
-					VaultUnsealStatusImpl.class);
+			VaultResponseEntity<VaultUnsealStatusImpl> response = client.getForEntity(
+					"sys/seal-status", VaultUnsealStatusImpl.class);
 
 			if (response.isSuccessful() && response.hasBody()) {
 				return response.getBody();
@@ -232,7 +241,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public Void doWithVault(VaultOperations.VaultSession session) {
 
-			VaultResponseEntity<Map> response = session.putForEntity("sys/seal", null, Map.class);
+			VaultResponseEntity<Map> response = session.putForEntity("sys/seal", null,
+					Map.class);
 
 			if (!response.isSuccessful()) {
 				throw new VaultException(buildExceptionMessage(response));
@@ -244,7 +254,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static class GetMounts implements SessionCallback<Map<String, VaultMount>> {
 
-		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {};
+		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
+		};
 
 		private final String path;
 
@@ -255,8 +266,9 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public Map<String, VaultMount> doWithVault(VaultOperations.VaultSession session) {
 
-			VaultResponseEntity<VaultMountsResponse> response = session.exchange(path, HttpMethod.GET, null, MOUNT_TYPE_REF,
-					Collections.<String, Object> emptyMap());
+			VaultResponseEntity<VaultMountsResponse> response = session.exchange(path,
+					HttpMethod.GET, null, MOUNT_TYPE_REF,
+					Collections.<String, Object>emptyMap());
 
 			if (response.isSuccessful() && response.hasBody()) {
 
@@ -272,7 +284,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			throw new VaultException(buildExceptionMessage(response));
 		}
 
-		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
+		private static class VaultMountsResponse extends
+				VaultResponseSupport<Map<String, VaultMount>> {
 
 			private Map<String, VaultMount> topLevelMounts = new HashMap<String, VaultMount>();
 
@@ -304,22 +317,26 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class Health implements VaultAccessor.RestTemplateCallback<VaultHealth> {
+	private static class Health implements
+			VaultAccessor.RestTemplateCallback<VaultHealth> {
 
 		@Override
 		public VaultHealth doWithRestTemplate(URI uri, RestTemplate restTemplate) {
 
 			try {
 
-				ResponseEntity<VaultHealthImpl> healthResponse = restTemplate.exchange(uri, HttpMethod.GET, null,
-						VaultHealthImpl.class);
+				ResponseEntity<VaultHealthImpl> healthResponse = restTemplate.exchange(
+						uri, HttpMethod.GET, null, VaultHealthImpl.class);
 				return healthResponse.getBody();
-			} catch (HttpStatusCodeException responseError) {
+			}
+			catch (HttpStatusCodeException responseError) {
 
 				try {
 					ObjectMapper mapper = new ObjectMapper();
-					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
-				} catch (Exception jsonError) {
+					return mapper.readValue(responseError.getResponseBodyAsString(),
+							VaultHealthImpl.class);
+				}
+				catch (Exception jsonError) {
 					throw responseError;
 				}
 			}
@@ -331,7 +348,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private List<String> keys = new ArrayList<String>();
 
-		@JsonProperty("root_token") private String rootToken;
+		@JsonProperty("root_token")
+		private String rootToken;
 
 		public VaultToken getRootToken() {
 			return VaultToken.of(rootToken);
@@ -343,9 +361,11 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private boolean sealed;
 
-		@JsonProperty("t") private int secretThreshold;
+		@JsonProperty("t")
+		private int secretThreshold;
 
-		@JsonProperty("n") private int secretShares;
+		@JsonProperty("n")
+		private int secretShares;
 
 		private int progress;
 	}
@@ -360,8 +380,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private final int serverTimeUtc;
 		private final String version;
 
-		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
-				@JsonProperty("standby") boolean standby, @JsonProperty("server_time_utc") int serverTimeUtc,
+		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
+				@JsonProperty("sealed") boolean sealed,
+				@JsonProperty("standby") boolean standby,
+				@JsonProperty("server_time_utc") int serverTimeUtc,
 				@JsonProperty("version") String version) {
 
 			this.initialized = initialized;

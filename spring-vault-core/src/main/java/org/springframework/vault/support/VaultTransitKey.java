@@ -25,7 +25,8 @@ import java.util.Map;
 public interface VaultTransitKey {
 
 	/**
-	 * @return {@literal true} if deletion of the key is allowed. Key deletion must be turned on to make keys deletable.
+	 * @return {@literal true} if deletion of the key is allowed. Key deletion must be
+	 * turned on to make keys deletable.
 	 */
 	boolean isDeletionAllowed();
 

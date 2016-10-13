@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
+import lombok.ToString;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
-
-import lombok.ToString;
 
 /**
  * Value object for a Vault token obtained by a login method.

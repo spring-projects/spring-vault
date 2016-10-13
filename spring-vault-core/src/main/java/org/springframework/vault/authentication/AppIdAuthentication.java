@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
@@ -28,25 +29,28 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * AppId implementation of {@link ClientAuthentication}. {@link AppIdAuthentication} uses a configured
- * {@link AppIdUserIdMechanism} to obtain or calculate a UserId. AppId and UserId are sent in the login request to Vault
- * to obtain a {@link VaultToken}.
+ * AppId implementation of {@link ClientAuthentication}. {@link AppIdAuthentication} uses
+ * a configured {@link AppIdUserIdMechanism} to obtain or calculate a UserId. AppId and
+ * UserId are sent in the login request to Vault to obtain a {@link VaultToken}.
  *
  * @author Mark Paluch
  * @see AppIdAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App ID</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
+ * ID</a>
  */
 public class AppIdAuthentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory.getLogger(AppIdAuthentication.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(AppIdAuthentication.class);
 
 	private final AppIdAuthenticationOptions options;
 
 	private final VaultClient vaultClient;
 
 	/**
-	 * Creates a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and {@link VaultClient}.
+	 * Creates a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
+	 * {@link VaultClient}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
@@ -67,13 +71,16 @@ public class AppIdAuthentication implements ClientAuthentication {
 
 	private VaultToken createTokenUsingAppId() {
 
-		Map<String, String> login = getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId());
+		Map<String, String> login = getAppIdLogin(options.getAppId(), options
+				.getUserIdMechanism().createUserId());
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient
-				.postForEntity(String.format("auth/%s/login", options.getPath()), login, VaultResponse.class);
+		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(
+				String.format("auth/%s/login", options.getPath()), login,
+				VaultResponse.class);
 
 		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using app-id: %s", entity.getMessage()));
+			throw new VaultException(String.format("Cannot login using app-id: %s",
+					entity.getMessage()));
 		}
 
 		logger.debug("Login successful using AppId authentication");

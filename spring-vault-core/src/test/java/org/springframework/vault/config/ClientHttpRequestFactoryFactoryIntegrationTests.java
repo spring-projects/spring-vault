@@ -15,9 +15,8 @@
  */
 package org.springframework.vault.config;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
@@ -35,6 +34,8 @@ import org.springframework.vault.util.Settings;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 /**
  * Integration tests for {@link ClientHttpRequestFactory}.
  *
@@ -47,8 +48,8 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	public void httpComponentsClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(new ClientOptions(),
-				Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(
+				new ClientOptions(), Settings.createSslConfiguration());
 		RestTemplate template = new RestTemplate(factory);
 
 		String response = request(template);
@@ -62,7 +63,8 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	public void nettyClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(), Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
+				Settings.createSslConfiguration());
 		((InitializingBean) factory).afterPropertiesSet();
 		RestTemplate template = new RestTemplate(factory);
 
@@ -77,7 +79,8 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	public void okHttpClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = OkHttp.usingOkHttp(new ClientOptions(), Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = OkHttp.usingOkHttp(new ClientOptions(),
+				Settings.createSslConfiguration());
 		RestTemplate template = new RestTemplate(factory);
 
 		String response = request(template);
@@ -92,9 +95,11 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET, null, String.class);
+			ResponseEntity<String> responseEntity = template.exchange(url,
+					HttpMethod.GET, null, String.class);
 			return responseEntity.getBody();
-		} catch (HttpStatusCodeException e) {
+		}
+		catch (HttpStatusCodeException e) {
 			return e.getResponseBodyAsString();
 		}
 	}

@@ -15,12 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.util.Map;
 
 import org.junit.Test;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +34,10 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeNotNull;
+
 /**
  * Integration tests for {@link CubbyholeAuthentication}.
  * 
@@ -49,13 +51,15 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		VaultResponseEntity<VaultResponse> response = prepare().getVaultOperations()
 				.doWithVault(new SessionCallback<VaultResponseEntity<VaultResponse>>() {
 					@Override
-					public VaultResponseEntity<VaultResponse> doWithVault(VaultSession session) {
+					public VaultResponseEntity<VaultResponse> doWithVault(
+							VaultSession session) {
 
 						HttpHeaders headers = new HttpHeaders();
 						headers.add("X-Vault-Wrap-TTL", "10m");
 
-						return session.exchange("auth/token/create", HttpMethod.POST, new HttpEntity<Object>(headers),
-								VaultResponse.class, null);
+						return session.exchange("auth/token/create", HttpMethod.POST,
+								new HttpEntity<Object>(headers), VaultResponse.class,
+								null);
 					}
 				});
 
@@ -69,10 +73,11 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings.createSslConfiguration()),
-				new VaultEndpoint());
+		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+				.createSslConfiguration()), new VaultEndpoint());
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 		VaultToken login = authentication.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
@@ -83,14 +88,16 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings.createSslConfiguration()),
-				new VaultEndpoint());
+		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+				.createSslConfiguration()), new VaultEndpoint());
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				vaultClient);
 		try {
 			authentication.login();
 			fail("Missing VaultException");
-		} catch (VaultException e) {
+		}
+		catch (VaultException e) {
 			assertThat(e).hasMessageContaining("Cannot retrieve Token from cubbyhole")
 					.hasMessageContaining("permission denied");
 		}

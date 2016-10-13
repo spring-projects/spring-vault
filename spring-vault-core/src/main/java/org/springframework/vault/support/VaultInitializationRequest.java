@@ -24,9 +24,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class VaultInitializationRequest {
 
-	@JsonProperty("secret_shares") private final int secretShares;
+	@JsonProperty("secret_shares")
+	private final int secretShares;
 
-	@JsonProperty("secret_threshold") private final int secretThreshold;
+	@JsonProperty("secret_threshold")
+	private final int secretThreshold;
 
 	private VaultInitializationRequest(int secretShares, int secretThreshold) {
 		this.secretShares = secretShares;
@@ -34,7 +36,8 @@ public class VaultInitializationRequest {
 	}
 
 	/**
-	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and {@code secretThreshold}.
+	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and
+	 * {@code secretThreshold}.
 	 * 
 	 * @param secretShares
 	 * @param secretThreshold

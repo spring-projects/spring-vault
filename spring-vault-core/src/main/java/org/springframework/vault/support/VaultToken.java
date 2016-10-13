@@ -16,10 +16,10 @@
 
 package org.springframework.vault.support;
 
-import org.springframework.util.Assert;
-
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+
+import org.springframework.util.Assert;
 
 /**
  * Value object for a Vault token.

@@ -23,27 +23,33 @@ import org.springframework.vault.support.VaultCertificateResponse;
 /**
  * Interface that specifies PKI backend-related operations.
  * <p>
- * The PKI secret backend for Vault generates X.509 certificates dynamically based on configured roles. This means
- * services can get certificates needed for both client and server authentication without going through the usual manual
- * process of generating a private key and CSR, submitting to a CA, and waiting for a verification and signing process
- * to complete. Vault's built-in authentication and authorization mechanisms provide the verification functionality.
+ * The PKI secret backend for Vault generates X.509 certificates dynamically based on
+ * configured roles. This means services can get certificates needed for both client and
+ * server authentication without going through the usual manual process of generating a
+ * private key and CSR, submitting to a CA, and waiting for a verification and signing
+ * process to complete. Vault's built-in authentication and authorization mechanisms
+ * provide the verification functionality.
  * 
  * @author Mark Paluch
  * @see <a href=
- *      "https://www.vaultproject.io/docs/secrets/pki/index.html">https://www.vaultproject.io/docs/secrets/pki/index.html</a>
+ * "https://www.vaultproject.io/docs/secrets/pki/index.html">https://www.vaultproject.io/docs/secrets/pki/index.html</a>
  */
 public interface VaultPkiOperations {
 
 	/**
-	 * Requests a certificate bundle (private key and certificate) from Vault's PKI backend given a {@code roleName} and
-	 * {@link VaultCertificateRequest}. The issuing CA certificate is returned as well, so that only the root CA need be
-	 * in a client's trust store. Certificates use DER format and are base64 encoded.
+	 * Requests a certificate bundle (private key and certificate) from Vault's PKI
+	 * backend given a {@code roleName} and {@link VaultCertificateRequest}. The issuing
+	 * CA certificate is returned as well, so that only the root CA need be in a client's
+	 * trust store. Certificates use DER format and are base64 encoded.
 	 *
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param certificateRequest must not be {@literal null}.
-	 * @return the {@link VaultCertificateResponse} containing a {@link CertificateBundle}.
-	 * @see <a href="https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST /pki/issue/[role name]</a>
+	 * @return the {@link VaultCertificateResponse} containing a {@link CertificateBundle}
+	 * .
+	 * @see <a
+	 * href="https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
+	 * /pki/issue/[role name]</a>
 	 */
-	VaultCertificateResponse issueCertificate(String roleName, VaultCertificateRequest certificateRequest)
-			throws VaultException;
+	VaultCertificateResponse issueCertificate(String roleName,
+			VaultCertificateRequest certificateRequest) throws VaultException;
 }

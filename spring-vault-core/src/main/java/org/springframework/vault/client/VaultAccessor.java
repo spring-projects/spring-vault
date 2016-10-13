@@ -27,7 +27,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Base class for Vault accessing helpers, defining common properties such as the {@link RestTemplate} to operate on.
+ * Base class for Vault accessing helpers, defining common properties such as the
+ * {@link RestTemplate} to operate on.
  * <p>
  * Not intended to be used directly. See {@link VaultClient}.
  *
@@ -66,41 +67,49 @@ public abstract class VaultAccessor {
 		return callback.doWithRestTemplate(uri, getRestTemplate());
 	}
 
-	public <T, S extends T> VaultResponseEntity<S> exchange(URI uri, HttpMethod httpMethod, HttpEntity<?> httpEntity,
-															Class<T> returnType) {
+	public <T, S extends T> VaultResponseEntity<S> exchange(URI uri,
+			HttpMethod httpMethod, HttpEntity<?> httpEntity, Class<T> returnType) {
 
 		Assert.notNull(uri, "URI must not be null");
 		Assert.notNull(httpMethod, "HttpMethod must not be null");
 		Assert.notNull(returnType, "Return type must not be null");
 
 		try {
-			ResponseEntity<T> response = this.getRestTemplate().exchange(uri, httpMethod, httpEntity, returnType);
+			ResponseEntity<T> response = this.getRestTemplate().exchange(uri, httpMethod,
+					httpEntity, returnType);
 
-			return new VaultResponseEntity<S>((S) response.getBody(), response.getStatusCode(), uri,
-					response.getStatusCode().getReasonPhrase());
-		} catch (HttpStatusCodeException e) {
+			return new VaultResponseEntity<S>((S) response.getBody(),
+					response.getStatusCode(), uri, response.getStatusCode()
+							.getReasonPhrase());
+		}
+		catch (HttpStatusCodeException e) {
 			return handleCodeException(uri, e);
 		}
 	}
 
-	public <T, S extends T> VaultResponseEntity<S> exchange(URI uri, HttpMethod httpMethod, HttpEntity<?> httpEntity,
-															ParameterizedTypeReference<T> returnType) {
+	public <T, S extends T> VaultResponseEntity<S> exchange(URI uri,
+			HttpMethod httpMethod, HttpEntity<?> httpEntity,
+			ParameterizedTypeReference<T> returnType) {
 
 		Assert.notNull(uri, "URI must not be null");
 		Assert.notNull(httpMethod, "HttpMethod must not be null");
 		Assert.notNull(returnType, "Return type must not be null");
 
 		try {
-			ResponseEntity<T> response = this.getRestTemplate().exchange(uri, httpMethod, httpEntity, returnType);
+			ResponseEntity<T> response = this.getRestTemplate().exchange(uri, httpMethod,
+					httpEntity, returnType);
 
-			return new VaultResponseEntity<S>((S) response.getBody(), response.getStatusCode(), uri,
-					response.getStatusCode().getReasonPhrase());
-		} catch (HttpStatusCodeException e) {
+			return new VaultResponseEntity<S>((S) response.getBody(),
+					response.getStatusCode(), uri, response.getStatusCode()
+							.getReasonPhrase());
+		}
+		catch (HttpStatusCodeException e) {
 			return handleCodeException(uri, e);
 		}
 	}
 
-	private <T> VaultResponseEntity<T> handleCodeException(URI uri, HttpStatusCodeException e) {
+	private <T> VaultResponseEntity<T> handleCodeException(URI uri,
+			HttpStatusCodeException e) {
 
 		String message = e.getResponseBodyAsString();
 

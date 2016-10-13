@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
@@ -28,8 +29,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional) are sent in the login request
- * to Vault to obtain a {@link VaultToken}.
+ * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
+ * are sent in the login request to Vault to obtain a {@link VaultToken}.
  * <p>
  * {@link AppRoleAuthentication} can be configured for push and pull mode by setting
  * {@link AppRoleAuthenticationOptions#getSecretId()}.
@@ -37,23 +38,27 @@ import org.springframework.vault.support.VaultToken;
  * @author Mark Paluch
  * @see AppRoleAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend: AppRole</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
+ * AppRole</a>
  */
 public class AppRoleAuthentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory.getLogger(AppRoleAuthentication.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(AppRoleAuthentication.class);
 
 	private final AppRoleAuthenticationOptions options;
 
 	private final VaultClient vaultClient;
 
 	/**
-	 * Creates a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions} and {@link VaultClient}.
+	 * Creates a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
+	 * and {@link VaultClient}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public AppRoleAuthentication(AppRoleAuthenticationOptions options, VaultClient vaultClient) {
+	public AppRoleAuthentication(AppRoleAuthenticationOptions options,
+			VaultClient vaultClient) {
 
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");
@@ -69,13 +74,16 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 	private VaultToken createTokenUsingAppRole() {
 
-		Map<String, String> login = getAppRoleLogin(options.getRoleId(), options.getSecretId());
+		Map<String, String> login = getAppRoleLogin(options.getRoleId(),
+				options.getSecretId());
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient
-				.postForEntity(String.format("auth/%s/login", options.getPath()), login, VaultResponse.class);
+		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(
+				String.format("auth/%s/login", options.getPath()), login,
+				VaultResponse.class);
 
 		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using AppRole: %s", entity.getMessage()));
+			throw new VaultException(String.format("Cannot login using AppRole: %s",
+					entity.getMessage()));
 		}
 
 		logger.debug("Login successful using AppRole authentication");

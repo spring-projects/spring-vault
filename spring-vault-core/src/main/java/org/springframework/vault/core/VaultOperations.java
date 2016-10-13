@@ -21,20 +21,22 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Interface that specifies a basic set of Vault operations, implemented by {@link VaultTemplate}. This is the main
- * entry point to interact with Vault in an authenticated and unauthenticated context with configured
- * {@link VaultClient} instances.
+ * Interface that specifies a basic set of Vault operations, implemented by
+ * {@link VaultTemplate}. This is the main entry point to interact with Vault in an
+ * authenticated and unauthenticated context with configured {@link VaultClient}
+ * instances.
  * <p>
- * {@link VaultOperations} resolves {@link VaultClient} instances and allows execution of callback methods on various
- * levels. Callbacks can execute requests within a {@link #doWithVault(SessionCallback) session}, the
- * {@link #doWithVault(ClientCallback) client (without requiring a session)} and a
+ * {@link VaultOperations} resolves {@link VaultClient} instances and allows execution of
+ * callback methods on various levels. Callbacks can execute requests within a
+ * {@link #doWithVault(SessionCallback) session}, the {@link #doWithVault(ClientCallback)
+ * client (without requiring a session)} and a
  * {@link #doWithRestTemplate(String, Map, RestTemplateCallback) low-level}
  * {@link org.springframework.web.client.RestTemplate} level.
  *
@@ -65,7 +67,8 @@ public interface VaultOperations {
 	VaultTransitOperations opsForTransit();
 
 	/**
-	 * Returns {@link VaultTransitOperations} if the transit backend is mounted on a different path than {@code transit}.
+	 * Returns {@link VaultTransitOperations} if the transit backend is mounted on a
+	 * different path than {@code transit}.
 	 * 
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transit backend.
@@ -78,7 +81,8 @@ public interface VaultOperations {
 	VaultPkiOperations opsForPki();
 
 	/**
-	 * Returns {@link VaultPkiOperations} if the PKI backend is mounted on a different path than {@code pki}.
+	 * Returns {@link VaultPkiOperations} if the PKI backend is mounted on a different
+	 * path than {@code pki}.
 	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault PKI backend.
@@ -86,8 +90,8 @@ public interface VaultOperations {
 	VaultPkiOperations opsForPki(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret backends that do not require a
-	 * request body.
+	 * Read from a secret backend. Reading data using this method is suitable for secret
+	 * backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -95,8 +99,8 @@ public interface VaultOperations {
 	VaultResponse read(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret backends that do not require a
-	 * request body.
+	 * Read from a secret backend. Reading data using this method is suitable for secret
+	 * backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
@@ -129,8 +133,8 @@ public interface VaultOperations {
 	void delete(String path);
 
 	/**
-	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using {@link VaultClient} without requiring
-	 * a session.
+	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using
+	 * {@link VaultClient} without requiring a session.
 	 *
 	 * @param clientCallback the request.
 	 * @return the {@link ClientCallback} return value.
@@ -138,7 +142,8 @@ public interface VaultOperations {
 	<T> T doWithVault(ClientCallback<T> clientCallback);
 
 	/**
-	 * Executes a Vault {@link SessionCallback}. Allows to interact with Vault in an authenticated session.
+	 * Executes a Vault {@link SessionCallback}. Allows to interact with Vault in an
+	 * authenticated session.
 	 *
 	 * @param sessionCallback the request.
 	 * @return the {@link SessionCallback} return value.
@@ -146,15 +151,19 @@ public interface VaultOperations {
 	<T> T doWithVault(SessionCallback<T> sessionCallback);
 
 	/**
-	 * Executes {@link RestTemplateCallback}. Expands the {@code pathTemplate} to an {@link java.net.URI} and allows
-	 * low-level interaction with the underlying {@link org.springframework.web.client.RestTemplate}.
+	 * Executes {@link RestTemplateCallback}. Expands the {@code pathTemplate} to an
+	 * {@link java.net.URI} and allows low-level interaction with the underlying
+	 * {@link org.springframework.web.client.RestTemplate}.
 	 *
-	 * @param pathTemplate the path of the resource, e.g. {@code transit/{key}/foo}, must not be empty or {@literal null}.
-	 * @param variables the variables for expansion of the {@code pathTemplate}, must not be {@literal null}.
+	 * @param pathTemplate the path of the resource, e.g. {@code transit/ key}/foo}, must
+	 * not be empty or {@literal null}.
+	 * @param variables the variables for expansion of the {@code pathTemplate}, must not
+	 * be {@literal null}.
 	 * @param callback the request callback.
 	 * @return the {@link RestTemplateCallback} return value.
 	 */
-	<T> T doWithRestTemplate(String pathTemplate, Map<String, ?> variables, RestTemplateCallback<T> callback);
+	<T> T doWithRestTemplate(String pathTemplate, Map<String, ?> variables,
+			RestTemplateCallback<T> callback);
 
 	/**
 	 * A callback for executing arbitrary operations on the {@link VaultClient}.
@@ -189,25 +198,28 @@ public interface VaultOperations {
 	}
 
 	/**
-	 * An authenticated Vault session. {@link VaultSession} exposes request accessor methods to be executed in an
-	 * authenticated context.
+	 * An authenticated Vault session. {@link VaultSession} exposes request accessor
+	 * methods to be executed in an authenticated context.
 	 *
 	 * @author Mark Paluch
 	 */
 	public interface VaultSession {
 
 		/**
-		 * Retrieve a resource by GETting from the path, and returns the response as {@link VaultResponseEntity}.
+		 * Retrieve a resource by GETting from the path, and returns the response as
+		 * {@link VaultResponseEntity}.
 		 *
 		 * @param path the path.
 		 * @param responseType the type of the return value
 		 * @return the response as entity.
 		 * @see VaultResponseEntity
 		 */
-		<T, S extends T> VaultResponseEntity<S> getForEntity(String path, Class<T> responseType);
+		<T, S extends T> VaultResponseEntity<S> getForEntity(String path,
+				Class<T> responseType);
 
 		/**
-		 * Issue a POST request using the given object to the path, and returns the response as {@link VaultResponseEntity}.
+		 * Issue a POST request using the given object to the path, and returns the
+		 * response as {@link VaultResponseEntity}.
 		 *
 		 * @param path the path.
 		 * @param request the Object to be POSTed, may be {@code null}.
@@ -215,11 +227,12 @@ public interface VaultOperations {
 		 * @return the response as entity.
 		 * @see VaultResponseEntity
 		 */
-		<T, S extends T> VaultResponseEntity<S> postForEntity(String path, Object request, Class<T> responseType);
+		<T, S extends T> VaultResponseEntity<S> postForEntity(String path,
+				Object request, Class<T> responseType);
 
 		/**
-		 * Create a new resource by PUTting the given object to the path, and returns the response as
-		 * {@link VaultResponseEntity}.
+		 * Create a new resource by PUTting the given object to the path, and returns the
+		 * response as {@link VaultResponseEntity}.
 		 *
 		 * @param path the path.
 		 * @param request the Object to be PUT.
@@ -227,53 +240,62 @@ public interface VaultOperations {
 		 * @return the response as entity.
 		 * @see VaultResponseEntity
 		 */
-		<T, S extends T> VaultResponseEntity<S> putForEntity(String path, Object request, Class<T> responseType);
+		<T, S extends T> VaultResponseEntity<S> putForEntity(String path, Object request,
+				Class<T> responseType);
 
 		/**
-		 * Delete a resource by DELETEing from the path, and returns the response as {@link VaultResponseEntity}.
+		 * Delete a resource by DELETEing from the path, and returns the response as
+		 * {@link VaultResponseEntity}.
 		 *
 		 * @param path the path.
 		 * @param responseType the type of the return value
 		 * @return the response as entity.
 		 * @see VaultResponseEntity
 		 */
-		<T, S extends T> VaultResponseEntity<S> deleteForEntity(String path, Class<T> responseType);
+		<T, S extends T> VaultResponseEntity<S> deleteForEntity(String path,
+				Class<T> responseType);
 
 		/**
-		 * Execute the HTTP method to the given URI template, writing the given request entity to the request, and returns
-		 * the response as {@link VaultResponseEntity}.
+		 * Execute the HTTP method to the given URI template, writing the given request
+		 * entity to the request, and returns the response as {@link VaultResponseEntity}.
 		 * <p>
 		 * URI Template variables are using the given URI variables, if any.
 		 *
 		 * @param pathTemplate the path template.
 		 * @param method the HTTP method (GET, POST, etc).
-		 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}.
+		 * @param requestEntity the entity (headers and/or body) to write to the request,
+		 * may be {@code null}.
 		 * @param responseType the type of the return value.
 		 * @param uriVariables the variables to expand in the template.
 		 * @return the response as entity.
 		 */
-		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate, HttpMethod method,
-				HttpEntity<?> requestEntity, Class<T> responseType, Map<String, ?> uriVariables);
+		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
+				HttpMethod method, HttpEntity<?> requestEntity, Class<T> responseType,
+				Map<String, ?> uriVariables);
 
 		/**
-		 * Execute the HTTP method to the given path template, writing the given request entity to the request, and returns
-		 * the response as {@link VaultResponseEntity}. The given {@link ParameterizedTypeReference} is used to pass generic
-		 * type information:
+		 * Execute the HTTP method to the given path template, writing the given request
+		 * entity to the request, and returns the response as {@link VaultResponseEntity}.
+		 * The given {@link ParameterizedTypeReference} is used to pass generic type
+		 * information:
 		 *
 		 * <pre class="code">
-		 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {};
-		 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = session.exchange(&quot;http://example.com&quot;, HttpMethod.GET, null, myBean,
-		 * 		null);
+		 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {
+		 * };
+		 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = session.exchange(&quot;http://example.com&quot;,
+		 * 		HttpMethod.GET, null, myBean, null);
 		 * </pre>
 		 *
 		 * @param pathTemplate the path template.
 		 * @param method the HTTP method (GET, POST, etc).
-		 * @param requestEntity the entity (headers and/or body) to write to the request, may be {@code null}.
+		 * @param requestEntity the entity (headers and/or body) to write to the request,
+		 * may be {@code null}.
 		 * @param responseType the type of the return value.
 		 * @param uriVariables the variables to expand in the template.
 		 * @return the response as entity.
 		 */
-		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate, HttpMethod method,
-				HttpEntity<?> requestEntity, ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables);
+		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
+				HttpMethod method, HttpEntity<?> requestEntity,
+				ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables);
 	}
 }

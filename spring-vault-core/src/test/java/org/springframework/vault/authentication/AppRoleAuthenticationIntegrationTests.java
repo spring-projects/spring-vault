@@ -15,22 +15,25 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assume.*;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assume.assumeThat;
 
 /**
  * Integration tests for {@link AppRoleAuthentication}.
@@ -42,8 +45,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 	@Before
 	public void before() {
 
-		assumeThat(prepare().getVaultOperations().opsForSys().health().getVersion(),
-				not(anyOf(nullValue(), equalTo(""), containsString("0.5"), containsString("0.6.1"))));
+		assumeThat(
+				prepare().getVaultOperations().opsForSys().health().getVersion(),
+				not(anyOf(nullValue(), equalTo(""), containsString("0.5"),
+						containsString("0.6.1"))));
 
 		if (!prepare().hasAuth("approle")) {
 			prepare().mountAuth("approle");
@@ -59,14 +64,16 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 				withSecretId.put("bound_cidr_list", "0.0.0.0/0");
 				withSecretId.put("bind_secret_id", "true");
 
-				session.postForEntity("auth/approle/role/with-secret-id", withSecretId, Map.class);
+				session.postForEntity("auth/approle/role/with-secret-id", withSecretId,
+						Map.class);
 
 				Map<String, String> noSecretIdRole = new HashMap<String, String>();
 				noSecretIdRole.put("policies", "dummy"); // policy
 				noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
 				noSecretIdRole.put("bind_secret_id", "false");
 
-				session.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole, Map.class);
+				session.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole,
+						Map.class);
 
 				return null;
 			}
@@ -77,8 +84,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 	public void shouldAuthenticateWithRoleIdOnly() {
 
 		String roleId = getRoleId("no-secret-id");
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(roleId).build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -88,11 +97,13 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 		String roleId = getRoleId("with-secret-id");
 		String secretId = (String) getVaultOperations()
-				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"), null).getData().get("secret_id");
+				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
+						null).getData().get("secret_id");
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(roleId).secretId(secretId)
-				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).secretId(secretId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -102,8 +113,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 		String roleId = getRoleId("with-secret-id");
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(roleId).build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -113,9 +126,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 		String roleId = getRoleId("with-secret-id");
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(roleId)
-				.secretId("this-is-a-wrong-secret-id").build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).secretId("this-is-a-wrong-secret-id").build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -126,16 +140,19 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		String roleId = getRoleId("with-secret-id");
 		final String secretId = "hello_world";
 
-		final VaultResponse customSecretIdResponse = getVaultOperations()
-				.write("auth/approle/role/with-secret-id/custom-secret-id", Collections.singletonMap("secret_id", secretId));
+		final VaultResponse customSecretIdResponse = getVaultOperations().write(
+				"auth/approle/role/with-secret-id/custom-secret-id",
+				Collections.singletonMap("secret_id", secretId));
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(roleId).secretId(secretId)
-				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).secretId(secretId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 
-		getVaultOperations().write("auth/approle/role/with-secret-id/secret-id-accessor/destroy",
+		getVaultOperations().write(
+				"auth/approle/role/with-secret-id/secret-id-accessor/destroy",
 				customSecretIdResponse.getData());
 	}
 
@@ -144,7 +161,8 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 	}
 
 	private String getRoleId(String roleName) {
-		return (String) getVaultOperations().read(String.format("auth/approle/role/%s/role-id", roleName)).getData()
+		return (String) getVaultOperations()
+				.read(String.format("auth/approle/role/%s/role-id", roleName)).getData()
 				.get("role_id");
 	}
 }

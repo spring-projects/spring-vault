@@ -15,15 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.Assume.*;
-
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
+
 import org.springframework.util.CollectionUtils;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Unit tests for {@link MacAddressUserId}.
@@ -37,7 +38,8 @@ public class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
+				Pattern.compile("[a-f]"));
 	}
 
 	@Test
@@ -48,7 +50,8 @@ public class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId(index).createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
+				Pattern.compile("[a-f]"));
 	}
 
 	/**
@@ -59,8 +62,8 @@ public class MacAddressUserIdUnitTests {
 	 */
 	private int getValidNetworkInterfaceIndex() throws SocketException {
 
-		NetworkInterface[] networkInterfaces = CollectionUtils.toArray(NetworkInterface.getNetworkInterfaces(),
-				new NetworkInterface[0]);
+		NetworkInterface[] networkInterfaces = CollectionUtils.toArray(
+				NetworkInterface.getNetworkInterfaces(), new NetworkInterface[0]);
 
 		int index = -1;
 

@@ -15,13 +15,12 @@
  */
 package org.springframework.vault.annotation;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Collections;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -32,6 +31,8 @@ import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.util.VaultRule;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Integration test for {@link VaultPropertySource} using multiple annotations.
  * 
@@ -41,12 +42,17 @@ import org.springframework.vault.util.VaultRule;
 @ContextConfiguration
 public class VaultPropertySourceMultipleIntegrationTests {
 
-	@VaultPropertySources({ @VaultPropertySource("secret/myapp/profile"), @VaultPropertySource("secret/myapp") })
-	static class Config extends VaultIntegrationTestConfiguration {}
+	@VaultPropertySources({ @VaultPropertySource("secret/myapp/profile"),
+			@VaultPropertySource("secret/myapp") })
+	static class Config extends VaultIntegrationTestConfiguration {
+	}
 
-	@Autowired Environment env;
-	@Autowired ApplicationContext context;
-	@Value("${myapp}") String myapp;
+	@Autowired
+	Environment env;
+	@Autowired
+	ApplicationContext context;
+	@Value("${myapp}")
+	String myapp;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -56,8 +62,10 @@ public class VaultPropertySourceMultipleIntegrationTests {
 
 		VaultOperations vaultOperations = rule.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
-		vaultOperations.write("secret/myapp/profile", Collections.singletonMap("myprofile", "myprofilevalue"));
+		vaultOperations.write("secret/myapp",
+				Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp/profile",
+				Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
 
 	@Test

@@ -20,8 +20,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 /**
- * Mechanism to generate a SHA-256 hashed and hex-encoded representation of the IP address. Can be calculated with
- * {@code echo -n 192.168.99.1 | sha256sum}.
+ * Mechanism to generate a SHA-256 hashed and hex-encoded representation of the IP
+ * address. Can be calculated with {@code echo -n 192.168.99.1 | sha256sum}.
  *
  * @author Mark Paluch
  * @see AppIdUserIdMechanism
@@ -32,7 +32,8 @@ public class IpAddressUserId implements AppIdUserIdMechanism {
 	public String createUserId() {
 		try {
 			return Sha256.toSha256(InetAddress.getLocalHost().getHostAddress());
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

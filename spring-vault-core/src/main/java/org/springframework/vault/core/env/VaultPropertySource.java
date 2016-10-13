@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
@@ -30,7 +31,8 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * {@link PropertySource} that reads keys and values from a {@link VaultTemplate} and {@code path}.
+ * {@link PropertySource} that reads keys and values from a {@link VaultTemplate} and
+ * {@code path}.
  *
  * @author Mark Paluch
  * @since 3.1
@@ -38,30 +40,35 @@ import org.springframework.vault.support.VaultResponse;
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	protected final static Logger logger = LoggerFactory.getLogger(VaultPropertySource.class);
+	protected final static Logger logger = LoggerFactory
+			.getLogger(VaultPropertySource.class);
 
 	private final String path;
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
 	private final Object lock = new Object();
 
 	/**
-	 * Create a new {@link VaultPropertySource} given a {@link VaultTemplate} and {@code path} inside of Vault. This
-	 * property source loads properties upon construction.
+	 * Create a new {@link VaultPropertySource} given a {@link VaultTemplate} and
+	 * {@code path} inside of Vault. This property source loads properties upon
+	 * construction.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
-	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not be empty or {@literal null}.
+	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
+	 * be empty or {@literal null}.
 	 */
 	public VaultPropertySource(VaultOperations vaultOperations, String path) {
 		this(path, vaultOperations, path);
 	}
 
 	/**
-	 * Create a new {@link VaultPropertySource} given a {@code name}, {@link VaultTemplate} and {@code path} inside of
-	 * Vault. This property source loads properties upon construction.
+	 * Create a new {@link VaultPropertySource} given a {@code name},
+	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
+	 * properties upon construction.
 	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
-	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not be empty or {@literal null}.
+	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
+	 * be empty or {@literal null}.
 	 */
 	public VaultPropertySource(String name, VaultOperations vaultOperations, String path) {
 
@@ -116,7 +123,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	}
 
 	/**
-	 * Utility method converting a {@code String/Object} map to a {@code String/String} map.
+	 * Utility method converting a {@code String/Object} map to a {@code String/String}
+	 * map.
 	 * 
 	 * @param data the map
 	 * @return

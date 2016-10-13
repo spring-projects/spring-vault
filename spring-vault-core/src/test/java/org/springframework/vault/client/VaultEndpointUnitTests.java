@@ -15,11 +15,11 @@
  */
 package org.springframework.vault.client;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.net.URI;
 
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link VaultEndpoint}.

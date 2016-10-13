@@ -17,15 +17,15 @@ package org.springframework.vault.support;
 
 import java.util.Map;
 
-import org.springframework.util.Assert;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import org.springframework.util.Assert;
 
 /**
  * Value object to bind Vault HTTP Mount API requests/responses.
  * <p>
- * A {@link VaultMount} represents an auth or secret mount with its config details. Instances of this class are
- * immutable once constructed.
+ * A {@link VaultMount} represents an auth or secret mount with its config details.
+ * Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @see #builder()
@@ -47,7 +47,8 @@ public class VaultMount {
 	 */
 	private final Map<String, Object> config;
 
-	private VaultMount(@JsonProperty("type") String type, @JsonProperty("description") String description,
+	private VaultMount(@JsonProperty("type") String type,
+			@JsonProperty("description") String description,
 			@JsonProperty("config") Map<String, Object> config) {
 		this.type = type;
 		this.description = description;
@@ -103,7 +104,8 @@ public class VaultMount {
 
 		private Map<String, Object> config;
 
-		VaultMountBuilder() {}
+		VaultMountBuilder() {
+		}
 
 		/**
 		 * Configure the backend type.
@@ -142,7 +144,8 @@ public class VaultMount {
 		}
 
 		/**
-		 * Build a new {@link VaultMount} instance. Requires {@link #type(String)} to be configured.
+		 * Build a new {@link VaultMount} instance. Requires {@link #type(String)} to be
+		 * configured.
 		 *
 		 * @return a new {@link VaultMount}.
 		 */

@@ -20,8 +20,9 @@ import org.springframework.util.Assert;
 /**
  * Authentication options for {@link AppIdAuthentication}.
  * <p>
- * Authentication options provide the path, appId and a {@link AppIdUserIdMechanism}. {@link AppIdAuthentication} can be
- * constructed using {@link #builder()}. Instances of this class are immutable once constructed.
+ * Authentication options provide the path, appId and a {@link AppIdUserIdMechanism}.
+ * {@link AppIdAuthentication} can be constructed using {@link #builder()}. Instances of
+ * this class are immutable once constructed.
  * 
  * @author Mark Paluch
  * @see AppIdAuthentication
@@ -47,7 +48,8 @@ public class AppIdAuthenticationOptions {
 	 */
 	private final AppIdUserIdMechanism userIdMechanism;
 
-	private AppIdAuthenticationOptions(String path, String appId, AppIdUserIdMechanism userIdMechanism) {
+	private AppIdAuthenticationOptions(String path, String appId,
+			AppIdUserIdMechanism userIdMechanism) {
 
 		this.path = path;
 		this.appId = appId;
@@ -93,7 +95,8 @@ public class AppIdAuthenticationOptions {
 
 		private AppIdUserIdMechanism userIdMechanism;
 
-		AppIdAuthenticationOptionsBuilder() {}
+		AppIdAuthenticationOptionsBuilder() {
+		}
 
 		/**
 		 * Configure the mount path.
@@ -130,7 +133,8 @@ public class AppIdAuthenticationOptions {
 		 * @param userIdMechanism must not be {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
 		 */
-		public AppIdAuthenticationOptionsBuilder userIdMechanism(AppIdUserIdMechanism userIdMechanism) {
+		public AppIdAuthenticationOptionsBuilder userIdMechanism(
+				AppIdUserIdMechanism userIdMechanism) {
 
 			Assert.notNull(userIdMechanism, "AppIdUserIdMechanism must not be null");
 
@@ -139,8 +143,8 @@ public class AppIdAuthenticationOptions {
 		}
 
 		/**
-		 * Build a new {@link AppIdAuthenticationOptions} instance. Requires {@link #userIdMechanism(AppIdUserIdMechanism)}
-		 * to be configured.
+		 * Build a new {@link AppIdAuthenticationOptions} instance. Requires
+		 * {@link #userIdMechanism(AppIdUserIdMechanism)} to be configured.
 		 * 
 		 * @return a new {@link AppIdAuthenticationOptions}.
 		 */

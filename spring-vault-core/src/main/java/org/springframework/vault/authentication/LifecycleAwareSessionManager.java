@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
@@ -36,15 +37,18 @@ import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * Lifecycle-aware Session Manager. This {@link SessionManager} obtains tokens from a {@link ClientAuthentication} upon
- * {@link #getSessionToken() request}. Tokens are renewed asynchronously if a token has a lease duration. This happens 5
- * seconds before the token expires, see {@link #REFRESH_PERIOD_BEFORE_EXPIRY}.
+ * Lifecycle-aware Session Manager. This {@link SessionManager} obtains tokens from a
+ * {@link ClientAuthentication} upon {@link #getSessionToken() request}. Tokens are
+ * renewed asynchronously if a token has a lease duration. This happens 5 seconds before
+ * the token expires, see {@link #REFRESH_PERIOD_BEFORE_EXPIRY}.
  * <p>
- * This {@link SessionManager} also implements {@link DisposableBean} to revoke the {@link LoginToken} once it's not
- * required anymore. Token revocation will stop regular token refresh.
+ * This {@link SessionManager} also implements {@link DisposableBean} to revoke the
+ * {@link LoginToken} once it's not required anymore. Token revocation will stop regular
+ * token refresh.
  * <p>
- * If Token renewal runs into a client-side error, it assumes the token was revoked/expired and discards the token state
- * so the next attempt will lead to another login attempt.
+ * If Token renewal runs into a client-side error, it assumes the token was
+ * revoked/expired and discards the token state so the next attempt will lead to another
+ * login attempt.
  *
  * @author Mark Paluch
  * @see LoginToken
@@ -55,7 +59,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	public static final int REFRESH_PERIOD_BEFORE_EXPIRY = 5;
 
-	private final static Logger logger = LoggerFactory.getLogger(LifecycleAwareSessionManager.class);
+	private final static Logger logger = LoggerFactory
+			.getLogger(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;
 	private final VaultClient vaultClient;
@@ -65,15 +70,15 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private volatile VaultToken token;
 
 	/**
-	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication}, {@link AsyncTaskExecutor} and
-	 * {@link VaultClient}.
+	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
+	 * {@link AsyncTaskExecutor} and {@link VaultClient}.
 	 * 
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskExecutor must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, AsyncTaskExecutor taskExecutor,
-			VaultClient vaultClient) {
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
+			AsyncTaskExecutor taskExecutor, VaultClient vaultClient) {
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");
@@ -91,21 +96,24 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		this.token = null;
 
 		if (token instanceof LoginToken) {
-			VaultResponseEntity<Map> response = vaultClient.postForEntity("auth/token/revoke-self", token, null, Map.class);
+			VaultResponseEntity<Map> response = vaultClient.postForEntity(
+					"auth/token/revoke-self", token, null, Map.class);
 
 			if (!response.isSuccessful()) {
-				logger.warn("Cannot revoke VaultToken: {}", buildExceptionMessage(response));
+				logger.warn("Cannot revoke VaultToken: {}",
+						buildExceptionMessage(response));
 			}
 		}
 	}
 
 	/**
-	 * Performs a token refresh. Creates a new token if no token was obtained before. If a token was obtained before, it
-	 * uses self-renewal to renew the current token. Client-side errors (like permission denied) indicate the token cannot
-	 * be renewed because it's expired or simply not found.
+	 * Performs a token refresh. Creates a new token if no token was obtained before. If a
+	 * token was obtained before, it uses self-renewal to renew the current token.
+	 * Client-side errors (like permission denied) indicate the token cannot be renewed
+	 * because it's expired or simply not found.
 	 * 
-	 * @return {@literal true} if the refresh was successful. {@literal false} if a new token was obtained or refresh
-	 *         failed.
+	 * @return {@literal true} if the refresh was successful. {@literal false} if a new
+	 * token was obtained or refresh failed.
 	 */
 	protected boolean renewToken() {
 
@@ -116,12 +124,14 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			return false;
 		}
 
-		VaultResponseEntity<Map> response = vaultClient.postForEntity("auth/token/renew-self", token, null, Map.class);
+		VaultResponseEntity<Map> response = vaultClient.postForEntity(
+				"auth/token/renew-self", token, null, Map.class);
 
 		if (!response.isSuccessful()) {
 
 			if (response.getStatusCode().is4xxClientError()) {
-				logger.debug("Cannot refresh token, resetting token and performing re-login: {}",
+				logger.debug(
+						"Cannot refresh token, resetting token and performing re-login: {}",
 						buildExceptionMessage(response));
 				token = null;
 				return false;
@@ -169,19 +179,23 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		logger.info("Scheduling Token renewal");
 
 		LoginToken loginToken = (LoginToken) token;
-		final int seconds = NumberUtils.convertNumberToTargetClass(
-				Math.max(1, loginToken.getLeaseDuration() - REFRESH_PERIOD_BEFORE_EXPIRY), Integer.class);
+		final int seconds = NumberUtils
+				.convertNumberToTargetClass(
+						Math.max(1, loginToken.getLeaseDuration()
+								- REFRESH_PERIOD_BEFORE_EXPIRY), Integer.class);
 
 		final Runnable task = new Runnable() {
 			@Override
 			public void run() {
 				try {
-					if (LifecycleAwareSessionManager.this.token != null && isTokenRenewable()) {
+					if (LifecycleAwareSessionManager.this.token != null
+							&& isTokenRenewable()) {
 						if (renewToken()) {
 							scheduleRenewal();
 						}
 					}
-				} catch (Exception e) {
+				}
+				catch (Exception e) {
 					logger.error("Cannot renew VaultToken", e);
 				}
 			}
@@ -196,12 +210,15 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			@Override
 			public void run() {
 				try {
-					// TODO: Revisit this approach since it blocks a thread. Spinning up a managed
-					// TaskScheduler just for once-in-a-while token renewal seemed a bit over-sophisticated
+					// TODO: Revisit this approach since it blocks a thread. Spinning up a
+					// managed
+					// TaskScheduler just for once-in-a-while token renewal seemed a bit
+					// over-sophisticated
 					// that's why we emulate a scheduler by blocking a Thread resource
 					Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
 					task.run();
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 				}
 			}
@@ -215,14 +232,17 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
 
 		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(), response.getUri(), response.getMessage());
+			return String.format("Status %s URI %s: %s", response.getStatusCode(),
+					response.getUri(), response.getMessage());
 		}
 
-		return String.format("Status %s URI %s", response.getStatusCode(), response.getUri());
+		return String.format("Status %s URI %s", response.getStatusCode(),
+				response.getUri());
 	}
 
 	/**
-	 * This one-shot trigger creates only one execution time to trigger an execution only once.
+	 * This one-shot trigger creates only one execution time to trigger an execution only
+	 * once.
 	 */
 	private static class OneShotTrigger implements Trigger {
 
@@ -237,7 +257,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (fired.compareAndSet(false, true)) {
-				return new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(seconds));
+				return new Date(System.currentTimeMillis()
+						+ TimeUnit.SECONDS.toMillis(seconds));
 			}
 
 			return null;

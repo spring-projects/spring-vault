@@ -21,8 +21,8 @@ import org.springframework.vault.support.VaultToken;
 /**
  * Authentication options for {@link CubbyholeAuthentication}.
  * <p>
- * Authentication options provide the path below cubbyhole and the cubbyhole mode. Instances of this class are immutable
- * once constructed.
+ * Authentication options provide the path below cubbyhole and the cubbyhole mode.
+ * Instances of this class are immutable once constructed.
  * 
  * @author Mark Paluch
  * @see CubbyholeAuthentication
@@ -45,7 +45,8 @@ public class CubbyholeAuthenticationOptions {
 	 */
 	private final boolean wrappedToken;
 
-	private CubbyholeAuthenticationOptions(VaultToken initialToken, String path, boolean wrappedToken) {
+	private CubbyholeAuthenticationOptions(VaultToken initialToken, String path,
+			boolean wrappedToken) {
 
 		this.initialToken = initialToken;
 		this.path = path;
@@ -74,8 +75,9 @@ public class CubbyholeAuthenticationOptions {
 	}
 
 	/**
-	 * @return {@literal true} indicates that the Cubbyhole response contains a wrapped token, otherwise {@literal false}
-	 *         to expect a token in the {@literal data} response.
+	 * @return {@literal true} indicates that the Cubbyhole response contains a wrapped
+	 * token, otherwise {@literal false} to expect a token in the {@literal data}
+	 * response.
 	 */
 	public boolean isWrappedToken() {
 		return wrappedToken;
@@ -92,7 +94,8 @@ public class CubbyholeAuthenticationOptions {
 
 		private boolean wrappedToken;
 
-		CubbyholeAuthenticationOptionsBuilder() {}
+		CubbyholeAuthenticationOptionsBuilder() {
+		}
 
 		/**
 		 * Configure the initial {@link VaultToken} to access Cubbyhole.
@@ -109,7 +112,8 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
-		 * Configure the cubbyhole path, such as {@code cubbyhole/token}. Expects a token in the {@code data} response.
+		 * Configure the cubbyhole path, such as {@code cubbyhole/token}. Expects a token
+		 * in the {@code data} response.
 		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
@@ -135,8 +139,8 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
-		 * Build a new {@link CubbyholeAuthenticationOptions} instance. Requires {@link #path(String)} or
-		 * {@link #wrapped()} to be configured.
+		 * Build a new {@link CubbyholeAuthenticationOptions} instance. Requires
+		 * {@link #path(String)} or {@link #wrapped()} to be configured.
 		 * 
 		 * @return a new {@link CubbyholeAuthenticationOptions}.
 		 */

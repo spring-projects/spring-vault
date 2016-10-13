@@ -32,9 +32,10 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Factory for {@link RestTemplate}. The template caches the {@link ClientHttpRequestFactory} once it was initialized.
- * Changes to timeouts or the SSL configuration won't be applied once a {@link ClientHttpRequestFactory} was created for
- * the first time.
+ * Factory for {@link RestTemplate}. The template caches the
+ * {@link ClientHttpRequestFactory} once it was initialized. Changes to timeouts or the
+ * SSL configuration won't be applied once a {@link ClientHttpRequestFactory} was created
+ * for the first time.
  * 
  * @author Mark Paluch
  */
@@ -43,9 +44,10 @@ public class TestRestTemplateFactory {
 	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
 
 	/**
-	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The underlying
-	 * {@link ClientHttpRequestFactory} is cached. See {@link #create(ClientHttpRequestFactory)} to create
-	 * {@link RestTemplate} for a given {@link ClientHttpRequestFactory}.
+	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The
+	 * underlying {@link ClientHttpRequestFactory} is cached. See
+	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
+	 * given {@link ClientHttpRequestFactory}.
 	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
@@ -57,15 +59,18 @@ public class TestRestTemplateFactory {
 		try {
 			initializeClientHttpRequestFactory(sslConfiguration);
 			return create(factoryCache.get());
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	/**
-	 * Create a new {@link RestTemplate} using the {@link ClientHttpRequestFactory}. The {@link RestTemplate} will throw
-	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error cases and behave in that aspect
-	 * like the regular {@link org.springframework.web.client.RestTemplate}.
+	 * Create a new {@link RestTemplate} using the {@link ClientHttpRequestFactory}. The
+	 * {@link RestTemplate} will throw
+	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
+	 * cases and behave in that aspect like the regular
+	 * {@link org.springframework.web.client.RestTemplate}.
 	 *
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
@@ -78,8 +83,8 @@ public class TestRestTemplateFactory {
 		template.setRequestFactory(requestFactory);
 		template.getInterceptors().add(new ClientHttpRequestInterceptor() {
 			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
-					throws IOException {
+			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
+					ClientHttpRequestExecution execution) throws IOException {
 				return execution.execute(request, body);
 			}
 		});
@@ -87,7 +92,8 @@ public class TestRestTemplateFactory {
 		return template;
 	}
 
-	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {
+	private static void initializeClientHttpRequestFactory(
+			SslConfiguration sslConfiguration) throws Exception {
 
 		if (factoryCache.get() != null) {
 			return;
@@ -104,17 +110,19 @@ public class TestRestTemplateFactory {
 
 			if (clientHttpRequestFactory instanceof DisposableBean) {
 
-				Runtime.getRuntime().addShutdownHook(new Thread("ClientHttpRequestFactory Shutdown Hook") {
+				Runtime.getRuntime().addShutdownHook(
+						new Thread("ClientHttpRequestFactory Shutdown Hook") {
 
-					@Override
-					public void run() {
-						try {
-							((DisposableBean) clientHttpRequestFactory).destroy();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
+							@Override
+							public void run() {
+								try {
+									((DisposableBean) clientHttpRequestFactory).destroy();
+								}
+								catch (Exception e) {
+									e.printStackTrace();
+								}
+							}
+						});
 			}
 		}
 	}

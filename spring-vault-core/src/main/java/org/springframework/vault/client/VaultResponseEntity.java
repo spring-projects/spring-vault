@@ -20,8 +20,9 @@ import java.net.URI;
 import org.springframework.http.HttpStatus;
 
 /**
- * Encapsulates the client response used in {@link VaultAccessor}. Consists of the body, status code the location and a
- * message. The {@code body} is empty for all non-successful results. This class is immutable.
+ * Encapsulates the client response used in {@link VaultAccessor}. Consists of the body,
+ * status code the location and a message. The {@code body} is empty for all
+ * non-successful results. This class is immutable.
  *
  * @author Mark Paluch
  */
@@ -78,8 +79,8 @@ public class VaultResponseEntity<T> {
 	}
 
 	/**
-	 * @return the message of this entity. {@literal null} for successful responses but provided usually when the response
-	 *         yielded an error.
+	 * @return the message of this entity. {@literal null} for successful responses but
+	 * provided usually when the response yielded an error.
 	 */
 	public String getMessage() {
 		return message;

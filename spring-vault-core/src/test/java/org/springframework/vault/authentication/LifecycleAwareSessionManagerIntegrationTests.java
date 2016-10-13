@@ -15,12 +15,11 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
+
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +29,8 @@ import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link LifecycleAwareSessionManager}.
@@ -46,8 +47,8 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication, taskExecutor,
-				prepare().getVaultClient());
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
+				tokenAuthentication, taskExecutor, prepare().getVaultClient());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -56,7 +57,8 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 	@Test
 	public void shouldRenewToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
+				.opsForToken();
 
 		VaultTokenRequest tokenRequest = new VaultTokenRequest();
 		tokenRequest.setRenewable(true);
@@ -65,11 +67,12 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 
-		TokenAuthentication tokenAuthentication = new TokenAuthentication(LoginToken.renewable(token.getToken(), 0));
+		TokenAuthentication tokenAuthentication = new TokenAuthentication(
+				LoginToken.renewable(token.getToken(), 0));
 
 		final AtomicInteger counter = new AtomicInteger();
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication, taskExecutor,
-				prepare().getVaultClient()) {
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
+				tokenAuthentication, taskExecutor, prepare().getVaultClient()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -90,30 +93,34 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		final LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication, taskExecutor,
-				prepare().getVaultClient());
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
+				tokenAuthentication, taskExecutor, prepare().getVaultClient());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
 
-		prepare().getVaultOperations().doWithVault(new VaultOperations.SessionCallback<Object>() {
+		prepare().getVaultOperations().doWithVault(
+				new VaultOperations.SessionCallback<Object>() {
 
-			@Override
-			public Object doWithVault(VaultOperations.VaultSession session) {
+					@Override
+					public Object doWithVault(VaultOperations.VaultSession session) {
 
-				VaultResponseEntity<Map> entity = session
-						.getForEntity(String.format("auth/token/lookup/%s", loginToken.getToken()), Map.class);
+						VaultResponseEntity<Map> entity = session.getForEntity(
+								String.format("auth/token/lookup/%s",
+										loginToken.getToken()), Map.class);
 
-				// Compatibility across Vault versions.
-				assertThat(entity.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
-				return null;
-			}
-		});
+						// Compatibility across Vault versions.
+						assertThat(entity.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+								HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+						return null;
+					}
+				});
 	}
 
 	private LoginToken createLoginToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
+				.opsForToken();
 		VaultToken token = tokenOperations.createOrphan().getToken();
 
 		return LoginToken.of(token.getToken());

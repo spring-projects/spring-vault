@@ -15,8 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import static org.springframework.vault.util.Settings.*;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -26,7 +24,10 @@ import java.util.Map;
 import org.assertj.core.util.Files;
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
  * Integration test to request certificates from the Vault PKI backend.
@@ -47,12 +48,15 @@ public class PkiSecretIntegrationTests extends IntegrationTestSupport {
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
 
-		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), StandardCharsets.US_ASCII);
-
-		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"),
+		String cert = Files.contentOf(
+				new File(workDir, "ca/certs/intermediate.cert.pem"),
 				StandardCharsets.US_ASCII);
 
-		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key);
+		String key = Files.contentOf(new File(workDir,
+				"ca/private/intermediate.decrypted.key.pem"), StandardCharsets.US_ASCII);
+
+		Map<String, String> pembundle = Collections
+				.singletonMap("pem_bundle", cert + key);
 
 		VaultOperations vaultOperations = prepare().getVaultOperations();
 		vaultOperations.write("pki/config/ca", pembundle);

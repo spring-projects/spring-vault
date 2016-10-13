@@ -37,13 +37,17 @@ public class VaultResponseSupport<T> {
 
 	private Map<String, String> metadata;
 
-	@JsonProperty("wrap_info") private Map<String, String> wrapInfo;
+	@JsonProperty("wrap_info")
+	private Map<String, String> wrapInfo;
 
-	@JsonProperty("lease_duration") private long leaseDuration;
+	@JsonProperty("lease_duration")
+	private long leaseDuration;
 
-	@JsonProperty("lease_id") private String leaseId;
+	@JsonProperty("lease_id")
+	private String leaseId;
 
-	@JsonProperty("request_id") private String requestId;
+	@JsonProperty("request_id")
+	private String requestId;
 
 	private boolean renewable;
 

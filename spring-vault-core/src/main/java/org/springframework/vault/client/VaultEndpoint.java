@@ -18,14 +18,15 @@ package org.springframework.vault.client;
 import java.io.Serializable;
 import java.net.URI;
 
-import org.springframework.util.Assert;
-
 import lombok.EqualsAndHashCode;
+
+import org.springframework.util.Assert;
 
 /**
  * Value object that defines Vault connection coordinates.
  * <p>
- * A {@link VaultEndpoint} defines the hostname, TCP port and the protocol scheme (HTTP or HTTPS).
+ * A {@link VaultEndpoint} defines the hostname, TCP port and the protocol scheme (HTTP or
+ * HTTPS).
  * 
  * @author Mark Paluch
  */
@@ -71,7 +72,8 @@ public class VaultEndpoint implements Serializable {
 	/**
 	 * Create a {@link VaultEndpoint} given a {@link URI}.
 	 *
-	 * @param uri must contain hostname, port and scheme, must not be empty or {@literal null}.
+	 * @param uri must contain hostname, port and scheme, must not be empty or
+	 * {@literal null}.
 	 * @return a new {@link VaultEndpoint}.
 	 */
 	public static VaultEndpoint from(URI uri) {
@@ -117,7 +119,8 @@ public class VaultEndpoint implements Serializable {
 	 */
 	public void setPort(int port) {
 
-		Assert.isTrue(port >= 1 && port <= 65535, "Port must be a valid port in the range between 1 and 65535");
+		Assert.isTrue(port >= 1 && port <= 65535,
+				"Port must be a valid port in the range between 1 and 65535");
 
 		this.port = port;
 	}
@@ -134,7 +137,8 @@ public class VaultEndpoint implements Serializable {
 	 */
 	public void setScheme(String scheme) {
 
-		Assert.isTrue("http".equals(scheme) || "https".equals(scheme), "Scheme must be http or https");
+		Assert.isTrue("http".equals(scheme) || "https".equals(scheme),
+				"Scheme must be http or https");
 
 		this.scheme = scheme;
 	}
@@ -159,7 +163,8 @@ public class VaultEndpoint implements Serializable {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(), API_VERSION, path);
+		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(),
+				API_VERSION, path);
 	}
 
 	@Override

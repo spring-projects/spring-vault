@@ -30,7 +30,8 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
- * Vault preparation utility class. This class allows preparing Vault for integration tests.
+ * Vault preparation utility class. This class allows preparing Vault for integration
+ * tests.
  * 
  * @author Mark Paluch
  */
@@ -59,12 +60,13 @@ public class PrepareVault {
 		int createKeys = 2;
 		int requiredKeys = 2;
 
-		VaultInitializationResponse initialized = vaultOperations.opsForSys()
-				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
+		VaultInitializationResponse initialized = vaultOperations.opsForSys().initialize(
+				VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 
-			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys().unseal(initialized.getKeys().get(i));
+			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys().unseal(
+					initialized.getKeys().get(i));
 
 			if (!unsealStatus.isSealed()) {
 				break;
@@ -90,7 +92,8 @@ public class PrepareVault {
 			tokenRequest.setPolicies(Collections.singletonList(policy));
 		}
 
-		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken().create(tokenRequest);
+		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken().create(
+				tokenRequest);
 		return vaultTokenResponse.getToken();
 	}
 

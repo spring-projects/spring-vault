@@ -47,16 +47,18 @@ class Sha256 {
 	}
 
 	/**
-	 * Get a MessageDigest instance for the given algorithm. Throws an IllegalArgumentException if <i>algorithm</i> is
-	 * unknown
+	 * Get a MessageDigest instance for the given algorithm. Throws an
+	 * IllegalArgumentException if <i>algorithm</i> is unknown
 	 *
 	 * @return MessageDigest instance
 	 * @throws IllegalArgumentException if NoSuchAlgorithmException is thrown
 	 */
-	private static MessageDigest getMessageDigest(String algorithm) throws IllegalArgumentException {
+	private static MessageDigest getMessageDigest(String algorithm)
+			throws IllegalArgumentException {
 		try {
 			return MessageDigest.getInstance(algorithm);
-		} catch (NoSuchAlgorithmException e) {
+		}
+		catch (NoSuchAlgorithmException e) {
 			throw new IllegalArgumentException("No such algorithm [" + algorithm + "]");
 		}
 	}

@@ -24,7 +24,8 @@ import org.junit.Rule;
  */
 public abstract class IntegrationTestSupport {
 
-	@Rule public final VaultRule vaultRule = new VaultRule();
+	@Rule
+	public final VaultRule vaultRule = new VaultRule();
 
 	public final PrepareVault prepare() {
 		return vaultRule.prepare();

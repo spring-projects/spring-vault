@@ -15,12 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -29,6 +26,13 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link AppIdAuthentication}.
@@ -51,18 +55,24 @@ public class AppIdAuthenticationUnitTests {
 	@Test
 	public void loginShouldObtainTokenWithStaticUserId() throws Exception {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("hello") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+				.appId("hello") //
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/app-id/login")) //
-				.andExpect(method(HttpMethod.POST)) //
-				.andExpect(jsonPath("$.app_id").value("hello")) //
-				.andExpect(jsonPath("$.user_id").value("world")) //
+		mockRest.expect(requestTo("https://localhost:8200/v1/auth/app-id/login"))
+				//
+				.andExpect(method(HttpMethod.POST))
+				//
+				.andExpect(jsonPath("$.app_id").value("hello"))
+				//
+				.andExpect(jsonPath("$.user_id").value("world"))
+				//
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options, vaultClient);
+		AppIdAuthentication authentication = new AppIdAuthentication(options,
+				vaultClient);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -72,7 +82,8 @@ public class AppIdAuthenticationUnitTests {
 	@Test(expected = VaultException.class)
 	public void loginShouldFail() throws Exception {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("hello") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+				.appId("hello") //
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
