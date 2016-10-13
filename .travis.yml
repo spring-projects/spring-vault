@@ -10,6 +10,9 @@ env:
     - VAULT_VER=0.6.1
     - VAULT_VER=0.6.2
 
+before_install:
+  - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
+
 install:
   - src/test/bash/start.sh
 
