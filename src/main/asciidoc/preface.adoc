@@ -21,7 +21,7 @@ To learn more about Spring, you can refer to the comprehensive (and sometimes di
 
 Security and working with secrets is a concern of every developer working with databases, user credentials or API keys. Vault steps in by providing a secure storage combined with access control, revocation, key rolling and auditing. In short: Vault is a service for securely accessing and storing  secrets. A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more.
 
-The jumping off ground for learning about Vault is www.vaultproject.io. Here is a list of useful resources:
+The jumping off ground for learning about Vault is https://www.vaultproject.io[www.vaultproject.io]. Here is a list of useful resources:
 
 * The manual introduces Vault and contains links to getting started guides, reference documentation and tutorials.
 
@@ -34,7 +34,7 @@ The jumping off ground for learning about Vault is www.vaultproject.io. Here is 
 [[requirements]]
 == Requirements
 
-Spring Vault 1.x binaries requires JDK level 6.0 and above, and http://spring.io/docs[Spring Framework] {springVersion} and above.
+Spring Vault 1.x binaries requires JDK level 6.0 and above, and http://spring.io/docs[Spring Framework] {springVersion} and above. While we maintain Java 6 compatibility, new projects should consider using Java 8  .
 
 In terms of Vault, https://www.vaultproject.io/[Vault] at least 0.5.
 
@@ -50,7 +50,7 @@ There are a few support options available:
 [[get-started:help:community]]
 ==== Community Forum
 
-Spring Vault on Stackoverflow http://stackoverflow.com/questions/tagged/spring-vault[Stackoverflow] is a tag for all Spring Vault users to share information and help each other. Note that registration is needed *only* for posting.
+Post questions questions regarding Spring Vault on http://stackoverflow.com/questions/tagged/spring-vault[Stackoverflow] to share information and help each other. Note that registration is needed *only* for posting.
 
 [[get-started:help:professional]]
 ==== Professional Support

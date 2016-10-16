@@ -45,12 +45,25 @@ You will also need to add the location of the Spring Milestone repository for ma
 
 The repository is also http://repo.spring.io/milestone/org/springframework/vault/[browseable here].
 
-You may also want to set the logging level to `DEBUG` to see some additional information, edit the log4j.properties file to have
+You may also want to set the logging level to `DEBUG` to see some additional information, edit the `logback.xml` file to have
 
 [source]
 ----
-log4j.category.org.springframework.vault=DEBUG
-log4j.appender.stdout.layout.ConversionPattern=%d{ABSOLUTE} %5p %40.40c:%4L - %m%n
+<configuration>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d %5p %40.40c:%4L - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework.vault" level="debug" />
+
+    <root level="info">
+        <appender-ref ref="console" />
+    </root>
+
+</configuration>
 ----
 Create a simple `Secrets` class to persist:
 
@@ -115,17 +128,19 @@ Even in this simple example, there are few things to take notice of
 
 * You can instantiate the central helper class of Spring Vault,
 <<vault-template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultClient`
- object and the `ClientAuthentication`.
+object and the `ClientAuthentication`.
+* Vault is expected to be configured with a root token of
+`00000000-0000-0000-0000-000000000000` to run this application.
 * The mapper works against standard POJO objects without the need for any
 additional metadata (though you can optionally provide that information).
 * Mapping conventions can use field access. Notice the `Secrets` class has only getters.
 * If the constructor argument names match the field names of the stored document,
-they will be used to instantiate the object
+they will be used to instantiate the object.
 
 [[vault.core.connection]]
 == Connecting to Vault with Spring
 
-One of the first tasks when using Vault and Spring is to create a `org.springframework.vault.client.VaultClient` object using the IoC container.
+One of the first tasks when using Vault and Spring is to create a `org.springframework.vault.client.VaultClient` object using the IoC container. This is useful to use `VaultOperations` from different places inside of your code. Using Spring Vault with bean management ensures a consistent session management where the session is disposed as your application terminates.
 
 [[vault.core.vault-java-config]]
 === Registering a Vault instance using Java based metadata
