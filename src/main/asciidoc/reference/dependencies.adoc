@@ -5,14 +5,14 @@ The easiest way to find compatible versions of Spring Vault dependencies is by r
 
 .Using the Spring Vault BOM
 ====
-[source, xml]
+[source, xml, subs="verbatim,attributes"]
 ----
 <dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.springframework.vault</groupId>
       <artifactId>spring-vault-dependencies</artifactId>
-      <version>${version}</version>
+      <version>{version}</version>
       <scope>import</scope>
       <type>pom</type>
     </dependency>

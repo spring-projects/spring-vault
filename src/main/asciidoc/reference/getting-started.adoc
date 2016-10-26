@@ -12,7 +12,7 @@ Then add the following to `pom.xml` dependencies section.
 
 .Using the Spring Vault BOM
 ====
-[source,xml]
+[source,xml,subs="verbatim,attributes"]
 ----
 <dependencies>
 
