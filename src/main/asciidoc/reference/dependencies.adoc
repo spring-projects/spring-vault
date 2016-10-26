@@ -39,7 +39,7 @@ The current version is `{version}`. The version name follows the following patte
     <groupId>org.springframework.vault</groupId>
     <artifactId>spring-vault-core</artifactId>
   </dependency>
-<dependencies>
+</dependencies>
 ----
 ====
 
