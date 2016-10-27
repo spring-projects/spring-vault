@@ -22,4 +22,3 @@ include::getting-started.adoc[]
 include::client-support.adoc[]
 
 include::authentication.adoc[]
-

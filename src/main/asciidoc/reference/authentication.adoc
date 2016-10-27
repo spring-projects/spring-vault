@@ -41,6 +41,7 @@ NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultProp
 See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`] 
 for a sample on referencing properties in components and other property sources.
 
+[[vault.authentication.token]]
 == Token authentication
 
 Tokens are the core method for authentication within Vault.
@@ -184,6 +185,7 @@ public class MyUserIdMechanism implements AppIdUserIdMechanism {
 
 See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
 
+[[vault.authentication.approle]]
 == AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] allows machine
@@ -222,6 +224,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
 
+[[vault.authentication.awsec2]]
 == AWS-EC2 authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
@@ -271,6 +274,7 @@ it in `AwsEc2AuthenticationOptions`.
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the AWS-EC2 auth backend]
 
+[[vault.authentication.clientcert]]
 == TLS certificate authentication
 
 The `cert` auth backend allows authentication using SSL/TLS client
@@ -302,6 +306,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
 
+[[vault.authentication.cubbyhole]]
 == Cubbyhole authentication
 
 Cubbyhole authentication uses Vault primitives to provide a secured authentication

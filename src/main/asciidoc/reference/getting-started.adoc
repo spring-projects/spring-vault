@@ -2,14 +2,14 @@
 === Getting Started
 
 Spring Vault support requires Vault 0.5 or higher and Java SE 6 or higher.
-An easy way to bootstrap setting up a working environment is to create a 
+An easy way to bootstrap setting up a working environment is to create a
 Spring based project in http://spring.io/tools/sts[STS].
 
-First you need to set up a running Vault server. 
+First you need to set up a running Vault server.
 Refer to the https://www.vaultproject.io/intro/[Vault] for an explanation on how to startup a Vault instance.
 
-To create a Spring project in STS go to File -> New -> 
-Spring Template Project -> Simple Spring Utility Project -> 
+To create a Spring project in STS go to File -> New ->
+Spring Template Project -> Simple Spring Utility Project ->
 press Yes when prompted. Then enter a project and a package name such as `org.spring.vault.example`.
 
 Then add the following to `pom.xml` dependencies section.
@@ -20,30 +20,30 @@ Then add the following to `pom.xml` dependencies section.
 ----
 <dependencies>
 
-  <!-- other dependency elements omitted -->
+    <!-- other dependency elements omitted -->
 
-  <dependency>
-    <groupId>org.springframework.vault</groupId>
-    <artifactId>spring-vault-core</artifactId>
-    <version>{version}</version>
-  </dependency>
+    <dependency>
+        <groupId>org.springframework.vault</groupId>
+        <artifactId>spring-vault-core</artifactId>
+        <version>{version}</version>
+    </dependency>
 
 </dependencies>
 ----
 ====
 
-You will also need to add the location of the Spring Milestone repository for maven to your 
+You will also need to add the location of the Spring Milestone repository for maven to your
 `pom.xml` which is at the same level of your `<dependencies/>` element.
 
 ====
 [source,xml]
 ----
 <repositories>
-  <repository>
-    <id>spring-milestone</id>
-    <name>Spring Maven MILESTONE Repository</name>
-    <url>http://repo.spring.io/libs-milestone</url>
-  </repository>
+    <repository>
+        <id>spring-milestone</id>
+        <name>Spring Maven MILESTONE Repository</name>
+        <url>http://repo.spring.io/libs-milestone</url>
+    </repository>
 </repositories>
 ----
 ====
@@ -113,7 +113,7 @@ Even in this simple example, there are few things to take notice of
 
 * You can instantiate the central class of Spring Vault,
 <<vault-template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultClient`
-object and the `ClientAuthentication`. 
+object and the `ClientAuthentication`.
 You are not required to spin up a Spring Context to use Spring Vault.
 * Vault is expected to be configured with a root token of
 `00000000-0000-0000-0000-000000000000` to run this application.
@@ -132,7 +132,7 @@ is the central class of the Spring's Vault support providing a rich feature set 
 interact with Vault. The template offers convenience operations to read, write and
 delete data in Vault and provides a mapping between your domain objects and Vault data.
 
-NOTE: Once configured, `VaultTemplate` is thread-safe and can be reused across 
+NOTE: Once configured, `VaultTemplate` is thread-safe and can be reused across
 multiple instances.
 
 The mapping between Vault documents and domain classes is done by delegating to
@@ -145,17 +145,17 @@ who are used to the API and CLI. For example, you will find methods such as
 "write", "delete", "read", and "revoke".
 The design goal was to make it as easy as possible to transition between
 the use of the Vault API and `VaultOperations`. A major difference in between
-the two APIs is that `VaultOperations` can be passed domain objects instead of 
+the two APIs is that `VaultOperations` can be passed domain objects instead of
 JSON Key-Value pairs.
 
-NOTE: The preferred way to reference the operations on `VaultTemplate` instance 
+NOTE: The preferred way to reference the operations on `VaultTemplate` instance
 is via its interface `VaultOperations`.
 
 While there are many convenience methods on `VaultTemplate` to help you easily
 perform common tasks if you should need to access the Vault API directly to access
 functionality not explicitly exposed by the `VaultTemplate` you can use one of
 several execute callback methods to access underlying APIs. The execute callbacks
-will give you a reference to either a `RestTemplate` or a `VaultClient` object. 
+will give you a reference to either a `RestTemplate` or a `VaultClient` object.
 Please see the section <<vault.core.executioncallback,Execution Callbacks>> for more information.
 
 Now let's look at a examples of how to work with Vault in the context of the Spring container.
@@ -172,12 +172,12 @@ instances across your application.
 
 Spring Vault comes with a supporting configuration class that provides bean definitions
 for use inside a Spring context. Application configuration
-classes typically extend from `AbstractVaultConfiguration` and are required to 
+classes typically extend from `AbstractVaultConfiguration` and are required to
 provide additional details that are environment specific.
 
 Extending from `AbstractVaultConfiguration` requires to implement
 ` VaultEndpoint vaultEndpoint()` and `ClientAuthentication clientAuthentication()`
-methods. 
+methods.
 
 .Registering Spring Vault objects using Java based bean metadata
 ====
@@ -193,7 +193,7 @@ public class AppConfig extends AbstractVaultConfiguration {
     public VaultEndpoint vaultEndpoint() {
         return new VaultEndpoint();                            <1>
     }
-    
+
     /**
      * Configure a client authentication.
      * Please consider a more secure authentication method
@@ -206,7 +206,7 @@ public class AppConfig extends AbstractVaultConfiguration {
 }
 ----
 <1> Create a new `VaultEndpoint` that points by default to `https://localhost:8200`.
-<2> This sample uses `TokenAuthentication` to get started quickly. 
+<2> This sample uses `TokenAuthentication` to get started quickly.
 See <<vault.core.authentication>> for details on supported authentication methods.
 ====
 
@@ -219,7 +219,7 @@ public class AppConfig extends AbstractVaultConfiguration {
 
     @Value("${vault.uri}")
     URI vaultUri;
-    
+
     /**
      * Specify an endpoint that was injected as URI.
      */
@@ -227,9 +227,9 @@ public class AppConfig extends AbstractVaultConfiguration {
     public VaultEndpoint vaultEndpoint() {
         return VaultEndpoint.from(vaultUri);                       <1>
     }
-    
+
     /**
-     * Configure a Client Certificate authentication. 
+     * Configure a Client Certificate authentication.
      * {@link VaultClient} can be obtained from {@link #vaultClient()}.
      */
     @Override
@@ -247,18 +247,18 @@ public class AppConfig extends AbstractVaultConfiguration {
 [[vault.core.template.sessionmanagement]]
 === Session Management
 
-Spring Vault requires a `ClientAuthentication` to login and access Vault. 
-See <<vault.core.authentication>> on details regarding authentication. 
-Vault login should not occur on each authenticated Vault interaction but 
-must be reused throughout a session. This aspect is handled by a 
-`SessionManager` implementation. A `SessionManager` decides how often it 
+Spring Vault requires a `ClientAuthentication` to login and access Vault.
+See <<vault.core.authentication>> on details regarding authentication.
+Vault login should not occur on each authenticated Vault interaction but
+must be reused throughout a session. This aspect is handled by a
+`SessionManager` implementation. A `SessionManager` decides how often it
 obtains a token, about revocation and renewal. Spring Vault comes with two implementations:
 
-* `SimpleSessionManager`: Just obtains tokens from the supplied 
+* `SimpleSessionManager`: Just obtains tokens from the supplied
 `ClientAuthentication` without refresh and revocation
-* `LifecycleAwareSessionManager`: This `SessionManager` schedules token 
-renewal if a token is renewable and revoke a login token on disposal. 
-Renewal is scheduled with an `AsyncTaskExecutor`. `LifecycleAwareSessionManager` 
+* `LifecycleAwareSessionManager`: This `SessionManager` schedules token
+renewal if a token is renewable and revoke a login token on disposal.
+Renewal is scheduled with an `AsyncTaskExecutor`. `LifecycleAwareSessionManager`
 is configured by default if using `AbstractVaultConfiguration`.
 
 [[vault.client-ssl]]
@@ -295,19 +295,19 @@ is on your class-path.
 [[vault.core.propertysupport]]
 == Vault Property Source Support
 
-Vault can be used in many different ways. One specific use-case is using 
-Vault to store encrypted properties. Spring Vault supports Vault as property 
+Vault can be used in many different ways. One specific use-case is using
+Vault to store encrypted properties. Spring Vault supports Vault as property
 source to obtain configuration properties using Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction].
 
 NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A `VaultPropertySource` must be initialized at that time to retrieve properties from Vault.
-  
+
 NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud-incubator/spring-cloud-vault-config[Spring Cloud Vault]'s
 configuration integration that initializes various property sources during application startup.
 
 === Registering `VaultPropertySource`
 
-Spring Vault provides a `VaultPropertySource` to be used with Vault to obtain 
-properties. It uses the nested `data` element to expose properties stored and 
+Spring Vault provides a `VaultPropertySource` to be used with Vault to obtain
+properties. It uses the nested `data` element to expose properties stored and
 encrypted in Vault.
 
 ====
@@ -321,22 +321,22 @@ sources.addFirst(new VaultPropertySource(vaultTemplate, "secret/my-application")
 
 In the code above, `VaultPropertySource` has been added with highest precedence
 in the search. If it contains a ´foo` property, it will be detected and returned
-ahead of any `foo` property in any other `PropertySource`. 
-`MutablePropertySources` exposes a number of methods that allow for precise 
+ahead of any `foo` property in any other `PropertySource`.
+`MutablePropertySources` exposes a number of methods that allow for precise
 manipulation of the set of property sources.
 
 
 === @VaultPropertySource
 
-The `@VaultPropertySource` annotation provides a convenient and declarative 
+The `@VaultPropertySource` annotation provides a convenient and declarative
 mechanism for adding a `PropertySource` to Spring’s `Environment`.
 
 To be used in conjunction with @Configuration classes.
 Example usage
 
-Given a Vault path `secret/my-application` containing the configuration data 
-pair `database.password=mysecretpassword`, the following `@Configuration` 
-class uses `@VaultPropertySource` to contribute `secret/my-application` to 
+Given a Vault path `secret/my-application` containing the configuration data
+pair `database.password=mysecretpassword`, the following `@Configuration`
+class uses `@VaultPropertySource` to contribute `secret/my-application` to
 the `Environment`'s set of `PropertySources`.
 
 ====
@@ -358,37 +358,37 @@ public class AppConfig {
 ----
 ====
 
-In certain situations, it may not be possible or practical to tightly control 
-property source ordering when using `@VaultPropertySource` annotations. 
-For example, if the @Configuration classes above were registered via 
-component-scanning, the ordering is difficult to predict. 
-In such cases - and if overriding is important - it is recommended that the 
-user fall back to using the programmatic PropertySource API. 
-See http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and 
+In certain situations, it may not be possible or practical to tightly control
+property source ordering when using `@VaultPropertySource` annotations.
+For example, if the @Configuration classes above were registered via
+component-scanning, the ordering is difficult to predict.
+In such cases - and if overriding is important - it is recommended that the
+user fall back to using the programmatic PropertySource API.
+See http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
 http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
 
 
 [[vault.core.executioncallback]]
 == Execution callbacks
 
-One common design feature of all Spring template classes is that all functionality 
-is routed into one of the templates execute callback methods. This helps ensure 
-that exceptions and any resource management that maybe required are performed 
-consistency. While this was of much greater need in the case of JDBC and JMS 
-than with Vault, it still offers a single spot for access and logging to occur. 
-As such, using the execute callback is the preferred way to access the Vault API 
+One common design feature of all Spring template classes is that all functionality
+is routed into one of the templates execute callback methods. This helps ensure
+that exceptions and any resource management that maybe required are performed
+consistency. While this was of much greater need in the case of JDBC and JMS
+than with Vault, it still offers a single spot for access and logging to occur.
+As such, using the execute callback is the preferred way to access the Vault API
 to perform uncommon operations that we've not exposed as methods on `VaultTemplate`.
 
 Here is a list of execute callback methods.
 
-* `<T> T` *doWithVault* `(ClientCallback<T> clientCallback)` Executes the given 
+* `<T> T` *doWithVault* `(ClientCallback<T> clientCallback)` Executes the given
 `ClientCallback`, allows to interact with Vault using  `VaultClient` without requiring a session.
 
-* `<T> T` *doWithVault* `(SessionCallback<T> sessionCallback)` Executes the given 
+* `<T> T` *doWithVault* `(SessionCallback<T> sessionCallback)` Executes the given
 `SessionCallback`, allows to interact with Vault in an authenticated session.
 
-* `<T> T` *doWithRestTemplate* `(String pathTemplate, Map<String, ?> variables, RestTemplateCallback<T> callback)` 
-Expands the `pathTemplate` to an `java.net.URI` and allows low-level interaction 
+* `<T> T` *doWithRestTemplate* `(String pathTemplate, Map<String, ?> variables, RestTemplateCallback<T> callback)`
+Expands the `pathTemplate` to an `java.net.URI` and allows low-level interaction
 with the underlying `org.springframework.web.client.RestTemplate`.
 
 
