@@ -26,24 +26,17 @@ OS access levels.
 ----
 @PropertySource("configuration.properties"),
 @Configuration
-static class Config extends VaultIntegrationTestConfiguration implements
-    ApplicationContextAware {
-
-    private Environment environment;
+public class Config extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new TokenAuthentication(environment.getProperty("vault.token"));
+        return new TokenAuthentication(getEnvironment().getProperty("vault.token"));
     }
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext)
-            throws BeansException {
-        environment = applicationContext.getEnvironment();
-        }
 }
 ----
 ====
+
+NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultPropertySource`, injection via `@Autowired Environment environment` will not provide the `Environment` as the environment bean is still in construction and autowiring comes at a later stage. Your configuration class should rather implement `ApplicationContextAware` and obtain the `Environment` from `ApplicationContext`.
 
 See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`] 
 for a sample on referencing properties in components and other property sources.

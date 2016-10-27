@@ -15,10 +15,14 @@
  */
 package org.springframework.vault.config;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -41,7 +45,9 @@ import org.springframework.vault.support.SslConfiguration;
  * @author Mark Paluch
  */
 @Configuration
-public abstract class AbstractVaultConfiguration {
+public abstract class AbstractVaultConfiguration implements ApplicationContextAware {
+
+	private ApplicationContext applicationContext;
 
 	/**
 	 * @return Vault endpoint coordinates for HTTP/HTTPS communication, must not be
@@ -162,6 +168,28 @@ public abstract class AbstractVaultConfiguration {
 	@Bean
 	public VaultTemplate vaultTemplate() {
 		return new VaultTemplate(vaultClientFactory(), sessionManager());
+	}
+
+	/**
+	 * Return the {@link Environment} to access property sources during Spring Vault
+	 * bootstrapping. Requires {@link #setApplicationContext(ApplicationContext)
+	 * ApplicationContext} to be set.
+	 * 
+	 * @return the {@link Environment} to access property sources during Spring Vault
+	 * bootstrapping.
+	 */
+	protected Environment getEnvironment() {
+
+		Assert.state(applicationContext != null,
+				"ApplicationContext must be set before accessing getEnvironment()");
+
+		return applicationContext.getEnvironment();
+	}
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext)
+			throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 	/**

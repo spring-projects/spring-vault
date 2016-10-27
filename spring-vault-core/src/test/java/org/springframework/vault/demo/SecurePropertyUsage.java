@@ -18,16 +18,12 @@ package org.springframework.vault.demo;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.vault.annotation.VaultPropertySource;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -82,20 +78,11 @@ public class SecurePropertyUsage {
 	@VaultPropertySource({ "secret/secure-introduction" })
 	@Configuration
 	@ComponentScan
-	static class Config extends VaultIntegrationTestConfiguration implements
-			ApplicationContextAware {
-
-		private Environment environment;
+	static class Config extends VaultIntegrationTestConfiguration {
 
 		@Override
 		public ClientAuthentication clientAuthentication() {
-			return new TokenAuthentication(environment.getProperty("vault.token"));
-		}
-
-		@Override
-		public void setApplicationContext(ApplicationContext applicationContext)
-				throws BeansException {
-			environment = applicationContext.getEnvironment();
+			return new TokenAuthentication(getEnvironment().getProperty("vault.token"));
 		}
 	}
 
