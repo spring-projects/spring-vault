@@ -32,8 +32,8 @@ Then add the following to `pom.xml` dependencies section.
 ----
 ====
 
-You will also need to add the location of the Spring Milestone repository for maven to your
-`pom.xml` which is at the same level of your `<dependencies/>` element.
+If you are using a milestone or release candidate, you will also need to add the location of the Spring
+Milestone repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
 
 ====
 [source,xml]
@@ -43,6 +43,24 @@ You will also need to add the location of the Spring Milestone repository for ma
         <id>spring-milestone</id>
         <name>Spring Maven MILESTONE Repository</name>
         <url>http://repo.spring.io/libs-milestone</url>
+    </repository>
+</repositories>
+----
+====
+
+The repository is also http://repo.spring.io/milestone/org/springframework/vault/[browseable here].
+
+If you are using a SNAPSHOT, you will also need to add the location of the Spring
+Snapshot repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
+
+====
+[source,xml]
+----
+<repositories>
+    <repository>
+        <id>spring-snapshot</id>
+        <name>Spring Maven SNAPSHOT Repository</name>
+        <url>http://repo.spring.io/libs-snapshot</url>
     </repository>
 </repositories>
 ----
