@@ -5,6 +5,49 @@ Different organizations have different requirements for security
 and authentication. Vault reflects that need by shipping multiple authentication
 methods. Spring Vault supports multiple authentications mechanisms.
 
+== Externalizing login credentials
+
+Obtaining first-time access to a secured system is known as secure introduction. 
+Any client requires ephemeral or permanent credentials to access Vault. Externalizing credentials
+is a good pattern to keep code maintainability high but comes at a risk of increased disclosure.
+
+Disclosure of login credentials to any party allows login to Vault and access secrets that
+are permitted by the underlying role. Picking the appropriate client authentication and
+injecting credentials into the application is subject to risk evaluation.
+ 
+Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction] is a natural fit 
+to keep configuration outside the application code. You can use system properties, environment
+variables or property files to store login credentials. Each approach comes with its own properties.
+Keep in mind that the command line and environment properties can be introspected with appropriate
+OS access levels.
+ 
+.Externalizing `vault.token` to a properties file 
+====
+----
+@PropertySource("configuration.properties"),
+@Configuration
+static class Config extends VaultIntegrationTestConfiguration implements
+    ApplicationContextAware {
+
+    private Environment environment;
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new TokenAuthentication(environment.getProperty("vault.token"));
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext)
+            throws BeansException {
+        environment = applicationContext.getEnvironment();
+        }
+}
+----
+====
+
+See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`] 
+for a sample on referencing properties in components and other property sources.
+
 == Token authentication
 
 Tokens are the core method for authentication within Vault.
