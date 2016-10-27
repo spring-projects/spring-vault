@@ -18,7 +18,6 @@
 		<netty.version>4.1.4.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
 		<jackson.version>2.8.2</jackson.version>
-		<slf4j.version>1.7.21</slf4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -42,26 +41,6 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-core</artifactId>
 				<version>${spring.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>commons-logging</groupId>
-						<artifactId>commons-logging</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<!-- Logging -->
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>jcl-over-slf4j</artifactId>
-				<version>${slf4j.version}</version>
-				<scope>runtime</scope>
 			</dependency>
 
 			<dependency>

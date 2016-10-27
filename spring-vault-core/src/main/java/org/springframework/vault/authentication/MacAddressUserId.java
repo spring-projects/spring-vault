@@ -22,8 +22,8 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -39,7 +39,7 @@ import org.springframework.util.StringUtils;
  */
 public class MacAddressUserId implements AppIdUserIdMechanism {
 
-	private final Logger log = LoggerFactory.getLogger(MacAddressUserId.class);
+	private final Log log = LogFactory.getLog(MacAddressUserId.class);
 
 	private final String networkInterfaceHint;
 

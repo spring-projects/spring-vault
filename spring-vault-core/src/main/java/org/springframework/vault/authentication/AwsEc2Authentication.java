@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -47,8 +47,7 @@ import org.springframework.web.client.RestTemplate;
  */
 public class AwsEc2Authentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(AwsEc2Authentication.class);
+	private final static Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
 	private final AwsEc2AuthenticationOptions options;
 

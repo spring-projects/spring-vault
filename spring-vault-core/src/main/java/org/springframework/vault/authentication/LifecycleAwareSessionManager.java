@@ -20,8 +20,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -59,8 +59,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	public static final int REFRESH_PERIOD_BEFORE_EXPIRY = 5;
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(LifecycleAwareSessionManager.class);
+	private final static Log logger = LogFactory
+			.getLog(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;
 	private final VaultClient vaultClient;
@@ -100,8 +100,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					"auth/token/revoke-self", token, null, Map.class);
 
 			if (!response.isSuccessful()) {
-				logger.warn("Cannot revoke VaultToken: {}",
-						buildExceptionMessage(response));
+				logger.warn(String.format("Cannot revoke VaultToken: %s",
+						buildExceptionMessage(response)));
 			}
 		}
 	}
@@ -130,9 +130,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		if (!response.isSuccessful()) {
 
 			if (response.getStatusCode().is4xxClientError()) {
-				logger.debug(
-						"Cannot refresh token, resetting token and performing re-login: {}",
-						buildExceptionMessage(response));
+				logger.debug(String
+						.format("Cannot refresh token, resetting token and performing re-login: %s",
+								buildExceptionMessage(response)));
 				token = null;
 				return false;
 			}

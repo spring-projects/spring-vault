@@ -19,8 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
@@ -40,8 +40,7 @@ import org.springframework.vault.support.VaultResponse;
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	protected final static Logger logger = LoggerFactory
-			.getLogger(VaultPropertySource.class);
+	protected final static Log logger = LogFactory.getLog(VaultPropertySource.class);
 
 	private final String path;
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();

@@ -17,8 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.util.Collections;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
@@ -34,8 +34,8 @@ import org.springframework.vault.support.VaultToken;
  */
 public class ClientCertificateAuthentication implements ClientAuthentication {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ClientCertificateAuthentication.class);
+	private final static Log logger = LogFactory
+			.getLog(ClientCertificateAuthentication.class);
 
 	private final VaultClient vaultClient;
 

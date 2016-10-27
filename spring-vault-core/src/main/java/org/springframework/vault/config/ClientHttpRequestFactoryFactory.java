@@ -31,12 +31,12 @@ import javax.net.ssl.TrustManagerFactory;
 import com.squareup.okhttp.OkHttpClient;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -59,8 +59,8 @@ import org.springframework.vault.support.SslConfiguration;
  */
 public class ClientHttpRequestFactoryFactory {
 
-	private static final Logger logger = LoggerFactory
-			.getLogger(ClientHttpRequestFactoryFactory.class);
+	private static final Log logger = LogFactory
+			.getLog(ClientHttpRequestFactoryFactory.class);
 
 	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
 			"org.apache.http.client.HttpClient",
