@@ -169,6 +169,6 @@ public class VaultEndpoint implements Serializable {
 
 	@Override
 	public String toString() {
-		return String.format("%://%:%d", scheme, host, port);
+		return String.format("%s://%s:%d", scheme, host, port);
 	}
 }
