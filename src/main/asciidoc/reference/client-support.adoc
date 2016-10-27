@@ -1,7 +1,10 @@
 [[vault.core.client.support]]
 = Client support
 
-Spring Vault supports a various HTTP clients to access Vault's HTTP API. Spring Vault uses  http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/remoting.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault. Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>> that is scoped only to Spring Vault's client components.
+Spring Vault supports a various HTTP clients to access Vault's HTTP API. Spring Vault uses
+http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/remoting.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault.
+Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
+that is scoped only to Spring Vault's client components.
 
 Spring Vault supports following HTTP clients:
 
@@ -10,15 +13,23 @@ Spring Vault supports following HTTP clients:
 * Netty
 * OkHttp 2
 
-Using a specific client requires the according dependency to be available on the classpath so Spring Vault can use the available client for communicating with Vault.
+Using a specific client requires the according dependency to be available on the classpath
+so Spring Vault can use the available client for communicating with Vault.
 
 == Java's builtin `HttpURLConnection`
 
-Java's builtin `HttpURLConnection` is available out-of-the-box without additional configuration. Using `HttpURLConnection` comes with a limitation regarding SSL configuration. Spring Vault won't apply <<vault.client-ssl,customized SSL configuration>> as it would require a deep reconfiguration of the JVM. This configuration would affect all components relying on the default SSL context. Configuring SSL settings using `HttpURLConnection` requires you providing these settings as System Properties. See
+Java's builtin `HttpURLConnection` is available out-of-the-box without additional
+configuration. Using `HttpURLConnection` comes with a limitation regarding SSL configuration.
+Spring Vault won't apply <<vault.client-ssl,customized SSL configuration>> as it would
+require a deep reconfiguration of the JVM. This configuration would affect all
+components relying on the default SSL context. Configuring SSL settings using
+`HttpURLConnection` requires you providing these settings as System Properties. See
 https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#InstallationAndCustomization[Customizing JSSE] for further details.
 
 == External Clients
-You can use external clients to access Vault's API. Simply add one of the following dependencies to your project. You can omit the version number if using <<dependencies,Spring Vault's Dependency BOM>>
+You can use external clients to access Vault's API. Simply add one of the following
+dependencies to your project. You can omit the version number if using
+<<dependencies,Spring Vault's Dependency BOM>>
 
 
 .Apache Http Components Dependency

@@ -9,7 +9,8 @@ Vault operations.  Includes integrated object mapping between Vault responses an
 
 For most tasks, you will find yourself using `VaultTemplate` that leverages the
 rich communication functionality. `VaultTemplate` is the place to look for 
-accessing functionality such as reading data from Vault or issuing administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to 
+accessing functionality such as reading data from Vault or issuing 
+administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to 
 get a hold of the low-level API artifacts such as `RestTemplate` to communicate
 directly with Vault.
 

@@ -12,11 +12,15 @@ NOTE: _Copies of this document may be made for your own use and for distribution
 toc::[]
 
 include::preface.adoc[]
+
 include::new-features.adoc[]
 
 ifndef::ebook-format[= Reference documentation [[reference-documentation]]]
 
 :leveloffset: +1
+
 include::reference/introduction.adoc[]
+
 include::reference/vault.adoc[]
+
 :leveloffset: -1
