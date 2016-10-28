@@ -6,7 +6,7 @@ image::https://spring.io/badges/spring-vault/snapshot.svg[link=http://projects.s
 
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
-With https://www.vaultproject.io[Hashicorp's Vault] you have a central place to manage external secret data for applications across all environments.
+With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to manage external secret data for applications across all environments.
 Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
 
 == Getting Help
@@ -160,7 +160,7 @@ public class AppConfig extends AbstractVaultConfiguration {
      */
     @Override
     public VaultEndpoint vaultEndpoint() {
-        return new VaultEndpoint();                            
+        return new VaultEndpoint();
     }
 
     /**
@@ -170,7 +170,7 @@ public class AppConfig extends AbstractVaultConfiguration {
      */
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new TokenAuthentication("…");                   
+        return new TokenAuthentication("…");
     }
 }
 ----
@@ -184,18 +184,18 @@ and then use `VaultTemplate` through its interface `VaultOperations`:
 public class MyApp {
 
     @Autowired VaultOperations vaultOperations;
-    
+
     public void useVault() {
 
         Secrets secrets = new Secrets();
         secrets.username = "hello";
         secrets.password = "world";
-    
+
         vaultOperations.write("secret/myapp", secrets);
-    
+
         VaultResponseSupport<Secrets> response = vaultOperations.read("secret/myapp", Secrets.class);
         System.out.println(response.getData().getUsername());
-    
+
         vaultOperations.delete("secret/myapp");
     }
 }

@@ -1,11 +1,11 @@
 [[preface]]
 = Preface
 
-The Spring Vault project applies core Spring concepts to the development of solutions using Hashicorp Vault. We provide a "template" as a high-level abstraction for storing and querying documents. You will notice similarities to the REST support in the Spring Framework.
+The Spring Vault project applies core Spring concepts to the development of solutions using HashiCorp Vault. We provide a "template" as a high-level abstraction for storing and querying documents. You will notice similarities to the REST support in the Spring Framework.
 
 This document is the reference guide for Spring Vault. It explains Vault concepts and semantics and the syntax.
 
-This section provides some basic introduction to Spring and Vault. The rest of the document refers only to Spring Vault features and assumes the user is familiar with Hashicorp Vault as well as Spring concepts.
+This section provides some basic introduction to Spring and Vault. The rest of the document refers only to Spring Vault features and assumes the user is familiar with HashiCorp Vault as well as Spring concepts.
 
 [[get-started:first-steps:spring]]
 == Knowing Spring
@@ -27,9 +27,9 @@ The jumping off ground for learning about Vault is https://www.vaultproject.io[w
 
 * The online shell provides a convenient way to interact with a Vault instance in combination with the online tutorial.
 
-* https://www.vaultproject.io/intro/index.html[Hashicorp Vault Introduction]
+* https://www.vaultproject.io/intro/index.html[HashiCorp Vault Introduction]
 
-* https://www.vaultproject.io/docs/index.html[Hashicorp Vault Documentation]
+* https://www.vaultproject.io/docs/index.html[HashiCorp Vault Documentation]
 
 [[requirements]]
 == Requirements
