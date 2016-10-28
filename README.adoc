@@ -1,3 +1,7 @@
+image::https://spring.io/badges/spring-vault/prerelease.svg[link=http://projects.spring.io/spring-vault#quick-start]
+
+image::https://spring.io/badges/spring-vault/snapshot.svg[link=http://projects.spring.io/spring-vault#quick-start]
+
 = Spring Vault
 
 
@@ -5,17 +9,69 @@ Spring Vault provides client-side support for accessing, storing and revoking se
 With https://www.vaultproject.io[Hashicorp's Vault] you have a central place to manage external secret data for applications across all environments.
 Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
 
-== Features
+== Getting Help
 
-=== Spring Vault
+For a comprehensive treatment of all the Spring Vault features, please refer to:
+
+* the http://docs.spring.io/spring-vault/docs/current/reference/html/[User Guide]
+* the http://docs.spring.io/spring-vault/docs/current/api/[JavaDocs] have extensive comments in them as well.
+* the home page of http://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
+* for more detailed questions, use http://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
+
+== Features
 
 Specifically for Spring applications:
 
 * JavaConfig for Vault Client
-* https://www.vaultproject.io/docs/auth/token.html[Token], https://www.vaultproject.io/docs/auth/app-id.html[AppId] authentication,
-and https://www.vaultproject.io/docs/auth/aws-ec2.html[AWS-EC2] authentication
+* Retrieve secrets from Vault and initialize Spring Environment with remote property sources
+* Obtain http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.backends.generic[secrets] secured with SSL
+* http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.token[Token],
+http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.appid[AppId],
+http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.approle[AppRole],
+http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.clientcert[Client Certificate],
+http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
+http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
+* Bootstrap application context: a parent context for the main application that can be trained to do anything
+
+Spring Boot users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault Config], an optimized integration with Vault to provide encrypted Vault properties inside Spring Boot applications.
+https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault] can also generate credentials for various services like MySQL, PostgreSQL, MongoDB and much more.
 
 == Quick Start
+
+=== Maven configuration
+
+Add the Maven dependency:
+
+====
+[source,xml]
+----
+<dependency>
+  <groupId>org.springframework.vault</groupId>
+  <artifactId>spring-vault-core</artifactId>
+  <version>${version}.RELEASE</version>
+</dependency>
+====
+
+If you'd rather like the latest snapshots of the upcoming major version, use our Maven snapshot repository and declare the appropriate dependency version.
+
+====
+[source,xml]
+----
+<dependency>
+  <groupId>org.springframework.vault</groupId>
+  <artifactId>spring-vault</artifactId>
+  <version>${version}.BUILD-SNAPSHOT</version>
+</dependency>
+
+<repository>
+  <id>spring-libs-snapshot</id>
+  <name>Spring Snapshot Repository</name>
+  <url>http://repo.spring.io/libs-snapshot</url>
+</repository>
+----
+====
+
+=== Vault Setup
 
 *Prerequisites*
 
@@ -85,6 +141,98 @@ $ vault unseal (Key 3)
 ----
 
 Vault is now initialized and unsealed.
+
+=== Using VaultTemplate
+
+The class VaultTemplate, located in the package org.springframework.vault.core, is the central class of the Spring’s Vault support providing a rich feature set to interact with Vault. The template offers convenience operations to read, write and delete data in Vault and provides a mapping between your domain objects and Vault data.
+
+
+You can have Spring initializing Spring Vault by providing a JavaConfig:
+
+====
+[source,java]
+----
+@Configuration
+public class AppConfig extends AbstractVaultConfiguration {
+
+    /**
+     * Specify an endpoint for connecting to Vault.
+     */
+    @Override
+    public VaultEndpoint vaultEndpoint() {
+        return new VaultEndpoint();                            
+    }
+
+    /**
+     * Configure a client authentication.
+     * Please consider a more secure authentication method
+     * for production use.
+     */
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new TokenAuthentication("…");                   
+    }
+}
+----
+====
+
+and then use `VaultTemplate` through its interface `VaultOperations`:
+
+====
+[source,java]
+----
+public class MyApp {
+
+    @Autowired VaultOperations vaultOperations;
+    
+    public void useVault() {
+
+        Secrets secrets = new Secrets();
+        secrets.username = "hello";
+        secrets.password = "world";
+    
+        vaultOperations.write("secret/myapp", secrets);
+    
+        VaultResponseSupport<Secrets> response = vaultOperations.read("secret/myapp", Secrets.class);
+        System.out.println(response.getData().getUsername());
+    
+        vaultOperations.delete("secret/myapp");
+    }
+}
+----
+====
+
+=== @VaultPropertySource
+
+`@VaultPropertySource` provides a convenient and declarative
+mechanism for adding a `PropertySource` to Spring’s `Environment`.
+
+To be used in conjunction with @Configuration classes.
+Example usage
+
+Given a Vault path `secret/my-application` containing the configuration data
+pair `database.password=mysecretpassword`, the following `@Configuration`
+class uses `@VaultPropertySource` to contribute `secret/my-application` to
+the `Environment`'s set of `PropertySources`.
+
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource("secret/my-application")
+public class AppConfig {
+
+    @Autowired Environment env;
+
+    @Bean
+    public TestBean testBean() {
+        TestBean testBean = new TestBean();
+        testBean.setPassword(env.getProperty("database.password"));
+        return testBean;
+    }
+}
+----
+====
 
 == Building
 
