@@ -66,7 +66,7 @@ Snapshot repository to your maven `pom.xml` which is at the same level of your `
 ----
 ====
 
-The repository is also http://repo.spring.io/milestone/org/springframework/vault/[browseable here].
+The repository is also http://repo.spring.io/snapshot/org/springframework/vault/[browseable here].
 
 Create a simple `Secrets` class to persist:
 
