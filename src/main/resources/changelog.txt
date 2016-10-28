@@ -1,5 +1,24 @@
 Spring Vault Changelog
 =============================
 
-Changes in version 1.0.0.M1 (?)
+Changes in version 1.0.0 M1
 -----------------------------------------
+* Provide transit backend support #1
+* Assert compatibility with Vault 0.5.2 to 0.6.1 #2
+* Support Cubbyhole authentication #3
+* Add documentation for supported clients #4
+* Provide documentation as zip file #5
+* Support AppRole Authentication #7
+* Cannot use Vault with Netty4ClientHttpRequestFactory #8
+* Add PropertySource support #9
+* Add support to generate certificates using the PKI backend #11
+* Revoke token on session disposal #13
+* Upgrade to Vault 0.6.2 #14
+* Task execution does not consider timeout #15
+* Apply Spring Boot (Spring Cloud) code formatter #16
+* Replace Codehaus Nexus with OSS Sonatype in TravisCI build #17
+* Replace {version} in documentation with the actual version #19
+* Getting Started and Dependencies #20
+* SLF4J vs commons-logging? #24
+* Document How to Externalize Vault's Token w/ VaultPropertySoure #26
+* Fix String format in VaultEndpoint.toString #27
