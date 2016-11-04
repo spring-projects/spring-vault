@@ -5,7 +5,18 @@ The Spring Vault project applies core Spring concepts to the development of solu
 
 This document is the reference guide for Spring Vault. It explains Vault concepts and semantics and the syntax.
 
-This section provides some basic introduction to Spring and Vault. The rest of the document refers only to Spring Vault features and assumes the user is familiar with HashiCorp Vault as well as Spring concepts.
+This part of the reference documentation explains the core functionality offered by Spring Vault.
+
+<<vault.core>> introduces the Vault module feature set.
+
+== Document Structure
+
+This section provides basic introduction to Spring and Vault.
+It contains details about following development and how to get support.
+
+The rest of the document refers to Spring Vault features and assumes
+the user is familiar with https://www.vaultproject.io[HashiCorp Vault]
+as well as Spring concepts.
 
 [[get-started:first-steps:spring]]
 == Knowing Spring
@@ -30,6 +41,13 @@ The jumping off ground for learning about Vault is https://www.vaultproject.io[w
 * https://www.vaultproject.io/intro/index.html[HashiCorp Vault Introduction]
 
 * https://www.vaultproject.io/docs/index.html[HashiCorp Vault Documentation]
+
+Spring Vault provides client-side support for accessing, storing and revoking secrets.
+With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to
+manage external secret data for applications across all environments.
+Vault can manage static and dynamic secrets such as application data,
+username/password for remote applications/resources and provide credentials
+for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
 
 [[requirements]]
 == Requirements

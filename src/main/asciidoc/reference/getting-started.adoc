@@ -1,5 +1,5 @@
 [[vault.core.getting-started]]
-=== Getting Started
+= Getting Started
 
 Spring Vault support requires Vault 0.5 or higher and Java SE 6 or higher.
 An easy way to bootstrap setting up a working environment is to create a

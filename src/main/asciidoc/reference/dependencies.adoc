@@ -48,7 +48,7 @@ pattern: `$\{version\}-$\{release\}` where release can be one of the following:
 ====
 
 [[dependencies.spring-framework]]
-=== Spring Framework
+== Spring Framework
 
 The current version of Spring Vault requires Spring Framework in version 
 {springVersion} or better. The modules might also work with an older bugfix 
