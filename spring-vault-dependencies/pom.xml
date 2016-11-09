@@ -12,8 +12,8 @@
 
 	<properties>
 		<httpclient.version>4.5.2</httpclient.version>
-		<httpcore.version>4.4.4</httpcore.version>
-		<netty.version>4.1.4.Final</netty.version>
+		<httpcore.version>4.4.5</httpcore.version>
+		<netty.version>4.1.6.Final</netty.version>
 		<okhttp.version>2.7.5</okhttp.version>
 		<jackson.version>2.8.2</jackson.version>
 	</properties>
