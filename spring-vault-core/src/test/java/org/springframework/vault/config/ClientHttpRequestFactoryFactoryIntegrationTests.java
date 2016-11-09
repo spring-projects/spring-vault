@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.config;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -61,6 +62,7 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	}
 
 	@Test
+	@Ignore("Requires SPR-14744 to be fixed")
 	public void nettyClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
