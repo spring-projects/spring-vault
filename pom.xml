@@ -19,7 +19,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.2.RELEASE</spring.version>
+		<spring.version>4.3.4.RELEASE</spring.version>
 		<java.version>1.6</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -93,6 +93,15 @@
 				<version>${project.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
+			</dependency>
+
+			<!-- Spring Framework -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-framework-bom</artifactId>
+				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<!-- Testing -->

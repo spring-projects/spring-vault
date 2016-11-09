@@ -11,7 +11,6 @@
 	<description>Spring Vault Dependencies</description>
 
 	<properties>
-		<spring.version>4.3.2.RELEASE</spring.version>
 		<httpclient.version>4.5.2</httpclient.version>
 		<httpcore.version>4.4.4</httpcore.version>
 		<netty.version>4.1.4.Final</netty.version>
@@ -20,6 +19,7 @@
 	</properties>
 
 	<dependencyManagement>
+
 		<dependencies>
 
 			<!-- Spring Vault -->
@@ -27,25 +27,6 @@
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-core</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-
-			<!-- Spring Framework -->
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-beans</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-core</artifactId>
-				<version>${spring.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-web</artifactId>
-				<version>${spring.version}</version>
 			</dependency>
 
 			<dependency>
