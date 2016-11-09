@@ -9,6 +9,8 @@ env:
     - VAULT_VER=0.6.0
     - VAULT_VER=0.6.1
     - VAULT_VER=0.6.2
+    - PROFILE=springNext
+    - PROFILE=spring5
 
 before_install:
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
@@ -16,7 +18,7 @@ before_install:
 install:
   - src/test/bash/start.sh
 
-script: mvn clean verify
+script: mvn clean verify -P${PROFILE:-ci}
 
 after_script:
   - pkill vault
