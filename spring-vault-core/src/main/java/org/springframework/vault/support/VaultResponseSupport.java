@@ -16,6 +16,7 @@
 
 package org.springframework.vault.support;
 
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -50,6 +51,8 @@ public class VaultResponseSupport<T> {
 	private String requestId;
 
 	private boolean renewable;
+
+	private List<String> warnings;
 
 	/**
 	 *
@@ -177,5 +180,21 @@ public class VaultResponseSupport<T> {
 	 */
 	public void setRequestId(String requestId) {
 		this.requestId = requestId;
+	}
+
+	/**
+	 *
+	 * @return the warnings.
+	 */
+	public List<String> getWarnings() {
+		return warnings;
+	}
+
+	/**
+	 *
+	 * @param warnings the warnings.
+	 */
+	public void setWarnings(List<String> warnings) {
+		this.warnings = warnings;
 	}
 }

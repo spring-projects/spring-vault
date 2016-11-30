@@ -28,6 +28,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@JsonIgnoreProperties(ignoreUnknown = false)
 public class VaultResponse extends VaultResponseSupport<Map<String, Object>> {
 }
