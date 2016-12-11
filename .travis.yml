@@ -9,6 +9,7 @@ env:
     - VAULT_VER=0.6.0
     - VAULT_VER=0.6.1
     - VAULT_VER=0.6.2
+    - VAULT_VER=0.6.3
     - PROFILE=springNext
     - PROFILE=spring5
 
