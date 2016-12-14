@@ -21,6 +21,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
@@ -31,6 +32,7 @@ import javax.net.ssl.TrustManagerFactory;
 import com.squareup.okhttp.OkHttpClient;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
+import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.config.RequestConfig;
@@ -42,6 +44,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
+import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
@@ -70,6 +73,10 @@ public class ClientHttpRequestFactoryFactory {
 			"com.squareup.okhttp.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
+	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent(
+			"okhttp3.OkHttpClient",
+			ClientHttpRequestFactoryFactory.class.getClassLoader());
+
 	private static final boolean NETTY_PRESENT = ClassUtils.isPresent(
 			"io.netty.channel.nio.NioEventLoopGroup",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
@@ -95,6 +102,10 @@ public class ClientHttpRequestFactoryFactory {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
 			}
 
+			if (OKHTTP3_PRESENT) {
+				return OkHttp3.usingOkHttp3(options, sslConfiguration);
+			}
+
 			if (OKHTTP_PRESENT) {
 				return OkHttp.usingOkHttp(options, sslConfiguration);
 			}
@@ -102,7 +113,6 @@ public class ClientHttpRequestFactoryFactory {
 			if (NETTY_PRESENT) {
 				return Netty.usingNetty(options, sslConfiguration);
 			}
-
 		}
 		catch (GeneralSecurityException e) {
 			throw new IllegalStateException(e);
@@ -260,6 +270,31 @@ public class ClientHttpRequestFactoryFactory {
 			requestFactory.setReadTimeout(options.getReadTimeout());
 
 			return requestFactory;
+		}
+	}
+
+	/**
+	 * {@link ClientHttpRequestFactory} for the {@link OkHttpClient}.
+	 *
+	 * @author Mark Paluch
+	 */
+	static class OkHttp3 {
+
+		static ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
+				SslConfiguration sslConfiguration) throws GeneralSecurityException,
+				IOException {
+
+			Builder builder = new Builder();
+
+			if (hasSslConfiguration(sslConfiguration)) {
+				builder.sslSocketFactory(getSSLContext(sslConfiguration)
+						.getSocketFactory());
+			}
+
+			builder.connectTimeout(options.getConnectionTimeout(), TimeUnit.MILLISECONDS)
+					.readTimeout(options.getReadTimeout(), TimeUnit.MILLISECONDS);
+
+			return new OkHttp3ClientHttpRequestFactory(builder.build());
 		}
 	}
 
