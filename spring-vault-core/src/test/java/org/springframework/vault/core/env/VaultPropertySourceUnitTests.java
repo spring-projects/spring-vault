@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.env;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -61,6 +62,7 @@ public class VaultPropertySourceUnitTests {
 
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo("1");
+		assertThat(vaultPropertySource.getProperty("complex.key")).isEqualTo("value");
 	}
 
 	@Test
@@ -71,7 +73,8 @@ public class VaultPropertySourceUnitTests {
 		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
 				vaultTemplate, "secret/myapp");
 
-		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer");
+		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer",
+				"complex.key");
 	}
 
 	private void prepareResponse() {
@@ -79,6 +82,7 @@ public class VaultPropertySourceUnitTests {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("key", "value");
 		data.put("integer", 1);
+		data.put("complex", Collections.singletonMap("key", "value"));
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(data);

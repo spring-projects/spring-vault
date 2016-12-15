@@ -347,16 +347,32 @@ manipulation of the set of property sources.
 === @VaultPropertySource
 
 The `@VaultPropertySource` annotation provides a convenient and declarative
-mechanism for adding a `PropertySource` to Spring’s `Environment`.
+mechanism for adding a `PropertySource` to Spring's `Environment`
+to be used in conjunction with @Configuration classes.
 
-To be used in conjunction with @Configuration classes.
-Example usage
+`@VaultPropertySource` takes a Vault path such as ``secret/my-application``
+and exposes the data stored at the node in a ``PropertySource``.
 
-Given a Vault path `secret/my-application` containing the configuration data
-pair `database.password=mysecretpassword`, the following `@Configuration`
-class uses `@VaultPropertySource` to contribute `secret/my-application` to
-the `Environment`'s set of `PropertySources`.
+.Properties stored in Vault
+====
+[source,json]
+----
+{
+  // …
 
+  "data": {
+    "database": {
+      "password": ...
+    },
+    "user.name": ...,
+  }
+
+  // …
+}
+----
+====
+
+.Declaring a `@VaultPropertySource`
 ====
 [source,java]
 ----
@@ -369,6 +385,7 @@ public class AppConfig {
     @Bean
     public TestBean testBean() {
         TestBean testBean = new TestBean();
+        testBean.setUser(env.getProperty("user.name"));
         testBean.setPassword(env.getProperty("database.password"));
         return testBean;
     }
@@ -378,7 +395,7 @@ public class AppConfig {
 
 In certain situations, it may not be possible or practical to tightly control
 property source ordering when using `@VaultPropertySource` annotations.
-For example, if the @Configuration classes above were registered via
+For example, if the `@Configuration` classes above were registered via
 component-scanning, the ordering is difficult to predict.
 In such cases - and if overriding is important - it is recommended that the
 user fall back to using the programmatic PropertySource API.

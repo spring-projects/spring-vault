@@ -28,6 +28,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.support.JsonMapFlattener;
 import org.springframework.vault.support.VaultResponse;
 
 /**
@@ -40,10 +41,12 @@ import org.springframework.vault.support.VaultResponse;
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	protected final static Log logger = LogFactory.getLog(VaultPropertySource.class);
+	private final static Log logger = LogFactory.getLog(VaultPropertySource.class);
 
 	private final String path;
+
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
+
 	private final Object lock = new Object();
 
 	/**
@@ -129,19 +132,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @return
 	 */
 	protected Map<String, String> toStringMap(Map<String, Object> data) {
-
-		Map<String, String> result = new LinkedHashMap<String, String>();
-
-		if (data != null) {
-			for (String s : data.keySet()) {
-				Object value = data.get(s);
-				if (value != null) {
-					result.put(s, value.toString());
-				}
-			}
-		}
-
-		return result;
+		return JsonMapFlattener.flatten(data);
 	}
 
 	@Override
