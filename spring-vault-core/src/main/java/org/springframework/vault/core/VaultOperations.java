@@ -35,9 +35,10 @@ import org.springframework.vault.support.VaultResponseSupport;
  * <p>
  * {@link VaultOperations} resolves {@link VaultClient} instances and allows execution of
  * callback methods on various levels. Callbacks can execute requests within a
- * {@link #doWithVault(SessionCallback) session}, the {@link #doWithVault(ClientCallback)
- * client (without requiring a session)} and a
- * {@link #doWithRestTemplate(String, Map, RestTemplateCallback) low-level}
+ * {@link VaultOperations#doWithVault(SessionCallback) session}, the
+ * {@link VaultOperations#doWithVault(ClientCallback) client (without requiring a
+ * session)} and a
+ * {@link VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback) low-level}
  * {@link org.springframework.web.client.RestTemplate} level.
  *
  * @author Mark Paluch

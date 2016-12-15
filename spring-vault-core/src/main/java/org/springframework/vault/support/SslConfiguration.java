@@ -62,10 +62,10 @@ public class SslConfiguration {
 	/**
 	 * Creates a new {@link SslConfiguration}.
 	 *
-	 * @param keyStore
-	 * @param keyStorePassword
-	 * @param trustStore
-	 * @param trustStorePassword
+	 * @param keyStore the keystore resource.
+	 * @param keyStorePassword the keystore password.
+	 * @param trustStore the truststore resource.
+	 * @param trustStorePassword the truststore password.
 	 */
 	public SslConfiguration(Resource keyStore, String keyStorePassword,
 			Resource trustStore, String trustStorePassword) {

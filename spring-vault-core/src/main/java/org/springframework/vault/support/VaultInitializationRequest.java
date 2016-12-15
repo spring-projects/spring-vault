@@ -39,8 +39,8 @@ public class VaultInitializationRequest {
 	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and
 	 * {@code secretThreshold}.
 	 * 
-	 * @param secretShares
-	 * @param secretThreshold
+	 * @param secretShares number of key shares.
+	 * @param secretThreshold number of required keys for unsealing.
 	 * @return a new {@link VaultInitializationRequest}.
 	 */
 	public static VaultInitializationRequest create(int secretShares, int secretThreshold) {

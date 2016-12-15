@@ -42,7 +42,7 @@ import org.springframework.util.StringUtils;
  * </code>
  * </pre>
  * 
- * <br/>
+ * <br>
  * Result
  * 
  * <pre>
