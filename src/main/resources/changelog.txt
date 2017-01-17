@@ -1,6 +1,22 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 1.0.0 M2
+-----------------------------------------
+* Review documentation #12
+* Documentation "Registering a Vault instance using Java based metadata" vs "Instantiating VaultTemplate" #22
+* Fix missing plugin versions #32
+* User Guide and JavaDocs 404 #34
+* Upgrade to Spring 4.3.4 #35
+* VaultResponse is incompatible with Vault 0.6.2 (missing warnings in VaultResponseSupport) #36
+* Upgrade to Vault 0.6.3 #38
+* Add support for OkHttp3 #39
+* Flatten hierarchical JSON objects into property paths #40
+* Upgrade to Spring 4.3.5 #41
+* Upgrade to Vault 0.6.4 #42
+* Upgrade to OkHttp 3.5.0 #43
+* Upgrade test dependencies #44
+
 Changes in version 1.0.0 M1
 -----------------------------------------
 * Provide transit backend support #1
