@@ -12,6 +12,7 @@ Spring Vault supports following HTTP clients:
 * Apache Http Components
 * Netty
 * OkHttp 2
+* OkHttp 3
 
 Using a specific client requires the according dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
@@ -60,6 +61,17 @@ dependencies to your project. You can omit the version number if using
 ----
 <dependency>
   <groupId>com.squareup.okhttp</groupId>
+  <artifactId>okhttp</artifactId>
+</dependency>
+----
+====
+
+.Square OkHttp 3
+====
+[source, xml]
+----
+<dependency>
+  <groupId>com.squareup.okhttp3</groupId>
   <artifactId>okhttp</artifactId>
 </dependency>
 ----

@@ -23,6 +23,7 @@ OS access levels.
  
 .Externalizing `vault.token` to a properties file 
 ====
+[source, java]
 ----
 @PropertySource("configuration.properties"),
 @Configuration
@@ -98,8 +99,9 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
-                .userIdMechanism(new IpAddressUserId()) //
+        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+                .appId("myapp")
+                .userIdMechanism(new IpAddressUserId())
                 .build();
 
         return new AppIdAuthentication(options, vaultClient());
@@ -136,8 +138,9 @@ class AppConfig extends AbstractVaultConfiguration {
     @Override
     public ClientAuthentication clientAuthentication() {
 
-        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
-                .userIdMechanism(new MacAddressUserId()) //
+        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+                .appId("myapp")
+                .userIdMechanism(new MacAddressUserId())
                 .build();
 
         return new AppIdAuthentication(options, vaultClient());
