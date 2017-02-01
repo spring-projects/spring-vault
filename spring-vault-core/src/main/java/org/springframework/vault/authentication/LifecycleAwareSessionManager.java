@@ -31,7 +31,7 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultToken;
@@ -63,7 +63,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			.getLog(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 	private final AsyncTaskExecutor taskExecutor;
 	private final Object lock = new Object();
 
@@ -71,14 +71,14 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
-	 * {@link AsyncTaskExecutor} and {@link VaultClient}.
+	 * {@link AsyncTaskExecutor} and {@link PreviousVaultClient}.
 	 * 
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskExecutor must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
-			AsyncTaskExecutor taskExecutor, VaultClient vaultClient) {
+			AsyncTaskExecutor taskExecutor, PreviousVaultClient vaultClient) {
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");

@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultResponse;
@@ -51,7 +51,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 
 	private final AwsEc2AuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	private final RestTemplate restTemplate;
 
@@ -62,22 +62,22 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	 * 
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public AwsEc2Authentication(VaultClient vaultClient) {
+	public AwsEc2Authentication(PreviousVaultClient vaultClient) {
 		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient
 				.getRestTemplate());
 	}
 
 	/**
 	 * Creates a new {@link AwsEc2Authentication} specifying
-	 * {@link AwsEc2AuthenticationOptions}, {@link VaultClient} and a {@link RestTemplate}
-	 * .
+	 * {@link AwsEc2AuthenticationOptions}, {@link PreviousVaultClient} and a
+	 * {@link RestTemplate} .
 	 * 
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param restTemplate must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
-			VaultClient vaultClient, RestTemplate restTemplate) {
+			PreviousVaultClient vaultClient, RestTemplate restTemplate) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultEndpoint must not be null");

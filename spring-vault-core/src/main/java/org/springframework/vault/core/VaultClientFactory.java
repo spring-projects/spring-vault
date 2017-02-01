@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultClient;
 
 /**
@@ -25,6 +26,12 @@ import org.springframework.vault.client.VaultClient;
 public interface VaultClientFactory {
 
 	/**
+	 * @return a {@link PreviousVaultClient}.
+	 */
+	PreviousVaultClient getPreviousVaultClient();
+
+	/**
+	 * 
 	 * @return a {@link VaultClient}.
 	 */
 	VaultClient getVaultClient();

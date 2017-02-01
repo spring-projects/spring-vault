@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.support.VaultToken;
@@ -41,7 +41,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class CubbyholeAuthenticationUnitTests {
 
-	private VaultClient vaultClient;
+	private PreviousVaultClient vaultClient;
 	private MockRestServiceServer mockRest;
 
 	@Before
@@ -49,7 +49,7 @@ public class CubbyholeAuthenticationUnitTests {
 
 		RestTemplate restTemplate = new RestTemplate();
 		mockRest = MockRestServiceServer.createServer(restTemplate);
-		vaultClient = new VaultClient(restTemplate, new VaultEndpoint());
+		vaultClient = new PreviousVaultClient(restTemplate, new VaultEndpoint());
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class CubbyholeAuthenticationUnitTests {
 				//
 				.andExpect(method(HttpMethod.GET))
 				//
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				.andExpect(header(PreviousVaultClient.VAULT_TOKEN, "hello"))
 				//
 				.andRespond(
 						withSuccess()
@@ -85,7 +85,7 @@ public class CubbyholeAuthenticationUnitTests {
 
 		mockRest.expect(requestTo("https://localhost:8200/v1/cubbyhole/token")) //
 				.andExpect(method(HttpMethod.GET)) //
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				.andExpect(header(PreviousVaultClient.VAULT_TOKEN, "hello"))
 				//
 				.andRespond(
 						withSuccess()
@@ -111,7 +111,7 @@ public class CubbyholeAuthenticationUnitTests {
 				//
 				.andExpect(method(HttpMethod.GET))
 				//
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				.andExpect(header(PreviousVaultClient.VAULT_TOKEN, "hello"))
 				//
 				.andRespond(
 						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
@@ -139,7 +139,7 @@ public class CubbyholeAuthenticationUnitTests {
 				//
 				.andExpect(method(HttpMethod.GET))
 				//
-				.andExpect(header(VaultClient.VAULT_TOKEN, "hello"))
+				.andExpect(header(PreviousVaultClient.VAULT_TOKEN, "hello"))
 				//
 				.andRespond(
 						withSuccess().contentType(MediaType.APPLICATION_JSON).body(

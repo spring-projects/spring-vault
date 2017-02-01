@@ -30,11 +30,13 @@ import org.springframework.web.client.RestTemplate;
  * Base class for Vault accessing helpers, defining common properties such as the
  * {@link RestTemplate} to operate on.
  * <p>
- * Not intended to be used directly. See {@link VaultClient}.
+ * Not intended to be used directly. See {@link PreviousVaultClient}.
  *
  * @author Spencer Gibb
  * @author Mark Paluch
+ * @deprecated Replaced with {@link VaultClient}.
  */
+@Deprecated
 public abstract class VaultAccessor {
 
 	private final RestTemplate restTemplate;

@@ -18,6 +18,7 @@ package org.springframework.vault.client;
 import java.net.URI;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 /**
  * Encapsulates the client response used in {@link VaultAccessor}. Consists of the body,
@@ -36,7 +37,19 @@ public class VaultResponseEntity<T> {
 
 	private final String message;
 
+	/**
+	 * Create a new {@link VaultResponseEntity} given {@link HttpStatus} and {@link URI}.
+	 * {@code}
+	 * @param body optional body for this response, may be {@literal null}.
+	 * @param statusCode the status code, must not be {@literal null}.
+	 * @param uri the status code, must not be {@literal null}.
+	 * @param message optional message, may be {@literal null}.
+	 */
 	protected VaultResponseEntity(T body, HttpStatus statusCode, URI uri, String message) {
+
+		Assert.notNull(statusCode, "HttpStatusCode must not be null");
+		Assert.notNull(uri, "URI must not be null");
+
 		this.body = body;
 		this.statusCode = statusCode;
 		this.uri = uri;
@@ -58,7 +71,7 @@ public class VaultResponseEntity<T> {
 	}
 
 	/**
-	 * @return the body of this entity.
+	 * @return the body of this entity, may be {@literal null} if absent.
 	 */
 	public T getBody() {
 		return body;

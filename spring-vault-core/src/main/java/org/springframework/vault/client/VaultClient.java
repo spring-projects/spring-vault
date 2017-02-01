@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,384 +15,186 @@
  */
 package org.springframework.vault.client;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.util.Assert;
-import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
- * Implementation of the low-level Vault client. This client uses the Vault HTTP API to
- * issue requests using different {@link HttpMethod HTTP methods}. {@link VaultClient} is
- * configured with an {@link VaultEndpoint} and {@link RestTemplate}. It does not maintain
- * any session or token state. See {@link VaultTemplate} and
+ * Interface defining the low-level Vault client. This client uses the Vault HTTP API to
+ * exchange requests and responses synchronously.
+ * <p>
+ * Implementing classes do not maintain any session or token state. See
+ * {@link org.springframework.vault.core.VaultTemplate} and
  * {@link org.springframework.vault.authentication.SessionManager} for authenticated and
- * stateful Vault access. {@link VaultClient} encapsulates base URI and path construction
- * and uses {@link VaultAccessor} for request and error handling by returning
- * {@link VaultResponseEntity} for requests.
+ * stateful Vault access.
+ * 
+ * <p>
+ * For example:
+ * 
+ * <pre class="code">
+ * DefaultVaultClient client = DefaultVaultClient.create(new RestTemplate());
+ * VaultResponseEntity&lt;Void&gt; request = client.get().uri(&quot;http://example.com/resource&quot;)
+ * 		.exchange();
+ * </pre>
  *
  * @author Mark Paluch
  * @see VaultResponseEntity
- * @see VaultTemplate
+ * @see VaultClient
+ * @see VaultRequest
+ * @see VaultRequestBody
  */
-public class VaultClient extends VaultAccessor {
-
-	public static final String VAULT_TOKEN = "X-Vault-Token";
-
-	private static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-
-	private final VaultEndpoint endpoint;
+public interface VaultClient {
 
 	/**
-	 * Creates a new {@link VaultClient} with a default a {@link RestTemplate} and
-	 * {@link VaultEndpoint}.
-	 *
-	 * @see VaultEndpoint
+	 * Prepare an HTTP GET request.
+	 * @return a spec for specifying the target URL
 	 */
-	public VaultClient() {
-		this(new RestTemplate(), new VaultEndpoint());
+	UriSpec get();
+
+	/**
+	 * Prepare an HTTP HEAD request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec head();
+
+	/**
+	 * Prepare an HTTP POST request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec post();
+
+	/**
+	 * Prepare an HTTP PUT request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec put();
+
+	/**
+	 * Prepare an HTTP DELETE request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec delete();
+
+	/**
+	 * Prepare an HTTP request.
+	 * @return a spec for specifying the target URL
+	 */
+	UriSpec method(HttpMethod method);
+
+	/**
+	 * Contract for specifying the URI for a request.
+	 */
+	interface UriSpec {
+
+		/**
+		 * Specify the URI using an absolute, fully constructed {@link URI}.
+		 */
+		HeaderSpec uri(URI uri);
+
+		/**
+		 * Specify the URI for the {@link UriTemplateHandler} using a URI template and URI
+		 * variables. If a {@link UriTemplateHandler} was configured for the client (e.g.
+		 * with a base URI) it will be used to expand the URI template.
+		 * 
+		 * @param uriTemplate the URI template to expand, must not be {@literal null}.
+		 * @param uriVariables the URI template variables. Must not be {@literal null},
+		 * may be empty.
+		 */
+		HeaderSpec uri(String uriTemplate, Object... uriVariables);
+
+		/**
+		 * Specify the URI for the {@link UriTemplateHandler} using a URI template and URI
+		 * variables. If a {@link UriTemplateHandler} was configured for the client (e.g.
+		 * with a base URI) it will be used to expand the URI template.
+		 * 
+		 * @param uriTemplate the URI template to expand, must not be {@literal null}.
+		 * @param uriVariables the URI template variables. Must not be {@literal null},
+		 * may be empty.
+		 */
+		HeaderSpec uri(String uriTemplate, Map<String, ?> uriVariables);
 	}
 
 	/**
-	 * Creates a new {@link VaultClient} for a {@link ClientHttpRequestFactory} and
-	 * {@link VaultEndpoint}.
-	 *
-	 * @param requestFactory must not be {@literal null}.
-	 * @param endpoint must not be {@literal null}.
+	 * Contract for specifying request headers leading up to the exchange.
 	 */
-	public VaultClient(ClientHttpRequestFactory requestFactory, VaultEndpoint endpoint) {
+	interface HeaderSpec extends ReturnTypeSpec {
 
-		super(newRestTemplate(requestFactory));
+		/**
+		 * Add the given, single header value under the given name.
+		 * @param headerName the header name.
+		 * @param headerValues the header value(s).
+		 * @return {@code this} builder.
+		 */
+		HeaderSpec header(String headerName, String... headerValues);
 
-		Assert.notNull(endpoint, "VaultEndpoint must not be null");
-		this.endpoint = endpoint;
+		/**
+		 * Copy the given headers into the entity's headers map.
+		 * @param headers the existing headers to copy from.
+		 * @return {@code this} builder.
+		 */
+		HeaderSpec headers(HttpHeaders headers);
+
+		/**
+		 * Copy the given headers into the entity's headers map.
+		 *
+		 * @param vaultToken the {@link VaultToken}.
+		 * @return {@code this} builder.
+		 */
+		HeaderSpec token(VaultToken vaultToken);
+
+		/**
+		 * Add the given {@link VaultRequestBody}.
+		 */
+		ReturnTypeSpec body(VaultRequestBody<?> body);
+
+		/**
+		 * Exchange the given request for a synchronous response. Invoking this method
+		 * performs the actual HTTP request/response exchange with a
+		 * {@link VaultRequestBody request body} without expecting a response body.
+		 * 
+		 * @return {@link VaultResponseEntity}.
+		 */
+		VaultResponseEntity<Void> exchange(VaultRequestBody<?> body);
 	}
 
 	/**
-	 * Create a {@link RestTemplate} using an interceptor given a
-	 * {@link ClientHttpRequestFactory}. This forces {@link RestTemplate} to create the
-	 * body representation instead of streaming the body to the TCP channel. Streaming the
-	 * body without knowing the size in advance will skip the
-	 * {@link HttpHeaders#CONTENT_LENGTH} makes Vault upset.
-	 * 
-	 * @param requestFactory must not be {@literal null}.
-	 * @return the {@link RestTemplate}
+	 * Contract for specifying the return type leading up to the exchange.
 	 */
-	private static RestTemplate newRestTemplate(ClientHttpRequestFactory requestFactory) {
+	interface ReturnTypeSpec {
 
-		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+		/**
+		 * Exchange the given request for a synchronous response. Invoking this method
+		 * performs the actual HTTP request/response exchange without expecting a response
+		 * body.
+		 * 
+		 * @return {@link VaultResponseEntity}.
+		 */
+		VaultResponseEntity<Void> exchange();
 
-		RestTemplate restTemplate = new RestTemplate(requestFactory);
-		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
+		/**
+		 * Exchange the given request for a synchronous response. Invoking this method
+		 * performs the actual HTTP request/response exchange expecting a response typed
+		 * to {@code returnType}.
+		 * 
+		 * @param returnType the expected return type.
+		 * @return {@link VaultResponseEntity}.
+		 */
+		<T, S extends T> VaultResponseEntity<S> exchange(Class<T> returnType);
 
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
-				return execution.execute(request, body);
-			}
-		});
-
-		return restTemplate;
-	}
-
-	/**
-	 * Creates a new {@link VaultClient} for a {@link RestTemplate} and
-	 * {@link VaultEndpoint}.
-	 *
-	 * @param restTemplate must not be {@literal null}.
-	 * @param endpoint must not be {@literal null}.
-	 */
-	public VaultClient(RestTemplate restTemplate, VaultEndpoint endpoint) {
-
-		super(restTemplate);
-
-		Assert.notNull(endpoint, "VaultEndpoint must not be null");
-		this.endpoint = endpoint;
-	}
-
-	/**
-	 * Retrieve a resource by GETting from the path, and returns the response as
-	 * {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> getForEntity(String path,
-			Class<T> responseType) {
-		return exchange(path, HttpMethod.GET, new HttpEntity<Object>(null), responseType,
-				null);
-	}
-
-	/**
-	 * Retrieve a resource by GETting from the path, and returns the response as
-	 * {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param vaultToken the {@link VaultToken}.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> getForEntity(String path,
-			VaultToken vaultToken, Class<T> responseType) {
-
-		return exchange(path, HttpMethod.GET, new HttpEntity<Object>(null,
-				createHeaders(vaultToken)), responseType, null);
-	}
-
-	/**
-	 * Issue a POST request using the given object to the path, and returns the response
-	 * as {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param request the Object to be POSTed, may be {@code null}.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> postForEntity(String path,
-			Object request, Class<T> responseType) {
-		return exchange(path, HttpMethod.POST, new HttpEntity<Object>(request),
-				responseType, null);
-	}
-
-	/**
-	 * Issue a POST request using the given object to the path, and returns the response
-	 * as {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param vaultToken the {@link VaultToken}.
-	 * @param request the Object to be POSTed, may be {@code null}.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> postForEntity(String path,
-			VaultToken vaultToken, Object request, Class<T> responseType) {
-		return exchange(path, HttpMethod.POST, new HttpEntity<Object>(request,
-				createHeaders(vaultToken)), responseType, null);
-	}
-
-	/**
-	 * Create a new resource by PUTting the given object to the path, and returns the
-	 * response as {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param request the Object to be PUT.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> putForEntity(String path,
-			Object request, Class<T> responseType) {
-		return exchange(path, HttpMethod.PUT, new HttpEntity<Object>(request),
-				responseType, null);
-	}
-
-	/**
-	 * Create a new resource by PUTting the given object to the path, and returns the
-	 * response as {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param vaultToken the {@link VaultToken}.
-	 * @param request the Object to be PUT.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> putForEntity(String path,
-			VaultToken vaultToken, Object request, Class<T> responseType) {
-		return exchange(path, HttpMethod.PUT, new HttpEntity<Object>(request,
-				createHeaders(vaultToken)), responseType, null);
-	}
-
-	/**
-	 * Delete a resource by DELETEing from the path, and returns the response as
-	 * {@link VaultResponseEntity}.
-	 *
-	 * @param path the path.
-	 * @param vaultToken the {@link VaultToken}.
-	 * @param responseType the type of the return value
-	 * @return the response as entity.
-	 * @see VaultResponseEntity
-	 */
-	public <T, S extends T> VaultResponseEntity<S> deleteForEntity(String path,
-			VaultToken vaultToken, Class<T> responseType) {
-
-		return exchange(path, HttpMethod.DELETE, new HttpEntity<Object>(null,
-				createHeaders(vaultToken)), responseType, null);
-	}
-
-	/**
-	 * Execute the HTTP method to the given URI template, writing the given request entity
-	 * to the request, and returns the response as {@link VaultResponseEntity}. URI
-	 * Template variables are using the given URI variables, if any.
-	 *
-	 * @param pathTemplate the path template.
-	 * @param method the HTTP method (GET, POST, etc).
-	 * @param requestEntity the entity (headers and/or body) to write to the request, may
-	 * be {@code null}.
-	 * @param responseType the type of the return value.
-	 * @param uriVariables the variables to expand in the template.
-	 * @return the response as entity.
-	 */
-	public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
-			HttpMethod method, HttpEntity<?> requestEntity, Class<T> responseType,
-			Map<String, ?> uriVariables) throws RestClientException {
-
-		Assert.hasText(pathTemplate, "Path template must not be null or empty");
-		Assert.isTrue(!pathTemplate.startsWith("/"),
-				"Path template must not start with a slash (/)");
-
-		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables)
-				: getEndpoint().createUri(pathTemplate);
-
-		return exchange(uri, method, requestEntity, responseType);
-	}
-
-	/**
-	 * Execute the HTTP method to the given path template, writing the given request
-	 * entity to the request, and returns the response as {@link VaultResponseEntity}. The
-	 * given {@link ParameterizedTypeReference} is used to pass generic type information:
-	 *
-	 * <pre class="code">
-	 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {
-	 * };
-	 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = client.exchange(&quot;http://example.com&quot;,
-	 * 		HttpMethod.GET, null, myBean, null);
-	 * </pre>
-	 *
-	 * @param pathTemplate the path template.
-	 * @param method the HTTP method (GET, POST, etc).
-	 * @param requestEntity the entity (headers and/or body) to write to the request, may
-	 * be {@code null}.
-	 * @param responseType the type of the return value.
-	 * @param uriVariables the variables to expand in the template.
-	 * @return the response as entity.
-	 */
-	public <T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
-			HttpMethod method, HttpEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables)
-			throws RestClientException {
-
-		Assert.hasText(pathTemplate, "Path template must not be null or empty");
-		Assert.isTrue(!pathTemplate.startsWith("/"),
-				"Path template must not start with a slash (/)");
-
-		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables)
-				: getEndpoint().createUri(pathTemplate);
-
-		return exchange(uri, method, requestEntity, responseType);
-	}
-
-	/**
-	 * Executes a {@link RestTemplateCallback}. Allows to interact with the underlying
-	 * {@link RestTemplate} and benefit from optional parameter expansion.
-	 *
-	 * @param pathTemplate the path template.
-	 * @param uriVariables the variables to expand in the template
-	 * @param callback the request.
-	 * @return the {@link RestTemplateCallback} return value.
-	 */
-	public <T> T doWithRestTemplate(String pathTemplate, Map<String, ?> uriVariables,
-			RestTemplateCallback<T> callback) {
-
-		Assert.hasText(pathTemplate, "Path template must not be null or empty");
-		Assert.isTrue(!pathTemplate.startsWith("/"),
-				"Path template must not start with a slash (/)");
-
-		URI uri = uriVariables != null ? buildUri(pathTemplate, uriVariables)
-				: getEndpoint().createUri(pathTemplate);
-
-		return super.doWithRestTemplate(uri, callback);
-	}
-
-	/**
-	 * @return the configured {@link VaultEndpoint}.
-	 */
-	public VaultEndpoint getEndpoint() {
-		return endpoint;
-	}
-
-	/**
-	 * Build the Vault {@link URI} based on the given {@link VaultEndpoint} and
-	 * {@code pathTemplate}. URI template variables will be expanded using
-	 * {@code uriVariables}.
-	 *
-	 * @param pathTemplate must not be empty or {@literal null}.
-	 * @param uriVariables must not be {@literal null}.
-	 * @return the resolved {@link URI}.
-	 * @see org.springframework.web.util.UriComponentsBuilder
-	 */
-	protected URI buildUri(String pathTemplate, Map<String, ?> uriVariables) {
-
-		Assert.hasText(pathTemplate, "Path must not be empty");
-
-		return getRestTemplate().getUriTemplateHandler().expand(
-				getEndpoint().createUriString(pathTemplate), uriVariables);
-	}
-
-	/**
-	 * Create {@link HttpHeaders} for a {@link VaultToken}.
-	 *
-	 * @param vaultToken must not be {@literal null}.
-	 * @return {@link HttpHeaders} for a {@link VaultToken}.
-	 */
-	public static HttpHeaders createHeaders(VaultToken vaultToken) {
-
-		Assert.notNull(vaultToken, "Vault Token must not be null");
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(VAULT_TOKEN, vaultToken.getToken());
-		return headers;
-	}
-
-	/**
-	 * Unwrap a wrapped response created by Vault Response Wrapping
-	 * 
-	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
-	 * @param responseType the type of the return value.
-	 * @return the unwrapped response.
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T unwrap(final String wrappedResponse, Class<T> responseType) {
-
-		Assert.hasText(wrappedResponse, "Wrapped response must not be empty");
-
-		try {
-			return (T) converter.read(responseType, new HttpInputMessage() {
-				@Override
-				public InputStream getBody() throws IOException {
-					return new ByteArrayInputStream(wrappedResponse.getBytes());
-				}
-
-				@Override
-				public HttpHeaders getHeaders() {
-					return new HttpHeaders();
-				}
-			});
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
-		}
+		/**
+		 * Exchange the given request for a synchronous response. Invoking this method
+		 * performs the actual HTTP request/response exchange expecting a response typed
+		 * to {@code returnType}.
+		 * 
+		 * @param returnType the expected return type.
+		 * @return {@link VaultResponseEntity}.
+		 */
+		<T, S extends T> VaultResponseEntity<S> exchange(
+				ParameterizedTypeReference<T> returnType);
 	}
 }

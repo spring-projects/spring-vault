@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultAccessor;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
+import org.springframework.vault.client.VaultRequestBody;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.core.VaultOperations.ClientCallback;
 import org.springframework.vault.core.VaultOperations.SessionCallback;
@@ -89,8 +90,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@Override
 			public Boolean doWithVault(VaultClient client) {
 
-				VaultResponseEntity<Map<String, Boolean>> response = client.getForEntity(
-						"sys/init", Map.class);
+				VaultResponseEntity<Map<String, Boolean>> response = client.get()
+						.uri("sys/init").exchange(Map.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody().get("initialized");
@@ -114,8 +115,9 @@ public class VaultSysTemplate implements VaultSysOperations {
 					public VaultInitializationResponse doWithVault(VaultClient client) {
 
 						VaultResponseEntity<VaultInitializationResponseImpl> response = client
-								.putForEntity("sys/init", vaultInitializationRequest,
-										VaultInitializationResponseImpl.class);
+								.post().uri("sys/init")
+								.body(VaultRequestBody.just(vaultInitializationRequest))
+								.exchange(VaultInitializationResponseImpl.class);
 
 						if (response.isSuccessful() && response.hasBody()) {
 							return response.getBody();
@@ -140,9 +142,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 			public VaultUnsealStatus doWithVault(VaultClient client) {
 
 				VaultResponseEntity<VaultUnsealStatusImpl> response = client
-						.putForEntity("sys/unseal",
-								Collections.singletonMap("key", keyShare),
-								VaultUnsealStatusImpl.class);
+						.put()
+						.uri("sys/unseal")
+						.body(VaultRequestBody.just(Collections.singletonMap("key",
+								keyShare))).exchange(VaultUnsealStatusImpl.class);
 
 				if (response.isSuccessful() && response.hasBody()) {
 					return response.getBody();
@@ -206,7 +209,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Override
 	public VaultHealth health() {
 		return vaultOperations.doWithRestTemplate("sys/health",
-				Collections.<String, Object>emptyMap(), HEALTH);
+				Collections.<String, Object> emptyMap(), HEALTH);
 	}
 
 	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
@@ -225,8 +228,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Override
 		public VaultUnsealStatus doWithVault(VaultClient client) {
 
-			VaultResponseEntity<VaultUnsealStatusImpl> response = client.getForEntity(
-					"sys/seal-status", VaultUnsealStatusImpl.class);
+			VaultResponseEntity<VaultUnsealStatusImpl> response = client.get()
+					.uri("sys/seal-status").exchange(VaultUnsealStatusImpl.class);
 
 			if (response.isSuccessful() && response.hasBody()) {
 				return response.getBody();
@@ -268,7 +271,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			VaultResponseEntity<VaultMountsResponse> response = session.exchange(path,
 					HttpMethod.GET, null, MOUNT_TYPE_REF,
-					Collections.<String, Object>emptyMap());
+					Collections.<String, Object> emptyMap());
 
 			if (response.isSuccessful() && response.hasBody()) {
 

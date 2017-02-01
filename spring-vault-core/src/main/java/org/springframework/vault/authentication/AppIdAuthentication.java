@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultResponse;
@@ -35,7 +35,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @see AppIdAuthenticationOptions
- * @see VaultClient
+ * @see PreviousVaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
  * ID</a>
  */
@@ -45,16 +45,17 @@ public class AppIdAuthentication implements ClientAuthentication {
 
 	private final AppIdAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	/**
 	 * Creates a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
-	 * {@link VaultClient}.
+	 * {@link PreviousVaultClient}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public AppIdAuthentication(AppIdAuthenticationOptions options, VaultClient vaultClient) {
+	public AppIdAuthentication(AppIdAuthenticationOptions options,
+			PreviousVaultClient vaultClient) {
 
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");

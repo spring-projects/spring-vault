@@ -15,11 +15,9 @@
  */
 package org.springframework.vault.util;
 
-import java.util.Collections;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
 import org.springframework.vault.support.VaultInitializationRequest;
@@ -27,9 +25,9 @@ import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
-import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
+import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 
 /**
  * Vault preparation utility class. This class allows preparing Vault for integration
@@ -39,13 +37,13 @@ import org.springframework.vault.support.VaultUnsealStatus;
  */
 public class PrepareVault {
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	private final VaultOperations vaultOperations;
 
 	private final VaultSysOperations adminOperations;
 
-	public PrepareVault(VaultClient vaultClient, VaultOperations vaultOperations) {
+	public PrepareVault(PreviousVaultClient vaultClient, VaultOperations vaultOperations) {
 
 		this.vaultClient = vaultClient;
 		this.vaultOperations = vaultOperations;
@@ -160,7 +158,7 @@ public class PrepareVault {
 		return vaultOperations;
 	}
 
-	public VaultClient getVaultClient() {
+	public PreviousVaultClient getVaultClient() {
 		return vaultClient;
 	}
 }

@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultResponse;
@@ -37,14 +37,15 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 	private final static Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	/**
-	 * Creates a {@link ClientCertificateAuthentication} using {@link VaultClient}.
+	 * Creates a {@link ClientCertificateAuthentication} using {@link PreviousVaultClient}
+	 * .
 	 *
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public ClientCertificateAuthentication(VaultClient vaultClient) {
+	public ClientCertificateAuthentication(PreviousVaultClient vaultClient) {
 
 		Assert.notNull(vaultClient, "VaultClient must not be null");
 

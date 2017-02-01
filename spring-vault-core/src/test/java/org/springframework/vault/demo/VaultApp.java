@@ -16,7 +16,8 @@
 package org.springframework.vault.demo;
 
 import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.DefaultVaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -27,8 +28,9 @@ public class VaultApp {
 
 	public static void main(String[] args) {
 
-		VaultTemplate vaultTemplate = new VaultTemplate(new VaultClient(),
-				new TokenAuthentication("00000000-0000-0000-0000-000000000000"));
+		VaultTemplate vaultTemplate = new VaultTemplate(new PreviousVaultClient(),
+				DefaultVaultClient.create(), new TokenAuthentication(
+						"00000000-0000-0000-0000-000000000000"));
 
 		Secrets secrets = new Secrets();
 		secrets.username = "hello";

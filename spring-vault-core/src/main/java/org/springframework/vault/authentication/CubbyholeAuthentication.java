@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultResponse;
@@ -118,17 +118,17 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 
 	private final CubbyholeAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
-	 * {@link CubbyholeAuthenticationOptions} and {@link VaultClient}.
+	 * {@link CubbyholeAuthenticationOptions} and {@link PreviousVaultClient}.
 	 * 
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options,
-			VaultClient vaultClient) {
+			PreviousVaultClient vaultClient) {
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");

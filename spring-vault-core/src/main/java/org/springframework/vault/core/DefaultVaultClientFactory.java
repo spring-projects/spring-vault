@@ -16,42 +16,53 @@
 package org.springframework.vault.core;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.web.client.RestTemplate;
 
 /**
  * Default implementation of {@link VaultClientFactory}. Returns the provided
- * {@link VaultClient}.
+ * {@link PreviousVaultClient}.
  *
  * @author Mark Paluch
  */
 public class DefaultVaultClientFactory implements VaultClientFactory {
 
+	private final PreviousVaultClient previousVaultClient;
 	private final VaultClient vaultClient;
 
 	/**
 	 * Creates a new {@link DefaultVaultClientFactory} returning always the same
-	 * {@link VaultClient}.
+	 * {@link PreviousVaultClient}.
 	 * 
+	 * @param previousVaultClient must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
-	public DefaultVaultClientFactory(VaultClient vaultClient) {
+	public DefaultVaultClientFactory(PreviousVaultClient previousVaultClient,
+			VaultClient vaultClient) {
 
+		Assert.notNull(previousVaultClient, "VaultClient must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");
 
+		this.previousVaultClient = previousVaultClient;
 		this.vaultClient = vaultClient;
 	}
 
 	/**
-	 * Creates a new {@link DefaultVaultClientFactory} using a default {@link VaultClient}
-	 * and {@link VaultEndpoint}. Will use Vault at {@code https://localhost:8200} .
+	 * Creates a new {@link DefaultVaultClientFactory} using a default
+	 * {@link PreviousVaultClient} and {@link VaultEndpoint}. Will use Vault at
+	 * {@code https://localhost:8200} .
 	 * 
-	 * @see VaultClient
+	 * @see PreviousVaultClient
 	 * @see VaultEndpoint
 	 */
 	public DefaultVaultClientFactory() {
-		this(new VaultClient(new RestTemplate(), new VaultEndpoint()));
+		this(new PreviousVaultClient(new RestTemplate(), new VaultEndpoint()), null);
+	}
+
+	public PreviousVaultClient getPreviousVaultClient() {
+		return previousVaultClient;
 	}
 
 	@Override

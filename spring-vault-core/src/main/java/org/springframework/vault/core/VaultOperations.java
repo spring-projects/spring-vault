@@ -21,6 +21,7 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
@@ -30,12 +31,12 @@ import org.springframework.vault.support.VaultResponseSupport;
 /**
  * Interface that specifies a basic set of Vault operations, implemented by
  * {@link VaultTemplate}. This is the main entry point to interact with Vault in an
- * authenticated and unauthenticated context with configured {@link VaultClient}
+ * authenticated and unauthenticated context with configured {@link PreviousVaultClient}
  * instances.
  * <p>
- * {@link VaultOperations} resolves {@link VaultClient} instances and allows execution of
- * callback methods on various levels. Callbacks can execute requests within a
- * {@link VaultOperations#doWithVault(SessionCallback) session}, the
+ * {@link VaultOperations} resolves {@link PreviousVaultClient} instances and allows
+ * execution of callback methods on various levels. Callbacks can execute requests within
+ * a {@link VaultOperations#doWithVault(SessionCallback) session}, the
  * {@link VaultOperations#doWithVault(ClientCallback) client (without requiring a
  * session)} and a
  * {@link VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback) low-level}
@@ -45,7 +46,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @see VaultOperations#doWithVault(ClientCallback)
  * @see VaultOperations#doWithVault(SessionCallback)
  * @see VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback)
- * @see VaultClient
+ * @see PreviousVaultClient
  * @see VaultTemplate
  * @see VaultTokenOperations
  * @see org.springframework.vault.authentication.SessionManager
@@ -135,7 +136,7 @@ public interface VaultOperations {
 
 	/**
 	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using
-	 * {@link VaultClient} without requiring a session.
+	 * {@link PreviousVaultClient} without requiring a session.
 	 *
 	 * @param clientCallback the request.
 	 * @return the {@link ClientCallback} return value.

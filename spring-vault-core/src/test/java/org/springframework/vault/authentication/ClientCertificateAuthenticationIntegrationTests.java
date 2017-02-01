@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.core.VaultOperations;
@@ -80,7 +80,8 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), prepareCertAuthenticationMethod());
-		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory,
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				clientHttpRequestFactory,
 				new VaultEndpoint());
 
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
@@ -97,7 +98,8 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), Settings.createSslConfiguration());
-		VaultClient vaultClient = new VaultClient(clientHttpRequestFactory,
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				clientHttpRequestFactory,
 				new VaultEndpoint());
 
 		new ClientCertificateAuthentication(vaultClient).login();

@@ -51,7 +51,8 @@ public class VaultEndpoint implements Serializable {
 	private String scheme = "https";
 
 	/**
-	 * Create a {@link VaultEndpoint} given a {@code host} and {@code port}.
+	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
+	 * {@literal https}.
 	 * 
 	 * @param host must not be empty or {@literal null}.
 	 * @param port must be a valid port in the range of 1-65535
@@ -65,6 +66,23 @@ public class VaultEndpoint implements Serializable {
 
 		vaultEndpoint.setHost(host);
 		vaultEndpoint.setPort(port);
+
+		return vaultEndpoint;
+	}
+
+	/**
+	 * Create a plaintext {@link VaultEndpoint} given a {@code host} and {@code port}
+	 * using {@literal http}.
+	 * 
+	 * @param host must not be empty or {@literal null}.
+	 * @param port must be a valid port in the range of 1-65535
+	 * @return a new {@link VaultEndpoint}.
+	 */
+	public static VaultEndpoint plain(String host, int port) {
+
+		VaultEndpoint vaultEndpoint = create(host, port);
+
+		vaultEndpoint.setScheme("http");
 
 		return vaultEndpoint;
 	}
