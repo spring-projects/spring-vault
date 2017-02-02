@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,15 +42,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 public class VaultPropertySourceMultipleIntegrationTests {
 
-	@VaultPropertySources({ @VaultPropertySource("secret/myapp/profile"),
+	@VaultPropertySources({
+			@VaultPropertySource(value = "secret/myapp/profile", propertyNamePrefix = "database."),
 			@VaultPropertySource("secret/myapp") })
 	static class Config extends VaultIntegrationTestConfiguration {
 	}
 
 	@Autowired
 	Environment env;
+
 	@Autowired
 	ApplicationContext context;
+
 	@Value("${myapp}")
 	String myapp;
 
@@ -72,7 +75,7 @@ public class VaultPropertySourceMultipleIntegrationTests {
 	public void environmentShouldResolveProperties() {
 
 		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
-		assertThat(env.getProperty("myprofile")).isEqualTo("myprofilevalue");
+		assertThat(env.getProperty("database.myprofile")).isEqualTo("myprofilevalue");
 	}
 
 	@Test

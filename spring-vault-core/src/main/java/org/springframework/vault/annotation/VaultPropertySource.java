@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;VaultPropertySource(&quot;secret/my-application&quot;)
  * public class AppConfig {
+ * 
  * 	&#064;Autowired
  * 	Environment env;
  * 
@@ -52,8 +53,8 @@ import org.springframework.context.annotation.Import;
  * }
  * </pre>
  *
- * Notice that the {@code Environment} object is @
- * {@link org.springframework.beans.factory.annotation.Autowired Autowired} into the
+ * Notice that the {@code Environment} object is
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} into the
  * configuration class and then used when populating the {@code TestBean} object. Given
  * the configuration above, a call to {@code testBean.getPassword()} will return
  * "mysecretpassword".
@@ -85,6 +86,12 @@ public @interface VaultPropertySource {
 	 * property source, and in the order declared.
 	 */
 	String[] value();
+
+	/**
+	 * Property name prefix for properties obtained from Vault. All properties will be
+	 * prefixed with {@code propertyNamePrefix}.
+	 */
+	String propertyNamePrefix() default "";
 
 	/**
 	 * Configure the name of the {@link org.springframework.vault.core.VaultTemplate} bean

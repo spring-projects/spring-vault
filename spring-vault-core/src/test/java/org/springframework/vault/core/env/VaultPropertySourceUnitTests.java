@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.VaultResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,23 +43,24 @@ public class VaultPropertySourceUnitTests {
 	VaultTemplate vaultTemplate;
 
 	@Test(expected = IllegalArgumentException.class)
-	public void shouldRejectEmptyPath() throws Exception {
-		new VaultPropertySource("hello", vaultTemplate, "");
+	public void shouldRejectEmptyPath() {
+		new VaultPropertySource("hello", vaultTemplate, "", PropertyTransformers.noop());
 
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void shouldRejectPathStartingWithSlash() throws Exception {
-		new VaultPropertySource("hello", vaultTemplate, "/secret");
+	public void shouldRejectPathStartingWithSlash() {
+		new VaultPropertySource("hello", vaultTemplate, "/secret",
+				PropertyTransformers.noop());
 	}
 
 	@Test
-	public void shouldLoadProperties() throws Exception {
+	public void shouldLoadProperties() {
 
 		prepareResponse();
 
 		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
-				vaultTemplate, "secret/myapp");
+				vaultTemplate, "secret/myapp", PropertyTransformers.noop());
 
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo("1");
@@ -66,12 +68,30 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void getPropertyNamesShouldReturnNames() throws Exception {
+	public void shouldLoadAndTransformProperties() {
 
 		prepareResponse();
 
 		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
-				vaultTemplate, "secret/myapp");
+				vaultTemplate, "secret/myapp",
+				PropertyTransformers.propertyNamePrefix("database."));
+
+		assertThat(vaultPropertySource.containsProperty("database.key")).isTrue();
+		assertThat(vaultPropertySource.containsProperty("key")).isFalse();
+		assertThat(vaultPropertySource.getProperty("database.key")).isEqualTo("value");
+		assertThat(vaultPropertySource.getProperty("key")).isNull();
+		assertThat(vaultPropertySource.getProperty("database.integer")).isEqualTo("1");
+		assertThat(vaultPropertySource.getProperty("database.complex.key")).isEqualTo(
+				"value");
+	}
+
+	@Test
+	public void getPropertyNamesShouldReturnNames() {
+
+		prepareResponse();
+
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
+				vaultTemplate, "secret/myapp", PropertyTransformers.noop());
 
 		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer",
 				"complex.key");

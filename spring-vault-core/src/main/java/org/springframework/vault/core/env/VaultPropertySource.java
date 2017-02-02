@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,16 +28,20 @@ import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.JsonMapFlattener;
 import org.springframework.vault.support.VaultResponse;
 
 /**
  * {@link PropertySource} that reads keys and values from a {@link VaultTemplate} and
- * {@code path}.
+ * {@code path}. Transforms properties after retrieving these from Vault using
+ * {@link PropertyTransformer}.
  *
  * @author Mark Paluch
- * @since 3.1
  * @see org.springframework.core.env.PropertiesPropertySource
+ * @see PropertyTransformer
+ * @see PropertyTransformers
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
@@ -46,6 +50,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	private final String path;
 
 	private final Map<String, String> properties = new LinkedHashMap<String, String>();
+
+	private final PropertyTransformer propertyTransformer;
 
 	private final Object lock = new Object();
 
@@ -73,13 +79,33 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * be empty or {@literal null}.
 	 */
 	public VaultPropertySource(String name, VaultOperations vaultOperations, String path) {
+		this(name, vaultOperations, path, PropertyTransformers.noop());
+	}
+
+	/**
+	 * Create a new {@link VaultPropertySource} given a {@code name},
+	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
+	 * properties upon construction and transforms these by applying
+	 * {@link PropertyTransformer}.
+	 *
+	 * @param name name of the property source, must not be {@literal null}.
+	 * @param vaultOperations must not be {@literal null}.
+	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
+	 * be empty or {@literal null}.
+	 * @param propertyTransformer object to transform properties.
+	 * @see PropertyTransformers
+	 */
+	public VaultPropertySource(String name, VaultOperations vaultOperations, String path,
+			PropertyTransformer propertyTransformer) {
 
 		super(name, vaultOperations);
 
 		Assert.hasText(path, "Path name must contain at least one character");
 		Assert.isTrue(!path.startsWith("/"), "Path name must not start with a slash (/)");
+		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
 		this.path = path;
+		this.propertyTransformer = propertyTransformer;
 
 		loadProperties();
 	}
@@ -97,10 +123,25 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 			Map<String, String> properties = doGetProperties(path);
 
 			if (properties != null) {
-				this.properties.putAll(properties);
+				this.properties.putAll(doTransformProperties(properties));
 			}
 		}
 	}
+
+	@Override
+	public Object getProperty(String name) {
+		return this.properties.get(name);
+	}
+
+	@Override
+	public String[] getPropertyNames() {
+		Set<String> strings = this.properties.keySet();
+		return strings.toArray(new String[strings.size()]);
+	}
+
+	// -------------------------------------------------------------------------
+	// Implementation hooks and helper methods
+	// -------------------------------------------------------------------------
 
 	/**
 	 * Hook method to obtain properties from Vault.
@@ -125,9 +166,19 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	}
 
 	/**
+	 * Hook method to transform properties using {@link PropertyTransformer}.
+	 *
+	 * @param properties must not be {@literal null}.
+	 * @return the transformed properties.
+	 */
+	protected Map<String, String> doTransformProperties(Map<String, String> properties) {
+		return this.propertyTransformer.transformProperties(properties);
+	}
+
+	/**
 	 * Utility method converting a {@code String/Object} map to a {@code String/String}
 	 * map.
-	 * 
+	 *
 	 * @param data the map
 	 * @return
 	 */
@@ -135,14 +186,4 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 		return JsonMapFlattener.flatten(data);
 	}
 
-	@Override
-	public Object getProperty(String name) {
-		return this.properties.get(name);
-	}
-
-	@Override
-	public String[] getPropertyNames() {
-		Set<String> strings = this.properties.keySet();
-		return strings.toArray(new String[strings.size()]);
-	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.core.util.PropertyTransformer;
+import org.springframework.vault.core.util.PropertyTransformers;
 
 /**
  * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s
@@ -92,13 +94,18 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		for (AnnotationAttributes propertySource : propertySources) {
 
 			String[] paths = propertySource.getStringArray("value");
+			String ref = propertySource.getString("vaultTemplateRef");
+			String propertyNamePrefix = propertySource.getString("propertyNamePrefix");
+
 			Assert.isTrue(paths.length > 0,
 					"At least one @VaultPropertySource(value) location is required");
 
-			String ref = propertySource.getString("vaultTemplateRef");
-
 			Assert.hasText(ref,
 					"'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
+
+			PropertyTransformer propertyTransformer = StringUtils
+					.hasText(propertyNamePrefix) ? PropertyTransformers
+					.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
 
 			for (String propertyPath : paths) {
 
@@ -112,6 +119,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 				builder.addConstructorArgValue(propertyPath);
 				builder.addConstructorArgReference(ref);
 				builder.addConstructorArgValue(propertyPath);
+				builder.addConstructorArgValue(propertyTransformer);
+
 				builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 				registry.registerBeanDefinition("vaultPropertySource#" + counter,
