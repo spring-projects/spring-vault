@@ -7,21 +7,21 @@ methods. Spring Vault supports multiple authentications mechanisms.
 
 == Externalizing login credentials
 
-Obtaining first-time access to a secured system is known as secure introduction. 
+Obtaining first-time access to a secured system is known as secure introduction.
 Any client requires ephemeral or permanent credentials to access Vault. Externalizing credentials
 is a good pattern to keep code maintainability high but comes at a risk of increased disclosure.
 
 Disclosure of login credentials to any party allows login to Vault and access secrets that
 are permitted by the underlying role. Picking the appropriate client authentication and
 injecting credentials into the application is subject to risk evaluation.
- 
-Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction] is a natural fit 
+
+Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction] is a natural fit
 to keep configuration outside the application code. You can use system properties, environment
 variables or property files to store login credentials. Each approach comes with its own properties.
 Keep in mind that the command line and environment properties can be introspected with appropriate
 OS access levels.
- 
-.Externalizing `vault.token` to a properties file 
+
+.Externalizing `vault.token` to a properties file
 ====
 [source, java]
 ----
@@ -39,7 +39,7 @@ public class Config extends AbstractVaultConfiguration {
 
 NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultPropertySource`, injection via `@Autowired Environment environment` will not provide the `Environment` as the environment bean is still in construction and autowiring comes at a later stage. Your configuration class should rather implement `ApplicationContextAware` and obtain the `Environment` from `ApplicationContext`.
 
-See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`] 
+See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`]
 for a sample on referencing properties in components and other property sources.
 
 [[vault.authentication.token]]
@@ -104,7 +104,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .userIdMechanism(new IpAddressUserId())
                 .build();
 
-        return new AppIdAuthentication(options, vaultClient());
+        return new AppIdAuthentication(options, restOperations());
     }
 
     // …
@@ -143,7 +143,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .userIdMechanism(new MacAddressUserId())
                 .build();
 
-        return new AppIdAuthentication(options, vaultClient());
+        return new AppIdAuthentication(options, restOperations());
     }
 
     // …
@@ -217,7 +217,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .secretId("…")
                 .build();
 
-        return new AppRoleAuthentication(options, vaultClient());
+        return new AppRoleAuthentication(options, restOperations());
     }
 
     // …
@@ -250,7 +250,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new AwsEc2Authentication(vaultClient());
+        return new AwsEc2Authentication(restOperations());
     }
 
     // …
@@ -299,7 +299,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new ClientCertificateAuthentication(options, vaultClient());
+        return new ClientCertificateAuthentication(options, restOperations());
     }
 
     // …
@@ -355,7 +355,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .wrapped()
                 .build();
 
-        return new CubbyholeAuthentication(options, vaultClient());
+        return new CubbyholeAuthentication(options, restOperations());
     }
 
     // …
@@ -410,7 +410,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .path("cubbyhole/token")
                 .build();
 
-        return new CubbyholeAuthentication(options, vaultClient());
+        return new CubbyholeAuthentication(options, restOperations());
     }
 
     // …

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,20 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link AppIdAuthentication}.
- * 
+ *
  * @author Mark Paluch
  */
 public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport {
@@ -46,24 +46,23 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 			prepare().mountAuth("app-id");
 		}
 
-		prepare().getVaultOperations().doWithVault(
-				new VaultOperations.SessionCallback<Object>() {
-
+		prepare().getVaultOperations().doWithSession(
+				new RestOperationsCallback<Object>() {
 					@Override
-					public Object doWithVault(VaultOperations.VaultSession session) {
+					public Object doWithRestOperations(RestOperations restOperations) {
 
 						Map<String, String> appIdData = new HashMap<String, String>();
 						appIdData.put("value", "dummy"); // policy
 						appIdData.put("display_name", "this is my test application");
 
-						session.postForEntity("auth/app-id/map/app-id/myapp", appIdData,
-								Map.class);
+						restOperations.postForEntity("auth/app-id/map/app-id/myapp",
+								appIdData, Map.class);
 
 						Map<String, String> userIdData = new HashMap<String, String>();
 						userIdData.put("value", "myapp"); // name of the app-id
 						userIdData.put("cidr_block", "0.0.0.0/0");
 
-						session.postForEntity(
+						restOperations.postForEntity(
 								"auth/app-id/map/user-id/static-userid-value",
 								userIdData, Map.class);
 
@@ -80,10 +79,11 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options, vaultClient);
+		AppIdAuthentication authentication = new AppIdAuthentication(options,
+				restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -97,9 +97,9 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		new AppIdAuthentication(options, vaultClient).login();
+		new AppIdAuthentication(options, restTemplate).login();
 	}
 }

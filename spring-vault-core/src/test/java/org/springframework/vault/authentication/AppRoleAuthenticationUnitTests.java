@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -36,20 +35,22 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 /**
  * Unit tests for {@link AppRoleAuthentication}.
- * 
+ *
  * @author Mark Paluch
  */
 public class AppRoleAuthenticationUnitTests {
 
-	private VaultClient vaultClient;
+	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
 
 	@Before
 	public void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
-		mockRest = MockRestServiceServer.createServer(restTemplate);
-		vaultClient = new VaultClient(restTemplate, new VaultEndpoint());
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+
+		this.mockRest = MockRestServiceServer.createServer(restTemplate);
+		this.restTemplate = restTemplate;
 	}
 
 	@Test
@@ -60,19 +61,15 @@ public class AppRoleAuthenticationUnitTests {
 				.secretId("world") //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login"))
-				//
+		mockRest.expect(requestTo("/auth/approle/login"))
 				.andExpect(method(HttpMethod.POST))
-				//
 				.andExpect(jsonPath("$.role_id").value("hello"))
-				//
 				.andExpect(jsonPath("$.secret_id").value("world"))
-				//
 				.andRespond(
 						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
 								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, vaultClient);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
 
 		VaultToken login = sut.login();
 
@@ -87,14 +84,10 @@ public class AppRoleAuthenticationUnitTests {
 				.roleId("hello") //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login"))
-				//
+		mockRest.expect(requestTo("/auth/approle/login"))
 				.andExpect(method(HttpMethod.POST))
-				//
 				.andExpect(jsonPath("$.role_id").value("hello"))
-				//
 				.andExpect(jsonPath("$.secret_id").doesNotExist())
-				//
 				.andRespond(
 						withSuccess()
 								.contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +95,7 @@ public class AppRoleAuthenticationUnitTests {
 										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
 										+ "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, vaultClient);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
 
 		VaultToken login = sut.login();
 
@@ -119,9 +112,9 @@ public class AppRoleAuthenticationUnitTests {
 				.roleId("hello") //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/approle/login")) //
+		mockRest.expect(requestTo("/auth/approle/login")) //
 				.andRespond(withServerError());
 
-		new AppRoleAuthentication(options, vaultClient).login();
+		new AppRoleAuthentication(options, restTemplate).login();
 	}
 }

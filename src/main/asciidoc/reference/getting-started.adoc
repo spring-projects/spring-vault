@@ -101,7 +101,7 @@ And a main application to run
 package org.springframework.vault.example;
 
 import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -109,7 +109,7 @@ public class VaultApp {
 
     public static void main(String[] args) {
 
-        VaultTemplate vaultTemplate = new VaultTemplate(new VaultClient(),
+        VaultTemplate vaultTemplate = new VaultTemplate(new VaultEndpoint(),
                 new TokenAuthentication("00000000-0000-0000-0000-000000000000"));
 
         Secrets secrets = new Secrets();
@@ -130,7 +130,7 @@ public class VaultApp {
 Even in this simple example, there are few things to take notice of
 
 * You can instantiate the central class of Spring Vault,
-<<vault-template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultClient`
+<<vault-template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultEndpoint`
 object and the `ClientAuthentication`.
 You are not required to spin up a Spring Context to use Spring Vault.
 * Vault is expected to be configured with a root token of
@@ -173,7 +173,7 @@ While there are many convenience methods on `VaultTemplate` to help you easily
 perform common tasks if you should need to access the Vault API directly to access
 functionality not explicitly exposed by the `VaultTemplate` you can use one of
 several execute callback methods to access underlying APIs. The execute callbacks
-will give you a reference to either a `RestTemplate` or a `VaultClient` object.
+will give you a reference to a `RestOperations` object.
 Please see the section <<vault.core.executioncallback,Execution Callbacks>> for more information.
 
 Now let's look at a examples of how to work with Vault in the context of the Spring container.
@@ -181,12 +181,11 @@ Now let's look at a examples of how to work with Vault in the context of the Spr
 [[vault.core.template.beans]]
 === Registering and configuring Spring Vault beans
 
-Using Spring Vault does not require a Spring Context. However, instances of `VaultTemplate`,
-`VaultClient` and `SessionManagers` registered inside a managed context will participate
+Using Spring Vault does not require a Spring Context. However, instances of `VaultTemplate` and `SessionManager` registered inside a managed context will participate
 in http://docs.spring.io/spring/docs/current/spring-framework-reference/html/beans.html#beans-factory-nature[lifecycle events]
 provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
-application shutdown. You also benefit from reusing the same `VaultTemplate` and `VaultClient`
-instances across your application.
+application shutdown. You also benefit from reusing the same `VaultTemplate`
+instance across your application.
 
 Spring Vault comes with a supporting configuration class that provides bean definitions
 for use inside a Spring context. Application configuration
@@ -243,16 +242,16 @@ public class AppConfig extends AbstractVaultConfiguration {
      */
     @Override
     public VaultEndpoint vaultEndpoint() {
-        return VaultEndpoint.from(vaultUri);                       <1>
+        return VaultEndpoint.from(vaultUri);                          <1>
     }
 
     /**
      * Configure a Client Certificate authentication.
-     * {@link VaultClient} can be obtained from {@link #vaultClient()}.
+     * {@link RestOperations} can be obtained from {@link #restOperations()}.
      */
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new ClientCertificateAuthentication(vaultClient()); <2>
+        return new ClientCertificateAuthentication(restOperations()); <2>
     }
 }
 ----
@@ -416,36 +415,30 @@ to perform uncommon operations that we've not exposed as methods on `VaultTempla
 
 Here is a list of execute callback methods.
 
-* `<T> T` *doWithVault* `(ClientCallback<T> clientCallback)` Executes the given
-`ClientCallback`, allows to interact with Vault using  `VaultClient` without requiring a session.
+* `<T> T` *doWithVault* `(RestOperationsCallback<T> callback)` Executes the given
+`RestOperationsCallback`, allows to interact with Vault using  `RestOperations` without requiring a session.
 
-* `<T> T` *doWithVault* `(SessionCallback<T> sessionCallback)` Executes the given
-`SessionCallback`, allows to interact with Vault in an authenticated session.
-
-* `<T> T` *doWithRestTemplate* `(String pathTemplate, Map<String, ?> variables, RestTemplateCallback<T> callback)`
-Expands the `pathTemplate` to an `java.net.URI` and allows low-level interaction
-with the underlying `org.springframework.web.client.RestTemplate`.
-
+* `<T> T` *doWithSession* `(RestOperationsCallback<T> callback)` Executes the given
+`RestOperationsCallback`, allows to interact with Vault in an authenticated session.
 
 Here is an example that uses the `ClientCallback` to initialize Vault:
 
 ====
 [source,java]
 ----
-return vaultTemplate.doWithVault(new ClientCallback<VaultInitializationResponse>() {
+vaultOperations.doWithVault(new RestOperationsCallback<VaultInitializationResponse>() {
 
-        @Override
-        public VaultInitializationResponse doWithVault(VaultClient client) {
+  @Override
+  public VaultInitializationResponse doWithRestOperations(RestOperations restOperations) {
 
-            VaultResponseEntity<VaultInitializationResponse> response = client.putForEntity("sys/init",
-                    vaultInitializationRequest, VaultInitializationResponse.class);
+    ResponseEntity<VaultInitializationResponse> exchange = restOperations
+                       .exchange("/sys/init", HttpMethod.PUT,
+                                 new HttpEntity<Object>(request),
+                                 VaultInitializationResponse.class);
 
-            if (response.isSuccessful() && response.hasBody()) {
-                return response.getBody();
-            }
+    return exchange.getBody();
+    }
+});
 
-            return null.
-        }
-    });
 ----
 ====

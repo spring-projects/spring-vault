@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
@@ -37,7 +38,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @see AppRoleAuthenticationOptions
- * @see VaultClient
+ * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
  * AppRole</a>
  */
@@ -47,23 +48,23 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 	private final AppRoleAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final RestOperations restOperations;
 
 	/**
 	 * Creates a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
-	 * and {@link VaultClient}.
+	 * and {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
 	 */
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options,
-			VaultClient vaultClient) {
+			RestOperations restOperations) {
 
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "VaultClient must not be null");
+		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.vaultClient = vaultClient;
+		this.restOperations = restOperations;
 	}
 
 	@Override
@@ -76,18 +77,18 @@ public class AppRoleAuthentication implements ClientAuthentication {
 		Map<String, String> login = getAppRoleLogin(options.getRoleId(),
 				options.getSecretId());
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(
-				String.format("auth/%s/login", options.getPath()), login,
-				VaultResponse.class);
+		try {
+			VaultResponse response = restOperations.postForObject("/auth/{mount}/login",
+					login, VaultResponse.class, options.getPath());
 
-		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using AppRole: %s",
-					entity.getMessage()));
+			logger.debug("Login successful using AppRole authentication");
+
+			return LoginTokenUtil.from(response.getAuth());
 		}
-
-		logger.debug("Login successful using AppRole authentication");
-
-		return LoginTokenUtil.from(entity.getBody().getAuth());
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format("Cannot login using AppRole: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
+		}
 	}
 
 	private Map<String, String> getAppRoleLogin(String roleId, String secretId) {

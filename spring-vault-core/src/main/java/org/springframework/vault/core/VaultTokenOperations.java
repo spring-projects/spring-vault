@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,14 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 
 /**
  * Interface that specifies token-related operations.
- * 
+ *
  * @author Mark Paluch
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  */
@@ -30,7 +30,7 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new token.
-	 * 
+	 *
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/create</a>
@@ -39,7 +39,7 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new token for the given {@link VaultTokenRequest}.
-	 * 
+	 *
 	 * @param request must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
@@ -68,7 +68,7 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Renew a {@link VaultToken}.
-	 * 
+	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
@@ -78,7 +78,7 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Revoke a {@link VaultToken}.
-	 * 
+	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/revoke/{token}</a>

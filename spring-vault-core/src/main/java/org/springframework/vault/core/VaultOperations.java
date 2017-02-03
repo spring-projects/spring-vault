@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,26 @@
 package org.springframework.vault.core;
 
 import java.util.List;
-import java.util.Map;
 
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultResponseEntity;
-import org.springframework.vault.client.VaultAccessor.RestTemplateCallback;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.web.client.RestClientException;
 
 /**
  * Interface that specifies a basic set of Vault operations, implemented by
  * {@link VaultTemplate}. This is the main entry point to interact with Vault in an
- * authenticated and unauthenticated context with configured {@link VaultClient}
- * instances.
+ * authenticated and unauthenticated context.
  * <p>
- * {@link VaultOperations} resolves {@link VaultClient} instances and allows execution of
- * callback methods on various levels. Callbacks can execute requests within a
- * {@link VaultOperations#doWithVault(SessionCallback) session}, the
- * {@link VaultOperations#doWithVault(ClientCallback) client (without requiring a
- * session)} and a
- * {@link VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback) low-level}
- * {@link org.springframework.web.client.RestTemplate} level.
+ * {@link VaultOperations} allows execution of callback methods. Callbacks can execute
+ * requests within a {@link VaultOperations#doWithSession(RestOperationsCallback) session
+ * context} and the {@link VaultOperations#doWithVault(RestOperationsCallback) without a
+ * session}.
  *
  * @author Mark Paluch
- * @see VaultOperations#doWithVault(ClientCallback)
- * @see VaultOperations#doWithVault(SessionCallback)
- * @see VaultOperations#doWithRestTemplate(String, Map, RestTemplateCallback)
- * @see VaultClient
+ * @see VaultOperations#doWithSession(RestOperationsCallback)
+ * @see VaultOperations#doWithVault(RestOperationsCallback)
+ * @see org.springframework.web.client.RestOperations
  * @see VaultTemplate
  * @see VaultTokenOperations
  * @see org.springframework.vault.authentication.SessionManager
@@ -70,7 +60,7 @@ public interface VaultOperations {
 	/**
 	 * Returns {@link VaultTransitOperations} if the transit backend is mounted on a
 	 * different path than {@code transit}.
-	 * 
+	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transit backend.
 	 */
@@ -134,169 +124,32 @@ public interface VaultOperations {
 	void delete(String path);
 
 	/**
-	 * Executes a Vault {@link ClientCallback}. Allows to interact with Vault using
-	 * {@link VaultClient} without requiring a session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
+	 * using {@link org.springframework.web.client.RestOperations} without requiring a
+	 * session.
 	 *
 	 * @param clientCallback the request.
-	 * @return the {@link ClientCallback} return value.
+	 * @return the {@link RestOperationsCallback} return value.
+	 * @throws VaultException when a
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * @throws RestClientException exceptions from
+	 * {@link org.springframework.web.client.RestOperations}.
 	 */
-	<T> T doWithVault(ClientCallback<T> clientCallback);
+	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException,
+			RestClientException;
 
 	/**
-	 * Executes a Vault {@link SessionCallback}. Allows to interact with Vault in an
-	 * authenticated session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
+	 * an authenticated session.
 	 *
 	 * @param sessionCallback the request.
-	 * @return the {@link SessionCallback} return value.
+	 * @return the {@link RestOperationsCallback} return value.
+	 * @throws VaultException when a
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * @throws RestClientException exceptions from
+	 * {@link org.springframework.web.client.RestOperations}.
 	 */
-	<T> T doWithVault(SessionCallback<T> sessionCallback);
+	<T> T doWithSession(RestOperationsCallback<T> sessionCallback) throws VaultException,
+			RestClientException;
 
-	/**
-	 * Executes {@link RestTemplateCallback}. Expands the {@code pathTemplate} to an
-	 * {@link java.net.URI} and allows low-level interaction with the underlying
-	 * {@link org.springframework.web.client.RestTemplate}.
-	 *
-	 * @param pathTemplate the path of the resource, e.g. {@code transit/ key}/foo}, must
-	 * not be empty or {@literal null}.
-	 * @param variables the variables for expansion of the {@code pathTemplate}, must not
-	 * be {@literal null}.
-	 * @param callback the request callback.
-	 * @return the {@link RestTemplateCallback} return value.
-	 */
-	<T> T doWithRestTemplate(String pathTemplate, Map<String, ?> variables,
-			RestTemplateCallback<T> callback);
-
-	/**
-	 * A callback for executing arbitrary operations on the {@link VaultClient}.
-	 *
-	 * @author Mark Paluch
-	 */
-	public interface ClientCallback<T> {
-
-		/**
-		 * Callback method.
-		 *
-		 * @param client session to use, must not be {@literal null}.
-		 * @return a result object or null if none.
-		 */
-		T doWithVault(VaultClient client);
-	}
-
-	/**
-	 * A callback for executing arbitrary operations on the {@link VaultSession}.
-	 *
-	 * @author Mark Paluch
-	 */
-	public interface SessionCallback<T> {
-
-		/**
-		 * Callback method.
-		 *
-		 * @param session session to use, must not be {@literal null}.
-		 * @return a result object or null if none.
-		 */
-		T doWithVault(VaultSession session);
-	}
-
-	/**
-	 * An authenticated Vault session. {@link VaultSession} exposes request accessor
-	 * methods to be executed in an authenticated context.
-	 *
-	 * @author Mark Paluch
-	 */
-	public interface VaultSession {
-
-		/**
-		 * Retrieve a resource by GETting from the path, and returns the response as
-		 * {@link VaultResponseEntity}.
-		 *
-		 * @param path the path.
-		 * @param responseType the type of the return value
-		 * @return the response as entity.
-		 * @see VaultResponseEntity
-		 */
-		<T, S extends T> VaultResponseEntity<S> getForEntity(String path,
-				Class<T> responseType);
-
-		/**
-		 * Issue a POST request using the given object to the path, and returns the
-		 * response as {@link VaultResponseEntity}.
-		 *
-		 * @param path the path.
-		 * @param request the Object to be POSTed, may be {@code null}.
-		 * @param responseType the type of the return value
-		 * @return the response as entity.
-		 * @see VaultResponseEntity
-		 */
-		<T, S extends T> VaultResponseEntity<S> postForEntity(String path,
-				Object request, Class<T> responseType);
-
-		/**
-		 * Create a new resource by PUTting the given object to the path, and returns the
-		 * response as {@link VaultResponseEntity}.
-		 *
-		 * @param path the path.
-		 * @param request the Object to be PUT.
-		 * @param responseType the type of the return value
-		 * @return the response as entity.
-		 * @see VaultResponseEntity
-		 */
-		<T, S extends T> VaultResponseEntity<S> putForEntity(String path, Object request,
-				Class<T> responseType);
-
-		/**
-		 * Delete a resource by DELETEing from the path, and returns the response as
-		 * {@link VaultResponseEntity}.
-		 *
-		 * @param path the path.
-		 * @param responseType the type of the return value
-		 * @return the response as entity.
-		 * @see VaultResponseEntity
-		 */
-		<T, S extends T> VaultResponseEntity<S> deleteForEntity(String path,
-				Class<T> responseType);
-
-		/**
-		 * Execute the HTTP method to the given URI template, writing the given request
-		 * entity to the request, and returns the response as {@link VaultResponseEntity}.
-		 * <p>
-		 * URI Template variables are using the given URI variables, if any.
-		 *
-		 * @param pathTemplate the path template.
-		 * @param method the HTTP method (GET, POST, etc).
-		 * @param requestEntity the entity (headers and/or body) to write to the request,
-		 * may be {@code null}.
-		 * @param responseType the type of the return value.
-		 * @param uriVariables the variables to expand in the template.
-		 * @return the response as entity.
-		 */
-		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
-				HttpMethod method, HttpEntity<?> requestEntity, Class<T> responseType,
-				Map<String, ?> uriVariables);
-
-		/**
-		 * Execute the HTTP method to the given path template, writing the given request
-		 * entity to the request, and returns the response as {@link VaultResponseEntity}.
-		 * The given {@link ParameterizedTypeReference} is used to pass generic type
-		 * information:
-		 *
-		 * <pre class="code">
-		 * ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt; myBean = new ParameterizedTypeReference&lt;List&lt;MyBean&gt;&gt;() {
-		 * };
-		 * ResponseEntity&lt;List&lt;MyBean&gt;&gt; response = session.exchange(&quot;http://example.com&quot;,
-		 * 		HttpMethod.GET, null, myBean, null);
-		 * </pre>
-		 *
-		 * @param pathTemplate the path template.
-		 * @param method the HTTP method (GET, POST, etc).
-		 * @param requestEntity the entity (headers and/or body) to write to the request,
-		 * may be {@code null}.
-		 * @param responseType the type of the return value.
-		 * @param uriVariables the variables to expand in the template.
-		 * @return the response as entity.
-		 */
-		<T, S extends T> VaultResponseEntity<S> exchange(String pathTemplate,
-				HttpMethod method, HttpEntity<?> requestEntity,
-				ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables);
-	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import java.security.spec.KeySpec;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 
 /**
  * Value object representing a certificate bundle consisting of a private key, the
@@ -62,7 +62,7 @@ public class CertificateBundle {
 	/**
 	 * Create a {@link CertificateBundle} given a private key with certificates and the
 	 * serial number.
-	 * 
+	 *
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
@@ -112,7 +112,7 @@ public class CertificateBundle {
 	/**
 	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is
 	 * DER-encoded.
-	 * 
+	 *
 	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate
 	 * a {@link java.security.PrivateKey} from this {@link KeySpec}.
 	 */
@@ -130,7 +130,7 @@ public class CertificateBundle {
 	/**
 	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate
 	 * is DER-encoded.
-	 * 
+	 *
 	 * @return the {@link X509Certificate}.
 	 */
 	public X509Certificate getX509Certificate() {
@@ -173,7 +173,7 @@ public class CertificateBundle {
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
 	 * private key and certificate chain. Only supported if certificate and private key
 	 * are DER-encoded.
-	 * 
+	 *
 	 * @param keyAlias the key alias to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */

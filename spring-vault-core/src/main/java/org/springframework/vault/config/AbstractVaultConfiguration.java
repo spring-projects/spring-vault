@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.core.DefaultVaultClientFactory;
-import org.springframework.vault.core.VaultClientFactory;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Base class for Spring Vault configuration using JavaConfig.
@@ -59,10 +58,47 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Annotate with {@link Bean} in case you want to expose a
 	 * {@link ClientAuthentication} instance to the
 	 * {@link org.springframework.context.ApplicationContext}.
-	 * 
+	 *
 	 * @return the {@link ClientAuthentication} to use. Must not be {@literal null}.
 	 */
 	public abstract ClientAuthentication clientAuthentication();
+
+	/**
+	 * Create a {@link VaultTemplate}.
+	 *
+	 * @return the {@link VaultTemplate}.
+	 * @see #vaultEndpoint()
+	 * @see #clientHttpRequestFactoryWrapper()
+	 * @see #sessionManager()
+	 */
+	@Bean
+	public VaultTemplate vaultTemplate() {
+		return new VaultTemplate(vaultEndpoint(), clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), sessionManager());
+	}
+
+	/**
+	 * Construct a {@link LifecycleAwareSessionManager} using
+	 * {@link #clientAuthentication()}. This {@link SessionManager} uses
+	 * {@link #asyncTaskExecutor()}.
+	 *
+	 * @return the {@link SessionManager} for Vault session management.
+	 * @see SessionManager
+	 * @see LifecycleAwareSessionManager
+	 * @see #restOperations()
+	 * @see #clientAuthentication()
+	 * @see #asyncTaskExecutor() ()
+	 */
+	@Bean
+	public SessionManager sessionManager() {
+
+		ClientAuthentication clientAuthentication = clientAuthentication();
+
+		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
+
+		return new LifecycleAwareSessionManager(clientAuthentication,
+				asyncTaskExecutor(), restOperations());
+	}
 
 	/**
 	 * Create a {@link AsyncTaskExecutor} used by {@link LifecycleAwareSessionManager}.
@@ -70,7 +106,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * instance to the {@link org.springframework.context.ApplicationContext}. This might
 	 * be useful to supply managed executor instances or {@link AsyncTaskExecutor}s using
 	 * a queue/pooled threads.
-	 * 
+	 *
 	 * @return the {@link AsyncTaskExecutor} to use. Must not be {@literal null}.
 	 * @see AsyncTaskExecutor
 	 */
@@ -79,25 +115,33 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * Construct a {@link LifecycleAwareSessionManager} using
-	 * {@link #clientAuthentication()} and {@link #vaultClient()}. This
-	 * {@link SessionManager} uses {@link #asyncTaskExecutor()}.
-	 * 
-	 * @return the {@link SessionManager} for Vault session management.
-	 * @see SessionManager
-	 * @see LifecycleAwareSessionManager
-	 * @see #clientAuthentication()
-	 * @see #asyncTaskExecutor() ()
-	 * @see #vaultClient()
+	 * Construct a {@link RestOperations} object configured for Vault usage.
+	 *
+	 * @return the {@link RestOperations} to be used for Vault access.
+	 * @see #vaultEndpoint()
+	 * @see #clientHttpRequestFactoryWrapper()
+	 */
+	public RestOperations restOperations() {
+		return VaultClients.createRestTemplate(vaultEndpoint(),
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
+	}
+
+	/**
+	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}
+	 * . {@link ClientHttpRequestFactory} is not exposed as root bean because
+	 * {@link ClientHttpRequestFactory} is configured with {@link ClientOptions} and
+	 * {@link SslConfiguration} which are not necessarily applicable for the whole
+	 * application.
+	 *
+	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
+	 * instance.
+	 * @see #clientOptions()
+	 * @see #sslConfiguration()
 	 */
 	@Bean
-	public SessionManager sessionManager() {
-
-		ClientAuthentication clientAuthentication = clientAuthentication();
-		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-
-		return new LifecycleAwareSessionManager(clientAuthentication,
-				asyncTaskExecutor(), vaultClient());
+	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
+				clientOptions(), sslConfiguration()));
 	}
 
 	/**
@@ -118,63 +162,10 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}
-	 * . {@link ClientHttpRequestFactory} is not exposed as root bean because
-	 * {@link ClientHttpRequestFactory} is configured with {@link ClientOptions} and
-	 * {@link SslConfiguration} which are not necessarily applicable for the whole
-	 * application.
-	 * 
-	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
-	 * instance.
-	 * @see #clientOptions()
-	 * @see #sslConfiguration()
-	 */
-	@Bean
-	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions(), sslConfiguration()));
-	}
-
-	/**
-	 * @return the {@link VaultClient}
-	 * @see #clientHttpRequestFactoryWrapper()
-	 * @see #vaultEndpoint()
-	 */
-	@Bean
-	public VaultClient vaultClient() {
-		return new VaultClient(clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), vaultEndpoint());
-	}
-
-	/**
-	 * Creates the {@link VaultClientFactory} to be used with {@link VaultTemplate}. Uses
-	 * by default {@link DefaultVaultClientFactory} with the configured
-	 * {@link #vaultClient()} instance.
-	 * 
-	 * @return the {@link VaultClientFactory}.
-	 */
-	@Bean
-	public VaultClientFactory vaultClientFactory() {
-		return new DefaultVaultClientFactory(vaultClient());
-	}
-
-	/**
-	 * Create a {@link VaultTemplate}.
-	 * 
-	 * @return the {@link VaultTemplate}.
-	 * @see #vaultClientFactory()
-	 * @see #sessionManager()
-	 */
-	@Bean
-	public VaultTemplate vaultTemplate() {
-		return new VaultTemplate(vaultClientFactory(), sessionManager());
-	}
-
-	/**
 	 * Return the {@link Environment} to access property sources during Spring Vault
 	 * bootstrapping. Requires {@link #setApplicationContext(ApplicationContext)
 	 * ApplicationContext} to be set.
-	 * 
+	 *
 	 * @return the {@link Environment} to access property sources during Spring Vault
 	 * bootstrapping.
 	 */

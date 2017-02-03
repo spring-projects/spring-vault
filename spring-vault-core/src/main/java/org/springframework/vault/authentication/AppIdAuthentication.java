@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * AppId implementation of {@link ClientAuthentication}. {@link AppIdAuthentication} uses
@@ -35,7 +36,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @see AppIdAuthenticationOptions
- * @see VaultClient
+ * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
  * ID</a>
  */
@@ -45,22 +46,23 @@ public class AppIdAuthentication implements ClientAuthentication {
 
 	private final AppIdAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final RestOperations restOperations;
 
 	/**
 	 * Creates a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
-	 * {@link VaultClient}.
+	 * {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
 	 */
-	public AppIdAuthentication(AppIdAuthenticationOptions options, VaultClient vaultClient) {
+	public AppIdAuthentication(AppIdAuthenticationOptions options,
+			RestOperations restOperations) {
 
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "VaultClient must not be null");
+		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.vaultClient = vaultClient;
+		this.restOperations = restOperations;
 	}
 
 	@Override
@@ -73,18 +75,18 @@ public class AppIdAuthentication implements ClientAuthentication {
 		Map<String, String> login = getAppIdLogin(options.getAppId(), options
 				.getUserIdMechanism().createUserId());
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient.postForEntity(
-				String.format("auth/%s/login", options.getPath()), login,
-				VaultResponse.class);
+		try {
+			VaultResponse response = restOperations.postForObject("/auth/{mount}/login",
+					login, VaultResponse.class, options.getPath());
 
-		if (!entity.isSuccessful()) {
-			throw new VaultException(String.format("Cannot login using app-id: %s",
-					entity.getMessage()));
+			logger.debug("Login successful using AppId authentication");
+
+			return LoginTokenUtil.from(response.getAuth());
 		}
-
-		logger.debug("Login successful using AppId authentication");
-
-		return LoginTokenUtil.from(entity.getBody().getAuth());
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format("Cannot login using app-id: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
+		}
 	}
 
 	private Map<String, String> getAppIdLogin(String appId, String userId) {

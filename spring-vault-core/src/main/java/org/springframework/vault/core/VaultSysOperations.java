@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.springframework.vault.core;
 
 import java.util.Map;
 
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
@@ -26,7 +26,7 @@ import org.springframework.vault.support.VaultUnsealStatus;
 
 /**
  * Interface that specifies a basic set of administrative Vault operations.
- * 
+ *
  * @author Mark Paluch
  */
 public interface VaultSysOperations {
@@ -40,7 +40,7 @@ public interface VaultSysOperations {
 
 	/**
 	 * Initialize Vault with a {@link VaultInitializationRequest}.
-	 * 
+	 *
 	 * @param vaultInitializationRequest must not be {@literal null}.
 	 * @return the {@link VaultInitializationResponse}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">PUT
@@ -51,7 +51,7 @@ public interface VaultSysOperations {
 
 	/**
 	 * Seal vault.
-	 * 
+	 *
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-seal.html">PUT
 	 * /sys/seal</a>
 	 */
@@ -59,7 +59,7 @@ public interface VaultSysOperations {
 
 	/**
 	 * Unseal vault. See {@link VaultUnsealStatus#getProgress()} for progress.
-	 * 
+	 *
 	 * @param keyShare must not be empty and not {@literal null}.
 	 * @return the {@link VaultUnsealStatus}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">PUT
@@ -76,7 +76,7 @@ public interface VaultSysOperations {
 
 	/**
 	 * Mounts a secret backend {@link VaultMount} to {@code path}.
-	 * 
+	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST
@@ -93,7 +93,7 @@ public interface VaultSysOperations {
 
 	/**
 	 * Unmounts the secret backend mount at {@code path}.
-	 * 
+	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE
 	 * /sys/mounts/{mount}</a>

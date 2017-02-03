@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,12 +20,17 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
@@ -37,7 +42,7 @@ import org.springframework.vault.support.VaultToken;
  * interact with Vault. The login token can be retrieved either from a wrapped response or
  * from the {@code data} section.
  * <h2>Wrapped token response usage</h2> <strong>Create a Token</strong>
- * 
+ *
  * <pre>
  * <code>
  *  $ vault token-create -wrap-ttl="10m"
@@ -51,7 +56,7 @@ import org.springframework.vault.support.VaultToken;
  * </pre>
  *
  * <strong>Setup {@link CubbyholeAuthentication}</strong>
- * 
+ *
  * <pre>
  * <code>
  *  CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions
@@ -59,7 +64,7 @@ import org.springframework.vault.support.VaultToken;
  * 		.initialToken(VaultToken.of("397ccb93-ff6c-b17b-9389-380b01ca2645"))
  * 		.wrapped()
  *  		.build();
- *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+ *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restOperations);
  * </code>
  * </pre>
  *
@@ -75,7 +80,7 @@ import org.springframework.vault.support.VaultToken;
  *  token_duration 	0s
  *  token_renewable	false
  *  token_policies 	[root]
- * 
+ *
  *  $ token-create -use-limit=2 -orphan -no-default-policy -policy=none
  *  Key            	Value
  *  ---            	-----
@@ -84,7 +89,7 @@ import org.springframework.vault.support.VaultToken;
  *  token_duration 	0s
  *  token_renewable	false
  *  token_policies 	[none]
- * 
+ *
  *  $ export VAULT_TOKEN=895cb88b-aef4-0e33-ba65-d50007290780
  *  $ vault write cubbyhole/token token=f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
  * </code>
@@ -99,12 +104,13 @@ import org.springframework.vault.support.VaultToken;
  * 		.initialToken(VaultToken.of("895cb88b-aef4-0e33-ba65-d50007290780"))
  * 		.path("cubbyhole/token")
  * 		.build();
- *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
+ *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restOperations);
  * </code>
  * </pre>
  *
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
+ * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  * @see <a href="https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
  * Secret Backend</a>
@@ -118,55 +124,61 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 
 	private final CubbyholeAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final RestOperations restOperations;
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
-	 * {@link CubbyholeAuthenticationOptions} and {@link VaultClient}.
-	 * 
+	 * {@link CubbyholeAuthenticationOptions} and {@link RestOperations}.
+	 *
 	 * @param options must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options,
-			VaultClient vaultClient) {
+			RestOperations restOperations) {
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "VaultClient must not be null");
+		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.vaultClient = vaultClient;
+		this.restOperations = restOperations;
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		VaultResponseEntity<VaultResponse> entity = vaultClient.getForEntity(
-				options.getPath(), options.getInitialToken(), VaultResponse.class);
+		try {
 
-		if (entity.isSuccessful() && entity.hasBody()) {
+			ResponseEntity<VaultResponse> entity = restOperations.exchange(
+					options.getPath(),
+					HttpMethod.GET,
+					new HttpEntity<Object>(VaultHttpHeaders.from(options
+							.getInitialToken())), VaultResponse.class);
 
-			VaultResponse body = entity.getBody();
-			Map<String, Object> data = body.getData();
+			Map<String, Object> data = entity.getBody().getData();
 
-			VaultToken token = getToken(entity, data);
+			VaultToken token = getToken(data);
 			if (token != null) {
 
 				logger.debug("Login successful using Cubbyhole authentication");
 				return token;
 			}
+
+			throw new VaultException(String.format(
+					"Cannot retrieve Token from cubbyhole: %s", entity.getStatusCode()));
+		}
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format(
+					"Cannot retrieve Token from cubbyhole: %s %s", e.getStatusCode(),
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 
-		throw new VaultException(String.format(
-				"Cannot retrieve Token from cubbyhole: %s %s", entity.getStatusCode(),
-				entity.getMessage()));
 	}
 
-	private VaultToken getToken(VaultResponseEntity<VaultResponse> entity,
-			Map<String, Object> data) {
+	private VaultToken getToken(Map<String, Object> data) {
 
 		if (options.isWrappedToken()) {
 
-			VaultResponse response = vaultClient.unwrap((String) data.get("response"),
+			VaultResponse response = VaultResponses.unwrap((String) data.get("response"),
 					VaultResponse.class);
 			return LoginTokenUtil.from(response.getAuth());
 		}
@@ -175,7 +187,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 			throw new VaultException(
 					String.format(
 							"Cannot retrieve Token from cubbyhole: Response at %s does not contain a token",
-							entity.getUri()));
+							options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -186,6 +198,6 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		throw new VaultException(
 				String.format(
 						"Cannot retrieve Token from cubbyhole: Response at %s does not contain an unique token",
-						entity.getUri()));
+						options.getPath()));
 	}
 }

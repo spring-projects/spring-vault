@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,19 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.util.NumberUtils;
-import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Lifecycle-aware Session Manager. This {@link SessionManager} obtains tokens from a
@@ -63,29 +66,32 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			.getLog(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;
-	private final VaultClient vaultClient;
+
+	private final RestOperations restOperations;
+
 	private final AsyncTaskExecutor taskExecutor;
+
 	private final Object lock = new Object();
 
 	private volatile VaultToken token;
 
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
-	 * {@link AsyncTaskExecutor} and {@link VaultClient}.
-	 * 
+	 * {@link AsyncTaskExecutor} and {@link RestOperations}.
+	 *
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskExecutor must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
-			AsyncTaskExecutor taskExecutor, VaultClient vaultClient) {
+			AsyncTaskExecutor taskExecutor, RestOperations restOperations) {
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");
-		Assert.notNull(vaultClient, "VaultClient must not be null");
+		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.clientAuthentication = clientAuthentication;
-		this.vaultClient = vaultClient;
+		this.restOperations = restOperations;
 		this.taskExecutor = taskExecutor;
 	}
 
@@ -96,12 +102,14 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		this.token = null;
 
 		if (token instanceof LoginToken) {
-			VaultResponseEntity<Map> response = vaultClient.postForEntity(
-					"auth/token/revoke-self", token, null, Map.class);
 
-			if (!response.isSuccessful()) {
+			try {
+				restOperations.postForObject("/auth/token/revoke-self",
+						new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
+			}
+			catch (HttpStatusCodeException e) {
 				logger.warn(String.format("Cannot revoke VaultToken: %s",
-						buildExceptionMessage(response)));
+						VaultResponses.getError(e.getResponseBodyAsString())));
 			}
 		}
 	}
@@ -111,7 +119,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	 * token was obtained before, it uses self-renewal to renew the current token.
 	 * Client-side errors (like permission denied) indicate the token cannot be renewed
 	 * because it's expired or simply not found.
-	 * 
+	 *
 	 * @return {@literal true} if the refresh was successful. {@literal false} if a new
 	 * token was obtained or refresh failed.
 	 */
@@ -124,23 +132,27 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			return false;
 		}
 
-		VaultResponseEntity<Map> response = vaultClient.postForEntity(
-				"auth/token/renew-self", token, null, Map.class);
+		try {
+			restOperations.postForObject("/auth/token/renew-self",
+					new HttpEntity<Object>(
+					VaultHttpHeaders.from(token)), Map.class);
+			return true;
+		}
+		catch (HttpStatusCodeException e) {
 
-		if (!response.isSuccessful()) {
-
-			if (response.getStatusCode().is4xxClientError()) {
+			if (e.getStatusCode().is4xxClientError()) {
 				logger.debug(String
 						.format("Cannot refresh token, resetting token and performing re-login: %s",
-								buildExceptionMessage(response)));
+								VaultResponses.getError(e.getResponseBodyAsString())));
 				token = null;
 				return false;
 			}
 
-			throw new VaultException(buildExceptionMessage(response));
+			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
 		}
-
-		return true;
+		catch (RestClientException e) {
+			throw new VaultException("Cannot refresh token", e);
+		}
 	}
 
 	@Override
@@ -227,17 +239,6 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	private void scheduleTask(TaskScheduler taskScheduler, int seconds, Runnable task) {
 		taskScheduler.schedule(task, new OneShotTrigger(seconds));
-	}
-
-	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
-
-		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(),
-					response.getUri(), response.getMessage());
-		}
-
-		return String.format("Status %s URI %s", response.getStatusCode(),
-				response.getUri());
 	}
 
 	/**

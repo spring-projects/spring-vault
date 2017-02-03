@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,8 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,15 +43,17 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class AwsEc2AuthenticationUnitTests {
 
-	private VaultClient vaultClient;
+	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
 
 	@Before
 	public void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
-		mockRest = MockRestServiceServer.createServer(restTemplate);
-		vaultClient = new VaultClient(restTemplate, new VaultEndpoint());
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+
+		this.mockRest = MockRestServiceServer.createServer(restTemplate);
+		this.restTemplate = restTemplate;
 	}
 
 	@Test
@@ -63,7 +64,7 @@ public class AwsEc2AuthenticationUnitTests {
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(vaultClient);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(restTemplate);
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world")
 				.containsKey("nonce").hasSize(2);
@@ -81,7 +82,7 @@ public class AwsEc2AuthenticationUnitTests {
 				.andRespond(withSuccess().body("Hello, world"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(options,
-				vaultClient, vaultClient.getRestTemplate());
+				restTemplate, restTemplate);
 
 		assertThat(authentication.getEc2Login()) //
 				.containsEntry("pkcs7", "Hello, world") //
@@ -92,12 +93,9 @@ public class AwsEc2AuthenticationUnitTests {
 	@Test
 	public void shouldLogin() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/aws-ec2/login"))
-				//
+		mockRest.expect(requestTo("/auth/aws-ec2/login"))
 				.andExpect(method(HttpMethod.POST))
-				//
 				.andExpect(jsonPath("$.pkcs7").value("value"))
-				//
 				.andRespond(
 						withSuccess()
 								.contentType(MediaType.APPLICATION_JSON)
@@ -105,7 +103,7 @@ public class AwsEc2AuthenticationUnitTests {
 										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
 										+ "}"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(vaultClient) {
+		AwsEc2Authentication authentication = new AwsEc2Authentication(restTemplate) {
 			@Override
 			protected Map<String, String> getEc2Login() {
 				return Collections.singletonMap("pkcs7", "value");
@@ -127,16 +125,16 @@ public class AwsEc2AuthenticationUnitTests {
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
-		new AwsEc2Authentication(vaultClient).login();
+		new AwsEc2Authentication(restTemplate).login();
 	}
 
 	@Test(expected = VaultException.class)
 	public void loginShouldFail() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/aws-ec2/login")) //
+		mockRest.expect(requestTo("/auth/aws-ec2/login")) //
 				.andRespond(withServerError());
 
-		new AwsEc2Authentication(vaultClient) {
+		new AwsEc2Authentication(restTemplate) {
 			@Override
 			protected Map<String, String> getEc2Login() {
 				return Collections.singletonMap("pkcs7", "value");
