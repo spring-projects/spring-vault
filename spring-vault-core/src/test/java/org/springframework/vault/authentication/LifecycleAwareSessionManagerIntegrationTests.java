@@ -24,14 +24,16 @@ import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
-import org.springframework.vault.client.VaultResponseEntity;
-import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests for {@link LifecycleAwareSessionManager}.
@@ -100,19 +102,24 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
 
-		prepare().getVaultOperations().doWithVault(
-				new VaultOperations.SessionCallback<Object>() {
-
+		prepare().getVaultOperations().doWithSession(
+				new RestOperationsCallback<Object>() {
 					@Override
-					public Object doWithVault(VaultOperations.VaultSession session) {
+					public Object doWithRestOperations(RestOperations restOperations) {
 
-						VaultResponseEntity<Map> entity = session.getForEntity(
-								String.format("auth/token/lookup/%s",
-										loginToken.getToken()), Map.class);
+						try {
+							restOperations.getForEntity(
+									String.format("auth/token/lookup/%s",
+											loginToken.getToken()), Map.class);
 
-						// Compatibility across Vault versions.
-						assertThat(entity.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-								HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+							fail("Missing RestClientException");
+						}
+						catch (HttpStatusCodeException e) {
+							// Compatibility across Vault versions.
+							assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+									HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+						}
+
 						return null;
 					}
 				});

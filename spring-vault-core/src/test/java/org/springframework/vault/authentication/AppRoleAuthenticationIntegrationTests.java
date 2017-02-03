@@ -23,9 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.vault.client.VaultException;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -54,26 +56,25 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 			prepare().mountAuth("approle");
 		}
 
-		getVaultOperations().doWithVault(new VaultOperations.SessionCallback<Object>() {
-
+		getVaultOperations().doWithSession(new RestOperationsCallback<Object>() {
 			@Override
-			public Object doWithVault(VaultOperations.VaultSession session) {
+			public Object doWithRestOperations(RestOperations restOperations) {
 
 				Map<String, String> withSecretId = new HashMap<String, String>();
 				withSecretId.put("policies", "dummy"); // policy
 				withSecretId.put("bound_cidr_list", "0.0.0.0/0");
 				withSecretId.put("bind_secret_id", "true");
 
-				session.postForEntity("auth/approle/role/with-secret-id", withSecretId,
-						Map.class);
+				restOperations.postForEntity("auth/approle/role/with-secret-id",
+						withSecretId, Map.class);
 
 				Map<String, String> noSecretIdRole = new HashMap<String, String>();
 				noSecretIdRole.put("policies", "dummy"); // policy
 				noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
 				noSecretIdRole.put("bind_secret_id", "false");
 
-				session.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole,
-						Map.class);
+				restOperations.postForEntity("auth/approle/role/no-secret-id",
+						noSecretIdRole, Map.class);
 
 				return null;
 			}

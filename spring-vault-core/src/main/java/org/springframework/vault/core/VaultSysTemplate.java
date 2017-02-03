@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,16 +29,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultAccessor;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
-import org.springframework.vault.core.VaultOperations.ClientCallback;
-import org.springframework.vault.core.VaultOperations.SessionCallback;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
@@ -48,7 +42,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultSysOperations}.
@@ -84,19 +78,20 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Override
 	public boolean isInitialized() {
 
-		return vaultOperations.doWithVault(new ClientCallback<Boolean>() {
+		return vaultOperations.doWithVault(new RestOperationsCallback<Boolean>() {
 
 			@Override
-			public Boolean doWithVault(VaultClient client) {
+			public Boolean doWithRestOperations(RestOperations restOperations) {
 
-				VaultResponseEntity<Map<String, Boolean>> response = client.getForEntity(
-						"sys/init", Map.class);
+				try {
+					Map<String, Boolean> body = restOperations.getForObject("sys/init",
+							Map.class);
 
-				if (response.isSuccessful() && response.hasBody()) {
-					return response.getBody().get("initialized");
+					return body.get("initialized");
 				}
-
-				throw new VaultException(buildExceptionMessage(response));
+				catch (HttpStatusCodeException e) {
+					throw VaultResponses.buildException(e);
+				}
 			}
 		});
 	}
@@ -108,20 +103,24 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
 		return vaultOperations
-				.doWithVault(new ClientCallback<VaultInitializationResponse>() {
+				.doWithVault(new RestOperationsCallback<VaultInitializationResponse>() {
 
 					@Override
-					public VaultInitializationResponse doWithVault(VaultClient client) {
+					public VaultInitializationResponse doWithRestOperations(
+							RestOperations restOperations) {
 
-						VaultResponseEntity<VaultInitializationResponseImpl> response = client
-								.putForEntity("sys/init", vaultInitializationRequest,
-										VaultInitializationResponseImpl.class);
+						try {
+							ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
+									.exchange("sys/init", HttpMethod.PUT,
+											new HttpEntity<Object>(
+													vaultInitializationRequest),
+											VaultInitializationResponseImpl.class);
 
-						if (response.isSuccessful() && response.hasBody()) {
-							return response.getBody();
+							return exchange.getBody();
 						}
-
-						throw new VaultException(buildExceptionMessage(response));
+						catch (HttpStatusCodeException e) {
+							throw VaultResponses.buildException(e);
+						}
 					}
 				});
 	}
@@ -134,23 +133,23 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Override
 	public VaultUnsealStatus unseal(final String keyShare) {
 
-		return vaultOperations.doWithVault(new ClientCallback<VaultUnsealStatus>() {
+		return vaultOperations
+				.doWithVault(new RestOperationsCallback<VaultUnsealStatus>() {
+					@Override
+					public VaultUnsealStatus doWithRestOperations(
+							RestOperations restOperations) {
 
-			@Override
-			public VaultUnsealStatus doWithVault(VaultClient client) {
+						ResponseEntity<VaultUnsealStatusImpl> response = restOperations
+								.exchange(
+										"sys/unseal",
+										HttpMethod.PUT,
+										new HttpEntity<Object>(Collections.singletonMap(
+												"key", keyShare)),
+										VaultUnsealStatusImpl.class);
 
-				VaultResponseEntity<VaultUnsealStatusImpl> response = client
-						.putForEntity("sys/unseal",
-								Collections.singletonMap("key", keyShare),
-								VaultUnsealStatusImpl.class);
-
-				if (response.isSuccessful() && response.hasBody()) {
-					return response.getBody();
-				}
-
-				throw new VaultException(buildExceptionMessage(response));
-			}
-		});
+						return response.getBody();
+					}
+				});
 	}
 
 	@Override
@@ -169,7 +168,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getMounts() {
-		return vaultOperations.doWithVault(GET_MOUNTS);
+		return vaultOperations.doWithSession(GET_MOUNTS);
 	}
 
 	@Override
@@ -192,7 +191,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getAuthMounts() throws VaultException {
-		return vaultOperations.doWithVault(GET_AUTH_MOUNTS);
+		return vaultOperations.doWithSession(GET_AUTH_MOUNTS);
 	}
 
 	@Override
@@ -205,54 +204,31 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultHealth health() {
-		return vaultOperations.doWithRestTemplate("sys/health",
-				Collections.<String, Object>emptyMap(), HEALTH);
+		return vaultOperations.doWithVault(HEALTH);
 	}
 
-	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
-
-		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(),
-					response.getUri(), response.getMessage());
-		}
-
-		return String.format("Status %s URI %s", response.getStatusCode(),
-				response.getUri());
-	}
-
-	private static class GetUnsealStatus implements ClientCallback<VaultUnsealStatus> {
+	private static class GetUnsealStatus implements
+			RestOperationsCallback<VaultUnsealStatus> {
 
 		@Override
-		public VaultUnsealStatus doWithVault(VaultClient client) {
-
-			VaultResponseEntity<VaultUnsealStatusImpl> response = client.getForEntity(
-					"sys/seal-status", VaultUnsealStatusImpl.class);
-
-			if (response.isSuccessful() && response.hasBody()) {
-				return response.getBody();
-			}
-
-			throw new VaultException(buildExceptionMessage(response));
+		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
+			return restOperations.getForObject("sys/seal-status",
+					VaultUnsealStatusImpl.class);
 		}
 	}
 
-	private static class Seal implements SessionCallback<Void> {
+	private static class Seal implements RestOperationsCallback<Void> {
 
 		@Override
-		public Void doWithVault(VaultOperations.VaultSession session) {
-
-			VaultResponseEntity<Map> response = session.putForEntity("sys/seal", null,
-					Map.class);
-
-			if (!response.isSuccessful()) {
-				throw new VaultException(buildExceptionMessage(response));
-			}
-
+		public Void doWithRestOperations(RestOperations restOperations) {
+			restOperations.put("sys/seal", null);
 			return null;
 		}
+
 	}
 
-	private static class GetMounts implements SessionCallback<Map<String, VaultMount>> {
+	private static class GetMounts implements
+			RestOperationsCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
@@ -264,24 +240,19 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 		@Override
-		public Map<String, VaultMount> doWithVault(VaultOperations.VaultSession session) {
+		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
 
-			VaultResponseEntity<VaultMountsResponse> response = session.exchange(path,
+			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(path,
 					HttpMethod.GET, null, MOUNT_TYPE_REF,
-					Collections.<String, Object>emptyMap());
+					Collections.<String, Object> emptyMap());
 
-			if (response.isSuccessful() && response.hasBody()) {
+			VaultMountsResponse body = exchange.getBody();
 
-				VaultMountsResponse body = response.getBody();
-
-				if (body.getData() != null) {
-					return response.getBody().getData();
-				}
-
-				return response.getBody().getTopLevelMounts();
+			if (body.getData() != null) {
+				return body.getData();
 			}
 
-			throw new VaultException(buildExceptionMessage(response));
+			return body.getTopLevelMounts();
 		}
 
 		private static class VaultMountsResponse extends
@@ -317,16 +288,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class Health implements
-			VaultAccessor.RestTemplateCallback<VaultHealth> {
+	private static class Health implements RestOperationsCallback<VaultHealth> {
 
 		@Override
-		public VaultHealth doWithRestTemplate(URI uri, RestTemplate restTemplate) {
+		public VaultHealth doWithRestOperations(RestOperations restOperations) {
 
 			try {
-
-				ResponseEntity<VaultHealthImpl> healthResponse = restTemplate.exchange(
-						uri, HttpMethod.GET, null, VaultHealthImpl.class);
+				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange(
+						"sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
 				return healthResponse.getBody();
 			}
 			catch (HttpStatusCodeException responseError) {

@@ -23,15 +23,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -137,12 +140,12 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		final VaultTokenResponse tokenResponse = tokenOperations.create();
 		tokenOperations.revoke(tokenResponse.getToken());
 
-		VaultResponseEntity<String> response = lookupSelf(tokenResponse);
-
-		assertThat(response.getStatusCode()).isIn(
-		/* <= Vault 0.6.0 */HttpStatus.BAD_REQUEST,
-		/* >= Vault 0.6.1 */HttpStatus.FORBIDDEN);
-		assertThat(response.getMessage()).isEqualTo("permission denied");
+		try {
+			lookupSelf(tokenResponse);
+		}
+		catch (VaultException e) {
+			assertThat(e).hasMessageContaining("permission denied");
+		}
 	}
 
 	@Test
@@ -150,20 +153,27 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		final VaultTokenResponse tokenResponse = tokenOperations.create();
 
-		VaultResponseEntity<String> response = lookupSelf(tokenResponse);
+		ResponseEntity<String> response = lookupSelf(tokenResponse);
 
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
-	private VaultResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
+	private ResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
 		return vaultOperations
-				.doWithVault(new VaultOperations.ClientCallback<VaultResponseEntity<String>>() {
+				.doWithVault(new RestOperationsCallback<ResponseEntity<String>>() {
 					@Override
-					public VaultResponseEntity<String> doWithVault(VaultClient client) {
-						return client.getForEntity("auth/token/lookup-self",
-								tokenResponse.getToken(), String.class);
+					public ResponseEntity<String> doWithRestOperations(
+							RestOperations restOperations) {
+						HttpHeaders headers = new HttpHeaders();
+						headers.add(VaultTemplate.VAULT_TOKEN, tokenResponse.getToken()
+								.getToken());
+
+						return restOperations.exchange("auth/token/lookup-self",
+								HttpMethod.GET, new HttpEntity<Object>(headers),
+								String.class);
 					}
 				});
+
 	}
 }

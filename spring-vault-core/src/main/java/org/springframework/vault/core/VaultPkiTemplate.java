@@ -21,9 +21,10 @@ import java.util.Map;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultPkiOperations}.
@@ -86,33 +87,22 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			request.put("exclude_cn_from_sans", true);
 		}
 
-		VaultResponseEntity<VaultCertificateResponse> entity = vaultOperations
-				.doWithVault(new VaultOperations.SessionCallback<VaultResponseEntity<VaultCertificateResponse>>() {
+		return vaultOperations
+				.doWithSession(new RestOperationsCallback<VaultCertificateResponse>() {
 					@Override
-					public VaultResponseEntity<VaultCertificateResponse> doWithVault(
-							VaultOperations.VaultSession session) {
+					public VaultCertificateResponse doWithRestOperations(
+							RestOperations restOperations) {
 
-						return session.postForEntity(
-								String.format("%s/issue/%s", path, roleName), request,
-								VaultCertificateResponse.class);
+						try {
+							return restOperations.postForObject(
+									"{path}/issue/{roleName}", request,
+									VaultCertificateResponse.class, path, roleName);
+						}
+						catch (HttpStatusCodeException e) {
+							throw VaultResponses.buildException(e);
+						}
 					}
 				});
-
-		if (entity.isSuccessful() && entity.hasBody()) {
-			return entity.getBody();
-		}
-
-		throw new VaultException(buildExceptionMessage(entity));
 	}
 
-	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
-
-		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(),
-					response.getUri(), response.getMessage());
-		}
-
-		return String.format("Status %s URI %s", response.getStatusCode(),
-				response.getUri());
-	}
 }

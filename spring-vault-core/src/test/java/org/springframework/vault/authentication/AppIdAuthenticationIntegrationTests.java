@@ -24,11 +24,12 @@ import org.junit.Test;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
-import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
+import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,24 +47,23 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 			prepare().mountAuth("app-id");
 		}
 
-		prepare().getVaultOperations().doWithVault(
-				new VaultOperations.SessionCallback<Object>() {
-
+		prepare().getVaultOperations().doWithSession(
+				new RestOperationsCallback<Object>() {
 					@Override
-					public Object doWithVault(VaultOperations.VaultSession session) {
+					public Object doWithRestOperations(RestOperations restOperations) {
 
 						Map<String, String> appIdData = new HashMap<String, String>();
 						appIdData.put("value", "dummy"); // policy
 						appIdData.put("display_name", "this is my test application");
 
-						session.postForEntity("auth/app-id/map/app-id/myapp", appIdData,
-								Map.class);
+						restOperations.postForEntity("auth/app-id/map/app-id/myapp",
+								appIdData, Map.class);
 
 						Map<String, String> userIdData = new HashMap<String, String>();
 						userIdData.put("value", "myapp"); // name of the app-id
 						userIdData.put("cidr_block", "0.0.0.0/0");
 
-						session.postForEntity(
+						restOperations.postForEntity(
 								"auth/app-id/map/user-id/static-userid-value",
 								userIdData, Map.class);
 
