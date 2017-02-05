@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.springframework.vault.config;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -39,6 +40,8 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.DefaultSchemePortResolver;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -212,6 +215,9 @@ public class ClientHttpRequestFactoryFactory {
 				IOException {
 
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
+
+			httpClientBuilder.setRoutePlanner(new SystemDefaultRoutePlanner(
+					DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
