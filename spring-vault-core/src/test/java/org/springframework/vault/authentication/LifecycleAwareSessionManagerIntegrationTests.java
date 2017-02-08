@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
@@ -51,7 +52,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getVaultClient());
+				tokenAuthentication, taskExecutor, prepare().getRestTemplate());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -75,7 +76,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getVaultClient()) {
+				tokenAuthentication, taskExecutor, prepare().getRestTemplate()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -97,7 +98,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getVaultClient());
+				tokenAuthentication, taskExecutor, prepare().getRestTemplate());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
@@ -108,11 +109,10 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 					public Object doWithRestOperations(RestOperations restOperations) {
 
 						try {
-							restOperations.getForEntity(
-									String.format("auth/token/lookup/%s",
-											loginToken.getToken()), Map.class);
-
-							fail("Missing RestClientException");
+							ResponseEntity<Map> forEntity = restOperations.getForEntity(
+									"auth/token/lookup/{token}", Map.class,
+									loginToken.getToken());
+							fail("Missing HttpStatusCodeException");
 						}
 						catch (HttpStatusCodeException e) {
 							// Compatibility across Vault versions.

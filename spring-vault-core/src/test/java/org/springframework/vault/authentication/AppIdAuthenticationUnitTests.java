@@ -21,9 +21,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -41,15 +39,15 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class AppIdAuthenticationUnitTests {
 
-	private VaultClient vaultClient;
+	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
 
 	@Before
 	public void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
-		mockRest = MockRestServiceServer.createServer(restTemplate);
-		vaultClient = new VaultClient(restTemplate, new VaultEndpoint());
+		this.mockRest = MockRestServiceServer.createServer(restTemplate);
+		this.restTemplate = restTemplate;
 	}
 
 	@Test
@@ -60,19 +58,15 @@ public class AppIdAuthenticationUnitTests {
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/app-id/login"))
-				//
+		mockRest.expect(requestTo("auth/app-id/login"))
 				.andExpect(method(HttpMethod.POST))
-				//
 				.andExpect(jsonPath("$.app_id").value("hello"))
-				//
 				.andExpect(jsonPath("$.user_id").value("world"))
-				//
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				vaultClient);
+				restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -87,9 +81,9 @@ public class AppIdAuthenticationUnitTests {
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/app-id/login")) //
+		mockRest.expect(requestTo("auth/app-id/login")) //
 				.andRespond(withServerError());
 
-		new AppIdAuthentication(options, vaultClient).login();
+		new AppIdAuthentication(options, restTemplate).login();
 	}
 }

@@ -51,7 +51,8 @@ public class VaultEndpoint implements Serializable {
 	private String scheme = "https";
 
 	/**
-	 * Create a {@link VaultEndpoint} given a {@code host} and {@code port}.
+	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
+	 * {@code https}.
 	 * 
 	 * @param host must not be empty or {@literal null}.
 	 * @param port must be a valid port in the range of 1-65535

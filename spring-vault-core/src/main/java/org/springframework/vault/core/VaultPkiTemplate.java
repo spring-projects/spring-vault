@@ -20,7 +20,8 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.web.client.HttpStatusCodeException;

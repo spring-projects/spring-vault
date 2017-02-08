@@ -17,7 +17,6 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -35,7 +34,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  * @see VaultOperations#doWithSession(RestOperationsCallback)
  * @see VaultOperations#doWithVault(RestOperationsCallback)
- * @see VaultClient
+ * @see org.springframework.web.client.RestOperations
  * @see VaultTemplate
  * @see VaultTokenOperations
  * @see org.springframework.vault.authentication.SessionManager
@@ -125,7 +124,8 @@ public interface VaultOperations {
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
-	 * using {@link VaultClient} without requiring a session.
+	 * using {@link org.springframework.web.client.RestOperations} without requiring a
+	 * session.
 	 *
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.

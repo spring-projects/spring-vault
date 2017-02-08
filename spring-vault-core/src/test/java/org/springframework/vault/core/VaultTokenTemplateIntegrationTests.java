@@ -30,7 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -166,7 +167,8 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 					public ResponseEntity<String> doWithRestOperations(
 							RestOperations restOperations) {
 						HttpHeaders headers = new HttpHeaders();
-						headers.add(VaultTemplate.VAULT_TOKEN, tokenResponse.getToken()
+						headers.add(VaultHttpHeaders.VAULT_TOKEN, tokenResponse
+								.getToken()
 								.getToken());
 
 						return restOperations.exchange("auth/token/lookup-self",

@@ -21,15 +21,14 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,10 +79,11 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options, vaultClient);
+		AppIdAuthentication authentication = new AppIdAuthentication(options,
+				restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -97,9 +97,9 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		new AppIdAuthentication(options, vaultClient).login();
+		new AppIdAuthentication(options, restTemplate).login();
 	}
 }

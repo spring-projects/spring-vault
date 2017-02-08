@@ -22,7 +22,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
@@ -88,7 +88,7 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getVaultClient());
+				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -104,7 +104,7 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).secretId(secretId).build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getVaultClient());
+				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -117,7 +117,7 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getVaultClient());
+				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -130,7 +130,7 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).secretId("this-is-a-wrong-secret-id").build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getVaultClient());
+				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -148,7 +148,7 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).secretId(secretId).build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getVaultClient());
+				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
 

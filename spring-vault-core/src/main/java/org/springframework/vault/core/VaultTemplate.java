@@ -31,32 +31,29 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriTemplateHandler;
 
 /**
  * This class encapsulates main Vault interaction. {@link VaultTemplate} will log into
  * Vault on initialization and use the token throughout the whole lifetime.
  *
  * @author Mark Paluch
- * @see VaultClientFactory
  * @see SessionManager
  */
 public class VaultTemplate implements InitializingBean, VaultOperations, DisposableBean {
-
-	public static final String VAULT_TOKEN = "X-Vault-Token";
-
-	private VaultClientFactory vaultClientFactory;
 
 	private SessionManager sessionManager;
 
@@ -67,7 +64,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private final boolean dedicatedSessionManager;
 
 	/**
-	 * Creates a new {@link VaultTemplate} without setting {@link VaultClientFactory} and
+	 * Creates a new {@link VaultTemplate} without setting {@link RestOperations} and
 	 * {@link SessionManager}.
 	 */
 	public VaultTemplate() {
@@ -75,68 +72,67 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultClient} and
+	 * Creates a new {@link VaultTemplate} with a {@link VaultEndpoint} and
 	 * {@link ClientAuthentication}.
 	 *
-	 * @param vaultClient must not be {@literal null}.
+	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultClient vaultClient,
+	public VaultTemplate(VaultEndpoint vaultEndpoint,
 			ClientAuthentication clientAuthentication) {
 
-		Assert.notNull(vaultClient, "VaultClientFactory must not be null");
+		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
-		this.vaultClientFactory = new DefaultVaultClientFactory(vaultClient);
 		this.sessionManager = new SimpleSessionManager(clientAuthentication);
 		this.dedicatedSessionManager = true;
 
-		this.sessionTemplate = createSessionTemplate(vaultClient.getEndpoint(),
-				vaultClient.getRestTemplate().getRequestFactory());
+		ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-		this.plainTemplate = createPlainTemplate(vaultClient.getEndpoint(), vaultClient
-				.getRestTemplate().getRequestFactory());
+		this.sessionTemplate = createSessionTemplate(vaultEndpoint, requestFactory);
+		this.plainTemplate = VaultClients.createRestTemplate(vaultEndpoint,
+				requestFactory);
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultClientFactory} and
-	 * {@link SessionManager}.
+	 * Creates a new {@link VaultTemplate} with a {@link VaultEndpoint},
+	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
 	 * 
-	 * @param vaultClientFactory must not be {@literal null}.
+	 * @param vaultEndpoint must not be {@literal null}.
+	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultClientFactory vaultClientFactory,
+	public VaultTemplate(VaultEndpoint vaultEndpoint,
+			ClientHttpRequestFactory clientHttpRequestFactory,
 			SessionManager sessionManager) {
 
-		Assert.notNull(vaultClientFactory, "VaultClientFactory must not be null");
+		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
+		Assert.notNull(clientHttpRequestFactory,
+				"ClientHttpRequestFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 
-		this.vaultClientFactory = vaultClientFactory;
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
 
-		VaultClient vaultClient = vaultClientFactory.getVaultClient();
-		this.sessionTemplate = createSessionTemplate(vaultClientFactory.getVaultClient()
-				.getEndpoint(), vaultClientFactory.getVaultClient().getRestTemplate()
-				.getRequestFactory());
-
-		this.plainTemplate = createPlainTemplate(vaultClient.getEndpoint(), vaultClient
-				.getRestTemplate().getRequestFactory());
+		this.sessionTemplate = createSessionTemplate(vaultEndpoint,
+				clientHttpRequestFactory);
+		this.plainTemplate = VaultClients.createRestTemplate(vaultEndpoint,
+				clientHttpRequestFactory);
 	}
 
 	private RestTemplate createSessionTemplate(VaultEndpoint endpoint,
 			ClientHttpRequestFactory requestFactory) {
 
-		RestTemplate restTemplate = new RestTemplate(requestFactory);
+		RestTemplate restTemplate = VaultClients.createRestTemplate(endpoint,
+				requestFactory);
 
-		restTemplate.setUriTemplateHandler(createDefaultUriTemplateHandler(endpoint));
 		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
 
 			@Override
 			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
 					ClientHttpRequestExecution execution) throws IOException {
 
-				request.getHeaders().add(VAULT_TOKEN,
+				request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
 						sessionManager.getSessionToken().getToken());
 
 				return execution.execute(request, body);
@@ -144,38 +140,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		});
 
 		return restTemplate;
-	}
-
-	private RestTemplate createPlainTemplate(VaultEndpoint endpoint,
-			ClientHttpRequestFactory requestFactory) {
-
-		RestTemplate restTemplate = new RestTemplate(requestFactory);
-
-		restTemplate.setUriTemplateHandler(createDefaultUriTemplateHandler(endpoint));
-
-		// Interceptor enforces byte[] serialization so netty can calculate a
-		// Content-length header instead of streaming data without a Content-length
-		// header.
-		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
-
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
-				return execution.execute(request, body);
-			}
-		});
-
-		return restTemplate;
-	}
-
-	private DefaultUriTemplateHandler createDefaultUriTemplateHandler(
-			VaultEndpoint endpoint) {
-		String baseUrl = String.format("%s://%s:%s/%s/", endpoint.getScheme(),
-				endpoint.getHost(), endpoint.getPort(), "v1");
-
-		DefaultUriTemplateHandler defaultUriTemplateHandler = new DefaultUriTemplateHandler();
-		defaultUriTemplateHandler.setBaseUrl(baseUrl);
-		return defaultUriTemplateHandler;
 	}
 
 	/**
@@ -193,7 +157,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@Override
 	public void afterPropertiesSet() {
 
-		Assert.notNull(vaultClientFactory, "VaultClientFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 	}
 
@@ -203,7 +166,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		if (dedicatedSessionManager && sessionManager instanceof DisposableBean) {
 			((DisposableBean) sessionManager).destroy();
 		}
-
 	}
 
 	@Override
@@ -358,5 +320,4 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private static class VaultListResponse extends
 			VaultResponseSupport<Map<String, Object>> {
 	}
-
 }

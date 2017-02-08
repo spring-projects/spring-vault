@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault.core;
+package org.springframework.vault.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -24,8 +26,12 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -35,6 +41,9 @@ import org.springframework.web.client.HttpStatusCodeException;
 public abstract class VaultResponses {
 
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+	private static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
+			OBJECT_MAPPER);
 
 	public static VaultException buildException(HttpStatusCodeException e, String path) {
 
@@ -116,5 +125,35 @@ public abstract class VaultResponses {
 			}
 		}
 		return json;
+	}
+
+	/**
+	 * Unwrap a wrapped response created by Vault Response Wrapping
+	 *
+	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
+	 * @param responseType the type of the return value.
+	 * @return the unwrapped response.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T unwrap(final String wrappedResponse, Class<T> responseType) {
+
+		Assert.hasText(wrappedResponse, "Wrapped response must not be empty");
+
+		try {
+			return (T) converter.read(responseType, new HttpInputMessage() {
+				@Override
+				public InputStream getBody() throws IOException {
+					return new ByteArrayInputStream(wrappedResponse.getBytes());
+				}
+
+				@Override
+				public HttpHeaders getHeaders() {
+					return new HttpHeaders();
+				}
+			});
+		}
+		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

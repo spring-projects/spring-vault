@@ -23,9 +23,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -33,6 +31,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -73,12 +72,11 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
-
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				vaultClient);
+				restTemplate);
 		VaultToken login = authentication.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
@@ -89,11 +87,11 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
-				.createSslConfiguration()), new VaultEndpoint());
-
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				vaultClient);
+				restTemplate);
+
 		try {
 			authentication.login();
 			fail("Missing VaultException");
