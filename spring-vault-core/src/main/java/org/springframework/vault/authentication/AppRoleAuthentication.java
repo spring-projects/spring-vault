@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultResponse;
@@ -37,7 +37,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @see AppRoleAuthenticationOptions
- * @see VaultClient
+ * @see PreviousVaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
  * AppRole</a>
  */
@@ -47,17 +47,17 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 	private final AppRoleAuthenticationOptions options;
 
-	private final VaultClient vaultClient;
+	private final PreviousVaultClient vaultClient;
 
 	/**
 	 * Creates a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
-	 * and {@link VaultClient}.
+	 * and {@link PreviousVaultClient}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 */
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options,
-			VaultClient vaultClient) {
+			PreviousVaultClient vaultClient) {
 
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");

@@ -46,6 +46,7 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
 	private VaultOperations vaultOperations;
+
 	private VaultTokenOperations tokenOperations;
 
 	@Before
@@ -161,8 +162,9 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 				.doWithVault(new VaultOperations.ClientCallback<VaultResponseEntity<String>>() {
 					@Override
 					public VaultResponseEntity<String> doWithVault(VaultClient client) {
-						return client.getForEntity("auth/token/lookup-self",
-								tokenResponse.getToken(), String.class);
+
+						return client.get().uri("auth/token/lookup-self")
+								.token(tokenResponse.getToken()).exchange(String.class);
 					}
 				});
 	}

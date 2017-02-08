@@ -33,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
@@ -65,19 +66,20 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultClient} and
+	 * Creates a new {@link VaultTemplate} with a {@link PreviousVaultClient} and
 	 * {@link ClientAuthentication}.
 	 *
 	 * @param vaultClient must not be {@literal null}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultClient vaultClient,
-			ClientAuthentication clientAuthentication) {
+	public VaultTemplate(PreviousVaultClient previousVaultClient,
+			VaultClient vaultClient, ClientAuthentication clientAuthentication) {
 
 		Assert.notNull(vaultClient, "VaultClientFactory must not be null");
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
-		this.vaultClientFactory = new DefaultVaultClientFactory(vaultClient);
+		this.vaultClientFactory = new DefaultVaultClientFactory(previousVaultClient,
+				vaultClient);
 		this.sessionManager = new SimpleSessionManager(clientAuthentication);
 		this.dedicatedSessionManager = true;
 	}
@@ -187,7 +189,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.state(vaultClientFactory != null, "VaultClientFactory must not be null");
 		Assert.state(sessionManager != null, "SessionManager must not be null");
 
-		VaultClient vaultClient = vaultClientFactory.getVaultClient();
+		PreviousVaultClient vaultClient = vaultClientFactory.getPreviousVaultClient();
 
 		return sessionCallback.doWithVault(new DefaultVaultSession(sessionManager,
 				vaultClient));
@@ -200,7 +202,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(callback, "RestTemplateCallback must not be null!");
 		Assert.state(vaultClientFactory != null, "VaultClientFactory must not be null");
 
-		return vaultClientFactory.getVaultClient().doWithRestTemplate(pathTemplate,
+		return vaultClientFactory.getPreviousVaultClient().doWithRestTemplate(
+				pathTemplate,
 				uriVariables, callback);
 	}
 
@@ -364,9 +367,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		private final SessionManager sessionManager;
 
-		private final VaultClient vaultClient;
+		private final PreviousVaultClient vaultClient;
 
-		DefaultVaultSession(SessionManager sessionManager, VaultClient vaultClient) {
+		DefaultVaultSession(SessionManager sessionManager, PreviousVaultClient vaultClient) {
 			this.sessionManager = sessionManager;
 			this.vaultClient = vaultClient;
 		}
@@ -421,7 +424,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		private HttpEntity<?> getHttpEntity(HttpEntity<?> requestEntity) {
 
-			HttpHeaders httpHeaders = VaultClient.createHeaders(sessionManager
+			HttpHeaders httpHeaders = PreviousVaultClient.createHeaders(sessionManager
 					.getSessionToken());
 			HttpEntity<?> requestEntityToUse = requestEntity;
 

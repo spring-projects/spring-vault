@@ -29,7 +29,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultResponseEntity;
 import org.springframework.vault.support.VaultToken;
 
@@ -60,7 +60,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	private ThreadPoolTaskScheduler taskScheduler;
 
 	@Mock
-	private VaultClient vaultClient;
+	private PreviousVaultClient vaultClient;
 
 	private LifecycleAwareSessionManager sessionManager;
 
@@ -87,7 +87,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				vaultClient.postForEntity(eq("auth/token/revoke-self"),
 						eq(LoginToken.of("login")), ArgumentMatchers.any(),
 						any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.OK, null, null));
+				new ResponseEntity<Object>(null, HttpStatus.OK, URI
+						.create("/auth/token/revoke-self"), null));
 
 		sessionManager.renewToken();
 		sessionManager.destroy();
@@ -116,7 +117,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				vaultClient.postForEntity(eq("auth/token/revoke-self"),
 						eq(LoginToken.of("login")), ArgumentMatchers.any(),
 						any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR, null,
+				new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR, URI
+						.create("/auth/token/revoke-self"),
 						null));
 
 		sessionManager.renewToken();
@@ -144,7 +146,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				vaultClient.postForEntity(eq("auth/token/renew-self"),
 						eq(LoginToken.renewable("login", 5)), ArgumentMatchers.any(),
 						any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.OK, null, null));
+				new ResponseEntity<Object>(null, HttpStatus.OK, URI
+						.create("/auth/token/renew-self"), null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -166,7 +169,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				vaultClient.postForEntity(eq("auth/token/renew-self"),
 						eq(LoginToken.renewable("login", 5)), ArgumentMatchers.any(),
 						any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.OK, null, null));
+				new ResponseEntity<Object>(null, HttpStatus.OK, URI
+						.create("/auth/token/renew-self"), null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -203,7 +207,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				vaultClient.postForEntity(eq("auth/token/renew-self"),
 						eq(LoginToken.renewable("login", 5)), ArgumentMatchers.any(),
 						any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR, null,
+				new ResponseEntity<Object>(null, HttpStatus.INTERNAL_SERVER_ERROR, URI
+						.create("/auth/token/renew-self"),
 						null));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -235,7 +240,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 		when(
 				vaultClient.postForEntity(anyString(), any(VaultToken.class),
 						ArgumentMatchers.any(), any(Class.class))).thenReturn(
-				new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST, null, null));
+				new ResponseEntity<Object>(null, HttpStatus.BAD_REQUEST, URI
+						.create("/login"), null));
 
 		sessionManager.getSessionToken();
 

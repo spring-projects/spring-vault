@@ -21,7 +21,7 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.core.VaultOperations;
@@ -80,7 +80,8 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				TestRestTemplateFactory.create(Settings
 				.createSslConfiguration()), new VaultEndpoint());
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options, vaultClient);
@@ -97,7 +98,8 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				TestRestTemplateFactory.create(Settings
 				.createSslConfiguration()), new VaultEndpoint());
 
 		new AppIdAuthentication(options, vaultClient).login();

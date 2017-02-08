@@ -30,6 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.client.DefaultVaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.DefaultVaultClientFactory;
@@ -97,7 +99,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
 		return new LifecycleAwareSessionManager(clientAuthentication,
-				asyncTaskExecutor(), vaultClient());
+				asyncTaskExecutor(), oldvaultClient());
 	}
 
 	/**
@@ -136,13 +138,24 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
+	 * @return the {@link PreviousVaultClient}
+	 * @see #clientHttpRequestFactoryWrapper()
+	 * @see #vaultEndpoint()
+	 */
+	@Bean
+	public PreviousVaultClient oldvaultClient() {
+		return new PreviousVaultClient(clientHttpRequestFactoryWrapper()
+				.getClientHttpRequestFactory(), vaultEndpoint());
+	}
+
+	/**
 	 * @return the {@link VaultClient}
 	 * @see #clientHttpRequestFactoryWrapper()
 	 * @see #vaultEndpoint()
 	 */
 	@Bean
 	public VaultClient vaultClient() {
-		return new VaultClient(clientHttpRequestFactoryWrapper()
+		return DefaultVaultClient.create(clientHttpRequestFactoryWrapper()
 				.getClientHttpRequestFactory(), vaultEndpoint());
 	}
 
@@ -155,7 +168,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public VaultClientFactory vaultClientFactory() {
-		return new DefaultVaultClientFactory(vaultClient());
+		return new DefaultVaultClientFactory(oldvaultClient(), vaultClient());
 	}
 
 	/**

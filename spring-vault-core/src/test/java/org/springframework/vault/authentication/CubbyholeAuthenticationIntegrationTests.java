@@ -22,7 +22,7 @@ import org.junit.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.PreviousVaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultException;
 import org.springframework.vault.client.VaultResponseEntity;
@@ -73,7 +73,8 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				TestRestTemplateFactory.create(Settings
 				.createSslConfiguration()), new VaultEndpoint());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
@@ -88,7 +89,8 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
 
-		VaultClient vaultClient = new VaultClient(TestRestTemplateFactory.create(Settings
+		PreviousVaultClient vaultClient = new PreviousVaultClient(
+				TestRestTemplateFactory.create(Settings
 				.createSslConfiguration()), new VaultEndpoint());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
