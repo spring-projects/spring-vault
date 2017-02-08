@@ -15,15 +15,17 @@
  */
 package org.springframework.vault.core;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultException;
-import org.springframework.vault.client.VaultResponseEntity;
-import org.springframework.vault.core.VaultOperations.SessionCallback;
-import org.springframework.vault.core.VaultOperations.VaultSession;
+import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -56,7 +58,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return vaultOperations.doWithVault(new CreateToken("auth/token/create", request));
+		return write("auth/token/create", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -69,8 +71,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return vaultOperations.doWithVault(new CreateToken("auth/token/create-orphan",
-				request));
+		return write("auth/token/create-orphan", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -78,8 +79,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		return vaultOperations.doWithVault(new RenewToken(String.format(
-				"auth/token/renew/%s", vaultToken.getToken())));
+		return write(String.format("auth/token/renew/%s", vaultToken.getToken()), null,
+				VaultTokenResponse.class);
 	}
 
 	@Override
@@ -87,8 +88,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		vaultOperations.doWithVault(new RevokeToken(String.format("auth/token/revoke/%s",
-				vaultToken.getToken())));
+		write(String.format("auth/token/revoke/%s", vaultToken.getToken()), null,
+				VaultTokenResponse.class);
 	}
 
 	@Override
@@ -96,87 +97,29 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		vaultOperations.doWithVault(new RevokeToken(String.format(
-				"auth/token/revoke-orphan/%s", vaultToken.getToken())));
+		write(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken()), null,
+				VaultTokenResponse.class);
 	}
 
-	private static String buildExceptionMessage(VaultResponseEntity<?> response) {
+	public <T extends VaultResponseSupport<?>> T write(final String path,
+			final Object body, final Class<T> responseType) {
 
-		if (StringUtils.hasText(response.getMessage())) {
-			return String.format("Status %s URI %s: %s", response.getStatusCode(),
-					response.getUri(), response.getMessage());
-		}
+		Assert.hasText(path, "Path must not be empty");
 
-		return String.format("Status %s URI %s", response.getStatusCode(),
-				response.getUri());
-	}
+		return vaultOperations.doWithSession(new RestOperationsCallback<T>() {
 
-	private static class CreateToken implements SessionCallback<VaultTokenResponse> {
+			@Override
+			public T doWithRestOperations(RestOperations restOperations) {
+				try {
+					ResponseEntity<T> exchange = restOperations.exchange(path,
+							HttpMethod.POST, new HttpEntity<Object>(body), responseType);
 
-		private final String path;
-
-		private final VaultTokenRequest request;
-
-		public CreateToken(String path, VaultTokenRequest request) {
-			this.path = path;
-			this.request = request;
-		}
-
-		@Override
-		public VaultTokenResponse doWithVault(VaultSession session) {
-
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
-					path, request, VaultTokenResponse.class);
-
-			if (response.isSuccessful() && response.hasBody()) {
-				return response.getBody();
+					return exchange.getBody();
+				}
+				catch (HttpStatusCodeException e) {
+					throw VaultResponses.buildException(e, path);
+				}
 			}
-
-			throw new VaultException(buildExceptionMessage(response));
-		}
-	}
-
-	private static class RevokeToken implements SessionCallback<Void> {
-
-		private final String path;
-
-		RevokeToken(String path) {
-			this.path = path;
-		}
-
-		@Override
-		public Void doWithVault(VaultSession session) {
-
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
-					path, null, VaultTokenResponse.class);
-
-			if (response.isSuccessful()) {
-				return null;
-			}
-
-			throw new VaultException(buildExceptionMessage(response));
-		}
-	}
-
-	private static class RenewToken implements SessionCallback<VaultTokenResponse> {
-
-		private final String path;
-
-		RenewToken(String path) {
-			this.path = path;
-		}
-
-		@Override
-		public VaultTokenResponse doWithVault(VaultSession session) {
-
-			VaultResponseEntity<VaultTokenResponse> response = session.postForEntity(
-					path, null, VaultTokenResponse.class);
-
-			if (response.isSuccessful() && response.hasBody()) {
-				return response.getBody();
-			}
-
-			throw new VaultException(buildExceptionMessage(response));
-		}
+		});
 	}
 }

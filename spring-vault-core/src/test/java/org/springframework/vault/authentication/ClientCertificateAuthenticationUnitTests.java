@@ -21,9 +21,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,21 +38,21 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class ClientCertificateAuthenticationUnitTests {
 
-	private VaultClient vaultClient;
+	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
 
 	@Before
 	public void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
-		mockRest = MockRestServiceServer.createServer(restTemplate);
-		vaultClient = new VaultClient(restTemplate, new VaultEndpoint());
+		this.mockRest = MockRestServiceServer.createServer(restTemplate);
+		this.restTemplate = restTemplate;
 	}
 
 	@Test
 	public void loginShouldObtainToken() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/cert/login"))
+		mockRest.expect(requestTo("auth/cert/login"))
 				//
 				.andExpect(method(HttpMethod.POST))
 				//
@@ -66,7 +64,7 @@ public class ClientCertificateAuthenticationUnitTests {
 										+ "}"));
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(
-				vaultClient);
+				restTemplate);
 
 		VaultToken login = sut.login();
 
@@ -79,9 +77,9 @@ public class ClientCertificateAuthenticationUnitTests {
 	@Test(expected = VaultException.class)
 	public void loginShouldFail() throws Exception {
 
-		mockRest.expect(requestTo("https://localhost:8200/v1/auth/cert/login")) //
+		mockRest.expect(requestTo("auth/cert/login")) //
 				.andRespond(withServerError());
 
-		new ClientCertificateAuthentication(vaultClient).login();
+		new ClientCertificateAuthentication(restTemplate).login();
 	}
 }

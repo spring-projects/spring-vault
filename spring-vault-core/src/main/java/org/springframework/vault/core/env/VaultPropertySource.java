@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.util.PropertyTransformer;

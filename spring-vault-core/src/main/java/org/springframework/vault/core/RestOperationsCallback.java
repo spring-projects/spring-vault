@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,20 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.vault.client.VaultClient;
+import org.springframework.web.client.RestOperations;
 
 /**
- * The strategy to produce a {@link VaultClient} instance(s).
+ * A callback for executing arbitrary operations on {@link RestOperations}.
  *
  * @author Mark Paluch
  */
-public interface VaultClientFactory {
+public interface RestOperationsCallback<T> {
 
 	/**
-	 * @return a {@link VaultClient}.
+	 * Callback method.
+	 *
+	 * @param restOperations restOperations to use, must not be {@literal null}.
+	 * @return a result object or null if none.
 	 */
-	VaultClient getVaultClient();
+	T doWithRestOperations(RestOperations restOperations);
 }

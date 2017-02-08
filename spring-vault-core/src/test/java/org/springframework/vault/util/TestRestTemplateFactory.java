@@ -15,17 +15,14 @@
  */
 package org.springframework.vault.util;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
@@ -40,6 +37,8 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  */
 public class TestRestTemplateFactory {
+
+	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
 
 	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
 
@@ -79,17 +78,7 @@ public class TestRestTemplateFactory {
 
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 
-		RestTemplate template = new RestTemplate();
-		template.setRequestFactory(requestFactory);
-		template.getInterceptors().add(new ClientHttpRequestInterceptor() {
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
-				return execution.execute(request, body);
-			}
-		});
-
-		return template;
+		return VaultClients.createRestTemplate(TEST_VAULT_ENDPOINT, requestFactory);
 	}
 
 	private static void initializeClientHttpRequestFactory(

@@ -25,7 +25,7 @@ import java.security.spec.KeySpec;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 
 /**
  * Value object representing a certificate bundle consisting of a private key, the

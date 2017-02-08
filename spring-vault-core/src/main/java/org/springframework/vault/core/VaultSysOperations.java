@@ -17,7 +17,7 @@ package org.springframework.vault.core;
 
 import java.util.Map;
 
-import org.springframework.vault.client.VaultException;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
