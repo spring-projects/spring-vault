@@ -12,4 +12,4 @@ pkill vault
 mkdir -p ${BASEDIR}/download
 ${BASEDIR}/src/test/bash/install_vault.sh
 ${BASEDIR}/src/test/bash/create_certificates.sh
-${BASEDIR}/src/test/bash/local_run_vault.sh > /dev/null 2>&1 &
+${BASEDIR}/src/test/bash/local_run_vault.sh &
