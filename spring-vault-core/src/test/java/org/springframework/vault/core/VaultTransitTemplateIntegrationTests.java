@@ -48,7 +48,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	private VaultTransitOperations transitOperations;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		transitOperations = vaultOperations.opsForTransit();
 
 		if (!vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
@@ -70,7 +70,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateKey() throws Exception {
+	public void createKeyShouldCreateKey() {
 
 		transitOperations.createKey("mykey");
 
@@ -86,7 +86,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateKeyWithOptions() throws Exception {
+	public void createKeyShouldCreateKeyWithOptions() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.convergentEncryption(true) //
@@ -105,14 +105,14 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void getKeyShouldReturnNullIfKeyNotExists() throws Exception {
+	public void getKeyShouldReturnNullIfKeyNotExists() {
 
 		VaultTransitKey key = transitOperations.getKey("hello-world");
 		assertThat(key).isNull();
 	}
 
 	@Test
-	public void deleteKeyShouldFailIfKeyNotExists() throws Exception {
+	public void deleteKeyShouldFailIfKeyNotExists() {
 
 		try {
 			transitOperations.deleteKey("hello-world");
@@ -124,7 +124,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void deleteKeyShouldDeleteKey() throws Exception {
+	public void deleteKeyShouldDeleteKey() {
 
 		transitOperations.createKey("mykey");
 		transitOperations.configureKey("mykey", VaultTransitKeyConfiguration.builder()
@@ -135,7 +135,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldCreateCiphertext() throws Exception {
+	public void encryptShouldCreateCiphertext() {
 
 		transitOperations.createKey("mykey");
 
@@ -144,7 +144,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldCreateCiphertextWithNonceAndContext() throws Exception {
+	public void encryptShouldCreateCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -160,7 +160,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void decryptShouldCreatePlaintext() throws Exception {
+	public void decryptShouldCreatePlaintext() {
 
 		transitOperations.createKey("mykey");
 
@@ -171,7 +171,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void decryptShouldCreatePlaintextWithNonceAndContext() throws Exception {
+	public void decryptShouldCreatePlaintextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -189,7 +189,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptAndRewrapShouldCreateCiphertext() throws Exception {
+	public void encryptAndRewrapShouldCreateCiphertext() {
 
 		transitOperations.createKey("mykey");
 
@@ -202,8 +202,23 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext()
-			throws Exception {
+	public void shouldEncryptBinaryPlaintext() {
+
+		transitOperations.createKey("mykey");
+
+		byte[] plaintext = new byte[] { 1, 2, 3, 4, 5 };
+
+		String ciphertext = transitOperations.encrypt("mykey", plaintext,
+				VaultTransitContext.empty());
+
+		byte[] decrypted = transitOperations.decrypt("mykey", ciphertext,
+				VaultTransitContext.empty());
+
+		assertThat(decrypted).isEqualTo(plaintext);
+	}
+
+	@Test
+	public void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());

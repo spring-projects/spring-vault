@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,12 @@ package org.springframework.vault.support;
  */
 public class VaultTransitContext {
 
+	/**
+	 * Empty (default) {@link VaultTransitContext} without a {@literal context} and
+	 * {@literal nonce}.
+	 */
+	private static final VaultTransitContext EMPTY = new VaultTransitContext(null, null);
+
 	private final byte[] context;
 
 	private final byte[] nonce;
@@ -36,6 +42,13 @@ public class VaultTransitContext {
 	 */
 	public static VaultTransitRequestBuilder builder() {
 		return new VaultTransitRequestBuilder();
+	}
+
+	/**
+	 * @return an empty {@link VaultTransitContext}.
+	 */
+	public static VaultTransitContext empty() {
+		return EMPTY;
 	}
 
 	/**
@@ -66,7 +79,7 @@ public class VaultTransitContext {
 
 		/**
 		 * Configure a key derivation context for the {@code transit} operation.
-		 * 
+		 *
 		 * @param context key derivation context, provided as a binary data. Must be
 		 * provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
@@ -80,7 +93,7 @@ public class VaultTransitContext {
 		 * Configure the nonce value for a {@code transit} operation. Must be provided if
 		 * convergent encryption is enabled for this key and the key was generated with
 		 * Vault 0.6.1. Not required for keys created in 0.6.2+.
-		 * 
+		 *
 		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must
 		 * ensure that for any given context (and thus, any given encryption key) this
 		 * nonce value is never reused
