@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +25,7 @@ import lombok.Data;
 
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
@@ -66,6 +69,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		vaultOperations.write(String.format("%s/keys/%s", path, keyName),
 				createKeyRequest);
+	}
+
+	@Override
+	public List<String> getKeys() {
+
+		VaultResponse response = vaultOperations.read(String.format("%s/keys?list=true",
+				path));
+
+		return response == null ? Collections.emptyList() : (List) response.getData()
+				.get("keys");
 	}
 
 	@Override

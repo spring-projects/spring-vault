@@ -29,9 +29,11 @@ import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultTransitTemplate} through
@@ -102,6 +104,18 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(mykey.isDerived()).isTrue();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 		assertThat(mykey.isLatestVersion()).isTrue();
+	}
+
+	@Test
+	public void shouldEnumerateKey() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+
+		assertThat(transitOperations.getKeys()).isEmpty();
+
+		transitOperations.createKey("mykey");
+
+		assertThat(transitOperations.getKeys()).contains("mykey");
 	}
 
 	@Test

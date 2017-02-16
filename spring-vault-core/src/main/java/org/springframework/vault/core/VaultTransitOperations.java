@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.vault.core;
+
+import java.util.List;
 
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
@@ -31,7 +33,7 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Creates a new named encryption key given a {@code name}.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void createKey(String keyName);
@@ -40,11 +42,18 @@ public interface VaultTransitOperations {
 	 * Creates a new named encryption key given a {@code name} and
 	 * {@link VaultTransitKeyCreationRequest}. The key options set here cannot be changed
 	 * after key creation.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param createKeyRequest must not be {@literal null}.
 	 */
 	void createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest);
+
+	/**
+	 * Get a {@link List} of transit key names.
+	 *
+	 * @return {@link List} of transit key names.
+	 */
+	List<String> getKeys();
 
 	/**
 	 * Creates a new named encryption key given a {@code name}.
@@ -56,7 +65,7 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Returns information about a named encryption key.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @return the {@link VaultTransitKey}.
 	 */
@@ -65,7 +74,7 @@ public interface VaultTransitOperations {
 	/**
 	 * Deletes a named encryption key. It will no longer be possible to decrypt any data
 	 * encrypted with the named key.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void deleteKey(String keyName);
@@ -74,7 +83,7 @@ public interface VaultTransitOperations {
 	 * Rotates the version of the named key. After rotation, new plaintext requests will
 	 * be encrypted with the new version of the key. To upgrade ciphertext to be encrypted
 	 * with the latest version of the key, use {@link #rewrap(String, String)}.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @see #rewrap(String, String)
 	 */
@@ -82,7 +91,7 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Encrypts the provided plaintext using the named key.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return cipher text.
@@ -122,7 +131,7 @@ public interface VaultTransitOperations {
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
 	 * this never returns plaintext, it is possible to delegate this functionality to
 	 * untrusted users or scripts.
-	 * 
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return cipher text.
