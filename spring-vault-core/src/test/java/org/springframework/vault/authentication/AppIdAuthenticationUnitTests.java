@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
@@ -46,7 +47,7 @@ public class AppIdAuthenticationUnitTests {
 	@Before
 	public void before() throws Exception {
 
-		RestTemplate restTemplate = new RestTemplate();
+		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;
