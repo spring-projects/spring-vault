@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.core;
 
+import java.util.List;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,23 +54,48 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 	@Before
 	public void before() {
+
 		transitOperations = vaultOperations.opsForTransit();
 
 		if (!vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
 			vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
 		}
 
+		removeKeys();
+	}
+
+	@After
+	public void tearDown() {
+		removeKeys();
+	}
+
+	private void deleteKey(String keyName) {
+
 		try {
-			transitOperations.configureKey("mykey", VaultTransitKeyConfiguration
+			transitOperations.configureKey(keyName, VaultTransitKeyConfiguration
 					.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
 
 		try {
-			transitOperations.deleteKey("mykey");
+			transitOperations.deleteKey(keyName);
 		}
 		catch (Exception e) {
+		}
+	}
+
+	private void removeKeys() {
+
+		if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+			List<String> keys = vaultOperations.opsForTransit().getKeys();
+			for (String keyName : keys) {
+				deleteKey(keyName);
+			}
+		}
+		else {
+			deleteKey("mykey");
+			deleteKey("derived");
 		}
 	}
 
