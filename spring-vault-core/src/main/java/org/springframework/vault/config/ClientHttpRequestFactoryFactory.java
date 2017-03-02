@@ -132,7 +132,7 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	private static SSLContext getSSLContext(SslConfiguration sslConfiguration)
+	static SSLContext getSSLContext(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(

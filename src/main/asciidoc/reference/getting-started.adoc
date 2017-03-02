@@ -261,6 +261,11 @@ public class AppConfig extends AbstractVaultConfiguration {
 `AbstractVaultConfiguration` or provided by your configuration.
 ====
 
+NOTE: Creating a custom configuration class might be cumbersome in some cases.
+Take a look at `EnvironmentVaultConfiguration` that allows configuration by using
+properties from existing property sources and Spring's `Environment`. Read more
+in <<vault.core.environment-vault-configuration>>.
+
 [[vault.core.template.sessionmanagement]]
 === Session Management
 
@@ -308,6 +313,75 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <3>
 Please note that providing `SslConfiguration` can be only
 applied when either Apache Http Components or the OkHttp client
 is on your class-path.
+
+
+[[vault.core.environment-vault-configuration]]
+== Using `EnvironmentVaultConfiguration`
+
+Spring Vault includes `EnvironmentVaultConfiguration` configure the Vault client from Spring's `Environment` and a set of predefined
+property keys. `EnvironmentVaultConfiguration` supports frequently applied configurations. Other configurations are supported by deriving from the most appropriate configuration class.  Include `EnvironmentVaultConfiguration` with `@Import(EnvironmentVaultConfiguration.class)` to existing
+Java-based configuration classes and supply configuration properties through any of Spring's ``PropertySource``s.
+
+.Using EnvironmentVaultConfiguration with a property file
+====
+
+.Java-based configuration class
+[source,java]
+----
+@PropertySource("vault.properties")
+@Import(EnvironmentVaultConfiguration.class)
+public class MyConfiguration{
+}
+----
+
+.vault.properties
+[source,properties]
+----
+vault.uri=https://localhost:8200
+vault.token=00000000-0000-0000-0000-000000000000
+----
+====
+
+**Property keys**
+
+* Vault URI: `vault.uri`
+* SSL Configuration
+ ** Keystore resource: `vault.ssl.key-store` (optional)
+ ** Keystore password: `vault.ssl.key-store-password` (optional)
+ ** Truststore resource: `vault.ssl.trust-store` (optional)
+ ** Truststore password: `vault.ssl.trust-store-password` (optional)
+* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `CERT`, `CUBBYHOLE`)
+
+
+**Authentication-specific property keys**
+
+**<<vault.authentication.token>>**
+
+* Vault Token: `vault.token`
+
+**<<vault.authentication.appid>>**
+
+* AppId: `vault.app-id.app-id`
+* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use `MacAddressUserId`, respective `IpAddressUserId` user id mechanisms. Any other value is used with `StaticUserId`.
+
+**<<vault.authentication.approle>>**
+
+* RoleId: `vault.app-role.role-id`
+* SecretId: `vault.app-role.secret-id` (optional)
+
+**<<vault.authentication.awsec2>>**
+
+* RoleId: `vault.aws-ec2.role-id`
+* Identity Document URL: `vault.aws-ec2.identity-document` (optional)
+
+**<<vault.authentication.clientcert>>**
+
+No configuration options.
+
+**<<vault.authentication.cubbyhole>>**
+
+* Initial Vault Token: `vault.token`
+
 
 [[vault.core.propertysupport]]
 == Vault Property Source Support
