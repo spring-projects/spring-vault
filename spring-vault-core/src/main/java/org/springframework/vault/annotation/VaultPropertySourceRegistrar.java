@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.annotation;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -24,15 +25,19 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
+import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.annotation.VaultPropertySource.Renewal;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 
@@ -48,27 +53,38 @@ import org.springframework.vault.core.util.PropertyTransformers;
  *
  * @author Mark Paluch
  */
-class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
-		BeanFactoryPostProcessor {
+class VaultPropertySourceRegistrar
+		implements ImportBeanDefinitionRegistrar, BeanFactoryPostProcessor {
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
 			throws BeansException {
 
 		ConfigurableEnvironment env = beanFactory.getBean(ConfigurableEnvironment.class);
-		Map<String, org.springframework.vault.core.env.VaultPropertySource> beans = beanFactory
-				.getBeansOfType(org.springframework.vault.core.env.VaultPropertySource.class);
-
 		MutablePropertySources propertySources = env.getPropertySources();
 
-		for (org.springframework.vault.core.env.VaultPropertySource vaultPropertySource : beans
-				.values()) {
+		registerPropertySources(beanFactory
+				.getBeansOfType(
+						org.springframework.vault.core.env.VaultPropertySource.class)
+				.values(), propertySources);
+
+		registerPropertySources(beanFactory
+				.getBeansOfType(
+						org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class)
+				.values(), propertySources);
+	}
+
+	private void registerPropertySources(
+			Collection<? extends PropertySource<?>> propertySources,
+			MutablePropertySources mutablePropertySources) {
+
+		for (PropertySource<?> vaultPropertySource : propertySources) {
 
 			if (propertySources.contains(vaultPropertySource.getName())) {
 				continue;
 			}
 
-			propertySources.addLast(vaultPropertySource);
+			mutablePropertySources.addLast(vaultPropertySource);
 		}
 	}
 
@@ -96,6 +112,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 			String[] paths = propertySource.getStringArray("value");
 			String ref = propertySource.getString("vaultTemplateRef");
 			String propertyNamePrefix = propertySource.getString("propertyNamePrefix");
+			Renewal renewal = propertySource.getEnum("renewal");
 
 			Assert.isTrue(paths.length > 0,
 					"At least one @VaultPropertySource(value) location is required");
@@ -104,8 +121,9 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 					"'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
 
 			PropertyTransformer propertyTransformer = StringUtils
-					.hasText(propertyNamePrefix) ? PropertyTransformers
-					.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
+					.hasText(propertyNamePrefix)
+							? PropertyTransformers.propertyNamePrefix(propertyNamePrefix)
+							: PropertyTransformers.noop();
 
 			for (String propertyPath : paths) {
 
@@ -113,22 +131,51 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 					continue;
 				}
 
-				BeanDefinitionBuilder builder = BeanDefinitionBuilder
-						.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
-
-				builder.addConstructorArgValue(propertyPath);
-				builder.addConstructorArgReference(ref);
-				builder.addConstructorArgValue(propertyPath);
-				builder.addConstructorArgValue(propertyTransformer);
-
-				builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref, renewal,
+						propertyTransformer, propertyPath);
 
 				registry.registerBeanDefinition("vaultPropertySource#" + counter,
-						builder.getBeanDefinition());
+						beanDefinition);
 
 				counter++;
 			}
 		}
+	}
+
+	private AbstractBeanDefinition createBeanDefinition(String ref, Renewal renewal,
+			PropertyTransformer propertyTransformer, String propertyPath) {
+
+		BeanDefinitionBuilder builder;
+
+		if (isRenewable(renewal)) {
+			builder = BeanDefinitionBuilder.rootBeanDefinition(
+					org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
+
+			RequestedSecret requestedSecret = renewal == Renewal.ROTATE
+					? RequestedSecret.rotating(propertyPath)
+					: RequestedSecret.renewable(propertyPath);
+
+			builder.addConstructorArgValue(propertyPath);
+			builder.addConstructorArgReference("secretLeaseContainer");
+			builder.addConstructorArgValue(requestedSecret);
+		}
+		else {
+			builder = BeanDefinitionBuilder.rootBeanDefinition(
+					org.springframework.vault.core.env.VaultPropertySource.class);
+
+			builder.addConstructorArgValue(propertyPath);
+			builder.addConstructorArgReference(ref);
+			builder.addConstructorArgValue(propertyPath);
+		}
+
+		builder.addConstructorArgValue(propertyTransformer);
+		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+
+		return builder.getBeanDefinition();
+	}
+
+	private boolean isRenewable(Renewal renewal) {
+		return renewal == Renewal.RENEW || renewal == Renewal.ROTATE;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -139,8 +186,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		addAttributesIfNotNull(result,
 				metadata.getAnnotationAttributes(annotationClassName, false));
 
-		Map<String, Object> container = metadata.getAnnotationAttributes(
-				containerClassName, false);
+		Map<String, Object> container = metadata
+				.getAnnotationAttributes(containerClassName, false);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container
 					.get("value")) {

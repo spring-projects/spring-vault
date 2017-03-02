@@ -27,9 +27,9 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
- * {@link VaultPropertySource} to Spring's
- * {@link org.springframework.core.env.Environment Environment}. To be used in conjunction
- * with @{@link Configuration} classes. <h3>Example usage</h3>
+ * {@link VaultPropertySource} to Spring's {@link org.springframework.core.env.Environment
+ * Environment}. To be used in conjunction with @{@link Configuration} classes.
+ * <h3>Example usage</h3>
  * <p>
  * Given a Vault path {@code secret/my-application} containing the configuration data pair
  * {@code database.password=mysecretpassword}, the following {@code @Configuration} class
@@ -40,10 +40,10 @@ import org.springframework.context.annotation.Import;
  * &#064;Configuration
  * &#064;VaultPropertySource(&quot;secret/my-application&quot;)
  * public class AppConfig {
- * 
+ *
  * 	&#064;Autowired
  * 	Environment env;
- * 
+ *
  * 	&#064;Bean
  * 	public TestBean testBean() {
  * 		TestBean testBean = new TestBean();
@@ -65,9 +65,8 @@ import org.springframework.context.annotation.Import;
  * ordering is difficult to predict. In such cases - and if overriding is important - it
  * is recommended that the user fall back to using the programmatic PropertySource API.
  * See {@link org.springframework.core.env.ConfigurableEnvironment
- * ConfigurableEnvironment} and
- * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
- * javadocs for details.
+ * ConfigurableEnvironment} and {@link org.springframework.core.env.MutablePropertySources
+ * MutablePropertySources} javadocs for details.
  *
  * @author Mark Paluch
  */
@@ -98,4 +97,28 @@ public @interface VaultPropertySource {
 	 * to be used with the property sources.
 	 */
 	String vaultTemplateRef() default "vaultTemplate";
+
+	/**
+	 * Configure lease renewal/rotation.
+	 */
+	Renewal renewal() default Renewal.OFF;
+
+	public enum Renewal {
+
+		/**
+		 * Do not renew leases associated with secrets.
+		 */
+		OFF,
+
+		/**
+		 * Renew secrets in regular intervals to keep the lease alive.
+		 */
+		RENEW,
+
+		/**
+		 * Renew secrets (like {@link #RENEW}) and request new secrets once the lease
+		 * expires.
+		 */
+		ROTATE;
+	}
 }

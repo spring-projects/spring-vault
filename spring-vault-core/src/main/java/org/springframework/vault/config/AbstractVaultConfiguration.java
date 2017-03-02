@@ -23,9 +23,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
@@ -33,6 +32,7 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
@@ -73,21 +73,22 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-		return new VaultTemplate(vaultEndpoint(), clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), sessionManager());
+		return new VaultTemplate(vaultEndpoint(),
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+				sessionManager());
 	}
 
 	/**
 	 * Construct a {@link LifecycleAwareSessionManager} using
 	 * {@link #clientAuthentication()}. This {@link SessionManager} uses
-	 * {@link #asyncTaskExecutor()}.
+	 * {@link #threadPoolTaskScheduler()}.
 	 *
 	 * @return the {@link SessionManager} for Vault session management.
 	 * @see SessionManager
 	 * @see LifecycleAwareSessionManager
 	 * @see #restOperations()
 	 * @see #clientAuthentication()
-	 * @see #asyncTaskExecutor() ()
+	 * @see #threadPoolTaskScheduler() ()
 	 */
 	@Bean
 	public SessionManager sessionManager() {
@@ -97,21 +98,50 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
 		return new LifecycleAwareSessionManager(clientAuthentication,
-				asyncTaskExecutor(), restOperations());
+				threadPoolTaskScheduler(), restOperations());
 	}
 
 	/**
-	 * Create a {@link AsyncTaskExecutor} used by {@link LifecycleAwareSessionManager}.
-	 * Annotate with {@link Bean} in case you want to expose a {@link AsyncTaskExecutor}
-	 * instance to the {@link org.springframework.context.ApplicationContext}. This might
-	 * be useful to supply managed executor instances or {@link AsyncTaskExecutor}s using
-	 * a queue/pooled threads.
+	 * Construct a {@link SecretLeaseContainer} using {@link #vaultTemplate()} and
+	 * {@link #threadPoolTaskScheduler()}.
 	 *
-	 * @return the {@link AsyncTaskExecutor} to use. Must not be {@literal null}.
-	 * @see AsyncTaskExecutor
+	 * @return the {@link SessionManager} for Vault session management.
+	 * @see #vaultTemplate()
+	 * @see #threadPoolTaskScheduler()
 	 */
-	public AsyncTaskExecutor asyncTaskExecutor() {
-		return new SimpleAsyncTaskExecutor("spring-vault-SimpleAsyncTaskExecutor-");
+	@Bean
+	public SecretLeaseContainer secretLeaseContainer() throws Exception {
+
+		SecretLeaseContainer secretLeaseContainer = new SecretLeaseContainer(
+				vaultTemplate(), threadPoolTaskScheduler());
+
+		secretLeaseContainer.afterPropertiesSet();
+		secretLeaseContainer.start();
+
+		return secretLeaseContainer;
+	}
+
+	/**
+	 * Create a {@link ThreadPoolTaskScheduler} used by
+	 * {@link LifecycleAwareSessionManager} and
+	 * {@link org.springframework.vault.core.lease.SecretLeaseContainer}. Annotate with
+	 * {@link Bean} in case you want to expose a {@link ThreadPoolTaskScheduler} instance
+	 * to the {@link org.springframework.context.ApplicationContext}. This might be useful
+	 * to supply managed executor instances or {@link ThreadPoolTaskScheduler}s using a
+	 * queue/pooled threads.
+	 *
+	 * @return the {@link ThreadPoolTaskScheduler} to use. Must not be {@literal null}.
+	 */
+	@Bean
+	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+
+		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+
+		threadPoolTaskScheduler
+				.setThreadNamePrefix("spring-vault-ThreadPoolTaskScheduler-");
+		threadPoolTaskScheduler.setDaemon(true);
+
+		return threadPoolTaskScheduler;
 	}
 
 	/**
@@ -140,8 +170,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions(), sslConfiguration()));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory
+				.create(clientOptions(), sslConfiguration()));
 	}
 
 	/**

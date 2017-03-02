@@ -421,10 +421,13 @@ manipulation of the set of property sources.
 
 The `@VaultPropertySource` annotation provides a convenient and declarative
 mechanism for adding a `PropertySource` to Spring's `Environment`
-to be used in conjunction with @Configuration classes.
+to be used in conjunction with `@Configuration` classes.
 
 `@VaultPropertySource` takes a Vault path such as ``secret/my-application``
 and exposes the data stored at the node in a ``PropertySource``.
+`@VaultPropertySource` supports lease renewal for secrets associated with a lease
+(i. e. credentials from the `mysql` backend) and credential rotation upon terminal
+lease expiration. Lease renewal is disabled by default.
 
 .Properties stored in Vault
 ====
@@ -462,6 +465,20 @@ public class AppConfig {
         testBean.setPassword(env.getProperty("database.password"));
         return testBean;
     }
+}
+----
+====
+
+.Declaring a `@VaultPropertySource` with credential rotation and prefix
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource(value = "aws/creds/s3-access",
+                     propertyNamePrefix = "aws.",
+                     renewal = Renewal.ROTATE)
+public class AppConfig {
+  // provides aws.access_key and aws.secret_key properties
 }
 ----
 ====
