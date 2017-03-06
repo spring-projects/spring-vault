@@ -26,8 +26,8 @@ import org.springframework.core.NestedRuntimeException;
 public class VaultException extends NestedRuntimeException {
 
 	/**
-	 * Creates a {@code VaultException} with the specified detail message.
-	 * 
+	 * Create a {@code VaultException} with the specified detail message.
+	 *
 	 * @param msg the detail message
 	 */
 	public VaultException(String msg) {
@@ -35,9 +35,9 @@ public class VaultException extends NestedRuntimeException {
 	}
 
 	/**
-	 * Creates a {@code NestedRuntimeException} with the specified detail message and
+	 * Create a {@code NestedRuntimeException} with the specified detail message and
 	 * nested exception.
-	 * 
+	 *
 	 * @param msg the detail message
 	 * @param cause the nested exception
 	 */

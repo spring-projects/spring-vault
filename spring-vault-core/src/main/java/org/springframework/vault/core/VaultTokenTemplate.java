@@ -37,7 +37,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 	private final VaultOperations vaultOperations;
 
 	/**
-	 * Creates a new {@link VaultTokenTemplate} with the given {@link VaultOperations}.
+	 * Create a new {@link VaultTokenTemplate} with the given {@link VaultOperations}.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */

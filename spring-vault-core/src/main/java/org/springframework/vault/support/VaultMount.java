@@ -56,7 +56,7 @@ public class VaultMount {
 	}
 
 	/**
-	 * Creates a new {@link VaultMount} given a {@code type}.
+	 * Create a new {@link VaultMount} given a {@code type}.
 	 *
 	 * @param type backend type, must not be empty or {@literal null}.
 	 * @return the created {@link VaultMount}.
@@ -109,7 +109,7 @@ public class VaultMount {
 
 		/**
 		 * Configure the backend type.
-		 * 
+		 *
 		 * @param type the backend type, must not be empty or {@literal null}.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
@@ -123,7 +123,7 @@ public class VaultMount {
 
 		/**
 		 * Configure a human readable description of this mount.
-		 * 
+		 *
 		 * @param description a human readable description of this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
@@ -134,7 +134,7 @@ public class VaultMount {
 
 		/**
 		 * Set additional configuration details for this mount.
-		 * 
+		 *
 		 * @param config additional configuration details for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */

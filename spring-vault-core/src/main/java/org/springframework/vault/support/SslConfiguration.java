@@ -60,7 +60,7 @@ public class SslConfiguration {
 	private final String trustStorePassword;
 
 	/**
-	 * Creates a new {@link SslConfiguration}.
+	 * Create a new {@link SslConfiguration}.
 	 *
 	 * @param keyStore the keystore resource.
 	 * @param keyStorePassword the keystore password.
@@ -77,7 +77,7 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * Creates a new {@link SslConfiguration} for the given trust store.
+	 * Create a new {@link SslConfiguration} for the given trust store.
 	 *
 	 * @param trustStore resource pointing to an existing trust store, must not be
 	 * {@literal null}.
@@ -96,7 +96,7 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * Creates a new {@link SslConfiguration} for the given key store.
+	 * Create a new {@link SslConfiguration} for the given key store.
 	 *
 	 * @param keyStore resource pointing to an existing key store, must not be
 	 * {@literal null}.
@@ -114,7 +114,7 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * Creates a new {@link SslConfiguration} for the given truststore.
+	 * Create a new {@link SslConfiguration} for the given truststore.
 	 *
 	 * @param keyStore resource pointing to an existing keystore, must not be
 	 * {@literal null}.

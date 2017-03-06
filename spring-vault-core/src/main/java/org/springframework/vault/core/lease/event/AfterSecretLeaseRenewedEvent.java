@@ -21,7 +21,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 /**
  * Event published after renewing a {@link Lease} for a {@link RequestedSecret}. The
  * secrets associated with {@link Lease} should be considered valid and the lease extended
- * when this event is received.
+ * at the time this event is received.
  *
  * @author Mark Paluch
  */

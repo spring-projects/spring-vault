@@ -41,7 +41,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 	private final RestOperations restOperations;
 
 	/**
-	 * Creates a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
 	 *
 	 * @param restOperations must not be {@literal null}.
 	 */

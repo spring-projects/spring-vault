@@ -18,7 +18,7 @@ package org.springframework.vault.core.lease.domain;
 import org.springframework.util.Assert;
 
 /**
- * A lease abstracting the lease Id, duration and renewability.
+ * A lease abstracting the lease Id, duration and its renewability.
  *
  * @author Mark Paluch
  */
@@ -33,6 +33,7 @@ public class Lease {
 	private final boolean renewable;
 
 	private Lease(String leaseId, long leaseDuration, boolean renewable) {
+
 		this.leaseId = leaseId;
 		this.leaseDuration = leaseDuration;
 		this.renewable = renewable;

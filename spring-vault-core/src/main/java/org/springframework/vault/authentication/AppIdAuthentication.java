@@ -49,7 +49,7 @@ public class AppIdAuthentication implements ClientAuthentication {
 	private final RestOperations restOperations;
 
 	/**
-	 * Creates a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
+	 * Create a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
 	 * {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.

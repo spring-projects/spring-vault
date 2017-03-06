@@ -20,8 +20,8 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
  * Event published after revoking a {@link Lease} for a {@link RequestedSecret}. The
- * secrets associated with {@link Lease} should be considered invalid when this event is
- * received.
+ * secrets associated with {@link Lease} should be considered invalid at the time this
+ * event is received.
  *
  * @author Mark Paluch
  */

@@ -37,8 +37,8 @@ public class SimpleSessionManager implements SessionManager {
 	private volatile VaultToken token;
 
 	/**
-	 * Creates a new {@link SimpleSessionManager} using a {@link ClientAuthentication}.
-	 * 
+	 * Create a new {@link SimpleSessionManager} using a {@link ClientAuthentication}.
+	 *
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
 	public SimpleSessionManager(ClientAuthentication clientAuthentication) {

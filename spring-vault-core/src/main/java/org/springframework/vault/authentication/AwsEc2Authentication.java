@@ -59,7 +59,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	private final AtomicReference<char[]> nonce = new AtomicReference<char[]>();
 
 	/**
-	 * Creates a new {@link AwsEc2Authentication}.
+	 * Create a new {@link AwsEc2Authentication}.
 	 *
 	 * @param vaultRestOperations must not be {@literal null}.
 	 */
@@ -69,7 +69,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	}
 
 	/**
-	 * Creates a new {@link AwsEc2Authentication} specifying
+	 * Create a new {@link AwsEc2Authentication} specifying
 	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
 	 * {@link RestOperations} .
 	 *

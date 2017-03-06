@@ -64,7 +64,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private final boolean dedicatedSessionManager;
 
 	/**
-	 * Creates a new {@link VaultTemplate} without setting {@link RestOperations} and
+	 * Create a new {@link VaultTemplate} without setting {@link RestOperations} and
 	 * {@link SessionManager}.
 	 */
 	public VaultTemplate() {
@@ -72,7 +72,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultEndpoint} and
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint} and
 	 * {@link ClientAuthentication}.
 	 *
 	 * @param vaultEndpoint must not be {@literal null}.
@@ -95,7 +95,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
-	 * Creates a new {@link VaultTemplate} with a {@link VaultEndpoint},
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
 	 *
 	 * @param vaultEndpoint must not be {@literal null}.

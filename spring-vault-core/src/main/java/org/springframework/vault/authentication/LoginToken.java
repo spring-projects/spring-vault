@@ -41,7 +41,7 @@ class LoginToken extends VaultToken {
 	}
 
 	/**
-	 * Creates a new {@link LoginToken}.
+	 * Create a new {@link LoginToken}.
 	 *
 	 * @param token must not be {@literal null}.
 	 * @return the created {@link VaultToken}
@@ -51,7 +51,7 @@ class LoginToken extends VaultToken {
 	}
 
 	/**
-	 * Creates a new {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new {@link LoginToken} with a {@code leaseDuration}.
 	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDuration the lease duration.
@@ -65,7 +65,7 @@ class LoginToken extends VaultToken {
 	}
 
 	/**
-	 * Creates a new renewable {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new renewable {@link LoginToken} with a {@code leaseDuration}.
 	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDuration the lease duration.

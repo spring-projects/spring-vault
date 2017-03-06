@@ -17,14 +17,14 @@ package org.springframework.vault.support;
 
 /**
  * Value object to bind Vault HTTP Token API responses.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultTokenResponse extends VaultResponse {
 
 	/**
-	 * Returns a {@link VaultToken} from the {@link VaultResponse}.
-	 * 
+	 * Return a {@link VaultToken} from the {@link VaultResponse}.
+	 *
 	 * @return the {@link VaultToken}.
 	 */
 	public VaultToken getToken() {

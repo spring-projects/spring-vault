@@ -58,7 +58,7 @@ public interface VaultOperations {
 	VaultTransitOperations opsForTransit();
 
 	/**
-	 * Returns {@link VaultTransitOperations} if the transit backend is mounted on a
+	 * Return {@link VaultTransitOperations} if the transit backend is mounted on a
 	 * different path than {@code transit}.
 	 *
 	 * @param path the mount path
@@ -72,8 +72,8 @@ public interface VaultOperations {
 	VaultPkiOperations opsForPki();
 
 	/**
-	 * Returns {@link VaultPkiOperations} if the PKI backend is mounted on a different
-	 * path than {@code pki}.
+	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a different path
+	 * than {@code pki}.
 	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault PKI backend.

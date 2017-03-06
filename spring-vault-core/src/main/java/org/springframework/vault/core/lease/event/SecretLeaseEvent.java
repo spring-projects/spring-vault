@@ -20,11 +20,17 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Abstract base class for {@link Lease} based events.
+ * Abstract base class for {@link Lease} based events associated with
+ * {@link RequestedSecret}.
  *
  * @author Mark Paluch
+ * @see ApplicationEvent
+ * @see Lease
+ * @see RequestedSecret
  */
 public abstract class SecretLeaseEvent extends ApplicationEvent {
+
+	private static final long serialVersionUID = 1L;
 
 	private final Lease lease;
 
@@ -37,6 +43,7 @@ public abstract class SecretLeaseEvent extends ApplicationEvent {
 	 */
 	protected SecretLeaseEvent(RequestedSecret requestedSecret, Lease lease) {
 		super(requestedSecret);
+
 		this.lease = lease;
 	}
 

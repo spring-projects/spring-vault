@@ -32,14 +32,14 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 public interface VaultTransitOperations {
 
 	/**
-	 * Creates a new named encryption key given a {@code name}.
+	 * Create a new named encryption key given a {@code name}.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void createKey(String keyName);
 
 	/**
-	 * Creates a new named encryption key given a {@code name} and
+	 * Create a new named encryption key given a {@code name} and
 	 * {@link VaultTransitKeyCreationRequest}. The key options set here cannot be changed
 	 * after key creation.
 	 *
@@ -56,7 +56,7 @@ public interface VaultTransitOperations {
 	List<String> getKeys();
 
 	/**
-	 * Creates a new named encryption key given a {@code name}.
+	 * Create a new named encryption key given a {@code name}.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param keyConfiguration must not be {@literal null}.
@@ -64,7 +64,7 @@ public interface VaultTransitOperations {
 	void configureKey(String keyName, VaultTransitKeyConfiguration keyConfiguration);
 
 	/**
-	 * Returns information about a named encryption key.
+	 * Return information about a named encryption key.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @return the {@link VaultTransitKey}.

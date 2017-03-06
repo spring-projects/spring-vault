@@ -65,7 +65,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	private final VaultOperations vaultOperations;
 
 	/**
-	 * Creates a new {@link VaultSysTemplate} with the given {@link VaultOperations}.
+	 * Create a new {@link VaultSysTemplate} with the given {@link VaultOperations}.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */

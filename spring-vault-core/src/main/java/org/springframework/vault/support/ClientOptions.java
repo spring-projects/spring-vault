@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Client options for Vault.
- * 
+ *
  * @author Mark Paluch
  */
 public class ClientOptions {
@@ -35,7 +35,7 @@ public class ClientOptions {
 	private final int readTimeout;
 
 	/**
-	 * Creates new {@link ClientOptions} with default timeouts of {@literal 5}
+	 * Create new {@link ClientOptions} with default timeouts of {@literal 5}
 	 * {@link TimeUnit#SECONDS} connection timeout and {@literal 15}
 	 * {@link TimeUnit#SECONDS} read timeout.
 	 */
@@ -44,8 +44,8 @@ public class ClientOptions {
 	}
 
 	/**
-	 * Creates new {@link ClientOptions}.
-	 * 
+	 * Create new {@link ClientOptions}.
+	 *
 	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must
 	 * be greater {@literal 0}.
 	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must be greater

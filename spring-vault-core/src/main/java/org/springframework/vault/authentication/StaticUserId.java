@@ -20,7 +20,7 @@ import org.springframework.util.Assert;
 
 /**
  * A static UserId.
- * 
+ *
  * @author Mark Paluch
  * @see AppIdUserIdMechanism
  */
@@ -29,7 +29,7 @@ public class StaticUserId implements AppIdUserIdMechanism {
 	private final String userId;
 
 	/**
-	 * Creates a new {@link StaticUserId} for a given {@code userId}.
+	 * Create a new {@link StaticUserId} for a given {@code userId}.
 	 *
 	 * @param userId must not be empty or {@literal null}.
 	 */

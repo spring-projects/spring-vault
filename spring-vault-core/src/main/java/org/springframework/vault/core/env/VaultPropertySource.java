@@ -186,5 +186,4 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	protected Map<String, String> toStringMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);
 	}
-
 }

@@ -127,7 +127,7 @@ public interface VaultSysOperations {
 	void authUnmount(String path) throws VaultException;
 
 	/**
-	 * Returns the health status of Vault.
+	 * Return the health status of Vault.
 	 *
 	 * @return the {@link VaultHealth}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET

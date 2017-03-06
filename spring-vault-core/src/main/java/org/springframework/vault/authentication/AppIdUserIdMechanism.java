@@ -26,7 +26,7 @@ package org.springframework.vault.authentication;
 public interface AppIdUserIdMechanism {
 
 	/**
-	 * Creates a UserId for AppId authentication.
+	 * Create a UserId for AppId authentication.
 	 *
 	 * @return the UserId.
 	 */

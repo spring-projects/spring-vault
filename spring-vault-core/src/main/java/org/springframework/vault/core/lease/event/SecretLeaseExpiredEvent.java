@@ -20,7 +20,8 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
  * Event published after an expired {@link Lease} for a {@link RequestedSecret} was
- * observed.
+ * observed. Secrets associated with the lease are about to expire or already expired at
+ * the time this event is received.
  *
  * @author Mark Paluch
  */

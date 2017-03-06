@@ -85,7 +85,7 @@ public class ClientHttpRequestFactoryFactory {
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	/**
-	 * Creates a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
+	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
 	 *
 	 * @param options must not be {@literal null}

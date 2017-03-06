@@ -75,7 +75,7 @@ public class VaultCertificateRequest {
 	}
 
 	/**
-	 * Creates a new {@link VaultCertificateRequest} given a {@code commonName}.
+	 * Create a new {@link VaultCertificateRequest} given a {@code commonName}.
 	 *
 	 * @param commonName must not be empty or {@literal null}.
 	 * @return the created {@link VaultCertificateRequest}.
@@ -189,7 +189,7 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure a TTL.
-		 * 
+		 *
 		 * @param ttl the TTL, must be a positive number.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
@@ -221,7 +221,7 @@ public class VaultCertificateRequest {
 		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
 		 * appropriate). Useful if the CN is not a hostname or email address, but is
 		 * instead some human-readable identifier.
-		 * 
+		 *
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
 		public VaultCertificateRequestBuilder excludeCommonNameFromSubjectAltNames() {

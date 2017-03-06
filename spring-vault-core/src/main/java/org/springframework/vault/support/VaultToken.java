@@ -40,8 +40,8 @@ public class VaultToken {
 	}
 
 	/**
-	 * Creates a new {@link VaultToken}.
-	 * 
+	 * Create a new {@link VaultToken}.
+	 *
 	 * @param token must not be empty or {@literal null}.
 	 * @return the created {@link VaultToken}
 	 */

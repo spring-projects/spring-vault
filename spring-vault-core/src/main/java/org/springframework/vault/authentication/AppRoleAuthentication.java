@@ -51,7 +51,7 @@ public class AppRoleAuthentication implements ClientAuthentication {
 	private final RestOperations restOperations;
 
 	/**
-	 * Creates a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
+	 * Create a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
 	 * and {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.

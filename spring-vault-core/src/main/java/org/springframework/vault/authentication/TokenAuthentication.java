@@ -30,8 +30,8 @@ public class TokenAuthentication implements ClientAuthentication {
 	private final VaultToken token;
 
 	/**
-	 * Creates a new {@link TokenAuthentication} with a static {@code token}.
-	 * 
+	 * Create a new {@link TokenAuthentication} with a static {@code token}.
+	 *
 	 * @param token the Vault token, must not be empty or {@literal null}.
 	 */
 	public TokenAuthentication(String token) {
@@ -41,7 +41,7 @@ public class TokenAuthentication implements ClientAuthentication {
 	}
 
 	/**
-	 * Creates a new {@link TokenAuthentication} with a static {@code token}.
+	 * Create a new {@link TokenAuthentication} with a static {@code token}.
 	 *
 	 * @param token the Vault token, must not be {@literal null}.
 	 */

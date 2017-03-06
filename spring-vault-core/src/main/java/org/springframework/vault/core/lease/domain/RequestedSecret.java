@@ -46,7 +46,7 @@ public class RequestedSecret {
 	 * this secret will be renewed if the lease is qualified for renewal. The lease is no
 	 * longer valid after expiry.
 	 *
-	 * @param path must not be {@literal null} or empty.
+	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @return the renewable {@link RequestedSecret}.
 	 */
 	public static RequestedSecret renewable(String path) {
@@ -58,7 +58,7 @@ public class RequestedSecret {
 	 * this secret will be renewed if the lease is qualified for renewal. Once the lease
 	 * expires, a new secret with a new lease is obtained.
 	 *
-	 * @param path must not be {@literal null} or empty.
+	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @return the rotating {@link RequestedSecret}.
 	 */
 	public static RequestedSecret rotating(String path) {

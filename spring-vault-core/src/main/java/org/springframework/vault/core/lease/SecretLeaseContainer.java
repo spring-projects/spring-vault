@@ -97,17 +97,17 @@ container.start(); // events are triggered after starting the container
  * by this container applying {@code minRenewalSeconds}/{@code expiryThresholdSeconds} on
  * a {@link TaskScheduler background thread}.
  * <p>
- * Requests for secrets can define either renewal or rotation. Renewable leases are
- * renewed until expiry. Rotating secrets renew their associated lease until expiry and
- * request new secrets after expiry. Vault requires active interaction from a caller side
- * to determine a secret is expired. Vault does not send any events. Expired secrets
- * events can dispatch later than the actual expiry.
+ * Requests for secrets can define either renewal or rotation. The container renews leases
+ * until expiry. Rotating secrets renew their associated lease until expiry and request
+ * new secrets after expiry. Vault requires active interaction from a caller side to
+ * determine a secret is expired. Vault does not send any events. Expired secrets events
+ * can dispatch later than the actual expiry.
  * <p>
  * The container dispatches lease events to {@link LeaseListener} and
  * {@link LeaseErrorListener}. Event notifications are dispatched either on the
- * {@link #start() stating} {@link Thread} or worker threads used for background renewal.
- *
- * Instances are thread-safe once {@link #afterPropertiesSet() initialized.}
+ * {@link #start() starting} {@link Thread} or worker threads used for background renewal.
+ * <p>
+ * Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
  * @see RequestedSecret
@@ -146,7 +146,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	private volatile int status = STATUS_INITIAL;
 
 	/**
-	 * Creates a new {@link SecretLeaseContainer} given {@link VaultOperations}.
+	 * Create a new {@link SecretLeaseContainer} given {@link VaultOperations}.
 	 *
 	 * @param operations must not be {@literal null}.
 	 */
@@ -158,7 +158,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Creates a new {@link SecretLeaseContainer} given {@link VaultOperations} and
+	 * Create a new {@link SecretLeaseContainer} given {@link VaultOperations} and
 	 * {@link TaskScheduler}.
 	 *
 	 * @param operations must not be {@literal null}.
@@ -170,7 +170,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 
 		this.operations = operations;
-		this.taskScheduler = taskScheduler;
+		setTaskScheduler(taskScheduler);
 	}
 
 	/**
@@ -221,10 +221,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @return the {@link RequestedSecret}.
 	 */
 	public RequestedSecret requestRenewableSecret(String path) {
-
-		RequestedSecret requestedSecret = RequestedSecret.renewable(path);
-		addRequestedSecret(requestedSecret);
-		return requestedSecret;
+		return addRequestedSecret(RequestedSecret.renewable(path));
 	}
 
 	/**
@@ -234,10 +231,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @return the {@link RequestedSecret}.
 	 */
 	public RequestedSecret requestRotatingSecret(String path) {
-
-		RequestedSecret requestedSecret = RequestedSecret.rotating(path);
-		addRequestedSecret(requestedSecret);
-		return requestedSecret;
+		return addRequestedSecret(RequestedSecret.rotating(path));
 	}
 
 	/**
@@ -245,7 +239,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 */
-	public void addRequestedSecret(RequestedSecret requestedSecret) {
+	public RequestedSecret addRequestedSecret(RequestedSecret requestedSecret) {
 
 		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
 
@@ -261,6 +255,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 				start(requestedSecret, leaseRenewalScheduler);
 			}
 		}
+
+		return requestedSecret;
 	}
 
 	/**
@@ -269,9 +265,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * events through {@link LeaseListener}. Additional secrets can be requested at any
 	 * time.
 	 * <p>
-	 * Multiple {@link #start()} calls are synchronized to start the container only once.
-	 * Container start requires {@link #afterPropertiesSet() initialization} and cannot be
-	 * started once the container was {@link #destroy() destroyed}.
+	 * Multiple calls are synchronized to start the container only once. Container start
+	 * requires {@link #afterPropertiesSet() initialization} and cannot be started once
+	 * the container was {@link #destroy() destroyed}.
 	 *
 	 * @see #afterPropertiesSet()
 	 * @see #stop()
@@ -314,7 +310,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * Stop the {@link SecretLeaseContainer}. Stopping the container will stop lease
 	 * renewal, secrets rotation and event publishing. Active leases are not expired.
 	 * <p>
-	 * Multiple {@link #stop()} calls are synchronized to stop the container only once.
+	 * Multiple calls are synchronized to stop the container only once.
 	 *
 	 * @see #start()
 	 */
@@ -359,6 +355,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	/**
 	 * Shutdown this {@link SecretLeaseContainer}, disable lease renewal and revoke
 	 * leases.
+	 *
+	 * @see #afterPropertiesSet()
+	 * @see #start()
+	 * @see #stop()
 	 */
 	@Override
 	public void destroy() throws Exception {
@@ -497,7 +497,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Hook method called when a {@link Lease} expired. The default implementation is to
+	 * Hook method called when a {@link Lease} expires. The default implementation is to
 	 * notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
 	 *
@@ -651,7 +651,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		/**
 		 * Disables schedule for already scheduled renewals.
 		 */
-		public void disableScheduleRenewal() {
+		void disableScheduleRenewal() {
 
 			currentLeaseRef.set(null);
 			Set<Lease> leases = new HashSet<Lease>(schedules.keySet());

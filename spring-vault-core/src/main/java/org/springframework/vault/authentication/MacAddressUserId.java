@@ -44,7 +44,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private final String networkInterfaceHint;
 
 	/**
-	 * Creates a new {@link MacAddressUserId} using the {@link NetworkInterface} from the
+	 * Create a new {@link MacAddressUserId} using the {@link NetworkInterface} from the
 	 * {@link InetAddress#getLocalHost()}.
 	 */
 	public MacAddressUserId() {
@@ -52,10 +52,10 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	}
 
 	/**
-	 * Creates a new {@link MacAddressUserId} using a {@code networkInterfaceIndex}. The
+	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceIndex}. The
 	 * index is applied to {@link NetworkInterface#getNetworkInterfaces()} to obtain the
 	 * desired network interface.
-	 * 
+	 *
 	 * @param networkInterfaceIndex must be greater or equal to zero.
 	 */
 	public MacAddressUserId(int networkInterfaceIndex) {
@@ -67,7 +67,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	}
 
 	/**
-	 * Creates a new {@link MacAddressUserId} using a {@code networkInterfaceName}. This
+	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceName}. This
 	 * name is compared with {@link NetworkInterface#getName()} and
 	 * {@link NetworkInterface#getDisplayName()} to obtain the desired network interface.
 	 *

@@ -41,8 +41,8 @@ import java.util.List;
 class KeystoreUtil {
 
 	/**
-	 * Creates a {@link KeyStore} containing the {@link KeySpec} and
-	 * {@link X509Certificate certificates} using the given {@code keyAlias}.
+	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
+	 * certificates} using the given {@code keyAlias}.
 	 *
 	 * @param keyAlias
 	 * @param certificates
@@ -82,7 +82,7 @@ class KeystoreUtil {
 	}
 
 	/**
-	 * Creates an empty {@link KeyStore}.
+	 * Create an empty {@link KeyStore}.
 	 *
 	 * @return
 	 * @throws GeneralSecurityException
@@ -337,7 +337,7 @@ class KeystoreUtil {
 		 * |  Class    | CF  |     +      Type             |
 		 * -------------------------------------------------
 		 * </pre>
-		 * 
+		 *
 		 * <ul>
 		 * <li>Class: Universal, Application, Context or Private
 		 * <li>CF: Constructed flag. If 1, the field is constructed.

@@ -17,6 +17,9 @@ package org.springframework.vault.core.lease.event;
 
 /**
  * Listener for Vault exceptional {@link SecretLeaseEvent}s.
+ * <p>
+ * Error events can occur during secret retrieval, lease renewal, lease revocation and
+ * secret rotation.
  *
  * @author Mark Paluch
  */
