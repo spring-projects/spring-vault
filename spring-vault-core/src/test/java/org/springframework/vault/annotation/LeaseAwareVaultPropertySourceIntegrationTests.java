@@ -50,8 +50,10 @@ public class LeaseAwareVaultPropertySourceIntegrationTests {
 
 	@Autowired
 	Environment env;
+
 	@Autowired
 	ApplicationContext context;
+
 	@Value("${myapp}")
 	String myapp;
 

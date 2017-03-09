@@ -53,6 +53,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -407,6 +408,27 @@ public class SecretLeaseContainerUnitTests {
 				.onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
 	}
 
+	@Test
+	public void shouldNotRevokeSecretsWithoutLease() throws Exception {
+
+		VaultResponse secrets = new VaultResponse();
+		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+
+		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(secrets);
+
+		secretLeaseContainer.addRequestedSecret(requestedSecret);
+		secretLeaseContainer.start();
+
+		secretLeaseContainer.destroy();
+
+		verifyZeroInteractions(taskScheduler);
+
+		verify(leaseListenerAdapter, never())
+				.onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
+		verify(leaseListenerAdapter, never())
+				.onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
+	}
+
 	@SuppressWarnings("unchecked")
 	private void prepareRenewal() {
 
@@ -446,5 +468,4 @@ public class SecretLeaseContainerUnitTests {
 
 		return secrets;
 	}
-
 }

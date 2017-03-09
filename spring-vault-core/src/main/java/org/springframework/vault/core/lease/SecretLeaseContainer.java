@@ -374,7 +374,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 					Lease lease = entry.getValue().getLease();
 					entry.getValue().disableScheduleRenewal();
-					doRevokeLease(entry.getKey(), lease);
+
+					if (lease != null) {
+						doRevokeLease(entry.getKey(), lease);
+					}
 				}
 
 				if (manageTaskScheduler) {

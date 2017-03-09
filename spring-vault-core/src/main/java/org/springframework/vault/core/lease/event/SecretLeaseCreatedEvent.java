@@ -23,7 +23,7 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published after creating a {@link Lease} for a {@link RequestedSecret}.
+ * Event published after obtaining secrets potentially associated with a {@link Lease}.
  *
  * @author Mark Paluch
  */
