@@ -22,7 +22,7 @@ import java.util.Map;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.util.PropertyTransformers;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link VaultPropertySource}.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(MockitoJUnitRunner.class)
