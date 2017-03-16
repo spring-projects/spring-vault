@@ -1,6 +1,24 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 1.0.0 RC1
+-----------------------------------------
+* Consider adding a EnvironmentVaultConfiguration #30
+* Upgrade to Spring Framework 4.3.6 #46
+* Request sent in XML instead of JSON when com.fasterxml.jackson.dataformat.xml.XmlMapper exists in the classpath #47
+* @VaultPropertySource should support custom prefixes #48
+* Reshape APIs #49
+* VaultPropertySource should renew leases #50
+* Apache HttpComponents should support proxy configuration via system properties #52
+* Allow listing transit keys #53
+* Provide default, empty VaultTransitContext #54
+* Upgrade to Vault 0.6.5 #55
+* Upgrade LibSSL on TravisCI #56
+* Upgrade to Spring Framework 4.3.7 #58
+* Replace Thread.sleep in LifecycleAwareSessionManager with TaskScheduler #59
+* Release 1.0 RC1 #60
+* Upgrade dependencies #61
+
 Changes in version 1.0.0 M2
 -----------------------------------------
 * Review documentation #12
