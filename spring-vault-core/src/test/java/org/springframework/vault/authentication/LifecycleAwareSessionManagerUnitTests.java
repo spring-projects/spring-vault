@@ -23,11 +23,10 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpServerErrorException;
@@ -54,10 +53,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	private ClientAuthentication clientAuthentication;
 
 	@Mock
-	private AsyncTaskExecutor taskExecutor;
-
-	@Mock
-	private ThreadPoolTaskScheduler taskScheduler;
+	private TaskScheduler taskScheduler;
 
 	@Mock
 	private RestOperations restOperations;
@@ -67,7 +63,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Before
 	public void before() throws Exception {
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
-				taskExecutor, restOperations);
+				taskScheduler, restOperations);
 	}
 
 	@Test
@@ -111,7 +107,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(
 				restOperations.postForObject(anyString(), any(),
-						ArgumentMatchers.<Class> any())).thenThrow(
+						ArgumentMatchers.<Class>any())).thenThrow(
 				new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
 		sessionManager.renewToken();
@@ -131,7 +127,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		sessionManager.getSessionToken();
 
-		verify(taskExecutor).execute(any(Runnable.class));
+		verify(taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
@@ -142,7 +138,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture());
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
@@ -161,11 +157,11 @@ public class LifecycleAwareSessionManagerUnitTests {
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture());
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskExecutor, times(2)).execute(any(Runnable.class));
+		verify(taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
@@ -191,17 +187,17 @@ public class LifecycleAwareSessionManagerUnitTests {
 		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 		when(
 				restOperations.postForObject(anyString(), any(),
-						ArgumentMatchers.<Class> any())).thenThrow(
+						ArgumentMatchers.<Class>any())).thenThrow(
 				new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		sessionManager.getSessionToken();
-		verify(taskExecutor).execute(runnableCaptor.capture());
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskExecutor, times(1)).execute(any(Runnable.class));
+		verify(taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
@@ -221,9 +217,9 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 		when(
-				restOperations.postForObject(anyString(),
-						ArgumentMatchers.<Object> any(), ArgumentMatchers.<Class> any()))
-				.thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
+				restOperations.postForObject(anyString(), ArgumentMatchers.<Object>any(),
+						ArgumentMatchers.<Class>any())).thenThrow(
+				new HttpServerErrorException(HttpStatus.BAD_REQUEST));
 
 		sessionManager.getSessionToken();
 

@@ -69,7 +69,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	private final RestOperations restOperations;
 
-	private final AsyncTaskExecutor taskExecutor;
+	private final TaskScheduler taskScheduler;
 
 	private final Object lock = new Object();
 
@@ -80,19 +80,19 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	 * {@link AsyncTaskExecutor} and {@link RestOperations}.
 	 *
 	 * @param clientAuthentication must not be {@literal null}.
-	 * @param taskExecutor must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
-			AsyncTaskExecutor taskExecutor, RestOperations restOperations) {
+			TaskScheduler taskScheduler, RestOperations restOperations) {
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-		Assert.notNull(taskExecutor, "AsyncTaskExecutor must not be null");
+		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.clientAuthentication = clientAuthentication;
 		this.restOperations = restOperations;
-		this.taskExecutor = taskExecutor;
+		this.taskScheduler = taskScheduler;
 	}
 
 	@Override
@@ -134,8 +134,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 		try {
 			restOperations.postForObject("/auth/token/renew-self",
-					new HttpEntity<Object>(
-					VaultHttpHeaders.from(token)), Map.class);
+					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
 			return true;
 		}
 		catch (HttpStatusCodeException e) {
@@ -213,28 +212,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			}
 		};
 
-		if (taskExecutor instanceof TaskScheduler) {
-			scheduleTask((TaskScheduler) taskExecutor, seconds, task);
-			return;
-		}
-
-		taskExecutor.execute(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					// TODO: Revisit this approach since it blocks a thread. Spinning up a
-					// managed
-					// TaskScheduler just for once-in-a-while token renewal seemed a bit
-					// over-sophisticated
-					// that's why we emulate a scheduler by blocking a Thread resource
-					Thread.sleep(TimeUnit.SECONDS.toMillis(seconds));
-					task.run();
-				}
-				catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-		});
+		scheduleTask(taskScheduler, seconds, task);
 	}
 
 	private void scheduleTask(TaskScheduler taskScheduler, int seconds, Runnable task) {

@@ -19,11 +19,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
@@ -42,7 +43,17 @@ import static org.assertj.core.api.Assertions.fail;
  */
 public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
 
-	private AsyncTaskExecutor taskExecutor = new SimpleAsyncTaskExecutor();
+	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+
+	@Before
+	public void before() throws Exception {
+		taskScheduler.afterPropertiesSet();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		taskScheduler.destroy();
+	}
 
 	@Test
 	public void shouldLogin() {
@@ -51,7 +62,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getRestTemplate());
+				tokenAuthentication, taskScheduler, prepare().getRestTemplate());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -75,7 +86,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getRestTemplate()) {
+				tokenAuthentication, taskScheduler, prepare().getRestTemplate()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -97,7 +108,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskExecutor, prepare().getRestTemplate());
+				tokenAuthentication, taskScheduler, prepare().getRestTemplate());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
@@ -108,9 +119,8 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 					public Object doWithRestOperations(RestOperations restOperations) {
 
 						try {
-							restOperations.getForEntity(
-									"auth/token/lookup/{token}", Map.class,
-									loginToken.getToken());
+							restOperations.getForEntity("auth/token/lookup/{token}",
+									Map.class, loginToken.getToken());
 							fail("Missing HttpStatusCodeException");
 						}
 						catch (HttpStatusCodeException e) {
