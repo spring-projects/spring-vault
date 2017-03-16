@@ -52,7 +52,7 @@ Vault can manage static and dynamic secrets such as application data, username/p
 
 * Connection package as low-level abstraction
 * Reading, writing and deleting data from Vault with object mapping support
-* Multiple authentication mechanisms: AppId, AppRole, Client Certificates, and Cubbyhole (wrapped/stored token)
+* Multiple authentication mechanisms: AppId, AppRole, AWS EC2, Client Certificates, and Cubbyhole (wrapped/stored token)
 
 <span id="quick-start"></span>
 
@@ -104,9 +104,37 @@ public class Example {
 }
 ```
 
+#### Vault `PropertySource`
+
+```java
+@VaultPropertySource(value = "aws/creds/s3",
+  propertyNamePrefix = "aws."
+  renewal = Renewal.RENEW)
+public class MyConfig {
+
+}
+
+public class Example {
+
+  // inject the actual values
+  @Value("${aws.access_key}
+  private String awsAccessKey;
+
+  @Value("${aws.secret_key}
+  private String awsSecretKeyKey;
+
+  public InputStream getFileFromS3(String filenname) {
+    // …
+  }
+}
+```
+
 {% endcapture %}
 
 {% capture related_resources %}
+### Getting Started
+
+[Examples](https://github.com/mp911de/spring-cloud-vault-config-samples)
 
 {% endcapture %}
 
