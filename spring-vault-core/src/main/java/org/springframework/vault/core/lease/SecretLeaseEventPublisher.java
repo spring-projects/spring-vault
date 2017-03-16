@@ -39,8 +39,8 @@ import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
  * Publisher for {@link SecretLeaseEvent}s.
  * <p>
  * This publisher dispatches events to {@link LeaseListener} and
- * {@link LeaseErrorListener}. Instances are thread-safe once {@link #afterPropertiesSet()
- * initialized}.
+ * {@link LeaseErrorListener}. Instances are thread-safe once
+ * {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
  * @see SecretLeaseEvent
@@ -118,8 +118,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 			Map<String, Object> body) {
 
 		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(
-					new SecretLeaseCreatedEvent(requestedSecret, lease, body));
+			leaseListener.onLeaseEvent(new SecretLeaseCreatedEvent(requestedSecret,
+					lease, body));
 		}
 	}
 
@@ -134,8 +134,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	protected void onAfterLeaseRenewed(RequestedSecret requestedSecret, Lease lease) {
 
 		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(
-					new AfterSecretLeaseRenewedEvent(requestedSecret, lease));
+			leaseListener.onLeaseEvent(new AfterSecretLeaseRenewedEvent(requestedSecret,
+					lease));
 		}
 	}
 
@@ -150,8 +150,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	protected void onBeforeLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
 
 		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(
-					new BeforeSecretLeaseRevocationEvent(requestedSecret, lease));
+			leaseListener.onLeaseEvent(new BeforeSecretLeaseRevocationEvent(
+					requestedSecret, lease));
 		}
 	}
 
@@ -166,8 +166,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	protected void onAfterLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
 
 		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(
-					new AfterSecretLeaseRevocationEvent(requestedSecret, lease));
+			leaseListener.onLeaseEvent(new AfterSecretLeaseRevocationEvent(
+					requestedSecret, lease));
 		}
 	}
 
@@ -199,8 +199,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	protected void onError(RequestedSecret requestedSecret, Lease lease, Exception e) {
 
 		for (LeaseErrorListener leaseErrorListener : leaseErrorListeners) {
-			leaseErrorListener.onLeaseError(
-					new SecretLeaseErrorEvent(requestedSecret, lease, e), e);
+			leaseErrorListener.onLeaseError(new SecretLeaseErrorEvent(requestedSecret,
+					lease, e), e);
 		}
 	}
 
@@ -214,8 +214,9 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
-			log.warn(String.format("[%s] %s %s", leaseEvent.getSource(),
-					leaseEvent.getLease(), exception.getMessage()), exception);
+			log.warn(
+					String.format("[%s] %s %s", leaseEvent.getSource(),
+							leaseEvent.getLease(), exception.getMessage()), exception);
 		}
 	}
 }

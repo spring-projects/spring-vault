@@ -245,7 +245,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(path,
 					HttpMethod.GET, null, MOUNT_TYPE_REF,
-					Collections.<String, Object> emptyMap());
+					Collections.<String, Object>emptyMap());
 
 			VaultMountsResponse body = exchange.getBody();
 

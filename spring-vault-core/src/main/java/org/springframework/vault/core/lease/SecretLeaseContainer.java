@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -65,30 +65,30 @@ import org.springframework.web.client.RestOperations;
  *
  * <pre>
  * <code>
-SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
-		taskScheduler);
-
-final RequestedSecret requestedSecret = container
-		.requestRotatingSecret("mysql/creds/my-role");
-container.addLeaseListener(new LeaseListenerAdapter() {
-	&#64;Override
-	public void onLeaseEvent(LeaseEvent leaseEvent) {
-
-		if (requestedSecret == leaseEvent.getSource()) {
-
-			if (leaseEvent instanceof LeaseCreatedEvent) {
-
-			}
-
-			if (leaseEvent instanceof LeaseExpiredEvent) {
-
-			}
-		}
-	}
-});
-
-container.afterPropertiesSet();
-container.start(); // events are triggered after starting the container
+ * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
+ * 		taskScheduler);
+ *
+ * final RequestedSecret requestedSecret = container
+ * 		.requestRotatingSecret("mysql/creds/my-role");
+ * container.addLeaseListener(new LeaseListenerAdapter() {
+ * 	&#64;Override
+ * 	public void onLeaseEvent(LeaseEvent leaseEvent) {
+ *
+ * 		if (requestedSecret == leaseEvent.getSource()) {
+ *
+ * 			if (leaseEvent instanceof LeaseCreatedEvent) {
+ *
+ * 			}
+ *
+ * 			if (leaseEvent instanceof LeaseExpiredEvent) {
+ *
+ * 			}
+ * 		}
+ * 	}
+ * });
+ *
+ * container.afterPropertiesSet();
+ * container.start(); // events are triggered after starting the container
  * </code>
  * </pre>
  * <p>
@@ -115,8 +115,8 @@ container.start(); // events are triggered after starting the container
  * @see Lease
  */
 @CommonsLog
-public class SecretLeaseContainer extends SecretLeaseEventPublisher
-		implements InitializingBean, DisposableBean {
+public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
+		InitializingBean, DisposableBean {
 
 	private final static AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
 			.newUpdater(SecretLeaseContainer.class, "status");
@@ -337,8 +337,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 				ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 				scheduler.setDaemon(true);
-				scheduler.setThreadNamePrefix(String.format("%s-%d-",
-						getClass().getSimpleName(), poolId.incrementAndGet()));
+				scheduler.setThreadNamePrefix(String.format("%s-%d-", getClass()
+						.getSimpleName(), poolId.incrementAndGet()));
 				scheduler.afterPropertiesSet();
 
 				this.taskScheduler = scheduler;
@@ -346,8 +346,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			}
 
 			for (RequestedSecret requestedSecret : requestedSecrets) {
-				this.renewals.put(requestedSecret,
-						new LeaseRenewalScheduler(this.taskScheduler));
+				this.renewals.put(requestedSecret, new LeaseRenewalScheduler(
+						this.taskScheduler));
 			}
 		}
 	}
@@ -457,8 +457,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	protected Lease doRenewLease(RequestedSecret requestedSecret, final Lease lease) {
 
 		try {
-			ResponseEntity<Map<String, Object>> entity = operations.doWithSession(
-					new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
+			ResponseEntity<Map<String, Object>> entity = operations
+					.doWithSession(new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
 
 						@Override
 						@SuppressWarnings("unchecked")
@@ -488,7 +488,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 				onLeaseExpired(requestedSecret, lease);
 			}
 
-			onError(requestedSecret, lease,
+			onError(requestedSecret,
+					lease,
 					new VaultException(String.format("Cannot renew lease: %s",
 							VaultResponses.getError(e.getResponseBodyAsString()))));
 		}
@@ -528,8 +529,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
-			operations.doWithSession(
-					new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
+			operations
+					.doWithSession(new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
 
 						@Override
 						@SuppressWarnings("unchecked")
@@ -544,7 +545,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			onAfterLeaseRevocation(requestedSecret, lease);
 		}
 		catch (HttpStatusCodeException e) {
-			onError(requestedSecret, lease,
+			onError(requestedSecret,
+					lease,
 					new VaultException(String.format("Cannot revoke lease: %s",
 							VaultResponses.getError(e.getResponseBodyAsString()))));
 		}
@@ -603,35 +605,38 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 				cancelSchedule(currentLease);
 			}
 
-			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(new Runnable() {
+			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
+					new Runnable() {
 
-				@Override
-				public void run() {
+						@Override
+						public void run() {
 
-					try {
+							try {
 
-						schedules.remove(lease);
+								schedules.remove(lease);
 
-						if (currentLeaseRef.get() != lease) {
-							log.debug("Current lease has changed. Skipping renewal");
-							return;
+								if (currentLeaseRef.get() != lease) {
+									log.debug("Current lease has changed. Skipping renewal");
+									return;
+								}
+
+								if (log.isDebugEnabled()) {
+									log.debug(String.format("Renewing lease %s",
+											lease.getLeaseId()));
+								}
+
+								currentLeaseRef.compareAndSet(lease,
+										renewLease.renewLease(lease));
+							}
+							catch (Exception e) {
+								log.error(
+										String.format("Cannot renew lease %s",
+												lease.getLeaseId()), e);
+							}
 						}
-
-						if (log.isDebugEnabled()) {
-							log.debug(String.format("Renewing lease %s",
-									lease.getLeaseId()));
-						}
-
-						currentLeaseRef.compareAndSet(lease,
-								renewLease.renewLease(lease));
-					}
-					catch (Exception e) {
-						log.error(String.format("Cannot renew lease %s",
-								lease.getLeaseId()), e);
-					}
-				}
-			}, new OneShotTrigger(
-					getRenewalSeconds(lease, minRenewalSeconds, expiryThresholdSeconds)));
+					},
+					new OneShotTrigger(getRenewalSeconds(lease, minRenewalSeconds,
+							expiryThresholdSeconds)));
 
 			schedules.put(lease, scheduledFuture);
 		}
@@ -667,8 +672,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 		private long getRenewalSeconds(Lease lease, int minRenewalSeconds,
 				int expiryThresholdSeconds) {
-			return Math.max(minRenewalSeconds,
-					lease.getLeaseDuration() - expiryThresholdSeconds);
+			return Math.max(minRenewalSeconds, lease.getLeaseDuration()
+					- expiryThresholdSeconds);
 		}
 
 		private boolean isLeaseRenewable(Lease lease) {
@@ -705,8 +710,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {
-				return new Date(
-						System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(seconds));
+				return new Date(System.currentTimeMillis()
+						+ TimeUnit.SECONDS.toMillis(seconds));
 			}
 
 			return null;

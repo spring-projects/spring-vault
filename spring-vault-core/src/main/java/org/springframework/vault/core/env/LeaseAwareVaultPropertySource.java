@@ -50,8 +50,8 @@ import org.springframework.vault.support.JsonMapFlattener;
  * @see PropertyTransformer
  * @see PropertyTransformers
  */
-public class LeaseAwareVaultPropertySource
-		extends EnumerablePropertySource<VaultOperations> {
+public class LeaseAwareVaultPropertySource extends
+		EnumerablePropertySource<VaultOperations> {
 
 	private final static Log logger = LogFactory
 			.getLog(LeaseAwareVaultPropertySource.class);

@@ -27,9 +27,9 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
- * {@link VaultPropertySource} to Spring's {@link org.springframework.core.env.Environment
- * Environment}. To be used in conjunction with @{@link Configuration} classes.
- * <h3>Example usage</h3>
+ * {@link VaultPropertySource} to Spring's
+ * {@link org.springframework.core.env.Environment Environment}. To be used in conjunction
+ * with @{@link Configuration} classes. <h3>Example usage</h3>
  * <p>
  * Given a Vault path {@code secret/my-application} containing the configuration data pair
  * {@code database.password=mysecretpassword}, the following {@code @Configuration} class
@@ -65,8 +65,9 @@ import org.springframework.context.annotation.Import;
  * ordering is difficult to predict. In such cases - and if overriding is important - it
  * is recommended that the user fall back to using the programmatic PropertySource API.
  * See {@link org.springframework.core.env.ConfigurableEnvironment
- * ConfigurableEnvironment} and {@link org.springframework.core.env.MutablePropertySources
- * MutablePropertySources} javadocs for details.
+ * ConfigurableEnvironment} and
+ * {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
+ * javadocs for details.
  *
  * @author Mark Paluch
  */

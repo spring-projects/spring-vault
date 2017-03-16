@@ -41,8 +41,8 @@ import java.util.List;
 class KeystoreUtil {
 
 	/**
-	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
-	 * certificates} using the given {@code keyAlias}.
+	 * Create a {@link KeyStore} containing the {@link KeySpec} and
+	 * {@link X509Certificate certificates} using the given {@code keyAlias}.
 	 *
 	 * @param keyAlias
 	 * @param certificates
