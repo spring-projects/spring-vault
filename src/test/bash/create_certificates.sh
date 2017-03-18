@@ -4,6 +4,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CA_DIR=work/ca
 KEYSTORE_FILE=work/keystore.jks
 CLIENT_CERT_KEYSTORE=work/client-cert.jks
+
 if [[ -d work/ca ]] ; then
     rm -Rf ${CA_DIR}
 fi
@@ -14,6 +15,22 @@ fi
 
 if [[ -f ${CLIENT_CERT_KEYSTORE} ]] ; then
     rm -Rf ${CLIENT_CERT_KEYSTORE}
+fi
+
+if [ ! -x "$(which openssl)" ] ; then
+   echo "[ERROR] No openssl in PATH"
+   exit 1
+fi
+
+KEYTOOL=keytool
+
+if [  ! -x "${KEYTOOL}" ] ; then
+   KEYTOOL=${JAVA_HOME}/bin/keytool
+fi
+
+if [  ! -x "${KEYTOOL}" ] ; then
+   echo "[ERROR] No keytool in PATH/JAVA_HOME"
+   exit 1
 fi
 
 mkdir -p ${CA_DIR}/private ${CA_DIR}/certs ${CA_DIR}/crl ${CA_DIR}/csr ${CA_DIR}/newcerts ${CA_DIR}/intermediate
@@ -97,8 +114,8 @@ openssl pkcs12 -export -clcerts \
       -passout pass:changeit \
       -out ${CA_DIR}/client.p12
 
-${JAVA_HOME}/bin/keytool -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
-${JAVA_HOME}/bin/keytool -importkeystore \
+${KEYTOOL} -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
+${KEYTOOL} -importkeystore \
                               -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit\
                               -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype JKS \
                               -noprompt -storepass changeit
