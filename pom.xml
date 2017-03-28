@@ -314,7 +314,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>4.3.7.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.8.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
