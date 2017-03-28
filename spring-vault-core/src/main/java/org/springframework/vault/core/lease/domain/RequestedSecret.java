@@ -66,6 +66,20 @@ public class RequestedSecret {
 	}
 
 	/**
+	 * Create a rotating or renewable {@link RequestedSecret} at {@code path}. A lease associated with
+	 * this secret will be renewed if the lease is qualified for renewal. Once the lease
+	 * expires, a new secret with a new lease is obtained if mode is ROTATE, otherwize the lease is no
+	 * longer valid after expiry.
+	 *
+	 * @param mode must not be {@literal null}
+	 * @param path must not be {@literal null} or empty, must not start with a slash.
+	 * @return the rotating {@link RequestedSecret}.
+	 */
+	public static RequestedSecret buildFromMode(Mode mode, String path) {
+		return mode.buildRequestedSecret(path);
+	}
+
+	/**
 	 * @return the Vault path of the requested secret.
 	 */
 	public String getPath() {
@@ -95,12 +109,24 @@ public class RequestedSecret {
 		/**
 		 * Renew lease of the requested secret until secret expires its max lease time.
 		 */
-		RENEW,
+		RENEW {
+			@Override
+			public RequestedSecret buildRequestedSecret(String path) {
+				return renewable(path);
+			}
+		},
 
 		/**
 		 * Renew lease of the requested secret. Obtains new secret along a new lease once
 		 * the previous lease expires its max lease time.
 		 */
-		ROTATE;
+		ROTATE {
+			@Override
+			public RequestedSecret buildRequestedSecret(String path) {
+				return rotating(path);
+			}
+		};
+
+		abstract RequestedSecret buildRequestedSecret(String path);
 	}
 }
