@@ -17,6 +17,9 @@ package org.springframework.vault.core.lease.domain;
 
 import org.springframework.util.Assert;
 
+import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.RENEW;
+import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.ROTATE;
+
 /**
  * Represents a requested secret from a specific Vault path associated with a lease
  * {@link Mode}.
@@ -50,7 +53,7 @@ public class RequestedSecret {
 	 * @return the renewable {@link RequestedSecret}.
 	 */
 	public static RequestedSecret renewable(String path) {
-		return new RequestedSecret(path, Mode.RENEW);
+		return new RequestedSecret(path, RENEW);
 	}
 
 	/**
@@ -63,6 +66,26 @@ public class RequestedSecret {
 	 */
 	public static RequestedSecret rotating(String path) {
 		return new RequestedSecret(path, Mode.ROTATE);
+	}
+
+	/**
+	 * Create a rotating or renewable {@link RequestedSecret} at {@code path}. A lease associated with
+	 * this secret will be renewed if the lease is qualified for renewal. Once the lease
+	 * expires, a new secret with a new lease is obtained if mode is ROTATE, otherwize the lease is no
+	 * longer valid after expiry.
+	 *
+	 * @param mode must not be {@literal null}
+	 * @param path must not be {@literal null} or empty, must not start with a slash.
+	 * @return the rotating {@link RequestedSecret}.
+	 */
+	public static RequestedSecret from(Mode mode, String path) {
+		Assert.notNull(mode, "Mode cannot be null");
+
+		if (mode == ROTATE) {
+			return rotating(path);
+		} else {
+			return renewable(path);
+		}
 	}
 
 	/**
