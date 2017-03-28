@@ -48,7 +48,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -70,10 +69,6 @@ public class ClientHttpRequestFactoryFactory {
 
 	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
 			"org.apache.http.client.HttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
-
-	private static final boolean OKHTTP_PRESENT = ClassUtils.isPresent(
-			"com.squareup.okhttp.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent(
@@ -107,10 +102,6 @@ public class ClientHttpRequestFactoryFactory {
 
 			if (OKHTTP3_PRESENT) {
 				return OkHttp3.usingOkHttp3(options, sslConfiguration);
-			}
-
-			if (OKHTTP_PRESENT) {
-				return OkHttp.usingOkHttp(options, sslConfiguration);
 			}
 
 			if (NETTY_PRESENT) {
@@ -237,45 +228,6 @@ public class ClientHttpRequestFactoryFactory {
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
-		}
-	}
-
-	/**
-	 * {@link ClientHttpRequestFactory} for the {@link OkHttpClient}.
-	 *
-	 * @author Mark Paluch
-	 */
-	static class OkHttp {
-
-		static ClientHttpRequestFactory usingOkHttp(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException,
-				IOException {
-
-			final OkHttpClient okHttpClient = new OkHttpClient();
-
-			OkHttpClientHttpRequestFactory requestFactory = new OkHttpClientHttpRequestFactory(
-					okHttpClient) {
-
-				@Override
-				public void destroy() throws IOException {
-
-					if (okHttpClient.getCache() != null) {
-						okHttpClient.getCache().close();
-					}
-
-					okHttpClient.getDispatcher().getExecutorService().shutdown();
-				}
-			};
-
-			if (hasSslConfiguration(sslConfiguration)) {
-				okHttpClient.setSslSocketFactory(getSSLContext(sslConfiguration)
-						.getSocketFactory());
-			}
-
-			requestFactory.setConnectTimeout(options.getConnectionTimeout());
-			requestFactory.setReadTimeout(options.getReadTimeout());
-
-			return requestFactory;
 		}
 	}
 
