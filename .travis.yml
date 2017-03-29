@@ -2,7 +2,7 @@ language: java
 
 jdk:
   - oraclejdk8
-  
+
 sudo: false
 
 addons:
@@ -22,7 +22,6 @@ env:
     - VAULT_VER=0.6.4
     - VAULT_VER=0.6.5
     - PROFILE=springNext
-    - PROFILE=spring5
 
 before_install:
   - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
