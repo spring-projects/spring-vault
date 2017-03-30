@@ -17,6 +17,9 @@ package org.springframework.vault.core.lease.domain;
 
 import org.springframework.util.Assert;
 
+import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.RENEW;
+import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.ROTATE;
+
 /**
  * Represents a requested secret from a specific Vault path associated with a lease
  * {@link Mode}.
@@ -50,7 +53,7 @@ public class RequestedSecret {
 	 * @return the renewable {@link RequestedSecret}.
 	 */
 	public static RequestedSecret renewable(String path) {
-		return new RequestedSecret(path, Mode.RENEW);
+		return new RequestedSecret(path, RENEW);
 	}
 
 	/**
@@ -75,8 +78,14 @@ public class RequestedSecret {
 	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @return the rotating {@link RequestedSecret}.
 	 */
-	public static RequestedSecret buildFromMode(Mode mode, String path) {
-		return mode.buildRequestedSecret(path);
+	public static RequestedSecret from(Mode mode, String path) {
+		Assert.notNull(mode, "Mode cannot be null");
+
+		if (mode == ROTATE) {
+			return rotating(path);
+		} else {
+			return renewable(path);
+		}
 	}
 
 	/**
@@ -109,24 +118,12 @@ public class RequestedSecret {
 		/**
 		 * Renew lease of the requested secret until secret expires its max lease time.
 		 */
-		RENEW {
-			@Override
-			public RequestedSecret buildRequestedSecret(String path) {
-				return renewable(path);
-			}
-		},
+		RENEW,
 
 		/**
 		 * Renew lease of the requested secret. Obtains new secret along a new lease once
 		 * the previous lease expires its max lease time.
 		 */
-		ROTATE {
-			@Override
-			public RequestedSecret buildRequestedSecret(String path) {
-				return rotating(path);
-			}
-		};
-
-		abstract RequestedSecret buildRequestedSecret(String path);
+		ROTATE;
 	}
 }

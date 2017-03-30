@@ -9,14 +9,14 @@ public class RequestedSecretTest {
 
     @Test
     public void should_build_rotating_requested_secret() {
-        RequestedSecret requestedSecret = RequestedSecret.buildFromMode(Mode.ROTATE, "my/path");
+        RequestedSecret requestedSecret = RequestedSecret.from(Mode.ROTATE, "my/path");
 
         assertThat(requestedSecret.getMode()).isEqualTo(Mode.ROTATE);
     }
 
     @Test
     public void should_build_renewal_requested_secret() {
-        RequestedSecret requestedSecret = RequestedSecret.buildFromMode(Mode.RENEW, "my/path");
+        RequestedSecret requestedSecret = RequestedSecret.from(Mode.RENEW, "my/path");
 
         assertThat(requestedSecret.getMode()).isEqualTo(Mode.RENEW);
     }
