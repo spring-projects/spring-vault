@@ -17,9 +17,6 @@ package org.springframework.vault.core.lease.domain;
 
 import org.springframework.util.Assert;
 
-import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.RENEW;
-import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.ROTATE;
-
 /**
  * Represents a requested secret from a specific Vault path associated with a lease
  * {@link Mode}.
@@ -27,6 +24,7 @@ import static org.springframework.vault.core.lease.domain.RequestedSecret.Mode.R
  * A {@link RequestedSecret} can be renewing or rotating.
  *
  * @author Mark Paluch
+ * @author Pierre-Jean Vardanega
  * @see Mode
  * @see Lease#isRenewable()
  */
@@ -53,7 +51,7 @@ public class RequestedSecret {
 	 * @return the renewable {@link RequestedSecret}.
 	 */
 	public static RequestedSecret renewable(String path) {
-		return new RequestedSecret(path, RENEW);
+		return new RequestedSecret(path, Mode.RENEW);
 	}
 
 	/**
@@ -69,23 +67,19 @@ public class RequestedSecret {
 	}
 
 	/**
-	 * Create a rotating or renewable {@link RequestedSecret} at {@code path}. A lease associated with
-	 * this secret will be renewed if the lease is qualified for renewal. Once the lease
-	 * expires, a new secret with a new lease is obtained if mode is ROTATE, otherwize the lease is no
-	 * longer valid after expiry.
+	 * Create a {@link RequestedSecret} given {@link Mode} at {@code path}.
 	 *
-	 * @param mode must not be {@literal null}
+	 * @param mode must not be {@literal null}.
 	 * @param path must not be {@literal null} or empty, must not start with a slash.
+	 * @see #rotating(String)
+	 * @see #renewable(String)
 	 * @return the rotating {@link RequestedSecret}.
 	 */
 	public static RequestedSecret from(Mode mode, String path) {
-		Assert.notNull(mode, "Mode cannot be null");
 
-		if (mode == ROTATE) {
-			return rotating(path);
-		} else {
-			return renewable(path);
-		}
+		Assert.notNull(mode, "Mode must not be null");
+
+		return mode == Mode.ROTATE ? rotating(path) : renewable(path);
 	}
 
 	/**
