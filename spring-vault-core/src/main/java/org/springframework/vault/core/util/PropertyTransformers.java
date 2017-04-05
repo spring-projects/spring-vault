@@ -38,6 +38,13 @@ public abstract class PropertyTransformers {
 	}
 
 	/**
+	 * @return removes {@literal null} value properties.
+	 */
+	public static PropertyTransformer removeNullProperties() {
+		return RemoveNullProperties.instance();
+	}
+
+	/**
 	 * @param propertyNamePrefix the prefix to add to each property name.
 	 * @return {@link PropertyTransformer} to add {@code propertyNamePrefix} to each
 	 * property name.
@@ -59,7 +66,8 @@ public abstract class PropertyTransformers {
 			return new PropertyTransformerSupport() {
 
 				@Override
-				public Map<String, String> transformProperties(Map<String, String> input) {
+				public Map<String, String> transformProperties(
+						Map<String, String> input) {
 
 					Map<String, String> processed = that.transformProperties(input);
 					return after.transformProperties(processed);
@@ -89,6 +97,42 @@ public abstract class PropertyTransformers {
 		@Override
 		public Map<String, String> transformProperties(Map<String, String> input) {
 			return input;
+		}
+	}
+
+	/**
+	 * {@link PropertyTransformer} to remove {@literal null}-value properties.
+	 */
+	static class RemoveNullProperties extends PropertyTransformerSupport {
+
+		static RemoveNullProperties INSTANCE = new RemoveNullProperties();
+
+		private RemoveNullProperties() {
+		}
+
+		/**
+		 * @return the {@link PropertyTransformer} instance.
+		 */
+		public static PropertyTransformer instance() {
+			return INSTANCE;
+		}
+
+		@Override
+		public Map<String, String> transformProperties(Map<String, String> input) {
+
+			Map<String, String> target = new LinkedHashMap<String, String>(input.size(),
+					1);
+
+			for (Entry<String, String> entry : input.entrySet()) {
+
+				if (entry.getValue() == null) {
+					continue;
+				}
+
+				target.put(entry.getKey(), entry.getValue());
+			}
+
+			return target;
 		}
 	}
 

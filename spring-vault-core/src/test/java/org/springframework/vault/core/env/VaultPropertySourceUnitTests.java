@@ -65,6 +65,8 @@ public class VaultPropertySourceUnitTests {
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo("1");
 		assertThat(vaultPropertySource.getProperty("complex.key")).isEqualTo("value");
+		assertThat(vaultPropertySource.getProperty("empty")).isNull();
+		assertThat(vaultPropertySource.containsProperty("empty")).isFalse();
 	}
 
 	@Test
@@ -102,6 +104,7 @@ public class VaultPropertySourceUnitTests {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("key", "value");
 		data.put("integer", 1);
+		data.put("empty", null);
 		data.put("complex", Collections.singletonMap("key", "value"));
 
 		VaultResponse vaultResponse = new VaultResponse();

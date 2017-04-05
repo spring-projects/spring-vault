@@ -105,7 +105,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
 		this.path = path;
-		this.propertyTransformer = propertyTransformer;
+		this.propertyTransformer = propertyTransformer
+				.andThen(PropertyTransformers.removeNullProperties());
 
 		loadProperties();
 	}
