@@ -128,7 +128,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void seal() {
-		vaultOperations.doWithVault(SEAL);
+		vaultOperations.doWithSession(SEAL);
 	}
 
 	@Override
