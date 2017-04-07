@@ -483,6 +483,8 @@ public class AppConfig {
 ----
 ====
 
+NOTE: Secrets obtained from `generic` secret backends are associated with a TTL (`refresh_interval`) but not a lease Id. Spring Vault's ``PropertySource`` is not refreshing/flushing these secrets once the TTL expires despite the requested `Renewal` mode.
+
 In certain situations, it may not be possible or practical to tightly control
 property source ordering when using `@VaultPropertySource` annotations.
 For example, if the `@Configuration` classes above were registered via
