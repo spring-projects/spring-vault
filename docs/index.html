@@ -117,11 +117,11 @@ public class MyConfig {
 public class Example {
 
   // inject the actual values
-  @Value("${aws.access_key}
+  @Value("${aws.access_key}")
   private String awsAccessKey;
 
-  @Value("${aws.secret_key}
-  private String awsSecretKeyKey;
+  @Value("${aws.secret_key}")
+  private String awsSecretKey;
 
   public InputStream getFileFromS3(String filenname) {
     // …
