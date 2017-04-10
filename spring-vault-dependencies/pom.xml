@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -9,6 +11,50 @@
 
 	<name>spring-vault-dependencies</name>
 	<description>Spring Vault Dependencies</description>
+
+	<url>http://projects.spring.io/spring-vault/</url>
+
+	<inceptionYear>2016</inceptionYear>
+
+	<organization>
+		<name>Pivotal Software, Inc.</name>
+		<url>http://www.spring.io</url>
+	</organization>
+
+	<scm>
+		<url>https://github.com/spring-projects/spring-vault</url>
+		<connection>scm:git:git://github.com/spring-projects/spring-vault.git</connection>
+		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-vault.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/spring-projects/spring-vault/issues</url>
+	</issueManagement>
+
+	<ciManagement>
+		<system>Bamboo</system>
+		<url>https://build.spring.io/browse/SPRINGVAULT-VAULT</url>
+	</ciManagement>
+
+	<developers>
+		<developer>
+			<id>sgibb</id>
+			<name>Spencer Gibb</name>
+		</developer>
+		<developer>
+			<id>mpaluch</id>
+			<name>Mark Paluch</name>
+		</developer>
+	</developers>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
+		</license>
+	</licenses>
 
 	<properties>
 		<httpclient.version>4.5.3</httpclient.version>
