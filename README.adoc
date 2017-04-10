@@ -1,4 +1,4 @@
-image::https://spring.io/badges/spring-vault/prerelease.svg[link=http://projects.spring.io/spring-vault#quick-start]
+image::https://spring.io/badges/spring-vault/ga.svg[link=http://projects.spring.io/spring-vault#quick-start]
 
 image::https://spring.io/badges/spring-vault/snapshot.svg[link=http://projects.spring.io/spring-vault#quick-start]
 
