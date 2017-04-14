@@ -425,7 +425,7 @@ public class VaultTokenRequest {
 				break;
 			default:
 				meta = Collections
-						.unmodifiableMap(new LinkedHashMap<String, String>(meta));
+						.unmodifiableMap(new LinkedHashMap<String, String>(this.meta));
 			}
 
 			return new VaultTokenRequest(id, policies, meta, noParent, noDefaultPolicy,
