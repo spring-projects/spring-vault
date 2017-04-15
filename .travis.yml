@@ -25,7 +25,7 @@ env:
     - PROFILE=springNext
 
 before_install:
-  - sed -i.bak -e 's|https://nexus.codehaus.org/snapshots/|https://oss.sonatype.org/content/repositories/codehaus-snapshots/|g' ~/.m2/settings.xml
+  - test ! -f ~/.m2/settings.xml || rm ~/.m2/settings.xml
 
 install:
   - src/test/bash/start.sh
