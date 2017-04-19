@@ -136,12 +136,14 @@ public class ClientHttpRequestFactoryFactory {
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(
-				sslConfiguration.getKeyStore(), sslConfiguration.getKeyStorePassword())
-				.getKeyManagers() : null;
+				sslConfiguration.getKeyStore(), sslConfiguration.getKeyStorePassword(),
+				sslConfiguration.getKeyStoreType()).getKeyManagers()
+				: null;
 
 		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null ? createTrustManagerFactory(
 				sslConfiguration.getTrustStore(),
-				sslConfiguration.getTrustStorePassword()).getTrustManagers()
+				sslConfiguration.getTrustStorePassword(),
+				sslConfiguration.getTrustStoreType()).getTrustManagers()
 				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -151,9 +153,12 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static KeyManagerFactory createKeyManagerFactory(Resource keystoreFile,
-			String storePassword) throws GeneralSecurityException, IOException {
+			String storePassword, String storeType) throws GeneralSecurityException,
+			IOException {
 
-		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		KeyStore keyStore = KeyStore
+				.getInstance(StringUtils.hasText(storeType) ? storeType : KeyStore
+						.getDefaultType());
 
 		loadKeyStore(keystoreFile, storePassword, keyStore);
 
@@ -167,9 +172,12 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static TrustManagerFactory createTrustManagerFactory(Resource trustFile,
-			String storePassword) throws GeneralSecurityException, IOException {
+			String storePassword, String storeType) throws GeneralSecurityException,
+			IOException {
 
-		KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		KeyStore trustStore = KeyStore
+				.getInstance(StringUtils.hasText(storeType) ? storeType : KeyStore
+						.getDefaultType());
 
 		loadKeyStore(trustFile, storePassword, trustStore);
 
@@ -325,13 +333,15 @@ public class ClientHttpRequestFactoryFactory {
 				if (sslConfiguration.getTrustStore() != null) {
 					sslContextBuilder.trustManager(createTrustManagerFactory(
 							sslConfiguration.getTrustStore(),
-							sslConfiguration.getTrustStorePassword()));
+							sslConfiguration.getTrustStorePassword(),
+							sslConfiguration.getTrustStoreType()));
 				}
 
 				if (sslConfiguration.getKeyStore() != null) {
 					sslContextBuilder.keyManager(createKeyManagerFactory(
 							sslConfiguration.getKeyStore(),
-							sslConfiguration.getKeyStorePassword()));
+							sslConfiguration.getKeyStorePassword(),
+							sslConfiguration.getKeyStoreType()));
 				}
 
 				requestFactory.setSslContext(sslContextBuilder.sslProvider(

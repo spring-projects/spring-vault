@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package org.springframework.vault.support;
+
+import java.security.KeyStore;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -50,6 +52,11 @@ public class SslConfiguration {
 	private final String keyStorePassword;
 
 	/**
+	 * Keystore type.
+	 */
+	private final String keyStoreType;
+
+	/**
 	 * Trust store that holds SSL certificates.
 	 */
 	private final Resource trustStore;
@@ -60,7 +67,12 @@ public class SslConfiguration {
 	private final String trustStorePassword;
 
 	/**
-	 * Create a new {@link SslConfiguration}.
+	 * Truststore type.
+	 */
+	private final String trustStoreType;
+
+	/**
+	 * Create a new {@link SslConfiguration} with the default {@link KeyStore} type.
 	 *
 	 * @param keyStore the keystore resource.
 	 * @param keyStorePassword the keystore password.
@@ -69,15 +81,34 @@ public class SslConfiguration {
 	 */
 	public SslConfiguration(Resource keyStore, String keyStorePassword,
 			Resource trustStore, String trustStorePassword) {
-
-		this.keyStore = keyStore;
-		this.keyStorePassword = keyStorePassword;
-		this.trustStore = trustStore;
-		this.trustStorePassword = trustStorePassword;
+		this(keyStore, keyStorePassword, KeyStore.getDefaultType(), trustStore,
+				trustStorePassword, KeyStore.getDefaultType());
 	}
 
 	/**
-	 * Create a new {@link SslConfiguration} for the given trust store.
+	 * Create a new {@link SslConfiguration}.
+	 *
+	 * @param keyStore the keystore resource.
+	 * @param keyStorePassword the keystore password.
+	 * @param trustStore the truststore resource.
+	 * @param trustStorePassword the truststore password.
+	 * @since 1.1
+	 */
+	public SslConfiguration(Resource keyStore, String keyStorePassword,
+			String keyStoreType, Resource trustStore, String trustStorePassword,
+			String trustStoreType) {
+
+		this.keyStore = keyStore;
+		this.keyStorePassword = keyStorePassword;
+		this.keyStoreType = keyStoreType;
+		this.trustStore = trustStore;
+		this.trustStorePassword = trustStorePassword;
+		this.trustStoreType = trustStoreType;
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given trust store with the default
+	 * {@link KeyStore} type.
 	 *
 	 * @param trustStore resource pointing to an existing trust store, must not be
 	 * {@literal null}.
@@ -96,7 +127,8 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * Create a new {@link SslConfiguration} for the given key store.
+	 * Create a new {@link SslConfiguration} for the given key store with the default
+	 * {@link KeyStore} type.
 	 *
 	 * @param keyStore resource pointing to an existing key store, must not be
 	 * {@literal null}.
@@ -114,7 +146,8 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * Create a new {@link SslConfiguration} for the given truststore.
+	 * Create a new {@link SslConfiguration} for the given truststore with the default
+	 * {@link KeyStore} type.
 	 *
 	 * @param keyStore resource pointing to an existing keystore, must not be
 	 * {@literal null}.
@@ -156,6 +189,13 @@ public class SslConfiguration {
 	}
 
 	/**
+	 * @return the key store type or {@literal null} if not configured.
+	 */
+	public String getKeyStoreType() {
+		return keyStoreType;
+	}
+
+	/**
 	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if
 	 * not configured.
 	 */
@@ -168,5 +208,12 @@ public class SslConfiguration {
 	 */
 	public String getTrustStorePassword() {
 		return trustStorePassword;
+	}
+
+	/**
+	 * @return the trust store type or {@literal null} if not configured.
+	 */
+	public String getTrustStoreType() {
+		return trustStoreType;
 	}
 }
