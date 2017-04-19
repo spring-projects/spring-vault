@@ -16,6 +16,8 @@
 
 package org.springframework.vault.support;
 
+import java.util.Arrays;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
@@ -30,13 +32,14 @@ import org.springframework.util.Assert;
 @ToString(exclude = "token")
 public class VaultToken {
 
-	private final String token;
+	private final char[] token;
 
-	protected VaultToken(String token) {
+	protected VaultToken(char[] token) {
 
-		Assert.hasText(token, "Token must not be empty");
+		Assert.notNull(token, "Token must not be null");
+		Assert.isTrue(token.length > 0, "Token must not be empty");
 
-		this.token = token;
+		this.token = Arrays.copyOf(token, token.length);
 	}
 
 	/**
@@ -46,6 +49,20 @@ public class VaultToken {
 	 * @return the created {@link VaultToken}
 	 */
 	public static VaultToken of(String token) {
+
+		Assert.hasText(token, "Token must not be empty");
+
+		return of(token.toCharArray());
+	}
+
+	/**
+	 * Create a new {@link VaultToken}.
+	 *
+	 * @param token must not be empty or {@literal null}.
+	 * @return the created {@link VaultToken}
+	 * @since 1.1
+	 */
+	public static VaultToken of(char[] token) {
 		return new VaultToken(token);
 	}
 
@@ -53,6 +70,14 @@ public class VaultToken {
 	 * @return the token value.
 	 */
 	public String getToken() {
+		return new String(token);
+	}
+
+	/**
+	 * @return the token value.
+	 * @since 1.1
+	 */
+	public char[] toCharArray() {
 		return token;
 	}
 

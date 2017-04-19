@@ -23,7 +23,7 @@ import org.springframework.vault.support.VaultToken;
 
 /**
  * Utility to retrieve settings during test.
- * 
+ *
  * @author Mark Paluch
  */
 public class Settings {
@@ -35,8 +35,8 @@ public class Settings {
 
 		File workDir = findWorkDir();
 
-		return SslConfiguration.forTrustStore(new FileSystemResource(new File(workDir,
-				"keystore.jks")), "changeit");
+		return SslConfiguration.forTrustStore(
+				new FileSystemResource(new File(workDir, "keystore.jks")), "changeit");
 	}
 
 	/**
@@ -78,7 +78,8 @@ public class Settings {
 	 * @return the token to use during tests.
 	 */
 	public static VaultToken token() {
-		return VaultToken.of(System.getProperty("vault.token",
-				"00000000-0000-0000-0000-000000000000"));
+		return VaultToken.of(
+				System.getProperty("vault.token", "00000000-0000-0000-0000-000000000000")
+						.toCharArray());
 	}
 }

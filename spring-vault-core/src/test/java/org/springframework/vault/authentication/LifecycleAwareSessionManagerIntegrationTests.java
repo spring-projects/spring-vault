@@ -120,7 +120,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 
 						try {
 							restOperations.getForEntity("auth/token/lookup/{token}",
-									Map.class, loginToken.getToken());
+									Map.class, loginToken.toCharArray());
 							fail("Missing HttpStatusCodeException");
 						}
 						catch (HttpStatusCodeException e) {

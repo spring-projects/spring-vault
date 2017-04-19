@@ -43,7 +43,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultSchemePortResolver;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
@@ -55,6 +54,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
@@ -136,14 +136,11 @@ public class ClientHttpRequestFactoryFactory {
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(
-				sslConfiguration.getKeyStore(), sslConfiguration.getKeyStorePassword(),
-				sslConfiguration.getKeyStoreType()).getKeyManagers()
+						sslConfiguration.getKeyStoreConfiguration()).getKeyManagers()
 				: null;
 
 		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null ? createTrustManagerFactory(
-				sslConfiguration.getTrustStore(),
-				sslConfiguration.getTrustStorePassword(),
-				sslConfiguration.getTrustStoreType()).getTrustManagers()
+						sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
 				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -152,34 +149,38 @@ public class ClientHttpRequestFactoryFactory {
 		return sslContext;
 	}
 
-	private static KeyManagerFactory createKeyManagerFactory(Resource keystoreFile,
-			String storePassword, String storeType) throws GeneralSecurityException,
+	private static KeyManagerFactory createKeyManagerFactory(
+			KeyStoreConfiguration keyStoreConfiguration)
+			throws GeneralSecurityException,
 			IOException {
 
 		KeyStore keyStore = KeyStore
-				.getInstance(StringUtils.hasText(storeType) ? storeType : KeyStore
-						.getDefaultType());
+				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
+						? keyStoreConfiguration.getStoreType()
+						: KeyStore.getDefaultType());
 
-		loadKeyStore(keystoreFile, storePassword, keyStore);
+		loadKeyStore(keyStoreConfiguration, keyStore);
 
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory
 				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		keyManagerFactory.init(keyStore,
-				StringUtils.hasText(storePassword) ? storePassword.toCharArray()
-						: new char[0]);
+				keyStoreConfiguration.getStorePassword() == null ? new char[0]
+						: keyStoreConfiguration.getStorePassword());
 
 		return keyManagerFactory;
 	}
 
-	private static TrustManagerFactory createTrustManagerFactory(Resource trustFile,
-			String storePassword, String storeType) throws GeneralSecurityException,
+	private static TrustManagerFactory createTrustManagerFactory(
+			KeyStoreConfiguration keyStoreConfiguration)
+			throws GeneralSecurityException,
 			IOException {
 
 		KeyStore trustStore = KeyStore
-				.getInstance(StringUtils.hasText(storeType) ? storeType : KeyStore
-						.getDefaultType());
+				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
+						? keyStoreConfiguration.getStoreType()
+						: KeyStore.getDefaultType());
 
-		loadKeyStore(trustFile, storePassword, trustStore);
+		loadKeyStore(keyStoreConfiguration, trustStore);
 
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
 				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -188,16 +189,14 @@ public class ClientHttpRequestFactoryFactory {
 		return trustManagerFactory;
 	}
 
-	private static void loadKeyStore(Resource keyStoreResource, String storePassword,
+	private static void loadKeyStore(KeyStoreConfiguration keyStoreConfiguration,
 			KeyStore keyStore) throws IOException, NoSuchAlgorithmException,
 			CertificateException {
 
 		InputStream inputStream = null;
 		try {
-			inputStream = keyStoreResource.getInputStream();
-			keyStore.load(inputStream,
-					StringUtils.hasText(storePassword) ? storePassword.toCharArray()
-							: null);
+			inputStream = keyStoreConfiguration.getResource().getInputStream();
+			keyStore.load(inputStream, keyStoreConfiguration.getStorePassword());
 		}
 		finally {
 			if (inputStream != null) {
@@ -332,16 +331,12 @@ public class ClientHttpRequestFactoryFactory {
 
 				if (sslConfiguration.getTrustStore() != null) {
 					sslContextBuilder.trustManager(createTrustManagerFactory(
-							sslConfiguration.getTrustStore(),
-							sslConfiguration.getTrustStorePassword(),
-							sslConfiguration.getTrustStoreType()));
+							sslConfiguration.getTrustStoreConfiguration()));
 				}
 
 				if (sslConfiguration.getKeyStore() != null) {
 					sslContextBuilder.keyManager(createKeyManagerFactory(
-							sslConfiguration.getKeyStore(),
-							sslConfiguration.getKeyStorePassword(),
-							sslConfiguration.getKeyStoreType()));
+							sslConfiguration.getKeyStoreConfiguration()));
 				}
 
 				requestFactory.setSslContext(sslContextBuilder.sslProvider(

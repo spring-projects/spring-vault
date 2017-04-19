@@ -32,7 +32,7 @@ class LoginToken extends VaultToken {
 
 	private final long leaseDuration;
 
-	private LoginToken(String token, long leaseDuration, boolean renewable) {
+	private LoginToken(char[] token, long leaseDuration, boolean renewable) {
 
 		super(token);
 
@@ -47,6 +47,20 @@ class LoginToken extends VaultToken {
 	 * @return the created {@link VaultToken}
 	 */
 	public static LoginToken of(String token) {
+
+		Assert.hasText(token, "Token must not be empty");
+
+		return of(token, 0);
+	}
+
+	/**
+	 * Create a new {@link LoginToken}.
+	 *
+	 * @param token must not be {@literal null}.
+	 * @return the created {@link VaultToken}
+	 * @since 1.1
+	 */
+	public static LoginToken of(char[] token) {
 		return of(token, 0);
 	}
 
@@ -61,6 +75,22 @@ class LoginToken extends VaultToken {
 
 		Assert.hasText(token, "Token must not be empty");
 
+		return of(token.toCharArray(), leaseDuration);
+	}
+
+	/**
+	 * Create a new {@link LoginToken} with a {@code leaseDuration}.
+	 *
+	 * @param token must not be {@literal null}.
+	 * @param leaseDuration the lease duration.
+	 * @return the created {@link VaultToken}
+	 * @since 1.1
+	 */
+	public static LoginToken of(char[] token, long leaseDuration) {
+
+		Assert.notNull(token, "Token must not be null");
+		Assert.isTrue(token.length > 0, "Token must not be empty");
+
 		return new LoginToken(token, leaseDuration, false);
 	}
 
@@ -74,6 +104,22 @@ class LoginToken extends VaultToken {
 	public static LoginToken renewable(String token, long leaseDuration) {
 
 		Assert.hasText(token, "Token must not be empty");
+
+		return renewable(token.toCharArray(), leaseDuration);
+	}
+
+	/**
+	 * Create a new renewable {@link LoginToken} with a {@code leaseDuration}.
+	 *
+	 * @param token must not be {@literal null}.
+	 * @param leaseDuration the lease duration.
+	 * @return the created {@link VaultToken}
+	 * @since 1.1
+	 */
+	public static LoginToken renewable(char[] token, long leaseDuration) {
+
+		Assert.notNull(token, "Token must not be null");
+		Assert.isTrue(token.length > 0, "Token must not be empty");
 
 		return new LoginToken(token, leaseDuration, true);
 	}

@@ -16,6 +16,7 @@
 package org.springframework.vault.support;
 
 import java.security.KeyStore;
+import java.util.Arrays;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -38,72 +39,70 @@ public class SslConfiguration {
 	/**
 	 * Default {@link SslConfiguration} without a KeyStore/TrustStore configured.
 	 */
-	public static final SslConfiguration NONE = new SslConfiguration(null, null, null,
-			null);
+	public static final SslConfiguration NONE = new SslConfiguration(
+			KeyStoreConfiguration.EMPTY, KeyStoreConfiguration.EMPTY);
 
-	/**
-	 * Trust store that holds certificates and private keys.
-	 */
-	private final Resource keyStore;
+	private final KeyStoreConfiguration keyStoreConfiguration;
 
-	/**
-	 * Password used to access the key store.
-	 */
-	private final String keyStorePassword;
-
-	/**
-	 * Keystore type.
-	 */
-	private final String keyStoreType;
-
-	/**
-	 * Trust store that holds SSL certificates.
-	 */
-	private final Resource trustStore;
-
-	/**
-	 * Password used to access the trust store.
-	 */
-	private final String trustStorePassword;
-
-	/**
-	 * Truststore type.
-	 */
-	private final String trustStoreType;
+	private final KeyStoreConfiguration trustStoreConfiguration;
 
 	/**
 	 * Create a new {@link SslConfiguration} with the default {@link KeyStore} type.
 	 *
-	 * @param keyStore the keystore resource.
-	 * @param keyStorePassword the keystore password.
-	 * @param trustStore the truststore resource.
-	 * @param trustStorePassword the truststore password.
+	 * @param keyStore the key store resource.
+	 * @param keyStorePassword the key store password.
+	 * @param trustStore the trust store resource.
+	 * @param trustStorePassword the trust store password.
+	 * @deprecated Since 1.1, use
+	 * {@link #SslConfiguration(KeyStoreConfiguration, KeyStoreConfiguration)} to prevent
+	 * {@link String} interning and retaining passwords represented as String longer from
+	 * GC than necessary.
 	 */
+	@Deprecated
 	public SslConfiguration(Resource keyStore, String keyStorePassword,
 			Resource trustStore, String trustStorePassword) {
-		this(keyStore, keyStorePassword, KeyStore.getDefaultType(), trustStore,
-				trustStorePassword, KeyStore.getDefaultType());
+
+		this(new KeyStoreConfiguration(keyStore, charsOrNull(keyStorePassword),
+				KeyStore.getDefaultType()),
+				new KeyStoreConfiguration(trustStore, charsOrNull(trustStorePassword),
+						KeyStore.getDefaultType()));
 	}
 
 	/**
 	 * Create a new {@link SslConfiguration}.
 	 *
-	 * @param keyStore the keystore resource.
-	 * @param keyStorePassword the keystore password.
-	 * @param trustStore the truststore resource.
-	 * @param trustStorePassword the truststore password.
+	 * @param keyStoreConfiguration the key store configuration.
+	 * @param trustStoreConfiguration the trust store configuration.
 	 * @since 1.1
 	 */
-	public SslConfiguration(Resource keyStore, String keyStorePassword,
-			String keyStoreType, Resource trustStore, String trustStorePassword,
-			String trustStoreType) {
+	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration,
+			KeyStoreConfiguration trustStoreConfiguration) {
 
-		this.keyStore = keyStore;
-		this.keyStorePassword = keyStorePassword;
-		this.keyStoreType = keyStoreType;
-		this.trustStore = trustStore;
-		this.trustStorePassword = trustStorePassword;
-		this.trustStoreType = trustStoreType;
+		Assert.notNull(keyStoreConfiguration, "KeyStore configuration must not be null");
+		Assert.notNull(trustStoreConfiguration,
+				"TrustStore configuration must not be null");
+
+		this.keyStoreConfiguration = keyStoreConfiguration;
+		this.trustStoreConfiguration = trustStoreConfiguration;
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given trust store with the default
+	 * {@link KeyStore} type.
+	 *
+	 * @param trustStore resource pointing to an existing trust store, must not be
+	 * {@literal null}.
+	 * @param trustStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
+	 * @see java.security.KeyStore
+	 * @deprecated Since 1.1, use {@link #forTrustStore(Resource, char[])} to prevent
+	 * {@link String} interning and retaining passwords represented as String longer from
+	 * GC than necessary.
+	 */
+	@Deprecated
+	public static SslConfiguration forTrustStore(Resource trustStore,
+			String trustStorePassword) {
+		return forTrustStore(trustStore, charsOrNull(trustStorePassword));
 	}
 
 	/**
@@ -117,13 +116,34 @@ public class SslConfiguration {
 	 * @see java.security.KeyStore
 	 */
 	public static SslConfiguration forTrustStore(Resource trustStore,
-			String trustStorePassword) {
+			char[] trustStorePassword) {
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
 		Assert.notNull(trustStore.exists(),
 				String.format("TrustStore %s does not exist", trustStore));
 
-		return new SslConfiguration(null, null, trustStore, trustStorePassword);
+		return new SslConfiguration(KeyStoreConfiguration.EMPTY,
+				new KeyStoreConfiguration(trustStore, trustStorePassword,
+						KeyStore.getDefaultType()));
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given key store with the default
+	 * {@link KeyStore} type.
+	 *
+	 * @param keyStore resource pointing to an existing key store, must not be
+	 * {@literal null}.
+	 * @param keyStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
+	 * @see java.security.KeyStore
+	 * @deprecated Since 1.1, use {@link #forKeyStore(Resource, char[])} to prevent
+	 * {@link String} interning and retaining passwords represented as String longer from
+	 * GC than necessary.
+	 */
+	@Deprecated
+	public static SslConfiguration forKeyStore(Resource keyStore,
+			String keyStorePassword) {
+		return forKeyStore(keyStore, charsOrNull(keyStorePassword));
 	}
 
 	/**
@@ -136,13 +156,38 @@ public class SslConfiguration {
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public static SslConfiguration forKeyStore(Resource keyStore, String keyStorePassword) {
+	public static SslConfiguration forKeyStore(Resource keyStore,
+			char[] keyStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.notNull(keyStore.exists(),
 				String.format("KeyStore %s does not exist", keyStore));
 
-		return new SslConfiguration(keyStore, keyStorePassword, null, null);
+		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword,
+				KeyStore.getDefaultType()), KeyStoreConfiguration.EMPTY);
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given truststore with the default
+	 * {@link KeyStore} type.
+	 *
+	 * @param keyStore resource pointing to an existing keystore, must not be
+	 * {@literal null}.
+	 * @param keyStorePassword may be {@literal null}.
+	 * @param trustStore resource pointing to an existing trust store, must not be
+	 * {@literal null}.
+	 * @param trustStorePassword may be {@literal null}.
+	 * @return the created {@link SslConfiguration}.
+	 * @see java.security.KeyStore
+	 * @deprecated Since 1.1, use {@link #create(Resource, char[], Resource, char[])} to
+	 * prevent {@link String} interning and retaining passwords represented as String
+	 * longer from GC than necessary.
+	 */
+	@Deprecated
+	public SslConfiguration create(Resource keyStore, String keyStorePassword,
+			Resource trustStore, String trustStorePassword) {
+		return create(keyStore, charsOrNull(keyStorePassword), trustStore,
+				charsOrNull(trustStorePassword));
 	}
 
 	/**
@@ -158,8 +203,8 @@ public class SslConfiguration {
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public SslConfiguration create(Resource keyStore, String keyStorePassword,
-			Resource trustStore, String trustStorePassword) {
+	public SslConfiguration create(Resource keyStore, char[] keyStorePassword,
+			Resource trustStore, char[] trustStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.notNull(keyStore.exists(),
@@ -169,8 +214,11 @@ public class SslConfiguration {
 		Assert.notNull(trustStore.exists(),
 				String.format("TrustStore %s does not exist", trustStore));
 
-		return new SslConfiguration(keyStore, keyStorePassword, trustStore,
-				trustStorePassword);
+		return new SslConfiguration(
+				new KeyStoreConfiguration(keyStore, keyStorePassword,
+						KeyStore.getDefaultType()),
+				new KeyStoreConfiguration(trustStore, trustStorePassword,
+						KeyStore.getDefaultType()));
 	}
 
 	/**
@@ -178,21 +226,26 @@ public class SslConfiguration {
 	 * not configured.
 	 */
 	public Resource getKeyStore() {
-		return keyStore;
+		return keyStoreConfiguration.getResource();
 	}
 
 	/**
 	 * @return the key store password or {@literal null} if not configured.
+	 * @deprecated Since 1.1, use {@link KeyStoreConfiguration#getStorePassword()} to
+	 * prevent {@link String} interning and retaining passwords represented as String
+	 * longer from GC than necessary.
 	 */
+	@Deprecated
 	public String getKeyStorePassword() {
-		return keyStorePassword;
+		return stringOrNull(keyStoreConfiguration.getStorePassword());
 	}
 
 	/**
-	 * @return the key store type or {@literal null} if not configured.
+	 * @return the key store configuration.
+	 * @since 1.1
 	 */
-	public String getKeyStoreType() {
-		return keyStoreType;
+	public KeyStoreConfiguration getKeyStoreConfiguration() {
+		return keyStoreConfiguration;
 	}
 
 	/**
@@ -200,20 +253,99 @@ public class SslConfiguration {
 	 * not configured.
 	 */
 	public Resource getTrustStore() {
-		return trustStore;
+		return trustStoreConfiguration.getResource();
 	}
 
 	/**
 	 * @return the trust store password or {@literal null} if not configured.
+	 * @deprecated Since 1.1, use {@link KeyStoreConfiguration#getStorePassword()} to
+	 * prevent {@link String} interning and retaining passwords represented as String
+	 * longer from GC than necessary.
 	 */
+	@Deprecated
 	public String getTrustStorePassword() {
-		return trustStorePassword;
+		return stringOrNull(trustStoreConfiguration.getStorePassword());
 	}
 
 	/**
-	 * @return the trust store type or {@literal null} if not configured.
+	 * @return the key store configuration.
+	 * @since 1.1
 	 */
-	public String getTrustStoreType() {
-		return trustStoreType;
+	public KeyStoreConfiguration getTrustStoreConfiguration() {
+		return trustStoreConfiguration;
+	}
+
+	private static String stringOrNull(char[] storePassword) {
+		return storePassword != null ? new String(storePassword) : null;
+	}
+
+	private static char[] charsOrNull(String trustStorePassword) {
+		return trustStorePassword == null ? null : trustStorePassword.toCharArray();
+	}
+
+	/**
+	 * Configuration for a key store/trust store.
+	 *
+	 * @since 1.1
+	 */
+	public static class KeyStoreConfiguration {
+
+		public final static KeyStoreConfiguration EMPTY = new KeyStoreConfiguration(null,
+				null, null);
+
+		/**
+		 * Store that holds certificates, private keys, ….
+		 */
+		private final Resource resource;
+
+		/**
+		 * Password used to access the key store/trust store.
+		 */
+		private final char[] storePassword;
+
+		/**
+		 * Key store/trust store type.
+		 */
+		private final String storeType;
+
+		/**
+		 * Create a new {@link KeyStoreConfiguration}.
+		 */
+		public KeyStoreConfiguration(Resource resource, char[] storePassword,
+				String storeType) {
+
+			this.resource = resource;
+			this.storeType = storeType;
+
+			if (storePassword == null) {
+				this.storePassword = null;
+			}
+			else {
+				this.storePassword = Arrays.copyOf(storePassword, storePassword.length);
+			}
+		}
+
+		/**
+		 * @return the {@link java.security.KeyStore key store} resource or
+		 * {@literal null} if not configured.
+		 */
+		public Resource getResource() {
+			return resource;
+		}
+
+		/**
+		 * @return the key store/trust store password or {@literal null} if not
+		 * configured.
+		 */
+		public char[] getStorePassword() {
+			return storePassword;
+		}
+
+		/**
+		 * @return the trust store type or {@literal null} if not configured.
+		 */
+		public String getStoreType() {
+			return storeType;
+		}
 	}
 }
