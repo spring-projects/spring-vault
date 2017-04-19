@@ -91,7 +91,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>1.0.0.BUILD-SNAPSHOT</version>
+				<version>1.0.1.BUILD-SNAPSHOT</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
