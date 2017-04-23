@@ -30,7 +30,7 @@ before_install:
 install:
   - src/test/bash/start.sh
 
-script: mvn clean verify -P${PROFILE:-ci}
+script: ./mvnw clean verify -P${PROFILE:-ci}
 
 after_script:
   - pkill vault
@@ -38,4 +38,5 @@ after_script:
 cache:
   directories:
     - '$HOME/.m2/repository'
+    - '$HOME/.m2/wrapper'
     - 'download'
