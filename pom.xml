@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -21,7 +22,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.8.RELEASE</spring.version>
+		<spring.version>5.0.0.RC1</spring.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -38,7 +39,9 @@
 	<scm>
 		<url>https://github.com/spring-projects/spring-vault</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-vault.git</connection>
-		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-vault.git</developerConnection>
+		<developerConnection>
+			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
+		</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -309,26 +312,17 @@
 		</pluginManagement>
 	</build>
 
+	<repositories>
+		<repository>
+			<id>spring-libs-snapshot</id>
+			<url>https://repo.spring.io/libs-snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 	<profiles>
-		<profile>
-
-			<id>springNext</id>
-
-			<properties>
-				<spring.version>4.3.9.BUILD-SNAPSHOT</spring.version>
-			</properties>
-
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>https://repo.spring.io/libs-snapshot</url>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
-		</profile>
 		<profile>
 
 			<id>spring5</id>
@@ -336,16 +330,6 @@
 			<properties>
 				<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
 			</properties>
-
-			<repositories>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<url>https://repo.spring.io/libs-snapshot</url>
-					<snapshots>
-						<enabled>true</enabled>
-					</snapshots>
-				</repository>
-			</repositories>
 		</profile>
 
 		<profile>
@@ -459,7 +443,8 @@
 			<id>distribute</id>
 
 			<properties>
-				<shared.resources>${project.build.directory}/shared-resources</shared.resources>
+				<shared.resources>${project.build.directory}/shared-resources
+				</shared.resources>
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
 			</properties>
@@ -496,7 +481,8 @@
 						</executions>
 						<configuration>
 							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifactIds>spring-data-build-resources</includeArtifactIds>
+							<includeArtifactIds>spring-data-build-resources
+							</includeArtifactIds>
 							<includeTypes>zip</includeTypes>
 							<excludeTransitive>true</excludeTransitive>
 							<outputDirectory>${shared.resources}</outputDirectory>
@@ -537,13 +523,15 @@
 								<configuration>
 									<target>
 										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
+											<fileset dir="${shared.resources}/asciidoc"
+													 erroronmissingdir="false">
 												<include name="**/*.css"/>
 											</fileset>
 											<flattenmapper/>
 										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
-											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
+											<fileset dir="${basedir}/src/main/asciidoc"
+													 erroronmissingdir="false">
 												<include name="**/*.png"/>
 												<include name="**/*.gif"/>
 												<include name="**/*.jpg"/>
@@ -563,8 +551,10 @@
 								<configuration>
 									<target>
 										<copy todir="${project.build.directory}/schemas">
-											<fileset dir="${basedir}" erroronmissingdir="false">
-												<include name="**/src/main/resources/**/config/spring-*.xsd"/>
+											<fileset dir="${basedir}"
+													 erroronmissingdir="false">
+												<include
+														name="**/src/main/resources/**/config/spring-*.xsd"/>
 											</fileset>
 											<flattenmapper/>
 										</copy>
@@ -614,14 +604,20 @@
 								<header>${project.name}</header>
 								<source>${java.version}</source>
 								<quiet>true</quiet>
-								<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
-								<overview>${shared.resources}/javadoc/overview.html</overview>
-								<stylesheetfile>${shared.resources}/javadoc/spring-javadoc.css</stylesheetfile>
+								<javadocDirectory>${shared.resources}/javadoc
+								</javadocDirectory>
+								<overview>${shared.resources}/javadoc/overview.html
+								</overview>
+								<stylesheetfile>
+									${shared.resources}/javadoc/spring-javadoc.css
+								</stylesheetfile>
 								<!-- copies doc-files subdirectory which contains image resources -->
 								<docfilessubdirs>true</docfilessubdirs>
 								<additionalparam>-Xdoclint:none</additionalparam>
 								<links>
-									<link>http://docs.spring.io/spring/docs/current/javadoc-api/</link>
+									<link>
+										http://docs.spring.io/spring/docs/current/javadoc-api/
+									</link>
 									<link>http://docs.oracle.com/javase/6/docs/api</link>
 								</links>
 							</configuration>
@@ -656,7 +652,9 @@
 									</goals>
 									<configuration>
 										<backend>html5</backend>
-										<outputDirectory>${project.root}/target/site/reference/html</outputDirectory>
+										<outputDirectory>
+											${project.root}/target/site/reference/html
+										</outputDirectory>
 										<sectids>false</sectids>
 										<sourceHighlighter>prettify</sourceHighlighter>
 										<attributes>
@@ -695,7 +693,8 @@
 							</executions>
 
 							<configuration>
-								<sourceDirectory>${project.root}/src/main/asciidoc</sourceDirectory>
+								<sourceDirectory>${project.root}/src/main/asciidoc
+								</sourceDirectory>
 								<sourceDocumentName>index.adoc</sourceDocumentName>
 								<doctype>book</doctype>
 								<attributes>
@@ -726,7 +725,9 @@
 									<phase>prepare-package</phase>
 									<configuration>
 										<descriptors>
-											<descriptor>${shared.resources}/assemblies/static-resources.xml</descriptor>
+											<descriptor>
+												${shared.resources}/assemblies/static-resources.xml
+											</descriptor>
 										</descriptors>
 										<finalName>static-resources</finalName>
 										<appendAssemblyId>false</appendAssemblyId>
@@ -742,7 +743,8 @@
 										<descriptors>
 											<descriptor>src/assembly/docs.xml</descriptor>
 										</descriptors>
-										<finalName>spring-vault-${project.version}-docs</finalName>
+										<finalName>spring-vault-${project.version}-docs
+										</finalName>
 										<appendAssemblyId>false</appendAssemblyId>
 										<classifier>docs</classifier>
 										<attach>true</attach>
