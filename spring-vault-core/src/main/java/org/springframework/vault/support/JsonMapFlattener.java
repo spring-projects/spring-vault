@@ -35,16 +35,16 @@ import org.springframework.util.StringUtils;
  * considered as sub-documents.
  * <p>
  * Input:
- * 
+ *
  * <pre>
  * <code>
  *     {"key": {"nested: "value"}, "another.key": ["one", "two"] }
  * </code>
  * </pre>
- * 
+ *
  * <br>
  * Result
- * 
+ *
  * <pre>
  * <code> key.nested=value
  *  another.key[0]=one
@@ -70,7 +70,7 @@ public abstract class JsonMapFlattener {
 
 		Assert.notNull(inputMap, "Input Map must not be null");
 
-		Map<String, String> resultMap = new LinkedHashMap<String, String>();
+		Map<String, String> resultMap = new LinkedHashMap<>();
 
 		doFlatten("", inputMap.entrySet().iterator(), resultMap);
 

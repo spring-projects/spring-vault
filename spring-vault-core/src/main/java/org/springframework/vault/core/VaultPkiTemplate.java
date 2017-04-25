@@ -25,11 +25,10 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultPkiOperations}.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultPkiTemplate implements VaultPkiOperations {
@@ -41,7 +40,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	/**
 	 * Create a new {@link VaultPkiTemplate} given {@link VaultPkiOperations} and the
 	 * mount {@code path}.
-	 * 
+	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -61,21 +60,17 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
 
-		final Map<String, Object> request = new HashMap<String, Object>();
+		final Map<String, Object> request = new HashMap<>();
 		request.put("common_name", certificateRequest.getCommonName());
 
 		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put(
-					"alt_names",
-					StringUtils.collectionToDelimitedString(
-							certificateRequest.getAltNames(), ","));
+			request.put("alt_names", StringUtils
+					.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
 		}
 
 		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put(
-					"ip_sans",
-					StringUtils.collectionToDelimitedString(
-							certificateRequest.getIpSubjectAltNames(), ","));
+			request.put("ip_sans", StringUtils.collectionToDelimitedString(
+					certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
 		if (certificateRequest.getTtl() != null) {
@@ -88,22 +83,16 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			request.put("exclude_cn_from_sans", true);
 		}
 
-		return vaultOperations
-				.doWithSession(new RestOperationsCallback<VaultCertificateResponse>() {
-					@Override
-					public VaultCertificateResponse doWithRestOperations(
-							RestOperations restOperations) {
+		return vaultOperations.doWithSession(restOperations -> {
 
-						try {
-							return restOperations.postForObject(
-									"{path}/issue/{roleName}", request,
-									VaultCertificateResponse.class, path, roleName);
-						}
-						catch (HttpStatusCodeException e) {
-							throw VaultResponses.buildException(e);
-						}
-					}
-				});
+			try {
+				return restOperations.postForObject("{path}/issue/{roleName}", request,
+						VaultCertificateResponse.class, path, roleName);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		});
 	}
 
 }

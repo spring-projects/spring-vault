@@ -168,9 +168,9 @@ public class VaultTokenRequest {
 
 		private String id;
 
-		private List<String> policies = new ArrayList<String>();
+		private List<String> policies = new ArrayList<>();
 
-		private Map<String, String> meta = new LinkedHashMap<String, String>();
+		private Map<String, String> meta = new LinkedHashMap<>();
 
 		private Boolean noParent;
 
@@ -414,7 +414,7 @@ public class VaultTokenRequest {
 				policies = Collections.singletonList(this.policies.get(0));
 				break;
 			default:
-				policies = Collections.unmodifiableList(new ArrayList<String>(
+				policies = Collections.unmodifiableList(new ArrayList<>(
 						this.policies));
 
 			}
@@ -425,7 +425,7 @@ public class VaultTokenRequest {
 				break;
 			default:
 				meta = Collections
-						.unmodifiableMap(new LinkedHashMap<String, String>(this.meta));
+						.unmodifiableMap(new LinkedHashMap<>(this.meta));
 			}
 
 			return new VaultTokenRequest(id, policies, meta, noParent, noDefaultPolicy,
@@ -434,7 +434,7 @@ public class VaultTokenRequest {
 
 		private static <E> List<E> toList(Iterable<E> iter) {
 
-			List<E> list = new ArrayList<E>();
+			List<E> list = new ArrayList<>();
 			for (E item : iter) {
 				list.add(item);
 			}

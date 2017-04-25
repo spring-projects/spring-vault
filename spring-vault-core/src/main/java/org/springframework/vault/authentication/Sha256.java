@@ -17,6 +17,7 @@
 package org.springframework.vault.authentication;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -29,7 +30,7 @@ import org.springframework.util.Assert;
  */
 class Sha256 {
 
-	private static final Charset US_ASCII = Charset.forName("US-ASCII");
+	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
 
 	/**
 	 * Generates a hex-encoded SHA256 checksum from the supplied {@code content}.
@@ -64,10 +65,11 @@ class Sha256 {
 	}
 
 	static String toHexString(byte[] bytes) {
+
 		StringBuilder sb = new StringBuilder(bytes.length * 2);
 
-		for (int i = 0; i < bytes.length; i++) {
-			sb.append(String.format("%X", bytes[i]));
+		for (byte b : bytes) {
+			sb.append(String.format("%X", b));
 		}
 
 		return sb.toString();

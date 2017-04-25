@@ -17,6 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -82,7 +83,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	private final Object lock = new Object();
 
-	private volatile VaultToken token;
+	private volatile Optional<VaultToken> token = Optional.empty();
 
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
@@ -126,19 +127,17 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	@Override
 	public void destroy() {
 
-		VaultToken token = this.token;
-		this.token = null;
+		Optional<VaultToken> token = this.token;
+		this.token = Optional.empty();
 
-		if (token instanceof LoginToken) {
-			revoke(token);
-		}
+		token.filter(LoginToken.class::isInstance).ifPresent(this::revoke);
 	}
 
 	private void revoke(VaultToken token) {
 
 		try {
-			restOperations.postForObject("/auth/token/revoke-self",
-					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
+			restOperations.postForObject("/auth/token/revoke-self", new HttpEntity<>(
+					VaultHttpHeaders.from(token)), Map.class);
 		}
 		catch (HttpStatusCodeException e) {
 			logger.warn(String.format("Cannot revoke VaultToken: %s",
@@ -159,14 +158,14 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 		logger.info("Renewing token");
 
-		if (token == null) {
+		if (!token.isPresent()) {
 			getSessionToken();
 			return false;
 		}
 
 		try {
-			restOperations.postForObject("/auth/token/renew-self",
-					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
+			restOperations.postForObject("/auth/token/renew-self", new HttpEntity<>(
+					VaultHttpHeaders.from(token.get())), Map.class);
 			return true;
 		}
 		catch (HttpStatusCodeException e) {
@@ -189,12 +188,12 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	@Override
 	public VaultToken getSessionToken() {
 
-		if (token == null) {
+		if (!token.isPresent()) {
 
 			synchronized (lock) {
 
-				if (token == null) {
-					token = login();
+				if (!token.isPresent()) {
+					token = Optional.ofNullable(clientAuthentication.login());
 
 					if (isTokenRenewable()) {
 						scheduleRenewal();
@@ -203,7 +202,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			}
 		}
 
-		return token;
+		return token.orElseThrow(() -> new IllegalStateException(
+				"Cannot obtain VaultToken"));
 	}
 
 	protected VaultToken login() {
@@ -212,13 +212,12 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	protected boolean isTokenRenewable() {
 
-		if (token instanceof LoginToken) {
+		return token.filter(LoginToken.class::isInstance) //
+				.filter(it -> {
 
-			LoginToken loginToken = (LoginToken) token;
-			return loginToken.getLeaseDuration() > 0 && loginToken.isRenewable();
-		}
-
-		return false;
+					LoginToken loginToken = (LoginToken) it;
+					return loginToken.getLeaseDuration() > 0 && loginToken.isRenewable();
+				}).isPresent();
 	}
 
 	private void scheduleRenewal() {
@@ -246,7 +245,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	}
 
 	private OneShotTrigger createTrigger() {
-		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token));
+		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token.get()));
 	}
 
 	/**

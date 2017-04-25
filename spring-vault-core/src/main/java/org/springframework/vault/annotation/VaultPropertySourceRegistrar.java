@@ -181,7 +181,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 	static Set<AnnotationAttributes> attributesForRepeatable(AnnotationMetadata metadata,
 			String containerClassName, String annotationClassName) {
 
-		Set<AnnotationAttributes> result = new LinkedHashSet<AnnotationAttributes>();
+		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 		addAttributesIfNotNull(result,
 				metadata.getAnnotationAttributes(annotationClassName, false));
 

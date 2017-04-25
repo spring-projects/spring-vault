@@ -41,8 +41,8 @@ import java.util.List;
 class KeystoreUtil {
 
 	/**
-	 * Create a {@link KeyStore} containing the {@link KeySpec} and
-	 * {@link X509Certificate certificates} using the given {@code keyAlias}.
+	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
+	 * certificates} using the given {@code keyAlias}.
 	 *
 	 * @param keyAlias
 	 * @param certificates
@@ -51,14 +51,15 @@ class KeystoreUtil {
 	 * @throws IOException
 	 */
 	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec,
-			X509Certificate... certificates) throws GeneralSecurityException, IOException {
+			X509Certificate... certificates)
+			throws GeneralSecurityException, IOException {
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		PrivateKey privateKey = kf.generatePrivate(privateKeySpec);
 
 		KeyStore keyStore = createKeyStore();
 
-		List<X509Certificate> certChain = new ArrayList<X509Certificate>();
+		List<X509Certificate> certChain = new ArrayList<>();
 		Collections.addAll(certChain, certificates);
 
 		keyStore.setKeyEntry(keyAlias, privateKey, new char[0],
@@ -67,18 +68,15 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
-	static X509Certificate getCertificate(byte[] source) throws CertificateException,
-			IOException {
+	static X509Certificate getCertificate(byte[] source)
+			throws CertificateException, IOException {
 
 		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
 
 		List<X509Certificate> certificates = getCertificates(certificateFactory, source);
 
-		if (certificates.isEmpty()) {
-			return null;
-		}
-
-		return certificates.get(0);
+		return certificates.stream().findFirst().orElseThrow(
+				() -> new IllegalArgumentException("No X509Certificate found"));
 	}
 
 	/**
@@ -88,7 +86,8 @@ class KeystoreUtil {
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	private static KeyStore createKeyStore() throws GeneralSecurityException, IOException {
+	private static KeyStore createKeyStore()
+			throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keyStore.load(null, new char[0]);
@@ -99,7 +98,7 @@ class KeystoreUtil {
 	private static List<X509Certificate> getCertificates(CertificateFactory cf,
 			byte[] source) throws CertificateException, IOException {
 
-		List<X509Certificate> x509Certificates = new ArrayList<X509Certificate>();
+		List<X509Certificate> x509Certificates = new ArrayList<>();
 
 		ByteArrayInputStream bis = new ByteArrayInputStream(source);
 		while (bis.available() > 0) {
@@ -299,8 +298,8 @@ class KeystoreUtil {
 
 			// We can't handle length longer than 4 bytes
 			if (i >= 0xFF || num > 4) {
-				throw new IllegalStateException("Invalid DER: length field too big (" + i
-						+ ")");
+				throw new IllegalStateException(
+						"Invalid DER: length field too big (" + i + ")");
 			}
 
 			byte[] bytes = new byte[num];

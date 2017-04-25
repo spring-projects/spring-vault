@@ -107,8 +107,8 @@ public class VaultCertificateRequest {
 	public static class VaultCertificateRequestBuilder {
 
 		private String commonName;
-		private List<String> altNames = new ArrayList<String>();
-		private List<String> ipSubjectAltNames = new ArrayList<String>();
+		private List<String> altNames = new ArrayList<>();
+		private List<String> ipSubjectAltNames = new ArrayList<>();
 		private Integer ttl;
 		private Boolean excludeCommonNameFromSubjectAltNames;
 
@@ -249,7 +249,8 @@ public class VaultCertificateRequest {
 				altNames = java.util.Collections.singletonList(this.altNames.get(0));
 				break;
 			default:
-				altNames = java.util.Collections.unmodifiableList(new ArrayList<String>(
+				altNames = java.util.Collections
+						.unmodifiableList(new ArrayList<>(
 						this.altNames));
 			}
 
@@ -264,7 +265,7 @@ public class VaultCertificateRequest {
 				break;
 			default:
 				ipSubjectAltNames = java.util.Collections
-						.unmodifiableList(new ArrayList<String>(this.ipSubjectAltNames));
+						.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
 			}
 
 			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames,
@@ -273,7 +274,7 @@ public class VaultCertificateRequest {
 
 		private static <E> List<E> toList(Iterable<E> iter) {
 
-			List<E> list = new ArrayList<E>();
+			List<E> list = new ArrayList<>();
 			for (E item : iter) {
 				list.add(item);
 			}

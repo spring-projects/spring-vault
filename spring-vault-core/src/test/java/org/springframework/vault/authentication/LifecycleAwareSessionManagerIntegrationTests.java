@@ -25,13 +25,11 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
@@ -114,23 +112,20 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 		sessionManager.destroy();
 
 		prepare().getVaultOperations().doWithSession(
-				new RestOperationsCallback<Object>() {
-					@Override
-					public Object doWithRestOperations(RestOperations restOperations) {
+				restOperations -> {
 
-						try {
-							restOperations.getForEntity("auth/token/lookup/{token}",
-									Map.class, loginToken.toCharArray());
-							fail("Missing HttpStatusCodeException");
-						}
-						catch (HttpStatusCodeException e) {
-							// Compatibility across Vault versions.
-							assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-									HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
-						}
-
-						return null;
+					try {
+						restOperations.getForEntity("auth/token/lookup/{token}",
+								Map.class, loginToken.toCharArray());
+						fail("Missing HttpStatusCodeException");
 					}
+					catch (HttpStatusCodeException e) {
+						// Compatibility across Vault versions.
+						assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+								HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+					}
+
+					return null;
 				});
 	}
 

@@ -91,7 +91,7 @@ public class AppIdAuthentication implements ClientAuthentication {
 
 	private Map<String, String> getAppIdLogin(String appId, String userId) {
 
-		Map<String, String> login = new HashMap<String, String>();
+		Map<String, String> login = new HashMap<>();
 		login.put("app_id", appId);
 		login.put("user_id", userId);
 		return login;

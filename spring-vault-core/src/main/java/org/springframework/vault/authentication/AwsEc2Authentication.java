@@ -49,13 +49,15 @@ public class AwsEc2Authentication implements ClientAuthentication {
 
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
+	private final static char[] EMPTY = new char[0];
+
 	private final AwsEc2AuthenticationOptions options;
 
 	private final RestOperations vaultRestOperations;
 
 	private final RestOperations awsMetadataRestOperations;
 
-	private final AtomicReference<char[]> nonce = new AtomicReference<char[]>();
+	private final AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
 
 	/**
 	 * Create a new {@link AwsEc2Authentication}.
@@ -77,7 +79,8 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	 * @param awsMetadataRestOperations must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
-			RestOperations vaultRestOperations, RestOperations awsMetadataRestOperations) {
+			RestOperations vaultRestOperations,
+			RestOperations awsMetadataRestOperations) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
@@ -109,10 +112,9 @@ public class AwsEc2Authentication implements ClientAuthentication {
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response
 							.getAuth().get("metadata");
-					logger.debug(String
-							.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-									metadata.get("instance_id"),
-									metadata.get("instance_id")));
+					logger.debug(String.format(
+							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+							metadata.get("instance_id"), metadata.get("instance_id")));
 				}
 				else {
 					logger.debug("Login successful using AWS-EC2 authentication");
@@ -129,21 +131,21 @@ public class AwsEc2Authentication implements ClientAuthentication {
 
 	protected Map<String, String> getEc2Login() {
 
-		Map<String, String> login = new HashMap<String, String>();
+		Map<String, String> login = new HashMap<>();
 
 		if (StringUtils.hasText(options.getRole())) {
 			login.put("role", options.getRole());
 		}
 
-		if (this.nonce.get() == null) {
-			this.nonce.compareAndSet(null, createNonce());
+		if (this.nonce.get() == EMPTY) {
+			this.nonce.compareAndSet(EMPTY, createNonce());
 		}
 
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = awsMetadataRestOperations.getForObject(
-					options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = awsMetadataRestOperations
+					.getForObject(options.getIdentityDocumentUri(), String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
@@ -151,9 +153,10 @@ public class AwsEc2Authentication implements ClientAuthentication {
 			return login;
 		}
 		catch (RestClientException e) {
-			throw new VaultException(String.format(
-					"Cannot obtain Identity Document from %s",
-					options.getIdentityDocumentUri()), e);
+			throw new VaultException(
+					String.format("Cannot obtain Identity Document from %s",
+							options.getIdentityDocumentUri()),
+					e);
 		}
 	}
 

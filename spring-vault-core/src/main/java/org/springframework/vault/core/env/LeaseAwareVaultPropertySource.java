@@ -60,7 +60,7 @@ public class LeaseAwareVaultPropertySource
 
 	private final RequestedSecret requestedSecret;
 
-	private final Map<String, String> properties = new ConcurrentHashMap<String, String>();
+	private final Map<String, String> properties = new ConcurrentHashMap<>();
 
 	private final PropertyTransformer propertyTransformer;
 

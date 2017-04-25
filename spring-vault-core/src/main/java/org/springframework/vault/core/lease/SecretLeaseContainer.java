@@ -54,7 +54,6 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Event-based container to request secrets from Vault and renew the associated
@@ -128,9 +127,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	private static final int STATUS_STARTED = 1;
 	private static final int STATUS_DESTROYED = 2;
 
-	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<RequestedSecret>();
+	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
 
-	private final Map<RequestedSecret, LeaseRenewalScheduler> renewals = new ConcurrentHashMap<RequestedSecret, LeaseRenewalScheduler>();
+	private final Map<RequestedSecret, LeaseRenewalScheduler> renewals = new ConcurrentHashMap<>();
 
 	private final VaultOperations operations;
 
@@ -279,7 +278,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		Assert.state(this.status != STATUS_DESTROYED,
 				"Container is destroyed and cannot be started");
 
-		Map<RequestedSecret, LeaseRenewalScheduler> renewals = new HashMap<RequestedSecret, LeaseRenewalScheduler>(
+		Map<RequestedSecret, LeaseRenewalScheduler> renewals = new HashMap<>(
 				this.renewals);
 
 		if (UPDATER.compareAndSet(this, STATUS_INITIAL, STATUS_STARTED)) {
@@ -429,24 +428,20 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		}
 
-		leaseRenewal.scheduleRenewal(requestedSecret, new RenewLease() {
+		leaseRenewal.scheduleRenewal(requestedSecret, lease1 -> {
 
-			@Override
-			public Lease renewLease(Lease lease) {
+			Lease newLease = doRenewLease(requestedSecret, lease1);
 
-				Lease newLease = doRenewLease(requestedSecret, lease);
+			if (!Lease.none().equals(newLease)) {
 
-				if (!Lease.none().equals(newLease)) {
+				potentiallyScheduleLeaseRenewal(requestedSecret, newLease, leaseRenewal);
 
-					potentiallyScheduleLeaseRenewal(requestedSecret, newLease,
-							leaseRenewal);
-
-					onAfterLeaseRenewed(requestedSecret, newLease);
-				}
-
-				return newLease;
+				onAfterLeaseRenewed(requestedSecret, newLease);
 			}
+
+			return newLease;
 		}, lease, getMinRenewalSeconds(), getExpiryThresholdSeconds());
+
 	}
 
 	// -------------------------------------------------------------------------
@@ -483,7 +478,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	protected Lease doRenewLease(final RequestedSecret requestedSecret, final Lease lease) {
 
 		try {
-
 			Lease renewed = lease.hasLeaseId() ? renew(lease) : lease;
 
 			if (!renewed.hasLeaseId() || renewed.getLeaseDuration() == 0
@@ -514,19 +508,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	private Lease renew(final Lease lease) {
-
 		ResponseEntity<Map<String, Object>> entity = operations
-				.doWithSession(new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
-
-					@Override
-					@SuppressWarnings("unchecked")
-					public ResponseEntity<Map<String, Object>> doWithRestOperations(
-							RestOperations restOperations) {
-						return (ResponseEntity) restOperations.exchange(
-								"/sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class,
-								lease.getLeaseId());
-					}
-				});
+				.doWithSession(restOperations -> (ResponseEntity) restOperations
+						.exchange("/sys/renew/{leaseId}", HttpMethod.PUT, null,
+								Map.class, lease.getLeaseId()));
 
 		Map<String, Object> body = entity.getBody();
 		String leaseId = (String) body.get("lease_id");
@@ -567,17 +552,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
 			operations
-					.doWithSession(new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
+					.doWithSession((RestOperationsCallback<ResponseEntity<Map<String, Object>>>) restOperations -> (ResponseEntity) restOperations
+							.exchange("/sys/revoke/{leaseId}", HttpMethod.PUT, null,
+									Map.class, lease.getLeaseId()));
 
-						@Override
-						@SuppressWarnings("unchecked")
-						public ResponseEntity<Map<String, Object>> doWithRestOperations(
-								RestOperations restOperations) {
-							return (ResponseEntity) restOperations.exchange(
-									"/sys/revoke/{leaseId}", HttpMethod.PUT, null,
-									Map.class, lease.getLeaseId());
-						}
-					});
 			onAfterLeaseRevocation(requestedSecret, lease);
 		}
 		catch (HttpStatusCodeException e) {
@@ -603,9 +581,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		private final TaskScheduler taskScheduler;
 
-		final AtomicReference<Lease> currentLeaseRef = new AtomicReference<Lease>();
+		final AtomicReference<Lease> currentLeaseRef = new AtomicReference<>();
 
-		final Map<Lease, ScheduledFuture<?>> schedules = new ConcurrentHashMap<Lease, ScheduledFuture<?>>();
+		final Map<Lease, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
 
 		/**
 		 *
@@ -664,7 +642,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 					if (log.isDebugEnabled()) {
 						if (lease.hasLeaseId()) {
-							log.debug(String.format("Renewing lease %s for secret %s",
+							log.debug(String.format("Renewing lease %sfor secret %s",
 									lease.getLeaseId(), requestedSecret.getPath()));
 						}
 						else {
@@ -713,7 +691,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		void disableScheduleRenewal() {
 
 			currentLeaseRef.set(null);
-			Set<Lease> leases = new HashSet<Lease>(schedules.keySet());
+			Set<Lease> leases = new HashSet<>(schedules.keySet());
 
 			for (Lease lease : leases) {
 				cancelSchedule(lease);

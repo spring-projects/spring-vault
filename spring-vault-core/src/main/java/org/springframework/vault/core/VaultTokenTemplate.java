@@ -25,7 +25,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -106,19 +105,15 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return vaultOperations.doWithSession(new RestOperationsCallback<T>() {
+		return vaultOperations.doWithSession(restOperations -> {
+			try {
+				ResponseEntity<T> exchange = restOperations.exchange(path,
+						HttpMethod.POST, new HttpEntity<>(body), responseType);
 
-			@Override
-			public T doWithRestOperations(RestOperations restOperations) {
-				try {
-					ResponseEntity<T> exchange = restOperations.exchange(path,
-							HttpMethod.POST, new HttpEntity<Object>(body), responseType);
-
-					return exchange.getBody();
-				}
-				catch (HttpStatusCodeException e) {
-					throw VaultResponses.buildException(e, path);
-				}
+				return exchange.getBody();
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, path);
 			}
 		});
 	}

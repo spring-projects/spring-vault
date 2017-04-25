@@ -120,7 +120,7 @@ public abstract class PropertyTransformers {
 		@Override
 		public Map<String, String> transformProperties(Map<String, String> input) {
 
-			Map<String, String> target = new LinkedHashMap<String, String>(input.size(),
+			Map<String, String> target = new LinkedHashMap<>(input.size(),
 					1);
 
 			for (Entry<String, String> entry : input.entrySet()) {
@@ -165,7 +165,7 @@ public abstract class PropertyTransformers {
 		@Override
 		public Map<String, String> transformProperties(Map<String, String> input) {
 
-			Map<String, String> target = new LinkedHashMap<String, String>(input.size(),
+			Map<String, String> target = new LinkedHashMap<>(input.size(),
 					1);
 
 			for (Entry<String, String> entry : input.entrySet()) {

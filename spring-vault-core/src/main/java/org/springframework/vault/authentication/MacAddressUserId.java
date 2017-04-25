@@ -16,19 +16,18 @@
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.util.ArrayList;
+import java.net.SocketException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -41,10 +40,6 @@ import org.springframework.util.StringUtils;
  * @see AppIdUserIdMechanism
  */
 public class MacAddressUserId implements AppIdUserIdMechanism {
-
-	// Compatibility with Java 1.7 and greater
-	private static final Method GET_INDEX = ReflectionUtils
-			.findMethod(NetworkInterface.class, "getIndex");
 
 	private final Log log = LogFactory.getLog(MacAddressUserId.class);
 
@@ -92,7 +87,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 		try {
 
-			NetworkInterface networkInterface = null;
+			Optional<NetworkInterface> networkInterface = Optional.empty();
 			List<NetworkInterface> interfaces = Collections
 					.list(NetworkInterface.getNetworkInterfaces());
 
@@ -108,7 +103,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 				}
 			}
 
-			if (networkInterface == null) {
+			if (!networkInterface.isPresent()) {
 
 				if (StringUtils.hasText(networkInterfaceHint)) {
 					log.warn(String.format(
@@ -117,96 +112,79 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 				}
 
 				InetAddress localHost = InetAddress.getLocalHost();
-				networkInterface = NetworkInterface.getByInetAddress(localHost);
+				networkInterface = Optional
+						.ofNullable(NetworkInterface.getByInetAddress(localHost));
 
-				if (networkInterface == null
-						|| networkInterface.getHardwareAddress() == null) {
-
+				if (!networkInterface.filter(MacAddressUserId::hasNetworkAddress)
+						.isPresent()) {
 					networkInterface = getNetworkInterfaceWithHardwareAddress(interfaces);
 				}
-
-				if (networkInterface == null) {
-					throw new IllegalStateException(String.format(
-							"Cannot determine NetworkInterface for %s", localHost));
-				}
 			}
 
-			byte[] mac = networkInterface.getHardwareAddress();
-			if (mac == null) {
-				throw new IllegalStateException(
-						String.format("Network interface %s has no hardware address",
-								networkInterface.getName()));
-			}
-
-			return Sha256.toSha256(Sha256.toHexString(mac));
+			return networkInterface.map(MacAddressUserId::getRequiredNetworkAddress) //
+					.map(Sha256::toHexString) //
+					.map(Sha256::toSha256) //
+					.orElseThrow(() -> new IllegalStateException(
+							"Cannot determine NetworkInterface"));
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+
 	}
 
-	private static NetworkInterface getNetworkInterface(Number hint,
+	private static Optional<NetworkInterface> getNetworkInterface(Number hint,
 			List<NetworkInterface> interfaces) {
 
 		if (interfaces.size() > hint.intValue() && hint.intValue() >= 0) {
-			return interfaces.get(hint.intValue());
+			return Optional.of(interfaces.get(hint.intValue()));
 		}
 
-		return null;
+		return Optional.empty();
 	}
 
-	private static NetworkInterface getNetworkInterface(String hint,
+	private static Optional<NetworkInterface> getNetworkInterface(String hint,
 			List<NetworkInterface> interfaces) {
 
-		for (NetworkInterface anInterface : interfaces) {
-			if (hint.equals(anInterface.getDisplayName())
-					|| hint.equals(anInterface.getName())) {
-				return anInterface;
-			}
-		}
-
-		return null;
+		return interfaces.stream() //
+				.filter(anInterface -> matchesHint(hint, anInterface)) //
+				.findFirst();
 	}
 
-	private static NetworkInterface getNetworkInterfaceWithHardwareAddress(
-			List<NetworkInterface> interfaces) throws IOException {
+	private static boolean matchesHint(String hint, NetworkInterface networkInterface) {
 
-		List<NetworkInterface> networkInterfacesToUse = interfaces;
-
-		if (GET_INDEX != null) {
-			networkInterfacesToUse = new ArrayList<NetworkInterface>(interfaces);
-			Collections.sort(networkInterfacesToUse,
-					NetworkInterfaceIndexComparator.INSTANCE);
-		}
-
-		for (NetworkInterface anInterface : networkInterfacesToUse) {
-			byte[] hardwareAddress = anInterface.getHardwareAddress();
-			if (hardwareAddress != null) {
-				return anInterface;
-			}
-		}
-
-		return null;
+		return hint.equals(networkInterface.getDisplayName())
+				|| hint.equals(networkInterface.getName());
 	}
 
-	/**
-	 * @since 1.0.1
-	 */
-	enum NetworkInterfaceIndexComparator implements Comparator<NetworkInterface> {
-		INSTANCE;
+	private static Optional<NetworkInterface> getNetworkInterfaceWithHardwareAddress(
+			List<NetworkInterface> interfaces) {
 
-		@Override
-		public int compare(NetworkInterface o1, NetworkInterface o2) {
+		return interfaces.stream() //
+				.filter(MacAddressUserId::hasNetworkAddress) //
+				.sorted(Comparator.comparingInt(NetworkInterface::getIndex)) //
+				.findFirst();
+	}
 
-			try {
-				int left = (Integer) GET_INDEX.invoke(o1);
-				int right = (Integer) GET_INDEX.invoke(o2);
-				return (left < right) ? -1 : ((left == right) ? 0 : 1);
-			}
-			catch (Exception e) {
-				throw new IllegalStateException(
-						"Cannot retrieve index from NetworkInterface", e);
-			}
+	private static Optional<byte[]> getNetworkAddress(NetworkInterface it) {
+
+		try {
+			return Optional.ofNullable(it.getHardwareAddress());
 		}
+		catch (SocketException e) {
+			throw new IllegalStateException(String
+					.format("Cannot determine hardware address for %s", it.getName()));
+		}
+	}
+
+	private static byte[] getRequiredNetworkAddress(NetworkInterface it) {
+
+		return getNetworkAddress(it) //
+				.orElseThrow(() -> new IllegalStateException(String.format(
+						"Network interface %s has no hardware address", it.getName())));
+	}
+
+	private static boolean hasNetworkAddress(NetworkInterface it) {
+		return getNetworkAddress(it).isPresent();
 	}
 }

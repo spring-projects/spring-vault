@@ -44,7 +44,7 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 			Map<String, Object> secrets) {
 
 		super(requestedSecret, lease);
-		this.secrets = Collections.unmodifiableMap(new HashMap<String, Object>(secrets));
+		this.secrets = Collections.unmodifiableMap(new HashMap<>(secrets));
 	}
 
 	public Map<String, Object> getSecrets() {

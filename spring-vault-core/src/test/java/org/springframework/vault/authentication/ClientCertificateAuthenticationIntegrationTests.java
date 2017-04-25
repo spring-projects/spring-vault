@@ -16,7 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.io.File;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
@@ -36,7 +36,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,8 +47,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationIntegrationTests extends
-		IntegrationTestSupport {
+public class ClientCertificateAuthenticationIntegrationTests
+		extends IntegrationTestSupport {
 
 	@Before
 	public void before() throws Exception {
@@ -58,19 +57,17 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations().doWithSession(
-				new RestOperationsCallback<Object>() {
-					@Override
-					public Object doWithRestOperations(RestOperations restOperations) {
-						File workDir = findWorkDir();
+		prepare().getVaultOperations()
+				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
+					File workDir = findWorkDir();
 
-						String certificate = Files.contentOf(new File(workDir,
-								"ca/certs/client.cert.pem"), Charset.forName("US-ASCII"));
+					String certificate = Files.contentOf(
+							new File(workDir, "ca/certs/client.cert.pem"),
+							StandardCharsets.US_ASCII);
 
-						return restOperations.postForEntity("auth/cert/certs/my-role",
-								Collections.singletonMap("certificate", certificate),
-								Map.class);
-					}
+					return restOperations.postForEntity("auth/cert/certs/my-role",
+							Collections.singletonMap("certificate", certificate),
+							Map.class);
 				});
 	}
 
@@ -106,9 +103,9 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 
 		SslConfiguration original = createSslConfiguration();
 
-		SslConfiguration sslConfiguration = new SslConfiguration(new FileSystemResource(
-				new File(findWorkDir(), "client-cert.jks")), "changeit",
-				original.getTrustStore(), original.getTrustStorePassword());
+		SslConfiguration sslConfiguration = new SslConfiguration(
+				new FileSystemResource(new File(findWorkDir(), "client-cert.jks")),
+				"changeit", original.getTrustStore(), original.getTrustStorePassword());
 
 		return sslConfiguration;
 	}

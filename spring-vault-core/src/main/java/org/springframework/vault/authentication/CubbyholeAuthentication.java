@@ -180,10 +180,9 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		try {
 
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					options.getPath(),
-					HttpMethod.GET,
-					new HttpEntity<Object>(VaultHttpHeaders.from(options
-							.getInitialToken())), VaultResponse.class);
+					options.getPath(), HttpMethod.GET,
+					new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken())),
+					VaultResponse.class);
 
 			return entity.getBody().getData();
 		}
@@ -222,10 +221,9 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultException(
-					String.format(
-							"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
-							options.getPath()));
+			throw new VaultException(String.format(
+					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
+					options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -233,9 +231,8 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 			return VaultToken.of(token);
 		}
 
-		throw new VaultException(
-				String.format(
-						"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
-						options.getPath()));
+		throw new VaultException(String.format(
+				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
+				options.getPath()));
 	}
 }

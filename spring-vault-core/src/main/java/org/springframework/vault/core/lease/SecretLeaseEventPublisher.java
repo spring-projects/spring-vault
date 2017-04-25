@@ -49,9 +49,9 @@ import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
  */
 public class SecretLeaseEventPublisher implements InitializingBean {
 
-	private final Set<LeaseListener> leaseListeners = new CopyOnWriteArraySet<LeaseListener>();
+	private final Set<LeaseListener> leaseListeners = new CopyOnWriteArraySet<>();
 
-	private final Set<LeaseErrorListener> leaseErrorListeners = new CopyOnWriteArraySet<LeaseErrorListener>();
+	private final Set<LeaseErrorListener> leaseErrorListeners = new CopyOnWriteArraySet<>();
 
 	/**
 	 * Add a {@link LeaseListener} to the container. The listener starts receiving events

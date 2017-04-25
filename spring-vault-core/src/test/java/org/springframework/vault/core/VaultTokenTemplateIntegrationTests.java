@@ -35,7 +35,6 @@ import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -162,19 +161,14 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	private ResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
 		return vaultOperations
-				.doWithVault(new RestOperationsCallback<ResponseEntity<String>>() {
-					@Override
-					public ResponseEntity<String> doWithRestOperations(
-							RestOperations restOperations) {
-						HttpHeaders headers = new HttpHeaders();
-						headers.add(VaultHttpHeaders.VAULT_TOKEN, tokenResponse
-								.getToken()
-								.getToken());
+				.doWithVault(restOperations -> {
+					HttpHeaders headers = new HttpHeaders();
+					headers.add(VaultHttpHeaders.VAULT_TOKEN,
+							tokenResponse.getToken().getToken());
 
-						return restOperations.exchange("auth/token/lookup-self",
-								HttpMethod.GET, new HttpEntity<Object>(headers),
-								String.class);
-					}
+					return restOperations.exchange("auth/token/lookup-self",
+							HttpMethod.GET, new HttpEntity<Object>(headers),
+							String.class);
 				});
 
 	}

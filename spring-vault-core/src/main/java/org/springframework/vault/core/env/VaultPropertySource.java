@@ -49,7 +49,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	private final String path;
 
-	private final Map<String, String> properties = new LinkedHashMap<String, String>();
+	private final Map<String, String> properties = new LinkedHashMap<>();
 
 	private final PropertyTransformer propertyTransformer;
 

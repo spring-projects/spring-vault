@@ -15,17 +15,13 @@
  */
 package org.springframework.vault.client;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -88,7 +84,7 @@ public class VaultClients {
 	 */
 	public static RestTemplate createRestTemplate() {
 
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<HttpMessageConverter<?>>(
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(
 				3);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
@@ -96,14 +92,8 @@ public class VaultClients {
 
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
 
-		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
-
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
-				return execution.execute(request, body);
-			}
-		});
+		restTemplate.getInterceptors()
+				.add((request, body, execution) -> execution.execute(request, body));
 
 		return restTemplate;
 	}

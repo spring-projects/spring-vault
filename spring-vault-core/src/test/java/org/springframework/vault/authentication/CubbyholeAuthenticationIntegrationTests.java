@@ -24,13 +24,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,18 +47,14 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 
 		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
 				.doWithSession(
-						new RestOperationsCallback<ResponseEntity<VaultResponse>>() {
-							@Override
-							public ResponseEntity<VaultResponse> doWithRestOperations(
-									RestOperations restOperations) {
+						restOperations -> {
 
-								HttpHeaders headers = new HttpHeaders();
-								headers.add("X-Vault-Wrap-TTL", "10m");
+							HttpHeaders headers = new HttpHeaders();
+							headers.add("X-Vault-Wrap-TTL", "10m");
 
-								return restOperations.exchange("auth/token/create",
-										HttpMethod.POST, new HttpEntity<Object>(headers),
-										VaultResponse.class);
-							}
+							return restOperations.exchange("auth/token/create",
+									HttpMethod.POST, new HttpEntity<Object>(headers),
+									VaultResponse.class);
 						});
 
 		Map<String, String> wrapInfo = response.getBody().getWrapInfo();

@@ -129,6 +129,7 @@ public abstract class VaultResponses {
 	 * @param json must not be {@literal null}.
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static String getError(String json) {
 
 		Assert.notNull(json, "Error JSON must not be null!");

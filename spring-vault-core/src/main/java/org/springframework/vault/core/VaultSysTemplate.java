@@ -79,20 +79,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Override
 	public boolean isInitialized() {
 
-		return vaultOperations.doWithVault(new RestOperationsCallback<Boolean>() {
+		return vaultOperations.doWithVault(restOperations -> {
 
-			@Override
-			public Boolean doWithRestOperations(RestOperations restOperations) {
+			try {
+				Map<String, Boolean> body = restOperations.getForObject("/sys/init",
+						Map.class);
 
-				try {
-					Map<String, Boolean> body = restOperations.getForObject("/sys/init",
-							Map.class);
-
-					return body.get("initialized");
-				}
-				catch (HttpStatusCodeException e) {
-					throw VaultResponses.buildException(e);
-				}
+				return body.get("initialized");
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
 			}
 		});
 	}
@@ -104,24 +100,20 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
 		return vaultOperations
-				.doWithVault(new RestOperationsCallback<VaultInitializationResponse>() {
+				.doWithVault(
+						(RestOperationsCallback<VaultInitializationResponse>) restOperations -> {
 
-					@Override
-					public VaultInitializationResponse doWithRestOperations(
-							RestOperations restOperations) {
+							try {
+								ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
+										.exchange("/sys/init", HttpMethod.PUT,
+												new HttpEntity<Object>(
+														vaultInitializationRequest),
+												VaultInitializationResponseImpl.class);
 
-						try {
-							ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
-									.exchange("/sys/init", HttpMethod.PUT,
-											new HttpEntity<Object>(
-													vaultInitializationRequest),
-											VaultInitializationResponseImpl.class);
-
-							return exchange.getBody();
-						}
-						catch (HttpStatusCodeException e) {
-							throw VaultResponses.buildException(e);
-						}
+								return exchange.getBody();
+							}
+							catch (HttpStatusCodeException e) {
+								throw VaultResponses.buildException(e);
 					}
 				});
 	}
@@ -135,21 +127,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 	public VaultUnsealStatus unseal(final String keyShare) {
 
 		return vaultOperations
-				.doWithVault(new RestOperationsCallback<VaultUnsealStatus>() {
-					@Override
-					public VaultUnsealStatus doWithRestOperations(
-							RestOperations restOperations) {
+				.doWithVault(
+						(RestOperationsCallback<VaultUnsealStatus>) restOperations -> {
 
-						ResponseEntity<VaultUnsealStatusImpl> response = restOperations
-								.exchange(
-										"/sys/unseal",
-										HttpMethod.PUT,
-										new HttpEntity<Object>(Collections.singletonMap(
-												"key", keyShare)),
-										VaultUnsealStatusImpl.class);
+							ResponseEntity<VaultUnsealStatusImpl> response = restOperations
+									.exchange("/sys/unseal", HttpMethod.PUT,
+											new HttpEntity<Object>(Collections
+													.singletonMap("key", keyShare)),
+											VaultUnsealStatusImpl.class);
 
-						return response.getBody();
-					}
+							return response.getBody();
 				});
 	}
 
@@ -259,7 +246,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private static class VaultMountsResponse extends
 				VaultResponseSupport<Map<String, VaultMount>> {
 
-			private Map<String, VaultMount> topLevelMounts = new HashMap<String, VaultMount>();
+			private Map<String, VaultMount> topLevelMounts = new HashMap<>();
 
 			@JsonIgnore
 			public Map<String, VaultMount> getTopLevelMounts() {
@@ -316,7 +303,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Data
 	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
 
-		private List<String> keys = new ArrayList<String>();
+		private List<String> keys = new ArrayList<>();
 
 		@JsonProperty("root_token")
 		private String rootToken;

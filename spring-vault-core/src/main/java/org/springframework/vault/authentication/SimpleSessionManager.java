@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Optional;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
 
@@ -34,7 +36,7 @@ public class SimpleSessionManager implements SessionManager {
 
 	private final Object lock = new Object();
 
-	private volatile VaultToken token;
+	private volatile Optional<VaultToken> token = Optional.empty();
 
 	/**
 	 * Create a new {@link SimpleSessionManager} using a {@link ClientAuthentication}.
@@ -51,14 +53,15 @@ public class SimpleSessionManager implements SessionManager {
 	@Override
 	public VaultToken getSessionToken() {
 
-		if (token == null) {
+		if (!token.isPresent()) {
 			synchronized (lock) {
-				if (token == null) {
-					token = clientAuthentication.login();
+				if (!token.isPresent()) {
+					token = Optional.of(clientAuthentication.login());
 				}
 			}
 		}
 
-		return token;
+		return token
+				.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
 }

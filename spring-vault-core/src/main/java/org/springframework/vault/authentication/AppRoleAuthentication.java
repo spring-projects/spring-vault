@@ -93,7 +93,7 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 	private Map<String, String> getAppRoleLogin(String roleId, String secretId) {
 
-		Map<String, String> login = new HashMap<String, String>();
+		Map<String, String> login = new HashMap<>();
 		login.put("role_id", roleId);
 		if (secretId != null) {
 			login.put("secret_id", secretId);

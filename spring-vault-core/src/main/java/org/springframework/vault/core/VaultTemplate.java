@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,13 +23,9 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -126,17 +121,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		RestTemplate restTemplate = VaultClients.createRestTemplate(endpoint,
 				requestFactory);
 
-		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
+		restTemplate.getInterceptors().add((request, body, execution) -> {
 
-			@Override
-			public ClientHttpResponse intercept(HttpRequest request, byte[] body,
-					ClientHttpRequestExecution execution) throws IOException {
+			request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
+					sessionManager.getSessionToken().getToken());
 
-				request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
-						sessionManager.getSessionToken().getToken());
-
-				return execution.execute(request, body);
-			}
+			return execution.execute(request, body);
 		});
 
 		return restTemplate;
@@ -208,14 +198,15 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> VaultResponseSupport<T> read(final String path, final Class<T> responseType) {
+	public <T> VaultResponseSupport<T> read(final String path,
+			final Class<T> responseType) {
 
 		final ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
 		try {
-			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate.exchange(
-					path, HttpMethod.GET, null, ref);
+			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate
+					.exchange(path, HttpMethod.GET, null, ref);
 
 			return exchange.getBody();
 		}
@@ -303,27 +294,23 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private <T> T doRead(final String path, final Class<T> responseType) {
 
-		return doWithSession(new RestOperationsCallback<T>() {
+		return doWithSession(restOperations -> {
 
-			@Override
-			public T doWithRestOperations(RestOperations restOperations) {
+			try {
+				return restOperations.getForObject(path, responseType);
+			}
+			catch (HttpStatusCodeException e) {
 
-				try {
-					return restOperations.getForObject(path, responseType);
+				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return null;
 				}
-				catch (HttpStatusCodeException e) {
 
-					if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-						return null;
-					}
-
-					throw VaultResponses.buildException(e, path);
-				}
+				throw VaultResponses.buildException(e, path);
 			}
 		});
 	}
 
-	private static class VaultListResponse extends
-			VaultResponseSupport<Map<String, Object>> {
+	private static class VaultListResponse
+			extends VaultResponseSupport<Map<String, Object>> {
 	}
 }
