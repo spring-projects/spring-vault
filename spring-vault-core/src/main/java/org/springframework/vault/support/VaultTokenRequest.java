@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 /**
  * Value object to bind Vault HTTP Token API requests.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultTokenRequest {
@@ -418,14 +418,14 @@ public class VaultTokenRequest {
 						this.policies));
 
 			}
-			Map<String, String> meta = null;
+			Map<String, String> meta;
 			switch (this.meta.size()) {
 			case 0:
 				meta = Collections.emptyMap();
 				break;
 			default:
 				meta = Collections
-						.unmodifiableMap(new LinkedHashMap<String, String>(meta));
+						.unmodifiableMap(new LinkedHashMap<String, String>(this.meta));
 			}
 
 			return new VaultTokenRequest(id, policies, meta, noParent, noDefaultPolicy,
