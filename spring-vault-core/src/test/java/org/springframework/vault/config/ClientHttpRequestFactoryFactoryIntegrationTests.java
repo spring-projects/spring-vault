@@ -25,11 +25,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory.HttpComponents;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory.Netty;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory.OkHttp;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory.OkHttp3;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.util.Settings;
@@ -79,21 +77,6 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	}
 
 	@Test
-	public void okHttpClientShouldWork() throws Exception {
-
-		ClientHttpRequestFactory factory = OkHttp.usingOkHttp(new ClientOptions(),
-				Settings.createSslConfiguration());
-		RestTemplate template = new RestTemplate(factory);
-
-		String response = request(template);
-
-		assertThat(factory).isInstanceOf(OkHttpClientHttpRequestFactory.class);
-		assertThat(response).isNotNull().contains("initialized");
-
-		((DisposableBean) factory).destroy();
-	}
-
-	@Test
 	public void okHttp3ClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = OkHttp3.usingOkHttp3(new ClientOptions(),
@@ -112,8 +95,8 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			ResponseEntity<String> responseEntity = template.exchange(url,
-					HttpMethod.GET, null, String.class);
+			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET,
+					null, String.class);
 			return responseEntity.getBody();
 		}
 		catch (HttpStatusCodeException e) {

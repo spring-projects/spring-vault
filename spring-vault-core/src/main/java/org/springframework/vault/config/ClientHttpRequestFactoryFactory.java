@@ -30,7 +30,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
-import com.squareup.okhttp.OkHttpClient;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
 import okhttp3.OkHttpClient.Builder;
@@ -47,7 +46,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.http.client.OkHttpClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -70,10 +68,6 @@ public class ClientHttpRequestFactoryFactory {
 
 	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
 			"org.apache.http.client.HttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
-
-	private static final boolean OKHTTP_PRESENT = ClassUtils.isPresent(
-			"com.squareup.okhttp.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent(
@@ -109,10 +103,6 @@ public class ClientHttpRequestFactoryFactory {
 				return OkHttp3.usingOkHttp3(options, sslConfiguration);
 			}
 
-			if (OKHTTP_PRESENT) {
-				return OkHttp.usingOkHttp(options, sslConfiguration);
-			}
-
 			if (NETTY_PRESENT) {
 				return Netty.usingNetty(options, sslConfiguration);
 			}
@@ -135,12 +125,14 @@ public class ClientHttpRequestFactoryFactory {
 	static SSLContext getSSLContext(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
-		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(
-						sslConfiguration.getKeyStoreConfiguration()).getKeyManagers()
+		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null
+				? createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration())
+						.getKeyManagers()
 				: null;
 
-		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null ? createTrustManagerFactory(
-						sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
+		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null
+				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration())
+						.getTrustManagers()
 				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -151,8 +143,7 @@ public class ClientHttpRequestFactoryFactory {
 
 	private static KeyManagerFactory createKeyManagerFactory(
 			KeyStoreConfiguration keyStoreConfiguration)
-			throws GeneralSecurityException,
-			IOException {
+			throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = KeyStore
 				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
@@ -163,17 +154,15 @@ public class ClientHttpRequestFactoryFactory {
 
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory
 				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		keyManagerFactory.init(keyStore,
-				keyStoreConfiguration.getStorePassword() == null ? new char[0]
-						: keyStoreConfiguration.getStorePassword());
+		keyManagerFactory.init(keyStore, keyStoreConfiguration.getStorePassword() == null
+				? new char[0] : keyStoreConfiguration.getStorePassword());
 
 		return keyManagerFactory;
 	}
 
 	private static TrustManagerFactory createTrustManagerFactory(
 			KeyStoreConfiguration keyStoreConfiguration)
-			throws GeneralSecurityException,
-			IOException {
+			throws GeneralSecurityException, IOException {
 
 		KeyStore trustStore = KeyStore
 				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
@@ -190,8 +179,8 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static void loadKeyStore(KeyStoreConfiguration keyStoreConfiguration,
-			KeyStore keyStore) throws IOException, NoSuchAlgorithmException,
-			CertificateException {
+			KeyStore keyStore)
+			throws IOException, NoSuchAlgorithmException, CertificateException {
 
 		InputStream inputStream = null;
 		try {
@@ -218,8 +207,8 @@ public class ClientHttpRequestFactoryFactory {
 	static class HttpComponents {
 
 		static ClientHttpRequestFactory usingHttpComponents(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException,
-				IOException {
+				SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
 
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
 
@@ -248,60 +237,21 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	/**
-	 * {@link ClientHttpRequestFactory} for the {@link OkHttpClient}.
-	 *
-	 * @author Mark Paluch
-	 */
-	static class OkHttp {
-
-		static ClientHttpRequestFactory usingOkHttp(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException,
-				IOException {
-
-			final OkHttpClient okHttpClient = new OkHttpClient();
-
-			OkHttpClientHttpRequestFactory requestFactory = new OkHttpClientHttpRequestFactory(
-					okHttpClient) {
-
-				@Override
-				public void destroy() throws IOException {
-
-					if (okHttpClient.getCache() != null) {
-						okHttpClient.getCache().close();
-					}
-
-					okHttpClient.getDispatcher().getExecutorService().shutdown();
-				}
-			};
-
-			if (hasSslConfiguration(sslConfiguration)) {
-				okHttpClient.setSslSocketFactory(getSSLContext(sslConfiguration)
-						.getSocketFactory());
-			}
-
-			requestFactory.setConnectTimeout(options.getConnectionTimeout());
-			requestFactory.setReadTimeout(options.getReadTimeout());
-
-			return requestFactory;
-		}
-	}
-
-	/**
-	 * {@link ClientHttpRequestFactory} for the {@link OkHttpClient}.
+	 * {@link ClientHttpRequestFactory} for the {@link okhttp3.OkHttpClient}.
 	 *
 	 * @author Mark Paluch
 	 */
 	static class OkHttp3 {
 
 		static ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException,
-				IOException {
+				SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
 
 			Builder builder = new Builder();
 
 			if (hasSslConfiguration(sslConfiguration)) {
-				builder.sslSocketFactory(getSSLContext(sslConfiguration)
-						.getSocketFactory());
+				builder.sslSocketFactory(
+						getSSLContext(sslConfiguration).getSocketFactory());
 			}
 
 			builder.connectTimeout(options.getConnectionTimeout(), TimeUnit.MILLISECONDS)
@@ -319,8 +269,8 @@ public class ClientHttpRequestFactoryFactory {
 	static class Netty {
 
 		static ClientHttpRequestFactory usingNetty(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException,
-				IOException {
+				SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
 
 			final Netty4ClientHttpRequestFactory requestFactory = new Netty4ClientHttpRequestFactory();
 
@@ -339,8 +289,8 @@ public class ClientHttpRequestFactoryFactory {
 							sslConfiguration.getKeyStoreConfiguration()));
 				}
 
-				requestFactory.setSslContext(sslContextBuilder.sslProvider(
-						SslProvider.JDK).build());
+				requestFactory.setSslContext(
+						sslContextBuilder.sslProvider(SslProvider.JDK).build());
 			}
 
 			requestFactory.setConnectTimeout(options.getConnectionTimeout());

@@ -62,7 +62,6 @@
 		<httpclient.version>4.5.3</httpclient.version>
 		<httpcore.version>4.4.6</httpcore.version>
 		<netty.version>4.1.9.Final</netty.version>
-		<okhttp.version>2.7.5</okhttp.version>
 		<okhttp3.version>3.7.0</okhttp3.version>
 		<jackson.version>2.9.0.pr2</jackson.version>
 	</properties>
@@ -109,13 +108,6 @@
 				<groupId>io.netty</groupId>
 				<artifactId>netty-all</artifactId>
 				<version>${netty.version}</version>
-				<optional>true</optional>
-			</dependency>
-
-			<dependency>
-				<groupId>com.squareup.okhttp</groupId>
-				<artifactId>okhttp</artifactId>
-				<version>${okhttp.version}</version>
 				<optional>true</optional>
 			</dependency>
 
