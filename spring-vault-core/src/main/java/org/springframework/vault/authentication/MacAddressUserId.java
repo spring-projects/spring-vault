@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,6 +41,10 @@ import org.springframework.util.StringUtils;
  * @see AppIdUserIdMechanism
  */
 public class MacAddressUserId implements AppIdUserIdMechanism {
+
+	// Compatibility with Java 1.7 and greater
+	private final static Method GET_INDEX = ReflectionUtils
+			.findMethod(NetworkInterface.class, "getIndex");
 
 	private final Log log = LogFactory.getLog(MacAddressUserId.class);
 
@@ -86,8 +93,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		try {
 
 			NetworkInterface networkInterface = null;
-			List<NetworkInterface> interfaces = Collections.list(NetworkInterface
-					.getNetworkInterfaces());
+			List<NetworkInterface> interfaces = Collections
+					.list(NetworkInterface.getNetworkInterfaces());
 
 			if (StringUtils.hasText(networkInterfaceHint)) {
 
@@ -112,6 +119,12 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 				InetAddress localHost = InetAddress.getLocalHost();
 				networkInterface = NetworkInterface.getByInetAddress(localHost);
 
+				if (networkInterface == null
+						|| networkInterface.getHardwareAddress() == null) {
+
+					networkInterface = getNetworkInterfaceWithHardwareAddress(interfaces);
+				}
+
 				if (networkInterface == null) {
 					throw new IllegalStateException(String.format(
 							"Cannot determine NetworkInterface for %s", localHost));
@@ -120,9 +133,9 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 			byte[] mac = networkInterface.getHardwareAddress();
 			if (mac == null) {
-				throw new IllegalStateException(String.format(
-						"Network interface %s has no hardware address",
-						networkInterface.getName()));
+				throw new IllegalStateException(
+						String.format("Network interface %s has no hardware address",
+								networkInterface.getName()));
 			}
 
 			return Sha256.toSha256(Sha256.toHexString(mac));
@@ -132,7 +145,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		}
 	}
 
-	private NetworkInterface getNetworkInterface(Number hint,
+	private static NetworkInterface getNetworkInterface(Number hint,
 			List<NetworkInterface> interfaces) {
 
 		if (interfaces.size() > hint.intValue() && hint.intValue() >= 0) {
@@ -142,7 +155,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		return null;
 	}
 
-	private NetworkInterface getNetworkInterface(String hint,
+	private static NetworkInterface getNetworkInterface(String hint,
 			List<NetworkInterface> interfaces) {
 
 		for (NetworkInterface anInterface : interfaces) {
@@ -153,5 +166,47 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		}
 
 		return null;
+	}
+
+	private static NetworkInterface getNetworkInterfaceWithHardwareAddress(
+			List<NetworkInterface> interfaces) throws IOException {
+
+		List<NetworkInterface> networkInterfacesToUse = interfaces;
+
+		if (GET_INDEX != null) {
+			networkInterfacesToUse = new ArrayList<NetworkInterface>(interfaces);
+			Collections.sort(networkInterfacesToUse,
+					NetworkInterfaceIndexComparator.INSTANCE);
+		}
+
+		for (NetworkInterface anInterface : networkInterfacesToUse) {
+			byte[] hardwareAddress = anInterface.getHardwareAddress();
+			if (hardwareAddress != null) {
+				return anInterface;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @since 1.0.1
+	 */
+	enum NetworkInterfaceIndexComparator implements Comparator<NetworkInterface> {
+		INSTANCE;
+
+		@Override
+		public int compare(NetworkInterface o1, NetworkInterface o2) {
+
+			try {
+				int left = (Integer) GET_INDEX.invoke(o1);
+				int right = (Integer) GET_INDEX.invoke(o2);
+				return (left < right) ? -1 : ((left == right) ? 0 : 1);
+			}
+			catch (Exception e) {
+				throw new IllegalStateException(
+						"Cannot retrieve index from NetworkInterface", e);
+			}
+		}
 	}
 }

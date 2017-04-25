@@ -17,18 +17,18 @@ package org.springframework.vault.authentication;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.Collections;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.junit.Test;
-
-import org.springframework.util.CollectionUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
  * Unit tests for {@link MacAddressUserId}.
- * 
+ *
  * @author Mark Paluch
  */
 public class MacAddressUserIdUnitTests {
@@ -38,8 +38,8 @@ public class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
-				Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
+				.doesNotMatch(Pattern.compile("[a-f]"));
 	}
 
 	@Test
@@ -50,25 +50,25 @@ public class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId(index).createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
-				Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
+				.doesNotMatch(Pattern.compile("[a-f]"));
 	}
 
 	/**
 	 * Obtain index for {@link NetworkInterface} with a HardwareAddress.
-	 * 
+	 *
 	 * @return -1 if none, otherwise index.
 	 * @throws SocketException
 	 */
 	private int getValidNetworkInterfaceIndex() throws SocketException {
 
-		NetworkInterface[] networkInterfaces = CollectionUtils.toArray(
-				NetworkInterface.getNetworkInterfaces(), new NetworkInterface[0]);
+		List<NetworkInterface> interfaces = Collections
+				.list(NetworkInterface.getNetworkInterfaces());
 
 		int index = -1;
 
-		for (int i = 0; i < networkInterfaces.length; i++) {
-			if (networkInterfaces[i].getHardwareAddress() != null) {
+		for (int i = 0; i < interfaces.size(); i++) {
+			if (interfaces.get(i).getHardwareAddress() != null) {
 				index = i;
 				break;
 			}
