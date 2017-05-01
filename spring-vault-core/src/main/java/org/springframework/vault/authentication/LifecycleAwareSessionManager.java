@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,7 +61,13 @@ import org.springframework.web.client.RestOperations;
  */
 public class LifecycleAwareSessionManager implements SessionManager, DisposableBean {
 
+	/**
+	 * Refresh 5 seconds before the token expires.
+	 */
 	public static final int REFRESH_PERIOD_BEFORE_EXPIRY = 5;
+
+	private final static RefreshTrigger DEFAULT_TRIGGER = new FixedTimeoutRefreshTrigger(
+			REFRESH_PERIOD_BEFORE_EXPIRY, TimeUnit.SECONDS);
 
 	private final static Log logger = LogFactory
 			.getLog(LifecycleAwareSessionManager.class);
@@ -70,6 +77,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private final RestOperations restOperations;
 
 	private final TaskScheduler taskScheduler;
+
+	private final RefreshTrigger refreshTrigger;
 
 	private final Object lock = new Object();
 
@@ -86,13 +95,32 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
 			TaskScheduler taskScheduler, RestOperations restOperations) {
 
+		this(clientAuthentication, taskScheduler, restOperations, DEFAULT_TRIGGER);
+	}
+
+	/**
+	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
+	 * {@link AsyncTaskExecutor} and {@link RestOperations}.
+	 *
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
+	 * @param refreshTrigger must not be {@literal null}.
+	 * @since 1.0.1
+	 */
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
+			TaskScheduler taskScheduler, RestOperations restOperations,
+			RefreshTrigger refreshTrigger) {
+
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
+		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
 
 		this.clientAuthentication = clientAuthentication;
 		this.restOperations = restOperations;
 		this.taskScheduler = taskScheduler;
+		this.refreshTrigger = refreshTrigger;
 	}
 
 	@Override
@@ -102,15 +130,19 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		this.token = null;
 
 		if (token instanceof LoginToken) {
+			revoke(token);
+		}
+	}
 
-			try {
-				restOperations.postForObject("/auth/token/revoke-self",
-						new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
-			}
-			catch (HttpStatusCodeException e) {
-				logger.warn(String.format("Cannot revoke VaultToken: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
-			}
+	private void revoke(VaultToken token) {
+
+		try {
+			restOperations.postForObject("/auth/token/revoke-self",
+					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
+		}
+		catch (HttpStatusCodeException e) {
+			logger.warn(String.format("Cannot revoke VaultToken: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 	}
 
@@ -140,14 +172,15 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		catch (HttpStatusCodeException e) {
 
 			if (e.getStatusCode().is4xxClientError()) {
-				logger.debug(String
-						.format("Cannot refresh token, resetting token and performing re-login: %s",
-								VaultResponses.getError(e.getResponseBodyAsString())));
+				logger.debug(String.format(
+						"Cannot refresh token, resetting token and performing re-login: %s",
+						VaultResponses.getError(e.getResponseBodyAsString())));
 				token = null;
 				return false;
 			}
 
-			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
+			throw new VaultException(
+					VaultResponses.getError(e.getResponseBodyAsString()));
 		}
 		catch (RestClientException e) {
 			throw new VaultException("Cannot refresh token", e);
@@ -162,7 +195,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			synchronized (lock) {
 
 				if (token == null) {
-					token = clientAuthentication.login();
+					token = login();
 
 					if (isTokenRenewable()) {
 						scheduleRenewal();
@@ -174,7 +207,11 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		return token;
 	}
 
-	private boolean isTokenRenewable() {
+	protected VaultToken login() {
+		return clientAuthentication.login();
+	}
+
+	protected boolean isTokenRenewable() {
 
 		if (token instanceof LoginToken) {
 
@@ -188,12 +225,6 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private void scheduleRenewal() {
 
 		logger.info("Scheduling Token renewal");
-
-		LoginToken loginToken = (LoginToken) token;
-		final int seconds = NumberUtils
-				.convertNumberToTargetClass(
-						Math.max(1, loginToken.getLeaseDuration()
-								- REFRESH_PERIOD_BEFORE_EXPIRY), Integer.class);
 
 		final Runnable task = new Runnable() {
 			@Override
@@ -212,35 +243,89 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			}
 		};
 
-		scheduleTask(taskScheduler, seconds, task);
+		taskScheduler.schedule(task, createTrigger());
 	}
 
-	private void scheduleTask(TaskScheduler taskScheduler, int seconds, Runnable task) {
-		taskScheduler.schedule(task, new OneShotTrigger(seconds));
+	private OneShotTrigger createTrigger() {
+		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token));
 	}
 
 	/**
 	 * This one-shot trigger creates only one execution time to trigger an execution only
 	 * once.
 	 */
+	@RequiredArgsConstructor
 	private static class OneShotTrigger implements Trigger {
 
 		private final AtomicBoolean fired = new AtomicBoolean();
-		private final int seconds;
 
-		OneShotTrigger(int seconds) {
-			this.seconds = seconds;
-		}
+		private final Date nextExecutionTime;
 
-		@Override
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (fired.compareAndSet(false, true)) {
-				return new Date(System.currentTimeMillis()
-						+ TimeUnit.SECONDS.toMillis(seconds));
+				return nextExecutionTime;
 			}
 
 			return null;
+		}
+	}
+
+	/**
+	 * Common interface for trigger objects that determine the next execution time of a
+	 * refresh task that they get associated with.
+	 */
+	public interface RefreshTrigger {
+
+		/**
+		 * Determine the next execution time according to the given trigger context.
+		 * @param loginToken login token encapsulating renewability and lease duration.
+		 * @return the next execution time as defined by the trigger, or {@code null} if
+		 * the trigger won't fire anymore
+		 */
+		Date nextExecutionTime(LoginToken loginToken);
+	}
+
+	/**
+	 * {@link RefreshTrigger} implementation using a fixed timeout to schedule renewal
+	 * before a {@link LoginToken} expires.
+	 *
+	 * @author Mark Paluch
+	 * @since 1.0.1
+	 */
+	public static class FixedTimeoutRefreshTrigger implements RefreshTrigger {
+
+		private final long duration;
+
+		private final TimeUnit timeUnit;
+
+		/**
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
+		 * {@code timeout} before the {@link LoginToken} expires
+		 * @param timeout timeout value, non-negative long value.
+		 * @param timeUnit must not be {@literal null}.
+		 */
+		public FixedTimeoutRefreshTrigger(long timeout, TimeUnit timeUnit) {
+
+			Assert.isTrue(timeout >= 0,
+					"Timeout duration must be greater or equal to zero");
+			Assert.notNull(timeUnit, "TimeUnit must not be null");
+
+			this.duration = timeout;
+			this.timeUnit = timeUnit;
+		}
+
+		@Override
+		public Date nextExecutionTime(LoginToken loginToken) {
+
+			long milliseconds = NumberUtils
+					.convertNumberToTargetClass(
+							Math.max(1000,
+									loginToken.getLeaseDuration()
+											- timeUnit.toMillis(duration)),
+							Integer.class);
+
+			return new Date(System.currentTimeMillis() + milliseconds);
 		}
 	}
 }
