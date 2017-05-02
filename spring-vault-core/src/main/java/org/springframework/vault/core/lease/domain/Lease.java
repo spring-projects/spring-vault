@@ -24,7 +24,7 @@ import org.springframework.util.Assert;
  */
 public class Lease {
 
-	private final static Lease NONE = new Lease(null, 0, false);
+	private static final Lease NONE = new Lease(null, 0, false);
 
 	private final String leaseId;
 

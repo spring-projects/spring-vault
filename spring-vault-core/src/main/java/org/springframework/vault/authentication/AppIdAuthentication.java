@@ -42,7 +42,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class AppIdAuthentication implements ClientAuthentication {
 
-	private final static Log logger = LogFactory.getLog(AppIdAuthentication.class);
+	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
 
 	private final AppIdAuthenticationOptions options;
 

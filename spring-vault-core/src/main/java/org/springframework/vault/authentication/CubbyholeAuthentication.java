@@ -134,7 +134,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class CubbyholeAuthentication implements ClientAuthentication {
 
-	private final static Log logger = LogFactory.getLog(CubbyholeAuthentication.class);
+	private static final Log logger = LogFactory.getLog(CubbyholeAuthentication.class);
 
 	private final CubbyholeAuthenticationOptions options;
 
@@ -186,7 +186,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultException(String.format(
-					"Cannot retrieve Token from cubbyhole: %s %s", e.getStatusCode(),
+					"Cannot retrieve Token from Cubbyhole: %s %s", e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 	}
@@ -236,7 +236,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultException(String.format(
-					"Cannot self-lookup Token from cubbyhole: %s %s", e.getStatusCode(),
+					"Cannot self-lookup Token from Cubbyhole: %s %s", e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 	}
@@ -252,7 +252,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 
 		if (data == null || data.isEmpty()) {
 			throw new VaultException(String.format(
-					"Cannot retrieve Token from cubbyhole: Response at %s does not contain a token",
+					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
 					options.getPath()));
 		}
 
@@ -262,7 +262,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 
 		throw new VaultException(String.format(
-				"Cannot retrieve Token from cubbyhole: Response at %s does not contain an unique token",
+				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
 				options.getPath()));
 	}
 }

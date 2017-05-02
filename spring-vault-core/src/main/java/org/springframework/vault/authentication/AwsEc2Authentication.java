@@ -48,7 +48,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class AwsEc2Authentication implements ClientAuthentication {
 
-	private final static Log logger = LogFactory.getLog(AwsEc2Authentication.class);
+	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
 	private final AwsEc2AuthenticationOptions options;
 

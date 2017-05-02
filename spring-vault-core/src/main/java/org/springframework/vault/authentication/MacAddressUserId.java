@@ -43,7 +43,7 @@ import org.springframework.util.StringUtils;
 public class MacAddressUserId implements AppIdUserIdMechanism {
 
 	// Compatibility with Java 1.7 and greater
-	private final static Method GET_INDEX = ReflectionUtils
+	private static final Method GET_INDEX = ReflectionUtils
 			.findMethod(NetworkInterface.class, "getIndex");
 
 	private final Log log = LogFactory.getLog(MacAddressUserId.class);
