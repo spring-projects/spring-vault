@@ -418,6 +418,18 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
+*Remaining TTL/Renewability*
+
+Tokens retrieved from Cubbyhole associated with a non-zero TTL start their TTL at the
+time of token creation. That time is not necessarily identical with application
+startup. To compensate for the initial delay, Cubbyhole authentication performs a
+self lookup for tokens associated with a non-zero TTL to retrieve the remaining TTL.
+Cubbyhole authentication will not self-lookup wrapped tokens without a TTL because a
+zero TTL indicates there is no TTL associated.
+
+Non-wrapped tokens do not provide details regarding renewability and TTL by just
+retrieving the token. A self-lookup will lookup renewability and the remaining TTL.
+
 See also:
 
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]

@@ -45,12 +45,19 @@ public class CubbyholeAuthenticationOptions {
 	 */
 	private final boolean wrappedToken;
 
+	/**
+	 * Perform a self-lookup using the actual token to obtain the remaining TTL and
+	 * renewability.
+	 */
+	private final boolean selfLookup;
+
 	private CubbyholeAuthenticationOptions(VaultToken initialToken, String path,
-			boolean wrappedToken) {
+			boolean wrappedToken, boolean selfLookup) {
 
 		this.initialToken = initialToken;
 		this.path = path;
 		this.wrappedToken = wrappedToken;
+		this.selfLookup = selfLookup;
 	}
 
 	/**
@@ -84,6 +91,17 @@ public class CubbyholeAuthenticationOptions {
 	}
 
 	/**
+	 * @return {@literal true} to perform a token self-lookup after token retrieval to
+	 * determine the remaining TTL and renewability for static wrapped tokens. Defaults to
+	 * {@literal true}.
+	 *
+	 * @since 1.0.1
+	 */
+	public boolean isSelfLookup() {
+		return selfLookup;
+	}
+
+	/**
 	 * Builder for {@link CubbyholeAuthenticationOptions}.
 	 */
 	public static class CubbyholeAuthenticationOptionsBuilder {
@@ -94,6 +112,8 @@ public class CubbyholeAuthenticationOptions {
 
 		private boolean wrappedToken;
 
+		private boolean selfLookup = true;
+
 		CubbyholeAuthenticationOptionsBuilder() {
 		}
 
@@ -103,7 +123,8 @@ public class CubbyholeAuthenticationOptions {
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
-		public CubbyholeAuthenticationOptionsBuilder initialToken(VaultToken initialToken) {
+		public CubbyholeAuthenticationOptionsBuilder initialToken(
+				VaultToken initialToken) {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 
@@ -139,6 +160,21 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
+		 * Configure whether to perform a self-lookup after token retrieval. Defaults to
+		 * {@literal true}.
+		 *
+		 * @param selfLookup {@literal true} to perform a self-lookup or {@literal false}
+		 * to disable it.
+		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
+		 * @since 1.0.1
+		 */
+		public CubbyholeAuthenticationOptionsBuilder selfLookup(boolean selfLookup) {
+
+			this.selfLookup = selfLookup;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link CubbyholeAuthenticationOptions} instance. Requires
 		 * {@link #path(String)} or {@link #wrapped()} to be configured.
 		 *
@@ -148,7 +184,8 @@ public class CubbyholeAuthenticationOptions {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 
-			return new CubbyholeAuthenticationOptions(initialToken, path, wrappedToken);
+			return new CubbyholeAuthenticationOptions(initialToken, path, wrappedToken,
+					selfLookup);
 		}
 	}
 }
