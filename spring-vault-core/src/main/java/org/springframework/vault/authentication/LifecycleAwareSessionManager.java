@@ -66,10 +66,10 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	 */
 	public static final int REFRESH_PERIOD_BEFORE_EXPIRY = 5;
 
-	private final static RefreshTrigger DEFAULT_TRIGGER = new FixedTimeoutRefreshTrigger(
+	private static final RefreshTrigger DEFAULT_TRIGGER = new FixedTimeoutRefreshTrigger(
 			REFRESH_PERIOD_BEFORE_EXPIRY, TimeUnit.SECONDS);
 
-	private final static Log logger = LogFactory
+	private static final Log logger = LogFactory
 			.getLog(LifecycleAwareSessionManager.class);
 
 	private final ClientAuthentication clientAuthentication;

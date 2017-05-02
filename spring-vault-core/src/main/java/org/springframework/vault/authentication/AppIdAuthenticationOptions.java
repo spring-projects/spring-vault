@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
  * Authentication options provide the path, appId and a {@link AppIdUserIdMechanism}.
  * {@link AppIdAuthentication} can be constructed using {@link #builder()}. Instances of
  * this class are immutable once constructed.
- * 
+ *
  * @author Mark Paluch
  * @see AppIdAuthentication
  * @see AppIdUserIdMechanism
@@ -31,7 +31,7 @@ import org.springframework.util.Assert;
  */
 public class AppIdAuthenticationOptions {
 
-	public final static String DEFAULT_APPID_AUTHENTICATION_PATH = "app-id";
+	public static final String DEFAULT_APPID_AUTHENTICATION_PATH = "app-id";
 
 	/**
 	 * Path of the appid authentication backend mount.
@@ -100,7 +100,7 @@ public class AppIdAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 * 
+		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_APPID_AUTHENTICATION_PATH
@@ -145,7 +145,7 @@ public class AppIdAuthenticationOptions {
 		/**
 		 * Build a new {@link AppIdAuthenticationOptions} instance. Requires
 		 * {@link #userIdMechanism(AppIdUserIdMechanism)} to be configured.
-		 * 
+		 *
 		 * @return a new {@link AppIdAuthenticationOptions}.
 		 */
 		public AppIdAuthenticationOptions build() {

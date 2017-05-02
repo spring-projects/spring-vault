@@ -32,17 +32,17 @@ import org.springframework.util.Assert;
  */
 public class AwsEc2AuthenticationOptions {
 
-	public final static URI DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI = URI
+	public static final URI DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI = URI
 			.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
 
-	public final static String DEFAULT_AWS_AUTHENTICATION_PATH = "aws-ec2";
+	public static final String DEFAULT_AWS_AUTHENTICATION_PATH = "aws-ec2";
 
 	/**
 	 * Default {@link AwsEc2AuthenticationOptions} using
 	 * {@link #DEFAULT_AWS_AUTHENTICATION_PATH} and
 	 * {@link #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI}.
 	 */
-	public final static AwsEc2AuthenticationOptions DEFAULT = new AwsEc2AuthenticationOptions();
+	public static final AwsEc2AuthenticationOptions DEFAULT = new AwsEc2AuthenticationOptions();
 
 	/**
 	 * Path of the aws-ec2 authentication backend mount.
@@ -142,7 +142,7 @@ public class AwsEc2AuthenticationOptions {
 		 * Configure the name of the role against which the login is being attempted.If
 		 * role is not specified, then the login endpoint looks for a role bearing the
 		 * name of the AMI ID of the EC2 instance that is trying to login.
-		 * 
+		 *
 		 * @param role may be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 */

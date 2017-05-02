@@ -23,14 +23,14 @@ import org.springframework.util.Assert;
  * Authentication options provide the path, roleId and pull/push mode.
  * {@link AppRoleAuthentication} can be constructed using {@link #builder()}. Instances of
  * this class are immutable once constructed.
- * 
+ *
  * @author Mark Paluch
  * @see AppRoleAuthentication
  * @see #builder()
  */
 public class AppRoleAuthenticationOptions {
 
-	public final static String DEFAULT_APPROLE_AUTHENTICATION_PATH = "approle";
+	public static final String DEFAULT_APPROLE_AUTHENTICATION_PATH = "approle";
 
 	/**
 	 * Path of the apprile authentication backend mount.
@@ -98,7 +98,7 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 * 
+		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_APPROLE_AUTHENTICATION_PATH
@@ -142,7 +142,7 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Build a new {@link AppRoleAuthenticationOptions} instance. Requires
 		 * {@link #roleId(String)} to be configured.
-		 * 
+		 *
 		 * @return a new {@link AppRoleAuthenticationOptions}.
 		 */
 		public AppRoleAuthenticationOptions build() {

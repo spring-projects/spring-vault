@@ -45,7 +45,7 @@ import org.springframework.vault.support.VaultResponse;
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	private final static Log logger = LogFactory.getLog(VaultPropertySource.class);
+	private static final Log logger = LogFactory.getLog(VaultPropertySource.class);
 
 	private final String path;
 

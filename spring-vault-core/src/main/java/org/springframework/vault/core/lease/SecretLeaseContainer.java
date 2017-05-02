@@ -20,8 +20,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -118,14 +118,14 @@ import org.springframework.web.client.RestOperations;
 public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		InitializingBean, DisposableBean {
 
-	private final static AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
+	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
 			.newUpdater(SecretLeaseContainer.class, "status");
 
 	private static final AtomicInteger poolId = new AtomicInteger();
 
-	private final static int STATUS_INITIAL = 0;
-	private final static int STATUS_STARTED = 1;
-	private final static int STATUS_DESTROYED = 2;
+	private static final int STATUS_INITIAL = 0;
+	private static final int STATUS_STARTED = 1;
+	private static final int STATUS_DESTROYED = 2;
 
 	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<RequestedSecret>();
 
@@ -691,11 +691,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 */
 	static class OneShotTrigger implements Trigger {
 
-		private final static AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
+		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
 				.newUpdater(OneShotTrigger.class, "status");
 
-		private final static int STATUS_ARMED = 0;
-		private final static int STATUS_FIRED = 1;
+		private static final int STATUS_ARMED = 0;
+		private static final int STATUS_FIRED = 1;
 
 		// see AtomicIntegerFieldUpdater UPDATER
 		private volatile int status = 0;

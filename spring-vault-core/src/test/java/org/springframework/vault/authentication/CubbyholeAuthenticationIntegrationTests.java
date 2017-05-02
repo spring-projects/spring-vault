@@ -97,7 +97,7 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 			fail("Missing VaultException");
 		}
 		catch (VaultException e) {
-			assertThat(e).hasMessageContaining("Cannot retrieve Token from cubbyhole")
+			assertThat(e).hasMessageContaining("Cannot retrieve Token from Cubbyhole")
 					.hasMessageContaining("permission denied");
 		}
 	}

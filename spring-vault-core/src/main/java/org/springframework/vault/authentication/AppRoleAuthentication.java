@@ -44,7 +44,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class AppRoleAuthentication implements ClientAuthentication {
 
-	private final static Log logger = LogFactory.getLog(AppRoleAuthentication.class);
+	private static final Log logger = LogFactory.getLog(AppRoleAuthentication.class);
 
 	private final AppRoleAuthenticationOptions options;
 

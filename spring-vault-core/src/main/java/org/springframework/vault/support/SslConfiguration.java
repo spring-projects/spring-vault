@@ -290,7 +290,7 @@ public class SslConfiguration {
 	 */
 	public static class KeyStoreConfiguration {
 
-		public final static KeyStoreConfiguration EMPTY = new KeyStoreConfiguration(null,
+		public static final KeyStoreConfiguration EMPTY = new KeyStoreConfiguration(null,
 				null, null);
 
 		/**

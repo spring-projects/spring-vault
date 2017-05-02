@@ -35,7 +35,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class ClientCertificateAuthentication implements ClientAuthentication {
 
-	private final static Log logger = LogFactory
+	private static final Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);
 
 	private final RestOperations restOperations;
