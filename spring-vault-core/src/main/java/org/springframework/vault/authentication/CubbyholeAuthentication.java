@@ -41,6 +41,7 @@ import org.springframework.web.client.RestOperations;
  * Vault's Cubbyhole secret backend. The login token is usually longer-lived and used to
  * interact with Vault. The login token can be retrieved either from a wrapped response or
  * from the {@code data} section.
+ *
  * <h2>Wrapped token response usage</h2> <strong>Create a Token</strong>
  *
  * <pre>
@@ -108,14 +109,27 @@ import org.springframework.web.client.RestOperations;
  * </code>
  * </pre>
  *
+ * <strong>Remaining TTL/Renewability</strong>
+ * <p>
+ * Tokens retrieved from Cubbyhole associated with a non-zero TTL start their TTL at the
+ * time of token creation. That time is not necessarily identical with application
+ * startup. To compensate for the initial delay, Cubbyhole authentication performs a
+ * {@link CubbyholeAuthenticationOptions#isSelfLookup() self lookup} for tokens associated
+ * with a non-zero TTL to retrieve the remaining TTL. Cubbyhole authentication will not
+ * self-lookup wrapped tokens without a TTL because a zero TTL indicates there is no TTL
+ * associated.
+ * <p>
+ * Non-wrapped tokens do not provide details regarding renewability and TTL by just
+ * retrieving the token. A self-lookup will lookup renewability and the remaining TTL.
+ *
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  * @see <a href="https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
  * Secret Backend</a>
- * @see <a
- * href="https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
+ * @see <a href=
+ * "https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
  * Wrapping</a>
  */
 public class CubbyholeAuthentication implements ClientAuthentication {
@@ -146,32 +160,85 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 	@Override
 	public VaultToken login() throws VaultException {
 
+		Map<String, Object> data = lookupToken();
+
+		VaultToken tokenToUse = getToken(data);
+
+		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
+			tokenToUse = augmentWithSelfLookup(tokenToUse);
+		}
+
+		logger.debug("Login successful using Cubbyhole authentication");
+		return tokenToUse;
+	}
+
+	private Map<String, Object> lookupToken() {
+
 		try {
 
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					options.getPath(),
-					HttpMethod.GET,
-					new HttpEntity<Object>(VaultHttpHeaders.from(options
-							.getInitialToken())), VaultResponse.class);
+					options.getPath(), HttpMethod.GET,
+					new HttpEntity<Object>(
+							VaultHttpHeaders.from(options.getInitialToken())),
+					VaultResponse.class);
 
-			Map<String, Object> data = entity.getBody().getData();
-
-			VaultToken token = getToken(data);
-			if (token != null) {
-
-				logger.debug("Login successful using Cubbyhole authentication");
-				return token;
-			}
-
-			throw new VaultException(String.format(
-					"Cannot retrieve Token from cubbyhole: %s", entity.getStatusCode()));
+			return entity.getBody().getData();
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultException(String.format(
 					"Cannot retrieve Token from cubbyhole: %s %s", e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
 
+	private boolean shouldEnhanceTokenWithSelfLookup(VaultToken token) {
+
+		if (!options.isSelfLookup()) {
+			return false;
+		}
+
+		if (token instanceof LoginToken) {
+
+			LoginToken loginToken = (LoginToken) token;
+
+			if (loginToken.getLeaseDuration() == 0) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private VaultToken augmentWithSelfLookup(VaultToken token) {
+
+		Map<String, Object> data = lookupSelf(token);
+
+		Boolean renewable = (Boolean) data.get("renewable");
+		Number ttl = (Number) data.get("ttl");
+
+		if (renewable != null && renewable) {
+			return LoginToken.renewable(token.toCharArray(),
+					ttl == null ? 0 : ttl.longValue());
+		}
+
+		return LoginToken.of(token.toCharArray(), ttl == null ? 0 : ttl.longValue());
+	}
+
+	private Map<String, Object> lookupSelf(VaultToken token) {
+
+		try {
+			ResponseEntity<VaultResponse> entity = restOperations.exchange(
+					"/auth/token/lookup-self", HttpMethod.GET,
+					new HttpEntity<Object>(VaultHttpHeaders.from(token)),
+					VaultResponse.class);
+
+			return entity.getBody().getData();
+		}
+		catch (HttpStatusCodeException e) {
+			throw new VaultException(String.format(
+					"Cannot self-lookup Token from cubbyhole: %s %s", e.getStatusCode(),
+					VaultResponses.getError(e.getResponseBodyAsString())));
+		}
 	}
 
 	private VaultToken getToken(Map<String, Object> data) {
@@ -184,10 +251,9 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultException(
-					String.format(
-							"Cannot retrieve Token from cubbyhole: Response at %s does not contain a token",
-							options.getPath()));
+			throw new VaultException(String.format(
+					"Cannot retrieve Token from cubbyhole: Response at %s does not contain a token",
+					options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -195,9 +261,8 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 			return VaultToken.of(token);
 		}
 
-		throw new VaultException(
-				String.format(
-						"Cannot retrieve Token from cubbyhole: Response at %s does not contain an unique token",
-						options.getPath()));
+		throw new VaultException(String.format(
+				"Cannot retrieve Token from cubbyhole: Response at %s does not contain an unique token",
+				options.getPath()));
 	}
 }
