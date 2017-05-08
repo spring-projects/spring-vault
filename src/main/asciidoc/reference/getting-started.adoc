@@ -130,7 +130,7 @@ public class VaultApp {
 Even in this simple example, there are few things to take notice of
 
 * You can instantiate the central class of Spring Vault,
-<<vault-template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultEndpoint`
+<<vault.core.template,`VaultTemplate`>>, using the `org.springframework.vault.client.VaultEndpoint`
 object and the `ClientAuthentication`.
 You are not required to spin up a Spring Context to use Spring Vault.
 * Vault is expected to be configured with a root token of
@@ -222,7 +222,7 @@ public class AppConfig extends AbstractVaultConfiguration {
     }
 }
 ----
-<1> Create a new `VaultEndpoint` that points by default to `https://localhost:8200`.
+<1> Create a new `VaultEndpoint` that points by default to `\https://localhost:8200`.
 <2> This sample uses `TokenAuthentication` to get started quickly.
 See <<vault.core.authentication>> for details on supported authentication methods.
 ====
