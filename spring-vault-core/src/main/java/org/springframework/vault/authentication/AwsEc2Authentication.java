@@ -17,7 +17,6 @@ package org.springframework.vault.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -159,6 +158,6 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	}
 
 	protected char[] createNonce() {
-		return UUID.randomUUID().toString().toCharArray();
+		return options.getNonce().getValue();
 	}
 }

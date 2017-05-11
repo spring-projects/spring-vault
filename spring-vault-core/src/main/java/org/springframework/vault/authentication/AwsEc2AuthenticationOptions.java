@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package org.springframework.vault.authentication;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.UUID;
 
 import org.springframework.util.Assert;
 
@@ -59,15 +61,23 @@ public class AwsEc2AuthenticationOptions {
 	 */
 	private final String role;
 
+	/**
+	 * Authentication nonce.
+	 */
+	private final Nonce nonce;
+
 	private AwsEc2AuthenticationOptions() {
-		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "");
+		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "",
+				Nonce.generated());
 	}
 
-	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, String role) {
+	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri,
+			String role, Nonce nonce) {
 
 		this.path = path;
 		this.identityDocumentUri = identityDocumentUri;
 		this.role = role;
+		this.nonce = nonce;
 	}
 
 	/**
@@ -99,6 +109,13 @@ public class AwsEc2AuthenticationOptions {
 	}
 
 	/**
+	 * @return the configured {@link Nonce}.
+	 */
+	public Nonce getNonce() {
+		return nonce;
+	}
+
+	/**
 	 * Builder for {@link AwsEc2AuthenticationOptionsBuilder}.
 	 */
 	public static class AwsEc2AuthenticationOptionsBuilder {
@@ -106,6 +123,7 @@ public class AwsEc2AuthenticationOptions {
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;
 		private URI identityDocumentUri = DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI;
 		private String role;
+		private Nonce nonce = Nonce.generated();
 
 		AwsEc2AuthenticationOptionsBuilder() {
 		}
@@ -153,6 +171,22 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 		/**
+		 * Configure a {@link Nonce} for login requests. Defaults to
+		 * {@link Nonce#generated()}.
+		 *
+		 * @param nonce must not be {@literal null}.
+		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @since 1.1
+		 */
+		public AwsEc2AuthenticationOptionsBuilder nonce(Nonce nonce) {
+
+			Assert.notNull(nonce, "Nonce must not be null");
+
+			this.nonce = nonce;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link AwsEc2AuthenticationOptions} instance.
 		 *
 		 * @return a new {@link AppIdAuthenticationOptions}.
@@ -161,7 +195,63 @@ public class AwsEc2AuthenticationOptions {
 
 			Assert.notNull(identityDocumentUri, "IdentityDocumentUri must not be null");
 
-			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role);
+			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role, nonce);
+		}
+	}
+
+	/**
+	 * Value object for an authentication nonce.
+	 *
+	 * @since 1.1
+	 */
+	public static class Nonce {
+
+		private final char[] value;
+
+		protected Nonce(char[] value) {
+			this.value = value;
+		}
+
+		/**
+		 * Create a new generated {@link Nonce} using {@link UUID}.
+		 *
+		 * @return a new generated {@link Nonce} using {@link UUID}.
+		 */
+		public static Nonce generated() {
+			return new Generated();
+		}
+
+		/**
+		 * Create a wrapped {@link Nonce} given a {@code nonce} value.
+		 *
+		 * @return a wrapped {@link Nonce} given for the {@code nonce} value.
+		 */
+		public static Nonce provided(char[] nonce) {
+
+			Assert.notNull(nonce, "Nonce must not be null");
+
+			return new Provided(Arrays.copyOf(nonce, nonce.length));
+		}
+
+		/**
+		 * @return the nonce value.
+		 */
+		public char[] getValue() {
+			return value;
+		}
+
+		static class Generated extends Nonce {
+
+			Generated() {
+				super(UUID.randomUUID().toString().toCharArray());
+			}
+		}
+
+		static class Provided extends Nonce {
+
+			Provided(char[] nonce) {
+				super(nonce);
+			}
 		}
 	}
 }

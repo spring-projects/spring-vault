@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
@@ -94,9 +95,20 @@ public class AwsEc2AuthenticationUnitTests {
 	@Test
 	public void shouldLogin() throws Exception {
 
+		Nonce nonce = Nonce.provided("foo".toCharArray());
+
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
+				.builder().nonce(nonce).build();
+
+		mockRest.expect(
+				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("value"));
+
 		mockRest.expect(requestTo("/auth/aws-ec2/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("value"))
+				.andExpect(jsonPath("$.nonce").value("foo"))
 				.andRespond(
 						withSuccess()
 								.contentType(MediaType.APPLICATION_JSON)
@@ -104,12 +116,8 @@ public class AwsEc2AuthenticationUnitTests {
 										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
 										+ "}"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(restTemplate) {
-			@Override
-			protected Map<String, String> getEc2Login() {
-				return Collections.singletonMap("pkcs7", "value");
-			}
-		};
+		AwsEc2Authentication authentication = new AwsEc2Authentication(
+				authenticationOptions, restTemplate, restTemplate);
 
 		VaultToken login = authentication.login();
 
