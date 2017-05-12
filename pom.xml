@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -391,6 +392,64 @@
 		<profile>
 
 			<!--
+				Profile to be activated when deploying to OSS Sonatype.
+
+				Generates Javadoc and PGP signatures.
+			-->
+
+			<id>central</id>
+
+			<distributionManagement>
+				<snapshotRepository>
+					<id>sonatype-nexus-snapshots</id>
+					<name>Sonatype Nexus Snapshots</name>
+					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+				</snapshotRepository>
+				<repository>
+					<id>sonatype-nexus-staging</id>
+					<name>Nexus Release Repository</name>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
+
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<phase>package</phase>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+
+		</profile>
+
+		<profile>
+
+		<!--
 				Profile to be activated when building the distribution atrifacts.
 
 				Generates reference documentation, aggregates JavaDoc etc. Has to be combined with
@@ -479,17 +538,17 @@
 									<target>
 										<copy todir="${project.root}/target/site/reference/html">
 											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css" />
+												<include name="**/*.css"/>
 											</fileset>
-											<flattenmapper />
+											<flattenmapper/>
 										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
+												<include name="**/*.png"/>
+												<include name="**/*.gif"/>
+												<include name="**/*.jpg"/>
 											</fileset>
-											<flattenmapper />
+											<flattenmapper/>
 										</copy>
 									</target>
 								</configuration>
@@ -505,9 +564,9 @@
 									<target>
 										<copy todir="${project.build.directory}/schemas">
 											<fileset dir="${basedir}" erroronmissingdir="false">
-												<include name="**/src/main/resources/**/config/spring-*.xsd" />
+												<include name="**/src/main/resources/**/config/spring-*.xsd"/>
 											</fileset>
-											<flattenmapper />
+											<flattenmapper/>
 										</copy>
 									</target>
 								</configuration>
@@ -521,8 +580,12 @@
 								<phase>process-resources</phase>
 								<configuration>
 									<target>
-										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
-										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
+										<copy failonerror="false"
+											  file="${project.build.directory}/generated-docs/index.pdf"
+											  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
+										<copy failonerror="false"
+											  file="${project.build.directory}/generated-docs/index.epub"
+											  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
 									</target>
 								</configuration>
 								<goals>
