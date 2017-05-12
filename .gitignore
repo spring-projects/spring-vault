@@ -13,3 +13,5 @@ target
 /vault/
 /download/
 /work/
+pom.xml.releaseBackup
+release.properties

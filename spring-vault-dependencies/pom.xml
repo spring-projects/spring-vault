@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-dependencies</artifactId>
-	<version>1.0.1.BUILD-SNAPSHOT</version>
+	<version>1.0.1.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<name>spring-vault-dependencies</name>
@@ -25,7 +23,7 @@
 		<url>https://github.com/spring-projects/spring-vault</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-vault.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-vault.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>1.0.1.RELEASE</tag>
 	</scm>
 
 	<issueManagement>
@@ -73,7 +71,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-core</artifactId>
-				<version>1.0.1.BUILD-SNAPSHOT</version>
+				<version>1.0.1.RELEASE</version>
 			</dependency>
 
 			<dependency>
@@ -127,32 +125,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<repositories>
-		<repository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>https://repo.spring.io/snapshot</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
 	<profiles>
-		<profile>
-
-			<id>milestone</id>
-
-			<distributionManagement>
-				<repository>
-					<id>repo.spring.io</id>
-					<name>Spring Milestone Repository</name>
-					<url>http://repo.spring.io/libs-milestone-local</url>
-				</repository>
-			</distributionManagement>
-
-		</profile>
-
 		<profile>
 
 			<id>central</id>
