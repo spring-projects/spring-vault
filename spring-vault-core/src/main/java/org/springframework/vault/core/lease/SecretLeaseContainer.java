@@ -110,6 +110,7 @@ import org.springframework.web.client.RestOperations;
  * Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
+ * @author Steven Swor
  * @see RequestedSecret
  * @see SecretLeaseEventPublisher
  * @see Lease
@@ -290,6 +291,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 	}
 
+	private boolean isRotatingGenericSecret(RequestedSecret requestedSecret,
+			VaultResponseSupport<Map<String, Object>> secrets) {
+		return Mode.ROTATE.equals(requestedSecret.getMode()) && !secrets.isRenewable()
+				&& secrets.getLeaseDuration() > 0
+				&& "".equals(secrets.getLeaseId());
+	}
+
 	private void start(RequestedSecret requestedSecret,
 			LeaseRenewalScheduler renewalScheduler) {
 
@@ -297,9 +305,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		if (secrets != null) {
 
-			Lease lease = !StringUtils.hasText(secrets.getLeaseId()) ? Lease.none()
-					: Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
-							secrets.isRenewable());
+			Lease lease = StringUtils.hasText(secrets.getLeaseId())
+					|| isRotatingGenericSecret(requestedSecret, secrets)
+							? Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
+									secrets.isRenewable())
+							: Lease.none();
 
 			potentiallyScheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
 			onSecretsObtained(requestedSecret, lease, secrets.getData());
@@ -454,7 +464,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * @param lease the lease.
 	 * @return the new lease or {@literal null} if expired/secret cannot be rotated.
 	 */
-	protected Lease doRenewLease(RequestedSecret requestedSecret, final Lease lease) {
+	protected Lease doRenewLease(final RequestedSecret requestedSecret,
+			final Lease lease) {
 
 		try {
 			ResponseEntity<Map<String, Object>> entity = operations
@@ -463,10 +474,15 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 						@Override
 						@SuppressWarnings("unchecked")
 						public ResponseEntity<Map<String, Object>> doWithRestOperations(
-								RestOperations restOperations) {
+										RestOperations restOperations) {
+									if (lease.isRotatingGenericLease()) {
+										return (ResponseEntity) restOperations.exchange(
+												requestedSecret.getPath(), HttpMethod.GET,
+												null, Map.class, (Object) null);
+									} else {
 							return (ResponseEntity) restOperations.exchange(
-									"/sys/renew/{leaseId}", HttpMethod.PUT, null,
-									Map.class, lease.getLeaseId());
+									"/sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class, lease.getLeaseId());
+									}
 						}
 					});
 
@@ -480,7 +496,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				return null;
 			}
 
-			return Lease.of(leaseId, leaseDuration.longValue(), renewable);
+			Lease results = Lease.of(leaseId, leaseDuration.longValue(), renewable);
+			if (results.isRotatingGenericLease()) {
+				onSecretsObtained(requestedSecret, results, body);
+			}
+			return results;
 		}
 		catch (HttpStatusCodeException e) {
 
@@ -677,7 +697,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 
 		private boolean isLeaseRenewable(Lease lease) {
-			return lease != null && lease.isRenewable();
+			return lease != null
+					&& (lease.isRenewable() || lease.isRotatingGenericLease());
 		}
 
 		public Lease getLease() {
