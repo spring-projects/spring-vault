@@ -549,19 +549,20 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
-			operations
-					.doWithSession(new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
+			if (!lease.isRotatingGenericLease()) {
+				operations.doWithSession(
+						new RestOperationsCallback<ResponseEntity<Map<String, Object>>>() {
 
-						@Override
-						@SuppressWarnings("unchecked")
-						public ResponseEntity<Map<String, Object>> doWithRestOperations(
-								RestOperations restOperations) {
-							return (ResponseEntity) restOperations.exchange(
-									"/sys/revoke/{leaseId}", HttpMethod.PUT, null,
-									Map.class, lease.getLeaseId());
-						}
-					});
-
+							@Override
+							@SuppressWarnings("unchecked")
+							public ResponseEntity<Map<String, Object>> doWithRestOperations(
+									RestOperations restOperations) {
+								return (ResponseEntity) restOperations.exchange(
+										"/sys/revoke/{leaseId}", HttpMethod.PUT, null,
+										Map.class, lease.getLeaseId());
+							}
+						});
+			}
 			onAfterLeaseRevocation(requestedSecret, lease);
 		}
 		catch (HttpStatusCodeException e) {
