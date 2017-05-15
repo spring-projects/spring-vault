@@ -64,6 +64,7 @@ import static org.mockito.Mockito.when;
  * Unit tests for {@link SecretLeaseContainer}.
  *
  * @author Mark Paluch
+ * @author Steven Swor
  */
 @RunWith(MockitoJUnitRunner.class)
 public class SecretLeaseContainerUnitTests {
@@ -84,6 +85,9 @@ public class SecretLeaseContainerUnitTests {
 	private ArgumentCaptor<SecretLeaseEvent> captor;
 
 	private RequestedSecret requestedSecret = RequestedSecret.renewable("my-secret");
+
+	private RequestedSecret rotatingGenericSecret = RequestedSecret
+			.rotating("rotating-generic");
 
 	private SecretLeaseContainer secretLeaseContainer;
 
@@ -427,6 +431,33 @@ public class SecretLeaseContainerUnitTests {
 				.onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
 		verify(leaseListenerAdapter, never())
 				.onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
+	}
+
+	@Test
+	public void shouldRequestRotatingGenericSecrets() throws Exception {
+
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
+
+		VaultResponse secrets = new VaultResponse();
+		secrets.setLeaseId("");
+		secrets.setRenewable(false);
+		secrets.setLeaseDuration(60);
+		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+
+		when(vaultOperations.read(rotatingGenericSecret.getPath())).thenReturn(secrets);
+
+		secretLeaseContainer.addRequestedSecret(rotatingGenericSecret);
+		secretLeaseContainer.start();
+
+		verify(leaseListenerAdapter).onLeaseEvent(captor.capture());
+
+		SecretLeaseCreatedEvent leaseCreatedEvent = (SecretLeaseCreatedEvent) captor
+				.getValue();
+
+		assertThat(leaseCreatedEvent.getSource()).isEqualTo(rotatingGenericSecret);
+		assertThat(leaseCreatedEvent.getLease()).isNotNull();
+		assertThat(leaseCreatedEvent.getSecrets()).containsKey("key");
 	}
 
 	@SuppressWarnings("unchecked")

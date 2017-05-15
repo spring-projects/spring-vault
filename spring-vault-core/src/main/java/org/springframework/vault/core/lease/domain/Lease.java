@@ -16,11 +16,13 @@
 package org.springframework.vault.core.lease.domain;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * A lease abstracting the lease Id, duration and its renewability.
  *
  * @author Mark Paluch
+ * @author Steven Swor
  */
 public class Lease {
 
@@ -54,6 +56,18 @@ public class Lease {
 	}
 
 	/**
+	 * Create a new non-renewable {@link Lease}, with an empty lease ID and
+	 * specified duration.
+	 *
+	 * @param leaseDuration the lease duration in seconds
+	 * @return the created {@link Lease}
+	 */
+	public static Lease of(long leaseDuration) {
+
+		return new Lease("", leaseDuration, false);
+	}
+
+	/**
 	 * Factory method to return a non-renewable, zero-duration {@link Lease}.
 	 *
 	 * @return a non-renewable, zero-duration {@link Lease}.
@@ -82,6 +96,14 @@ public class Lease {
 	 */
 	public boolean isRenewable() {
 		return renewable;
+	}
+
+	/**
+	 *
+	 * @return {@literal true} if the lease represents a rotating generic secret.
+	 */
+	public boolean isRotatingGenericLease() {
+		return !renewable && leaseDuration > 0 && StringUtils.isEmpty(leaseId);
 	}
 
 	@Override
