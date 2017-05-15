@@ -18,17 +18,21 @@ package org.springframework.vault.core.lease;
 import java.util.HashMap;
 import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
 import org.springframework.vault.core.lease.RotatingGenericSecretsIntegrationTestConfiguration.PropertySourceHolder;
+import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.vault.util.PrepareVault;
+import org.springframework.vault.util.VaultRule;
 
 /**
  * Integration tests for {@link SecretLeaseContainer} using the {@code generic} backend.
@@ -39,9 +43,6 @@ import org.springframework.vault.core.lease.RotatingGenericSecretsIntegrationTes
 @ContextConfiguration(classes = { VaultIntegrationTestConfiguration.class,
 		RotatingGenericSecretsIntegrationTestConfiguration.class })
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@TestExecutionListeners(mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS, listeners = {
-		WriteSecretsBeforeTestBeginsListener.class,
-		DeleteSecretsAfterTestFinishesListener.class })
 public class SecretLeaseContainerIntegrationTests {
 
 	@Autowired
@@ -49,6 +50,36 @@ public class SecretLeaseContainerIntegrationTests {
 
 	@Autowired
 	private PropertySourceHolder propertySourceHolder;
+
+	private static PrepareVault prepareVault;
+
+	@BeforeClass
+	public static void beforeClass() {
+
+		VaultRule rule = new VaultRule();
+		rule.before();
+
+		prepareVault = rule.prepare();
+
+		VaultOperations vaultOperations = prepareVault.getVaultOperations();
+		Map<String, Object> data = new HashMap<String, Object>();
+		data.put("hello", "world");
+		data.put("ttl", "5");
+
+		vaultOperations.write("secret/rotating", data);
+
+		VaultResponseSupport secretInfo = vaultOperations.read("secret/rotating");
+		assertThat(secretInfo).isNotNull();
+		assertThat(secretInfo.getLeaseId()).isNotNull().isEmpty();
+		assertThat(secretInfo.getLeaseDuration()).isEqualTo(5);
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		if (prepareVault != null) {
+			prepareVault.getVaultOperations().delete("secret/rotating");
+		}
+	}
 
 	@Test
 	public void shouldRotateGenericSecrets() throws Exception {
