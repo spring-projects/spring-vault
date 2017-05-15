@@ -64,7 +64,7 @@ public class SecretLeaseContainerIntegrationTests {
 		VaultOperations vaultOperations = prepareVault.getVaultOperations();
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("hello", "world");
-		data.put("ttl", "5");
+		data.put("ttl", "5s");
 
 		vaultOperations.write("secret/rotating", data);
 
@@ -90,7 +90,7 @@ public class SecretLeaseContainerIntegrationTests {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("hello", "foo");
-		data.put("ttl", "5");
+		data.put("ttl", "5s");
 		vaultOperations.write("secret/rotating", data);
 
 		Thread.sleep(10000L);
