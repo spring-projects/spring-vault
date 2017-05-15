@@ -321,7 +321,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			long milliseconds = NumberUtils
 					.convertNumberToTargetClass(
 							Math.max(1000,
-									loginToken.getLeaseDuration()
+									1000 * loginToken.getLeaseDuration()
 											- timeUnit.toMillis(duration)),
 							Integer.class);
 
