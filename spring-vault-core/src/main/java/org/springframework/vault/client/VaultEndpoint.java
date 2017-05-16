@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.vault.client;
 
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URI;
 
 import lombok.EqualsAndHashCode;
@@ -27,7 +28,7 @@ import org.springframework.util.Assert;
  * <p>
  * A {@link VaultEndpoint} defines the hostname, TCP port and the protocol scheme (HTTP or
  * HTTPS).
- * 
+ *
  * @author Mark Paluch
  */
 @EqualsAndHashCode
@@ -53,7 +54,7 @@ public class VaultEndpoint implements Serializable {
 	/**
 	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
 	 * {@code https}.
-	 * 
+	 *
 	 * @param host must not be empty or {@literal null}.
 	 * @param port must be a valid port in the range of 1-65535
 	 * @return a new {@link VaultEndpoint}.
@@ -86,7 +87,14 @@ public class VaultEndpoint implements Serializable {
 		VaultEndpoint vaultEndpoint = new VaultEndpoint();
 
 		vaultEndpoint.setHost(uri.getHost());
-		vaultEndpoint.setPort(uri.getPort());
+		try {
+			vaultEndpoint.setPort(uri.getPort() == -1 ? uri.toURL().getDefaultPort()
+					: uri.getPort());
+		}
+		catch (MalformedURLException e) {
+			throw new IllegalArgumentException(String.format(
+					"Can't retrieve default port from %s", uri), e);
+		}
 		vaultEndpoint.setScheme(uri.getScheme());
 
 		return vaultEndpoint;
@@ -101,7 +109,7 @@ public class VaultEndpoint implements Serializable {
 
 	/**
 	 * Sets the hostname.
-	 * 
+	 *
 	 * @param host must not be empty or {@literal null}.
 	 */
 	public void setHost(String host) {
@@ -156,7 +164,7 @@ public class VaultEndpoint implements Serializable {
 
 	/**
 	 * Build the Vault URI string based on the given {@code path}.
-	 * 
+	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @return constructed URI String.
 	 */
