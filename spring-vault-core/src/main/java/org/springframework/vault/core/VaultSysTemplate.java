@@ -62,6 +62,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static final Health HEALTH = new Health();
 
+	private static final Health HEALTH_STANDBY_OK = new Health(true);
+
 	private final VaultOperations vaultOperations;
 
 	/**
@@ -205,7 +207,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultHealth health() {
-		return vaultOperations.doWithVault(HEALTH);
+		return health(false);
+	}
+
+	@Override
+	public VaultHealth health(boolean standbyOk) {
+		return vaultOperations.doWithVault(standbyOk ? HEALTH_STANDBY_OK : HEALTH);
 	}
 
 	private static class GetUnsealStatus implements
@@ -291,12 +298,24 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static class Health implements RestOperationsCallback<VaultHealth> {
 
+		private final Map<String, Object> parameters;
+
+		public Health() {
+			this(false);
+		}
+
+		public Health(final boolean standbyOk) {
+			this.parameters = new HashMap<String, Object>();
+			this.parameters.put("standbyok", standbyOk);
+		}
+
 		@Override
 		public VaultHealth doWithRestOperations(RestOperations restOperations) {
 
 			try {
 				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange(
-						"/sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
+						"/sys/health?standbyok={standbyok}", HttpMethod.GET, null,
+						VaultHealthImpl.class, parameters);
 				return healthResponse.getBody();
 			}
 			catch (HttpStatusCodeException responseError) {
