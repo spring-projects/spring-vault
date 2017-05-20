@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +30,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.vault.authentication.LifecycleAwareSessionManager.FixedTimeoutRefreshTrigger;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpServerErrorException;
@@ -107,7 +111,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(
 				restOperations.postForObject(anyString(), any(),
-						ArgumentMatchers.<Class>any())).thenThrow(
+						ArgumentMatchers.<Class> any())).thenThrow(
 				new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
 		sessionManager.renewToken();
@@ -187,7 +191,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 		when(
 				restOperations.postForObject(anyString(), any(),
-						ArgumentMatchers.<Class>any())).thenThrow(
+						ArgumentMatchers.<Class> any())).thenThrow(
 				new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -217,13 +221,37 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
 		when(
-				restOperations.postForObject(anyString(), ArgumentMatchers.<Object>any(),
-						ArgumentMatchers.<Class>any())).thenThrow(
-				new HttpServerErrorException(HttpStatus.BAD_REQUEST));
+				restOperations.postForObject(anyString(),
+						ArgumentMatchers.<Object> any(), ArgumentMatchers.<Class> any()))
+				.thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
 
 		sessionManager.getSessionToken();
 
 		assertThat(sessionManager.renewToken()).isFalse();
 		verify(clientAuthentication, times(1)).login();
+	}
+
+	@Test
+	public void shouldScheduleNextExecutionTimeCorrectly() {
+
+		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
+				TimeUnit.SECONDS);
+
+		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo", 60));
+		assertThat(nextExecutionTime).isBetween(
+				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(52)),
+				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(56)));
+	}
+
+	@Test
+	public void shouldScheduleNextExecutionIfValidityLessThanTimeout() {
+
+		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
+				TimeUnit.SECONDS);
+
+		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo", 2));
+		assertThat(nextExecutionTime).isBetween(
+				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
+				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1)));
 	}
 }

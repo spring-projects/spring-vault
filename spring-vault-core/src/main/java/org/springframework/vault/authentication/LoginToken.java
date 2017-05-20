@@ -30,13 +30,16 @@ public class LoginToken extends VaultToken {
 
 	private final boolean renewable;
 
+	/**
+	 * Duration in seconds.
+	 */
 	private final long leaseDuration;
 
-	private LoginToken(char[] token, long leaseDuration, boolean renewable) {
+	private LoginToken(char[] token, long leaseDurationSeconds, boolean renewable) {
 
 		super(token);
 
-		this.leaseDuration = leaseDuration;
+		this.leaseDuration = leaseDurationSeconds;
 		this.renewable = renewable;
 	}
 
@@ -65,67 +68,67 @@ public class LoginToken extends VaultToken {
 	}
 
 	/**
-	 * Create a new {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
 	 *
 	 * @param token must not be {@literal null}.
-	 * @param leaseDuration the lease duration.
+	 * @param leaseDurationSeconds the lease duration in seconds.
 	 * @return the created {@link VaultToken}
 	 */
-	public static LoginToken of(String token, long leaseDuration) {
+	public static LoginToken of(String token, long leaseDurationSeconds) {
 
 		Assert.hasText(token, "Token must not be empty");
 
-		return of(token.toCharArray(), leaseDuration);
+		return of(token.toCharArray(), leaseDurationSeconds);
 	}
 
 	/**
-	 * Create a new {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
 	 *
 	 * @param token must not be {@literal null}.
-	 * @param leaseDuration the lease duration.
+	 * @param leaseDurationSeconds the lease duration in seconds.
 	 * @return the created {@link VaultToken}
 	 * @since 1.1
 	 */
-	public static LoginToken of(char[] token, long leaseDuration) {
+	public static LoginToken of(char[] token, long leaseDurationSeconds) {
 
 		Assert.notNull(token, "Token must not be null");
 		Assert.isTrue(token.length > 0, "Token must not be empty");
 
-		return new LoginToken(token, leaseDuration, false);
+		return new LoginToken(token, leaseDurationSeconds, false);
 	}
 
 	/**
-	 * Create a new renewable {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
 	 *
 	 * @param token must not be {@literal null}.
-	 * @param leaseDuration the lease duration.
+	 * @param leaseDurationSeconds the lease duration in seconds.
 	 * @return the created {@link VaultToken}
 	 */
-	public static LoginToken renewable(String token, long leaseDuration) {
+	public static LoginToken renewable(String token, long leaseDurationSeconds) {
 
 		Assert.hasText(token, "Token must not be empty");
 
-		return renewable(token.toCharArray(), leaseDuration);
+		return renewable(token.toCharArray(), leaseDurationSeconds);
 	}
 
 	/**
-	 * Create a new renewable {@link LoginToken} with a {@code leaseDuration}.
+	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
 	 *
 	 * @param token must not be {@literal null}.
-	 * @param leaseDuration the lease duration.
+	 * @param leaseDurationSeconds the lease duration in seconds.
 	 * @return the created {@link VaultToken}
 	 * @since 1.1
 	 */
-	public static LoginToken renewable(char[] token, long leaseDuration) {
+	public static LoginToken renewable(char[] token, long leaseDurationSeconds) {
 
 		Assert.notNull(token, "Token must not be null");
 		Assert.isTrue(token.length > 0, "Token must not be empty");
 
-		return new LoginToken(token, leaseDuration, true);
+		return new LoginToken(token, leaseDurationSeconds, true);
 	}
 
 	/**
-	 * @return the lease duration. May be {@literal 0} if none.
+	 * @return the lease duration in seconds. May be {@literal 0} if none.
 	 */
 	public long getLeaseDuration() {
 		return leaseDuration;
