@@ -31,7 +31,6 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
-import org.springframework.util.NumberUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
@@ -55,6 +54,7 @@ import org.springframework.web.client.RestOperations;
  * login attempt.
  *
  * @author Mark Paluch
+ * @author Steven Swor
  * @see LoginToken
  * @see SessionManager
  * @see AsyncTaskExecutor
@@ -172,15 +172,14 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		catch (HttpStatusCodeException e) {
 
 			if (e.getStatusCode().is4xxClientError()) {
-				logger.debug(String.format(
-						"Cannot refresh token, resetting token and performing re-login: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+				logger.debug(String
+						.format("Cannot refresh token, resetting token and performing re-login: %s",
+								VaultResponses.getError(e.getResponseBodyAsString())));
 				token = null;
 				return false;
 			}
 
-			throw new VaultException(
-					VaultResponses.getError(e.getResponseBodyAsString()));
+			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
 		}
 		catch (RestClientException e) {
 			throw new VaultException("Cannot refresh token", e);
@@ -318,12 +317,10 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		@Override
 		public Date nextExecutionTime(LoginToken loginToken) {
 
-			long milliseconds = NumberUtils
-					.convertNumberToTargetClass(
-							Math.max(1000,
-									1000 * loginToken.getLeaseDuration()
-											- timeUnit.toMillis(duration)),
-							Integer.class);
+			long milliseconds = Math.max(
+					TimeUnit.SECONDS.toMillis(1),
+					TimeUnit.SECONDS.toMillis(loginToken.getLeaseDuration())
+							- timeUnit.toMillis(duration));
 
 			return new Date(System.currentTimeMillis() + milliseconds);
 		}

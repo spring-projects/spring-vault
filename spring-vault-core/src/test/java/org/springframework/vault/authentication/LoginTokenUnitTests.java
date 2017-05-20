@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link LoginToken}.
- * 
+ *
  * @author Mark Paluch
  */
 public class LoginTokenUnitTests {
