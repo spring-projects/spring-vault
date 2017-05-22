@@ -291,7 +291,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 	}
 
-	private boolean isRotatingGenericSecret(RequestedSecret requestedSecret,
+	private static boolean isRotatingGenericSecret(RequestedSecret requestedSecret,
 			VaultResponseSupport<Map<String, Object>> secrets) {
 		return Mode.ROTATE.equals(requestedSecret.getMode()) && !secrets.isRenewable()
 				&& secrets.getLeaseDuration() > 0
