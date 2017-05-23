@@ -20,6 +20,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ import org.springframework.vault.util.VaultRule;
  *
  * @author Steven Swor
  */
+@Ignore("Need to fix race conditions")
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = { VaultIntegrationTestConfiguration.class,
 		RotatingGenericSecretsIntegrationTestConfiguration.class })
