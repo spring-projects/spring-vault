@@ -305,11 +305,15 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		if (secrets != null) {
 
-			Lease lease = StringUtils.hasText(secrets.getLeaseId())
-					|| isRotatingGenericSecret(requestedSecret, secrets)
-							? Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
-									secrets.isRenewable())
-							: Lease.none();
+			Lease lease;
+			if (StringUtils.hasText(secrets.getLeaseId())) {
+				lease = Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
+						secrets.isRenewable());
+			} else if (isRotatingGenericSecret(requestedSecret, secrets)) {
+				lease = Lease.of(secrets.getLeaseDuration());
+			} else {
+				lease = Lease.none();
+			}
 
 			potentiallyScheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
 			onSecretsObtained(requestedSecret, lease, secrets.getData());

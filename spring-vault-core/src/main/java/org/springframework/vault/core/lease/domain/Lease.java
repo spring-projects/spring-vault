@@ -44,15 +44,27 @@ public class Lease {
 	/**
 	 * Create a new {@link Lease}.
 	 *
-	 * @param leaseId must not {@literal null}. Empty string implies a generic secret.
+	 * @param leaseId must not be empty or {@literal null}.
 	 * @param leaseDuration the lease duration in seconds
 	 * @param renewable {@literal true} if this lease is renewable.
 	 * @return the created {@link Lease}
 	 */
 	public static Lease of(String leaseId, long leaseDuration, boolean renewable) {
 
-		Assert.notNull(leaseId, "LeaseId must not be null");
+		Assert.hasText(leaseId, "LeaseId must not be empty");
 		return new Lease(leaseId, leaseDuration, renewable);
+	}
+
+	/**
+	 * Create a new non-renewable {@link Lease}, with an empty lease ID and
+	 * specified duration.
+	 *
+	 * @param leaseDuration the lease duration in seconds
+	 * @return the created {@link Lease}
+	 */
+	public static Lease of(long leaseDuration) {
+
+		return new Lease("", leaseDuration, false);
 	}
 
 	/**
