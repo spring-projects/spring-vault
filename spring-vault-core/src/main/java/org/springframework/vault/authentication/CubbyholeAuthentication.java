@@ -165,7 +165,10 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		VaultToken tokenToUse = getToken(data);
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
-			tokenToUse = augmentWithSelfLookup(tokenToUse);
+
+			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(
+					tokenToUse), restOperations);
+			tokenToUse = adapter.login();
 		}
 
 		logger.debug("Login successful using Cubbyhole authentication");
@@ -177,10 +180,10 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		try {
 
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					options.getPath(), HttpMethod.GET,
-					new HttpEntity<Object>(
-							VaultHttpHeaders.from(options.getInitialToken())),
-					VaultResponse.class);
+					options.getPath(),
+					HttpMethod.GET,
+					new HttpEntity<Object>(VaultHttpHeaders.from(options
+							.getInitialToken())), VaultResponse.class);
 
 			return entity.getBody().getData();
 		}
@@ -209,38 +212,6 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		return true;
 	}
 
-	private VaultToken augmentWithSelfLookup(VaultToken token) {
-
-		Map<String, Object> data = lookupSelf(token);
-
-		Boolean renewable = (Boolean) data.get("renewable");
-		Number ttl = (Number) data.get("ttl");
-
-		if (renewable != null && renewable) {
-			return LoginToken.renewable(token.toCharArray(),
-					ttl == null ? 0 : ttl.longValue());
-		}
-
-		return LoginToken.of(token.toCharArray(), ttl == null ? 0 : ttl.longValue());
-	}
-
-	private Map<String, Object> lookupSelf(VaultToken token) {
-
-		try {
-			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					"/auth/token/lookup-self", HttpMethod.GET,
-					new HttpEntity<Object>(VaultHttpHeaders.from(token)),
-					VaultResponse.class);
-
-			return entity.getBody().getData();
-		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format(
-					"Cannot self-lookup Token from Cubbyhole: %s %s", e.getStatusCode(),
-					VaultResponses.getError(e.getResponseBodyAsString())));
-		}
-	}
-
 	private VaultToken getToken(Map<String, Object> data) {
 
 		if (options.isWrappedToken()) {
@@ -251,9 +222,10 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultException(String.format(
-					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
-					options.getPath()));
+			throw new VaultException(
+					String.format(
+							"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
+							options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -261,8 +233,9 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 			return VaultToken.of(token);
 		}
 
-		throw new VaultException(String.format(
-				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
-				options.getPath()));
+		throw new VaultException(
+				String.format(
+						"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
+						options.getPath()));
 	}
 }
