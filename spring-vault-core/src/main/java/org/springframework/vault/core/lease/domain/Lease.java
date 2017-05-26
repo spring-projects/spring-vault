@@ -16,7 +16,6 @@
 package org.springframework.vault.core.lease.domain;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * A lease abstracting the lease Id, duration and its renewability.
@@ -52,19 +51,20 @@ public class Lease {
 	public static Lease of(String leaseId, long leaseDuration, boolean renewable) {
 
 		Assert.hasText(leaseId, "LeaseId must not be empty");
+
 		return new Lease(leaseId, leaseDuration, renewable);
 	}
 
 	/**
-	 * Create a new non-renewable {@link Lease}, with an empty lease ID and
-	 * specified duration.
+	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
+	 * duration.
 	 *
-	 * @param leaseDuration the lease duration in seconds
+	 * @param leaseDuration the lease duration in seconds.
 	 * @return the created {@link Lease}
+	 * @since 1.1
 	 */
-	public static Lease of(long leaseDuration) {
-
-		return new Lease("", leaseDuration, false);
+	public static Lease fromTimeToLive(long leaseDuration) {
+		return new Lease(null, leaseDuration, false);
 	}
 
 	/**
@@ -74,6 +74,14 @@ public class Lease {
 	 */
 	public static Lease none() {
 		return NONE;
+	}
+
+	/**
+	 * @return {@literal true} is the lease is associated with a {@code leaseId}.
+	 * @since 1.1
+	 */
+	public boolean hasLeaseId() {
+		return leaseId != null;
 	}
 
 	/**
@@ -91,19 +99,10 @@ public class Lease {
 	}
 
 	/**
-	 *
 	 * @return {@literal true} if the lease is renewable.
 	 */
 	public boolean isRenewable() {
 		return renewable;
-	}
-
-	/**
-	 *
-	 * @return {@literal true} if the lease represents a rotating generic secret.
-	 */
-	public boolean isRotatingGenericLease() {
-		return !renewable && leaseDuration > 0 && StringUtils.isEmpty(leaseId);
 	}
 
 	@Override
