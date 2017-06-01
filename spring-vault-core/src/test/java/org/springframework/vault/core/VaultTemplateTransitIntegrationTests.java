@@ -27,9 +27,14 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.support.VaultExportKeyTypes;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
+import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+import org.springframework.vault.support.VaultTransitKeyExport;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
 
@@ -39,6 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Integration tests for {@link VaultTemplate} using the {@code transit} backend.
  *
  * @author Mark Paluch
+ * @author Sven Schürmann
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -61,6 +67,8 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		vaultOperations.write("transit/keys/mykey", null);
 		vaultOperations.write("transit/keys/derived",
 				Collections.singletonMap("derived", true));
+		vaultOperations.write("transit/keys/export",
+				Collections.singletonMap("exportable", true));
 	}
 
 	@After
@@ -95,6 +103,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		else {
 			deleteKey("mykey");
 			deleteKey("derived");
+			deleteKey("export");
 		}
 	}
 
@@ -125,4 +134,80 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		assertThat((String) decrypted.getData().get("plaintext")).isEqualTo(
 				Base64.encodeBase64String("that message is secret".getBytes()));
 	}
+
+	@Test
+	public void shouldCreateNewExportableKey() throws Exception {
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations
+				.opsForTransit();
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
+				.builder().exportable(true).derived(true).build();
+
+		vaultTransitOperations.createKey("export-test", vaultTransitKeyCreationRequest);
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations
+				.getKey("export-test");
+
+		assertThat(vaultTransitKey.getName()).isEqualTo("export-test");
+		assertThat(vaultTransitKey.isExportable()).isTrue();
+
+	}
+
+	@Test
+	public void shouldNotCreateExportableKeyPerDefault() throws Exception {
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations
+				.opsForTransit();
+
+		vaultTransitOperations.createKey("no-export");
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations
+				.getKey("no-export");
+
+		assertThat(vaultTransitKey.getName()).isEqualTo("no-export");
+		assertThat(vaultTransitKey.isExportable()).isFalse();
+
+	}
+
+	@Test
+	public void shouldExportEncryptionKey() throws Exception {
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations
+				.opsForTransit();
+
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+				.exportKey("export", VaultExportKeyTypes.ENCRYPTION_KEY);
+
+		assertThat(vaultTransitKeyExport.getName()).isEqualTo("export");
+		assertThat(vaultTransitKeyExport.getKeys()).isNotEmpty();
+		assertThat(vaultTransitKeyExport.getKeys().get("1")).isNotBlank();
+
+	}
+
+	@Test(expected = VaultException.class)
+	public void shouldNotExportSigningKey() throws Exception {
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations
+				.opsForTransit();
+
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+				.exportKey("export", VaultExportKeyTypes.SIGNING_KEY);
+
+	}
+
+	@Test
+	public void shouldExportHmacKey() throws Exception {
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations
+				.opsForTransit();
+
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+				.exportKey("export", VaultExportKeyTypes.HMAC_KEY);
+
+		assertThat(vaultTransitKeyExport.getName()).isEqualTo("export");
+		assertThat(vaultTransitKeyExport.getKeys()).isNotEmpty();
+		assertThat(vaultTransitKeyExport.getKeys().get("1")).isNotBlank();
+
+	}
+
 }
