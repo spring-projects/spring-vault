@@ -37,8 +37,8 @@ public class VaultTransitKeyCreationRequest {
 
 	private final Boolean exportable;
 
-	private VaultTransitKeyCreationRequest(final Boolean derived, final String type,
-			final Boolean convergentEncryption, final Boolean exportable) {
+	private VaultTransitKeyCreationRequest(Boolean derived, String type,
+			Boolean convergentEncryption, Boolean exportable) {
 		this.derived = derived;
 		this.type = type;
 		this.convergentEncryption = convergentEncryption;
@@ -57,7 +57,7 @@ public class VaultTransitKeyCreationRequest {
 	 * @return {@literal true} if key derivation MUST be used.
 	 */
 	public Boolean getDerived() {
-		return this.derived;
+		return derived;
 	}
 
 	/**
@@ -66,7 +66,7 @@ public class VaultTransitKeyCreationRequest {
 	 * plaintext creates the same cipher text).
 	 */
 	public Boolean getConvergentEncryption() {
-		return this.convergentEncryption;
+		return convergentEncryption;
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class VaultTransitKeyCreationRequest {
 	 * @return the key type.
 	 */
 	public String getType() {
-		return this.type;
+		return type;
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class VaultTransitKeyCreationRequest {
 		 * @param type the type of key to create, must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
-		public VaultTransitKeyCreationRequestBuilder type(final String type) {
+		public VaultTransitKeyCreationRequestBuilder type(String type) {
 
 			Assert.hasText(type, "Type must not be empty");
 
@@ -120,7 +120,7 @@ public class VaultTransitKeyCreationRequest {
 		 * for key derivation. Defaults to {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
-		public VaultTransitKeyCreationRequestBuilder derived(final boolean derived) {
+		public VaultTransitKeyCreationRequestBuilder derived(boolean derived) {
 
 			this.derived = derived;
 			return this;
@@ -135,8 +135,7 @@ public class VaultTransitKeyCreationRequest {
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder convergentEncryption(
-				final boolean convergentEncryption) {
-
+				boolean convergentEncryption) {
 			this.convergentEncryption = convergentEncryption;
 			return this;
 		}
@@ -148,8 +147,7 @@ public class VaultTransitKeyCreationRequest {
 		 * {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
-		public VaultTransitKeyCreationRequestBuilder exportable(
-				final boolean exportable) {
+		public VaultTransitKeyCreationRequestBuilder exportable(boolean exportable) {
 
 			this.exportable = exportable;
 			return this;
@@ -163,10 +161,10 @@ public class VaultTransitKeyCreationRequest {
 		 */
 		public VaultTransitKeyCreationRequest build() {
 
-			Assert.hasText(this.type, "Type must not be empty");
+			Assert.hasText(type, "Type must not be empty");
 
-			return new VaultTransitKeyCreationRequest(this.derived, this.type,
-					this.convergentEncryption, this.exportable);
+			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption,
+					exportable);
 		}
 	}
 }

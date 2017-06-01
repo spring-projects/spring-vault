@@ -56,7 +56,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Before
 	public void before() throws Exception {
 
-		final VaultSysOperations adminOperations = this.vaultOperations.opsForSys();
+		VaultSysOperations adminOperations = vaultOperations.opsForSys();
 
 		if (!adminOperations.getMounts().containsKey("transit/")) {
 			adminOperations.mount("transit", VaultMount.create("transit"));
@@ -64,10 +64,10 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 
 		removeKeys();
 
-		this.vaultOperations.write("transit/keys/mykey", null);
-		this.vaultOperations.write("transit/keys/derived",
+		vaultOperations.write("transit/keys/mykey", null);
+		vaultOperations.write("transit/keys/derived",
 				Collections.singletonMap("derived", true));
-		this.vaultOperations.write("transit/keys/export",
+		vaultOperations.write("transit/keys/export",
 				Collections.singletonMap("exportable", true));
 	}
 
@@ -76,27 +76,27 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		removeKeys();
 	}
 
-	private void deleteKey(final String keyName) {
+	private void deleteKey(String keyName) {
 
 		try {
-			this.vaultOperations.opsForTransit().configureKey(keyName,
+			vaultOperations.opsForTransit().configureKey(keyName,
 					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
-		catch (final Exception e) {
+		catch (Exception e) {
 		}
 
 		try {
-			this.vaultOperations.opsForTransit().deleteKey(keyName);
+			vaultOperations.opsForTransit().deleteKey(keyName);
 		}
-		catch (final Exception e) {
+		catch (Exception e) {
 		}
 	}
 
 	private void removeKeys() {
 
 		if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
-			final List<String> keys = this.vaultOperations.opsForTransit().getKeys();
-			for (final String keyName : keys) {
+			List<String> keys = vaultOperations.opsForTransit().getKeys();
+			for (String keyName : keys) {
 				deleteKey(keyName);
 			}
 		}
@@ -110,7 +110,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldEncrypt() throws Exception {
 
-		final VaultResponse response = this.vaultOperations.write(
+		VaultResponse response = vaultOperations.write(
 				"transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
 						Base64.encodeBase64String("that message is secret".getBytes())));
@@ -121,13 +121,12 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldEncryptAndDecrypt() throws Exception {
 
-		final VaultResponse response = this.vaultOperations.write(
+		VaultResponse response = vaultOperations.write(
 				"transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
 						Base64.encodeBase64String("that message is secret".getBytes())));
 
-		final VaultResponse decrypted = this.vaultOperations
-				.write(
+		VaultResponse decrypted = vaultOperations.write(
 				"transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext",
 						response.getData().get("ciphertext")));
@@ -139,13 +138,14 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldCreateNewExportableKey() throws Exception {
 
-		final VaultTransitOperations vaultTransitOperations = this.vaultOperations
+		VaultTransitOperations vaultTransitOperations = vaultOperations
 				.opsForTransit();
-		final VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
 				.builder().exportable(true).derived(true).build();
 
 		vaultTransitOperations.createKey("export-test", vaultTransitKeyCreationRequest);
-		final VaultTransitKey vaultTransitKey = vaultTransitOperations
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations
 				.getKey("export-test");
 
 		assertThat(vaultTransitKey.getName()).isEqualTo("export-test");
@@ -156,11 +156,12 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldNotCreateExportableKeyPerDefault() throws Exception {
 
-		final VaultTransitOperations vaultTransitOperations = this.vaultOperations
+		VaultTransitOperations vaultTransitOperations = vaultOperations
 				.opsForTransit();
 
 		vaultTransitOperations.createKey("no-export");
-		final VaultTransitKey vaultTransitKey = vaultTransitOperations
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations
 				.getKey("no-export");
 
 		assertThat(vaultTransitKey.getName()).isEqualTo("no-export");
@@ -171,10 +172,10 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldExportEncryptionKey() throws Exception {
 
-		final VaultTransitOperations vaultTransitOperations = this.vaultOperations
+		VaultTransitOperations vaultTransitOperations = vaultOperations
 				.opsForTransit();
 
-		final VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
 				.exportKey("export", VaultExportKeyTypes.ENCRYPTION_KEY);
 
 		assertThat(vaultTransitKeyExport.getName()).isEqualTo("export");
@@ -186,10 +187,10 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test(expected = VaultException.class)
 	public void shouldNotExportSigningKey() throws Exception {
 
-		final VaultTransitOperations vaultTransitOperations = this.vaultOperations
+		VaultTransitOperations vaultTransitOperations = vaultOperations
 				.opsForTransit();
 
-		final VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
 				.exportKey("export", VaultExportKeyTypes.SIGNING_KEY);
 
 	}
@@ -197,10 +198,10 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldExportHmacKey() throws Exception {
 
-		final VaultTransitOperations vaultTransitOperations = this.vaultOperations
+		VaultTransitOperations vaultTransitOperations = vaultOperations
 				.opsForTransit();
 
-		final VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
+		VaultTransitKeyExport vaultTransitKeyExport = vaultTransitOperations
 				.exportKey("export", VaultExportKeyTypes.HMAC_KEY);
 
 		assertThat(vaultTransitKeyExport.getName()).isEqualTo("export");
