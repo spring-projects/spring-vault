@@ -98,8 +98,32 @@ public class RequestedSecret {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+
+		if (this == o)
+			return true;
+		if (!(o instanceof RequestedSecret))
+			return false;
+
+		RequestedSecret that = (RequestedSecret) o;
+
+		if (!path.equals(that.path))
+			return false;
+		return mode == that.mode;
+	}
+
+	@Override
+	public int hashCode() {
+
+		int result = path.hashCode();
+		result = 31 * result + mode.hashCode();
+		return result;
+	}
+
+	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer();
+
+		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
 		sb.append(" [path='").append(path).append('\'');
 		sb.append(", mode=").append(mode);
