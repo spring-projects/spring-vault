@@ -127,11 +127,25 @@ public interface VaultSysOperations {
 	void authUnmount(String path) throws VaultException;
 
 	/**
-	 * Return the health status of Vault.
+	 * Return the health status of Vault. Implementations should ensure this is
+	 * functionally equivalent to {@link #health(boolean) health(false)}.
 	 *
 	 * @return the {@link VaultHealth}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET
 	 * /sys/health</a>
 	 */
 	VaultHealth health() throws VaultException;
+
+	/**
+	 * Return the health status of Vault.
+	 *
+	 * @param standbyOk when {@literal true}, requests to a standby Vault server in HA
+	 * configuration will return the active response code instead of the standby response
+	 * code.
+	 *
+	 * @return the {@link VaultHealth}.
+	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET
+	 * /sys/health</a>
+	 */
+	VaultHealth health(boolean standbyOk) throws VaultException;
 }
