@@ -17,15 +17,18 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
+import org.springframework.vault.support.VaultExportKeyTypes;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+import org.springframework.vault.support.VaultTransitKeyExport;
 
 /**
  * Interface that specifies operations using the {@code transit} backend.
  *
  * @author Mark Paluch
+ * @author Sven Schürmann
  * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
  * Secret Backend</a>
  */
@@ -78,6 +81,18 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void deleteKey(String keyName);
+
+	/**
+	 * Returns the value of the named encryption key. Depending on the type of key,
+	 * different information may be returned. The key must be exportable to support this
+	 * operation.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param vaultExportKeyTypes must not be {@literal null}.
+	 * @return the {@link VaultTransitKeyExport}.
+	 */
+	VaultTransitKeyExport exportKey(String keyName,
+			VaultExportKeyTypes vaultExportKeyTypes);
 
 	/**
 	 * Rotates the version of the named key. After rotation, new plaintext requests will

@@ -21,6 +21,7 @@ import java.util.Map;
  * A key inside Vault's {@code transit} backend.
  *
  * @author Mark Paluch
+ * @author Sven Schürmann
  */
 public interface VaultTransitKey {
 
@@ -31,9 +32,14 @@ public interface VaultTransitKey {
 	boolean isDeletionAllowed();
 
 	/**
-	 * @return {@literal true} if if key derivation MUST be used.
+	 * @return {@literal true} if key derivation MUST be used.
 	 */
 	boolean isDerived();
+
+	/**
+	 * @return {@literal true} if the raw key is exportable.
+	 */
+	boolean isExportable();
 
 	/**
 	 * @return a {@link Map} of key version to its creation timestamp.

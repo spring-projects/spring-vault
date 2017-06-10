@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
  * Transit backend key creation request options.
  * 
  * @author Mark Paluch
+ * @author Sven Schürmann
  */
 public class VaultTransitKeyCreationRequest {
 
@@ -34,11 +35,14 @@ public class VaultTransitKeyCreationRequest {
 	@JsonProperty("convergent_encryption")
 	private final Boolean convergentEncryption;
 
+	private final Boolean exportable;
+
 	private VaultTransitKeyCreationRequest(Boolean derived, String type,
-			Boolean convergentEncryption) {
+			Boolean convergentEncryption, Boolean exportable) {
 		this.derived = derived;
 		this.type = type;
 		this.convergentEncryption = convergentEncryption;
+		this.exportable = exportable;
 	}
 
 	/**
@@ -74,6 +78,14 @@ public class VaultTransitKeyCreationRequest {
 	}
 
 	/**
+	 *
+	 * @return {@literal true} if key MUST be exportable.
+	 */
+	public Boolean getExportable() {
+		return this.exportable;
+	}
+
+	/**
 	 * Builder for {@link VaultTransitKeyCreationRequest}.
 	 */
 	public static class VaultTransitKeyCreationRequestBuilder {
@@ -81,6 +93,7 @@ public class VaultTransitKeyCreationRequest {
 		private Boolean derived;
 		private String type = "aes256-gcm96";
 		private Boolean convergentEncryption;
+		private Boolean exportable;
 
 		VaultTransitKeyCreationRequestBuilder() {
 		}
@@ -128,6 +141,19 @@ public class VaultTransitKeyCreationRequest {
 		}
 
 		/**
+		 * Configure if the raw key is exportable.
+		 *
+		 * @param exportable {@literal true} the raw key is exportable. Defaults to
+		 * {@literal false}.
+		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
+		 */
+		public VaultTransitKeyCreationRequestBuilder exportable(boolean exportable) {
+
+			this.exportable = exportable;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link VaultTransitKeyCreationRequest} instance. Requires
 		 * {@link #type(String)} to be configured.
 		 *
@@ -137,7 +163,8 @@ public class VaultTransitKeyCreationRequest {
 
 			Assert.hasText(type, "Type must not be empty");
 
-			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption);
+			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption,
+					exportable);
 		}
 	}
 }
