@@ -25,14 +25,14 @@ import lombok.Data;
 
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
-import org.springframework.vault.support.VaultExportKeyTypes;
+import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.VaultTransitKeyExport;
+import org.springframework.vault.support.RawTransitKey;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -64,8 +64,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public void createKey(String keyName,
-			VaultTransitKeyCreationRequest createKeyRequest) {
+	public void createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(createKeyRequest,
@@ -78,22 +77,34 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public List<String> getKeys() {
 
-		VaultResponse response = vaultOperations
-				.read(String.format("%s/keys?list=true", path));
+		VaultResponse response = vaultOperations.read(String.format("%s/keys?list=true",
+				path));
 
 		return response == null ? Collections.emptyList() : (List) response.getData()
 				.get("keys");
 	}
 
 	@Override
-	public void configureKey(String keyName,
-			VaultTransitKeyConfiguration keyConfiguration) {
+	public void configureKey(String keyName, VaultTransitKeyConfiguration keyConfiguration) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
 
 		vaultOperations.write(String.format("%s/keys/%s/config", path, keyName),
 				keyConfiguration);
+	}
+
+	@Override
+	public RawTransitKey exportKey(String keyName, TransitKeyType type) {
+
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(type, "Key type must not be null");
+
+		VaultResponseSupport<RawTransitKeyImpl> result = vaultOperations.read(
+				String.format("%s/export/%s/%s", path, type.getValue(), keyName),
+				RawTransitKeyImpl.class);
+
+		return result != null ? result.getData() : null;
 	}
 
 	@Override
@@ -117,25 +128,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "KeyName must not be empty");
 
 		vaultOperations.delete(String.format("%s/keys/%s", path, keyName));
-	}
-
-	@Override
-	public VaultTransitKeyExport exportKey(String keyName,
-			VaultExportKeyTypes vaultExportKeyType) {
-
-		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notNull(vaultExportKeyType, "vaultExportKeyTypes must not be null");
-
-		VaultResponseSupport<VaultTransitKeyExportImpl> result = vaultOperations.read(
-				String.format("%s/export/%s/%s", path,
-						vaultExportKeyType.getValue(), keyName),
-						VaultTransitKeyExportImpl.class);
-
-		if (result != null) {
-			return result.getData();
-		}
-
-		return null;
 	}
 
 	@Override
@@ -302,15 +294,13 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 			return this.cipherMode;
 		}
-
 	}
 
 	@Data
-	static class VaultTransitKeyExportImpl implements VaultTransitKeyExport {
+	static class RawTransitKeyImpl implements RawTransitKey {
 
 		private Map<String, String> keys;
 
 		private String name;
-
 	}
 }

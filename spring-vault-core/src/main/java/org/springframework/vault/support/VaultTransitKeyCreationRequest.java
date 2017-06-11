@@ -21,7 +21,7 @@ import org.springframework.util.Assert;
 
 /**
  * Transit backend key creation request options.
- * 
+ *
  * @author Mark Paluch
  * @author Sven Schürmann
  */
@@ -114,7 +114,7 @@ public class VaultTransitKeyCreationRequest {
 
 		/**
 		 * Configure key derivation.
-		 * 
+		 *
 		 * @param derived {@literal true} if key derivation MUST be used. If enabled, all
 		 * encrypt/decrypt requests to this named key must provide a context which is used
 		 * for key derivation. Defaults to {@literal false}.
@@ -136,6 +136,7 @@ public class VaultTransitKeyCreationRequest {
 		 */
 		public VaultTransitKeyCreationRequestBuilder convergentEncryption(
 				boolean convergentEncryption) {
+
 			this.convergentEncryption = convergentEncryption;
 			return this;
 		}
@@ -163,8 +164,8 @@ public class VaultTransitKeyCreationRequest {
 
 			Assert.hasText(type, "Type must not be empty");
 
-			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption,
-					exportable);
+			return new VaultTransitKeyCreationRequest(derived, type,
+					convergentEncryption, exportable);
 		}
 	}
 }

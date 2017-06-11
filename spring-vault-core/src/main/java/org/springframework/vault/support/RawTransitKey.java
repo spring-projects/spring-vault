@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,22 @@
  */
 package org.springframework.vault.support;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.util.Map;
 
 /**
- * Enumeration to specify the type of the key to export. Intended for use
- * with {@link org.springframework.vault.core.VaultTransitTemplate}
+ * A exported raw key inside Vault's {@code transit} backend.
  *
  * @author Sven Schürmann
  */
-@AllArgsConstructor
-public enum VaultExportKeyTypes {
+public interface RawTransitKey {
 
-    ENCRYPTION_KEY("encryption-key"), SIGNING_KEY("signing-key"), HMAC_KEY("hmac-key");
+	/**
+	 * @return a {@link Map} of key version to its key value.
+	 */
+	Map<String, String> getKeys();
 
-    @Getter
-    String value;
-
+	/**
+	 * @return name of the key
+	 */
+	String getName();
 }
