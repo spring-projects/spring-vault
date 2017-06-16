@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>1.0.2.BUILD-SNAPSHOT</version>
+	<version>1.0.2.RELEASE</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -39,7 +38,7 @@
 		<url>https://github.com/spring-projects/spring-vault</url>
 		<connection>scm:git:git://github.com/spring-projects/spring-vault.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/spring-projects/spring-vault.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>1.0.2.RELEASE</tag>
 	</scm>
 
 	<issueManagement>
@@ -92,7 +91,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>1.0.2.BUILD-SNAPSHOT</version>
+				<version>1.0.2.RELEASE</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -538,17 +537,17 @@
 									<target>
 										<copy todir="${project.root}/target/site/reference/html">
 											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css"/>
+												<include name="**/*.css" />
 											</fileset>
-											<flattenmapper/>
+											<flattenmapper />
 										</copy>
 										<copy todir="${project.root}/target/site/reference/html/images">
 											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-												<include name="**/*.png"/>
-												<include name="**/*.gif"/>
-												<include name="**/*.jpg"/>
+												<include name="**/*.png" />
+												<include name="**/*.gif" />
+												<include name="**/*.jpg" />
 											</fileset>
-											<flattenmapper/>
+											<flattenmapper />
 										</copy>
 									</target>
 								</configuration>
@@ -564,9 +563,9 @@
 									<target>
 										<copy todir="${project.build.directory}/schemas">
 											<fileset dir="${basedir}" erroronmissingdir="false">
-												<include name="**/src/main/resources/**/config/spring-*.xsd"/>
+												<include name="**/src/main/resources/**/config/spring-*.xsd" />
 											</fileset>
-											<flattenmapper/>
+											<flattenmapper />
 										</copy>
 									</target>
 								</configuration>
@@ -580,12 +579,8 @@
 								<phase>process-resources</phase>
 								<configuration>
 									<target>
-										<copy failonerror="false"
-											  file="${project.build.directory}/generated-docs/index.pdf"
-											  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
-										<copy failonerror="false"
-											  file="${project.build.directory}/generated-docs/index.epub"
-											  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
+										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
+										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
 									</target>
 								</configuration>
 								<goals>
