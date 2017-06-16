@@ -1,6 +1,13 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 1.0.2.RELEASE
+-----------------------------------------
+* Login Token Duration is assumed milliseconds instead of seconds #96
+* Convert login token duration to milliseconds when calculating renewal… #97
+* VaultEndpoint uses -1 as port if initialized from URI without a port #99
+* Release 1.0.2 #106
+
 Changes in version 1.0.1.RELEASE
 -----------------------------------------
 * Add developer, SCM location and project URL to dependency POM #73
