@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core.lease.domain;
 
+import java.time.Duration;
+
 import org.springframework.util.Assert;
 
 /**
@@ -25,15 +27,15 @@ import org.springframework.util.Assert;
  */
 public class Lease {
 
-	private static final Lease NONE = new Lease(null, 0, false);
+	private static final Lease NONE = new Lease(null, Duration.ZERO, false);
 
 	private final String leaseId;
 
-	private final long leaseDuration;
+	private final Duration leaseDuration;
 
 	private final boolean renewable;
 
-	private Lease(String leaseId, long leaseDuration, boolean renewable) {
+	private Lease(String leaseId, Duration leaseDuration, boolean renewable) {
 
 		this.leaseId = leaseId;
 		this.leaseDuration = leaseDuration;
@@ -44,13 +46,34 @@ public class Lease {
 	 * Create a new {@link Lease}.
 	 *
 	 * @param leaseId must not be empty or {@literal null}.
-	 * @param leaseDuration the lease duration in seconds
+	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @param renewable {@literal true} if this lease is renewable.
 	 * @return the created {@link Lease}
+	 * @deprecated since 2.0, use {@link #of(String, Duration, boolean)} for time unit
+	 * safety.
 	 */
-	public static Lease of(String leaseId, long leaseDuration, boolean renewable) {
+	@Deprecated
+	public static Lease of(String leaseId, long leaseDurationSeconds, boolean renewable) {
+
+		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
+
+		return of(leaseId, Duration.ofSeconds(leaseDurationSeconds), renewable);
+	}
+
+	/**
+	 * Create a new {@link Lease}.
+	 *
+	 * @param leaseId must not be empty or {@literal null}.
+	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
+	 * @param renewable {@literal true} if this lease is renewable.
+	 * @return the created {@link Lease}
+	 * @since 2.0
+	 */
+	public static Lease of(String leaseId, Duration leaseDuration, boolean renewable) {
 
 		Assert.hasText(leaseId, "LeaseId must not be empty");
+		Assert.notNull(leaseDuration, "Lease duration must not be null");
+		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
 		return new Lease(leaseId, leaseDuration, renewable);
 	}
@@ -59,11 +82,32 @@ public class Lease {
 	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
 	 * duration.
 	 *
-	 * @param leaseDuration the lease duration in seconds.
+	 * @param leaseDuration the lease duration in seconds, must not be negative.
 	 * @return the created {@link Lease}
 	 * @since 1.1
+	 * @deprecated since 2.0, use {@link #fromTimeToLive(Duration)} for time unit safety.
 	 */
+	@Deprecated
 	public static Lease fromTimeToLive(long leaseDuration) {
+
+		Assert.isTrue(leaseDuration >= 0, "Lease duration must not be negative");
+
+		return new Lease(null, Duration.ofSeconds(leaseDuration), false);
+	}
+
+	/**
+	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
+	 * duration.
+	 *
+	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
+	 * @return the created {@link Lease}
+	 * @since 2.0
+	 */
+	public static Lease fromTimeToLive(Duration leaseDuration) {
+
+		Assert.notNull(leaseDuration, "Lease duration must not be null");
+		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
+
 		return new Lease(null, leaseDuration, false);
 	}
 
@@ -94,7 +138,7 @@ public class Lease {
 	/**
 	 * @return the lease duration in seconds.
 	 */
-	public long getLeaseDuration() {
+	public Duration getLeaseDuration() {
 		return leaseDuration;
 	}
 
@@ -126,7 +170,7 @@ public class Lease {
 	public int hashCode() {
 
 		int result = leaseId != null ? leaseId.hashCode() : 0;
-		result = 31 * result + (int) (leaseDuration ^ (leaseDuration >>> 32));
+		result = 31 * result + (leaseDuration != null ? leaseDuration.hashCode() : 0);
 		result = 31 * result + (renewable ? 1 : 0);
 		return result;
 	}

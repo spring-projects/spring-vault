@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.support;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -44,9 +45,9 @@ public class VaultCertificateRequest {
 	private final List<String> ipSubjectAltNames;
 
 	/**
-	 * Requested Time To Live
+	 * Requested Time to Live
 	 */
-	private final Integer ttl;
+	private final Duration ttl;
 
 	/**
 	 * If {@literal true}, the given common name will not be included in DNS or Email
@@ -56,7 +57,7 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	VaultCertificateRequest(String commonName, List<String> altNames,
-			List<String> ipSubjectAltNames, Integer ttl,
+			List<String> ipSubjectAltNames, Duration ttl,
 			Boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
@@ -96,7 +97,7 @@ public class VaultCertificateRequest {
 		return ipSubjectAltNames;
 	}
 
-	public Integer getTtl() {
+	public Duration getTtl() {
 		return ttl;
 	}
 
@@ -109,7 +110,7 @@ public class VaultCertificateRequest {
 		private String commonName;
 		private List<String> altNames = new ArrayList<>();
 		private List<String> ipSubjectAltNames = new ArrayList<>();
-		private Integer ttl;
+		private Duration ttl;
 		private Boolean excludeCommonNameFromSubjectAltNames;
 
 		VaultCertificateRequestBuilder() {
@@ -190,30 +191,48 @@ public class VaultCertificateRequest {
 		/**
 		 * Configure a TTL.
 		 *
-		 * @param ttl the TTL, must be a positive number.
+		 * @param ttl the time to live, in seconds, must not be negative.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
 		 */
+		@Deprecated
 		public VaultCertificateRequestBuilder ttl(int ttl) {
 
-			Assert.isTrue(ttl > 0, "TTL must be greater 0");
+			Assert.isTrue(ttl > 0, "TTL must not be negative");
 
-			this.ttl = ttl;
+			this.ttl = Duration.ofSeconds(ttl);
 			return this;
 		}
 
 		/**
 		 * Configure a TTL.
 		 *
-		 * @param ttl the TTL, must be a positive number.
+		 * @param ttl the time to live, must not be negative.
 		 * @param timeUnit must not be {@literal null}
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
 		public VaultCertificateRequestBuilder ttl(long ttl, TimeUnit timeUnit) {
 
-			Assert.isTrue(ttl > 0, "TTL must be greater 0");
+			Assert.isTrue(ttl > 0, "TTL must not be negative");
 			Assert.notNull(timeUnit, "TimeUnit must be greater 0");
 
-			this.ttl = (int) timeUnit.toSeconds(ttl);
+			this.ttl = Duration.ofSeconds(timeUnit.toSeconds(ttl));
+			return this;
+		}
+
+		/**
+		 * Configure a TTL.
+		 *
+		 * @param ttl the time to live, must not be {@literal null} or negative.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.0
+		 */
+		public VaultCertificateRequestBuilder ttl(Duration ttl) {
+
+			Assert.notNull(ttl, "TTL must not be null");
+			Assert.isTrue(!ttl.isNegative(), "TTL must not be negative");
+
+			this.ttl = ttl;
 			return this;
 		}
 
@@ -249,8 +268,7 @@ public class VaultCertificateRequest {
 				altNames = java.util.Collections.singletonList(this.altNames.get(0));
 				break;
 			default:
-				altNames = java.util.Collections
-						.unmodifiableList(new ArrayList<>(
+				altNames = java.util.Collections.unmodifiableList(new ArrayList<>(
 						this.altNames));
 			}
 

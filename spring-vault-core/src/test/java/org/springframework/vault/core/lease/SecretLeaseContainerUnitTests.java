@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -98,6 +99,18 @@ public class SecretLeaseContainerUnitTests {
 		secretLeaseContainer.addLeaseListener(leaseListenerAdapter);
 		secretLeaseContainer.addErrorListener(leaseListenerAdapter);
 		secretLeaseContainer.afterPropertiesSet();
+	}
+
+	@Test
+	public void shouldSetProperties() {
+
+		secretLeaseContainer.setMinRenewal(Duration.ofMinutes(2));
+		secretLeaseContainer.setExpiryThreshold(Duration.ofMinutes(3));
+
+		assertThat(secretLeaseContainer.getMinRenewal().getSeconds()).isEqualTo(120);
+		assertThat(secretLeaseContainer.getMinRenewalSeconds()).isEqualTo(120);
+		assertThat(secretLeaseContainer.getExpiryThreshold().getSeconds()).isEqualTo(180);
+		assertThat(secretLeaseContainer.getExpiryThresholdSeconds()).isEqualTo(180);
 	}
 
 	@Test

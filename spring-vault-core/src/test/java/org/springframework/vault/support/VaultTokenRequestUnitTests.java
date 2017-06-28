@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.support;
 
+import java.time.Duration;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -53,5 +54,16 @@ public class VaultTokenRequestUnitTests {
 				.build();
 
 		assertThat(tokenRequest.getPolicies()).containsOnly("foo");
+	}
+
+	@Test
+	public void shouldRequestWithDuration() {
+
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+				.ttl(Duration.ofSeconds(10)).explicitMaxTtl(Duration.ofSeconds(20))
+				.build();
+
+		assertThat(tokenRequest.getTtl()).isEqualTo("10s");
+		assertThat(tokenRequest.getExplicitMaxTtl()).isEqualTo("20s");
 	}
 }

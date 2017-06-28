@@ -203,7 +203,7 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 
 			LoginToken loginToken = (LoginToken) token;
 
-			if (loginToken.getLeaseDuration() == 0) {
+			if (loginToken.getLeaseDuration().isZero()) {
 				return false;
 			}
 		}
@@ -221,9 +221,10 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultException(String.format(
-					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
-					options.getPath()));
+			throw new VaultException(
+					String.format(
+							"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
+							options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -231,8 +232,9 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 			return VaultToken.of(token);
 		}
 
-		throw new VaultException(String.format(
-				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
-				options.getPath()));
+		throw new VaultException(
+				String.format(
+						"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
+						options.getPath()));
 	}
 }

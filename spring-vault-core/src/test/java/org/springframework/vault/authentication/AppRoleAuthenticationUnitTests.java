@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -102,7 +104,8 @@ public class AppRoleAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(10);
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
+				Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 

@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,8 +25,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -86,7 +88,7 @@ public class CubbyholeAuthenticationUnitTests {
 
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isFalse();
-		assertThat(loginToken.getLeaseDuration()).isEqualTo(0);
+		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ZERO);
 	}
 
 	@Test
@@ -126,7 +128,7 @@ public class CubbyholeAuthenticationUnitTests {
 
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isFalse();
-		assertThat(loginToken.getLeaseDuration()).isEqualTo(456);
+		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(456));
 	}
 
 	@Test
@@ -179,7 +181,7 @@ public class CubbyholeAuthenticationUnitTests {
 
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isTrue();
-		assertThat(loginToken.getLeaseDuration()).isEqualTo(456);
+		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(456));
 	}
 
 	@Test

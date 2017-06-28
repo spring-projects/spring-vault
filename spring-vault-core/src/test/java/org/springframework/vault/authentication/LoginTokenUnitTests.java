@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link LoginToken}.
- * 
+ *
  * @author Mark Paluch
  */
 public class LoginTokenUnitTests {
@@ -38,10 +38,10 @@ public class LoginTokenUnitTests {
 	public void toStringShouldPrintFields() {
 
 		assertThat(LoginToken.of("token").toString()).isEqualTo(
-				"LoginToken(renewable=false, leaseDuration=0)");
+				"LoginToken(renewable=false, leaseDuration=PT0S)");
 		assertThat(LoginToken.of("token", 1).toString()).isEqualTo(
-				"LoginToken(renewable=false, leaseDuration=1)");
+				"LoginToken(renewable=false, leaseDuration=PT1S)");
 		assertThat(LoginToken.renewable("token", 1).toString()).isEqualTo(
-				"LoginToken(renewable=true, leaseDuration=1)");
+				"LoginToken(renewable=true, leaseDuration=PT1S)");
 	}
 }

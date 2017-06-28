@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -133,9 +134,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	private final VaultOperations operations;
 
-	private int minRenewalSeconds = 10;
+	private Duration minRenewal = Duration.ofSeconds(10);
 
-	private int expiryThresholdSeconds = 60;
+	private Duration expiryThreshold = Duration.ofSeconds(60);
 
 	private TaskScheduler taskScheduler;
 
@@ -174,32 +175,88 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	/**
-	 * Set the expiry threshold. {@link Lease} is renewed the given seconds before it
-	 * expires.
-	 *
-	 * @param expiryThresholdSeconds number of seconds before {@link Lease} expiry.
-	 */
-	public void setExpiryThresholdSeconds(int expiryThresholdSeconds) {
-		this.expiryThresholdSeconds = expiryThresholdSeconds;
-	}
-
-	/**
 	 * Sets the amount of seconds that is at least required before renewing a lease.
 	 * {@code minRenewalSeconds} prevents renewals to happen too often.
 	 *
 	 * @param minRenewalSeconds number of seconds that is at least required before
-	 * renewing a {@link Lease}.
+	 * renewing a {@link Lease}, must not be negative.
+	 * @deprecated since 2.0, use {@link #setMinRenewal(Duration)} for time unit safety.
 	 */
+	@Deprecated
 	public void setMinRenewalSeconds(int minRenewalSeconds) {
-		this.minRenewalSeconds = minRenewalSeconds;
+		setMinRenewal(Duration.ofSeconds(minRenewalSeconds));
+	}
+
+	/**
+	 * Sets the amount of seconds that is at least required before renewing a lease.
+	 * {@code minRenewal} prevents renewals to happen too often.
+	 *
+	 * @param minRenewal duration that is at least required before renewing a
+	 * {@link Lease}, must not be {@literal null} or negative.
+	 * @since 2.0
+	 */
+	public void setMinRenewal(Duration minRenewal) {
+
+		Assert.notNull(minRenewal, "Minimal renewal time must not be null");
+		Assert.isTrue(!minRenewal.isNegative(),
+				"Minimal renewal time must not be negative");
+
+		this.minRenewal = minRenewal;
+	}
+
+	/**
+	 * Set the expiry threshold. {@link Lease} is renewed the given seconds before it
+	 * expires.
+	 *
+	 * @param expiryThresholdSeconds number of seconds before {@link Lease} expiry, must
+	 * not be negative.
+	 * @deprecated since 2.0, use {@link #setExpiryThreshold(Duration)} for time unit
+	 * safety.
+	 */
+	@Deprecated
+	public void setExpiryThresholdSeconds(int expiryThresholdSeconds) {
+		setExpiryThreshold(Duration.ofSeconds(expiryThresholdSeconds));
+	}
+
+	/**
+	 * Set the expiry threshold. {@link Lease} is renewed the given time before it
+	 * expires.
+	 *
+	 * @param expiryThreshold duration before {@link Lease} expiry, must not be
+	 * {@literal null} or negative.
+	 * @since 2.0
+	 */
+	public void setExpiryThreshold(Duration expiryThreshold) {
+
+		Assert.notNull(expiryThreshold, "Expiry threshold must not be null");
+		Assert.isTrue(!expiryThreshold.isNegative(),
+				"Expiry threshold must not be negative");
+
+		this.expiryThreshold = expiryThreshold;
 	}
 
 	public int getMinRenewalSeconds() {
-		return minRenewalSeconds;
+		return Math.toIntExact(minRenewal.getSeconds());
+	}
+
+	/**
+	 * @return minimum renewal timeout.
+	 * @since 2.0
+	 */
+	public Duration getMinRenewal() {
+		return minRenewal;
 	}
 
 	public int getExpiryThresholdSeconds() {
-		return expiryThresholdSeconds;
+		return Math.toIntExact(expiryThreshold.getSeconds());
+	}
+
+	/**
+	 * @return expiry threshold.
+	 * @since 2.0
+	 */
+	public Duration getExpiryThreshold() {
+		return expiryThreshold;
 	}
 
 	/**
@@ -300,11 +357,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			Lease lease;
 
 			if (StringUtils.hasText(secrets.getLeaseId())) {
-				lease = Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
+				lease = Lease.of(secrets.getLeaseId(),
+						Duration.ofSeconds(secrets.getLeaseDuration()),
 						secrets.isRenewable());
 			}
 			else if (isRotatingGenericSecret(requestedSecret, secrets)) {
-				lease = Lease.fromTimeToLive(secrets.getLeaseDuration());
+				lease = Lease.fromTimeToLive(Duration.ofSeconds(secrets
+						.getLeaseDuration()));
 			}
 			else {
 				lease = Lease.none();
@@ -440,7 +499,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			}
 
 			return newLease;
-		}, lease, getMinRenewalSeconds(), getExpiryThresholdSeconds());
+		}, lease, getMinRenewal(), getExpiryThreshold());
 
 	}
 
@@ -480,8 +539,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		try {
 			Lease renewed = lease.hasLeaseId() ? renew(lease) : lease;
 
-			if (!renewed.hasLeaseId() || renewed.getLeaseDuration() == 0
-					|| renewed.getLeaseDuration() < minRenewalSeconds) {
+			if (!renewed.hasLeaseId() || renewed.getLeaseDuration().isZero()
+					|| renewed.getLeaseDuration().getSeconds() < minRenewal.getSeconds()) {
 
 				onLeaseExpired(requestedSecret, lease);
 				return Lease.none();
@@ -599,25 +658,26 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		 * @param requestedSecret the requested secret.
 		 * @param renewLease strategy to renew a {@link Lease}.
 		 * @param lease the current {@link Lease}.
-		 * @param minRenewalSeconds minimum number of seconds before renewing a
-		 * {@link Lease}. This is to prevent too many renewals in a very short timeframe.
-		 * @param expiryThresholdSeconds number of seconds to renew before {@link Lease}.
+		 * @param minRenewal minimum duration before renewing a {@link Lease}. This is to
+		 * prevent too many renewals in a very short timeframe.
+		 * @param expiryThreshold duration to renew before {@link Lease}.
 		 */
 		void scheduleRenewal(final RequestedSecret requestedSecret,
 				final RenewLease renewLease, final Lease lease,
-				final int minRenewalSeconds, final int expiryThresholdSeconds) {
+				final Duration minRenewal, final Duration expiryThreshold) {
 
 			if (log.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
 					log.debug(String
 							.format("Scheduling renewal for secret %s with lease %s, lease duration %d",
-									requestedSecret.getPath(), lease.getLeaseId(),
-									lease.getLeaseDuration()));
+									requestedSecret.getPath(), lease.getLeaseId(), lease
+											.getLeaseDuration().getSeconds()));
 				}
 				else {
 					log.debug(String
 							.format("Scheduling renewal for secret %s, with cache hint duration %d",
-									requestedSecret.getPath(), lease.getLeaseDuration()));
+									requestedSecret.getPath(), lease.getLeaseDuration()
+											.getSeconds()));
 				}
 			}
 
@@ -664,8 +724,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			ScheduledFuture<?> scheduledFuture = taskScheduler.schedule(
 					task,
-					new OneShotTrigger(getRenewalSeconds(lease, minRenewalSeconds,
-							expiryThresholdSeconds)));
+					new OneShotTrigger(getRenewalSeconds(lease, minRenewal,
+							expiryThreshold)));
 
 			schedules.put(lease, scheduledFuture);
 		}
@@ -699,10 +759,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			}
 		}
 
-		private long getRenewalSeconds(Lease lease, int minRenewalSeconds,
-				int expiryThresholdSeconds) {
-			return Math.max(minRenewalSeconds, lease.getLeaseDuration()
-					- expiryThresholdSeconds);
+		private long getRenewalSeconds(Lease lease, Duration minRenewal,
+				Duration expiryThreshold) {
+			return Math.max(minRenewal.getSeconds(), lease.getLeaseDuration()
+					.getSeconds() - expiryThreshold.getSeconds());
 		}
 
 		private boolean isLeaseRenewable(Lease lease, RequestedSecret requestedSecret) {

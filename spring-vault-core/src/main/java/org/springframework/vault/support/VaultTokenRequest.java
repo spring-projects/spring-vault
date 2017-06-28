@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.support;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -313,7 +314,9 @@ public class VaultTokenRequest {
 		 *
 		 * @param ttl the time to live in seconds, must not be negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
+		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
 		 */
+		@Deprecated
 		public VaultTokenRequestBuilder ttl(long ttl) {
 			return ttl(ttl, TimeUnit.SECONDS);
 		}
@@ -322,7 +325,7 @@ public class VaultTokenRequest {
 		 * Configure a TTL (seconds) for the token.
 		 *
 		 * @param ttl the time to live, must not be negative.
-		 * @param timeUnit the time to live, must not be {@literal null}.
+		 * @param timeUnit the time to live time unit, must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder ttl(long ttl, TimeUnit timeUnit) {
@@ -335,6 +338,23 @@ public class VaultTokenRequest {
 		}
 
 		/**
+		 * Configure a TTL for the token using
+		 * {@link java.time.temporal.ChronoUnit#SECONDS} resolution.
+		 *
+		 * @param ttl the time to live, must not be {@literal null} or negative.
+		 * @return {@code this} {@link VaultTokenRequestBuilder}.
+		 * @since 2.0
+		 */
+		public VaultTokenRequestBuilder ttl(Duration ttl) {
+
+			Assert.notNull(ttl, "TTL must not be null");
+			Assert.isTrue(!ttl.isNegative(), "TTL must not be negative");
+
+			this.ttl = String.format("%ss", ttl.getSeconds());
+			return this;
+		}
+
+		/**
 		 * Configure the explicit maximum TTL (seconds) for the token. This maximum token
 		 * TTL cannot be changed later, and unlike with normal tokens, updates to the
 		 * system/mount max TTL value will have no effect at renewal time - the token will
@@ -342,7 +362,10 @@ public class VaultTokenRequest {
 		 *
 		 * @param explicitMaxTtl the time to live in seconds, must not be negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
+		 * @deprecated since 2.0, use {@link #explicitMaxTtl(Duration)} for time unit
+		 * safety.
 		 */
+		@Deprecated
 		public VaultTokenRequestBuilder explicitMaxTtl(long explicitMaxTtl) {
 			return explicitMaxTtl(explicitMaxTtl, TimeUnit.SECONDS);
 		}
@@ -365,6 +388,26 @@ public class VaultTokenRequest {
 
 			this.explicitMaxTtl = String
 					.format("%ss", timeUnit.toSeconds(explicitMaxTtl));
+			return this;
+		}
+
+		/**
+		 * Configure the explicit maximum TTL for the token. This maximum token TTL cannot
+		 * be changed later, and unlike with normal tokens, updates to the system/mount
+		 * max TTL value will have no effect at renewal time - the token will never be
+		 * able to be renewed or used past the value set at issue time.
+		 *
+		 * @param explicitMaxTtl the time to live, must not be {@literal null} or
+		 * negative.
+		 * @return {@code this} {@link VaultTokenRequestBuilder}.
+		 * @since 2.0
+		 */
+		public VaultTokenRequestBuilder explicitMaxTtl(Duration explicitMaxTtl) {
+
+			Assert.notNull(explicitMaxTtl, "Explicit max TTL must not be null");
+			Assert.isTrue(!explicitMaxTtl.isNegative(), "TTL must not be negative");
+
+			this.explicitMaxTtl = String.format("%ss", explicitMaxTtl.getSeconds());
 			return this;
 		}
 
@@ -414,8 +457,7 @@ public class VaultTokenRequest {
 				policies = Collections.singletonList(this.policies.get(0));
 				break;
 			default:
-				policies = Collections.unmodifiableList(new ArrayList<>(
-						this.policies));
+				policies = Collections.unmodifiableList(new ArrayList<>(this.policies));
 
 			}
 			Map<String, String> meta;
@@ -424,8 +466,7 @@ public class VaultTokenRequest {
 				meta = Collections.emptyMap();
 				break;
 			default:
-				meta = Collections
-						.unmodifiableMap(new LinkedHashMap<>(this.meta));
+				meta = Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
 			}
 
 			return new VaultTokenRequest(id, policies, meta, noParent, noDefaultPolicy,

@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -216,7 +217,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 				.filter(it -> {
 
 					LoginToken loginToken = (LoginToken) it;
-					return loginToken.getLeaseDuration() > 0 && loginToken.isRenewable();
+					return !loginToken.getLeaseDuration().isZero()
+							&& loginToken.isRenewable();
 				}).isPresent();
 	}
 
@@ -245,7 +247,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	}
 
 	private OneShotTrigger createTrigger() {
-		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token.get()));
+		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token
+				.get()));
 	}
 
 	/**
@@ -293,9 +296,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	 */
 	public static class FixedTimeoutRefreshTrigger implements RefreshTrigger {
 
-		private final long duration;
+		private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
-		private final TimeUnit timeUnit;
+		private final Duration duration;
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
@@ -309,17 +312,28 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					"Timeout duration must be greater or equal to zero");
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
 
+			this.duration = Duration.ofMillis(timeUnit.toMillis(timeout));
+		}
+
+		/**
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
+		 * {@code timeout} before the {@link LoginToken} expires
+		 * @param timeout timeout value.
+		 * @since 2.0
+		 */
+		public FixedTimeoutRefreshTrigger(Duration timeout) {
+
+			Assert.isTrue(timeout.toMillis() >= 0,
+					"Timeout duration must be greater or equal to zero");
+
 			this.duration = timeout;
-			this.timeUnit = timeUnit;
 		}
 
 		@Override
 		public Date nextExecutionTime(LoginToken loginToken) {
 
-			long milliseconds = Math.max(
-					TimeUnit.SECONDS.toMillis(1),
-					TimeUnit.SECONDS.toMillis(loginToken.getLeaseDuration())
-							- timeUnit.toMillis(duration));
+			long milliseconds = Math.max(ONE_SECOND.toMillis(), loginToken
+					.getLeaseDuration().toMillis() - duration.toMillis());
 
 			return new Date(System.currentTimeMillis() + milliseconds);
 		}

@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -123,7 +124,8 @@ public class AwsEc2AuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(20);
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
+				Duration.ofSeconds(20));
 		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 

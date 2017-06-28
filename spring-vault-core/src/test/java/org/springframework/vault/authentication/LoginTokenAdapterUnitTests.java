@@ -76,7 +76,7 @@ public class LoginTokenAdapterUnitTests {
 
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isFalse();
-		assertThat(loginToken.getLeaseDuration()).isEqualTo(456);
+		assertThat(loginToken.getLeaseDuration().getSeconds()).isEqualTo(456);
 	}
 
 }
