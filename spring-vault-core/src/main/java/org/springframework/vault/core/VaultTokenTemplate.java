@@ -58,7 +58,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return write("/auth/token/create", request, VaultTokenResponse.class);
+		return write("auth/token/create", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return write("/auth/token/create-orphan", request, VaultTokenResponse.class);
+		return write("auth/token/create-orphan", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		return write(String.format("/auth/token/renew/%s", vaultToken.getToken()), null,
+		return write(String.format("auth/token/renew/%s", vaultToken.getToken()), null,
 				VaultTokenResponse.class);
 	}
 
@@ -88,7 +88,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("/auth/token/revoke/%s", vaultToken.getToken()), null,
+		write(String.format("auth/token/revoke/%s", vaultToken.getToken()), null,
 				VaultTokenResponse.class);
 	}
 
@@ -97,7 +97,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("/auth/token/revoke-orphan/%s", vaultToken.getToken()), null,
+		write(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken()), null,
 				VaultTokenResponse.class);
 	}
 

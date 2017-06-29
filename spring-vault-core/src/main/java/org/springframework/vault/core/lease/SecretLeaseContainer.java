@@ -523,7 +523,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 					public ResponseEntity<Map<String, Object>> doWithRestOperations(
 							RestOperations restOperations) {
 						return (ResponseEntity) restOperations.exchange(
-								"/sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class,
+								"sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class,
 								lease.getLeaseId());
 					}
 				});
@@ -574,7 +574,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 						public ResponseEntity<Map<String, Object>> doWithRestOperations(
 								RestOperations restOperations) {
 							return (ResponseEntity) restOperations.exchange(
-									"/sys/revoke/{leaseId}", HttpMethod.PUT, null,
+									"sys/revoke/{leaseId}", HttpMethod.PUT, null,
 									Map.class, lease.getLeaseId());
 						}
 					});

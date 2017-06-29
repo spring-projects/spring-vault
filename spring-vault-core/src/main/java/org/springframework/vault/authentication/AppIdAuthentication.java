@@ -76,7 +76,7 @@ public class AppIdAuthentication implements ClientAuthentication {
 				.getUserIdMechanism().createUserId());
 
 		try {
-			VaultResponse response = restOperations.postForObject("/auth/{mount}/login",
+			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
 					login, VaultResponse.class, options.getPath());
 
 			logger.debug("Login successful using AppId authentication");

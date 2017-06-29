@@ -137,7 +137,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private void revoke(VaultToken token) {
 
 		try {
-			restOperations.postForObject("/auth/token/revoke-self",
+			restOperations.postForObject("auth/token/revoke-self",
 					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
 		}
 		catch (HttpStatusCodeException e) {
@@ -165,7 +165,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		}
 
 		try {
-			restOperations.postForObject("/auth/token/renew-self",
+			restOperations.postForObject("auth/token/renew-self",
 					new HttpEntity<Object>(VaultHttpHeaders.from(token)), Map.class);
 			return true;
 		}

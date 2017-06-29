@@ -102,7 +102,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 		try {
 
 			VaultResponse response = this.vaultRestOperations.postForObject(
-					"/auth/{mount}/login", login, VaultResponse.class, options.getPath());
+					"auth/{mount}/login", login, VaultResponse.class, options.getPath());
 
 			if (logger.isDebugEnabled()) {
 
