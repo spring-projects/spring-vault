@@ -1,6 +1,33 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.M1
+-----------------------------------------
+* Setup 2.0 development #67
+* Add automatic rotation of secrets stored in generic backend #68
+* Add developer, SCM location and project URL to dependency POM #73
+* Upgrade to Maven 3.5.0 #74
+* SslConfiguration to support keystore type and keystore provider parameters #78
+* VaultTokenRequestBuilder does not consider configured meta attributes #80
+* Upgrade to Spring Framework 4.3.8 #81
+* Store VaultToken as char[] #82
+* Remove Maven settings.xml for TravisCI build and use Maven wrapper #83
+* Cannot resolve LocalHost NetworkInterface in MacAddressUserId #84
+* Remove support for OkHttp 2 #85
+* LifecycleAwareSessionManager renewal starts eventually #87
+* Use remaining token TTL for Cubbyhole authentication #88
+* Allow AWS-EC2 nonce configuration #89
+* Upgrade to Vault 0.7.2 #90
+* Include notice and license in jar files #93
+* Allow static token use with TTL #94
+* Login Token Duration is assumed milliseconds instead of seconds #96
+* VaultEndpoint uses -1 as port if initialized from URI without a port #99
+* Transit Backend: Support for export operation added. #101
+* Introduce equals/hashCode methods for RequestedSecret #103
+* Upgrade to Vault 0.7.3 #105
+* Introduce Duration instead of numeric durations #109
+* Upgrade to Spring 5 RC2 #111
+
 Changes in version 1.0.2.RELEASE
 -----------------------------------------
 * Login Token Duration is assumed milliseconds instead of seconds #96
