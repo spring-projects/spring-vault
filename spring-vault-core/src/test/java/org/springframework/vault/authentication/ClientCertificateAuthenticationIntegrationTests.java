@@ -33,6 +33,7 @@ import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
@@ -106,10 +107,8 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 
 		SslConfiguration original = createSslConfiguration();
 
-		SslConfiguration sslConfiguration = new SslConfiguration(new FileSystemResource(
-				new File(findWorkDir(), "client-cert.jks")), "changeit",
-				original.getTrustStore(), original.getTrustStorePassword());
-
-		return sslConfiguration;
+		return new SslConfiguration(new KeyStoreConfiguration(new FileSystemResource(
+				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray(),
+				null), original.getTrustStoreConfiguration());
 	}
 }

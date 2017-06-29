@@ -43,7 +43,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 	 */
 	public VaultTokenTemplate(VaultOperations vaultOperations) {
 
-		Assert.notNull(vaultOperations);
+		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
 		this.vaultOperations = vaultOperations;
 	}
