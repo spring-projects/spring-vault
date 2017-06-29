@@ -86,7 +86,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 		try {
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					"/auth/token/lookup-self", HttpMethod.GET, new HttpEntity<Object>(
+					"auth/token/lookup-self", HttpMethod.GET, new HttpEntity<Object>(
 							VaultHttpHeaders.from(token)), VaultResponse.class);
 
 			return entity.getBody().getData();

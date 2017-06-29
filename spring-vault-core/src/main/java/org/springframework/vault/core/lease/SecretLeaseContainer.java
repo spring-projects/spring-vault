@@ -569,7 +569,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	private Lease renew(final Lease lease) {
 		ResponseEntity<Map<String, Object>> entity = operations
 				.doWithSession(restOperations -> (ResponseEntity) restOperations
-						.exchange("/sys/renew/{leaseId}", HttpMethod.PUT, null,
+						.exchange("sys/renew/{leaseId}", HttpMethod.PUT, null,
 								Map.class, lease.getLeaseId()));
 
 		Map<String, Object> body = entity.getBody();
@@ -612,7 +612,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			operations
 					.doWithSession((RestOperationsCallback<ResponseEntity<Map<String, Object>>>) restOperations -> (ResponseEntity) restOperations
-							.exchange("/sys/revoke/{leaseId}", HttpMethod.PUT, null,
+							.exchange("sys/revoke/{leaseId}", HttpMethod.PUT, null,
 									Map.class, lease.getLeaseId()));
 
 			onAfterLeaseRevocation(requestedSecret, lease);

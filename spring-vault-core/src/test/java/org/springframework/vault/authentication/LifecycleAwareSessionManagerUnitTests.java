@@ -88,7 +88,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		verify(restOperations)
 				.postForObject(
-						eq("/auth/token/revoke-self"),
+						eq("auth/token/revoke-self"),
 						eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken
 								.of("login")))), any(Class.class));
 	}
@@ -119,7 +119,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		verify(restOperations)
 				.postForObject(
-						eq("/auth/token/revoke-self"),
+						eq("auth/token/revoke-self"),
 						eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken
 								.of("login")))), any(Class.class));
 	}
@@ -147,7 +147,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 		runnableCaptor.getValue().run();
 
 		verify(restOperations).postForObject(
-				eq("/auth/token/renew-self"),
+				eq("auth/token/renew-self"),
 				eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken.renewable(
 						"login", 5)))), any(Class.class));
 		verify(clientAuthentication, times(1)).login();

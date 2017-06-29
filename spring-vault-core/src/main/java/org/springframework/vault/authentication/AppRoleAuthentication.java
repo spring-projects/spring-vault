@@ -78,7 +78,7 @@ public class AppRoleAuthentication implements ClientAuthentication {
 				options.getSecretId());
 
 		try {
-			VaultResponse response = restOperations.postForObject("/auth/{mount}/login",
+			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
 					login, VaultResponse.class, options.getPath());
 
 			logger.debug("Login successful using AppRole authentication");

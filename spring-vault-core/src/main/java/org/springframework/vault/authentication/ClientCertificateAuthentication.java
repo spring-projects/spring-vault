@@ -60,7 +60,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 	private VaultToken createTokenUsingTlsCertAuthentication(String path) {
 
 		try {
-			VaultResponse response = restOperations.postForObject("/auth/{mount}/login",
+			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
 					Collections.emptyMap(), VaultResponse.class, path);
 
 			logger.debug("Login successful using TLS certificates");

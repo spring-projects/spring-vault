@@ -56,9 +56,9 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static final Seal SEAL = new Seal();
 
-	private static final GetMounts GET_MOUNTS = new GetMounts("/sys/mounts");
+	private static final GetMounts GET_MOUNTS = new GetMounts("sys/mounts");
 
-	private static final GetMounts GET_AUTH_MOUNTS = new GetMounts("/sys/auth");
+	private static final GetMounts GET_AUTH_MOUNTS = new GetMounts("sys/auth");
 
 	private static final Health HEALTH = new Health();
 
@@ -82,7 +82,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return vaultOperations.doWithVault(restOperations -> {
 
 			try {
-				Map<String, Boolean> body = restOperations.getForObject("/sys/init",
+				Map<String, Boolean> body = restOperations.getForObject("sys/init",
 						Map.class);
 
 				return body.get("initialized");
@@ -105,7 +105,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 							try {
 								ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
-										.exchange("/sys/init", HttpMethod.PUT,
+										.exchange("sys/init", HttpMethod.PUT,
 												new HttpEntity<Object>(
 														vaultInitializationRequest),
 												VaultInitializationResponseImpl.class);
@@ -131,7 +131,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 						(RestOperationsCallback<VaultUnsealStatus>) restOperations -> {
 
 							ResponseEntity<VaultUnsealStatusImpl> response = restOperations
-									.exchange("/sys/unseal", HttpMethod.PUT,
+									.exchange("sys/unseal", HttpMethod.PUT,
 											new HttpEntity<Object>(Collections
 													.singletonMap("key", keyShare)),
 											VaultUnsealStatusImpl.class);
@@ -151,7 +151,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.write(String.format("/sys/mounts/%s", path), vaultMount);
+		vaultOperations.write(String.format("sys/mounts/%s", path), vaultMount);
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.delete(String.format("/sys/mounts/%s", path));
+		vaultOperations.delete(String.format("sys/mounts/%s", path));
 	}
 
 	@Override
@@ -174,7 +174,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.write(String.format("/sys/auth/%s", path), vaultMount);
+		vaultOperations.write(String.format("sys/auth/%s", path), vaultMount);
 	}
 
 	@Override
@@ -187,7 +187,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.delete(String.format("/sys/auth/%s", path));
+		vaultOperations.delete(String.format("sys/auth/%s", path));
 	}
 
 	@Override
@@ -200,7 +200,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		@Override
 		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
-			return restOperations.getForObject("/sys/seal-status",
+			return restOperations.getForObject("sys/seal-status",
 					VaultUnsealStatusImpl.class);
 		}
 	}
@@ -209,7 +209,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		@Override
 		public Void doWithRestOperations(RestOperations restOperations) {
-			restOperations.put("/sys/seal", null);
+			restOperations.put("sys/seal", null);
 			return null;
 		}
 
@@ -283,7 +283,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			try {
 				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange(
-						"/sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
+						"sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
 				return healthResponse.getBody();
 			}
 			catch (HttpStatusCodeException responseError) {
