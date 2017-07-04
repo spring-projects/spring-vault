@@ -40,7 +40,8 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
  * ID</a>
  */
-public class AppIdAuthentication implements ClientAuthentication {
+public class AppIdAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
 
@@ -87,6 +88,14 @@ public class AppIdAuthentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using app-id: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	public AuthenticationSteps getAuthenticationSteps() {
+
+		return AuthenticationSteps.fromSupplier(
+				() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism()
+						.createUserId())) //
+				.login("auth/{mount}/login", options.getPath());
 	}
 
 	private Map<String, String> getAppIdLogin(String appId, String userId) {

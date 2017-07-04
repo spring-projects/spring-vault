@@ -48,23 +48,22 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationIntegrationTests
-		extends IntegrationTestSupport {
+public class ClientCertificateAuthenticationIntegrationTests extends
+		IntegrationTestSupport {
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		if (!prepare().hasAuth("cert")) {
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations()
-				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
+		prepare().getVaultOperations().doWithSession(
+				(RestOperationsCallback<Object>) restOperations -> {
 					File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(
-							new File(workDir, "ca/certs/client.cert.pem"),
-							StandardCharsets.US_ASCII);
+					String certificate = Files.contentOf(new File(workDir,
+							"ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
 
 					return restOperations.postForEntity("auth/cert/certs/my-role",
 							Collections.singletonMap("certificate", certificate),
@@ -73,7 +72,7 @@ public class ClientCertificateAuthenticationIntegrationTests
 	}
 
 	@Test
-	public void shouldLoginSuccessfully() throws Exception {
+	public void shouldLoginSuccessfully() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), prepareCertAuthenticationMethod());
@@ -90,7 +89,7 @@ public class ClientCertificateAuthenticationIntegrationTests
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
 	// receive a VaultException here.
 	@Test(expected = NestedRuntimeException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), Settings.createSslConfiguration());
@@ -98,6 +97,41 @@ public class ClientCertificateAuthenticationIntegrationTests
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
 		new ClientCertificateAuthentication(restTemplate).login();
+	}
+
+	@Test
+	public void authenticationStepsShouldLoginSuccessfully() {
+
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(), prepareCertAuthenticationMethod());
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				restTemplate);
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+
+		VaultToken login = executor.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+	}
+
+	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
+	// receive a VaultException here.
+	@Test(expected = NestedRuntimeException.class)
+	public void authenticationStepsLoginShouldFail() {
+
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(), Settings.createSslConfiguration());
+		RestTemplate restTemplate = VaultClients.createRestTemplate(
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
+
+		AuthenticationSteps steps = new ClientCertificateAuthentication(restTemplate)
+				.getAuthenticationSteps();
+
+		new AuthenticationStepsExecutor(steps, restTemplate).login();
 	}
 
 	private SslConfiguration prepareCertAuthenticationMethod() {

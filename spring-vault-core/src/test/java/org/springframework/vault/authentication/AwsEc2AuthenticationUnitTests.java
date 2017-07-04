@@ -129,6 +129,44 @@ public class AwsEc2AuthenticationUnitTests {
 		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 
+	@Test
+	public void authenticationChainShouldLogin() throws Exception {
+
+		Nonce nonce = Nonce.provided("foo".toCharArray());
+
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
+				.builder().nonce(nonce).build();
+
+		mockRest.expect(
+				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("value"));
+
+		mockRest.expect(requestTo("/auth/aws-ec2/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.pkcs7").value("value"))
+				.andExpect(jsonPath("$.nonce").value("foo"))
+				.andRespond(
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{"
+										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
+										+ "}"));
+
+		AwsEc2Authentication authentication = new AwsEc2Authentication(
+				authenticationOptions, restTemplate, restTemplate);
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+		VaultToken login = executor.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
+				Duration.ofSeconds(20));
+		assertThat(((LoginToken) login).isRenewable()).isFalse();
+	}
+
 	@Test(expected = VaultException.class)
 	public void loginShouldFailWhileObtainingIdentityDocument() throws Exception {
 

@@ -38,36 +38,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport {
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		if (!prepare().hasAuth("app-id")) {
 			prepare().mountAuth("app-id");
 		}
 
-		prepare().getVaultOperations().doWithSession(
-				restOperations -> {
+		prepare().getVaultOperations().doWithSession(restOperations -> {
 
-					Map<String, String> appIdData = new HashMap<String, String>();
-					appIdData.put("value", "dummy"); // policy
-					appIdData.put("display_name", "this is my test application");
+			Map<String, String> appIdData = new HashMap<String, String>();
+			appIdData.put("value", "dummy"); // policy
+				appIdData.put("display_name", "this is my test application");
 
-					restOperations.postForEntity("auth/app-id/map/app-id/myapp",
-							appIdData, Map.class);
+				restOperations.postForEntity("auth/app-id/map/app-id/myapp", appIdData,
+						Map.class);
 
-					Map<String, String> userIdData = new HashMap<String, String>();
-					userIdData.put("value", "myapp"); // name of the app-id
-					userIdData.put("cidr_block", "0.0.0.0/0");
+				Map<String, String> userIdData = new HashMap<String, String>();
+				userIdData.put("value", "myapp"); // name of the app-id
+				userIdData.put("cidr_block", "0.0.0.0/0");
 
-					restOperations.postForEntity(
-							"auth/app-id/map/user-id/static-userid-value", userIdData,
-							Map.class);
+				restOperations.postForEntity(
+						"auth/app-id/map/user-id/static-userid-value", userIdData,
+						Map.class);
 
-					return null;
-				});
+				return null;
+			});
 	}
 
 	@Test
-	public void shouldLoginSuccessfully() throws Exception {
+	public void shouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
@@ -85,7 +84,7 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //
@@ -96,5 +95,47 @@ public class AppIdAuthenticationIntegrationTests extends IntegrationTestSupport 
 				.createSslConfiguration());
 
 		new AppIdAuthentication(options, restTemplate).login();
+
+	}
+
+	@Test
+	public void authenticationStepsShouldLoginSuccessfully() {
+
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+				.appId("myapp") //
+				.userIdMechanism(new StaticUserId("static-userid-value")) //
+				.build();
+
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
+
+		AppIdAuthentication authentication = new AppIdAuthentication(options,
+				restTemplate);
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+
+		VaultToken login = executor.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+	}
+
+	@Test(expected = VaultException.class)
+	public void authenticationStepsLoginShouldFail() {
+
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+				.appId("wrong") //
+				.userIdMechanism(new StaticUserId("wrong")) //
+				.build();
+
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
+
+		AuthenticationSteps authenticationChain = new AppIdAuthentication(options,
+				restTemplate).getAuthenticationSteps();
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authenticationChain, restTemplate);
+
+		executor.login();
 	}
 }

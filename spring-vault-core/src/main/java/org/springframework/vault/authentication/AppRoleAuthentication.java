@@ -42,7 +42,8 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
  * AppRole</a>
  */
-public class AppRoleAuthentication implements ClientAuthentication {
+public class AppRoleAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AppRoleAuthentication.class);
 
@@ -89,6 +90,14 @@ public class AppRoleAuthentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using AppRole: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+
+		return AuthenticationSteps.fromSupplier(
+				() -> getAppRoleLogin(options.getRoleId(), options.getSecretId())) //
+				.login("auth/{mount}/login", options.getPath());
 	}
 
 	private Map<String, String> getAppRoleLogin(String roleId, String secretId) {

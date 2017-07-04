@@ -43,24 +43,9 @@ import static org.junit.Assume.assumeNotNull;
 public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupport {
 
 	@Test
-	public void shouldCreateWrappedToken() throws Exception {
+	public void shouldCreateWrappedToken() {
 
-		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
-				.doWithSession(
-						restOperations -> {
-
-							HttpHeaders headers = new HttpHeaders();
-							headers.add("X-Vault-Wrap-TTL", "10m");
-
-							return restOperations.exchange("auth/token/create",
-									HttpMethod.POST, new HttpEntity<Object>(headers),
-									VaultResponse.class);
-						});
-
-		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
-
-		// Response Wrapping requires Vault 0.6.0+
-		assumeNotNull(wrapInfo);
+		Map<String, String> wrapInfo = prepareWrappedToken();
 
 		String initialToken = wrapInfo.get("token");
 
@@ -76,7 +61,29 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 	}
 
 	@Test
-	public void loginShouldFail() throws Exception {
+	public void authenticationStepsShouldCreateWrappedToken() {
+
+		Map<String, String> wrapInfo = prepareWrappedToken();
+
+		String initialToken = wrapInfo.get("token");
+
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.initialToken(VaultToken.of(initialToken)).wrapped().build();
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
+
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				restTemplate);
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+
+		VaultToken login = executor.login();
+		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
+	}
+
+	@Test
+	public void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
@@ -94,5 +101,26 @@ public class CubbyholeAuthenticationIntegrationTests extends IntegrationTestSupp
 			assertThat(e).hasMessageContaining("Cannot retrieve Token from Cubbyhole")
 					.hasMessageContaining("permission denied");
 		}
+	}
+
+	private Map<String, String> prepareWrappedToken() {
+
+		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
+				.doWithSession(
+						restOperations -> {
+
+							HttpHeaders headers = new HttpHeaders();
+							headers.add("X-Vault-Wrap-TTL", "10m");
+
+							return restOperations.exchange("auth/token/create",
+									HttpMethod.POST, new HttpEntity<Object>(headers),
+									VaultResponse.class);
+						});
+
+		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
+
+		// Response Wrapping requires Vault 0.6.0+
+		assumeNotNull(wrapInfo);
+		return wrapInfo;
 	}
 }

@@ -25,7 +25,8 @@ import org.springframework.vault.support.VaultToken;
  * @see VaultToken
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  */
-public class TokenAuthentication implements ClientAuthentication {
+public class TokenAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private final VaultToken token;
 
@@ -56,5 +57,10 @@ public class TokenAuthentication implements ClientAuthentication {
 	@Override
 	public VaultToken login() {
 		return token;
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return AuthenticationSteps.just(token);
 	}
 }

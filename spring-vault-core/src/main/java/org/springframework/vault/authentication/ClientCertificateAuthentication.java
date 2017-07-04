@@ -28,12 +28,15 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
+
 /**
  * TLS Client Certificate {@link ClientAuthentication}.
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthentication implements ClientAuthentication {
+public class ClientCertificateAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);
@@ -72,5 +75,10 @@ public class ClientCertificateAuthentication implements ClientAuthentication {
 					"Cannot login using TLS certificates: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return AuthenticationSteps.just(post("auth/cert/login").as(VaultResponse.class));
 	}
 }

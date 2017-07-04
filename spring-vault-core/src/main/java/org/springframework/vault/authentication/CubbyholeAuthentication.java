@@ -25,12 +25,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
@@ -132,7 +136,8 @@ import org.springframework.web.client.RestOperations;
  * "https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
  * Wrapping</a>
  */
-public class CubbyholeAuthentication implements ClientAuthentication {
+public class CubbyholeAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(CubbyholeAuthentication.class);
 
@@ -173,6 +178,17 @@ public class CubbyholeAuthentication implements ClientAuthentication {
 
 		logger.debug("Login successful using Cubbyhole authentication");
 		return tokenToUse;
+	}
+
+	public AuthenticationSteps getAuthenticationSteps() {
+
+		HttpRequest<VaultResponse> initialRequest = get(options.getPath()) //
+				.with(VaultHttpHeaders.from(options.getInitialToken())) //
+				.as(VaultResponse.class);
+
+		return AuthenticationSteps.fromHttpRequest(initialRequest) //
+				.map(VaultResponseSupport::getData) //
+				.login(this::getToken);
 	}
 
 	private Map<String, Object> lookupToken() {

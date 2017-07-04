@@ -58,22 +58,22 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 			Map<String, String> withSecretId = new HashMap<String, String>();
 			withSecretId.put("policies", "dummy"); // policy
-			withSecretId.put("bound_cidr_list", "0.0.0.0/0");
-			withSecretId.put("bind_secret_id", "true");
+				withSecretId.put("bound_cidr_list", "0.0.0.0/0");
+				withSecretId.put("bind_secret_id", "true");
 
-			restOperations.postForEntity("auth/approle/role/with-secret-id", withSecretId,
-					Map.class);
+				restOperations.postForEntity("auth/approle/role/with-secret-id",
+						withSecretId, Map.class);
 
-			Map<String, String> noSecretIdRole = new HashMap<String, String>();
-			noSecretIdRole.put("policies", "dummy"); // policy
-			noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
-			noSecretIdRole.put("bind_secret_id", "false");
+				Map<String, String> noSecretIdRole = new HashMap<String, String>();
+				noSecretIdRole.put("policies", "dummy"); // policy
+				noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
+				noSecretIdRole.put("bind_secret_id", "false");
 
-			restOperations.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole,
-					Map.class);
+				restOperations.postForEntity("auth/approle/role/no-secret-id",
+						noSecretIdRole, Map.class);
 
-			return null;
-		});
+				return null;
+			});
 	}
 
 	@Test
@@ -146,6 +146,47 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
+
+		getVaultOperations().write(
+				"auth/approle/role/with-secret-id/secret-id-accessor/destroy",
+				customSecretIdResponse.getData());
+	}
+
+	@Test(expected = VaultException.class)
+	public void authenticationStepsShouldAuthenticatePullModeFailsWithWrongSecretId() {
+
+		String roleId = getRoleId("with-secret-id");
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).secretId("this-is-a-wrong-secret-id").build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), prepare().getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
+	}
+
+	@Test
+	public void authenticationStepsShouldAuthenticatePushModeWithProvidedSecretId() {
+
+		String roleId = getRoleId("with-secret-id");
+		final String secretId = "hello_world_two";
+
+		final VaultResponse customSecretIdResponse = getVaultOperations().write(
+				"auth/approle/role/with-secret-id/custom-secret-id",
+				Collections.singletonMap("secret_id", secretId));
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).secretId(secretId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), prepare().getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
 
 		getVaultOperations().write(
 				"auth/approle/role/with-secret-id/secret-id-accessor/destroy",

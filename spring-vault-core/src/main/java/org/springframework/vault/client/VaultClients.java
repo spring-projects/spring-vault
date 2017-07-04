@@ -84,16 +84,15 @@ public class VaultClients {
 	 */
 	public static RestTemplate createRestTemplate() {
 
-		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(
-				3);
+		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(3);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
 		messageConverters.add(new MappingJackson2HttpMessageConverter());
 
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
 
-		restTemplate.getInterceptors()
-				.add((request, body, execution) -> execution.execute(request, body));
+		restTemplate.getInterceptors().add(
+				(request, body, execution) -> execution.execute(request, body));
 
 		return restTemplate;
 	}
@@ -122,8 +121,8 @@ public class VaultClients {
 		}
 
 		/**
-		 * Strip/add leading slashes from {@code uriTemplate} depending on whetner the
-		 * base url has a trailing slash.
+		 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base
+		 * url has a trailing slash.
 		 *
 		 * @param uriTemplate
 		 * @return
@@ -140,6 +139,16 @@ public class VaultClients {
 				}
 
 				return uriTemplate;
+			}
+
+			try {
+				URI uri = URI.create(uriTemplate);
+
+				if (uri.getHost() != null) {
+					return uriTemplate;
+				}
+			}
+			catch (IllegalArgumentException e) {
 			}
 
 			if (!uriTemplate.startsWith("/")) {

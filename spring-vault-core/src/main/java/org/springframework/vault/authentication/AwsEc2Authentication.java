@@ -17,6 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.logging.Log;
@@ -25,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -45,7 +47,8 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
  * aws-ec2</a>
  */
-public class AwsEc2Authentication implements ClientAuthentication {
+public class AwsEc2Authentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
@@ -79,8 +82,7 @@ public class AwsEc2Authentication implements ClientAuthentication {
 	 * @param awsMetadataRestOperations must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
-			RestOperations vaultRestOperations,
-			RestOperations awsMetadataRestOperations) {
+			RestOperations vaultRestOperations, RestOperations awsMetadataRestOperations) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
@@ -112,9 +114,10 @@ public class AwsEc2Authentication implements ClientAuthentication {
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response
 							.getAuth().get("metadata");
-					logger.debug(String.format(
-							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-							metadata.get("instance_id"), metadata.get("instance_id")));
+					logger.debug(String
+							.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+									metadata.get("instance_id"),
+									metadata.get("instance_id")));
 				}
 				else {
 					logger.debug("Login successful using AWS-EC2 authentication");
@@ -127,6 +130,33 @@ public class AwsEc2Authentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using AWS-EC2: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	public AuthenticationSteps getAuthenticationSteps() {
+
+		return AuthenticationSteps
+				.fromHttpRequest(
+						HttpRequestBuilder.get(
+								options.getIdentityDocumentUri().toString()).as(
+								String.class))
+				.map(pkcs7 -> pkcs7.replaceAll("\\r", "").replace("\\n", ""))
+				.map(pkcs7 -> {
+
+					Map<String, String> login = new HashMap<>();
+
+					if (StringUtils.hasText(options.getRole())) {
+						login.put("role", options.getRole());
+					}
+
+					if (Objects.equals(this.nonce.get(), EMPTY)) {
+						this.nonce.compareAndSet(EMPTY, createNonce());
+					}
+
+					login.put("nonce", new String(this.nonce.get()));
+					login.put("pkcs7", pkcs7);
+
+					return login;
+				}).login("auth/{mount}/login", options.getPath());
 	}
 
 	protected Map<String, String> getEc2Login() {
@@ -144,8 +174,8 @@ public class AwsEc2Authentication implements ClientAuthentication {
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = awsMetadataRestOperations
-					.getForObject(options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = awsMetadataRestOperations.getForObject(
+					options.getIdentityDocumentUri(), String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
@@ -153,10 +183,9 @@ public class AwsEc2Authentication implements ClientAuthentication {
 			return login;
 		}
 		catch (RestClientException e) {
-			throw new VaultException(
-					String.format("Cannot obtain Identity Document from %s",
-							options.getIdentityDocumentUri()),
-					e);
+			throw new VaultException(String.format(
+					"Cannot obtain Identity Document from %s",
+					options.getIdentityDocumentUri()), e);
 		}
 	}
 
