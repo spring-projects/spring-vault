@@ -20,7 +20,6 @@ import reactor.test.StepVerifier;
 
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestWebClientFactory;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -42,11 +41,8 @@ public class AppIdAuthenticationOperatorIntegrationTests extends
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				new RestTemplate());
-
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
-				authentication.getAuthenticationSteps(), webClient);
+				AppIdAuthentication.createAuthenticationSteps(options), webClient);
 
 		StepVerifier.create(supplier.getVaultToken()).expectNextCount(1).verifyComplete();
 	}
@@ -59,11 +55,8 @@ public class AppIdAuthenticationOperatorIntegrationTests extends
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				new RestTemplate());
-
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
-				authentication.getAuthenticationSteps(), webClient);
+				AppIdAuthentication.createAuthenticationSteps(options), webClient);
 
 		StepVerifier.create(supplier.getVaultToken()).expectError().verify();
 	}

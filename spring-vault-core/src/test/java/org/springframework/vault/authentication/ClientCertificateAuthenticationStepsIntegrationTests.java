@@ -46,11 +46,9 @@ public class ClientCertificateAuthenticationStepsIntegrationTests extends
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				restTemplate);
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), restTemplate);
+				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate);
 
 		VaultToken login = executor.login();
 
@@ -67,9 +65,8 @@ public class ClientCertificateAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		AuthenticationSteps steps = new ClientCertificateAuthentication(restTemplate)
-				.getAuthenticationSteps();
-
-		new AuthenticationStepsExecutor(steps, restTemplate).login();
+		new AuthenticationStepsExecutor(
+				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate)
+				.login();
 	}
 }

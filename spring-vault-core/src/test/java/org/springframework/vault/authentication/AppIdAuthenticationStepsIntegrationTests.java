@@ -45,11 +45,8 @@ public class AppIdAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				restTemplate);
-
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), restTemplate);
+				AppIdAuthentication.createAuthenticationSteps(options), restTemplate);
 
 		VaultToken login = executor.login();
 
@@ -67,10 +64,8 @@ public class AppIdAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		AuthenticationSteps authenticationChain = new AppIdAuthentication(options,
-				restTemplate).getAuthenticationSteps();
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authenticationChain, restTemplate);
+				AppIdAuthentication.createAuthenticationSteps(options), restTemplate);
 
 		executor.login();
 	}

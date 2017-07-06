@@ -50,7 +50,7 @@ public class AwsEc2AuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -60,7 +60,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldObtainIdentityDocument() throws Exception {
+	public void shouldObtainIdentityDocument() {
 
 		mockRest.expect(
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
@@ -74,7 +74,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldContainRole() throws Exception {
+	public void shouldContainRole() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
 				.role("ami").build();
@@ -94,7 +94,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLogin() throws Exception {
+	public void shouldLogin() {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
@@ -130,12 +130,12 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void authenticationChainShouldLogin() throws Exception {
+	public void authenticationChainShouldLogin() {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
-				.builder().nonce(nonce).build();
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+				.nonce(nonce).build();
 
 		mockRest.expect(
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
@@ -153,11 +153,8 @@ public class AwsEc2AuthenticationUnitTests {
 										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
 										+ "}"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(
-				authenticationOptions, restTemplate, restTemplate);
-
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), restTemplate);
+				AwsEc2Authentication.createAuthenticationSteps(options), restTemplate);
 		VaultToken login = executor.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -168,7 +165,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFailWhileObtainingIdentityDocument() throws Exception {
+	public void loginShouldFailWhileObtainingIdentityDocument() {
 
 		mockRest.expect(
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
@@ -178,7 +175,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		mockRest.expect(requestTo("/auth/aws-ec2/login")) //
 				.andRespond(withServerError());

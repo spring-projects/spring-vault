@@ -175,5 +175,4 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		return entity;
 	}
-
 }

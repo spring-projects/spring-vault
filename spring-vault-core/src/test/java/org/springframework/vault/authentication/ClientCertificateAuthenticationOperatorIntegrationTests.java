@@ -18,13 +18,7 @@ package org.springframework.vault.authentication;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
-import org.springframework.http.client.ClientHttpRequestFactory;
-import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.support.ClientOptions;
-import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.vault.util.TestWebClientFactory;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -42,16 +36,8 @@ public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		WebClient webClient = TestWebClientFactory
 				.create(prepareCertAuthenticationMethod());
 
-		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-				.create(new ClientOptions(), prepareCertAuthenticationMethod());
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate(
-				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				restTemplate);
-
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
-				authentication.getAuthenticationSteps(), webClient);
+				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
 	}

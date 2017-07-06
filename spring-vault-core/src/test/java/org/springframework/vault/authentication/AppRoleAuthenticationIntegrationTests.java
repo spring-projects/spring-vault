@@ -159,11 +159,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).secretId("this-is-a-wrong-secret-id").build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getRestTemplate());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), prepare().getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
+						.getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -180,11 +179,10 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).secretId(secretId).build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
-				prepare().getRestTemplate());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), prepare().getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
+						.getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 

@@ -22,9 +22,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.vault.util.TestWebClientFactory;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,14 +47,9 @@ public class CubbyholeAuthenticationOperatorIntegrationTests extends
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
-
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				restTemplate);
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
-				authentication.getAuthenticationSteps(), webClient);
+				CubbyholeAuthentication.createAuthenticationSteps(options), webClient);
 
 		StepVerifier.create(operator.getVaultToken()).consumeNextWith(actual -> {
 

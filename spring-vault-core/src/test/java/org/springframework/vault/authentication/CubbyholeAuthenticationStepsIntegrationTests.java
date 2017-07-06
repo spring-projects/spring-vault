@@ -47,11 +47,8 @@ public class CubbyholeAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				restTemplate);
-
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				authentication.getAuthenticationSteps(), restTemplate);
+				CubbyholeAuthentication.createAuthenticationSteps(options), restTemplate);
 
 		VaultToken login = executor.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());

@@ -47,7 +47,7 @@ public class AppRoleAuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -57,7 +57,7 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainToken() throws Exception {
+	public void loginShouldObtainToken() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
@@ -81,7 +81,7 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithoutSecretId() throws Exception {
+	public void loginShouldObtainTokenWithoutSecretId() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
@@ -110,7 +110,7 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
