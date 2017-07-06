@@ -68,9 +68,32 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for AppRole authentication given
+	 * {@link AppRoleAuthenticationOptions}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for AppRole authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			AppRoleAuthenticationOptions options) {
+
+		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
+
+		return AuthenticationSteps.fromSupplier(
+				() -> getAppRoleLogin(options.getRoleId(), options.getSecretId())) //
+				.login("auth/{mount}/login", options.getPath());
+	}
+
 	@Override
 	public VaultToken login() {
 		return createTokenUsingAppRole();
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(options);
 	}
 
 	private VaultToken createTokenUsingAppRole() {
@@ -92,21 +115,15 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		}
 	}
 
-	@Override
-	public AuthenticationSteps getAuthenticationSteps() {
-
-		return AuthenticationSteps.fromSupplier(
-				() -> getAppRoleLogin(options.getRoleId(), options.getSecretId())) //
-				.login("auth/{mount}/login", options.getPath());
-	}
-
-	private Map<String, String> getAppRoleLogin(String roleId, String secretId) {
+	private static Map<String, String> getAppRoleLogin(String roleId, String secretId) {
 
 		Map<String, String> login = new HashMap<>();
+
 		login.put("role_id", roleId);
 		if (secretId != null) {
 			login.put("secret_id", secretId);
 		}
+
 		return login;
 	}
 }

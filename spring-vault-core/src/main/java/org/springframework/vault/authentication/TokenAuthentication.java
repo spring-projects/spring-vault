@@ -54,13 +54,28 @@ public class TokenAuthentication implements ClientAuthentication,
 		this.token = token;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for token authentication given
+	 * {@link VaultToken}.
+	 *
+	 * @param token must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for token authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(VaultToken token) {
+
+		Assert.notNull(token, "VaultToken must not be null");
+
+		return AuthenticationSteps.just(token);
+	}
+
 	@Override
 	public VaultToken login() {
-		return token;
+		return this.token;
 	}
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return AuthenticationSteps.just(token);
+		return createAuthenticationSteps(this.token);
 	}
 }

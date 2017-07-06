@@ -162,12 +162,34 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for cubbyhole authentication given
+	 * {@link CubbyholeAuthenticationOptions}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for cubbyhole authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			CubbyholeAuthenticationOptions options) {
+
+		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
+
+		HttpRequest<VaultResponse> initialRequest = get(options.getPath()) //
+				.with(VaultHttpHeaders.from(options.getInitialToken())) //
+				.as(VaultResponse.class);
+
+		return AuthenticationSteps.fromHttpRequest(initialRequest) //
+				.map(VaultResponseSupport::getData) //
+				.login(map -> getToken(options, map));
+	}
+
 	@Override
 	public VaultToken login() throws VaultException {
 
 		Map<String, Object> data = lookupToken();
 
-		VaultToken tokenToUse = getToken(data);
+		VaultToken tokenToUse = getToken(this.options, data);
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
@@ -180,15 +202,9 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		return tokenToUse;
 	}
 
+	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-
-		HttpRequest<VaultResponse> initialRequest = get(options.getPath()) //
-				.with(VaultHttpHeaders.from(options.getInitialToken())) //
-				.as(VaultResponse.class);
-
-		return AuthenticationSteps.fromHttpRequest(initialRequest) //
-				.map(VaultResponseSupport::getData) //
-				.login(this::getToken);
+		return createAuthenticationSteps(options);
 	}
 
 	private Map<String, Object> lookupToken() {
@@ -227,7 +243,8 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		return true;
 	}
 
-	private VaultToken getToken(Map<String, Object> data) {
+	private static VaultToken getToken(CubbyholeAuthenticationOptions options,
+			Map<String, Object> data) {
 
 		if (options.isWrappedToken()) {
 

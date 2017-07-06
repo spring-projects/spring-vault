@@ -25,6 +25,7 @@ package org.springframework.vault.authentication;
  * @since 2.0
  * @see AuthenticationSteps
  */
+@FunctionalInterface
 public interface AuthenticationStepsFactory {
 
 	/**

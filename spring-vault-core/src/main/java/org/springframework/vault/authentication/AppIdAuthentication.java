@@ -66,9 +66,33 @@ public class AppIdAuthentication implements ClientAuthentication,
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for AppId authentication given
+	 * {@link AppIdAuthenticationOptions}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for AppId authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			AppIdAuthenticationOptions options) {
+
+		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
+
+		return AuthenticationSteps.fromSupplier(
+				() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism()
+						.createUserId())) //
+				.login("auth/{mount}/login", options.getPath());
+	}
+
 	@Override
 	public VaultToken login() {
 		return createTokenUsingAppId();
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(options);
 	}
 
 	private VaultToken createTokenUsingAppId() {
@@ -90,19 +114,13 @@ public class AppIdAuthentication implements ClientAuthentication,
 		}
 	}
 
-	public AuthenticationSteps getAuthenticationSteps() {
-
-		return AuthenticationSteps.fromSupplier(
-				() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism()
-						.createUserId())) //
-				.login("auth/{mount}/login", options.getPath());
-	}
-
-	private Map<String, String> getAppIdLogin(String appId, String userId) {
+	private static Map<String, String> getAppIdLogin(String appId, String userId) {
 
 		Map<String, String> login = new HashMap<>();
+
 		login.put("app_id", appId);
 		login.put("user_id", userId);
+
 		return login;
 	}
 }

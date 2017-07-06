@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,9 +95,62 @@ public class AwsEc2Authentication implements ClientAuthentication,
 		this.awsMetadataRestOperations = awsMetadataRestOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for AWS-EC2 authentication given
+	 * {@link AwsEc2AuthenticationOptions}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for AWS-EC2 authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			AwsEc2AuthenticationOptions options) {
+
+		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
+
+		AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
+
+		return createAuthenticationSteps(options, nonce, () -> doCreateNonce(options));
+	}
+
+	protected static AuthenticationSteps createAuthenticationSteps(
+			AwsEc2AuthenticationOptions options, AtomicReference<char[]> nonce,
+			Supplier<char[]> nonceSupplier) {
+
+		return AuthenticationSteps
+				.fromHttpRequest(
+						HttpRequestBuilder.get(
+								options.getIdentityDocumentUri().toString()).as(
+								String.class)) //
+				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
+				.map(pkcs7 -> pkcs7.replace("\\n", "")) //
+				.map(pkcs7 -> {
+
+					Map<String, String> login = new HashMap<>();
+
+					if (StringUtils.hasText(options.getRole())) {
+						login.put("role", options.getRole());
+					}
+
+					if (Objects.equals(nonce.get(), EMPTY)) {
+						nonce.compareAndSet(EMPTY, nonceSupplier.get());
+					}
+
+					login.put("nonce", new String(nonce.get()));
+					login.put("pkcs7", pkcs7);
+
+					return login;
+				}).login("auth/{mount}/login", options.getPath());
+	}
+
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingAwsEc2();
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(this.options, this.nonce, this::createNonce);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,33 +186,6 @@ public class AwsEc2Authentication implements ClientAuthentication,
 		}
 	}
 
-	public AuthenticationSteps getAuthenticationSteps() {
-
-		return AuthenticationSteps
-				.fromHttpRequest(
-						HttpRequestBuilder.get(
-								options.getIdentityDocumentUri().toString()).as(
-								String.class))
-				.map(pkcs7 -> pkcs7.replaceAll("\\r", "").replace("\\n", ""))
-				.map(pkcs7 -> {
-
-					Map<String, String> login = new HashMap<>();
-
-					if (StringUtils.hasText(options.getRole())) {
-						login.put("role", options.getRole());
-					}
-
-					if (Objects.equals(this.nonce.get(), EMPTY)) {
-						this.nonce.compareAndSet(EMPTY, createNonce());
-					}
-
-					login.put("nonce", new String(this.nonce.get()));
-					login.put("pkcs7", pkcs7);
-
-					return login;
-				}).login("auth/{mount}/login", options.getPath());
-	}
-
 	protected Map<String, String> getEc2Login() {
 
 		Map<String, String> login = new HashMap<>();
@@ -167,15 +194,15 @@ public class AwsEc2Authentication implements ClientAuthentication,
 			login.put("role", options.getRole());
 		}
 
-		if (this.nonce.get() == EMPTY) {
+		if (Objects.equals(this.nonce.get(), EMPTY)) {
 			this.nonce.compareAndSet(EMPTY, createNonce());
 		}
 
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = awsMetadataRestOperations.getForObject(
-					options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = this.awsMetadataRestOperations.getForObject(
+					this.options.getIdentityDocumentUri(), String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
@@ -190,6 +217,10 @@ public class AwsEc2Authentication implements ClientAuthentication,
 	}
 
 	protected char[] createNonce() {
+		return doCreateNonce(this.options);
+	}
+
+	private static char[] doCreateNonce(AwsEc2AuthenticationOptions options) {
 		return options.getNonce().getValue();
 	}
 }

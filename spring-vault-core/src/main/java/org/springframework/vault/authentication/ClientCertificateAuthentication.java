@@ -55,9 +55,24 @@ public class ClientCertificateAuthentication implements ClientAuthentication,
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 *
+	 * @return {@link AuthenticationSteps} for client certificate authentication.
+	 * @since 2.0
+	 */
+	public static AuthenticationSteps createAuthenticationSteps() {
+		return AuthenticationSteps.just(post("auth/cert/login").as(VaultResponse.class));
+	}
+
 	@Override
 	public VaultToken login() {
 		return createTokenUsingTlsCertAuthentication("cert");
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps();
 	}
 
 	private VaultToken createTokenUsingTlsCertAuthentication(String path) {
@@ -75,10 +90,5 @@ public class ClientCertificateAuthentication implements ClientAuthentication,
 					"Cannot login using TLS certificates: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
-	}
-
-	@Override
-	public AuthenticationSteps getAuthenticationSteps() {
-		return AuthenticationSteps.just(post("auth/cert/login").as(VaultResponse.class));
 	}
 }
