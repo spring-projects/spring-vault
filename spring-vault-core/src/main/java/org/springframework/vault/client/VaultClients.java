@@ -27,7 +27,10 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriBuilder;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Vault Client factory to create {@link RestTemplate} configured to the needs of
@@ -108,54 +111,82 @@ public class VaultClients {
 		return defaultUriTemplateHandler;
 	}
 
+	public static UriBuilderFactory createUriBuilderFactory(VaultEndpoint endpoint) {
+
+		String baseUrl = String.format("%s://%s:%s/%s/", endpoint.getScheme(),
+				endpoint.getHost(), endpoint.getPort(), "v1");
+
+		return new PrefixAwareUriBuilderFactory(baseUrl);
+	}
+
 	public static class PrefixAwareUriTemplateHandler extends DefaultUriTemplateHandler {
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
-			return super.expandInternal(prepareUriTemplate(uriTemplate), uriVariables);
+			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate),
+					uriVariables);
 		}
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Object... uriVariables) {
-			return super.expandInternal(prepareUriTemplate(uriTemplate), uriVariables);
+			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate),
+					uriVariables);
+		}
+	}
+
+	/**
+	 * @since 2.0
+	 */
+	public static class PrefixAwareUriBuilderFactory extends DefaultUriBuilderFactory {
+
+		private final String baseUri;
+
+		public PrefixAwareUriBuilderFactory(String baseUri) {
+			super(baseUri);
+			this.baseUri = baseUri;
 		}
 
-		/**
-		 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base
-		 * url has a trailing slash.
-		 *
-		 * @param uriTemplate
-		 * @return
-		 */
-		private String prepareUriTemplate(String uriTemplate) {
+		@Override
+		public UriBuilder uriString(String uriTemplate) {
+			return super.uriString(prepareUriTemplate(baseUri, uriTemplate));
+		}
+	}
 
-			if (getBaseUrl() != null) {
-				if (uriTemplate.startsWith("/") && getBaseUrl().endsWith("/")) {
-					return uriTemplate.substring(1);
-				}
+	/**
+	 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base url
+	 * has a trailing slash.
+	 *
+	 * @param uriTemplate
+	 * @return
+	 */
+	static String prepareUriTemplate(String baseUrl, String uriTemplate) {
 
-				if (!uriTemplate.startsWith("/") && !getBaseUrl().endsWith("/")) {
-					return "/" + uriTemplate;
-				}
-
-				return uriTemplate;
+		if (baseUrl != null) {
+			if (uriTemplate.startsWith("/") && baseUrl.endsWith("/")) {
+				return uriTemplate.substring(1);
 			}
 
-			try {
-				URI uri = URI.create(uriTemplate);
-
-				if (uri.getHost() != null) {
-					return uriTemplate;
-				}
-			}
-			catch (IllegalArgumentException e) {
-			}
-
-			if (!uriTemplate.startsWith("/")) {
+			if (!uriTemplate.startsWith("/") && !baseUrl.endsWith("/")) {
 				return "/" + uriTemplate;
 			}
 
 			return uriTemplate;
 		}
+
+		try {
+			URI uri = URI.create(uriTemplate);
+
+			if (uri.getHost() != null) {
+				return uriTemplate;
+			}
+		}
+		catch (IllegalArgumentException e) {
+		}
+
+		if (!uriTemplate.startsWith("/")) {
+			return "/" + uriTemplate;
+		}
+
+		return uriTemplate;
 	}
 }

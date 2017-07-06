@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,26 +18,30 @@ package org.springframework.vault.authentication;
 import java.util.Map;
 
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
-import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
+import org.springframework.vault.util.TestWebClientFactory;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
- * Integration tests for {@link CubbyholeAuthentication}.
+ * Integration tests for {@link CubbyholeAuthentication} using
+ * {@link AuthenticationStepsOperator}.
  *
  * @author Mark Paluch
  */
-public class CubbyholeAuthenticationIntegrationTests extends
+public class CubbyholeAuthenticationOperatorIntegrationTests extends
 		CubbyholeAuthenticationIntegrationTestBase {
 
+	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
+
 	@Test
-	public void shouldCreateWrappedToken() {
+	public void authenticationStepsShouldCreateWrappedToken() {
 
 		Map<String, String> wrapInfo = prepareWrappedToken();
 
@@ -50,29 +54,13 @@ public class CubbyholeAuthenticationIntegrationTests extends
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
 				restTemplate);
-		VaultToken login = authentication.login();
-		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
+
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
+				authentication.getAuthenticationSteps(), webClient);
+
+		StepVerifier.create(operator.getVaultToken()).consumeNextWith(actual -> {
+
+			assertThat(actual).isNotEqualTo(Settings.token().getToken()).isNotNull();
+		}).verifyComplete();
 	}
-
-	@Test
-	public void loginShouldFail() {
-
-		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.initialToken(VaultToken.of("Hello")).wrapped().build();
-
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				restTemplate);
-
-		try {
-			authentication.login();
-			fail("Missing VaultException");
-		}
-		catch (VaultException e) {
-			assertThat(e).hasMessageContaining("Cannot retrieve Token from Cubbyhole")
-					.hasMessageContaining("permission denied");
-		}
-	}
-
 }

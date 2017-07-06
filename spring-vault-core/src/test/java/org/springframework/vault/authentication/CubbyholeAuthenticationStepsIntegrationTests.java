@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Map;
+
 import org.junit.Test;
 
-import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
@@ -26,43 +27,33 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link AppIdAuthentication}.
+ * Integration tests for {@link CubbyholeAuthentication} using
+ * {@link AuthenticationStepsExecutor}.
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationIntegrationTests extends
-		AppIdAuthenticationIntegrationTestBase {
+public class CubbyholeAuthenticationStepsIntegrationTests extends
+		CubbyholeAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	public void authenticationStepsShouldCreateWrappedToken() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("myapp") //
-				.userIdMechanism(new StaticUserId("static-userid-value")) //
-				.build();
+		Map<String, String> wrapInfo = prepareWrappedToken();
 
+		String initialToken = wrapInfo.get("token");
+
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
 				restTemplate);
-		VaultToken login = authentication.login();
 
-		assertThat(login.getToken()).isNotEmpty();
-	}
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
-
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("wrong") //
-				.userIdMechanism(new StaticUserId("wrong")) //
-				.build();
-
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
-
-		new AppIdAuthentication(options, restTemplate).login();
-
+		VaultToken login = executor.login();
+		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
 }

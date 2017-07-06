@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,53 +16,55 @@
 package org.springframework.vault.authentication;
 
 import org.junit.Test;
+import reactor.test.StepVerifier;
 
-import org.springframework.vault.VaultException;
-import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
+import org.springframework.vault.util.TestWebClientFactory;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Integration tests for {@link AppIdAuthentication}.
+ * Integration tests for {@link AppIdAuthentication} using
+ * {@link AuthenticationStepsOperator}.
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationIntegrationTests extends
+public class AppIdAuthenticationOperatorIntegrationTests extends
 		AppIdAuthenticationIntegrationTestBase {
 
+	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
+
 	@Test
-	public void shouldLoginSuccessfully() {
+	public void authenticationStepsShouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
-
 		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				restTemplate);
-		VaultToken login = authentication.login();
+				new RestTemplate());
 
-		assertThat(login.getToken()).isNotEmpty();
+		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
+				authentication.getAuthenticationSteps(), webClient);
+
+		StepVerifier.create(supplier.getVaultToken()).expectNextCount(1).verifyComplete();
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	public void authenticationStepsLoginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		AppIdAuthentication authentication = new AppIdAuthentication(options,
+				new RestTemplate());
 
-		new AppIdAuthentication(options, restTemplate).login();
+		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
+				authentication.getAuthenticationSteps(), webClient);
 
+		StepVerifier.create(supplier.getVaultToken()).expectError().verify();
 	}
 }

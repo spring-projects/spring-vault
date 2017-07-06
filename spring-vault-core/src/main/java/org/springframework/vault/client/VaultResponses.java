@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -77,14 +78,19 @@ public abstract class VaultResponses {
 
 		Assert.notNull(e, "HttpStatusCodeException must not be null");
 
-		String message = VaultResponses.getError(e.getResponseBodyAsString());
+		return buildException(e.getStatusCode(), path,
+				VaultResponses.getError(e.getResponseBodyAsString()));
+	}
+
+	public static VaultException buildException(HttpStatus statusCode, String path,
+			String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s: %s",
-					e.getStatusCode(), path, message));
+			return new VaultException(String.format("Status %s %s: %s", statusCode, path,
+					message));
 		}
 
-		return new VaultException(String.format("Status %s %s", e.getStatusCode(), path));
+		return new VaultException(String.format("Status %s %s", statusCode, path));
 	}
 
 	/**

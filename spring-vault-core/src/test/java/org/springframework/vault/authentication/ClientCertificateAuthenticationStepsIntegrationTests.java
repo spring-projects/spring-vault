@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,16 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link ClientCertificateAuthentication}.
+ * Integration tests for {@link ClientCertificateAuthentication} using
+ * {@link AuthenticationStepsExecutor}.
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationIntegrationTests extends
+public class ClientCertificateAuthenticationStepsIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	public void authenticationStepsShouldLoginSuccessfully() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), prepareCertAuthenticationMethod());
@@ -47,7 +48,11 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
 				restTemplate);
-		VaultToken login = authentication.login();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+
+		VaultToken login = executor.login();
 
 		assertThat(login.getToken()).isNotEmpty();
 	}
@@ -55,13 +60,16 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
 	// receive a VaultException here.
 	@Test(expected = NestedRuntimeException.class)
-	public void loginShouldFail() {
+	public void authenticationStepsLoginShouldFail() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), Settings.createSslConfiguration());
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		new ClientCertificateAuthentication(restTemplate).login();
+		AuthenticationSteps steps = new ClientCertificateAuthentication(restTemplate)
+				.getAuthenticationSteps();
+
+		new AuthenticationStepsExecutor(steps, restTemplate).login();
 	}
 }

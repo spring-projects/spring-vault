@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,16 @@ import org.springframework.web.client.RestTemplate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link AppIdAuthentication}.
+ * Integration tests for {@link AppIdAuthentication} using
+ * {@link AuthenticationStepsExecutor}.
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationIntegrationTests extends
+public class AppIdAuthenticationStepsIntegrationTests extends
 		AppIdAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	public void authenticationStepsShouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
@@ -46,13 +47,17 @@ public class AppIdAuthenticationIntegrationTests extends
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options,
 				restTemplate);
-		VaultToken login = authentication.login();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authentication.getAuthenticationSteps(), restTemplate);
+
+		VaultToken login = executor.login();
 
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	public void authenticationStepsLoginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //
@@ -62,7 +67,11 @@ public class AppIdAuthenticationIntegrationTests extends
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		new AppIdAuthentication(options, restTemplate).login();
+		AuthenticationSteps authenticationChain = new AppIdAuthentication(options,
+				restTemplate).getAuthenticationSteps();
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				authenticationChain, restTemplate);
 
+		executor.login();
 	}
 }

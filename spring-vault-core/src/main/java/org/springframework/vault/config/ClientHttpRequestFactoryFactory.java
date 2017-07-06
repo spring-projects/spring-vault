@@ -139,7 +139,7 @@ public class ClientHttpRequestFactoryFactory {
 		return sslContext;
 	}
 
-	private static KeyManagerFactory createKeyManagerFactory(
+	static KeyManagerFactory createKeyManagerFactory(
 			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
 			IOException {
 
@@ -158,7 +158,7 @@ public class ClientHttpRequestFactoryFactory {
 		return keyManagerFactory;
 	}
 
-	private static TrustManagerFactory createTrustManagerFactory(
+	static TrustManagerFactory createTrustManagerFactory(
 			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
 			IOException {
 
@@ -191,7 +191,7 @@ public class ClientHttpRequestFactoryFactory {
 		}
 	}
 
-	private static boolean hasSslConfiguration(SslConfiguration sslConfiguration) {
+	static boolean hasSslConfiguration(SslConfiguration sslConfiguration) {
 		return sslConfiguration.getTrustStore() != null
 				|| sslConfiguration.getKeyStore() != null;
 	}

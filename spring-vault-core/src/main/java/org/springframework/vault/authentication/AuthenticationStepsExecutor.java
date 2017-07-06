@@ -40,6 +40,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @since 2.0
+ * @see AuthenticationSteps
  */
 public class AuthenticationStepsExecutor implements ClientAuthentication {
 

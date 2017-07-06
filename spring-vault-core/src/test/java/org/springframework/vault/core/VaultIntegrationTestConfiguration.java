@@ -19,17 +19,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.config.AbstractVaultConfiguration;
+import org.springframework.vault.config.AbstractReactiveVaultConfiguration;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
 
 /**
  * Test configuration for Vault integration tests.
- * 
+ *
  * @author Mark Paluch
  */
 @Configuration
-public class VaultIntegrationTestConfiguration extends AbstractVaultConfiguration {
+public class VaultIntegrationTestConfiguration extends AbstractReactiveVaultConfiguration {
 
 	@Override
 	public VaultEndpoint vaultEndpoint() {
