@@ -100,6 +100,14 @@
 				<type>pom</type>
 			</dependency>
 
+			<dependency>
+				<groupId>io.projectreactor</groupId>
+				<artifactId>reactor-bom</artifactId>
+				<version>Bismuth-BUILD-SNAPSHOT</version>
+				<scope>import</scope>
+				<type>pom</type>
+			</dependency>
+
 			<!-- Spring Framework -->
 			<dependency>
 				<groupId>org.springframework</groupId>
