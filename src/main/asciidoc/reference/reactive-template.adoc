@@ -1,0 +1,151 @@
+[[vault.core.reactive.template]]
+= Introduction to ReactiveVaultTemplate
+
+This section covers basic information on the reactive programming support using Spring Vault.
+
+== What is Reactive Programming?
+
+In plain terms reactive programming is about non-blocking applications that are
+asynchronous and event-driven and require a small number of threads to scale vertically
+(i.e. within the JVM) rather than horizontally (i.e. through clustering).
+
+A key aspect of reactive applications is the concept of backpressure which is a mechanism
+to ensure producers don’t overwhelm consumers. For example in a pipeline of reactive
+components extending from the database to the HTTP response when the HTTP connection is
+too slow the data repository can also slow down or stop completely until network capacity frees up.
+
+== Reactive Vault Client
+
+Spring Vault's reactive client support is built on top of <<vault.authentication.steps,composable authentication steps>> and Spring's functional `WebClient` via Reactor Netty, which features a fully non-blocking, event-driven HTTP client.
+
+It exposes `VaultTokenSupplier` as supplier of `VaultToken` to authenticate HTTP requests and `ReactiveVaultOperations`
+as the primary entry point. The core configuration of `VaultEndpoint`, `ClientOptions` and
+<<vault.client-ssl,SSL>> are reused across the various client implementation.
+
+The class `ReactiveVaultTemplate`, located in the package `org.springframework.vault.core`,
+is the central class of the Spring's reactive Vault support providing a rich feature set to
+interact with Vault. The template offers convenience operations to read, write and
+delete data in Vault and provides a mapping between your domain objects and Vault data.
+
+NOTE: Once configured, `ReactiveVaultTemplate` is thread-safe and can be reused across
+multiple instances.
+
+The mapping between Vault documents and domain classes is done by delegating to
+`WebClient` and its codecs.
+
+The `ReactiveVaultTemplate` class implements the interface `ReactiveVaultOperations`.
+In as much as possible, the methods on `ReactiveVaultOperations` are named after methods
+available on the Vault API to make the API familiar to existing Vault developers
+who are used to the API and CLI. For example, you will find methods such as
+"write", "delete", and "read".
+The design goal was to make it as easy as possible to transition between
+the use of the Vault API and `ReactiveVaultOperations`. A major difference in between
+the two APIs is that `ReactiveVaultOperations` can be passed domain objects instead of
+JSON Key-Value pairs.
+
+NOTE: The preferred way to reference the operations on `ReactiveVaultTemplate` instance
+is via its interface `ReactiveVaultOperations`.
+
+Functionality not explicitly exposed by the `ReactiveVaultTemplate` you can use one of
+several execute callback methods to access underlying APIs. The execute callbacks
+will give you a reference to a `WebClient` object.
+Please see the section <<vault.core.reactive.executioncallback,Execution Callbacks>> for more information.
+
+Now let's look at a examples of how to work with Vault in the context of the Spring container.
+
+[[vault.core.reactive.template.beans]]
+== Registering and configuring Spring Vault beans
+
+Using Spring Vault does not require a Spring Context. However, instances of
+`ReactiveVaultTemplate` and `VaultTokenSupplier` registered inside a managed context will participate
+in http://docs.spring.io/spring/docs/current/spring-framework-reference/html/beans.html#beans-factory-nature[lifecycle events]
+provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
+application shutdown. You also benefit from reusing the same `ReactiveVaultTemplate`
+instance across your application.
+
+Spring Vault comes with a supporting configuration class that provides bean definitions
+for use inside a Spring context. Application configuration
+classes typically extend from `AbstractVaultConfiguration` and are required to
+provide additional details that are environment specific.
+
+Extending from `AbstractVaultConfiguration` requires to implement
+` VaultEndpoint vaultEndpoint()` and `ClientAuthentication clientAuthentication()`
+methods.
+
+.Registering Spring Vault objects using Java based bean metadata
+====
+[source,java]
+----
+@Configuration
+public class AppConfig extends AbstractReactiveVaultConfiguration {
+
+    /**
+     * Specify an endpoint for connecting to Vault.
+     */
+    @Override
+    public VaultEndpoint vaultEndpoint() {
+        return new VaultEndpoint();                            <1>
+    }
+
+    /**
+     * Configure a client authentication.
+     * Please consider a more secure authentication method
+     * for production use.
+     */
+    @Override
+    public ClientAuthentication clientAuthentication() {
+        return new TokenAuthentication("…");                   <2>
+    }
+}
+----
+<1> Create a new `VaultEndpoint` that points by default to `\https://localhost:8200`.
+<2> This sample uses `TokenAuthentication` to get started quickly.
+See <<vault.core.authentication>> for details on supported authentication methods.
+====
+
+[[vault.core.reactive.template.sessionmanagement]]
+== Session Management
+
+Spring Vault requires a token to authenticate Vault requests.
+See <<vault.core.authentication>> on details regarding authentication.
+The reactive client requires a non-blocking token supplier whose contract is defined
+in `VaultTokenSupplier`. Tokens can be static or obtained through a
+<<vault.authentication.steps,declared authentication flow>>.
+Vault login should not occur on each authenticated Vault interaction but
+must be reused throughout a session. This aspect is handled by a
+session manager implementing `VaultTokenSupplier`.
+
+[[vault.core.reactive.executioncallback]]
+== Execution callbacks
+
+One common design feature of all Spring template classes is that all functionality
+is routed into one of the templates execute callback methods. This helps ensure
+that exceptions and any resource management that maybe required are performed
+consistency. While this was of much greater need in the case of JDBC and JMS
+than with Vault, it still offers a single spot for access and logging to occur.
+As such, using the execute callback is the preferred way to access the Vault API
+to perform uncommon operations that we've not exposed as methods on `ReactiveVaultTemplate`.
+
+Here is a list of execute callback methods.
+
+* `<T> T` *doWithVault* `(Function<WebClient, ? super T> clientCallback)` Composes a reactive
+sequence the given `WebClient`, allows to interact with Vault without a session context.
+
+* `<T> T` *doWithSession* `(Function<WebClient, ? super T> clientCallback)` Composes a reactive
+sequence the given `WebClient`, allows to interact with Vault in an authenticated session.
+
+Here is an example that uses the callback to initialize Vault:
+
+====
+[source,java]
+----
+reactiveVaultOperations.doWithVault(webClient -> {
+
+    return webClient.put()
+                    .uri("/sys/init")
+                    .syncBody(request)
+                    .retrieve()
+                    .toEntity(VaultInitializationResponse.class);
+});
+----
+====

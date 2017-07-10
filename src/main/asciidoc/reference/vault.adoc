@@ -4,13 +4,13 @@
 The Vault support contains a wide range of features which are summarized below.
 
 * Spring configuration support using Java based @Configuration classes
-* `VaultTemplate` helper class that increases productivity performing common 
+* `VaultTemplate` helper class that increases productivity performing common
 Vault operations.  Includes integrated object mapping between Vault responses and POJOs.
 
 For most tasks, you will find yourself using `VaultTemplate` that leverages the
-rich communication functionality. `VaultTemplate` is the place to look for 
-accessing functionality such as reading data from Vault or issuing 
-administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to 
+rich communication functionality. `VaultTemplate` is the place to look for
+accessing functionality such as reading data from Vault or issuing
+administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to
 get a hold of the low-level API artifacts such as `RestTemplate` to communicate
 directly with Vault.
 
@@ -18,6 +18,12 @@ directly with Vault.
 include::dependencies.adoc[]
 
 include::getting-started.adoc[]
+
+include::imperative-template.adoc[]
+
+include::reactive-template.adoc[]
+
+include::propertysource.adoc[]
 
 include::client-support.adoc[]
 

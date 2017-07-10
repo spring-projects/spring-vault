@@ -1,7 +1,7 @@
 [[vault.core.client.support]]
 = Client support
 
-Spring Vault supports a various HTTP clients to access Vault's HTTP API. Spring Vault uses
+Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Vault uses
 http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/remoting.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault.
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
@@ -64,3 +64,34 @@ dependencies to your project. You can omit the version number if using
 </dependency>
 ----
 ====
+
+[[vault.client-ssl]]
+== Vault Client SSL configuration
+
+SSL can be configured using `SslConfiguration` by setting various properties.
+You can set either `javax.net.ssl.trustStore` to configure
+JVM-wide SSL settings or configure `SslConfiguration`
+to set SSL settings only for Spring Vault.
+
+====
+[source,java]
+----
+
+SslConfiguration sslConfiguration = new SslConfiguration(               <1>
+                new FileSystemResource("client-cert.jks"), "changeit",
+                new FileSystemResource("truststore.jks"), "changeit");
+
+SslConfiguration.forTrustStore(new FileSystemResource("keystore.jks"),  <2>
+                                      "changeit")
+
+SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <3>
+                                      "changeit")
+----
+<1> Full configuration.
+<2> Configuring only trust store settings.
+<3> Configuring only key store settings.
+====
+
+Please note that providing `SslConfiguration` can be only
+applied when either Apache Http Components or the OkHttp client
+is on your class-path.

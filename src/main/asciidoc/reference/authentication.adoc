@@ -435,3 +435,73 @@ See also:
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 * https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
+
+
+[[vault.authentication.steps]]
+== Authentication Steps
+
+`ClientAuthentication` objects describe the authentication flow and perform the actual
+authentication steps. Pre-composed authentications are easy to use and to configure with
+a tight binding to synchronous execution.
+
+The composition of authentication methods and reusing common steps, such as posting login
+payload to Vault or retrieving authentication input from an HTTP source is not intended
+with `ClientAuthentication` objects.
+
+Authentication steps provide reusability of common authentication activity.
+Steps created via `AuthenticationSteps` describe an authentication flow in a functional
+style leaving the actual authentication execution to specific executors.
+
+.Stored token authentication flow.
+====
+[source,java]
+----
+AuthenticationSteps.just(VaultToken.of(…));                              <1>
+----
+<1> Creates `AuthenticationSteps` from just a `VaultToken`.
+====
+
+A single-step authentication flow can be created from a single input. Flows declaring
+multiple authentication steps start with a `Supplier` or `HttpRequest` that provide an
+authentication state object which can be used to map or post to Vault for login.
+
+.AppRole authentication flow
+====
+[source,java]
+----
+AuthenticationSteps.fromSupplier(                                       <1>
+
+    () -> getAppRoleLogin(options.getRoleId(), options.getSecretId()))  <2>
+
+    .login("auth/{mount}/login", options.getPath());                    <3>
+----
+<1> Start declaring `AuthenticationSteps` accepting a `Supplier<T>`. The state
+object type depends on the `Supplier` response type which can be mapped in a later step.
+<2> The actual `Supplier` implementation. Creating a `Map` in this case.
+<3> Perform a Vault login by posting the state object (`Map`) to a Vault endpoint
+for Vault token creation.
+====
+
+Authentication flows require an executor to perform the actual login. We provide two executors
+for different execution models:
+
+* `AuthenticationStepsExecutor` as a drop-in replacement for synchronous `ClientAuthentication`.
+* `AuthenticationStepsOperator` for reactive execution.
+
+Many ``ClientAuthentication``'s come with static factory methods to create `AuthenticationSteps`
+for their authentication-specific options:
+
+.Synchronous `AuthenticationSteps` execution
+====
+[source,java]
+----
+CubbyholeAuthenticationOptions options = …
+RestOperations restOperations = …
+
+AuthenticationSteps steps = CubbyholeAuthentication.createAuthenticationSteps(options);
+
+AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, restOperations);
+
+VaultToken token = executor.login();
+----
+====

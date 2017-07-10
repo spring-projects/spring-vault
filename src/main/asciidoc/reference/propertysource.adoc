@@ -1,0 +1,109 @@
+[[vault.core.propertysupport]]
+= Vault Property Source Support
+
+Vault can be used in many different ways. One specific use-case is using
+Vault to store encrypted properties. Spring Vault supports Vault as property
+source to obtain configuration properties using Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction].
+
+NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A `VaultPropertySource` must be initialized at that time to retrieve properties from Vault.
+
+NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud-incubator/spring-cloud-vault-config[Spring Cloud Vault]'s
+configuration integration that initializes various property sources during application startup.
+
+== Registering `VaultPropertySource`
+
+Spring Vault provides a `VaultPropertySource` to be used with Vault to obtain
+properties. It uses the nested `data` element to expose properties stored and
+encrypted in Vault.
+
+====
+[source,java]
+----
+ConfigurableApplicationContext ctx = new GenericApplicationContext();
+MutablePropertySources sources = ctx.getEnvironment().getPropertySources();
+sources.addFirst(new VaultPropertySource(vaultTemplate, "secret/my-application"));
+----
+====
+
+In the code above, `VaultPropertySource` has been added with highest precedence
+in the search. If it contains a ´foo` property, it will be detected and returned
+ahead of any `foo` property in any other `PropertySource`.
+`MutablePropertySources` exposes a number of methods that allow for precise
+manipulation of the set of property sources.
+
+== @VaultPropertySource
+
+The `@VaultPropertySource` annotation provides a convenient and declarative
+mechanism for adding a `PropertySource` to Spring's `Environment`
+to be used in conjunction with `@Configuration` classes.
+
+`@VaultPropertySource` takes a Vault path such as ``secret/my-application``
+and exposes the data stored at the node in a ``PropertySource``.
+`@VaultPropertySource` supports lease renewal for secrets associated with a lease
+(i. e. credentials from the `mysql` backend) and credential rotation upon terminal
+lease expiration. Lease renewal is disabled by default.
+
+.Properties stored in Vault
+====
+[source,json]
+----
+{
+  // …
+
+  "data": {
+    "database": {
+      "password": ...
+    },
+    "user.name": ...,
+  }
+
+  // …
+}
+----
+====
+
+.Declaring a `@VaultPropertySource`
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource("secret/my-application")
+public class AppConfig {
+
+    @Autowired Environment env;
+
+    @Bean
+    public TestBean testBean() {
+        TestBean testBean = new TestBean();
+        testBean.setUser(env.getProperty("user.name"));
+        testBean.setPassword(env.getProperty("database.password"));
+        return testBean;
+    }
+}
+----
+====
+
+.Declaring a `@VaultPropertySource` with credential rotation and prefix
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource(value = "aws/creds/s3-access",
+                     propertyNamePrefix = "aws.",
+                     renewal = Renewal.ROTATE)
+public class AppConfig {
+  // provides aws.access_key and aws.secret_key properties
+}
+----
+====
+
+NOTE: Secrets obtained from `generic` secret backends are associated with a TTL (`refresh_interval`) but not a lease Id. Spring Vault's ``PropertySource`` rotates generic secrets when reaching its TTL.
+
+In certain situations, it may not be possible or practical to tightly control
+property source ordering when using `@VaultPropertySource` annotations.
+For example, if the `@Configuration` classes above were registered via
+component-scanning, the ordering is difficult to predict.
+In such cases - and if overriding is important - it is recommended that the
+user fall back to using the programmatic PropertySource API.
+See http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
+http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
