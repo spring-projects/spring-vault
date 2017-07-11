@@ -21,6 +21,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
@@ -105,6 +106,9 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
 					login, VaultResponse.class, options.getPath());
 
+			Assert.state(response != null && response.getAuth() != null,
+					"Auth field must not be null");
+
 			logger.debug("Login successful using AppRole authentication");
 
 			return LoginTokenUtil.from(response.getAuth());
@@ -115,7 +119,8 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		}
 	}
 
-	private static Map<String, String> getAppRoleLogin(String roleId, String secretId) {
+	private static Map<String, String> getAppRoleLogin(String roleId,
+			@Nullable String secretId) {
 
 		Map<String, String> login = new HashMap<>();
 

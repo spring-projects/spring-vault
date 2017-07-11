@@ -120,6 +120,10 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 					if (stateObject instanceof VaultResponse) {
 
 						VaultResponse response = (VaultResponse) stateObject;
+
+						Assert.state(response.getAuth() != null,
+								"Auth field must not be null");
+
 						return LoginTokenUtil.from(response.getAuth());
 					}
 

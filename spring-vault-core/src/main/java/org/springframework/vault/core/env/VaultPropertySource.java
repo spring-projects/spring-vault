@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultOperations;
@@ -152,6 +153,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @return the resulting {@link Map} or {@literal null} if properties were not found.
 	 * @throws VaultException on problems retrieving properties
 	 */
+	@Nullable
 	protected Map<String, String> doGetProperties(String path) throws VaultException {
 
 		VaultResponse vaultResponse = this.source.read(path);

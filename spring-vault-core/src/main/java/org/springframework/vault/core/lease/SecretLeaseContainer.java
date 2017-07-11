@@ -38,6 +38,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
@@ -138,6 +139,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	private Duration expiryThreshold = Duration.ofSeconds(60);
 
+	@Nullable
 	private TaskScheduler taskScheduler;
 
 	private boolean manageTaskScheduler;
@@ -304,6 +306,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		if (initialized) {
 
+			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
+
 			LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(
 					this.taskScheduler);
 			this.renewals.put(requestedSecret, leaseRenewalScheduler);
@@ -370,7 +374,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			}
 
 			potentiallyScheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
-			onSecretsObtained(requestedSecret, lease, secrets.getData());
+			onSecretsObtained(requestedSecret, lease, secrets.getRequiredData());
 		}
 	}
 
@@ -514,6 +518,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * {@code path}.
 	 * @return the response.
 	 */
+	@Nullable
 	protected VaultResponseSupport<Map<String, Object>> doGetSecrets(
 			RequestedSecret requestedSecret) {
 
@@ -566,11 +571,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		return Lease.none();
 	}
 
+	@SuppressWarnings("unchecked")
 	private Lease renew(final Lease lease) {
+
 		ResponseEntity<Map<String, Object>> entity = operations
 				.doWithSession(restOperations -> (ResponseEntity) restOperations
-						.exchange("sys/renew/{leaseId}", HttpMethod.PUT, null,
-								Map.class, lease.getLeaseId()));
+						.exchange("sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class,
+								lease.getLeaseId()));
+
+		Assert.state(entity != null && entity.getBody() != null,
+				"Renew response must not be null");
 
 		Map<String, Object> body = entity.getBody();
 		String leaseId = (String) body.get("lease_id");
@@ -604,6 +614,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
+	@SuppressWarnings("unchecked")
 	protected void doRevokeLease(RequestedSecret requestedSecret, final Lease lease) {
 
 		try {
@@ -765,7 +776,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 					.getSeconds() - expiryThreshold.getSeconds());
 		}
 
-		private boolean isLeaseRenewable(Lease lease, RequestedSecret requestedSecret) {
+		private boolean isLeaseRenewable(@Nullable Lease lease,
+				RequestedSecret requestedSecret) {
 
 			if (lease == null) {
 				return false;
@@ -809,6 +821,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 
 		@Override
+		@Nullable
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {

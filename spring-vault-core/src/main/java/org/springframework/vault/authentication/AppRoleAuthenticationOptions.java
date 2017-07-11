@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -45,9 +46,11 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * The Bind SecretId.
 	 */
+	@Nullable
 	private final String secretId;
 
-	private AppRoleAuthenticationOptions(String path, String roleId, String secretId) {
+	private AppRoleAuthenticationOptions(String path, String roleId,
+			@Nullable String secretId) {
 
 		this.path = path;
 		this.roleId = roleId;
@@ -78,6 +81,7 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * @return the bound SecretId.
 	 */
+	@Nullable
 	public String getSecretId() {
 		return secretId;
 	}
@@ -89,8 +93,10 @@ public class AppRoleAuthenticationOptions {
 
 		private String path = DEFAULT_APPROLE_AUTHENTICATION_PATH;
 
+		@Nullable
 		private String roleId;
 
+		@Nullable
 		private String secretId;
 
 		AppRoleAuthenticationOptionsBuilder() {

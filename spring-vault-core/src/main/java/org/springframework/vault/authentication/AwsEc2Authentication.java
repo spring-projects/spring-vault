@@ -163,6 +163,9 @@ public class AwsEc2Authentication implements ClientAuthentication,
 			VaultResponse response = this.vaultRestOperations.postForObject(
 					"auth/{mount}/login", login, VaultResponse.class, options.getPath());
 
+			Assert.state(response != null && response.getAuth() != null,
+					"Auth field must not be null");
+
 			if (logger.isDebugEnabled()) {
 
 				if (response.getAuth().get("metadata") instanceof Map) {

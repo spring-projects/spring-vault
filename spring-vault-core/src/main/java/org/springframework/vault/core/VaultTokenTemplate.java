@@ -18,6 +18,7 @@ package org.springframework.vault.core;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -57,7 +58,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return write("auth/token/create", request, VaultTokenResponse.class);
+		return writeAndReturn("auth/token/create", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -70,7 +71,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return write("auth/token/create-orphan", request, VaultTokenResponse.class);
+		return writeAndReturn("auth/token/create-orphan", request,
+				VaultTokenResponse.class);
 	}
 
 	@Override
@@ -78,7 +80,8 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		return write(String.format("auth/token/renew/%s", vaultToken.getToken()), null,
+		return writeAndReturn(
+				String.format("auth/token/renew/%s", vaultToken.getToken()), null,
 				VaultTokenResponse.class);
 	}
 
@@ -87,7 +90,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("auth/token/revoke/%s", vaultToken.getToken()), null,
+		write(String.format("auth/token/revoke/%s", vaultToken.getToken()),
 				VaultTokenResponse.class);
 	}
 
@@ -96,25 +99,48 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken()), null,
+		write(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken()),
 				VaultTokenResponse.class);
 	}
 
-	public <T extends VaultResponseSupport<?>> T write(final String path,
-			final Object body, final Class<T> responseType) {
+	private <T extends VaultResponseSupport<?>> T writeAndReturn(String path,
+			@Nullable Object body, Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return vaultOperations.doWithSession(restOperations -> {
+		T response = vaultOperations.doWithSession(restOperations -> {
 			try {
 				ResponseEntity<T> exchange = restOperations.exchange(path,
-						HttpMethod.POST, new HttpEntity<>(body), responseType);
+						HttpMethod.POST, body == null ? HttpEntity.EMPTY
+								: new HttpEntity<>(body), responseType);
 
 				return exchange.getBody();
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e, path);
 			}
+		});
+
+		Assert.state(response != null, "Response must not be null");
+
+		return response;
+	}
+
+	private void write(String path, Class<?> responseType) {
+
+		Assert.hasText(path, "Path must not be empty");
+
+		vaultOperations.doWithSession(restOperations -> {
+
+			try {
+				restOperations.exchange(path, HttpMethod.POST, HttpEntity.EMPTY,
+						responseType);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, path);
+			}
+
+			return null;
 		});
 	}
 }

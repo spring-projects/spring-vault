@@ -17,20 +17,25 @@ package org.springframework.vault.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Value object to bind Vault HTTP Transit Key Config API requests.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultTransitKeyConfiguration {
 
 	@JsonProperty("deletion_allowed")
+	@Nullable
 	private final Boolean deletionAllowed;
 
 	@JsonProperty("latest_version")
+	@Nullable
 	private final Integer latestVersion;
 
-	private VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion) {
+	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed,
+			@Nullable Integer latestVersion) {
 		this.deletionAllowed = deletionAllowed;
 		this.latestVersion = latestVersion;
 	}
@@ -45,6 +50,7 @@ public class VaultTransitKeyConfiguration {
 	/**
 	 * @return whether key deletion is configured
 	 */
+	@Nullable
 	public Boolean getDeletionAllowed() {
 		return deletionAllowed;
 	}
@@ -52,6 +58,7 @@ public class VaultTransitKeyConfiguration {
 	/**
 	 * @return latest key version
 	 */
+	@Nullable
 	public Integer getLatestVersion() {
 		return latestVersion;
 	}
@@ -61,8 +68,10 @@ public class VaultTransitKeyConfiguration {
 	 */
 	public static class VaultTransitKeyConfigurationBuilder {
 
+		@Nullable
 		private Boolean deletionAllowed;
 
+		@Nullable
 		private Integer latestVersion;
 
 		VaultTransitKeyConfigurationBuilder() {

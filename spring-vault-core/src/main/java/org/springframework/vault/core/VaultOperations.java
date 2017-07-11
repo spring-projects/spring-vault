@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -87,6 +88,7 @@ public interface VaultOperations {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
+	@Nullable
 	VaultResponse read(String path);
 
 	/**
@@ -97,6 +99,7 @@ public interface VaultOperations {
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
+	@Nullable
 	<T> VaultResponseSupport<T> read(String path, Class<T> responseType);
 
 	/**
@@ -105,6 +108,7 @@ public interface VaultOperations {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
+	@Nullable
 	List<String> list(String path);
 
 	/**
@@ -112,9 +116,10 @@ public interface VaultOperations {
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
-	 * @return the configuration data. May be empty but never {@literal null}.
+	 * @return the configuration data. May be {@literal null}.
 	 */
-	VaultResponse write(String path, Object body);
+	@Nullable
+	VaultResponse write(String path, @Nullable Object body);
 
 	/**
 	 * Delete a path in the secret backend.
@@ -135,6 +140,7 @@ public interface VaultOperations {
 	 * @throws RestClientException exceptions from
 	 * {@link org.springframework.web.client.RestOperations}.
 	 */
+	@Nullable
 	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException,
 			RestClientException;
 
@@ -149,6 +155,7 @@ public interface VaultOperations {
 	 * @throws RestClientException exceptions from
 	 * {@link org.springframework.web.client.RestOperations}.
 	 */
+	@Nullable
 	<T> T doWithSession(RestOperationsCallback<T> sessionCallback) throws VaultException,
 			RestClientException;
 

@@ -15,10 +15,12 @@
  */
 package org.springframework.vault.support;
 
+import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,6 +42,7 @@ public class VaultMount {
 	/**
 	 * Human readable description of the mount.
 	 */
+	@Nullable
 	private final String description;
 
 	/**
@@ -48,11 +51,11 @@ public class VaultMount {
 	private final Map<String, Object> config;
 
 	private VaultMount(@JsonProperty("type") String type,
-			@JsonProperty("description") String description,
-			@JsonProperty("config") Map<String, Object> config) {
+			@Nullable @JsonProperty("description") String description,
+			@Nullable @JsonProperty("config") Map<String, Object> config) {
 		this.type = type;
 		this.description = description;
-		this.config = config;
+		this.config = config != null ? config : Collections.emptyMap();
 	}
 
 	/**
@@ -82,6 +85,7 @@ public class VaultMount {
 	/**
 	 * @return human readable description of this mount.
 	 */
+	@Nullable
 	public String getDescription() {
 		return description;
 	}
@@ -89,6 +93,7 @@ public class VaultMount {
 	/**
 	 * @return additional configuration details.
 	 */
+	@Nullable
 	public Map<String, Object> getConfig() {
 		return config;
 	}
@@ -98,11 +103,13 @@ public class VaultMount {
 	 */
 	public static class VaultMountBuilder {
 
+		@Nullable
 		private String type;
 
+		@Nullable
 		private String description;
 
-		private Map<String, Object> config;
+		private Map<String, Object> config = Collections.emptyMap();
 
 		VaultMountBuilder() {
 		}
@@ -128,6 +135,7 @@ public class VaultMount {
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
 		public VaultMountBuilder description(String description) {
+
 			this.description = description;
 			return this;
 		}
@@ -139,6 +147,9 @@ public class VaultMount {
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
 		public VaultMountBuilder config(Map<String, Object> config) {
+
+			Assert.notNull(config, "Configuration map must not be null");
+
 			this.config = config;
 			return this;
 		}
@@ -151,6 +162,7 @@ public class VaultMount {
 		 */
 		public VaultMount build() {
 
+			Assert.notNull(type, "Type must not be null");
 			Assert.hasText(type, "Type must not be empty or null");
 
 			return new VaultMount(type, description, config);

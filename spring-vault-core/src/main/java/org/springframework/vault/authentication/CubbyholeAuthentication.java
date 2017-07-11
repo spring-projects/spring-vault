@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
@@ -207,6 +208,7 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		return createAuthenticationSteps(options);
 	}
 
+	@Nullable
 	private Map<String, Object> lookupToken() {
 
 		try {
@@ -215,6 +217,8 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 					options.getPath(), HttpMethod.GET,
 					new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken())),
 					VaultResponse.class);
+
+			Assert.state(entity.getBody() != null, "Auth response must not be null");
 
 			return entity.getBody().getData();
 		}
@@ -244,12 +248,17 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 	}
 
 	private static VaultToken getToken(CubbyholeAuthenticationOptions options,
-			Map<String, Object> data) {
+			@Nullable Map<String, Object> data) {
 
 		if (options.isWrappedToken()) {
 
+			Assert.state(data != null, "Auth data must not be null");
+
 			VaultResponse response = VaultResponses.unwrap((String) data.get("response"),
 					VaultResponse.class);
+
+			Assert.state(response.getAuth() != null, "Auth field must not be null");
+
 			return LoginTokenUtil.from(response.getAuth());
 		}
 

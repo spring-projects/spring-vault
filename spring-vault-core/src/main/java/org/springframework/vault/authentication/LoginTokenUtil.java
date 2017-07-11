@@ -19,9 +19,11 @@ import java.util.Map;
 
 import lombok.experimental.UtilityClass;
 
+import org.springframework.util.Assert;
+
 /**
  * Utility class for {@link LoginToken}.
- * 
+ *
  * @author Mark Paluch
  */
 @UtilityClass
@@ -29,11 +31,13 @@ class LoginTokenUtil {
 
 	/**
 	 * Construct a {@link LoginToken} from an auth response.
-	 * 
+	 *
 	 * @param auth {@link Map} holding a login response.
 	 * @return the {@link LoginToken}
 	 */
 	static LoginToken from(Map<String, Object> auth) {
+
+		Assert.notNull(auth, "Authentication must not be null");
 
 		String token = (String) auth.get("client_token");
 		Boolean renewable = (Boolean) auth.get("renewable");

@@ -34,6 +34,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.annotation.VaultPropertySource.Renewal;
@@ -197,7 +198,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 	}
 
 	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
-			Map<String, Object> attributes) {
+			@Nullable Map<String, Object> attributes) {
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}

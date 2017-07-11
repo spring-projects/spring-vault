@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -92,7 +93,7 @@ public abstract class JsonMapFlattener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void flattenElement(String propertyPrefix, Object source,
+	private static void flattenElement(String propertyPrefix, @Nullable Object source,
 			Map<String, String> resultMap) {
 
 		if (source instanceof Iterable) {

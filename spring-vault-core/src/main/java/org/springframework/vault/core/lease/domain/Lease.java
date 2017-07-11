@@ -17,6 +17,7 @@ package org.springframework.vault.core.lease.domain;
 
 import java.time.Duration;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -29,13 +30,14 @@ public class Lease {
 
 	private static final Lease NONE = new Lease(null, Duration.ZERO, false);
 
+	@Nullable
 	private final String leaseId;
 
 	private final Duration leaseDuration;
 
 	private final boolean renewable;
 
-	private Lease(String leaseId, Duration leaseDuration, boolean renewable) {
+	private Lease(@Nullable String leaseId, Duration leaseDuration, boolean renewable) {
 
 		this.leaseId = leaseId;
 		this.leaseDuration = leaseDuration;
@@ -131,6 +133,7 @@ public class Lease {
 	/**
 	 * @return the lease Id
 	 */
+	@Nullable
 	public String getLeaseId() {
 		return leaseId;
 	}
@@ -170,7 +173,7 @@ public class Lease {
 	public int hashCode() {
 
 		int result = leaseId != null ? leaseId.hashCode() : 0;
-		result = 31 * result + (leaseDuration != null ? leaseDuration.hashCode() : 0);
+		result = 31 * result + leaseDuration.hashCode();
 		result = 31 * result + (renewable ? 1 : 0);
 		return result;
 	}

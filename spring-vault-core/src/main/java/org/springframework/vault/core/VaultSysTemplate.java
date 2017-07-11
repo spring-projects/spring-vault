@@ -32,6 +32,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
@@ -77,20 +78,23 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean isInitialized() {
 
-		return vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(vaultOperations.doWithVault(restOperations -> {
 
 			try {
 				Map<String, Boolean> body = restOperations.getForObject("sys/init",
 						Map.class);
+
+				Assert.state(body != null, "Initialization response must not be null");
 
 				return body.get("initialized");
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
-		});
+		}));
 	}
 
 	@Override
@@ -99,23 +103,23 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
-		return vaultOperations
-				.doWithVault(
-						(RestOperationsCallback<VaultInitializationResponse>) restOperations -> {
+		return requireResponse(vaultOperations.doWithVault(restOperations -> {
 
-							try {
-								ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
-										.exchange("sys/init", HttpMethod.PUT,
-												new HttpEntity<Object>(
-														vaultInitializationRequest),
-												VaultInitializationResponseImpl.class);
+			try {
+				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
+						.exchange("sys/init", HttpMethod.PUT, new HttpEntity<Object>(
+								vaultInitializationRequest),
+								VaultInitializationResponseImpl.class);
 
-								return exchange.getBody();
-							}
-							catch (HttpStatusCodeException e) {
-								throw VaultResponses.buildException(e);
-					}
-				});
+				Assert.state(exchange.getBody() != null,
+						"Initialization response must not be null");
+
+				return exchange.getBody();
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		}));
 	}
 
 	@Override
@@ -126,23 +130,22 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Override
 	public VaultUnsealStatus unseal(final String keyShare) {
 
-		return vaultOperations
-				.doWithVault(
-						(RestOperationsCallback<VaultUnsealStatus>) restOperations -> {
+		return requireResponse(vaultOperations.doWithVault(restOperations -> {
 
-							ResponseEntity<VaultUnsealStatusImpl> response = restOperations
-									.exchange("sys/unseal", HttpMethod.PUT,
-											new HttpEntity<Object>(Collections
-													.singletonMap("key", keyShare)),
-											VaultUnsealStatusImpl.class);
+			ResponseEntity<VaultUnsealStatusImpl> response = restOperations.exchange(
+					"sys/unseal", HttpMethod.PUT,
+					new HttpEntity<Object>(Collections.singletonMap("key", keyShare)),
+					VaultUnsealStatusImpl.class);
 
-							return response.getBody();
-				});
+			Assert.state(response.getBody() != null, "Unseal response must not be null");
+
+			return response.getBody();
+		}));
 	}
 
 	@Override
 	public VaultUnsealStatus getUnsealStatus() {
-		return vaultOperations.doWithVault(GET_UNSEAL_STATUS);
+		return requireResponse(vaultOperations.doWithVault(GET_UNSEAL_STATUS));
 	}
 
 	@Override
@@ -156,7 +159,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getMounts() {
-		return vaultOperations.doWithSession(GET_MOUNTS);
+		return requireResponse(vaultOperations.doWithSession(GET_MOUNTS));
 	}
 
 	@Override
@@ -179,7 +182,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getAuthMounts() throws VaultException {
-		return vaultOperations.doWithSession(GET_AUTH_MOUNTS);
+		return requireResponse(vaultOperations.doWithSession(GET_AUTH_MOUNTS));
 	}
 
 	@Override
@@ -192,7 +195,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultHealth health() {
-		return vaultOperations.doWithVault(HEALTH);
+		return requireResponse(vaultOperations.doWithVault(HEALTH));
+	}
+
+	private static <T> T requireResponse(@Nullable T response) {
+
+		Assert.state(response != null, "Response must not be null");
+
+		return response;
 	}
 
 	private static class GetUnsealStatus implements
@@ -231,10 +241,11 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
 
 			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(path,
-					HttpMethod.GET, null, MOUNT_TYPE_REF,
-					Collections.<String, Object>emptyMap());
+					HttpMethod.GET, null, MOUNT_TYPE_REF, Collections.emptyMap());
 
 			VaultMountsResponse body = exchange.getBody();
+
+			Assert.state(body != null, "Get mounts response must not be null");
 
 			if (body.getData() != null) {
 				return body.getData();
@@ -306,7 +317,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private List<String> keys = new ArrayList<>();
 
 		@JsonProperty("root_token")
-		private String rootToken;
+		private String rootToken = "";
 
 		public VaultToken getRootToken() {
 			return VaultToken.of(rootToken);
@@ -335,13 +346,15 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private final boolean sealed;
 		private final boolean standby;
 		private final int serverTimeUtc;
+
+		@Nullable
 		private final String version;
 
 		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
 				@JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
 				@JsonProperty("server_time_utc") int serverTimeUtc,
-				@JsonProperty("version") String version) {
+				@Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;

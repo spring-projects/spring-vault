@@ -17,6 +17,7 @@ package org.springframework.vault.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -27,18 +28,21 @@ import org.springframework.util.Assert;
  */
 public class VaultTransitKeyCreationRequest {
 
+	@Nullable
 	private final Boolean derived;
 
 	@JsonProperty("type")
 	private final String type;
 
 	@JsonProperty("convergent_encryption")
+	@Nullable
 	private final Boolean convergentEncryption;
 
+	@Nullable
 	private final Boolean exportable;
 
-	private VaultTransitKeyCreationRequest(Boolean derived, String type,
-			Boolean convergentEncryption, Boolean exportable) {
+	private VaultTransitKeyCreationRequest(@Nullable Boolean derived, String type,
+			@Nullable Boolean convergentEncryption, @Nullable Boolean exportable) {
 		this.derived = derived;
 		this.type = type;
 		this.convergentEncryption = convergentEncryption;
@@ -56,6 +60,7 @@ public class VaultTransitKeyCreationRequest {
 	 *
 	 * @return {@literal true} if key derivation MUST be used.
 	 */
+	@Nullable
 	public Boolean getDerived() {
 		return derived;
 	}
@@ -65,6 +70,7 @@ public class VaultTransitKeyCreationRequest {
 	 * @return {@literal true} if convergent encryption should be used (where the same
 	 * plaintext creates the same cipher text).
 	 */
+	@Nullable
 	public Boolean getConvergentEncryption() {
 		return convergentEncryption;
 	}
@@ -81,6 +87,7 @@ public class VaultTransitKeyCreationRequest {
 	 *
 	 * @return {@literal true} if key MUST be exportable.
 	 */
+	@Nullable
 	public Boolean getExportable() {
 		return this.exportable;
 	}
@@ -90,9 +97,14 @@ public class VaultTransitKeyCreationRequest {
 	 */
 	public static class VaultTransitKeyCreationRequestBuilder {
 
+		@Nullable
 		private Boolean derived;
 		private String type = "aes256-gcm96";
+
+		@Nullable
 		private Boolean convergentEncryption;
+
+		@Nullable
 		private Boolean exportable;
 
 		VaultTransitKeyCreationRequestBuilder() {

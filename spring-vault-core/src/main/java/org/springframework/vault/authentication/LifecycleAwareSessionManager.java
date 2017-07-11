@@ -175,7 +175,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 				logger.debug(String
 						.format("Cannot refresh token, resetting token and performing re-login: %s",
 								VaultResponses.getError(e.getResponseBodyAsString())));
-				token = null;
+				token = Optional.empty();
 				return false;
 			}
 
@@ -194,7 +194,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			synchronized (lock) {
 
 				if (!token.isPresent()) {
-					token = Optional.ofNullable(clientAuthentication.login());
+					token = Optional.of(clientAuthentication.login());
 
 					if (isTokenRenewable()) {
 						scheduleRenewal();
@@ -230,7 +230,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			@Override
 			public void run() {
 				try {
-					if (LifecycleAwareSessionManager.this.token != null
+					if (LifecycleAwareSessionManager.this.token.isPresent()
 							&& isTokenRenewable()) {
 						if (renewToken()) {
 							scheduleRenewal();

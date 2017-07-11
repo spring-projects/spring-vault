@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -34,33 +35,43 @@ import org.springframework.util.Assert;
  */
 public class VaultTokenRequest {
 
+	@Nullable
 	private final String id;
 
 	private final List<String> policies;
 
 	private final Map<String, String> meta;
 
+	@Nullable
 	private final Boolean noParent;
 
 	@JsonProperty("no_default_policy")
+	@Nullable
 	private final Boolean noDefaultPolicy;
 
+	@Nullable
 	private final Boolean renewable;
 
+	@Nullable
 	private final String ttl;
 
 	@JsonProperty("explicit_max_ttl")
+	@Nullable
 	private final String explicitMaxTtl;
 
 	@JsonProperty("display_name")
+	@Nullable
 	private final String displayName;
 
 	@JsonProperty("num_uses")
+	@Nullable
 	private final Integer numUses;
 
-	VaultTokenRequest(String id, List<String> policies, Map<String, String> meta,
-			Boolean noParent, Boolean noDefaultPolicy, Boolean renewable, String ttl,
-			String explicitMaxTtl, String displayName, Integer numUses) {
+	VaultTokenRequest(@Nullable String id, List<String> policies,
+			Map<String, String> meta, @Nullable Boolean noParent,
+			@Nullable Boolean noDefaultPolicy, @Nullable Boolean renewable,
+			@Nullable String ttl, @Nullable String explicitMaxTtl,
+			@Nullable String displayName, @Nullable Integer numUses) {
 
 		this.id = id;
 		this.policies = policies;
@@ -85,6 +96,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return Id of the client token.
 	 */
+	@Nullable
 	public String getId() {
 		return id;
 	}
@@ -110,6 +122,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return {@literal true} if the token should not have the parent.
 	 */
+	@Nullable
 	public Boolean getNoParent() {
 		return noParent;
 	}
@@ -118,6 +131,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return {@literal true} if the default policy should not be be applied.
 	 */
+	@Nullable
 	public Boolean getNoDefaultPolicy() {
 		return noDefaultPolicy;
 	}
@@ -126,6 +140,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return {@literal true} if then the token should be renewable.
 	 */
+	@Nullable
 	public Boolean getRenewable() {
 		return renewable;
 	}
@@ -134,6 +149,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return TTL period of the token.
 	 */
+	@Nullable
 	public String getTtl() {
 		return ttl;
 	}
@@ -142,6 +158,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return explicit TTL of the token.
 	 */
+	@Nullable
 	public String getExplicitMaxTtl() {
 		return explicitMaxTtl;
 	}
@@ -150,6 +167,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return the display name.
 	 */
+	@Nullable
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -158,6 +176,7 @@ public class VaultTokenRequest {
 	 *
 	 * @return the number of allowed token uses.
 	 */
+	@Nullable
 	public Integer getNumUses() {
 		return numUses;
 	}
@@ -167,24 +186,32 @@ public class VaultTokenRequest {
 	 */
 	public static class VaultTokenRequestBuilder {
 
+		@Nullable
 		private String id;
 
 		private List<String> policies = new ArrayList<>();
 
 		private Map<String, String> meta = new LinkedHashMap<>();
 
+		@Nullable
 		private Boolean noParent;
 
+		@Nullable
 		private Boolean noDefaultPolicy;
 
+		@Nullable
 		private Boolean renewable;
 
+		@Nullable
 		private String ttl;
 
+		@Nullable
 		private String explicitMaxTtl;
 
+		@Nullable
 		private String displayName;
 
+		@Nullable
 		private Integer numUses;
 
 		VaultTokenRequestBuilder() {

@@ -26,6 +26,7 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriTemplateHandler;
@@ -159,7 +160,7 @@ public class VaultClients {
 	 * @param uriTemplate
 	 * @return
 	 */
-	static String prepareUriTemplate(String baseUrl, String uriTemplate) {
+	static String prepareUriTemplate(@Nullable String baseUrl, String uriTemplate) {
 
 		if (baseUrl != null) {
 			if (uriTemplate.startsWith("/") && baseUrl.endsWith("/")) {

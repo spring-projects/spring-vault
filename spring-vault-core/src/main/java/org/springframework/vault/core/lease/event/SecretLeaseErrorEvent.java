@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease.event;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
@@ -38,9 +39,11 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 	 * @param lease can be {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
-	public SecretLeaseErrorEvent(RequestedSecret requestedSecret, Lease lease,
+	public SecretLeaseErrorEvent(RequestedSecret requestedSecret, @Nullable Lease lease,
 			Throwable exception) {
+
 		super(requestedSecret, lease);
+
 		this.exception = exception;
 	}
 

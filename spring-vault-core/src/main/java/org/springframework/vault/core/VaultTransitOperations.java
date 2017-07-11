@@ -17,12 +17,13 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.RawTransitKey;
 
 /**
  * Interface that specifies operations using the {@code transit} backend.
@@ -75,6 +76,7 @@ public interface VaultTransitOperations {
 	 * @param type must not be {@literal null}.
 	 * @return the {@link RawTransitKey}.
 	 */
+	@Nullable
 	RawTransitKey exportKey(String keyName, TransitKeyType type);
 
 	/**
@@ -83,6 +85,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @return the {@link VaultTransitKey}.
 	 */
+	@Nullable
 	VaultTransitKey getKey(String keyName);
 
 	/**
@@ -120,7 +123,8 @@ public interface VaultTransitOperations {
 	 * @param transitRequest may be {@literal null} if no request options provided.
 	 * @return cipher text.
 	 */
-	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
+	String encrypt(String keyName, byte[] plaintext,
+			@Nullable VaultTransitContext transitRequest);
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
@@ -139,7 +143,8 @@ public interface VaultTransitOperations {
 	 * @param transitRequest may be {@literal null} if no request options provided.
 	 * @return plain text.
 	 */
-	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitRequest);
+	byte[] decrypt(String keyName, String ciphertext,
+			@Nullable VaultTransitContext transitRequest);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
@@ -164,5 +169,6 @@ public interface VaultTransitOperations {
 	 * @return cipher text.
 	 * @see #rotate(String)
 	 */
-	String rewrap(String keyName, String ciphertext, VaultTransitContext transitRequest);
+	String rewrap(String keyName, String ciphertext,
+			@Nullable VaultTransitContext transitRequest);
 }

@@ -23,8 +23,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -32,7 +34,6 @@ import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.RawTransitKey;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -80,8 +81,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		VaultResponse response = vaultOperations.read(String.format("%s/keys?list=true",
 				path));
 
-		return response == null ? Collections.emptyList() : (List) response.getData()
-				.get("keys");
+		return response == null ? Collections.emptyList() : (List) response
+				.getRequiredData().get("keys");
 	}
 
 	@Override
@@ -95,6 +96,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	@Nullable
 	public RawTransitKey exportKey(String keyName, TransitKeyType type) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
@@ -104,10 +106,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				String.format("%s/export/%s/%s", path, type.getValue(), keyName),
 				RawTransitKeyImpl.class);
 
-		return result != null ? result.getData() : null;
+		return result != null ? result.getRequiredData() : null;
 	}
 
 	@Override
+	@Nullable
 	public VaultTransitKey getKey(String keyName) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
@@ -116,7 +119,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				String.format("%s/keys/%s", path, keyName), VaultTransitKeyImpl.class);
 
 		if (result != null) {
-			return result.getData();
+			return result.getRequiredData();
 		}
 
 		return null;
@@ -149,13 +152,13 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		request.put("plaintext", Base64Utils.encodeToString(plaintext.getBytes()));
 
 		return (String) vaultOperations
-				.write(String.format("%s/encrypt/%s", path, keyName), request).getData()
-				.get("ciphertext");
+				.write(String.format("%s/encrypt/%s", path, keyName), request)
+				.getRequiredData().get("ciphertext");
 	}
 
 	@Override
 	public String encrypt(String keyName, byte[] plaintext,
-			VaultTransitContext transitRequest) {
+			@Nullable VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(plaintext, "Plain text must not be null");
@@ -169,8 +172,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		return (String) vaultOperations
-				.write(String.format("%s/encrypt/%s", path, keyName), request).getData()
-				.get("ciphertext");
+				.write(String.format("%s/encrypt/%s", path, keyName), request)
+				.getRequiredData().get("ciphertext");
 	}
 
 	@Override
@@ -184,15 +187,15 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		request.put("ciphertext", ciphertext);
 
 		String plaintext = (String) vaultOperations
-				.write(String.format("%s/decrypt/%s", path, keyName), request).getData()
-				.get("plaintext");
+				.write(String.format("%s/decrypt/%s", path, keyName), request)
+				.getRequiredData().get("plaintext");
 
 		return new String(Base64Utils.decodeFromString(plaintext));
 	}
 
 	@Override
 	public byte[] decrypt(String keyName, String ciphertext,
-			VaultTransitContext transitRequest) {
+			@Nullable VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.hasText(keyName, "Cipher text must not be empty");
@@ -206,8 +209,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		String plaintext = (String) vaultOperations
-				.write(String.format("%s/decrypt/%s", path, keyName), request).getData()
-				.get("plaintext");
+				.write(String.format("%s/decrypt/%s", path, keyName), request)
+				.getRequiredData().get("plaintext");
 
 		return Base64Utils.decodeFromString(plaintext);
 	}
@@ -222,13 +225,13 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		request.put("ciphertext", ciphertext);
 
 		return (String) vaultOperations
-				.write(String.format("%s/rewrap/%s", path, keyName), request).getData()
-				.get("ciphertext");
+				.write(String.format("%s/rewrap/%s", path, keyName), request)
+				.getRequiredData().get("ciphertext");
 	}
 
 	@Override
 	public String rewrap(String keyName, String ciphertext,
-			VaultTransitContext transitRequest) {
+			@Nullable VaultTransitContext transitRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.hasText(ciphertext, "Cipher text must not be empty");
@@ -242,8 +245,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		return (String) vaultOperations
-				.write(String.format("%s/rewrap/%s", path, keyName), request).getData()
-				.get("ciphertext");
+				.write(String.format("%s/rewrap/%s", path, keyName), request)
+				.getRequiredData().get("ciphertext");
 	}
 
 	private void applyTransitOptions(VaultTransitContext transitRequest,
@@ -263,9 +266,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	static class VaultTransitKeyImpl implements VaultTransitKey {
 
 		@JsonProperty("cipher_mode")
-		private String cipherMode;
+		private String cipherMode = "";
 
 		@JsonProperty("type")
+		@Nullable
 		private String type;
 
 		@JsonProperty("deletion_allowed")
@@ -275,7 +279,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		private boolean exportable;
 
-		private Map<String, Long> keys;
+		private Map<String, Long> keys = Collections.emptyMap();
 
 		@JsonProperty("latest_version")
 		private boolean latestVersion;
@@ -283,6 +287,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("min_decryption_version")
 		private int minDecryptionVersion;
 
+		@Nullable
 		private String name;
 
 		@Override
@@ -299,8 +304,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Data
 	static class RawTransitKeyImpl implements RawTransitKey {
 
-		private Map<String, String> keys;
+		private Map<String, String> keys = Collections.emptyMap();
 
+		@Nullable
 		private String name;
 	}
 }

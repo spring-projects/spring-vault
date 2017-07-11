@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import org.springframework.lang.Nullable;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -30,5 +31,6 @@ public interface RestOperationsCallback<T> {
 	 * @param restOperations restOperations to use, must not be {@literal null}.
 	 * @return a result object or null if none.
 	 */
+	@Nullable
 	T doWithRestOperations(RestOperations restOperations);
 }

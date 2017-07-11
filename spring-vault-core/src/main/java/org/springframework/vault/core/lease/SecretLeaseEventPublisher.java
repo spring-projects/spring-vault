@@ -22,6 +22,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
@@ -196,7 +197,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param lease may be {@literal null}
 	 * @param e the causing exception.
 	 */
-	protected void onError(RequestedSecret requestedSecret, Lease lease, Exception e) {
+	protected void onError(RequestedSecret requestedSecret, @Nullable Lease lease,
+			Exception e) {
 
 		for (LeaseErrorListener leaseErrorListener : leaseErrorListeners) {
 			leaseErrorListener.onLeaseError(new SecretLeaseErrorEvent(requestedSecret,

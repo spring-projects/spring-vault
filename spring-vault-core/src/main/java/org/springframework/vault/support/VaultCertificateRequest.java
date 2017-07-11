@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -47,6 +48,7 @@ public class VaultCertificateRequest {
 	/**
 	 * Requested Time to Live
 	 */
+	@Nullable
 	private final Duration ttl;
 
 	/**
@@ -57,8 +59,8 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	VaultCertificateRequest(String commonName, List<String> altNames,
-			List<String> ipSubjectAltNames, Duration ttl,
-			Boolean excludeCommonNameFromSubjectAltNames) {
+			List<String> ipSubjectAltNames, @Nullable Duration ttl,
+			@Nullable Boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
@@ -97,6 +99,7 @@ public class VaultCertificateRequest {
 		return ipSubjectAltNames;
 	}
 
+	@Nullable
 	public Duration getTtl() {
 		return ttl;
 	}
@@ -107,10 +110,15 @@ public class VaultCertificateRequest {
 
 	public static class VaultCertificateRequestBuilder {
 
+		@Nullable
 		private String commonName;
 		private List<String> altNames = new ArrayList<>();
 		private List<String> ipSubjectAltNames = new ArrayList<>();
+
+		@Nullable
 		private Duration ttl;
+
+		@Nullable
 		private Boolean excludeCommonNameFromSubjectAltNames;
 
 		VaultCertificateRequestBuilder() {
@@ -257,6 +265,7 @@ public class VaultCertificateRequest {
 		 */
 		public VaultCertificateRequest build() {
 
+			Assert.notNull(commonName, "Common name must not be null");
 			Assert.hasText(commonName, "Common name must not be empty");
 
 			List<String> altNames;

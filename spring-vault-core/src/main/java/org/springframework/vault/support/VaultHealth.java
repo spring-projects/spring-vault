@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Vault health state.
  *
@@ -50,5 +52,6 @@ public interface VaultHealth {
 	/**
 	 * @return the Vault version.
 	 */
+	@Nullable
 	String getVersion();
 }

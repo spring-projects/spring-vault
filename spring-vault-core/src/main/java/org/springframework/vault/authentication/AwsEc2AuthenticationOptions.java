@@ -19,6 +19,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.UUID;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -59,6 +60,7 @@ public class AwsEc2AuthenticationOptions {
 	/**
 	 * EC2 instance role name. May be {@literal null} if none.
 	 */
+	@Nullable
 	private final String role;
 
 	/**
@@ -72,7 +74,7 @@ public class AwsEc2AuthenticationOptions {
 	}
 
 	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri,
-			String role, Nonce nonce) {
+			@Nullable String role, Nonce nonce) {
 
 		this.path = path;
 		this.identityDocumentUri = identityDocumentUri;
@@ -104,6 +106,7 @@ public class AwsEc2AuthenticationOptions {
 	/**
 	 * @return the role, may be {@literal null} if none.
 	 */
+	@Nullable
 	public String getRole() {
 		return role;
 	}
@@ -122,7 +125,10 @@ public class AwsEc2AuthenticationOptions {
 
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;
 		private URI identityDocumentUri = DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI;
+
+		@Nullable
 		private String role;
+
 		private Nonce nonce = Nonce.generated();
 
 		AwsEc2AuthenticationOptionsBuilder() {
@@ -164,7 +170,7 @@ public class AwsEc2AuthenticationOptions {
 		 * @param role may be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 */
-		public AwsEc2AuthenticationOptionsBuilder role(String role) {
+		public AwsEc2AuthenticationOptionsBuilder role(@Nullable String role) {
 
 			this.role = role;
 			return this;

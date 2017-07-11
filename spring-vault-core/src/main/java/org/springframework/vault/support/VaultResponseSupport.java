@@ -22,6 +22,8 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Value object to bind generic Vault HTTP API responses.
  *
@@ -32,64 +34,95 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultResponseSupport<T> {
 
+	@Nullable
 	private Map<String, Object> auth;
 
+	@Nullable
 	private T data;
 
+	@Nullable
 	private Map<String, String> metadata;
 
 	@JsonProperty("wrap_info")
+	@Nullable
 	private Map<String, String> wrapInfo;
 
 	@JsonProperty("lease_duration")
 	private long leaseDuration;
 
 	@JsonProperty("lease_id")
+	@Nullable
 	private String leaseId;
 
 	@JsonProperty("request_id")
+	@Nullable
 	private String requestId;
 
 	private boolean renewable;
 
+	@Nullable
 	private List<String> warnings;
 
 	/**
-	 *
 	 * @return authentication payload.
 	 */
+	@Nullable
 	public Map<String, Object> getAuth() {
 		return auth;
 	}
 
 	/**
-	 *
+	 * @return the authentication payload.
+	 * @throws IllegalStateException if {@code auth} is null.
+	 */
+	public Map<String, Object> getRequiredAuth() {
+
+		if (auth != null) {
+			return auth;
+		}
+
+		throw new IllegalStateException("Auth field is empty");
+	}
+
+	/**
 	 * @param auth the authentication payload.
 	 */
-	public void setAuth(Map<String, Object> auth) {
+	public void setAuth(@Nullable Map<String, Object> auth) {
 		this.auth = auth;
 	}
 
 	/**
-	 *
 	 * @return secret data.
 	 */
+	@Nullable
 	public T getData() {
 		return data;
 	}
 
 	/**
-	 *
+	 * @return the required secret data.
+	 * @throws IllegalStateException if {@code data} is null.
+	 */
+	public T getRequiredData() {
+
+		if (data != null) {
+			return data;
+		}
+
+		throw new IllegalStateException("Data field is empty");
+	}
+
+	/**
 	 * @param data secret data.
 	 */
-	public void setData(T data) {
+	public void setData(@Nullable T data) {
 		this.data = data;
 	}
 
 	/**
-	 *
 	 * @return request metadata.
 	 */
+	@Nullable
 	public Map<String, String> getMetadata() {
 		return metadata;
 	}
@@ -98,7 +131,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param metadata request metadata.
 	 */
-	public void setMetadata(Map<String, String> metadata) {
+	public void setMetadata(@Nullable Map<String, String> metadata) {
 		this.metadata = metadata;
 	}
 
@@ -122,6 +155,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @return the lease Id.
 	 */
+	@Nullable
 	public String getLeaseId() {
 		return leaseId;
 	}
@@ -130,7 +164,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param leaseId the lease Id.
 	 */
-	public void setLeaseId(String leaseId) {
+	public void setLeaseId(@Nullable String leaseId) {
 		this.leaseId = leaseId;
 	}
 
@@ -154,6 +188,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @return response wrapping details.
 	 */
+	@Nullable
 	public Map<String, String> getWrapInfo() {
 		return wrapInfo;
 	}
@@ -162,7 +197,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param wrapInfo response wrapping details.
 	 */
-	public void setWrapInfo(Map<String, String> wrapInfo) {
+	public void setWrapInfo(@Nullable Map<String, String> wrapInfo) {
 		this.wrapInfo = wrapInfo;
 	}
 
@@ -170,6 +205,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @return the request Id.
 	 */
+	@Nullable
 	public String getRequestId() {
 		return requestId;
 	}
@@ -178,7 +214,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param requestId the request Id.
 	 */
-	public void setRequestId(String requestId) {
+	public void setRequestId(@Nullable String requestId) {
 		this.requestId = requestId;
 	}
 
@@ -186,6 +222,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @return the warnings.
 	 */
+	@Nullable
 	public List<String> getWarnings() {
 		return warnings;
 	}
@@ -194,7 +231,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param warnings the warnings.
 	 */
-	public void setWarnings(List<String> warnings) {
+	public void setWarnings(@Nullable List<String> warnings) {
 		this.warnings = warnings;
 	}
 }

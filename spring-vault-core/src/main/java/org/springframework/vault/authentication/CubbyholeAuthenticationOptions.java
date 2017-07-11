@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
 
@@ -106,8 +107,10 @@ public class CubbyholeAuthenticationOptions {
 	 */
 	public static class CubbyholeAuthenticationOptionsBuilder {
 
+		@Nullable
 		private VaultToken initialToken;
 
+		@Nullable
 		private String path;
 
 		private boolean wrappedToken;
@@ -123,8 +126,7 @@ public class CubbyholeAuthenticationOptions {
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
-		public CubbyholeAuthenticationOptionsBuilder initialToken(
-				VaultToken initialToken) {
+		public CubbyholeAuthenticationOptionsBuilder initialToken(VaultToken initialToken) {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 
@@ -183,6 +185,7 @@ public class CubbyholeAuthenticationOptions {
 		public CubbyholeAuthenticationOptions build() {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
+			Assert.notNull(path, "Path must not be null");
 
 			return new CubbyholeAuthenticationOptions(initialToken, path, wrappedToken,
 					selfLookup);

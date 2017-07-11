@@ -52,7 +52,7 @@ public interface ReactiveVaultOperations {
 	 * backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
-	 * @return the data. May be {@literal null} if the path does not exist.
+	 * @return the data. May be empty if the path does not exist.
 	 */
 	Mono<VaultResponse> read(String path);
 
@@ -62,7 +62,7 @@ public interface ReactiveVaultOperations {
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
-	 * @return the data. May be {@literal null} if the path does not exist.
+	 * @return the data. May be empty if the path does not exist.
 	 */
 	<T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType);
 
@@ -70,7 +70,7 @@ public interface ReactiveVaultOperations {
 	 * Enumerate keys from a secret backend.
 	 *
 	 * @param path must not be {@literal null}.
-	 * @return the data. May be {@literal null} if the path does not exist.
+	 * @return the data. May be empty if the path does not exist.
 	 */
 	Flux<String> list(String path);
 

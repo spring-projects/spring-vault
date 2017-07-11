@@ -117,11 +117,12 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 				String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
 				VaultListResponse.class);
 
-		return read.filter(
-				response -> response.getData() != null
-						&& response.getData().containsKey("keys")) //
+		return read
+				.filter(response -> response.getData() != null
+						&& response.getData().containsKey("keys"))
+				//
 				.flatMapIterable(
-						response -> (List<String>) response.getData().get("keys"));
+						response -> (List<String>) response.getRequiredData().get("keys"));
 	}
 
 	@Override

@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
@@ -121,6 +122,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		if (state instanceof VaultResponse) {
 
 			VaultResponse response = (VaultResponse) state;
+			Assert.state(response.getAuth() != null, "Auth field must not be null");
 			return LoginTokenUtil.from(response.getAuth());
 		}
 
@@ -141,7 +143,9 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		return o.apply(state);
 	}
 
-	private Object doHttpRequest(HttpRequestNode<Object> step, Object state) {
+	@SuppressWarnings("ConstantConditions")
+	@Nullable
+	private Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
 
 		HttpRequest<Object> definition = step.getDefinition();
 
@@ -163,7 +167,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	}
 
-	private static HttpEntity<?> getEntity(HttpEntity<?> entity, Object state) {
+	private static HttpEntity<?> getEntity(HttpEntity<?> entity, @Nullable Object state) {
 
 		if (entity == null) {
 			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);

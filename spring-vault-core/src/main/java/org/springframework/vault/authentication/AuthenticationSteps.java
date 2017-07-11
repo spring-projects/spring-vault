@@ -35,6 +35,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -270,12 +271,16 @@ public class AuthenticationSteps {
 
 		HttpMethod method;
 
+		@Nullable
 		URI uri;
 
+		@Nullable
 		String uriTemplate;
 
+		@Nullable
 		String[] urlVariables;
 
+		@Nullable
 		HttpEntity<?> entity;
 
 		/**
@@ -325,15 +330,16 @@ public class AuthenticationSteps {
 			this.uri = uri;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, String uriTemplate,
-				String[] urlVariables) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate,
+				@Nullable String[] urlVariables) {
 			this.method = method;
 			this.uriTemplate = uriTemplate;
 			this.urlVariables = urlVariables;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, URI uri, String uriTemplate,
-				String[] urlVariables, HttpEntity<?> entity) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable URI uri,
+				@Nullable String uriTemplate, @Nullable String[] urlVariables,
+				@Nullable HttpEntity<?> entity) {
 			this.method = method;
 			this.uri = uri;
 			this.uriTemplate = uriTemplate;
@@ -393,12 +399,16 @@ public class AuthenticationSteps {
 
 		HttpMethod method;
 
+		@Nullable
 		URI uri;
 
+		@Nullable
 		String uriTemplate;
 
+		@Nullable
 		String[] urlVariables;
 
+		@Nullable
 		HttpEntity<?> entity;
 
 		Class<T> responseType;

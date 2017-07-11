@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Transit backend encryption/decryption/rewrapping context.
  *
@@ -28,11 +30,13 @@ public class VaultTransitContext {
 	 */
 	private static final VaultTransitContext EMPTY = new VaultTransitContext(null, null);
 
+	@Nullable
 	private final byte[] context;
 
+	@Nullable
 	private final byte[] nonce;
 
-	VaultTransitContext(byte[] context, byte[] nonce) {
+	VaultTransitContext(@Nullable byte[] context, @Nullable byte[] nonce) {
 		this.context = context;
 		this.nonce = nonce;
 	}
@@ -54,6 +58,7 @@ public class VaultTransitContext {
 	/**
 	 * @return the key derivation context.
 	 */
+	@Nullable
 	public byte[] getContext() {
 		return context;
 	}
@@ -61,6 +66,7 @@ public class VaultTransitContext {
 	/**
 	 * @return the
 	 */
+	@Nullable
 	public byte[] getNonce() {
 		return nonce;
 	}
@@ -70,8 +76,10 @@ public class VaultTransitContext {
 	 */
 	public static class VaultTransitRequestBuilder {
 
+		@Nullable
 		private byte[] context;
 
+		@Nullable
 		private byte[] nonce;
 
 		VaultTransitRequestBuilder() {
@@ -84,7 +92,7 @@ public class VaultTransitContext {
 		 * provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
-		public VaultTransitRequestBuilder context(byte[] context) {
+		public VaultTransitRequestBuilder context(@Nullable byte[] context) {
 			this.context = context;
 			return this;
 		}
@@ -99,7 +107,7 @@ public class VaultTransitContext {
 		 * nonce value is never reused
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
-		public VaultTransitRequestBuilder nonce(byte[] nonce) {
+		public VaultTransitRequestBuilder nonce(@Nullable byte[] nonce) {
 			this.nonce = nonce;
 			return this;
 		}

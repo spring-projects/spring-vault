@@ -104,6 +104,9 @@ public class AppIdAuthentication implements ClientAuthentication,
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
 					login, VaultResponse.class, options.getPath());
 
+			Assert.state(response != null && response.getAuth() != null,
+					"Auth field must not be null");
+
 			logger.debug("Login successful using AppId authentication");
 
 			return LoginTokenUtil.from(response.getAuth());

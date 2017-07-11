@@ -64,13 +64,17 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		request.put("common_name", certificateRequest.getCommonName());
 
 		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put("alt_names", StringUtils
-					.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
+			request.put(
+					"alt_names",
+					StringUtils.collectionToDelimitedString(
+							certificateRequest.getAltNames(), ","));
 		}
 
 		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put("ip_sans", StringUtils.collectionToDelimitedString(
-					certificateRequest.getIpSubjectAltNames(), ","));
+			request.put(
+					"ip_sans",
+					StringUtils.collectionToDelimitedString(
+							certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
 		if (certificateRequest.getTtl() != null) {
@@ -83,16 +87,20 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			request.put("exclude_cn_from_sans", true);
 		}
 
-		return vaultOperations.doWithSession(restOperations -> {
+		VaultCertificateResponse response = vaultOperations
+				.doWithSession(restOperations -> {
 
-			try {
-				return restOperations.postForObject("{path}/issue/{roleName}", request,
-						VaultCertificateResponse.class, path, roleName);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
-		});
+					try {
+						return restOperations.postForObject("{path}/issue/{roleName}",
+								request, VaultCertificateResponse.class, path, roleName);
+					}
+					catch (HttpStatusCodeException e) {
+						throw VaultResponses.buildException(e);
+					}
+				});
+
+		Assert.state(response != null, "VaultCertificateResponse must not be null");
+
+		return response;
 	}
-
 }

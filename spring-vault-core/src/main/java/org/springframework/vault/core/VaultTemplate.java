@@ -27,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
@@ -38,7 +39,6 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -50,21 +50,14 @@ import org.springframework.web.client.RestTemplate;
  */
 public class VaultTemplate implements InitializingBean, VaultOperations, DisposableBean {
 
+	private final RestTemplate sessionTemplate;
+
+	private final RestTemplate plainTemplate;
+
+	@Nullable
 	private SessionManager sessionManager;
 
-	private RestTemplate sessionTemplate;
-
-	private RestTemplate plainTemplate;
-
 	private final boolean dedicatedSessionManager;
-
-	/**
-	 * Create a new {@link VaultTemplate} without setting {@link RestOperations} and
-	 * {@link SessionManager}.
-	 */
-	public VaultTemplate() {
-		this.dedicatedSessionManager = false;
-	}
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint} and
@@ -121,13 +114,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		RestTemplate restTemplate = VaultClients.createRestTemplate(endpoint,
 				requestFactory);
 
-		restTemplate.getInterceptors().add((request, body, execution) -> {
+		restTemplate.getInterceptors().add(
+				(request, body, execution) -> {
 
-			request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
-					sessionManager.getSessionToken().getToken());
+					Assert.notNull(sessionManager, "SessionManager must not be null");
 
-			return execution.execute(request, body);
-		});
+					request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
+							sessionManager.getSessionToken().getToken());
+
+					return execution.execute(request, body);
+				});
 
 		return restTemplate;
 	}
@@ -146,7 +142,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	@Override
 	public void afterPropertiesSet() {
-
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 	}
 
@@ -198,15 +193,15 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> VaultResponseSupport<T> read(final String path,
-			final Class<T> responseType) {
+	@Nullable
+	public <T> VaultResponseSupport<T> read(final String path, final Class<T> responseType) {
 
 		final ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
 		try {
-			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate
-					.exchange(path, HttpMethod.GET, null, ref);
+			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate.exchange(
+					path, HttpMethod.GET, null, ref);
 
 			return exchange.getBody();
 		}
@@ -221,6 +216,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	@Nullable
 	public List<String> list(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -232,11 +229,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			return Collections.emptyList();
 		}
 
-		return (List) read.getData().get("keys");
+		return (List<String>) read.getRequiredData().get("keys");
 	}
 
 	@Override
-	public VaultResponse write(final String path, final Object body) {
+	@Nullable
+	public VaultResponse write(String path, @Nullable Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -292,6 +290,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 	}
 
+	@Nullable
 	private <T> T doRead(final String path, final Class<T> responseType) {
 
 		return doWithSession(restOperations -> {
@@ -310,7 +309,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		});
 	}
 
-	private static class VaultListResponse
-			extends VaultResponseSupport<Map<String, Object>> {
+	private static class VaultListResponse extends
+			VaultResponseSupport<Map<String, Object>> {
 	}
 }

@@ -19,7 +19,7 @@ class Base64 {
 	private Base64() {
 	}
 
-	public static byte[] decode(String in) {
+	static byte[] decode(String in) {
 		// Ignore trailing '=' padding and whitespace from the input.
 		int limit = in.length();
 		for (; limit > 0; limit--) {
