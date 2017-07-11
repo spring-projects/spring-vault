@@ -120,11 +120,11 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
-	 * @param transitRequest may be {@literal null} if no request options provided.
+	 * @param transitRequest must not be {@literal null}. Use
+	 * {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 */
-	String encrypt(String keyName, byte[] plaintext,
-			@Nullable VaultTransitContext transitRequest);
+	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
@@ -140,11 +140,12 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
-	 * @param transitRequest may be {@literal null} if no request options provided.
+	 * @param transitContext must not be {@literal null}. Use
+	 * {@link VaultTransitContext#empty()} if no request options provided.
+	 * @return cipher text.
 	 * @return plain text.
 	 */
-	byte[] decrypt(String keyName, String ciphertext,
-			@Nullable VaultTransitContext transitRequest);
+	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitContext);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
@@ -165,10 +166,10 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
-	 * @param transitRequest may be {@literal null} if no request options provided.
+	 * @param transitContext must not be {@literal null}. Use
+	 * {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 * @see #rotate(String)
 	 */
-	String rewrap(String keyName, String ciphertext,
-			@Nullable VaultTransitContext transitRequest);
+	String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
 }

@@ -26,6 +26,7 @@ import lombok.Data;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultResponse;
@@ -158,18 +159,17 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	@Override
 	public String encrypt(String keyName, byte[] plaintext,
-			@Nullable VaultTransitContext transitRequest) {
+			VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(plaintext, "Plain text must not be null");
+		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
 		request.put("plaintext", Base64Utils.encodeToString(plaintext));
 
-		if (transitRequest != null) {
-			applyTransitOptions(transitRequest, request);
-		}
+		applyTransitOptions(transitContext, request);
 
 		return (String) vaultOperations
 				.write(String.format("%s/encrypt/%s", path, keyName), request)
@@ -180,7 +180,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public String decrypt(String keyName, String ciphertext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(keyName, "Cipher text must not be empty");
+		Assert.hasText(ciphertext, "Cipher text must not be empty");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
@@ -195,18 +195,17 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	@Override
 	public byte[] decrypt(String keyName, String ciphertext,
-			@Nullable VaultTransitContext transitRequest) {
+			VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(keyName, "Cipher text must not be empty");
+		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
 		request.put("ciphertext", ciphertext);
 
-		if (transitRequest != null) {
-			applyTransitOptions(transitRequest, request);
-		}
+		applyTransitOptions(transitContext, request);
 
 		String plaintext = (String) vaultOperations
 				.write(String.format("%s/decrypt/%s", path, keyName), request)
@@ -231,34 +230,32 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	@Override
 	public String rewrap(String keyName, String ciphertext,
-			@Nullable VaultTransitContext transitRequest) {
+			VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
 		request.put("ciphertext", ciphertext);
 
-		if (transitRequest != null) {
-			applyTransitOptions(transitRequest, request);
-		}
+		applyTransitOptions(transitContext, request);
 
 		return (String) vaultOperations
 				.write(String.format("%s/rewrap/%s", path, keyName), request)
 				.getRequiredData().get("ciphertext");
 	}
 
-	private void applyTransitOptions(VaultTransitContext transitRequest,
+	private static void applyTransitOptions(VaultTransitContext context,
 			Map<String, String> request) {
 
-		if (transitRequest.getContext() != null) {
-			request.put("context",
-					Base64Utils.encodeToString(transitRequest.getContext()));
+		if (!ObjectUtils.isEmpty(context.getContext())) {
+			request.put("context", Base64Utils.encodeToString(context.getContext()));
 		}
 
-		if (transitRequest.getNonce() != null) {
-			request.put("nonce", Base64Utils.encodeToString(transitRequest.getNonce()));
+		if (!ObjectUtils.isEmpty(context.getNonce())) {
+			request.put("nonce", Base64Utils.encodeToString(context.getNonce()));
 		}
 	}
 
