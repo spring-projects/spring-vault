@@ -139,10 +139,7 @@ public class CertificateBundle {
 			byte[] bytes = Base64.decode(getCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
-		catch (IOException e) {
-			throw new VaultException("Cannot create Certificate from certificate", e);
-		}
-		catch (CertificateException e) {
+		catch (IOException | CertificateException e) {
 			throw new VaultException("Cannot create Certificate from certificate", e);
 		}
 	}
@@ -159,11 +156,7 @@ public class CertificateBundle {
 			byte[] bytes = Base64.decode(getIssuingCaCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
-		catch (IOException e) {
-			throw new VaultException(
-					"Cannot create Certificate from issuing CA certificate", e);
-		}
-		catch (CertificateException e) {
+		catch (IOException | CertificateException e) {
 			throw new VaultException(
 					"Cannot create Certificate from issuing CA certificate", e);
 		}
@@ -185,10 +178,7 @@ public class CertificateBundle {
 			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
 					getX509Certificate(), getX509IssuerCertificate());
 		}
-		catch (GeneralSecurityException e) {
-			throw new VaultException("Cannot create KeyStore", e);
-		}
-		catch (IOException e) {
+		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
 	}

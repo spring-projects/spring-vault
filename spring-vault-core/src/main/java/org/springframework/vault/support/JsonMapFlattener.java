@@ -88,7 +88,8 @@ public abstract class JsonMapFlattener {
 		while (inputMap.hasNext()) {
 
 			Entry<String, ? extends Object> entry = inputMap.next();
-			flattenElement(propertyPrefix + entry.getKey(), entry.getValue(), resultMap);
+			flattenElement(propertyPrefix.concat(entry.getKey()), entry.getValue(),
+					resultMap);
 		}
 	}
 
