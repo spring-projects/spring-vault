@@ -195,7 +195,7 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Build a new {@link AwsEc2AuthenticationOptions} instance.
 		 *
-		 * @return a new {@link AppIdAuthenticationOptions}.
+		 * @return a new {@link AwsEc2AuthenticationOptions}.
 		 */
 		public AwsEc2AuthenticationOptions build() {
 

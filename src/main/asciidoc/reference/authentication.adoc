@@ -277,6 +277,76 @@ it in `AwsEc2AuthenticationOptions`.
 
 See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the AWS-EC2 auth backend]
 
+[[vault.authentication.awsiam]]
+== AWS-IAM authentication
+
+The https://www.vaultproject.io/docs/auth/aws.html[aws]
+auth backend allows Vault login by using existing AWS IAM credentials.
+
+AWS IAM authentication creates a signed HTTP request that is
+executed by Vault to get the identity of the signer using AWS STS
+`GetCallerIdentity` method. AWSv4 signatures require IAM credentials.
+
+IAM credentials can be obtained from either the runtime environment
+or supplied externally. Runtime environments such as AWS-EC2,
+Lambda and ECS with assigned IAM principals do not require client-specific
+configuration of credentials but can obtain these from its metadata source.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
+                .credentials(new BasicAWSCredentials(…)).build();
+
+        return new AwsIamAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+.Using AWS-EC2 instance profile as credentials source
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
+                .credentialsProvider(InstanceProfileCredentialsProvider.getInstance()).build();
+
+        return new AwsIamAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+`AwsIamAuthentication` requires the AWS Java SDK dependency (`com.amazonaws:aws-java-sdk-core`)
+as the authentication implementation uses AWS SDK types for credentials and request signing.
+
+You can configure the authentication via `AwsIamAuthenticationOptions`.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth backend]
+* http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
+
 [[vault.authentication.clientcert]]
 == TLS certificate authentication
 
