@@ -29,8 +29,10 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
@@ -55,6 +57,15 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public abstract VaultEndpoint vaultEndpoint();
 
 	/**
+	 * @return a {@link VaultEndpointProvider} returning the value of
+	 * {@link #vaultEndpoint()}.
+	 * @since 1.1
+	 */
+	public VaultEndpointProvider vaultEndpointProvider() {
+		return SimpleVaultEndpointProvider.of(vaultEndpoint());
+	}
+
+	/**
 	 * Annotate with {@link Bean} in case you want to expose a
 	 * {@link ClientAuthentication} instance to the
 	 * {@link org.springframework.context.ApplicationContext}.
@@ -67,14 +78,15 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Create a {@link VaultTemplate}.
 	 *
 	 * @return the {@link VaultTemplate}.
-	 * @see #vaultEndpoint()
+	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
 	 * @see #sessionManager()
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-		return new VaultTemplate(vaultEndpoint(), clientHttpRequestFactoryWrapper()
-				.getClientHttpRequestFactory(), sessionManager());
+		return new VaultTemplate(vaultEndpointProvider(),
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+				sessionManager());
 	}
 
 	/**
@@ -147,11 +159,11 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Construct a {@link RestOperations} object configured for Vault usage.
 	 *
 	 * @return the {@link RestOperations} to be used for Vault access.
-	 * @see #vaultEndpoint()
+	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	public RestOperations restOperations() {
-		return VaultClients.createRestTemplate(vaultEndpoint(),
+		return VaultClients.createRestTemplate(vaultEndpointProvider(),
 				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
 	}
 

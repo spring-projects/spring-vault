@@ -49,12 +49,28 @@ public class ReactiveVaultClients {
 	 */
 	public static WebClient createWebClient(VaultEndpoint endpoint,
 			ClientHttpConnector connector) {
+		return createWebClient(SimpleVaultEndpointProvider.of(endpoint), connector);
+	}
 
-		Assert.notNull(endpoint, "VaultEndpoint must not be null");
+	/**
+	 * Create a {@link WebClient} configured with {@link VaultEndpoint} and
+	 * {@link ClientHttpConnector}. The client accepts relative URIs without a leading
+	 * slash that are expanded to use {@link VaultEndpoint}.
+	 * <p>
+	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @return the configured {@link WebClient}.
+	 */
+	public static WebClient createWebClient(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
 		UriBuilderFactory uriBuilderFactory = VaultClients
-				.createUriBuilderFactory(endpoint);
+				.createUriBuilderFactory(endpointProvider);
 
 		ExchangeStrategies strategies = ExchangeStrategies.builder()
 				.codecs(configurer -> {

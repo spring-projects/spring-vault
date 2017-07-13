@@ -31,7 +31,9 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -69,8 +71,21 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 */
 	public ReactiveVaultTemplate(VaultEndpoint vaultEndpoint,
 			ClientHttpConnector connector, VaultTokenSupplier vaultTokenSupplier) {
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector, vaultTokenSupplier);
+	}
 
-		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
+	/**
+	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpointProvider},
+	 * {@link ClientHttpConnector} and {@link VaultTokenSupplier}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @param vaultTokenSupplier must not be {@literal null}.
+	 */
+	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector, VaultTokenSupplier vaultTokenSupplier) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 		Assert.notNull(vaultTokenSupplier, "AuthenticationSupplier must not be null");
 
@@ -82,10 +97,10 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 					}).build();
 				}));
 
-		this.statelessClient = ReactiveVaultClients.createWebClient(vaultEndpoint,
+		this.statelessClient = ReactiveVaultClients.createWebClient(endpointProvider,
 				connector);
 		this.sessionClient = ReactiveVaultClients
-				.createWebClient(vaultEndpoint, connector).mutate().filter(filter)
+				.createWebClient(endpointProvider, connector).mutate().filter(filter)
 				.build();
 	}
 

@@ -32,6 +32,8 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Vault Client factory to create {@link RestTemplate} configured to the needs of
@@ -63,11 +65,36 @@ public class VaultClients {
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint,
 			ClientHttpRequestFactory requestFactory) {
+		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint),
+				requestFactory);
+	}
+
+	/**
+	 * Create a {@link RestTemplate} configured with {@link VaultEndpointProvider} and
+	 * {@link ClientHttpRequestFactory}. The template accepts relative URIs without a
+	 * leading slash that are expanded to use {@link VaultEndpoint}. {@link RestTemplate}
+	 * is configured with a {@link ClientHttpRequestInterceptor} to enforce serialization
+	 * to a byte array prior continuing the request. Eager serialization leads to a known
+	 * request body size that is required to send a
+	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
+	 * Otherwise, Vault will deny body processing.
+	 * <p>
+	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate}.
+	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
+	 * @see MappingJackson2HttpMessageConverter
+	 * @since 1.1
+	 */
+	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory) {
 
 		RestTemplate restTemplate = createRestTemplate();
 
 		restTemplate.setRequestFactory(requestFactory);
-		restTemplate.setUriTemplateHandler(createUriTemplateHandler(endpoint));
+		restTemplate.setUriTemplateHandler(createUriBuilderFactory(endpointProvider));
 
 		return restTemplate;
 	}
@@ -102,25 +129,28 @@ public class VaultClients {
 	}
 
 	private static DefaultUriTemplateHandler createUriTemplateHandler(
-			VaultEndpoint endpoint) {
+			VaultEndpointProvider endpointProvider) {
 
-		String baseUrl = String.format("%s://%s:%s/%s/", endpoint.getScheme(),
-				endpoint.getHost(), endpoint.getPort(), "v1");
-
-		DefaultUriTemplateHandler defaultUriTemplateHandler = new PrefixAwareUriTemplateHandler();
-		defaultUriTemplateHandler.setBaseUrl(baseUrl);
-		return defaultUriTemplateHandler;
+		return new PrefixAwareUriTemplateHandler(endpointProvider);
 	}
 
-	public static UriBuilderFactory createUriBuilderFactory(VaultEndpoint endpoint) {
-
-		String baseUrl = String.format("%s://%s:%s/%s/", endpoint.getScheme(),
-				endpoint.getHost(), endpoint.getPort(), "v1");
-
-		return new PrefixAwareUriBuilderFactory(baseUrl);
+	public static UriBuilderFactory createUriBuilderFactory(
+			VaultEndpointProvider endpointProvider) {
+		return new PrefixAwareUriBuilderFactory(endpointProvider);
 	}
 
 	public static class PrefixAwareUriTemplateHandler extends DefaultUriTemplateHandler {
+
+		@Nullable
+		private final VaultEndpointProvider endpointProvider;
+
+		public PrefixAwareUriTemplateHandler() {
+			this.endpointProvider = null;
+		}
+
+		public PrefixAwareUriTemplateHandler(VaultEndpointProvider endpointProvider) {
+			this.endpointProvider = endpointProvider;
+		}
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
@@ -133,6 +163,18 @@ public class VaultClients {
 			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate),
 					uriVariables);
 		}
+
+		@Override
+		public String getBaseUrl() {
+
+			if (endpointProvider != null) {
+
+				VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
+				return toBaseUri(endpoint);
+			}
+
+			return super.getBaseUrl();
+		}
 	}
 
 	/**
@@ -140,22 +182,34 @@ public class VaultClients {
 	 */
 	public static class PrefixAwareUriBuilderFactory extends DefaultUriBuilderFactory {
 
-		private final String baseUri;
+		private final VaultEndpointProvider endpointProvider;
 
-		public PrefixAwareUriBuilderFactory(String baseUri) {
-			super(baseUri);
-			this.baseUri = baseUri;
+		public PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider) {
+			this.endpointProvider = endpointProvider;
 		}
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
-			return super.uriString(prepareUriTemplate(baseUri, uriTemplate));
+
+			VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
+
+			String baseUri = toBaseUri(endpoint);
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(
+					prepareUriTemplate(baseUri, uriTemplate)).build();
+
+			return UriComponentsBuilder.fromUriString(baseUri).uriComponents(
+					uriComponents);
 		}
 	}
 
+	private static String toBaseUri(VaultEndpoint endpoint) {
+		return endpoint.getScheme() + "://" + endpoint.getHost() + ":"
+				+ endpoint.getPort() + "/v1";
+	}
+
 	/**
-	 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base url
-	 * has a trailing slash.
+	 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base
+	 * url* has a trailing slash.
 	 *
 	 * @param uriTemplate
 	 * @return
