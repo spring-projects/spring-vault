@@ -63,11 +63,36 @@ public class VaultClients {
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint,
 			ClientHttpRequestFactory requestFactory) {
+		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint),
+				requestFactory);
+	}
+
+	/**
+	 * Create a {@link RestTemplate} configured with {@link VaultEndpointProvider} and
+	 * {@link ClientHttpRequestFactory}. The template accepts relative URIs without a
+	 * leading slash that are expanded to use {@link VaultEndpoint}. {@link RestTemplate}
+	 * is configured with a {@link ClientHttpRequestInterceptor} to enforce serialization
+	 * to a byte array prior continuing the request. Eager serialization leads to a known
+	 * request body size that is required to send a
+	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
+	 * Otherwise, Vault will deny body processing.
+	 * <p>
+	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate}.
+	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
+	 * @see MappingJackson2HttpMessageConverter
+	 * @since 1.1
+	 */
+	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory) {
 
 		RestTemplate restTemplate = createRestTemplate();
 
 		restTemplate.setRequestFactory(requestFactory);
-		restTemplate.setUriTemplateHandler(createUriTemplateHandler(endpoint));
+		restTemplate.setUriTemplateHandler(createUriTemplateHandler(endpointProvider));
 
 		return restTemplate;
 	}
@@ -109,17 +134,22 @@ public class VaultClients {
 	}
 
 	private static DefaultUriTemplateHandler createUriTemplateHandler(
-			VaultEndpoint endpoint) {
+			VaultEndpointProvider endpointProvider) {
 
-		String baseUrl = String.format("%s://%s:%s/%s/", endpoint.getScheme(),
-				endpoint.getHost(), endpoint.getPort(), "v1");
-
-		DefaultUriTemplateHandler defaultUriTemplateHandler = new PrefixAwareUriTemplateHandler();
-		defaultUriTemplateHandler.setBaseUrl(baseUrl);
-		return defaultUriTemplateHandler;
+		return new PrefixAwareUriTemplateHandler(endpointProvider);
 	}
 
 	public static class PrefixAwareUriTemplateHandler extends DefaultUriTemplateHandler {
+
+		private final VaultEndpointProvider endpointProvider;
+
+		public PrefixAwareUriTemplateHandler() {
+			this.endpointProvider = null;
+		}
+
+		public PrefixAwareUriTemplateHandler(VaultEndpointProvider endpointProvider) {
+			this.endpointProvider = endpointProvider;
+		}
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
@@ -129,6 +159,20 @@ public class VaultClients {
 		@Override
 		protected URI expandInternal(String uriTemplate, Object... uriVariables) {
 			return super.expandInternal(prepareUriTemplate(uriTemplate), uriVariables);
+		}
+
+		@Override
+		public String getBaseUrl() {
+
+			if (endpointProvider != null) {
+
+				VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
+
+				return endpoint.getScheme() + "://" + endpoint.getHost() + ":"
+						+ endpoint.getPort() + "/v1";
+			}
+
+			return super.getBaseUrl();
 		}
 
 		/**

@@ -36,8 +36,10 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -89,7 +91,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-		this.sessionTemplate = createSessionTemplate(vaultEndpoint, requestFactory);
+		VaultEndpointProvider endpointProvider = SimpleVaultEndpointProvider
+				.of(vaultEndpoint);
+
+		this.sessionTemplate = createSessionTemplate(endpointProvider, requestFactory);
 		this.plainTemplate = VaultClients.createRestTemplate(vaultEndpoint,
 				requestFactory);
 	}
@@ -105,8 +110,24 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	public VaultTemplate(VaultEndpoint vaultEndpoint,
 			ClientHttpRequestFactory clientHttpRequestFactory,
 			SessionManager sessionManager) {
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory,
+				sessionManager);
+	}
 
-		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
+	/**
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpointProvider},
+	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param clientHttpRequestFactory must not be {@literal null}.
+	 * @param sessionManager must not be {@literal null}.
+	 * @since 1.1
+	 */
+	public VaultTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory clientHttpRequestFactory,
+			SessionManager sessionManager) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(clientHttpRequestFactory,
 				"ClientHttpRequestFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
@@ -114,16 +135,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
 
-		this.sessionTemplate = createSessionTemplate(vaultEndpoint,
+		this.sessionTemplate = createSessionTemplate(endpointProvider,
 				clientHttpRequestFactory);
-		this.plainTemplate = VaultClients.createRestTemplate(vaultEndpoint,
+		this.plainTemplate = VaultClients.createRestTemplate(endpointProvider,
 				clientHttpRequestFactory);
 	}
 
-	private RestTemplate createSessionTemplate(VaultEndpoint endpoint,
+	private RestTemplate createSessionTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(endpoint,
+		RestTemplate restTemplate = VaultClients.createRestTemplate(endpointProvider,
 				requestFactory);
 
 		restTemplate.getInterceptors().add(new ClientHttpRequestInterceptor() {
