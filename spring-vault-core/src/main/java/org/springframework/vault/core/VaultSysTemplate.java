@@ -43,6 +43,7 @@ import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
+import org.springframework.vault.support.VaultMount.VaultMountBuilder;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
@@ -268,19 +269,25 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@JsonAnySetter
 			public void set(String name, Object value) {
 
-				if (value instanceof Map) {
+				if (!(value instanceof Map)) {
+					return;
+				}
 
-					Map<String, Object> map = (Map) value;
+				Map<String, Object> map = (Map) value;
 
-					if (map.containsKey("type")) {
+				if (map.containsKey("type")) {
 
-						VaultMount vaultMount = VaultMount.builder() //
-								.type((String) map.get("type")) //
-								.description((String) map.get("description")) //
-								.config((Map) map.get("config")).build();
+					VaultMountBuilder builder = VaultMount.builder() //
+							.type((String) map.get("type")) //
+							.description((String) map.get("description"));// ;
 
-						topLevelMounts.put(name, vaultMount);
+					if (map.containsKey("config")) {
+						builder.config((Map) map.get("config"));
 					}
+
+					VaultMount vaultMount = builder.build();
+
+					topLevelMounts.put(name, vaultMount);
 				}
 			}
 		}

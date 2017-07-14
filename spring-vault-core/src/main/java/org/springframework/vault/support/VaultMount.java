@@ -50,9 +50,10 @@ public class VaultMount {
 	 */
 	private final Map<String, Object> config;
 
-	private VaultMount(@JsonProperty("type") String type,
+	VaultMount(@JsonProperty("type") String type,
 			@Nullable @JsonProperty("description") String description,
 			@Nullable @JsonProperty("config") Map<String, Object> config) {
+
 		this.type = type;
 		this.description = description;
 		this.config = config != null ? config : Collections.emptyMap();

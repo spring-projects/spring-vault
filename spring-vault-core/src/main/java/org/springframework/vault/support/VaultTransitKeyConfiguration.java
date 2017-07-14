@@ -36,6 +36,7 @@ public class VaultTransitKeyConfiguration {
 
 	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed,
 			@Nullable Integer latestVersion) {
+
 		this.deletionAllowed = deletionAllowed;
 		this.latestVersion = latestVersion;
 	}

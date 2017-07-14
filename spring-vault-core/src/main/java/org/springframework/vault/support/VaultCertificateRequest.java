@@ -60,14 +60,13 @@ public class VaultCertificateRequest {
 
 	VaultCertificateRequest(String commonName, List<String> altNames,
 			List<String> ipSubjectAltNames, @Nullable Duration ttl,
-			@Nullable Boolean excludeCommonNameFromSubjectAltNames) {
+			boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
 		this.ttl = ttl;
-		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames != null
-				&& excludeCommonNameFromSubjectAltNames.booleanValue();
+		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 	}
 
 	/**
@@ -118,8 +117,7 @@ public class VaultCertificateRequest {
 		@Nullable
 		private Duration ttl;
 
-		@Nullable
-		private Boolean excludeCommonNameFromSubjectAltNames;
+		private boolean excludeCommonNameFromSubjectAltNames;
 
 		VaultCertificateRequestBuilder() {
 		}
