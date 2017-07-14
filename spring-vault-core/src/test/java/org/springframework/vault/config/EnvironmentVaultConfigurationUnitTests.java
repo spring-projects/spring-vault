@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -77,7 +76,7 @@ public class EnvironmentVaultConfigurationUnitTests {
 	public void shouldConfigureSsl() {
 
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("vault.ssl.key-store", "http://foo.bar");
+		map.put("vault.ssl.key-store", "classpath:certificate.json");
 		map.put("vault.ssl.trust-store", "classpath:certificate.json");
 
 		MapPropertySource propertySource = new MapPropertySource("shouldConfigureSsl",
@@ -86,14 +85,14 @@ public class EnvironmentVaultConfigurationUnitTests {
 
 		SslConfiguration sslConfiguration = configuration.sslConfiguration();
 
-		assertThat(sslConfiguration.getKeyStore()).isInstanceOf(UrlResource.class);
+		assertThat(sslConfiguration.getKeyStore()).isInstanceOf(ClassPathResource.class);
 		assertThat(sslConfiguration.getKeyStorePassword())
 				.isEqualTo("key store password");
 
 		assertThat(sslConfiguration.getTrustStore())
 				.isInstanceOf(ClassPathResource.class);
-		assertThat(sslConfiguration.getTrustStorePassword())
-				.isEqualTo("trust store password");
+		assertThat(sslConfiguration.getTrustStorePassword()).isEqualTo(
+				"trust store password");
 
 		configurableEnvironment.getPropertySources().remove(propertySource.getName());
 	}

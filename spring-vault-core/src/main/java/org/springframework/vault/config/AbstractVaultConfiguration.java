@@ -194,12 +194,13 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * @return SSL configuration options. Defaults to {@link SslConfiguration#NONE}.
+	 * @return SSL configuration options. Defaults to
+	 * {@link SslConfiguration#unconfigured()}.
 	 * @see SslConfiguration
-	 * @see SslConfiguration#NONE
+	 * @see SslConfiguration#unconfigured()
 	 */
 	public SslConfiguration sslConfiguration() {
-		return SslConfiguration.NONE;
+		return SslConfiguration.unconfigured();
 	}
 
 	/**

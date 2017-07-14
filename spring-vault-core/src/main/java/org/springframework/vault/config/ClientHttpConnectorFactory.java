@@ -76,12 +76,12 @@ public class ClientHttpConnectorFactory {
 
 		try {
 
-			if (sslConfiguration.getTrustStore() != null) {
+			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
 				sslContextBuilder.trustManager(createTrustManagerFactory(sslConfiguration
 						.getTrustStoreConfiguration()));
 			}
 
-			if (sslConfiguration.getKeyStore() != null) {
+			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
 				sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration
 						.getKeyStoreConfiguration()));
 			}

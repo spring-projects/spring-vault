@@ -15,9 +15,12 @@
  */
 package org.springframework.vault.support;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.Arrays;
 
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,11 +40,7 @@ import org.springframework.util.Assert;
  */
 public class SslConfiguration {
 
-	/**
-	 * Default {@link SslConfiguration} without a KeyStore/TrustStore configured.
-	 */
-	public static final SslConfiguration NONE = new SslConfiguration(
-			KeyStoreConfiguration.EMPTY, KeyStoreConfiguration.EMPTY);
+	private final static String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
 
 	private final KeyStoreConfiguration keyStoreConfiguration;
 
@@ -50,9 +49,9 @@ public class SslConfiguration {
 	/**
 	 * Create a new {@link SslConfiguration} with the default {@link KeyStore} type.
 	 *
-	 * @param keyStore the key store resource.
+	 * @param keyStore the key store resource, must not be {@literal null}.
 	 * @param keyStorePassword the key store password.
-	 * @param trustStore the trust store resource.
+	 * @param trustStore the trust store resource, must not be {@literal null}.
 	 * @param trustStorePassword the trust store password.
 	 * @deprecated Since 1.1, use
 	 * {@link #SslConfiguration(KeyStoreConfiguration, KeyStoreConfiguration)} to prevent
@@ -60,20 +59,21 @@ public class SslConfiguration {
 	 * GC than necessary.
 	 */
 	@Deprecated
-	public SslConfiguration(@Nullable Resource keyStore,
-			@Nullable String keyStorePassword, @Nullable Resource trustStore,
-			@Nullable String trustStorePassword) {
+	public SslConfiguration(Resource keyStore, @Nullable String keyStorePassword,
+			Resource trustStore, @Nullable String trustStorePassword) {
 
 		this(new KeyStoreConfiguration(keyStore, charsOrNull(keyStorePassword),
-				KeyStore.getDefaultType()), new KeyStoreConfiguration(trustStore,
-				charsOrNull(trustStorePassword), KeyStore.getDefaultType()));
+				DEFAULT_KEYSTORE_TYPE), new KeyStoreConfiguration(trustStore,
+				charsOrNull(trustStorePassword), DEFAULT_KEYSTORE_TYPE));
 	}
 
 	/**
 	 * Create a new {@link SslConfiguration}.
 	 *
-	 * @param keyStoreConfiguration the key store configuration.
-	 * @param trustStoreConfiguration the trust store configuration.
+	 * @param keyStoreConfiguration the key store configuration, must not be
+	 * {@literal null}.
+	 * @param trustStoreConfiguration the trust store configuration, must not be
+	 * {@literal null}.
 	 * @since 1.1
 	 */
 	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration,
@@ -121,11 +121,11 @@ public class SslConfiguration {
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
 		Assert.isTrue(trustStore.exists(),
-				String.format("TrustStore %s does not exist", trustStore));
+				() -> String.format("TrustStore %s does not exist", trustStore));
 
-		return new SslConfiguration(KeyStoreConfiguration.EMPTY,
+		return new SslConfiguration(KeyStoreConfiguration.UNCONFIGURED,
 				new KeyStoreConfiguration(trustStore, trustStorePassword,
-						KeyStore.getDefaultType()));
+						DEFAULT_KEYSTORE_TYPE));
 	}
 
 	/**
@@ -162,10 +162,10 @@ public class SslConfiguration {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.isTrue(keyStore.exists(),
-				String.format("KeyStore %s does not exist", keyStore));
+				() -> String.format("KeyStore %s does not exist", keyStore));
 
 		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword,
-				KeyStore.getDefaultType()), KeyStoreConfiguration.EMPTY);
+				DEFAULT_KEYSTORE_TYPE), KeyStoreConfiguration.UNCONFIGURED);
 	}
 
 	/**
@@ -209,22 +209,32 @@ public class SslConfiguration {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.isTrue(keyStore.exists(),
-				String.format("KeyStore %s does not exist", trustStore));
+				() -> String.format("KeyStore %s does not exist", trustStore));
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
 		Assert.isTrue(trustStore.exists(),
 				String.format("TrustStore %s does not exist", trustStore));
 
 		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword,
-				KeyStore.getDefaultType()), new KeyStoreConfiguration(trustStore,
-				trustStorePassword, KeyStore.getDefaultType()));
+				DEFAULT_KEYSTORE_TYPE), new KeyStoreConfiguration(trustStore,
+				trustStorePassword, DEFAULT_KEYSTORE_TYPE));
+	}
+
+	/**
+	 * Factory method returning an unconfigured {@link SslConfiguration} instance.
+	 *
+	 * @return an unconfigured {@link SslConfiguration} instance.
+	 * @since 2.0
+	 */
+	public static SslConfiguration unconfigured() {
+		return new SslConfiguration(KeyStoreConfiguration.unconfigured(),
+				KeyStoreConfiguration.unconfigured());
 	}
 
 	/**
 	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if
 	 * not configured.
 	 */
-	@Nullable
 	public Resource getKeyStore() {
 		return keyStoreConfiguration.getResource();
 	}
@@ -250,10 +260,21 @@ public class SslConfiguration {
 	}
 
 	/**
+	 * Create a new {@link SslConfiguration} with {@link KeyStoreConfiguration} applied
+	 * retaining the {@link #getTrustStoreConfiguration() trust store} configuration.
+	 *
+	 * @param configuration must not be {@literal null}.
+	 * @return a new {@link SslConfiguration} with {@link KeyStoreConfiguration} applied.
+	 * @since 2.0
+	 */
+	public SslConfiguration withKeyStore(KeyStoreConfiguration configuration) {
+		return new SslConfiguration(configuration, this.trustStoreConfiguration);
+	}
+
+	/**
 	 * @return the {@link java.security.KeyStore key store} resource or {@literal null} if
 	 * not configured.
 	 */
-	@Nullable
 	public Resource getTrustStore() {
 		return trustStoreConfiguration.getResource();
 	}
@@ -271,11 +292,25 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * @return the key store configuration.
+	 * @return the trust store configuration.
 	 * @since 1.1
 	 */
 	public KeyStoreConfiguration getTrustStoreConfiguration() {
 		return trustStoreConfiguration;
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} with {@link KeyStoreConfiguration trust store
+	 * configuration} applied retaining the {@link #getKeyStoreConfiguration()} key store}
+	 * configuration.
+	 *
+	 * @param configuration must not be {@literal null}.
+	 * @return a new {@link SslConfiguration} with {@link KeyStoreConfiguration trust
+	 * store configuration} applied.
+	 * @since 2.0
+	 */
+	public SslConfiguration withTrustStore(KeyStoreConfiguration configuration) {
+		return new SslConfiguration(this.keyStoreConfiguration, configuration);
 	}
 
 	@Nullable
@@ -295,13 +330,12 @@ public class SslConfiguration {
 	 */
 	public static class KeyStoreConfiguration {
 
-		public static final KeyStoreConfiguration EMPTY = new KeyStoreConfiguration(null,
-				null, null);
+		private static final KeyStoreConfiguration UNCONFIGURED = new KeyStoreConfiguration(
+				AbsentResource.INSTANCE, new char[0], DEFAULT_KEYSTORE_TYPE);
 
 		/**
-		 * Store that holds certificates, private keys, ….
+		 * Store that holds certificates, private keys.
 		 */
-		@Nullable
 		private final Resource resource;
 
 		/**
@@ -313,14 +347,18 @@ public class SslConfiguration {
 		/**
 		 * Key store/trust store type.
 		 */
-		@Nullable
 		private final String storeType;
 
 		/**
 		 * Create a new {@link KeyStoreConfiguration}.
 		 */
-		public KeyStoreConfiguration(@Nullable Resource resource,
-				@Nullable char[] storePassword, @Nullable String storeType) {
+		public KeyStoreConfiguration(Resource resource, @Nullable char[] storePassword,
+				String storeType) {
+
+			Assert.notNull(resource, "Resource must not be null");
+			Assert.isTrue(resource instanceof AbsentResource || resource.exists(),
+					() -> String.format("Resource %s does not exist", resource));
+			Assert.notNull(storeType, "Keystore type must not be null");
 
 			this.resource = resource;
 			this.storeType = storeType;
@@ -334,17 +372,61 @@ public class SslConfiguration {
 		}
 
 		/**
+		 * Create a new {@link KeyStoreConfiguration} given {@link Resource}.
+		 *
+		 * @param resource resource referencing the key store, must not be {@literal null}
+		 * .
+		 * @return the {@link KeyStoreConfiguration} for {@code resource}.
+		 * @since 2.0
+		 */
+		public static KeyStoreConfiguration of(Resource resource) {
+			return new KeyStoreConfiguration(resource, new char[0], DEFAULT_KEYSTORE_TYPE);
+		}
+
+		/**
+		 * Create a new {@link KeyStoreConfiguration} given {@link Resource} and
+		 * {@code storePassword} using the default keystore type.
+		 *
+		 * @param resource resource referencing the key store, must not be {@literal null}
+		 * .
+		 * @param storePassword key store password, must not be {@literal null}.
+		 * @return the {@link KeyStoreConfiguration} for {@code resource}.
+		 * @since 2.0
+		 */
+		public static KeyStoreConfiguration of(Resource resource, char[] storePassword) {
+			return new KeyStoreConfiguration(resource, storePassword,
+					DEFAULT_KEYSTORE_TYPE);
+		}
+
+		/**
+		 * Create an unconfigured, empty {@link KeyStoreConfiguration}.
+		 *
+		 * @return unconfigured, empty {@link KeyStoreConfiguration}.
+		 * @since 2.0
+		 */
+		public static KeyStoreConfiguration unconfigured() {
+			return UNCONFIGURED;
+		}
+
+		/**
+		 * @return {@literal true} if the resource is present.
+		 * @since 2.0
+		 */
+		public boolean isPresent() {
+			return !(resource instanceof AbsentResource);
+		}
+
+		/**
 		 * @return the {@link java.security.KeyStore key store} resource or
 		 * {@literal null} if not configured.
 		 */
-		@Nullable
 		public Resource getResource() {
 			return resource;
 		}
 
 		/**
-		 * @return the key store/trust store password or {@literal null} if not
-		 * configured.
+		 * @return the key store/trust store password. Empty {@code char} array if not
+		 * set.
 		 */
 		@Nullable
 		public char[] getStorePassword() {
@@ -352,11 +434,28 @@ public class SslConfiguration {
 		}
 
 		/**
-		 * @return the trust store type or {@literal null} if not configured.
+		 * @return the trust store type.
 		 */
-		@Nullable
 		public String getStoreType() {
 			return storeType;
+		}
+	}
+
+	static class AbsentResource extends AbstractResource {
+
+		static final AbsentResource INSTANCE = new AbsentResource();
+
+		private AbsentResource() {
+		}
+
+		@Override
+		public String getDescription() {
+			return getClass().getSimpleName();
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			throw new UnsupportedOperationException("Empty resource");
 		}
 	}
 }

@@ -125,13 +125,13 @@ public class ClientHttpRequestFactoryFactory {
 	static SSLContext getSSLContext(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
-		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(
-				sslConfiguration.getKeyStoreConfiguration()).getKeyManagers()
-				: null;
+		KeyManager[] keyManagers = sslConfiguration.getKeyStoreConfiguration()
+				.isPresent() ? createKeyManagerFactory(
+				sslConfiguration.getKeyStoreConfiguration()).getKeyManagers() : null;
 
-		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null ? createTrustManagerFactory(
-				sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
-				: null;
+		TrustManager[] trustManagers = sslConfiguration.getTrustStoreConfiguration()
+				.isPresent() ? createTrustManagerFactory(
+				sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(keyManagers, trustManagers, null);
@@ -192,8 +192,8 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	static boolean hasSslConfiguration(SslConfiguration sslConfiguration) {
-		return sslConfiguration.getTrustStore() != null
-				|| sslConfiguration.getKeyStore() != null;
+		return sslConfiguration.getTrustStoreConfiguration().isPresent()
+				|| sslConfiguration.getKeyStoreConfiguration().isPresent();
 	}
 
 	/**
@@ -281,13 +281,13 @@ public class ClientHttpRequestFactoryFactory {
 				SslContextBuilder sslContextBuilder = SslContextBuilder //
 						.forClient();
 
-				if (sslConfiguration.getTrustStore() != null) {
+				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
 					sslContextBuilder
 							.trustManager(createTrustManagerFactory(sslConfiguration
 									.getTrustStoreConfiguration()));
 				}
 
-				if (sslConfiguration.getKeyStore() != null) {
+				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
 					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration
 							.getKeyStoreConfiguration()));
 				}

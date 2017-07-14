@@ -43,6 +43,7 @@ import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsE
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -172,14 +173,30 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	@Override
 	public SslConfiguration sslConfiguration() {
 
-		Resource keyStore = getResource("vault.ssl.key-store");
-		String keyStorePassword = getProperty("vault.ssl.key-store-password");
-		Resource trustStore = getResource("vault.ssl.trust-store");
-		String trustStorePassword = getEnvironment().getProperty(
-				"vault.ssl.trust-store-password");
+		KeyStoreConfiguration keyStoreConfiguration = getKeyStoreConfiguration(
+				"vault.ssl.key-store", "vault.ssl.key-store-password");
 
-		return new SslConfiguration(keyStore, keyStorePassword, trustStore,
-				trustStorePassword);
+		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration(
+				"vault.ssl.trust-store", "vault.ssl.trust-store-password");
+
+		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration);
+	}
+
+	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty,
+			String passwordProperty) {
+
+		Resource keyStore = getResource(resourceProperty);
+		String keyStorePassword = getProperty(passwordProperty);
+
+		if (keyStore == null) {
+			return KeyStoreConfiguration.unconfigured();
+		}
+
+		if (StringUtils.hasText(keyStorePassword)) {
+			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray());
+		}
+
+		return KeyStoreConfiguration.of(keyStore);
 	}
 
 	@Override

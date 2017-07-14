@@ -64,8 +64,8 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 
 		SslConfiguration original = createSslConfiguration();
 
-		return new SslConfiguration(new KeyStoreConfiguration(new FileSystemResource(
-				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray(),
-				null), original.getTrustStoreConfiguration());
+		return new SslConfiguration(KeyStoreConfiguration.of(new FileSystemResource(
+				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
+				original.getTrustStoreConfiguration());
 	}
 }
