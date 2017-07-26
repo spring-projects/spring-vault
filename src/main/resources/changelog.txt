@@ -1,6 +1,16 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.M2
+-----------------------------------------
+* Reactive Support #25
+* Add support for AWS ECS/IAM authentication #91
+* Add authentication flow DSL #107
+* Introduce null-safety of Spring Vault API #112
+* Introduce VaultEndpointProvider to allow usage of multiple endpoints within an application #113
+* Upgrade dependencies #119
+* Upgrade to Spring Framework 5.0 RC3 #120
+
 Changes in version 1.1.0.M1
 -----------------------------------------
 * Add developer, SCM location and project URL to dependency POM #73
