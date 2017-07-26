@@ -1,6 +1,33 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 1.1.0.M1
+-----------------------------------------
+* Add developer, SCM location and project URL to dependency POM #73
+* Upgrade to Maven 3.5.0 #74
+* SslConfiguration to support keystore type and keystore provider parameters #78
+* VaultTokenRequestBuilder does not consider configured meta attributes #80
+* Upgrade to Spring Framework 4.3.8 #81
+* Store VaultToken as char[] #82
+* Remove Maven settings.xml for TravisCI build and use Maven wrapper #83
+* Cannot resolve LocalHost NetworkInterface in MacAddressUserId #84
+* LifecycleAwareSessionManager renewal starts eventually #87
+* Use remaining token TTL for Cubbyhole authentication #88
+* Allow AWS-EC2 nonce configuration #89
+* Upgrade to Vault 0.7.2 #90
+* Support AWS IAM authentication #91
+* Add central profiles #92
+* Include notice and license in jar files #93
+* Add LoginTokenAdapter for LoginToken TTL/renewability lookup #94
+* Rotate generic secrets based on lease_duration/ttl #95
+* Convert login token duration to milliseconds when calculating renewal time #96
+* Add transit export operation #101
+* Introduce equals/hashCode methods for RequestedSecret #103
+* Upgrade to Vault 0.7.3 #105
+* Introduce VaultEndpointProvider to allow usage of multiple endpoints within an application #113
+* Upgrade to Spring Framework 4.3.10 #117
+* Upgrade dependencies #118
+
 Changes in version 2.0.0.M1
 -----------------------------------------
 * Setup 2.0 development #67
