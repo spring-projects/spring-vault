@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.util.Collections;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -76,7 +77,7 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 				.renewable() //
 				.noDefaultPolicy() //
 				.noParent() //
-				.id("HELLO-WORLD") //
+				.id(UUID.randomUUID().toString()) //
 				.build();
 
 		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
@@ -103,7 +104,7 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 				.renewable() //
 				.noDefaultPolicy() //
 				.noParent() //
-				.id("HELLO-WORLD") //
+				.id(UUID.randomUUID().toString()) //
 				.build();
 
 		VaultTokenResponse tokenResponse = tokenOperations.createOrphan(tokenRequest);
