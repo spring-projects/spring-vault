@@ -139,9 +139,6 @@ renewal if a token is renewable and revoke a login token on disposal.
 Renewal is scheduled with an `AsyncTaskExecutor`. `LifecycleAwareSessionManager`
 is configured by default if using `AbstractVaultConfiguration`.
 
-
-
-
 [[vault.core.environment-vault-configuration]]
 == Using `EnvironmentVaultConfiguration`
 
