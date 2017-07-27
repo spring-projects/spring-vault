@@ -10,6 +10,7 @@ Changes in version 2.0.0.M2
 * Introduce VaultEndpointProvider to allow usage of multiple endpoints within an application #113
 * Upgrade dependencies #119
 * Upgrade to Spring Framework 5.0 RC3 #120
+* Upgrade to Reactor 3.1.0 M3 #121
 
 Changes in version 1.1.0.M1
 -----------------------------------------

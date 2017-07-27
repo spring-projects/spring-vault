@@ -23,6 +23,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>5.0.0.RC3</spring.version>
+		<reactor.version>Bismuth-M3</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -103,7 +104,7 @@
 			<dependency>
 				<groupId>io.projectreactor</groupId>
 				<artifactId>reactor-bom</artifactId>
-				<version>Bismuth-BUILD-SNAPSHOT</version>
+				<version>${reactor.version}</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
