@@ -6,6 +6,7 @@
 
 * Authentication steps DSL to <<vault.authentication.steps,compose authentication flows>>.
 * Reactive Vault client via `ReactiveVaultOperations`.
+* <<vault.repositories,Vault repository support>> based on Spring Data KeyValue.
 
 [[new-features.1-0-0]]
 === What's new in Spring Vault 1.0

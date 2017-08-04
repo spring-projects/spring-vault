@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  */
 public class SslConfiguration {
 
-	private final static String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
+	private static final String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
 
 	private final KeyStoreConfiguration keyStoreConfiguration;
 

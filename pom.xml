@@ -15,17 +15,20 @@
 	<modules>
 		<module>spring-vault-dependencies</module>
 		<module>spring-vault-core</module>
+		<module>spring-vault-repository</module>
 		<module>spring-vault-distribution</module>
 	</modules>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>5.0.0.RC3</spring.version>
+		<spring-data-releasetrain.version>Kay-RC2</spring-data-releasetrain.version>
 		<reactor.version>Bismuth-M3</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
 		<project.root>${basedir}</project.root>
+		<shared.resources>${project.build.directory}/shared-resources</shared.resources>
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -112,6 +115,15 @@
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-framework-bom</artifactId>
 				<version>${spring.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
+			<!-- Spring Data -->
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-releasetrain</artifactId>
+				<version>${spring-data-releasetrain.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -233,6 +245,12 @@
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.0.2</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.19.1</version>
 				</plugin>
@@ -247,6 +265,26 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>2.10.4</version>
+					<configuration>
+						<breakiterator>true</breakiterator>
+						<header>${project.name}</header>
+						<source>${java.version}</source>
+						<quiet>true</quiet>
+						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
+						<overview>${shared.resources}/javadoc/overview.html</overview>
+						<stylesheetfile>
+							${shared.resources}/javadoc/spring-javadoc.css
+						</stylesheetfile>
+						<!-- copies doc-files subdirectory which contains image resources -->
+						<docfilessubdirs>true</docfilessubdirs>
+						<additionalparam>-Xdoclint:none</additionalparam>
+						<links>
+							<link>https://docs.spring.io/spring-data/commons/docs/current/api</link>
+							<link>https://docs.spring.io/spring-data/keyvalue/docs/current/api</link>
+							<link>http://docs.spring.io/spring/docs/current/javadoc-api</link>
+							<link>http://docs.oracle.com/javase/8/docs/api</link>
+						</links>
+					</configuration>
 				</plugin>
 
 				<plugin>
@@ -471,8 +509,6 @@
 			<id>distribute</id>
 
 			<properties>
-				<shared.resources>${project.build.directory}/shared-resources
-				</shared.resources>
 				<maven.install.skip>true</maven.install.skip>
 				<skipTests>true</skipTests>
 			</properties>
@@ -611,37 +647,6 @@
 
 				<pluginManagement>
 					<plugins>
-
-						<!--
-							JavaDoc
-						-->
-
-						<plugin>
-							<groupId>org.apache.maven.plugins</groupId>
-							<artifactId>maven-javadoc-plugin</artifactId>
-							<configuration>
-								<breakiterator>true</breakiterator>
-								<header>${project.name}</header>
-								<source>${java.version}</source>
-								<quiet>true</quiet>
-								<javadocDirectory>${shared.resources}/javadoc
-								</javadocDirectory>
-								<overview>${shared.resources}/javadoc/overview.html
-								</overview>
-								<stylesheetfile>
-									${shared.resources}/javadoc/spring-javadoc.css
-								</stylesheetfile>
-								<!-- copies doc-files subdirectory which contains image resources -->
-								<docfilessubdirs>true</docfilessubdirs>
-								<additionalparam>-Xdoclint:none</additionalparam>
-								<links>
-									<link>
-										http://docs.spring.io/spring/docs/current/javadoc-api/
-									</link>
-									<link>http://docs.oracle.com/javase/6/docs/api</link>
-								</links>
-							</configuration>
-						</plugin>
 
 						<!--
 							Asciidoctor

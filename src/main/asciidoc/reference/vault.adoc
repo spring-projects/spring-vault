@@ -25,6 +25,8 @@ include::reactive-template.adoc[]
 
 include::propertysource.adoc[]
 
+include::vault-repositories.adoc[]
+
 include::client-support.adoc[]
 
 include::authentication.adoc[]

@@ -1,0 +1,276 @@
+[[vault.repositories]]
+= Vault Repositories
+
+Working with `VaultTemplate` and responses mapped to Java classes allows basic data operations like read, write
+and delete. Vault repositories apply Spring Data's repository concept on top of Vault.
+A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining
+the Id property, paging and sorting.
+
+[[vault.repositories.usage]]
+== Usage
+
+To access domain entities stored in Vault you can leverage repository support that eases implementing those quite significantly.
+
+.Sample Credentials Entity
+====
+[source,java]
+----
+@Secret
+public class Credentials {
+
+  @Id String id;
+  String password;
+  String socialSecurityNumber;
+  Address address;
+}
+----
+====
+
+We have a pretty simple domain object here. Note that it has a property named `id` annotated with
+`org.springframework.data.annotation.Id` and a `@Secret` annotation on its type.
+Those two are responsible for creating the actual key used to persist the object as JSON inside Vault.
+
+NOTE: Properties annotated with `@Id` as well as those named `id` are considered as the identifier properties.
+Those with the annotation are favored over others.
+
+The next step is to declare a repository interface that uses the domain object.
+
+.Basic Repository Interface for `Credentials` entities
+====
+[source,java]
+----
+public interface CredentialsRepository extends CrudRepository<Credentials, String> {
+
+}
+----
+====
+
+As our repository extends `CrudRepository` it provides basic CRUD and query methods.
+The thing we need in between to glue things together is the according Spring configuration.
+
+.JavaConfig for Vault Repositories
+====
+[source,java]
+----
+@Configuration
+@EnableVaultRepositories
+public class ApplicationConfig {
+
+  @Bean
+  public VaultTemplate vaultTemplate() {
+    return new VaultTemplate(…);
+  }
+}
+----
+====
+
+Given the setup above we can go on and inject `CredentialsRepository` into our components.
+
+.Access to Person Entities
+====
+[source,java]
+----
+@Autowired CredentialsRepository repo;
+
+public void basicCrudOperations() {
+
+  Credentials creds = new Credentials("heisenberg", "327215", "AAA-GG-SSSS");
+  rand.setAddress(new Address("308 Negra Arroyo Lane", "Albuquerque", "New Mexico", "87104"));
+
+  repo.save(creds);                                        <1>
+
+  repo.findOne(creds.getId());                             <2>
+
+  repo.count();                                            <3>
+
+  repo.delete(creds);                                      <4>
+}
+----
+<1> Stores properties of `Credentials` inside Vault Hash with a key pattern `keyspace/id`,
+in this case `credentials/heisenberg`, in the generic secret backend.
+<2> Uses the provided id to retrieve the object stored at `keyspace/id`.
+<3> Counts the total number of entities available within the keyspace _credentials_ defined by `@Secret` on `Credentials`.
+<4> Removes the key for the given object from Vault.
+====
+
+[[vault.repositories.mapping]]
+== Object to Vault JSON Mapping
+
+Vault repositories store objects in Vault using JSON as interchange format. Object mapping between JSON and
+the entity is done by `VaultConverter`. The converter reads and writes `SecretDocument` that contains the body
+from a `VaultResponse`. ``VaultResponse``s are read from Vault and the body is deserialized by
+Jackson into a `Map` of `String` and `Object`.
+The default `VaultConverter` implementation reads the `Map` with nested values, `List` and `Map` objects and
+converts these to entities and vice versa.
+
+Given the `Credentials` type from the previous sections the default mapping is as follows:
+
+====
+[source,json]
+----
+{
+  "_class": "org.example.Credentials",                 <1>
+  "password", "327215",                                <2>
+  "socialSecurityNumber": "AAA-GG-SSSS",
+  "address": {                                         <3>
+    "street": "308 Negra Arroyo Lane",
+    "city": "Albuquerque",
+    "state": "New Mexico",
+    "zip":"87104"
+  }
+}
+----
+<1> The `_class` attribute is included on root level as well as on any nested interface or abstract types.
+<2> Simple property values are mapped by path.
+<3> Properties of complex types are mapped as nested objects.
+====
+
+NOTE: The `@Id` property must be mapped to `String`.
+
+[cols="1,2,3", options="header"]
+.Default Mapping Rules
+|===
+| Type
+| Sample
+| Mapped Value
+
+| Simple Type +
+(eg. String)
+| String firstname = "Walter";
+| firstname = "Walter"
+
+| Complex Type +
+(eg. Address)
+| Address adress = new Address("308 Negra Arroyo Lane");
+| address: { "street": "308 Negra Arroyo Lane" }
+
+| List +
+of Simple Type
+| List<String> nicknames = asList("walt", "heisenberg");
+| nicknames: ["walt", "heisenberg"]
+
+| Map +
+of Simple Type
+| Map<String, Integer> atts = asMap("age", 51)
+| atts : {"age" : 51}
+
+| List +
+of Complex Type
+| List<Address> addresses = asList(new Address("308…
+| address: [{ "street": "308 Negra Arroyo Lane" }, …]
+
+|===
+
+You can customize the mapping behavior by registering a `Converter` in `VaultCustomConversions`.
+Those converters can take care of converting from/to a type such as `LocalDate` as well as `SecretDocument`
+whereas the first one is suitable for converting simple properties and the last one complex types to their JSON
+representation. The second option offers full control over the resulting `SecretDocument`. Writing objects to `Vault`
+will delete the content and re-create the whole entry, so not mapped data will be lost.
+
+[[vault.repositories.queries]]
+== Queries and Query Methods
+
+Query methods allow automatic derivation of simple queries from the method name. Vault has no query engine but
+requires direct access of HTTP context paths. Vault query methods translate Vault's API possibilities to queries.
+A query method execution lists children under a context path, applies filtering to the Id, optionally limits the
+Id stream with offset/limit and applies sorting after fetching the results.
+
+.Sample Repository Query Method
+====
+[source,java]
+----
+public interface CredentialsRepository extends CrudRepository<Credentials, String> {
+
+  List<Credentials> findByIdStartsWith(String prefix);
+}
+----
+====
+
+NOTE: Query methods for Vault repositories support only queries with predicates on the `@Id` property.
+
+Here's an overview of the keywords supported for Vault.
+
+[cols="1,2" options="header"]
+.Supported keywords for query methods
+|===
+| Keyword
+| Sample
+
+| `After`, `GreaterThan`
+| `findByIdGreaterThan(String id)`
+
+| `GreaterThanEqual`
+| `findByIdGreaterThanEqual(String id)`
+
+| `Before`, `LessThan`
+| `findByIdLessThan(String id)`
+
+| `LessThanEqual`
+| `findByIdLessThanEqual(String id)`
+
+| `Between`
+| `findByIdBetween(String from, String to)`
+
+| `In`
+| `findByIdIn(Collection ids)`
+
+| `NotIn`
+| `findByIdNotIn(Collection ids)`
+
+| `Like`, `StartingWith`, `EndingWith`
+| `findByIdLike(String id)`
+
+| `NotLike`, `IsNotLike`
+| `findByIdNotLike(String id)`
+
+| `Containing`
+| `findByFirstnameContaining(String id)`
+
+| `NotContaining`
+| `findByFirstnameNotContaining(String name)`
+
+| `Regex`
+| `findByIdRegex(String id)`
+
+| `(No keyword)`
+| `findById(String name)`
+
+| `Not`
+| `findByIdNot(String id)`
+
+| `And`
+| `findByLastnameAndFirstname`
+
+| `Or`
+| `findByLastnameOrFirstname`
+
+| `Is,Equals`
+| `findByFirstname`,`findByFirstnameIs`,`findByFirstnameEquals`
+
+| `Top,First`
+| `findFirst10ByFirstname`,`findTop5ByFirstname`
+|===
+
+=== Sorting and Paging
+
+Query methods support sorting and paging by selecting in memory a sublist (offset/limit) Id's retrieved from
+a Vault context path. Sorting has is not limited to a particular field, unlike query method predicates.
+Unpaged sorting is applied after Id filtering and all resulting secrets are fetched from Vault. This way
+a query method fetches only results that are also returned as part of the result.
+
+Using paging and sorting requires secret fetching before filtering the Id's which impacts performance.
+Sorting and paging guarantees to return the same result even if the natural order of Id returned by Vault changes.
+Therefore, all Id's are fetched from Vault first, then sorting is applied and afterwards filtering and offset/limiting.
+
+.Paging and Sorting Repository
+====
+[source,java]
+----
+public interface CredentialsRepository extends PagingAndSortingRepository<Credentials, String> {
+
+  List<Credentials> findTop10ByIdStartsWithOrderBySocialSecurityNumberDesc(String prefix);
+
+  List<Credentials> findByIdStarts(String prefix, Pageable pageRequest);
+}
+----
+====

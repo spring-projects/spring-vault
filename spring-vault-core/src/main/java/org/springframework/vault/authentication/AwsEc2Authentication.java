@@ -53,7 +53,7 @@ public class AwsEc2Authentication implements ClientAuthentication,
 
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
-	private final static char[] EMPTY = new char[0];
+	private static final char[] EMPTY = new char[0];
 
 	private final AwsEc2AuthenticationOptions options;
 

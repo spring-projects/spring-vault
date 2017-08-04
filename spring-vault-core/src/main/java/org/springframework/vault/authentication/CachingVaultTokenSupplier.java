@@ -34,7 +34,7 @@ import org.springframework.vault.support.VaultToken;
  */
 public class CachingVaultTokenSupplier implements VaultTokenSupplier {
 
-	private final static Mono<VaultToken> EMPTY = Mono.empty();
+	private static final Mono<VaultToken> EMPTY = Mono.empty();
 
 	private final VaultTokenSupplier clientAuthentication;
 
