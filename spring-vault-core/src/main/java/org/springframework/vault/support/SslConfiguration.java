@@ -331,7 +331,7 @@ public class SslConfiguration {
 	public static class KeyStoreConfiguration {
 
 		private static final KeyStoreConfiguration UNCONFIGURED = new KeyStoreConfiguration(
-				AbsentResource.INSTANCE, new char[0], DEFAULT_KEYSTORE_TYPE);
+				AbsentResource.INSTANCE, null, DEFAULT_KEYSTORE_TYPE);
 
 		/**
 		 * Store that holds certificates, private keys.
@@ -380,7 +380,7 @@ public class SslConfiguration {
 		 * @since 2.0
 		 */
 		public static KeyStoreConfiguration of(Resource resource) {
-			return new KeyStoreConfiguration(resource, new char[0], DEFAULT_KEYSTORE_TYPE);
+			return new KeyStoreConfiguration(resource, null, DEFAULT_KEYSTORE_TYPE);
 		}
 
 		/**
