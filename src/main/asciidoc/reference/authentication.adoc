@@ -196,10 +196,7 @@ authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.a
 AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
 
 Spring Vault supports AppRole authentication by providing either RoleId only
-or together with a provided SecretId (push or pull mode).
-
-RoleId and optionally SecretId must be provided to `AppRoleAuthenticationOptions`,
-Spring Vault will not look up these or create a custom SecretId.
+or together with a provided SecretId.
 
 ====
 [source,java]
@@ -215,6 +212,32 @@ class AppConfig extends AbstractVaultConfiguration {
         AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
                 .roleId("…")
                 .secretId("…")
+                .build();
+
+        return new AppRoleAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+Spring Vault also support a full pull mode: if RoleId and SecretId are not provided, Spring Vault will retreive them usind AppRole and RoleToken
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+                .appRole("…")
+                .roleToken("…")
                 .build();
 
         return new AppRoleAuthentication(options, restOperations());
