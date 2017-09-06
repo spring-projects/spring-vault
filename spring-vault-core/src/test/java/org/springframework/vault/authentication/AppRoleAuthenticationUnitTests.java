@@ -81,19 +81,19 @@ public class AppRoleAuthenticationUnitTests {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("app_role")
-				.roleToken("role_token")
+				.initialToken("initial_token")
 				.build();
 
 		mockRest.expect(requestTo("/auth/approle/role/app_role/role-id"))
 				.andExpect(method(HttpMethod.GET))
-				.andExpect(header("X-Vault-token", "role_token"))
+				.andExpect(header("X-Vault-token", "initial_token"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
 						"{\"data\": {\"role_id\": \"hello\"}}"
 				));
 
 		mockRest.expect(requestTo("/auth/approle/role/app_role/secret-id"))
 				.andExpect(method(HttpMethod.POST))
-				.andExpect(header("X-Vault-token", "role_token"))
+				.andExpect(header("X-Vault-token", "initial_token"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
 						"{\"data\": {\"secret_id\": \"world\"}}"
 				));

@@ -56,15 +56,15 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * Token associated to the roleName.
 	 */
-	private final String roleToken;
+	private final String initialToken;
 
-	private AppRoleAuthenticationOptions(String path, String roleId, String secretId, String appRole, String roleToken) {
+	private AppRoleAuthenticationOptions(String path, String roleId, String secretId, String appRole, String initialToken) {
 
 		this.path = path;
 		this.roleId = roleId;
 		this.secretId = secretId;
 		this.appRole = appRole;
-		this.roleToken = roleToken;
+		this.initialToken = initialToken;
 	}
 
 	/**
@@ -103,10 +103,10 @@ public class AppRoleAuthenticationOptions {
 	}
 
 	/**
-	 * @return the bound RoleToken.
+	 * @return the bound InitialToken.
 	 */
-	public String getRoleToken() {
-		return roleToken;
+	public String getInitialToken() {
+		return initialToken;
 	}
 
 	/**
@@ -118,7 +118,7 @@ public class AppRoleAuthenticationOptions {
 
 		private String appRole;
 
-		private String roleToken;
+		private String initialToken;
 
 		private String roleId;
 
@@ -157,16 +157,16 @@ public class AppRoleAuthenticationOptions {
 		}
 
 		/**
-		 * Configure a {@code roleToken}.
+		 * Configure a {@code initialToken}.
 		 *
-		 * @param roleToken must not be empty or {@literal null}.
+		 * @param initialToken must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 */
-		public AppRoleAuthenticationOptionsBuilder roleToken(String roleToken) {
+		public AppRoleAuthenticationOptionsBuilder initialToken(String initialToken) {
 
-			Assert.hasText(roleToken, "RoleToken must not be empty");
+			Assert.hasText(initialToken, "InitialToken must not be empty");
 
-			this.roleToken = roleToken;
+			this.initialToken = initialToken;
 			return this;
 		}
 
@@ -200,7 +200,8 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Build a new {@link AppRoleAuthenticationOptions} instance. Requires
-		 * {@link #roleId(String)} to be configured.
+		 * {@link #roleId(String)} for Push Mode or {@link #appRole(String)} and
+		 * {@link #initialToken(String)} for pull Mode to be configured.
 		 *
 		 * @return a new {@link AppRoleAuthenticationOptions}.
 		 */
@@ -208,15 +209,19 @@ public class AppRoleAuthenticationOptions {
 
 			Assert.hasText(path, "Path must not be empty");
 
-			//Need to have either RoleID or (AppRole and RoleToken)
-			if(StringUtils.isEmpty(appRole) && StringUtils.isEmpty(roleToken)){
+			//Role ID is required in order to use push mode (no appRole and initialToken)
+			if (StringUtils.isEmpty(appRole) && StringUtils.isEmpty(initialToken)) {
 				Assert.notNull(roleId, "RoleId must not be null");
-			} else if(StringUtils.isEmpty(roleId) || StringUtils.isEmpty(secretId)){
-				Assert.notNull(appRole, "AppRole must not be null");
-				Assert.notNull(roleToken, "RoleToken must not be null");
 			}
 
-			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole, roleToken);
+			//AppRole and InitialToken are required in order to use pull mode (no roleId)
+			if (StringUtils.isEmpty(roleId)) {
+				Assert.notNull(appRole, "AppRole must not be null");
+				Assert.notNull(initialToken, "InitialToken must not be null");
+			}
+
+			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole,
+				initialToken);
 		}
 	}
 }
