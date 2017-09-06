@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Authentication options for {@link AppRoleAuthentication}.
@@ -47,11 +48,23 @@ public class AppRoleAuthenticationOptions {
 	 */
 	private final String secretId;
 
-	private AppRoleAuthenticationOptions(String path, String roleId, String secretId) {
+	/**
+	 * Role name used to get roleId and secretID
+	 */
+	private final String appRole;
+
+	/**
+	 * Token associated to the roleName.
+	 */
+	private final String roleToken;
+
+	private AppRoleAuthenticationOptions(String path, String roleId, String secretId, String appRole, String roleToken) {
 
 		this.path = path;
 		this.roleId = roleId;
 		this.secretId = secretId;
+		this.appRole = appRole;
+		this.roleToken = roleToken;
 	}
 
 	/**
@@ -83,11 +96,29 @@ public class AppRoleAuthenticationOptions {
 	}
 
 	/**
+	 * @return the bound AppRole.
+	 */
+	public String getAppRole() {
+		return appRole;
+	}
+
+	/**
+	 * @return the bound RoleToken.
+	 */
+	public String getRoleToken() {
+		return roleToken;
+	}
+
+	/**
 	 * Builder for {@link AppRoleAuthenticationOptions}.
 	 */
 	public static class AppRoleAuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_APPROLE_AUTHENTICATION_PATH;
+
+		private String appRole;
+
+		private String roleToken;
 
 		private String roleId;
 
@@ -108,6 +139,34 @@ public class AppRoleAuthenticationOptions {
 			Assert.hasText(path, "Path must not be empty");
 
 			this.path = path;
+			return this;
+		}
+
+		/**
+		 * Configure a {@code appRole}.
+		 *
+		 * @param appRole must not be empty or {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 */
+		public AppRoleAuthenticationOptionsBuilder appRole(String appRole) {
+
+			Assert.hasText(appRole, "AppRole must not be empty");
+
+			this.appRole = appRole;
+			return this;
+		}
+
+		/**
+		 * Configure a {@code roleToken}.
+		 *
+		 * @param roleToken must not be empty or {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 */
+		public AppRoleAuthenticationOptionsBuilder roleToken(String roleToken) {
+
+			Assert.hasText(roleToken, "RoleToken must not be empty");
+
+			this.roleToken = roleToken;
 			return this;
 		}
 
@@ -148,9 +207,16 @@ public class AppRoleAuthenticationOptions {
 		public AppRoleAuthenticationOptions build() {
 
 			Assert.hasText(path, "Path must not be empty");
-			Assert.notNull(roleId, "RoleId must not be null");
 
-			return new AppRoleAuthenticationOptions(path, roleId, secretId);
+			//Need to have either RoleID or (AppRole and RoleToken)
+			if(StringUtils.isEmpty(appRole) && StringUtils.isEmpty(roleToken)){
+				Assert.notNull(roleId, "RoleId must not be null");
+			} else if(StringUtils.isEmpty(roleId) || StringUtils.isEmpty(secretId)){
+				Assert.notNull(appRole, "AppRole must not be null");
+				Assert.notNull(roleToken, "RoleToken must not be null");
+			}
+
+			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole, roleToken);
 		}
 	}
 }

@@ -17,11 +17,14 @@ package org.springframework.vault.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -74,8 +77,10 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 	private VaultToken createTokenUsingAppRole() {
 
-		Map<String, String> login = getAppRoleLogin(options.getRoleId(),
-				options.getSecretId());
+		String roleId = getRoleId();
+		String secretId = getSecretId();
+
+		Map<String, String> login = getAppRoleLogin(roleId, secretId);
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
@@ -90,6 +95,48 @@ public class AppRoleAuthentication implements ClientAuthentication {
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 	}
+
+	private String getRoleId() {
+		String roleId = options.getRoleId();
+		if (StringUtils.isEmpty(roleId) && !StringUtils.isEmpty(options.getAppRole())) {
+			try {
+				ResponseEntity<VaultResponse> response = restOperations.exchange("auth/approle/role/{role}/role-id",
+						HttpMethod.GET, createHttpEntityWithToken(), VaultResponse.class, options.getAppRole());
+				roleId = (String) response.getBody().getData().get("role_id");
+			} catch (HttpStatusCodeException e) {
+				throw new VaultException(String.format("Cannot get Role id using AppRole: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
+			}
+		}
+		return roleId;
+
+	}
+
+	private String getSecretId() {
+		String secretId = options.getSecretId();
+		if(StringUtils.isEmpty(secretId) && !StringUtils.isEmpty(options.getAppRole())) {
+			try {
+				VaultResponse response = restOperations.postForObject("auth/approle/role/{role}/secret-id",
+						createHttpEntityWithToken(), VaultResponse.class, options.getAppRole());
+				secretId = (String) response.getData().get("secret_id");
+			}
+			catch (HttpStatusCodeException e) {
+				throw new VaultException(String.format("Cannot get Secret id using AppRole: %s",
+						VaultResponses.getError(e.getResponseBodyAsString())));
+			}
+		}
+		return secretId;
+
+	}
+
+	private HttpEntity createHttpEntityWithToken(){
+		HttpHeaders headers = new HttpHeaders();
+		if (options.getRoleToken() != null) {
+			headers.set("X-Vault-Token",  options.getRoleToken());
+		}
+		return new HttpEntity<String>(null, headers);
+	}
+
 
 	private Map<String, String> getAppRoleLogin(String roleId, String secretId) {
 

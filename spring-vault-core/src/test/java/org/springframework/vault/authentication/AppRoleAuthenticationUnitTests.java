@@ -28,9 +28,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -76,6 +74,57 @@ public class AppRoleAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
+	}
+
+	@Test
+	public void loginShouldPullRoleIdAndSecretId() throws Exception {
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.appRole("app_role")
+				.roleToken("role_token")
+				.build();
+
+		mockRest.expect(requestTo("/auth/approle/role/app_role/role-id"))
+				.andExpect(method(HttpMethod.GET))
+				.andExpect(header("X-Vault-token", "role_token"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{\"data\": {\"role_id\": \"hello\"}}"
+				));
+
+		mockRest.expect(requestTo("/auth/approle/role/app_role/secret-id"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(header("X-Vault-token", "role_token"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{\"data\": {\"secret_id\": \"world\"}}"
+				));
+
+		mockRest.expect(requestTo("/auth/approle/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("hello"))
+				.andExpect(jsonPath("$.secret_id").value("world"))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
+
+		VaultToken login = sut.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void loginShouldFailIfPullModeButNoToken() throws Exception {
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.appRole("app_role")
+				.build();
+
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
+
+		sut.login();
+
 	}
 
 	@Test
