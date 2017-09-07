@@ -25,6 +25,7 @@ env:
     - VAULT_VER=0.7.3
     - VAULT_VER=0.8.0
     - VAULT_VER=0.8.1
+    - VAULT_VER=0.8.2
     - PROFILE=springNext
 
 before_install:
