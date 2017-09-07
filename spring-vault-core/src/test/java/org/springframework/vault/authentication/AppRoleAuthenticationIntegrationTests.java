@@ -27,6 +27,7 @@ import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Settings;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,6 +88,29 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		String roleId = getRoleId("no-secret-id");
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(roleId).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		assertThat(authentication.login()).isNotNull();
+	}
+
+	@Test
+	public void shouldAuthenticateWithFullPullMode() {
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.appRole("with-secret-id").initialToken(Settings.token()).build();
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		assertThat(authentication.login()).isNotNull();
+	}
+
+	@Test
+	public void shouldAuthenticateWithPullMode() {
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(getRoleId("with-secret-id")).appRole("with-secret-id")
+				.initialToken(Settings.token()).build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
 				prepare().getRestTemplate());
 

@@ -17,8 +17,10 @@ package org.springframework.vault.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -40,6 +42,7 @@ import org.springframework.web.client.RestOperations;
  * {@link AppRoleAuthenticationOptions#getSecretId()}.
  *
  * @author Mark Paluch
+ * @author Vincent Le Nair
  * @see AppRoleAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
@@ -70,7 +73,8 @@ public class AppRoleAuthentication implements ClientAuthentication {
 		this.restOperations = restOperations;
 	}
 
-	@Override public VaultToken login() {
+	@Override
+	public VaultToken login() {
 		return createTokenUsingAppRole();
 	}
 
@@ -82,9 +86,8 @@ public class AppRoleAuthentication implements ClientAuthentication {
 		Map<String, String> login = getAppRoleLogin(roleId, secretId);
 
 		try {
-			VaultResponse response = restOperations
-				.postForObject("auth/{mount}/login", login, VaultResponse.class,
-					options.getPath());
+			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
+					login, VaultResponse.class, options.getPath());
 
 			logger.debug("Login successful using AppRole authentication");
 
@@ -92,55 +95,59 @@ public class AppRoleAuthentication implements ClientAuthentication {
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultException(String.format("Cannot login using AppRole: %s",
-				VaultResponses.getError(e.getResponseBodyAsString())));
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 	}
 
 	private String getRoleId() {
+
 		String roleId = options.getRoleId();
-		if (StringUtils.isEmpty(roleId) && !StringUtils.isEmpty(options.getAppRole())) {
+
+		if (StringUtils.isEmpty(roleId)) {
+
 			try {
-				ResponseEntity<VaultResponse> response = restOperations
-					.exchange("auth/approle/role/{role}/role-id", HttpMethod.GET,
+				ResponseEntity<VaultResponse> response = restOperations.exchange(
+						"auth/{mount}/role/{role}/role-id", HttpMethod.GET,
 						createHttpEntityWithToken(), VaultResponse.class,
-						options.getAppRole());
+						options.getPath(), options.getAppRole());
 				roleId = (String) response.getBody().getData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String
-					.format("Cannot get Role id using AppRole: %s",
+				throw new VaultException(String.format(
+						"Cannot get Role id using AppRole: %s",
 						VaultResponses.getError(e.getResponseBodyAsString())));
 			}
 		}
-		return roleId;
 
+		return roleId;
 	}
 
 	private String getSecretId() {
+
 		String secretId = options.getSecretId();
-		if (StringUtils.isEmpty(secretId) && !StringUtils.isEmpty(options.getAppRole())) {
+
+		if (StringUtils.isEmpty(secretId) && options.getInitialToken() != null) {
 			try {
-				VaultResponse response = restOperations
-					.postForObject("auth/approle/role/{role}/secret-id",
+				VaultResponse response = restOperations.postForObject(
+						"auth/{mount}/role/{role}/secret-id",
 						createHttpEntityWithToken(), VaultResponse.class,
-						options.getAppRole());
+						options.getPath(), options.getAppRole());
 				secretId = (String) response.getData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String
-					.format("Cannot get Secret id using AppRole: %s",
+				throw new VaultException(String.format(
+						"Cannot get Secret id using AppRole: %s",
 						VaultResponses.getError(e.getResponseBodyAsString())));
 			}
 		}
-		return secretId;
 
+		return secretId;
 	}
 
 	private HttpEntity createHttpEntityWithToken() {
+
 		HttpHeaders headers = new HttpHeaders();
-		if (options.getInitialToken() != null) {
-			headers.set("X-Vault-Token", options.getInitialToken());
-		}
+		headers.set("X-Vault-Token", options.getInitialToken().getToken());
 		return new HttpEntity<String>(null, headers);
 	}
 
@@ -148,9 +155,11 @@ public class AppRoleAuthentication implements ClientAuthentication {
 
 		Map<String, String> login = new HashMap<String, String>();
 		login.put("role_id", roleId);
+
 		if (secretId != null) {
 			login.put("secret_id", secretId);
 		}
+
 		return login;
 	}
 }
