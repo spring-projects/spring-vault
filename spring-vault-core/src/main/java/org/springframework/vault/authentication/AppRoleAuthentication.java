@@ -25,16 +25,16 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
@@ -89,6 +89,25 @@ public class AppRoleAuthentication implements ClientAuthentication,
 
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
 
+		if (secretIdPullRequired(options)) {
+
+			Assert.notNull(options.getRoleId(),
+					"RoleId must not be null for pull mode via AuthenticationSteps");
+
+			HttpEntity body = createHttpEntity(options.getInitialToken());
+
+			return AuthenticationSteps
+					.fromHttpRequest(
+							post("auth/{mount}/role/{role}/secret-id", options.getPath(),
+									options.getAppRole()).with(body).as(
+									VaultResponse.class))
+					//
+					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"secret_id"))
+					.map(secretId -> getAppRoleLogin(options.getRoleId(), secretId))
+					.login("auth/{mount}/login", options.getPath());
+		}
+
 		return AuthenticationSteps.fromSupplier(
 				() -> getAppRoleLogin(options.getRoleId(), options.getSecretId())) //
 				.login("auth/{mount}/login", options.getPath());
@@ -130,16 +149,14 @@ public class AppRoleAuthentication implements ClientAuthentication,
 
 	private String getRoleId() {
 
-		String roleId = options.getRoleId();
-
-		if (StringUtils.isEmpty(roleId)) {
+		if (roleIdPullRequired(options)) {
 
 			try {
 				ResponseEntity<VaultResponse> response = restOperations.exchange(
 						"auth/{mount}/role/{role}/role-id", HttpMethod.GET,
-						createHttpEntityWithToken(), VaultResponse.class,
+						createHttpEntity(options.getInitialToken()), VaultResponse.class,
 						options.getPath(), options.getAppRole());
-				roleId = (String) response.getBody().getData().get("role_id");
+				return (String) response.getBody().getRequiredData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultException(String.format(
@@ -148,20 +165,22 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			}
 		}
 
-		return roleId;
+		return options.getRoleId();
+	}
+
+	private static boolean roleIdPullRequired(AppRoleAuthenticationOptions options) {
+		return options.getRoleId() == null;
 	}
 
 	private String getSecretId() {
 
-		String secretId = options.getSecretId();
-
-		if (StringUtils.isEmpty(secretId) && options.getInitialToken() != null) {
+		if (secretIdPullRequired(options)) {
 			try {
 				VaultResponse response = restOperations.postForObject(
 						"auth/{mount}/role/{role}/secret-id",
-						createHttpEntityWithToken(), VaultResponse.class,
+						createHttpEntity(options.getInitialToken()), VaultResponse.class,
 						options.getPath(), options.getAppRole());
-				secretId = (String) response.getData().get("secret_id");
+				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultException(String.format(
@@ -170,13 +189,17 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			}
 		}
 
-		return secretId;
+		return options.getSecretId();
 	}
 
-	private HttpEntity createHttpEntityWithToken() {
+	private static boolean secretIdPullRequired(AppRoleAuthenticationOptions options) {
+		return options.getSecretId() == null && options.getInitialToken() != null;
+	}
+
+	private static HttpEntity createHttpEntity(VaultToken token) {
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Vault-Token", options.getInitialToken().getToken());
+		headers.set("X-Vault-Token", token.getToken());
 		return new HttpEntity<String>(null, headers);
 	}
 

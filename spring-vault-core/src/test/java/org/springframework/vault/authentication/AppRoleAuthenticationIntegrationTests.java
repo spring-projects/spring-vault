@@ -195,9 +195,9 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 	public void authenticationStepsShouldAuthenticatePushModeWithProvidedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
-		final String secretId = "hello_world_two";
+		String secretId = "hello_world_two";
 
-		final VaultResponse customSecretIdResponse = getVaultOperations().write(
+		VaultResponse customSecretIdResponse = getVaultOperations().write(
 				"auth/approle/role/with-secret-id/custom-secret-id",
 				Collections.singletonMap("secret_id", secretId));
 
@@ -213,6 +213,22 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		getVaultOperations().write(
 				"auth/approle/role/with-secret-id/secret-id-accessor/destroy",
 				customSecretIdResponse.getData());
+	}
+
+	@Test
+	public void authenticationStepsShouldAuthenticatePushMode() {
+
+		String roleId = getRoleId("with-secret-id");
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(roleId).appRole("with-secret-id").initialToken(Settings.token())
+				.build();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
+						.getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
 	}
 
 	private VaultOperations getVaultOperations() {
