@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.support.VaultToken;
 
 /**
  * Authentication options for {@link AppRoleAuthentication}.
@@ -27,6 +28,7 @@ import org.springframework.util.StringUtils;
  * this class are immutable once constructed.
  *
  * @author Mark Paluch
+ * @author Vincent Le Nair
  * @see AppRoleAuthentication
  * @see #builder()
  */
@@ -35,13 +37,14 @@ public class AppRoleAuthenticationOptions {
 	public static final String DEFAULT_APPROLE_AUTHENTICATION_PATH = "approle";
 
 	/**
-	 * Path of the apprile authentication backend mount.
+	 * Path of the approle authentication backend mount.
 	 */
 	private final String path;
 
 	/**
 	 * The RoleId.
 	 */
+	@Nullable
 	private final String roleId;
 
 	/**
@@ -53,15 +56,18 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * Role name used to get roleId and secretID
 	 */
+	@Nullable
 	private final String appRole;
 
 	/**
-	 * Token associated to the roleName.
+	 * Token associated for pull mode (retrieval of secretId/roleId).
 	 */
-	private final String initialToken;
+	@Nullable
+	private final VaultToken initialToken;
 
-	private AppRoleAuthenticationOptions(String path, String roleId,
-			@Nullable String secretId, String appRole, String initialToken) {
+	private AppRoleAuthenticationOptions(String path, @Nullable String roleId,
+			@Nullable String secretId, @Nullable String appRole,
+			@Nullable VaultToken initialToken) {
 
 		this.path = path;
 		this.roleId = roleId;
@@ -87,6 +93,7 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * @return the RoleId.
 	 */
+	@Nullable
 	public String getRoleId() {
 		return roleId;
 	}
@@ -101,15 +108,19 @@ public class AppRoleAuthenticationOptions {
 
 	/**
 	 * @return the bound AppRole.
+	 * @since 1.1
 	 */
+	@Nullable
 	public String getAppRole() {
 		return appRole;
 	}
 
 	/**
-	 * @return the bound InitialToken.
+	 * @return the initial token for roleId/secretId retrieval in pull mode.
+	 * @since 1.1
 	 */
-	public String getInitialToken() {
+	@Nullable
+	public VaultToken getInitialToken() {
 		return initialToken;
 	}
 
@@ -120,15 +131,15 @@ public class AppRoleAuthenticationOptions {
 
 		private String path = DEFAULT_APPROLE_AUTHENTICATION_PATH;
 
-		private String appRole;
-
-		private String initialToken;
-
 		@Nullable
 		private String roleId;
 
 		@Nullable
 		private String secretId;
+
+		private String appRole;
+
+		private VaultToken initialToken;
 
 		AppRoleAuthenticationOptionsBuilder() {
 		}
@@ -145,34 +156,6 @@ public class AppRoleAuthenticationOptions {
 			Assert.hasText(path, "Path must not be empty");
 
 			this.path = path;
-			return this;
-		}
-
-		/**
-		 * Configure a {@code appRole}.
-		 *
-		 * @param appRole must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 */
-		public AppRoleAuthenticationOptionsBuilder appRole(String appRole) {
-
-			Assert.hasText(appRole, "AppRole must not be empty");
-
-			this.appRole = appRole;
-			return this;
-		}
-
-		/**
-		 * Configure a {@code initialToken}.
-		 *
-		 * @param initialToken must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 */
-		public AppRoleAuthenticationOptionsBuilder initialToken(String initialToken) {
-
-			Assert.hasText(initialToken, "InitialToken must not be empty");
-
-			this.initialToken = initialToken;
 			return this;
 		}
 
@@ -205,9 +188,39 @@ public class AppRoleAuthenticationOptions {
 		}
 
 		/**
+		 * Configure a {@code appRole}.
+		 *
+		 * @param appRole must not be empty or {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @since 1.1
+		 */
+		public AppRoleAuthenticationOptionsBuilder appRole(String appRole) {
+
+			Assert.hasText(appRole, "AppRole must not be empty");
+
+			this.appRole = appRole;
+			return this;
+		}
+
+		/**
+		 * Configure a {@code initialToken}.
+		 *
+		 * @param initialToken must not be empty or {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @since 1.1
+		 */
+		public AppRoleAuthenticationOptionsBuilder initialToken(VaultToken initialToken) {
+
+			Assert.notNull(initialToken, "InitialToken must not be null");
+
+			this.initialToken = initialToken;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link AppRoleAuthenticationOptions} instance. Requires
-		 * {@link #roleId(String)} for Push Mode or {@link #appRole(String)} and
-		 * {@link #initialToken(String)} for pull Mode to be configured.
+		 * {@link #roleId(String)} for push mode or {@link #appRole(String)} and
+		 * {@link #initialToken(VaultToken)} for pull mode to be configured.
 		 *
 		 * @return a new {@link AppRoleAuthenticationOptions}.
 		 */
@@ -215,19 +228,26 @@ public class AppRoleAuthenticationOptions {
 
 			Assert.hasText(path, "Path must not be empty");
 
-			//Role ID is required in order to use push mode (no appRole and initialToken)
-			if (StringUtils.isEmpty(appRole) && StringUtils.isEmpty(initialToken)) {
-				Assert.notNull(roleId, "RoleId must not be null");
+			// Role ID is required in order to use push mode (no appRole and initialToken)
+
+			if (StringUtils.isEmpty(roleId) && StringUtils.isEmpty(appRole)
+					&& initialToken == null) {
+				throw new IllegalArgumentException(
+						"Either roleId (push mode) or appRole/initialToken (pull mode) must be configured for AppRole authentication");
 			}
 
-			//AppRole and InitialToken are required in order to use pull mode (no roleId)
+			// AppRole and InitialToken are required in order to use pull mode (no roleId)
 			if (StringUtils.isEmpty(roleId)) {
-				Assert.notNull(appRole, "AppRole must not be null");
-				Assert.notNull(initialToken, "InitialToken must not be null");
+
+				Assert.notNull(appRole,
+						"AppRole authentication configured for pull mode. AppRole must not be null.");
+				Assert.notNull(
+						initialToken,
+						"AppRole authentication configured for pull mode. InitialToken must not be null (pull mode)");
 			}
 
 			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole,
-				initialToken);
+					initialToken);
 		}
 	}
 }

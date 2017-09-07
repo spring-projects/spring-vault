@@ -30,7 +30,10 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -38,6 +41,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Unit tests for {@link AppRoleAuthentication}.
  *
  * @author Mark Paluch
+ * @author Vincent Le Nair
  */
 public class AppRoleAuthenticationUnitTests {
 
@@ -82,23 +86,21 @@ public class AppRoleAuthenticationUnitTests {
 	public void loginShouldPullRoleIdAndSecretId() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.appRole("app_role")
-				.initialToken("initial_token")
-				.build();
+				.appRole("app_role").initialToken(VaultToken.of("initial_token")).build();
 
 		mockRest.expect(requestTo("/auth/approle/role/app_role/role-id"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header("X-Vault-token", "initial_token"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-						"{\"data\": {\"role_id\": \"hello\"}}"
-				));
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{\"data\": {\"role_id\": \"hello\"}}"));
 
 		mockRest.expect(requestTo("/auth/approle/role/app_role/secret-id"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header("X-Vault-token", "initial_token"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-						"{\"data\": {\"secret_id\": \"world\"}}"
-				));
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{\"data\": {\"secret_id\": \"world\"}}"));
 
 		mockRest.expect(requestTo("/auth/approle/login"))
 				.andExpect(method(HttpMethod.POST))
@@ -117,16 +119,18 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void loginShouldFailIfPullModeButNoToken() throws Exception {
+	public void optionsShouldRequireTokenOrRoleIdIfNothingIsSet() {
+		AppRoleAuthenticationOptions.builder().build();
+	}
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.appRole("app_role")
-				.build();
+	@Test(expected = IllegalArgumentException.class)
+	public void optionsShouldRequireTokenOrRoleIdIfTokenIsSet() {
+		AppRoleAuthenticationOptions.builder().initialToken(VaultToken.of("foo")).build();
+	}
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
-
-		sut.login();
-
+	@Test(expected = IllegalArgumentException.class)
+	public void optionsShouldRequireTokenOrRoleIdIfAppRoleIdIsSet() {
+		AppRoleAuthenticationOptions.builder().appRole("app_role").build();
 	}
 
 	@Test
