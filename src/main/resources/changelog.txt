@@ -1,6 +1,14 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 1.1.0.RC1
+-----------------------------------------
+* Upgrade to Vault 0.8.1 #127
+* Allow Pull Mode when using the AppRoleAuthentication by sending on Ap… #133
+* Upgrade to Vault 0.8.2 #134
+* Upgrade to Spring Framework 4.3.11 #135
+* Release 1.1.0 RC1 #136
+
 Changes in version 1.1.0.M1
 -----------------------------------------
 * Add developer, SCM location and project URL to dependency POM #73
