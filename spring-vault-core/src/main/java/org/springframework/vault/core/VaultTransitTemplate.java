@@ -23,6 +23,8 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultResponse;
@@ -178,11 +180,34 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public List<Map<String, String>> encrypt(String keyName, List<String> plaintexts) {
 
+		return encrypt(keyName, plaintexts, null);
+	}
+	
+	@Override
+	public List<Map<String, String>> encrypt(String keyName, List<String> plaintexts,
+			List<VaultTransitContext> transitRequests) {
+		
+		Boolean hasContext = false;
+		
+		if(transitRequests!= null) {
+			Assert.isTrue(plaintexts.size() == transitRequests.size(), "not all of the plaintexts contain the context.");
+			hasContext = true;
+		}
+		
 		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+		
+		int currentIndex = 0;
 
 		for (String plaintext : plaintexts) {
+			
 			Map<String, String> request = new LinkedHashMap<String, String>();
+			
 			request.put("plaintext", Base64Utils.encodeToString(plaintext.getBytes()));
+			
+			if (hasContext) {
+				applyTransitOptions(transitRequests.get(currentIndex++), request);
+			}
+			
 			batch.add(request);
 		}
 
@@ -193,6 +218,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		return (List<Map<String, String>>) vaultResponse.getData().get("batch_results");
 	}
+
 	
 	@Override
 	public String decrypt(String keyName, String ciphertext) {
@@ -236,11 +262,34 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts) {
 
+		return decrypt(keyName, ciphertexts, null);
+	}
+	
+	@Override
+	public List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts,
+			List<VaultTransitContext> transitRequests) {
+		
+		Boolean hasContext= false;
+		
+		if(transitRequests!= null) {
+			Assert.isTrue(ciphertexts.size() == transitRequests.size(), "not all of the ciphertexts contain the context.");
+			hasContext = true;
+		}
+		
 		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
 
+		int currentIndex = 0;
+		
 		for (String ciphertext : ciphertexts) {
+			
 			Map<String, String> request = new LinkedHashMap<String, String>();
+			
 			request.put("ciphertext", ciphertext);
+			
+			if (hasContext) {
+				applyTransitOptions(transitRequests.get(currentIndex++), request);
+			}
+			
 			batch.add(request);
 		}
 
@@ -249,7 +298,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/decrypt/%s", path, keyName), request);
 
-		return (List<Map<String, String>>) vaultResponse.getData().get("batch_results");
+		List<Map<String, String>> batchResult = (List<Map<String, String>>) vaultResponse.getData().get("batch_results");
+		
+		return batchResult;		
 	}
 
 	@Override
@@ -343,4 +394,5 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		private String name;
 	}
+	
 }

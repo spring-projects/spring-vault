@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultTransitContext;
@@ -283,7 +284,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 	
 	@Test
-	public void batchEncryptionAndDecryption() {
+	public void batchEncryptionAndDecryptionTestWithoutContext() {
 
 		transitOperations.createKey("mykey");
 
@@ -291,7 +292,80 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		plaintexts.add("one");
 		plaintexts.add("two");
 
-		List<Map<String, String>> cipherResponse = transitOperations.encrypt("mykey", plaintexts);
+		batchEncryptionAndDecryption(plaintexts, null, null);
+	}
+
+	@Test
+	public void batchEncryptionAndDecryptionTestWithMatchingContext() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
+
+		transitOperations.createKey("mykey", request);
+
+		List<String> plaintexts = new ArrayList<String>();
+		plaintexts.add("one");
+		plaintexts.add("two");
+
+		List<VaultTransitContext> contexts = new ArrayList<VaultTransitContext>();
+		contexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		contexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+		batchEncryptionAndDecryption(plaintexts, contexts, contexts);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void batchEncryptionAndDecryptionTestWithNonEqualContext() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
+
+		transitOperations.createKey("mykey", request);
+
+		List<String> plaintexts = new ArrayList<String>();
+		plaintexts.add("one");
+		plaintexts.add("two");
+
+		List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
+		encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+		List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
+		decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+		batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+	}
+
+	@Test(expected = VaultException.class)
+	public void batchEncryptionAndDecryptionTestWithNonMatchingContext() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
+
+		transitOperations.createKey("mykey", request);
+
+		List<String> plaintexts = new ArrayList<String>();
+		plaintexts.add("one");
+		plaintexts.add("two");
+
+		List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
+		encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+		List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
+		decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		decryptionContext.add(VaultTransitContext.builder().context("wrongTwoContext".getBytes()).build());
+
+		batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+	}
+
+	private void batchEncryptionAndDecryption(List<String> plaintexts, List<VaultTransitContext> encryptionContexts,
+			List<VaultTransitContext> decryptionContext) {
+
+		List<Map<String, String>> cipherResponse = transitOperations.encrypt("mykey", plaintexts, encryptionContexts);
 
 		List<String> cipherList = new ArrayList<String>();
 
@@ -299,7 +373,21 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			cipherList.add(entry.get("ciphertext"));
 		}
 
-		List<Map<String, String>> plaintextResponse = transitOperations.decrypt("mykey", cipherList);
+		List<Map<String, String>> plaintextResponse = transitOperations.decrypt("mykey", cipherList, decryptionContext);
+
+		/**
+		 * check to see if decryption ended up with errors. this is special
+		 * handling when context is supplied. For the other use cases, the
+		 * handling should be done by the applications.
+		 */
+		if (decryptionContext != null) {
+			for (Map<String, String> entry : plaintextResponse) {
+
+				if (!StringUtils.isEmpty(entry.get("error"))) {
+					throw new VaultException(entry.get("error"));
+				}
+			}
+		}
 
 		List<String> decryptedTexts = new ArrayList<String>();
 
@@ -311,7 +399,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		int i = 0;
 
-		for (String  plaintext: plaintexts) {
+		for (String plaintext : plaintexts) {
 			Assert.assertEquals(plaintext, decryptedTexts.get(i++));
 		}
 
