@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,6 +30,11 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
+import org.springframework.vault.support.VaultDecryptionPayload;
+import org.springframework.vault.support.VaultDecryptionResult;
+import org.springframework.vault.support.VaultEncryptionDecryptionResultHelper;
+import org.springframework.vault.support.VaultEncryptionPayload;
+import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultTransitContext;
@@ -36,11 +42,16 @@ import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
+
 /**
  * Default implementation of {@link VaultTransitOperations}.
  *
  * @author Mark Paluch
  * @author Sven Schürmann
+ * @author Praveendra Singh
  */
 public class VaultTransitTemplate implements VaultTransitOperations {
 
@@ -177,6 +188,37 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	public List<VaultEncryptionResult> encrypt(String keyName, List<VaultEncryptionPayload> batchRequest) {
+
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
+
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+
+		for (VaultEncryptionPayload request : batchRequest) {
+
+			Assert.notNull(request.getPlaintext(), "Plain text must not be null");
+
+			Map<String, String> vaultRequest = new LinkedHashMap<String, String>();
+
+			vaultRequest.put("plaintext", Base64Utils.encodeToString(request.getPlaintext()));
+
+			if (request.getContext() != null) {
+				applyTransitOptions(request.getContext(), vaultRequest);
+			}
+
+			batch.add(vaultRequest);
+		}
+
+		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
+		request.put("batch_input", batch);
+
+		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/encrypt/%s", path, keyName), request);
+
+		return VaultEncryptionDecryptionResultHelper.fetchEncryptionResult(vaultResponse);
+	}
+
+	@Override
 	public String decrypt(String keyName, String ciphertext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
@@ -212,6 +254,37 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.getRequiredData().get("plaintext");
 
 		return Base64Utils.decodeFromString(plaintext);
+	}
+
+	@Override
+	public List<VaultDecryptionResult> decrypt(String keyName, List<VaultDecryptionPayload> batchRequest) {
+
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
+
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+
+		for (VaultDecryptionPayload request : batchRequest) {
+
+			Assert.notNull(request.getCiphertext(), "Cipher text must not be null");
+
+			Map<String, String> vaultRequest = new LinkedHashMap<String, String>();
+
+			vaultRequest.put("ciphertext", request.getCiphertext());
+
+			if (request.getContext() != null) {
+				applyTransitOptions(request.getContext(), vaultRequest);
+			}
+
+			batch.add(vaultRequest);
+		}
+
+		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
+		request.put("batch_input", batch);
+
+		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/decrypt/%s", path, keyName), request);
+
+		return VaultEncryptionDecryptionResultHelper.fetchDecryptionResult(vaultResponse);
 	}
 
 	@Override
@@ -306,4 +379,5 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@Nullable
 		private String name;
 	}
+
 }
