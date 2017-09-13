@@ -127,6 +127,8 @@ public interface VaultTransitOperations {
 	 * Encrypts the provided list of plaintext using the named key.
 	 * The encryption is done using transit backend's batch operation.
 	 *
+	 * works with Vault 0.6.5 and after.
+	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintexts a list of non-empty (or {@literal null}) plaintext.
 	 * @return list of cipher text in the same order as in plaintexts.
@@ -155,6 +157,8 @@ public interface VaultTransitOperations {
 	/**
 	 * Decrypts the provided list of ciphertext using the named key.
 	 * The decryption is done using transit backend's batch operation.
+	 * 
+	 * works with Vault 0.6.5 and after.
 	 * 
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertexts a list of non-empty (or {@literal null}) ciphertext.
