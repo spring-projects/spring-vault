@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,16 +15,15 @@
  */
 package org.springframework.vault.core;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -32,7 +31,10 @@ import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.RawTransitKey;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Data;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -152,7 +154,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.write(String.format("%s/encrypt/%s", path, keyName), request).getData()
 				.get("ciphertext");
 	}
-
+	
 	@Override
 	public String encrypt(String keyName, byte[] plaintext,
 			VaultTransitContext transitRequest) {
@@ -173,6 +175,25 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.get("ciphertext");
 	}
 
+	@Override
+	public List<Map<String, String>> encrypt(String keyName, List<String> plaintexts) {
+
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+
+		for (String plaintext : plaintexts) {
+			Map<String, String> request = new LinkedHashMap<String, String>();
+			request.put("plaintext", Base64Utils.encodeToString(plaintext.getBytes()));
+			batch.add(request);
+		}
+
+		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
+		request.put("batch_input", batch);
+
+		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/encrypt/%s", path, keyName), request);
+
+		return (List<Map<String, String>>) vaultResponse.getData().get("batch_results");
+	}
+	
 	@Override
 	public String decrypt(String keyName, String ciphertext) {
 
@@ -210,6 +231,25 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.get("plaintext");
 
 		return Base64Utils.decodeFromString(plaintext);
+	}
+	
+	@Override
+	public List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts) {
+
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+
+		for (String ciphertext : ciphertexts) {
+			Map<String, String> request = new LinkedHashMap<String, String>();
+			request.put("ciphertext", ciphertext);
+			batch.add(request);
+		}
+
+		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
+		request.put("batch_input", batch);
+
+		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/decrypt/%s", path, keyName), request);
+
+		return (List<Map<String, String>>) vaultResponse.getData().get("batch_results");
 	}
 
 	@Override

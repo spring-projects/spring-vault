@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *	  http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,9 +15,12 @@
  */
 package org.springframework.vault.core;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultTransitContext;
@@ -98,7 +102,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			deleteKey("derived");
 		}
 	}
-
+	
 	@Test
 	public void createKeyShouldCreateKey() {
 
@@ -276,5 +280,40 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		String rewrapped = transitOperations.rewrap("mykey", ciphertext, transitRequest);
 		assertThat(rewrapped).startsWith("vault:v2");
+	}
+	
+	@Test
+	public void batchEncryptionAndDecryption() {
+
+		transitOperations.createKey("mykey");
+
+		List<String> plaintexts = new ArrayList<String>();
+		plaintexts.add("one");
+		plaintexts.add("two");
+
+		List<Map<String, String>> cipherResponse = transitOperations.encrypt("mykey", plaintexts);
+
+		List<String> cipherList = new ArrayList<String>();
+
+		for (Map<String, String> entry : cipherResponse) {
+			cipherList.add(entry.get("ciphertext"));
+		}
+
+		List<Map<String, String>> plaintextResponse = transitOperations.decrypt("mykey", cipherList);
+
+		List<String> decryptedTexts = new ArrayList<String>();
+
+		for (Map<String, String> entry : plaintextResponse) {
+			decryptedTexts.add(new String(Base64Utils.decodeFromString(entry.get("plaintext"))));
+		}
+
+		Assert.assertEquals(plaintexts.size(), decryptedTexts.size());
+
+		int i = 0;
+
+		for (String  plaintext: plaintexts) {
+			Assert.assertEquals(plaintext, decryptedTexts.get(i++));
+		}
+
 	}
 }

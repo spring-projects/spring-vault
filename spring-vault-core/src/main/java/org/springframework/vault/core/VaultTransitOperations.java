@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultTransitContext;
@@ -123,6 +124,16 @@ public interface VaultTransitOperations {
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
 
 	/**
+	 * Encrypts the provided list of plaintext using the named key.
+	 * The encryption is done using transit backend's batch operation.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintexts a list of non-empty (or {@literal null}) plaintext.
+	 * @return list of cipher text in the same order as in plaintexts.
+	 */
+	List<Map<String, String>> encrypt(String keyName, List<String> plaintexts);
+     
+	/**
 	 * Decrypts the provided plaintext using the named key.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
@@ -140,6 +151,16 @@ public interface VaultTransitOperations {
 	 * @return plain text.
 	 */
 	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitRequest);
+
+	/**
+	 * Decrypts the provided list of ciphertext using the named key.
+	 * The decryption is done using transit backend's batch operation.
+	 * 
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param ciphertexts a list of non-empty (or {@literal null}) ciphertext.
+	 * @return list of plain text in the same order as in ciphertexts.
+	 */
+	List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
