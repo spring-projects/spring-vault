@@ -16,20 +16,24 @@
 package org.springframework.vault.core;
 
 import java.util.List;
-import java.util.Map;
 
+import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
+import org.springframework.vault.support.VaultDecryptionPayload;
+import org.springframework.vault.support.VaultDecryptionResult;
+import org.springframework.vault.support.VaultEncryptionPayload;
+import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-import org.springframework.vault.support.RawTransitKey;
 
 /**
  * Interface that specifies operations using the {@code transit} backend.
  *
  * @author Mark Paluch
  * @author Sven Schürmann
+ * @author Praveendra Singh
  * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
  * Secret Backend</a>
  */
@@ -124,30 +128,17 @@ public interface VaultTransitOperations {
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
 
 	/**
-	 * Encrypts the provided list of plaintext using the named key.
-	 * The encryption is done using transit backend's batch operation.
-	 *
-	 * works with Vault 0.6.5 and later.
-	 *
-	 * @param keyName must not be empty or {@literal null}.
-	 * @param plaintexts a list of non-empty (or {@literal null}) plaintext.
-	 * @return list of cipher text in the same order as in plaintexts.
-	 */
-	List<Map<String, String>> encrypt(String keyName, List<String> plaintexts);
-
-	/**
 	 * Encrypts the provided list of plaintext using the named key and context.
 	 * The encryption is done using transit backend's batch operation.
 	 *
 	 * works with Vault 0.6.5 and later.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param plaintexts a list of non-empty (or {@literal null}) plaintext.
-	 * @param transitRequests a list of  VaultTransitContext. May be {@literal null} if no request options provided.
+	 * @param batchRequest a list of VaultEncryptionRequest which includes plaintext and optional context
 	 * @return list of cipher text in the same order as in plaintexts.
 	 * @throws IllegalArgumentException in case of not matching context found.
 	 */
-	List<Map<String, String>> encrypt(String keyName, List<String> plaintexts, List<VaultTransitContext> transitRequests);
+	VaultEncryptionResult encrypt(String keyName, List<VaultEncryptionPayload> batchRequest);
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
@@ -169,30 +160,17 @@ public interface VaultTransitOperations {
 	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitRequest);
 
 	/**
-	 * Decrypts the provided list of ciphertext using the named key.
-	 * The decryption is done using transit backend's batch operation.
-	 * 
-	 * works with Vault 0.6.5 and later.
-	 * 
-	 * @param keyName must not be empty or {@literal null}.
-	 * @param ciphertexts a list of non-empty (or {@literal null}) ciphertext.
-	 * @return list of plain text in the same order as in ciphertexts.
-	 */
-	List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts);
-	
-	/**
 	 * Decrypts the provided list of ciphertext using the named key and context.
 	 * The decryption is done using transit backend's batch operation.
 	 * 
 	 * works with Vault 0.6.5 and later.
 	 * 
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param ciphertexts a list of non-empty (or {@literal null}) ciphertext.
-	 * @param transitRequests a list of  VaultTransitContext. May be {@literal null} if no request options provided.
+	 * @param batchRequest a list of VaultDecryptionBatchRequest which includes plaintext and optional context
 	 * @return list of plain text in the same order as in ciphertexts.
 	 * @throws IllegalArgumentException in case of not matching context found.
 	 */
-	List<Map<String, String>> decrypt(String keyName, List<String> ciphertexts, List<VaultTransitContext> transitRequests);
+	VaultDecryptionResult decrypt(String keyName, List<VaultDecryptionPayload> batchRequest);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because

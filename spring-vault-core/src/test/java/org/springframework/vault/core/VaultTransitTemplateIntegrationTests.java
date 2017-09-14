@@ -15,22 +15,26 @@
  */
 package org.springframework.vault.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeTrue;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.support.VaultDecryptionPayload;
+import org.springframework.vault.support.VaultDecryptionResult;
+import org.springframework.vault.support.VaultEncryptionPayload;
+import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
@@ -39,21 +43,18 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assume.assumeTrue;
-
 /**
  * Integration tests for {@link VaultTransitTemplate} through
  * {@link VaultTransitOperations}.
  *
  * @author Mark Paluch
+ * @author Praveendra Singh
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
-	private static final String BATCH_SUPPORTED_VERSION = "0.6.5";
+	private static final String BATCH_INTRODUCED_IN_VERSION = "0.6.5";
 
 	@Autowired
 	private VaultOperations vaultOperations;
@@ -288,10 +289,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithoutContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
 			return;
 		}
-		
+
 		transitOperations.createKey("mykey");
 
 		List<String> plaintexts = new ArrayList<String>();
@@ -304,10 +305,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithMatchingContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
 			return;
 		}
-		
+
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
 				.build();
@@ -328,7 +329,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithNonEqualContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
 			return;
 		}
 
@@ -352,8 +353,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
 			batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
-		
+
 		} catch (IllegalArgumentException e) {
+			return;
+		} catch (VaultException e) {
 			return;
 		}
 
@@ -363,7 +366,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithNonMatchingContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
 			return;
 		}
 
@@ -399,42 +402,57 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	private void batchEncryptionAndDecryption(List<String> plaintexts, List<VaultTransitContext> encryptionContexts,
 			List<VaultTransitContext> decryptionContext) {
 
-		List<Map<String, String>> cipherResponse = transitOperations.encrypt("mykey", plaintexts, encryptionContexts);
+		List<VaultEncryptionPayload> encryptionBatchRequest = new ArrayList<VaultEncryptionPayload>();
 
-		List<String> cipherList = new ArrayList<String>();
+		int index = 0;
 
-		for (Map<String, String> entry : cipherResponse) {
-			cipherList.add(entry.get("ciphertext"));
-		}
+		for (String plaintext : plaintexts) {
 
-		List<Map<String, String>> plaintextResponse = transitOperations.decrypt("mykey", cipherList, decryptionContext);
+			VaultEncryptionPayload req = VaultEncryptionPayload.of(plaintext);
 
-		/**
-		 * check to see if decryption ended up with errors. this is special
-		 * handling when context is supplied. For the other use cases, the
-		 * handling should be done by the applications.
-		 */
-		if (decryptionContext != null) {
-			for (Map<String, String> entry : plaintextResponse) {
-
-				if (!StringUtils.isEmpty(entry.get("error"))) {
-					throw new VaultException(entry.get("error"));
+			if (encryptionContexts != null) {
+				if (encryptionContexts.size() >= (index + 1)) {
+					req = req.with(encryptionContexts.get(index));
 				}
 			}
+
+			encryptionBatchRequest.add(req);
+			index++;
 		}
 
-		List<String> decryptedTexts = new ArrayList<String>();
+		VaultEncryptionResult cipherResult = transitOperations.encrypt("mykey", encryptionBatchRequest);
 
-		for (Map<String, String> entry : plaintextResponse) {
-			decryptedTexts.add(new String(Base64Utils.decodeFromString(entry.get("plaintext"))));
+		List<String> ciphers = cipherResult.get();
+
+		List<VaultDecryptionPayload> decryptionBatchRequest = new ArrayList<VaultDecryptionPayload>();
+
+		index = 0;
+
+		for (String cipher : ciphers) {
+
+			VaultDecryptionPayload req = VaultDecryptionPayload.of(cipher);
+
+			if (decryptionContext != null) {
+				if (decryptionContext.size() >= (index + 1)) {
+					req = req.with(decryptionContext.get(index));
+				}
+			}
+
+			decryptionBatchRequest.add(req);
+			index++;
 		}
+
+		VaultDecryptionResult plaintextResult = transitOperations.decrypt("mykey", decryptionBatchRequest);
+
+		List<byte[]> decryptedTexts = plaintextResult.get();
 
 		Assert.assertEquals(plaintexts.size(), decryptedTexts.size());
 
 		int i = 0;
 
 		for (String plaintext : plaintexts) {
-			Assert.assertEquals(plaintext, decryptedTexts.get(i++));
+			String decrypted = new String(decryptedTexts.get(i++));
+			Assert.assertEquals(plaintext, decrypted);
 		}
 
 	}
