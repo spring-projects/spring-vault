@@ -134,7 +134,7 @@ public interface VaultTransitOperations {
 	 * works with Vault 0.6.5 and later.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of VaultEncryptionRequest which includes plaintext and optional context
+	 * @param batchRequest a list of VaultEncryptionPayload which includes plaintext and optional context
 	 * @return list of cipher text in the same order as in plaintexts.
 	 * @throws IllegalArgumentException in case of not matching context found.
 	 */
@@ -166,7 +166,7 @@ public interface VaultTransitOperations {
 	 * works with Vault 0.6.5 and later.
 	 * 
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of VaultDecryptionBatchRequest which includes plaintext and optional context
+	 * @param batchRequest a list of VaultDecryptionPayload which includes plaintext and optional context
 	 * @return list of plain text in the same order as in ciphertexts.
 	 * @throws IllegalArgumentException in case of not matching context found.
 	 */
