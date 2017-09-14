@@ -136,7 +136,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of VaultEncryptionPayload which includes plaintext and optional context
 	 * @return list of cipher text in the same order as in plaintexts.
-	 * @throws IllegalArgumentException in case of not matching context found.
+	 * @throws VaultException in case of not matching context found.
 	 */
 	VaultEncryptionResult encrypt(String keyName, List<VaultEncryptionPayload> batchRequest);
 
@@ -168,7 +168,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of VaultDecryptionPayload which includes plaintext and optional context
 	 * @return list of plain text in the same order as in ciphertexts.
-	 * @throws IllegalArgumentException in case of not matching context found.
+	 * @throws VaultException in case of not matching context found.
 	 */
 	VaultDecryptionResult decrypt(String keyName, List<VaultDecryptionPayload> batchRequest);
 
