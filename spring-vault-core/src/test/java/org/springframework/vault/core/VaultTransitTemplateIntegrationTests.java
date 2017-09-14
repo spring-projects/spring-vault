@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *	  http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,8 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
+
+	private static final String BATCH_SUPPORTED_VERSION = "0.6.5";
 
 	@Autowired
 	private VaultOperations vaultOperations;
@@ -286,6 +288,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithoutContext() {
 
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+			return;
+		}
+		
 		transitOperations.createKey("mykey");
 
 		List<String> plaintexts = new ArrayList<String>();
@@ -298,6 +304,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void batchEncryptionAndDecryptionTestWithMatchingContext() {
 
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+			return;
+		}
+		
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
 				.build();
@@ -315,51 +325,75 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		batchEncryptionAndDecryption(plaintexts, contexts, contexts);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void batchEncryptionAndDecryptionTestWithNonEqualContext() {
 
-		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
-				.derived(true) //
-				.build();
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+			return;
+		}
 
-		transitOperations.createKey("mykey", request);
+		try {
 
-		List<String> plaintexts = new ArrayList<String>();
-		plaintexts.add("one");
-		plaintexts.add("two");
+			VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+					.derived(true) //
+					.build();
 
-		List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
-		encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-		encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+			transitOperations.createKey("mykey", request);
 
-		List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
-		decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+			List<String> plaintexts = new ArrayList<String>();
+			plaintexts.add("one");
+			plaintexts.add("two");
 
-		batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+			List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
+			encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+			encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+			List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
+			decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+			batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+		
+		} catch (IllegalArgumentException e) {
+			return;
+		}
+
+		Assert.fail();
 	}
 
-	@Test(expected = VaultException.class)
+	@Test
 	public void batchEncryptionAndDecryptionTestWithNonMatchingContext() {
 
-		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
-				.derived(true) //
-				.build();
+		if (prepare().getVersion().isLessThan(Version.parse(BATCH_SUPPORTED_VERSION))) {
+			return;
+		}
 
-		transitOperations.createKey("mykey", request);
+		try {
 
-		List<String> plaintexts = new ArrayList<String>();
-		plaintexts.add("one");
-		plaintexts.add("two");
+			VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+					.derived(true) //
+					.build();
 
-		List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
-		encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-		encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+			transitOperations.createKey("mykey", request);
 
-		List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
-		decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-		decryptionContext.add(VaultTransitContext.builder().context("wrongTwoContext".getBytes()).build());
+			List<String> plaintexts = new ArrayList<String>();
+			plaintexts.add("one");
+			plaintexts.add("two");
 
-		batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+			List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
+			encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+			encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+			List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
+			decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+			decryptionContext.add(VaultTransitContext.builder().context("wrongTwoContext".getBytes()).build());
+
+			batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+
+		} catch (VaultException e) {
+			return;
+		}
+
+		Assert.fail();
 	}
 
 	private void batchEncryptionAndDecryption(List<String> plaintexts, List<VaultTransitContext> encryptionContexts,
