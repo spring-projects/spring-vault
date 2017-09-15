@@ -10,8 +10,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Holds the response from decryption operation and provides helper methods to
- * deal with the data.
+ * Holds the response from encryption/decryption operation and provides helper
+ * methods to generate list of encryption/decryption objects by fetching the
+ * respective fields from VaultResponse.
  * 
  * @author Praveendra Singh
  *
