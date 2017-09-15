@@ -420,17 +420,15 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			index++;
 		}
 
-		VaultEncryptionResult cipherResult = transitOperations.encrypt("mykey", encryptionBatchRequest);
-
-		List<String> ciphers = cipherResult.get();
+		List<VaultEncryptionResult> cipherResult = transitOperations.encrypt("mykey", encryptionBatchRequest);
 
 		List<VaultDecryptionPayload> decryptionBatchRequest = new ArrayList<VaultDecryptionPayload>();
 
 		index = 0;
 
-		for (String cipher : ciphers) {
+		for (VaultEncryptionResult cipher : cipherResult) {
 
-			VaultDecryptionPayload req = VaultDecryptionPayload.of(cipher);
+			VaultDecryptionPayload req = VaultDecryptionPayload.of(cipher.get());
 
 			if (decryptionContext != null) {
 				if (decryptionContext.size() >= (index + 1)) {
@@ -442,18 +440,15 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			index++;
 		}
 
-		VaultDecryptionResult plaintextResult = transitOperations.decrypt("mykey", decryptionBatchRequest);
+		List<VaultDecryptionResult> plaintextResult = transitOperations.decrypt("mykey", decryptionBatchRequest);
 
-		List<byte[]> decryptedTexts = plaintextResult.get();
-
-		Assert.assertEquals(plaintexts.size(), decryptedTexts.size());
+		Assert.assertEquals(plaintexts.size(), plaintextResult.size());
 
 		int i = 0;
 
 		for (String plaintext : plaintexts) {
-			String decrypted = new String(decryptedTexts.get(i++));
+			String decrypted = new String(plaintextResult.get(i++).get());
 			Assert.assertEquals(plaintext, decrypted);
 		}
-
 	}
 }

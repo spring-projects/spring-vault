@@ -138,7 +138,7 @@ public interface VaultTransitOperations {
 	 * @return list of cipher text in the same order as in plaintexts.
 	 * throws VaultException in case of not matching context found.
 	 */
-	VaultEncryptionResult encrypt(String keyName, List<VaultEncryptionPayload> batchRequest);
+	List<VaultEncryptionResult> encrypt(String keyName, List<VaultEncryptionPayload> batchRequest);
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
@@ -170,7 +170,7 @@ public interface VaultTransitOperations {
 	 * @return list of plain text in the same order as in ciphertexts.
 	 * throws VaultException in case of not matching context found.
 	 */
-	VaultDecryptionResult decrypt(String keyName, List<VaultDecryptionPayload> batchRequest);
+	List<VaultDecryptionResult> decrypt(String keyName, List<VaultDecryptionPayload> batchRequest);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because

@@ -1,12 +1,9 @@
 package org.springframework.vault.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.util.Base64Utils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,51 +16,24 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class VaultDecryptionResult extends AbstractVaultCryptoResult {
+@AllArgsConstructor
+public class VaultDecryptionResult {
 
-	public VaultDecryptionResult(VaultResponse vaultResponse) {
-		super(vaultResponse);
-	}
-
-	public static VaultDecryptionResult of(VaultResponse vaultResponse) {
-		return new VaultDecryptionResult(vaultResponse);
-	}
+	private byte[] cipherText;
+	private String error;
 
 	/**
-	 * returns the list of plaintexts or throws VaultException with the first
-	 * error encountered.
+	 * returns the list of plaintext or throws VaultException if error
+	 * encountered.
 	 * 
-	 * @return plaintexts
+	 * @return plaintext
 	 */
-	public List<byte[]> get() {
+	public byte[] get() {
 
-		String detailMessage = getErrorMessage();
-
-		if (detailMessage != null) {
-
-			throw new VaultException(detailMessage);
+		if (!StringUtils.isEmpty(error)) {
+			throw new VaultException(error);
 		}
-
-		return fetchFieldInBytes("plaintext");
-	}
-
-	/**
-	 * fetches decoded values for a given field from the batch data elements
-	 * received from the VaultResponse.
-	 * 
-	 * @param field
-	 *            needed to be fetched
-	 * @return
-	 */
-	private List<byte[]> fetchFieldInBytes(String field) {
-
-		List<byte[]> fields = new ArrayList<byte[]>();
-
-		for (Map<String, String> data : getBatchData()) {
-			fields.add(Base64Utils.decodeFromString(data.get(field)));
-		}
-
-		return fields;
+		return cipherText;
 	}
 
 }

@@ -27,6 +27,7 @@ import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionPayload;
 import org.springframework.vault.support.VaultDecryptionResult;
+import org.springframework.vault.support.VaultEncryptionDecryptionResultHelper;
 import org.springframework.vault.support.VaultEncryptionPayload;
 import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultResponse;
@@ -181,7 +182,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public VaultEncryptionResult encrypt(String keyName, List<VaultEncryptionPayload> batchRequest) {
+	public List<VaultEncryptionResult> encrypt(String keyName, List<VaultEncryptionPayload> batchRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
@@ -208,9 +209,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/encrypt/%s", path, keyName), request);
 
-		return VaultEncryptionResult.of(vaultResponse);
+		return VaultEncryptionDecryptionResultHelper.fetchEncryptionResult(vaultResponse);
 	}
-	
+		
 	@Override
 	public String decrypt(String keyName, String ciphertext) {
 
@@ -251,7 +252,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 	
 	@Override
-	public VaultDecryptionResult decrypt(String keyName, List<VaultDecryptionPayload> batchRequest) {
+	public List<VaultDecryptionResult> decrypt(String keyName, List<VaultDecryptionPayload> batchRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
@@ -278,7 +279,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/decrypt/%s", path, keyName), request);
 
-		return VaultDecryptionResult.of(vaultResponse);
+		return VaultEncryptionDecryptionResultHelper.fetchDecryptionResult(vaultResponse);
 	}
 
 	@Override

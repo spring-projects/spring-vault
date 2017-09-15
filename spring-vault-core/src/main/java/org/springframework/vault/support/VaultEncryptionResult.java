@@ -1,11 +1,9 @@
 package org.springframework.vault.support;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,51 +16,24 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class VaultEncryptionResult extends AbstractVaultCryptoResult {
+@AllArgsConstructor
+public class VaultEncryptionResult {
 
-	public VaultEncryptionResult(VaultResponse vaultResponse) {
-		super(vaultResponse);
-	}
-
-	public static VaultEncryptionResult of(VaultResponse vaultResponse) {
-		return new VaultEncryptionResult(vaultResponse);
-	}
+	private String cipherText;
+	private String error;
 
 	/**
-	 * returns the list of ciphertexts or throws VaultException with the first
-	 * error encountered.
+	 * returns the list of ciphertexts or throws VaultException if error
+	 * encountered.
 	 * 
 	 * @return ciphertexts
 	 */
-	public List<String> get() {
+	public String get() {
 
-		String detailMessage = getErrorMessage();
-
-		if (detailMessage != null) {
-
-			throw new VaultException(detailMessage);
+		if (!StringUtils.isEmpty(error)) {
+			throw new VaultException(error);
 		}
-
-		return fetchField("ciphertext");
-	}
-
-	/**
-	 * fetches values for a given field from the batch data elements received
-	 * from the VaultResponse.
-	 * 
-	 * @param field
-	 *            needed to be fetched
-	 * @return
-	 */
-	private List<String> fetchField(String field) {
-
-		List<String> fields = new ArrayList<String>();
-
-		for (Map<String, String> data : getBatchData()) {
-			fields.add(data.get(field));
-		}
-
-		return fields;
+		return cipherText;
 	}
 
 }
