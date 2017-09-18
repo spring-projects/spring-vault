@@ -28,12 +28,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
-import org.springframework.vault.support.VaultDecryptionPayload;
 import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultEncryptionDecryptionResultHelper;
-import org.springframework.vault.support.VaultEncryptionPayload;
 import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -41,10 +42,6 @@ import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.Data;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -157,7 +154,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public String encrypt(String keyName, String plaintext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notNull(plaintext, "Plain text must not be null");
+		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
@@ -169,11 +166,22 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	public Ciphertext encrypt(String keyName, Plaintext plaintext) {
+
+		Assert.notNull(plaintext, "Plaintext must not be null");
+
+		String ciphertext = encrypt(keyName, plaintext.getPlaintext(),
+				plaintext.getContext());
+
+		return toCiphertext(ciphertext, plaintext.getContext());
+	}
+
+	@Override
 	public String encrypt(String keyName, byte[] plaintext,
 			VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notNull(plaintext, "Plain text must not be null");
+		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
@@ -188,20 +196,22 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public List<VaultEncryptionResult> encrypt(String keyName, List<VaultEncryptionPayload> batchRequest) {
+	public List<VaultEncryptionResult> encrypt(String keyName,
+			List<Plaintext> batchRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
+		Assert.notEmpty(batchRequest,
+				"BatchRequest must not be null and must have at least one entry");
 
-		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>(
+				batchRequest.size());
 
-		for (VaultEncryptionPayload request : batchRequest) {
+		for (Plaintext request : batchRequest) {
 
-			Assert.notNull(request.getPlaintext(), "Plain text must not be null");
+			Map<String, String> vaultRequest = new LinkedHashMap<String, String>(2);
 
-			Map<String, String> vaultRequest = new LinkedHashMap<String, String>();
-
-			vaultRequest.put("plaintext", Base64Utils.encodeToString(request.getPlaintext()));
+			vaultRequest.put("plaintext",
+					Base64Utils.encodeToString(request.getPlaintext()));
 
 			if (request.getContext() != null) {
 				applyTransitOptions(request.getContext(), vaultRequest);
@@ -210,12 +220,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
-		request.put("batch_input", batch);
+		VaultResponse vaultResponse = vaultOperations.write(
+				String.format("%s/encrypt/%s", path, keyName),
+				Collections.singletonMap("batch_input", batch));
 
-		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/encrypt/%s", path, keyName), request);
-
-		return VaultEncryptionDecryptionResultHelper.fetchEncryptionResult(vaultResponse);
+		return toEncryptionResults(vaultResponse, batchRequest);
 	}
 
 	@Override
@@ -233,6 +242,17 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				.getRequiredData().get("plaintext");
 
 		return new String(Base64Utils.decodeFromString(plaintext));
+	}
+
+	@Override
+	public Plaintext decrypt(String keyName, Ciphertext ciphertext) {
+
+		Assert.hasText(keyName, "Ciphertext must not be null");
+
+		byte[] plaintext = decrypt(keyName, ciphertext.getCiphertext(),
+				ciphertext.getContext());
+
+		return toPlaintext(plaintext, ciphertext.getContext());
 	}
 
 	@Override
@@ -257,18 +277,19 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public List<VaultDecryptionResult> decrypt(String keyName, List<VaultDecryptionPayload> batchRequest) {
+	public List<VaultDecryptionResult> decrypt(String keyName,
+			List<Ciphertext> batchRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notEmpty(batchRequest, "batchRequest must not be null and should have at least one entry");
+		Assert.notEmpty(batchRequest,
+				"BatchRequest must not be null and must have at least one entry");
 
-		List<Map<String, String>> batch = new ArrayList<Map<String, String>>();
+		List<Map<String, String>> batch = new ArrayList<Map<String, String>>(
+				batchRequest.size());
 
-		for (VaultDecryptionPayload request : batchRequest) {
+		for (Ciphertext request : batchRequest) {
 
-			Assert.notNull(request.getCiphertext(), "Cipher text must not be null");
-
-			Map<String, String> vaultRequest = new LinkedHashMap<String, String>();
+			Map<String, String> vaultRequest = new LinkedHashMap<String, String>(2);
 
 			vaultRequest.put("ciphertext", request.getCiphertext());
 
@@ -279,19 +300,18 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		Map<String, List<Map<String, String>>> request = new LinkedHashMap<String, List<Map<String, String>>>();
-		request.put("batch_input", batch);
+		VaultResponse vaultResponse = vaultOperations.write(
+				String.format("%s/decrypt/%s", path, keyName),
+				Collections.singletonMap("batch_input", batch));
 
-		VaultResponse vaultResponse = vaultOperations.write(String.format("%s/decrypt/%s", path, keyName), request);
-
-		return VaultEncryptionDecryptionResultHelper.fetchDecryptionResult(vaultResponse);
+		return toDecryptionResults(vaultResponse, batchRequest);
 	}
 
 	@Override
 	public String rewrap(String keyName, String ciphertext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("ciphertext", ciphertext);
@@ -306,7 +326,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
@@ -330,6 +350,91 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		if (!ObjectUtils.isEmpty(context.getNonce())) {
 			request.put("nonce", Base64Utils.encodeToString(context.getNonce()));
 		}
+	}
+
+	private static List<VaultEncryptionResult> toEncryptionResults(
+			VaultResponse vaultResponse, List<Plaintext> batchRequest) {
+
+		List<VaultEncryptionResult> result = new ArrayList<VaultEncryptionResult>(
+				batchRequest.size());
+		List<Map<String, String>> batchData = getBatchData(vaultResponse);
+
+		for (int i = 0; i < batchRequest.size(); i++) {
+
+			VaultEncryptionResult encrypted;
+			Plaintext plaintext = batchRequest.get(i);
+			if (batchData.size() > i) {
+
+				Map<String, String> data = batchData.get(i);
+				if (StringUtils.hasText(data.get("error"))) {
+					encrypted = new VaultEncryptionResult(new VaultException(
+							data.get("error")));
+				}
+				else {
+					encrypted = new VaultEncryptionResult(toCiphertext(
+							data.get("ciphertext"), plaintext.getContext()));
+				}
+			}
+			else {
+				encrypted = new VaultEncryptionResult(new VaultException(
+						"No result for plaintext #" + i));
+			}
+
+			result.add(encrypted);
+		}
+
+		return result;
+	}
+
+	private static List<VaultDecryptionResult> toDecryptionResults(
+			VaultResponse vaultResponse, List<Ciphertext> batchRequest) {
+
+		List<VaultDecryptionResult> result = new ArrayList<VaultDecryptionResult>(
+				batchRequest.size());
+		List<Map<String, String>> batchData = getBatchData(vaultResponse);
+
+		for (int i = 0; i < batchRequest.size(); i++) {
+
+			VaultDecryptionResult encrypted;
+			Ciphertext ciphertext = batchRequest.get(i);
+			if (batchData.size() > i) {
+
+				Map<String, String> data = batchData.get(i);
+				if (StringUtils.hasText(data.get("error"))) {
+					encrypted = new VaultDecryptionResult(new VaultException(
+							data.get("error")));
+				}
+				else {
+					encrypted = new VaultDecryptionResult(toPlaintext(
+							Base64Utils.decodeFromString(data.get("plaintext")),
+							ciphertext.getContext()));
+				}
+			}
+			else {
+				encrypted = new VaultDecryptionResult(new VaultException(
+						"No result for ciphertext #" + i));
+			}
+
+			result.add(encrypted);
+		}
+
+		return result;
+	}
+
+	private static Ciphertext toCiphertext(String ciphertext, VaultTransitContext context) {
+		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext
+				.of(ciphertext);
+	}
+
+	private static Plaintext toPlaintext(byte[] plaintext, VaultTransitContext context) {
+		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
+				.of(plaintext);
+	}
+
+	@SuppressWarnings("unchecked")
+	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
+		return (List<Map<String, String>>) vaultResponse.getRequiredData().get(
+				"batch_results");
 	}
 
 	@Data

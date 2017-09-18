@@ -15,25 +15,21 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assume.assumeTrue;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.VaultDecryptionPayload;
+import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultEncryptionPayload;
 import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultTransitContext;
@@ -42,6 +38,10 @@ import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultTransitTemplate} through
@@ -54,7 +54,7 @@ import org.springframework.vault.util.Version;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
-	private static final String BATCH_INTRODUCED_IN_VERSION = "0.6.5";
+	private static final Version BATCH_INTRODUCED_IN_VERSION = Version.parse("0.6.5");
 
 	@Autowired
 	private VaultOperations vaultOperations;
@@ -106,7 +106,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 			deleteKey("derived");
 		}
 	}
-	
+
 	@Test
 	public void createKeyShouldCreateKey() {
 
@@ -210,6 +210,24 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
+	public void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
+
+		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
+				.convergentEncryption(true).derived(true).build());
+
+		VaultTransitContext context = VaultTransitContext.builder()
+				.context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
+
+		Ciphertext ciphertext = transitOperations.encrypt("mykey",
+				Plaintext.of("hello-world").with(context));
+
+		assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
+		assertThat(ciphertext.getContext()).isEqualTo(context);
+	}
+
+	@Test
 	public void decryptShouldCreatePlaintext() {
 
 		transitOperations.createKey("mykey");
@@ -236,6 +254,25 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		byte[] plaintext = transitOperations.decrypt("mykey", ciphertext, transitRequest);
 		assertThat(new String(plaintext)).isEqualTo("hello-world");
+	}
+
+	@Test
+	public void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
+
+		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
+				.convergentEncryption(true).derived(true).build());
+
+		VaultTransitContext context = VaultTransitContext.builder() //
+				.context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
+
+		Ciphertext ciphertext = transitOperations.encrypt("mykey",
+				Plaintext.of("hello-world").with(context));
+		Plaintext plaintext = transitOperations.decrypt("mykey", ciphertext);
+
+		assertThat(plaintext.asString()).isEqualTo("hello-world");
+		assertThat(plaintext.getContext()).isEqualTo(context);
 	}
 
 	@Test
@@ -285,29 +322,50 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		String rewrapped = transitOperations.rewrap("mykey", ciphertext, transitRequest);
 		assertThat(rewrapped).startsWith("vault:v2");
 	}
-	
-	@Test
-	public void batchEncryptionAndDecryptionTestWithoutContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
-			return;
-		}
+	@Test
+	public void shouldBatchEncrypt() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				BATCH_INTRODUCED_IN_VERSION));
 
 		transitOperations.createKey("mykey");
 
-		List<String> plaintexts = new ArrayList<String>();
-		plaintexts.add("one");
-		plaintexts.add("two");
+		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+				Arrays.asList(Plaintext.of("one"), Plaintext.of("two")));
 
-		batchEncryptionAndDecryption(plaintexts, null, null);
+		assertThat(encrypted.get(0).get().getCiphertext()).startsWith("vault:");
+		assertThat(encrypted.get(1).get().getCiphertext()).startsWith("vault:");
 	}
 
 	@Test
-	public void batchEncryptionAndDecryptionTestWithMatchingContext() {
+	public void shouldBatchDecrypt() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
-			return;
-		}
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				BATCH_INTRODUCED_IN_VERSION));
+
+		transitOperations.createKey("mykey");
+
+		Ciphertext one = transitOperations.encrypt("mykey", Plaintext.of("one"));
+		Ciphertext two = transitOperations.encrypt("mykey", Plaintext.of("two"));
+
+		Plaintext plainOne = transitOperations.decrypt("mykey", one);
+		Plaintext plainTwo = transitOperations.decrypt("mykey", two);
+
+		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+				Arrays.asList(one, two));
+
+		assertThat(decrypted.get(0).get()).isEqualTo(plainOne);
+		assertThat(decrypted.get(0).getAsString()).isEqualTo("one");
+		assertThat(decrypted.get(1).get()).isEqualTo(plainTwo);
+		assertThat(decrypted.get(1).getAsString()).isEqualTo("two");
+	}
+
+	@Test
+	public void shouldBatchEncryptWithContext() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				BATCH_INTRODUCED_IN_VERSION));
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -315,140 +373,77 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		transitOperations.createKey("mykey", request);
 
-		List<String> plaintexts = new ArrayList<String>();
-		plaintexts.add("one");
-		plaintexts.add("two");
+		Plaintext one = Plaintext.of("one").with(
+				VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-		List<VaultTransitContext> contexts = new ArrayList<VaultTransitContext>();
-		contexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-		contexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		Plaintext two = Plaintext.of("two").with(
+				VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-		batchEncryptionAndDecryption(plaintexts, contexts, contexts);
+		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+				Arrays.asList(one, two));
+
+		assertThat(encrypted.get(0).get().getContext()).isEqualTo(one.getContext());
+		assertThat(encrypted.get(1).get().getContext()).isEqualTo(two.getContext());
 	}
 
 	@Test
-	public void batchEncryptionAndDecryptionTestWithNonEqualContext() {
+	public void shouldBatchDecryptWithContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
-			return;
-		}
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				BATCH_INTRODUCED_IN_VERSION));
 
-		try {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
 
-			VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
-					.derived(true) //
-					.build();
+		transitOperations.createKey("mykey", request);
 
-			transitOperations.createKey("mykey", request);
+		Plaintext one = Plaintext.of("one").with(
+				VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-			List<String> plaintexts = new ArrayList<String>();
-			plaintexts.add("one");
-			plaintexts.add("two");
+		Plaintext two = Plaintext.of("two").with(
+				VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-			List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
-			encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-			encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+				Arrays.asList(one, two));
+		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+				Arrays.asList(encrypted.get(0).get(), encrypted.get(1).get()));
 
-			List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
-			decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-
-			batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
-
-		} catch (IllegalArgumentException e) {
-			return;
-		} catch (VaultException e) {
-			return;
-		}
-
-		Assert.fail();
+		assertThat(decrypted.get(0).get()).isEqualTo(one);
+		assertThat(decrypted.get(1).get()).isEqualTo(two);
 	}
 
 	@Test
-	public void batchEncryptionAndDecryptionTestWithNonMatchingContext() {
+	public void shouldBatchDecryptWithWrongContext() {
 
-		if (prepare().getVersion().isLessThan(Version.parse(BATCH_INTRODUCED_IN_VERSION))) {
-			return;
-		}
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				BATCH_INTRODUCED_IN_VERSION));
 
-		try {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
 
-			VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
-					.derived(true) //
-					.build();
+		transitOperations.createKey("mykey", request);
 
-			transitOperations.createKey("mykey", request);
+		Plaintext one = Plaintext.of("one").with(
+				VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-			List<String> plaintexts = new ArrayList<String>();
-			plaintexts.add("one");
-			plaintexts.add("two");
+		Plaintext two = Plaintext.of("two").with(
+				VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-			List<VaultTransitContext> encryptionContexts = new ArrayList<VaultTransitContext>();
-			encryptionContexts.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-			encryptionContexts.add(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+				Arrays.asList(one, two));
 
-			List<VaultTransitContext> decryptionContext = new ArrayList<VaultTransitContext>();
-			decryptionContext.add(VaultTransitContext.builder().context("oneContext".getBytes()).build());
-			decryptionContext.add(VaultTransitContext.builder().context("wrongTwoContext".getBytes()).build());
+		Ciphertext encryptedOne = encrypted.get(0).get();
+		Ciphertext decryptedTwo = encrypted.get(1).get();
 
-			batchEncryptionAndDecryption(plaintexts, encryptionContexts, decryptionContext);
+		Ciphertext tampered = decryptedTwo.with(encryptedOne.getContext());
 
-		} catch (VaultException e) {
-			return;
-		}
+		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+				Arrays.asList(encryptedOne, tampered));
 
-		Assert.fail();
-	}
-
-	private void batchEncryptionAndDecryption(List<String> plaintexts, List<VaultTransitContext> encryptionContexts,
-			List<VaultTransitContext> decryptionContext) {
-
-		List<VaultEncryptionPayload> encryptionBatchRequest = new ArrayList<VaultEncryptionPayload>();
-
-		int index = 0;
-
-		for (String plaintext : plaintexts) {
-
-			VaultEncryptionPayload req = VaultEncryptionPayload.of(plaintext);
-
-			if (encryptionContexts != null) {
-				if (encryptionContexts.size() >= (index + 1)) {
-					req = req.with(encryptionContexts.get(index));
-				}
-			}
-
-			encryptionBatchRequest.add(req);
-			index++;
-		}
-
-		List<VaultEncryptionResult> cipherResult = transitOperations.encrypt("mykey", encryptionBatchRequest);
-
-		List<VaultDecryptionPayload> decryptionBatchRequest = new ArrayList<VaultDecryptionPayload>();
-
-		index = 0;
-
-		for (VaultEncryptionResult cipher : cipherResult) {
-
-			VaultDecryptionPayload req = VaultDecryptionPayload.of(cipher.get());
-
-			if (decryptionContext != null) {
-				if (decryptionContext.size() >= (index + 1)) {
-					req = req.with(decryptionContext.get(index));
-				}
-			}
-
-			decryptionBatchRequest.add(req);
-			index++;
-		}
-
-		List<VaultDecryptionResult> plaintextResult = transitOperations.decrypt("mykey", decryptionBatchRequest);
-
-		Assert.assertEquals(plaintexts.size(), plaintextResult.size());
-
-		int i = 0;
-
-		for (String plaintext : plaintexts) {
-			String decrypted = new String(plaintextResult.get(i++).get());
-			Assert.assertEquals(plaintext, decrypted);
-		}
+		assertThat(decrypted.get(0).get()).isEqualTo(one);
+		assertThat(decrypted.get(1).isSuccessful()).isEqualTo(false);
+		assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
 	}
 }

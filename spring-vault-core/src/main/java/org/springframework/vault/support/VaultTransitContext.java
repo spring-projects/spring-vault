@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import lombok.EqualsAndHashCode;
+
 import org.springframework.util.Assert;
 
 /**
@@ -22,6 +24,7 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
+@EqualsAndHashCode
 public class VaultTransitContext {
 
 	/**
