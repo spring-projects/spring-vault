@@ -17,11 +17,11 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
+import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.TransitKeyType;
-import org.springframework.vault.support.VaultDecryptionPayload;
 import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultEncryptionPayload;
 import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
@@ -121,6 +121,16 @@ public interface VaultTransitOperations {
 	 * Encrypts the provided plaintext using the named key.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be {@literal null}.
+	 * @since 1.1
+	 * @return cipher text.
+	 */
+	Ciphertext encrypt(String keyName, Plaintext plaintext);
+
+	/**
+	 * Encrypts the provided plaintext using the named key.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @param transitRequest may be {@literal null} if no request options provided.
 	 * @return cipher text.
@@ -128,17 +138,16 @@ public interface VaultTransitOperations {
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
 
 	/**
-	 * Encrypts the provided list of plaintext using the named key and context.
-	 * The encryption is done using transit backend's batch operation.
-	 *
-	 * works with Vault 0.6.5 and later.
+	 * Encrypts the provided batch of plaintext using the named key and context. The
+	 * encryption is done using transit backend's batch operation.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of VaultEncryptionPayload which includes plaintext and optional context
-	 * @return list of cipher text in the same order as in plaintexts.
-	 * throws VaultException in case of not matching context found.
+	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
+	 * optional context.
+	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
+	 * @since 1.1
 	 */
-	List<VaultEncryptionResult> encrypt(String keyName, List<VaultEncryptionPayload> batchRequest);
+	List<VaultEncryptionResult> encrypt(String keyName, List<Plaintext> batchRequest);
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
@@ -153,6 +162,16 @@ public interface VaultTransitOperations {
 	 * Decrypts the provided plaintext using the named key.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
+	 * @param ciphertext must not be {@literal null}.
+	 * @return plain text.
+	 * @since 1.1
+	 */
+	Plaintext decrypt(String keyName, Ciphertext ciphertext);
+
+	/**
+	 * Decrypts the provided plaintext using the named key.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitRequest may be {@literal null} if no request options provided.
 	 * @return plain text.
@@ -160,17 +179,16 @@ public interface VaultTransitOperations {
 	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitRequest);
 
 	/**
-	 * Decrypts the provided list of ciphertext using the named key and context.
-	 * The decryption is done using transit backend's batch operation.
-	 * 
-	 * works with Vault 0.6.5 and later.
-	 * 
+	 * Decrypts the provided barch of ciphertext using the named key and context. The
+	 * decryption is done using transit backend's batch operation.
+	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of VaultDecryptionPayload which includes plaintext and optional context
-	 * @return list of plain text in the same order as in ciphertexts.
-	 * throws VaultException in case of not matching context found.
+	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
+	 * optional context.
+	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
+	 * @since 1.1
 	 */
-	List<VaultDecryptionResult> decrypt(String keyName, List<VaultDecryptionPayload> batchRequest);
+	List<VaultDecryptionResult> decrypt(String keyName, List<Ciphertext> batchRequest);
 
 	/**
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because

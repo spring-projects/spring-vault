@@ -9,4 +9,4 @@
 [[new-features.1-1-0]]
 === What's new in Spring Vault 1.1.0
 
-* Batch encryption & decryption support.
+* Transit batch encrypt and decrypt support.

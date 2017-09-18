@@ -15,11 +15,14 @@
  */
 package org.springframework.vault.support;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * Transit backend encryption/decryption/rewrapping context.
  *
  * @author Mark Paluch
  */
+@EqualsAndHashCode
 public class VaultTransitContext {
 
 	/**
