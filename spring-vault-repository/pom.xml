@@ -14,6 +14,10 @@
 	<name>Spring Vault Repository</name>
 	<description>Spring Vault Repository support</description>
 	<packaging>jar</packaging>
+	
+	<properties>
+		<java-module-name>spring.vault.repository</java-module-name>
+	</properties>
 
 	<build>
 		<resources>

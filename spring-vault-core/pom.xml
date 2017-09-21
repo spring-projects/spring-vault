@@ -15,6 +15,10 @@
 	<description>Spring Vault Core Components</description>
 	<packaging>jar</packaging>
 
+	<properties>
+		<java-module-name>spring.vault.core</java-module-name>
+	</properties>
+
 	<build>
 		<resources>
 			<resource>
