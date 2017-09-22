@@ -22,15 +22,15 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.0.RC3</spring.version>
-		<spring-data-releasetrain.version>Kay-RC2</spring-data-releasetrain.version>
-		<reactor.version>Bismuth-M3</reactor.version>
+		<spring.version>5.0.0.BUILD-SNAPSHOT</spring.version>
+		<spring-data-releasetrain.version>Kay-RC3</spring-data-releasetrain.version>
+		<reactor.version>Bismuth-M4</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
 		<project.root>${basedir}</project.root>
 		<shared.resources>${project.build.directory}/shared-resources</shared.resources>
-		
+
 		<!-- To be overridden by individual modules -->
 		<java-module-name></java-module-name>
 	</properties>
@@ -211,20 +211,6 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifestEntries>
-							<Implementation-Title>${project.name}</Implementation-Title>
-							<Implementation-Version>${project.version}</Implementation-Version>
-							<Automatic-Module-Name>${java-module-name}</Automatic-Module-Name>
-						</manifestEntries>
-					</archive>
-				</configuration>
-			</plugin>
-
-			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>animal-sniffer-maven-plugin</artifactId>
 				<configuration>
@@ -266,6 +252,15 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
 					<version>3.0.2</version>
+					<configuration>
+						<archive>
+							<manifestEntries>
+								<Implementation-Title>${project.name}</Implementation-Title>
+								<Implementation-Version>${project.version}</Implementation-Version>
+								<Automatic-Module-Name>${java-module-name}</Automatic-Module-Name>
+							</manifestEntries>
+						</archive>
+					</configuration>
 				</plugin>
 
 				<plugin>
