@@ -20,10 +20,12 @@ import java.util.List;
 
 import org.junit.Test;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.repository.query.DefaultParameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.vault.repository.mapping.VaultMappingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 public class VaultQueryCreatorUnitTests {
+
+	private VaultMappingContext mappingContext = new VaultMappingContext();
 
 	@Test
 	public void greaterThan() {
@@ -178,6 +182,11 @@ public class VaultQueryCreatorUnitTests {
 		assertThat(query.getPredicate()).accepts("3", "4").rejects("2", "5", "6");
 	}
 
+	@Test(expected = InvalidDataAccessApiUsageException.class)
+	public void failsForNonIdProperties() {
+		createQuery("findByName", "");
+	}
+
 	VaultQuery createQuery(String methodName, String value) {
 
 		DefaultParameters defaultParameters = new DefaultParameters(
@@ -187,7 +196,8 @@ public class VaultQueryCreatorUnitTests {
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(
 				partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }));
+				new ParametersParameterAccessor(defaultParameters, new Object[] { value }),
+				mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}
@@ -201,7 +211,8 @@ public class VaultQueryCreatorUnitTests {
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(
 				partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }));
+				new ParametersParameterAccessor(defaultParameters, new Object[] { value }),
+				mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}
@@ -215,7 +226,7 @@ public class VaultQueryCreatorUnitTests {
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
 				new ParametersParameterAccessor(defaultParameters, new Object[] { value,
-						anotherValue }));
+						anotherValue }), mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}
@@ -231,6 +242,6 @@ public class VaultQueryCreatorUnitTests {
 
 	static class Credentials {
 
-		String id;
+		String id, name;
 	}
 }

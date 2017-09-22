@@ -1,8 +1,6 @@
 /**
  * Spring Vault specific converter infrastructure.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
 package org.springframework.vault.repository.convert;
-
-import org.springframework.lang.NonNullApi;
 

@@ -27,6 +27,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.data.convert.JodaTimeConverters;
 import org.springframework.data.convert.WritingConverter;
+import org.springframework.lang.Nullable;
 import org.springframework.vault.repository.mapping.VaultSimpleTypes;
 
 /**
@@ -43,6 +44,7 @@ public class VaultCustomConversions extends
 		org.springframework.data.convert.CustomConversions {
 
 	private static final StoreConversions STORE_CONVERSIONS;
+
 	private static final List<Object> STORE_CONVERTERS;
 
 	static {
@@ -89,9 +91,10 @@ public class VaultCustomConversions extends
 			return new HashSet<>(Arrays.asList(localeToString, booleanToString));
 		}
 
-		public Object convert(Object source, TypeDescriptor sourceType,
+		@Nullable
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType,
 				TypeDescriptor targetType) {
-			return source.toString();
+			return source != null ? source.toString() : null;
 		}
 	}
 }

@@ -18,22 +18,14 @@ package org.springframework.vault.repository.configuration;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.annotation.AnnotationAttributes;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.data.keyvalue.repository.config.KeyValueRepositoryConfigurationExtension;
-import org.springframework.data.keyvalue.repository.config.QueryCreatorType;
-import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
-import org.springframework.data.keyvalue.repository.query.SpelQueryCreator;
-import org.springframework.data.repository.config.AnnotationRepositoryConfigurationSource;
 import org.springframework.data.repository.config.RepositoryConfigurationExtension;
 import org.springframework.data.repository.config.RepositoryConfigurationSource;
 import org.springframework.vault.repository.core.VaultKeyValueAdapter;
@@ -67,70 +59,6 @@ public class VaultRepositoryConfigurationExtension extends
 	@Override
 	protected String getDefaultKeyValueTemplateRef() {
 		return "vaultKeyValueTemplate";
-	}
-
-	// TODO: Remove this as soon as KeyValue provides overrides for the mapping context
-	// name.
-	@Override
-	public void postProcess(BeanDefinitionBuilder builder,
-			AnnotationRepositoryConfigurationSource config) {
-
-		AnnotationAttributes attributes = config.getAttributes();
-
-		builder.addPropertyReference("keyValueOperations",
-				attributes.getString(KEY_VALUE_TEMPLATE_BEAN_REF_ATTRIBUTE));
-		builder.addPropertyValue("queryCreator", getQueryCreatorType(config));
-		builder.addPropertyValue("queryType", getQueryType(config));
-		builder.addPropertyReference("mappingContext", VAULT_MAPPING_CONTEXT_BEAN_NAME);
-	}
-
-	/**
-	 * Detects the query creator type to be used for the factory to set. Will lookup a
-	 * {@link QueryCreatorType} annotation on the {@code @Enable}-annotation or use
-	 * {@link SpelQueryCreator} if not found.
-	 *
-	 * @param config
-	 * @return
-	 */
-	private static Class<?> getQueryCreatorType(
-			AnnotationRepositoryConfigurationSource config) {
-
-		AnnotationMetadata metadata = config.getEnableAnnotationMetadata();
-
-		Map<String, Object> queryCreatorAnnotationAttributes = metadata
-				.getAnnotationAttributes(QueryCreatorType.class.getName());
-
-		if (queryCreatorAnnotationAttributes == null) {
-			return SpelQueryCreator.class;
-		}
-
-		AnnotationAttributes queryCreatorAttributes = new AnnotationAttributes(
-				queryCreatorAnnotationAttributes);
-		return queryCreatorAttributes.getClass("value");
-	}
-
-	/**
-	 * Detects the query creator type to be used for the factory to set. Will lookup a
-	 * {@link QueryCreatorType} annotation on the {@code @Enable}-annotation or use
-	 * {@link SpelQueryCreator} if not found.
-	 *
-	 * @param config
-	 * @return
-	 */
-	private static Class<?> getQueryType(AnnotationRepositoryConfigurationSource config) {
-
-		AnnotationMetadata metadata = config.getEnableAnnotationMetadata();
-
-		Map<String, Object> queryCreatorAnnotationAttributes = metadata
-				.getAnnotationAttributes(QueryCreatorType.class.getName());
-
-		if (queryCreatorAnnotationAttributes == null) {
-			return KeyValuePartTreeQuery.class;
-		}
-
-		AnnotationAttributes queryCreatorAttributes = new AnnotationAttributes(
-				queryCreatorAnnotationAttributes);
-		return queryCreatorAttributes.getClass("repositoryQueryType");
 	}
 
 	@Override
@@ -171,11 +99,11 @@ public class VaultRepositoryConfigurationExtension extends
 
 			AbstractBeanDefinition beanDefinition = getDefaultKeyValueTemplateBeanDefinition(configurationSource);
 
-			if (beanDefinition != null) {
-				registerIfNotAlreadyRegistered(beanDefinition, registry,
-						keyValueTemplateName.get(), configurationSource.getSource());
-			}
+			registerIfNotAlreadyRegistered(beanDefinition, registry,
+					keyValueTemplateName.get(), configurationSource.getSource());
 		}
+
+		super.registerBeansForRoot(registry, configurationSource);
 	}
 
 	private RootBeanDefinition createVaultMappingContext(
@@ -186,6 +114,7 @@ public class VaultRepositoryConfigurationExtension extends
 		RootBeanDefinition mappingContextBeanDef = new RootBeanDefinition(
 				VaultMappingContext.class);
 		mappingContextBeanDef.setConstructorArgumentValues(mappingContextArgs);
+		mappingContextBeanDef.setSource(configurationSource.getSource());
 
 		return mappingContextBeanDef;
 	}
@@ -213,5 +142,10 @@ public class VaultRepositoryConfigurationExtension extends
 	@Override
 	protected Collection<Class<? extends Annotation>> getIdentifyingAnnotations() {
 		return Collections.<Class<? extends Annotation>> singleton(Secret.class);
+	}
+
+	@Override
+	protected String getMappingContextBeanRef() {
+		return VAULT_MAPPING_CONTEXT_BEAN_NAME;
 	}
 }

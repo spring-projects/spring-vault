@@ -66,7 +66,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	public VaultKeyValueAdapter(VaultOperations vaultOperations,
 			VaultConverter vaultConverter) {
 
-		super(VaultQueryEngine.INSTANCE);
+		super(new VaultQueryEngine());
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.notNull(vaultConverter, "VaultConverter must not be null");

@@ -24,14 +24,19 @@ import java.util.regex.Pattern;
 
 import lombok.Value;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.keyvalue.core.query.KeyValueQuery;
+import org.springframework.data.mapping.context.MappingContext;
+import org.springframework.data.mapping.context.PersistentPropertyPath;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
 import org.springframework.data.repository.query.parser.Part.Type;
+import org.springframework.vault.repository.mapping.VaultPersistentEntity;
+import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
 /**
  * Query creator for Vault queries. Vault queries are limited to criterias constraining
@@ -44,14 +49,7 @@ import org.springframework.data.repository.query.parser.Part.Type;
 public class VaultQueryCreator extends
 		AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
 
-	/**
-	 * Create a new {@link VaultQueryCreator} given {@link PartTree}.
-	 *
-	 * @param tree must not be {@literal null}.
-	 */
-	public VaultQueryCreator(PartTree tree) {
-		super(tree);
-	}
+	private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
 	/**
 	 * Create a new {@link VaultQueryCreator} given {@link PartTree} and
@@ -59,27 +57,38 @@ public class VaultQueryCreator extends
 	 *
 	 * @param tree must not be {@literal null}.
 	 * @param parameters must not be {@literal null}.
+	 * @param mappingContext must not be {@literal null}.
 	 */
-	public VaultQueryCreator(PartTree tree, ParameterAccessor parameters) {
+	public VaultQueryCreator(
+			PartTree tree,
+			ParameterAccessor parameters,
+			MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
+
 		super(tree, parameters);
+		this.mappingContext = mappingContext;
 	}
 
 	@Override
 	protected VaultQuery create(Part part, Iterator<Object> parameters) {
-		return new VaultQuery(createPredicate(part, parameters), part.getProperty());
+		return new VaultQuery(createPredicate(part, parameters));
 	}
 
 	@Override
 	protected VaultQuery and(Part part, VaultQuery base, Iterator<Object> parameters) {
-
-		if (base == null) {
-			return create(part, parameters);
-		}
-		return base.and(createPredicate(part, parameters), part.getProperty());
+		return base.and(createPredicate(part, parameters));
 	}
 
-	private static Predicate<String> createPredicate(Part part,
-			Iterator<Object> parameters) {
+	private Predicate<String> createPredicate(Part part, Iterator<Object> parameters) {
+
+		PersistentPropertyPath<VaultPersistentProperty> propertyPath = mappingContext
+				.getPersistentPropertyPath(part.getProperty());
+
+		if (propertyPath.getLeafProperty() != null
+				&& !propertyPath.getLeafProperty().isIdProperty()) {
+			throw new InvalidDataAccessApiUsageException(String.format(
+					"Cannot create criteria for non-@Id property %s",
+					propertyPath.getLeafProperty()));
+		}
 
 		VariableAccessor accessor = getVariableAccessor(part);
 
@@ -167,7 +176,7 @@ public class VaultQueryCreator extends
 
 		KeyValueQuery<VaultQuery> query = new KeyValueQuery<>(vaultQuery);
 
-		if (sort != null) {
+		if (sort.isSorted()) {
 			query.orderBy(sort);
 		}
 

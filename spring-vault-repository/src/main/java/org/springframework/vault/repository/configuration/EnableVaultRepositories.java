@@ -30,6 +30,7 @@ import org.springframework.data.keyvalue.repository.config.QueryCreatorType;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryLookupStrategy.Key;
+import org.springframework.vault.repository.query.VaultPartTreeQuery;
 import org.springframework.vault.repository.query.VaultQueryCreator;
 import org.springframework.vault.repository.support.VaultRepositoryFactoryBean;
 
@@ -46,7 +47,7 @@ import org.springframework.vault.repository.support.VaultRepositoryFactoryBean;
 @Documented
 @Inherited
 @Import(VaultRepositoriesRegistrar.class)
-@QueryCreatorType(VaultQueryCreator.class)
+@QueryCreatorType(value = VaultQueryCreator.class, repositoryQueryType = VaultPartTreeQuery.class)
 public @interface EnableVaultRepositories {
 
 	/**

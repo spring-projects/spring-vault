@@ -15,12 +15,8 @@
  */
 package org.springframework.vault.repository.query;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.Predicate;
 
-import org.springframework.data.mapping.PropertyPath;
 import org.springframework.util.Assert;
 import org.springframework.vault.repository.convert.SecretDocument;
 
@@ -39,8 +35,6 @@ public class VaultQuery {
 
 	private final Predicate<String> predicate;
 
-	private final Set<PropertyPath> propertyPaths;
-
 	/**
 	 * Create a new {@link VaultQuery} that evaluates unconditionally to {@literal true}.
 	 */
@@ -54,30 +48,10 @@ public class VaultQuery {
 	 * @param predicate must not be {@literal null}.
 	 */
 	public VaultQuery(Predicate<String> predicate) {
-		this(predicate, Collections.emptySet());
-	}
 
-	/**
-	 * Create a new {@link VaultQuery} given {@link Predicate} and {@link PropertyPath}.
-	 *
-	 * @param predicate must not be {@literal null}.
-	 */
-	public VaultQuery(Predicate<String> predicate, PropertyPath propertyPath) {
-
-		Assert.notNull(predicate, "Predicate must not be null");
-		Assert.notNull(propertyPath, "PropertyPath must not be null");
-
-		this.predicate = predicate;
-		this.propertyPaths = Collections.singleton(propertyPath);
-	}
-
-	private VaultQuery(Predicate<String> predicate, Set<PropertyPath> propertyPaths) {
-
-		Assert.notNull(propertyPaths, "PropertyPaths must not be null");
 		Assert.notNull(predicate, "Predicate must not be null");
 
 		this.predicate = predicate;
-		this.propertyPaths = propertyPaths;
 	}
 
 	/**
@@ -115,13 +89,19 @@ public class VaultQuery {
 	 * @see Predicate#and(Predicate)
 	 */
 	public VaultQuery and(VaultQuery other) {
+		return new VaultQuery(this.predicate.and(other.predicate));
+	}
 
-		Set<PropertyPath> propertyPaths = new HashSet<>(this.propertyPaths.size()
-				+ other.propertyPaths.size(), 1);
-		propertyPaths.addAll(this.propertyPaths);
-		propertyPaths.addAll(other.propertyPaths);
-
-		return new VaultQuery(this.predicate.and(other.predicate), propertyPaths);
+	/**
+	 * Compose a new {@link VaultQuery} using predicates of {@literal this} and the
+	 * {@code other} query using logical {@code AND}.
+	 *
+	 * @param other must not be {@literal null}.
+	 * @return a new composed {@link VaultQuery}.
+	 * @see Predicate#and(Predicate)
+	 */
+	public VaultQuery and(Predicate<String> predicate) {
+		return new VaultQuery(this.predicate.and(predicate));
 	}
 
 	/**
@@ -133,30 +113,7 @@ public class VaultQuery {
 	 * @see Predicate#and(Predicate)
 	 */
 	public VaultQuery or(VaultQuery other) {
-
-		Set<PropertyPath> propertyPaths = new HashSet<>(this.propertyPaths.size()
-				+ other.propertyPaths.size(), 1);
-		propertyPaths.addAll(this.propertyPaths);
-		propertyPaths.addAll(other.propertyPaths);
-
-		return new VaultQuery(this.predicate.or(other.predicate), propertyPaths);
-	}
-
-	/**
-	 * Compose a new {@link VaultQuery} using predicates of {@literal this} query and the
-	 * {@code other} {@link Predicate} using logical {@code AND}.
-	 *
-	 * @param other must not be {@literal null}.
-	 * @return a new composed {@link VaultQuery}.
-	 * @see Predicate#and(Predicate)
-	 */
-	public VaultQuery and(Predicate<String> predicate, PropertyPath propertyPath) {
-
-		Set<PropertyPath> propertyPaths = new HashSet<>(this.propertyPaths.size() + 1, 1);
-		propertyPaths.addAll(this.propertyPaths);
-		propertyPaths.add(propertyPath);
-
-		return new VaultQuery(this.predicate.and(predicate), propertyPaths);
+		return new VaultQuery(this.predicate.or(other.predicate));
 	}
 
 	/**
@@ -164,12 +121,5 @@ public class VaultQuery {
 	 */
 	public Predicate<String> getPredicate() {
 		return predicate;
-	}
-
-	/**
-	 * @return constrained {@link PropertyPath}s for this {@link VaultQuery}.
-	 */
-	public Set<PropertyPath> getPropertyPaths() {
-		return Collections.unmodifiableSet(propertyPaths);
 	}
 }
