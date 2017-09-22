@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -48,7 +49,7 @@ import org.springframework.web.client.RestOperations;
 @Configuration
 public abstract class AbstractVaultConfiguration implements ApplicationContextAware {
 
-	private ApplicationContext applicationContext;
+	private @Nullable ApplicationContext applicationContext;
 
 	/**
 	 * @return Vault endpoint coordinates for HTTP/HTTPS communication, must not be

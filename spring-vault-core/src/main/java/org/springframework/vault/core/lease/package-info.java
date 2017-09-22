@@ -1,7 +1,6 @@
 /**
  * The core package implementing lease renewal and secret rotation.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.core.lease;
-
-import org.springframework.lang.NonNullApi;

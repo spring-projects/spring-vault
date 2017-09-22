@@ -1,8 +1,7 @@
 /**
  * Property transformer classes for Spring Vault core support.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.core.util;
-
-import org.springframework.lang.NonNullApi;
 

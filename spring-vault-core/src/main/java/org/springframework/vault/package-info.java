@@ -1,7 +1,6 @@
 /**
  * Spring support for <a href="https://vaultproject.io">Hashicorp Vault</a>.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault;
-
-import org.springframework.lang.NonNullApi;

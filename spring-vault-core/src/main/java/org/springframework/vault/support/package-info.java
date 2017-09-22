@@ -1,8 +1,7 @@
 /**
  * Classes supporting the Vault packages, such as value objects.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.support;
-
-import org.springframework.lang.NonNullApi;
 

@@ -1,7 +1,6 @@
 /**
  * Spring Vault's environment abstraction consisting property source support.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.core.env;
-
-import org.springframework.lang.NonNullApi;

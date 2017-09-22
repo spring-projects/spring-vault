@@ -22,6 +22,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AppIdAuthentication;
@@ -137,8 +138,8 @@ import org.springframework.web.client.RestOperations;
 public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration implements
 		ApplicationContextAware {
 
-	private RestOperations cachedRestOperations;
-	private ApplicationContext applicationContext;
+	private @Nullable RestOperations cachedRestOperations;
+	private @Nullable ApplicationContext applicationContext;
 
 	@Override
 	public RestOperations restOperations() {
@@ -324,10 +325,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return new CubbyholeAuthentication(options, restOperations());
 	}
 
+	@Nullable
 	private String getProperty(String key) {
 		return getEnvironment().getProperty(key);
 	}
 
+	@Nullable
 	private Resource getResource(String key) {
 
 		String value = getProperty(key);

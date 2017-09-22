@@ -1,7 +1,6 @@
 /**
  * Spring Vault Client abstraction.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.client;
-
-import org.springframework.lang.NonNullApi;

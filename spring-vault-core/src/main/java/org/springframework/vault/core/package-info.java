@@ -1,7 +1,6 @@
 /**
  * Vault core support.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.core;
-
-import org.springframework.lang.NonNullApi;

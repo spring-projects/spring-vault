@@ -1,7 +1,6 @@
 /**
  * Support classes for lease application events.
  */
-@NonNullApi
+@org.springframework.lang.NonNullApi
+@org.springframework.lang.NonNullFields
 package org.springframework.vault.core.lease.event;
-
-import org.springframework.lang.NonNullApi;
