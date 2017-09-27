@@ -8,6 +8,7 @@
 * Reactive Vault client via `ReactiveVaultOperations`.
 * <<vault.repositories,Vault repository support>> based on Spring Data KeyValue.
 * Transit batch encrypt and decrypt support.
+* Policy management for policies stored as JSON.
 
 [[new-features.1-0-0]]
 === What's new in Spring Vault 1.0

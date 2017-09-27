@@ -1,0 +1,40 @@
+{
+  "path": {
+	"secret/*": {
+	  "capabilities": [
+		"create",
+		"read",
+		"update"
+	  ],
+	  "allowed_parameters": {
+		"ttl": [
+		  "1h",
+		  "2h"
+		]
+	  },
+	  "denied_parameters": {
+		"password": []
+	  }
+	},
+	"secret/foo": {
+	  "capabilities": [
+		"create",
+		"read",
+		"update",
+		"delete",
+		"list"
+	  ],
+	  "min_wrapping_ttl": "60",
+	  "max_wrapping_ttl": "3600",
+	  "allowed_parameters": {
+		"ttl": [
+		  "1h",
+		  "2h"
+		]
+	  },
+	  "denied_parameters": {
+		"password": []
+	  }
+	}
+  }
+}

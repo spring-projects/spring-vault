@@ -15,8 +15,10 @@
  */
 package org.springframework.vault.core;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -26,11 +28,17 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultUnsealStatus;
+import org.springframework.vault.support.Policy.Rule;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.vault.support.Policy.BuiltinCapabilities.READ;
+import static org.springframework.vault.support.Policy.BuiltinCapabilities.UPDATE;
 
 /**
  * Integration tests for {@link VaultSysTemplate} through {@link VaultSysOperations}.
@@ -44,10 +52,15 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@Autowired
 	private VaultOperations vaultOperations;
 
+	private Version vaultVersion;
+
 	private VaultSysOperations adminOperations;
 
 	@Before
 	public void before() throws Exception {
+
+		vaultVersion = prepare().getVersion();
+
 		adminOperations = vaultOperations.opsForSys();
 	}
 
@@ -121,6 +134,65 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	public void shouldEnumeratePolicyNames() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+
+		List<String> policyNames = adminOperations.getPolicyNames();
+
+		assertThat(policyNames).contains("root", "default");
+	}
+
+	@Test
+	public void shouldReadRootPolicy() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+
+		Policy root = adminOperations.getPolicy("root");
+
+		assertThat(root).isEqualTo(Policy.empty());
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void shouldReadDefaultPolicy() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+
+		adminOperations.getPolicy("default");
+	}
+
+	@Test
+	public void shouldCreatePolicy() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0")));
+
+		Rule rule = Rule.builder().path("foo").capabilities(READ, UPDATE)
+				.minWrappingTtl(Duration.ofSeconds(100))
+				.maxWrappingTtl(Duration.ofHours(2)).build();
+
+		adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
+
+		assertThat(adminOperations.getPolicyNames()).contains("foo");
+
+		Policy loaded = adminOperations.getPolicy("foo");
+		assertThat(loaded.getRules()).contains(rule);
+	}
+
+	@Test
+	public void shouldDeletePolicy() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.0")));
+
+		Rule rule = Rule.builder().path("foo").capabilities(READ).build();
+
+		adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
+
+		adminOperations.deletePolicy("foo");
+
+		assertThat(adminOperations.getPolicyNames()).doesNotContain("foo");
+	}
+
+	@Test
 	public void isInitializedShouldReturnTrue() {
 		assertThat(adminOperations.isInitialized()).isTrue();
 	}
@@ -129,6 +201,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	public void getUnsealStatusShouldReturnStatus() {
 
 		VaultUnsealStatus unsealStatus = adminOperations.getUnsealStatus();
+
 		assertThat(unsealStatus.isSealed()).isFalse();
 		assertThat(unsealStatus.getProgress()).isEqualTo(0);
 	}

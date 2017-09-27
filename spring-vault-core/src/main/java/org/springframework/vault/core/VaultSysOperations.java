@@ -15,9 +15,12 @@
  */
 package org.springframework.vault.core;
 
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
@@ -125,6 +128,50 @@ public interface VaultSysOperations {
 	 * /sys/auth/{mount}</a>
 	 */
 	void authUnmount(String path) throws VaultException;
+
+	/**
+	 * Lists policy names stored in Vault.
+	 *
+	 * @return policy names.
+	 * @since 2.0
+	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
+	 * /sys/policy/</a>
+	 */
+	List<String> getPolicyNames() throws VaultException;
+
+	/**
+	 * Read a {@link Policy} by its {@literal name}. Policies are either represented as
+	 * HCL (HashiCorp configuration language) or JSON. Retrieving policies is only
+	 * possible if the policy is represented as JSON.
+	 *
+	 * @return the {@link Policy} or {@literal null}, if the policy was not found.
+	 * @since 2.0
+	 * @throws UnsupportedOperationException if the policy is represented as HCL.
+	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
+	 * /sys/policy/{name}</a>
+	 */
+	@Nullable
+	Policy getPolicy(String name) throws VaultException;
+
+	/**
+	 * Create or update a {@link Policy}.
+	 *
+	 * @param name the policy name, must not be {@literal null} or empty.
+	 * @since 2.0
+	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">PUT
+	 * /sys/policy/{name}</a>
+	 */
+	void createOrUpdatePolicy(String name, Policy policy) throws VaultException;
+
+	/**
+	 * Delete a {@link Policy} by its {@literal name}.
+	 *
+	 * @param name the policy name, must not be {@literal null} or empty.
+	 * @since 2.0
+	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">DELETE
+	 * /sys/policy/{name}</a>
+	 */
+	void deletePolicy(String name) throws VaultException;
 
 	/**
 	 * Return the health status of Vault.

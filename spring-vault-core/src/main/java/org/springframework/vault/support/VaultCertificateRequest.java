@@ -111,7 +111,9 @@ public class VaultCertificateRequest {
 
 		@Nullable
 		private String commonName;
+
 		private List<String> altNames = new ArrayList<>();
+
 		private List<String> ipSubjectAltNames = new ArrayList<>();
 
 		@Nullable

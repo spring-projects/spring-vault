@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,15 +32,19 @@ import lombok.Data;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
@@ -63,6 +68,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 	private static final GetMounts GET_AUTH_MOUNTS = new GetMounts("sys/auth");
 
 	private static final Health HEALTH = new Health();
+
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	private final VaultOperations vaultOperations;
 
@@ -192,6 +199,75 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 
 		vaultOperations.delete(String.format("sys/auth/%s", path));
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<String> getPolicyNames() throws VaultException {
+		return requireResponse((List<String>) vaultOperations.read("sys/policy")
+				.getRequiredData().get("policies"));
+	}
+
+	@Nullable
+	@Override
+	public Policy getPolicy(String name) throws VaultException {
+
+		Assert.hasText(name, "Name must not be null or empty");
+
+		return vaultOperations.doWithSession(restOperations -> {
+
+			ResponseEntity<VaultResponse> response = restOperations.getForEntity(
+					"sys/policy/{name}", VaultResponse.class, name);
+
+			if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
+				return null;
+			}
+
+			String rules = (String) response.getBody().getRequiredData().get("rules");
+
+			if (StringUtils.isEmpty(rules)) {
+				return Policy.empty();
+			}
+
+			if (rules.trim().startsWith("{")) {
+				return VaultResponses.unwrap(rules, Policy.class);
+			}
+
+			throw new UnsupportedOperationException("Cannot parse policy in HCL format");
+		});
+	}
+
+	@Override
+	public void createOrUpdatePolicy(String name, Policy policy) throws VaultException {
+
+		Assert.hasText(name, "Name must not be null or empty");
+		Assert.notNull(policy, "Policy must not be null");
+
+		String rules;
+
+		try {
+			rules = OBJECT_MAPPER.writeValueAsString(policy);
+		}
+		catch (IOException e) {
+			throw new VaultException("Cannot serialize policy to JSON", e);
+		}
+
+		vaultOperations.doWithSession(restOperations -> {
+
+			restOperations.exchange("sys/policy/{name}", HttpMethod.PUT,
+					new HttpEntity<>(Collections.singletonMap("rules", rules)),
+					VaultResponse.class, name);
+
+			return null;
+		});
+	}
+
+	@Override
+	public void deletePolicy(String name) throws VaultException {
+
+		Assert.hasText(name, "Name must not be null or empty");
+
+		vaultOperations.delete(String.format("sys/policy/%s", name));
 	}
 
 	@Override
