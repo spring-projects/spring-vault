@@ -182,7 +182,7 @@ Now let's look at a examples of how to work with Vault in the context of the Spr
 === Registering and configuring Spring Vault beans
 
 Using Spring Vault does not require a Spring Context. However, instances of `VaultTemplate` and `SessionManager` registered inside a managed context will participate
-in http://docs.spring.io/spring/docs/current/spring-framework-reference/html/beans.html#beans-factory-nature[lifecycle events]
+in {spring-framework-docs}html/beans.html#beans-factory-nature[lifecycle events]
 provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
 application shutdown. You also benefit from reusing the same `VaultTemplate`
 instance across your application.
@@ -388,7 +388,7 @@ No configuration options.
 
 Vault can be used in many different ways. One specific use-case is using
 Vault to store encrypted properties. Spring Vault supports Vault as property
-source to obtain configuration properties using Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction].
+source to obtain configuration properties using Spring's {spring-framework-docs}beans.html#beans-property-source-abstraction[PropertySource abstraction].
 
 NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A `VaultPropertySource` must be initialized at that time to retrieve properties from Vault.
 
@@ -491,8 +491,8 @@ For example, if the `@Configuration` classes above were registered via
 component-scanning, the ordering is difficult to predict.
 In such cases - and if overriding is important - it is recommended that the
 user fall back to using the programmatic PropertySource API.
-See http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
+See http://docs.spring.io/spring-framework/docs/{springVersion}/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
+http://docs.spring.io/spring/docs/{springVersion}/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
 
 
 [[vault.core.executioncallback]]
