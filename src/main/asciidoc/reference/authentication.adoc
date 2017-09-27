@@ -15,7 +15,7 @@ Disclosure of login credentials to any party allows login to Vault and access se
 are permitted by the underlying role. Picking the appropriate client authentication and
 injecting credentials into the application is subject to risk evaluation.
 
-Spring's http://docs.spring.io/spring-framework/docs/current/spring-framework-reference/html/beans.html#beans-property-source-abstraction[PropertySource abstraction] is a natural fit
+Spring's {spring-framework-docs}core.html#beans-property-source-abstraction[PropertySource abstraction] is a natural fit
 to keep configuration outside the application code. You can use system properties, environment
 variables or property files to store login credentials. Each approach comes with its own properties.
 Keep in mind that the command line and environment properties can be introspected with appropriate

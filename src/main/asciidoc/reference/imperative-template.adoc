@@ -38,7 +38,7 @@ Now let's look at a examples of how to work with Vault in the context of the Spr
 == Registering and configuring Spring Vault beans
 
 Using Spring Vault does not require a Spring Context. However, instances of `VaultTemplate` and `SessionManager` registered inside a managed context will participate
-in http://docs.spring.io/spring/docs/current/spring-framework-reference/html/beans.html#beans-factory-nature[lifecycle events]
+in {spring-framework-docs}core.html#beans-factory-nature[lifecycle events]
 provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
 application shutdown. You also benefit from reusing the same `VaultTemplate`
 instance across your application.
