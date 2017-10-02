@@ -454,7 +454,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		private boolean exportable;
 
-		private Map<String, Long> keys = Collections.emptyMap();
+		private Map<String, Object> keys = Collections.emptyMap();
 
 		@JsonProperty("latest_version")
 		private boolean latestVersion;

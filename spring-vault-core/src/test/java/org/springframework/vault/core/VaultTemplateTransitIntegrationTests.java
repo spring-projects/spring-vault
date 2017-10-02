@@ -27,19 +27,13 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.vault.VaultException;
-import org.springframework.vault.support.RawTransitKey;
-import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
-import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultTemplate} using the {@code transit} backend.
@@ -50,7 +44,6 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
-
 
 	@Autowired
 	private VaultOperations vaultOperations;
@@ -71,10 +64,6 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		removeKeys();
 
 		vaultOperations.write("transit/keys/mykey", null);
-		vaultOperations.write("transit/keys/derived",
-				Collections.singletonMap("derived", true));
-		vaultOperations.write("transit/keys/export",
-				Collections.singletonMap("exportable", true));
 	}
 
 	@After
@@ -106,8 +95,6 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		}
 		else {
 			deleteKey("mykey");
-			deleteKey("derived");
-			deleteKey("export");
 		}
 	}
 
@@ -137,77 +124,5 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 
 		assertThat((String) decrypted.getData().get("plaintext")).isEqualTo(
 				Base64.encodeBase64String("that message is secret".getBytes()));
-	}
-
-	@Test
-	public void shouldCreateNewExportableKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
-
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
-				.builder().exportable(true).derived(true).build();
-
-		vaultTransitOperations.createKey("export-test", vaultTransitKeyCreationRequest);
-
-		VaultTransitKey vaultTransitKey = vaultTransitOperations.getKey("export-test");
-
-		assertThat(vaultTransitKey.getName()).isEqualTo("export-test");
-		assertThat(vaultTransitKey.isExportable()).isTrue();
-	}
-
-	@Test
-	public void shouldCreateNotExportableKeyByDefault() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
-
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-
-		vaultTransitOperations.createKey("no-export");
-
-		VaultTransitKey vaultTransitKey = vaultTransitOperations.getKey("no-export");
-
-		assertThat(vaultTransitKey.getName()).isEqualTo("no-export");
-		assertThat(vaultTransitKey.isExportable()).isFalse();
-	}
-
-	@Test
-	public void shouldExportEncryptionKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
-
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-
-		RawTransitKey rawTransitKey = vaultTransitOperations.exportKey("export",
-				TransitKeyType.ENCRYPTION_KEY);
-
-		assertThat(rawTransitKey.getName()).isEqualTo("export");
-		assertThat(rawTransitKey.getKeys()).isNotEmpty();
-		assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
-	}
-
-	@Test(expected = VaultException.class)
-	public void shouldNotAllowExportSigningKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
-
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-
-		vaultTransitOperations.exportKey("export", TransitKeyType.SIGNING_KEY);
-	}
-
-	@Test
-	public void shouldExportHmacKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
-
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-
-		RawTransitKey rawTransitKey = vaultTransitOperations.exportKey("export",
-				TransitKeyType.HMAC_KEY);
-
-		assertThat(rawTransitKey.getName()).isEqualTo("export");
-		assertThat(rawTransitKey.getKeys()).isNotEmpty();
-		assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
 	}
 }

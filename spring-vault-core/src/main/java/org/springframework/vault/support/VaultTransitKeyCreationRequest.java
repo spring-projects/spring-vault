@@ -46,6 +46,18 @@ public class VaultTransitKeyCreationRequest {
 	}
 
 	/**
+	 * Create a new {@link VaultTransitKeyCreationRequest} specifically for a {@code type}
+	 * .
+	 * @param the key type to use, must not be {@literal null} or empty.
+	 * @return a new {@link VaultTransitKeyCreationRequest} for the given key {@code type}
+	 * .
+	 * @since 2.0
+	 */
+	public static VaultTransitKeyCreationRequest ofKeyType(String type) {
+		return builder().type(type).build();
+	}
+
+	/**
 	 * @return a new {@link VaultTransitKeyCreationRequestBuilder}.
 	 */
 	public static VaultTransitKeyCreationRequestBuilder builder() {
@@ -99,14 +111,14 @@ public class VaultTransitKeyCreationRequest {
 		}
 
 		/**
-		 * Configure key derivation.
+		 * Configure the key type.
 		 *
 		 * @param type the type of key to create, must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder type(String type) {
 
-			Assert.hasText(type, "Type must not be empty");
+			Assert.hasText(type, "Type must not be null or empty");
 
 			this.type = type;
 			return this;

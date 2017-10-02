@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.After;
@@ -29,6 +30,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.Ciphertext;
 import org.springframework.vault.support.Plaintext;
+import org.springframework.vault.support.RawTransitKey;
+import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionResult;
 import org.springframework.vault.support.VaultEncryptionResult;
 import org.springframework.vault.support.VaultMount;
@@ -58,7 +61,10 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 	@Autowired
 	private VaultOperations vaultOperations;
+
 	private VaultTransitOperations transitOperations;
+
+	private Version vaultVersion;
 
 	@Before
 	public void before() {
@@ -68,6 +74,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		if (!vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
 			vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
 		}
+
+		vaultVersion = prepare().getVersion();
 
 		removeKeys();
 	}
@@ -95,7 +103,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 	private void removeKeys() {
 
-		if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
 			List<String> keys = vaultOperations.opsForTransit().getKeys();
 			for (String keyName : keys) {
 				deleteKey(keyName);
@@ -103,7 +111,9 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		}
 		else {
 			deleteKey("mykey");
-			deleteKey("derived");
+			deleteKey("export");
+			deleteKey("ecdsa-key");
+			deleteKey("ed-key");
 		}
 	}
 
@@ -121,6 +131,38 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(mykey.isDerived()).isFalse();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 		assertThat(mykey.isLatestVersion()).isTrue();
+	}
+
+	@Test
+	public void createKeyShouldCreateEcDsaKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest
+				.ofKeyType("ecdsa-p256");
+
+		transitOperations.createKey("ecdsa-key", request);
+
+		VaultTransitKey mykey = transitOperations.getKey("ecdsa-key");
+
+		assertThat(mykey.getType()).startsWith("ecdsa");
+		assertThat(mykey.getKeys()).isNotEmpty();
+	}
+
+	@Test
+	public void createKeyShouldCreateEdKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest
+				.ofKeyType("ed25519");
+
+		transitOperations.createKey("ed-key", request);
+
+		VaultTransitKey mykey = transitOperations.getKey("ed-key");
+
+		assertThat(mykey.getType()).startsWith("ed");
+		assertThat(mykey.getKeys()).isNotEmpty();
 	}
 
 	@Test
@@ -145,7 +187,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldEnumerateKey() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
 
 		assertThat(transitOperations.getKeys()).isEmpty();
 
@@ -326,8 +368,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldBatchEncrypt() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				BATCH_INTRODUCED_IN_VERSION));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
 		transitOperations.createKey("mykey");
 
@@ -341,8 +382,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldBatchDecrypt() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				BATCH_INTRODUCED_IN_VERSION));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
 		transitOperations.createKey("mykey");
 
@@ -364,8 +404,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldBatchEncryptWithContext() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				BATCH_INTRODUCED_IN_VERSION));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -389,8 +428,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldBatchDecryptWithContext() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				BATCH_INTRODUCED_IN_VERSION));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -416,8 +454,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldBatchDecryptWithWrongContext() {
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				BATCH_INTRODUCED_IN_VERSION));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -445,5 +482,122 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(decrypted.get(0).get()).isEqualTo(one);
 		assertThat(decrypted.get(1).isSuccessful()).isEqualTo(false);
 		assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
+	}
+
+	@Test
+	public void shouldCreateNewExportableKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
+				.builder().exportable(true).derived(true).build();
+
+		vaultTransitOperations.createKey("export-test", vaultTransitKeyCreationRequest);
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations.getKey("export-test");
+
+		assertThat(vaultTransitKey.getName()).isEqualTo("export-test");
+		assertThat(vaultTransitKey.isExportable()).isTrue();
+	}
+
+	@Test
+	public void shouldCreateNotExportableKeyByDefault() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
+
+		vaultTransitOperations.createKey("no-export");
+
+		VaultTransitKey vaultTransitKey = vaultTransitOperations.getKey("no-export");
+
+		assertThat(vaultTransitKey.getName()).isEqualTo("no-export");
+		assertThat(vaultTransitKey.isExportable()).isFalse();
+	}
+
+	@Test
+	public void shouldExportEncryptionKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		vaultOperations.write("transit/keys/export",
+				Collections.singletonMap("exportable", true));
+
+		RawTransitKey rawTransitKey = transitOperations.exportKey("export",
+				TransitKeyType.ENCRYPTION_KEY);
+
+		assertThat(rawTransitKey.getName()).isEqualTo("export");
+		assertThat(rawTransitKey.getKeys()).isNotEmpty();
+		assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
+	}
+
+	@Test(expected = VaultException.class)
+	public void shouldNotAllowExportSigningKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		vaultOperations.write("transit/keys/export",
+				Collections.singletonMap("exportable", true));
+
+		transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY);
+	}
+
+	@Test
+	public void shouldExportHmacKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		vaultOperations.write("transit/keys/export",
+				Collections.singletonMap("exportable", true));
+
+		RawTransitKey rawTransitKey = transitOperations.exportKey("export",
+				TransitKeyType.HMAC_KEY);
+
+		assertThat(rawTransitKey.getName()).isEqualTo("export");
+		assertThat(rawTransitKey.getKeys()).isNotEmpty();
+		assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
+	}
+
+	@Test
+	public void shouldExportEcDsaKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
+				.type("ecdsa-p256").exportable(true).build();
+
+		transitOperations.createKey("ecdsa-key", request);
+
+		RawTransitKey hmacKey = transitOperations.exportKey("ecdsa-key",
+				TransitKeyType.HMAC_KEY);
+		RawTransitKey signingKey = transitOperations.exportKey("ecdsa-key",
+				TransitKeyType.SIGNING_KEY);
+
+		assertThat(hmacKey.getKeys()).isNotEmpty();
+		assertThat(signingKey.getKeys()).isNotEmpty();
+	}
+
+	@Test
+	public void shouldExportEdKey() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+
+		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
+				.type("ed25519").exportable(true).build();
+
+		transitOperations.createKey("ed-key", request);
+
+		RawTransitKey hmacKey = transitOperations.exportKey("ed-key",
+				TransitKeyType.HMAC_KEY);
+		RawTransitKey signingKey = transitOperations.exportKey("ed-key",
+				TransitKeyType.SIGNING_KEY);
+
+		assertThat(hmacKey.getKeys()).isNotEmpty();
+		assertThat(signingKey.getKeys()).isNotEmpty();
 	}
 }

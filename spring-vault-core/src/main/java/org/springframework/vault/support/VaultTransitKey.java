@@ -42,9 +42,9 @@ public interface VaultTransitKey {
 	boolean isExportable();
 
 	/**
-	 * @return a {@link Map} of key version to its creation timestamp.
+	 * @return a {@link Map} of key version to its Vault-specific representation.
 	 */
-	Map<String, Long> getKeys();
+	Map<String, Object> getKeys();
 
 	/**
 	 * @return {@literal true} if the key represents the latest version.
