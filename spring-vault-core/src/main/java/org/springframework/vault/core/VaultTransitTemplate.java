@@ -439,6 +439,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Data
 	static class VaultTransitKeyImpl implements VaultTransitKey {
 
+		private String name;
+
 		@JsonProperty("cipher_mode")
 		private String cipherMode;
 
@@ -460,7 +462,20 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("min_decryption_version")
 		private int minDecryptionVersion;
 
-		private String name;
+		@JsonProperty("min_encryption_version")
+		private int minEncryptionVersion;
+
+		@JsonProperty("supports_decryption")
+		private boolean supportsDecryption;
+
+		@JsonProperty("supports_encryption")
+		private boolean supportsEncryption;
+
+		@JsonProperty("supports_derivation")
+		private boolean supportsDerivation;
+
+		@JsonProperty("supports_signing")
+		private boolean supportsSigning;
 
 		@Override
 		public String getType() {
@@ -470,6 +485,26 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			}
 
 			return this.cipherMode;
+		}
+
+		@Override
+		public boolean supportsDecryption() {
+			return isSupportsDecryption();
+		}
+
+		@Override
+		public boolean supportsEncryption() {
+			return isSupportsEncryption();
+		}
+
+		@Override
+		public boolean supportsDerivation() {
+			return isSupportsDerivation();
+		}
+
+		@Override
+		public boolean supportsSigning() {
+			return isSupportsSigning();
 		}
 	}
 

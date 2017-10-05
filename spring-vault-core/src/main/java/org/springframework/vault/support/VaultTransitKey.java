@@ -26,6 +26,16 @@ import java.util.Map;
 public interface VaultTransitKey {
 
 	/**
+	 * @return name of the key
+	 */
+	String getName();
+
+	/**
+	 * @return the key type ({@code aes-gcm}, {@code ecdsa-p256}, ...).
+	 */
+	String getType();
+
+	/**
 	 * @return {@literal true} if deletion of the key is allowed. Key deletion must be
 	 * turned on to make keys deletable.
 	 */
@@ -57,12 +67,32 @@ public interface VaultTransitKey {
 	int getMinDecryptionVersion();
 
 	/**
-	 * @return name of the key
+	 * @return required key version to encrypt data.
+	 * @since 1.1
 	 */
-	String getName();
+	int getMinEncryptionVersion();
 
 	/**
-	 * @return the key type ({@code aes-gcm}, {@code ecdsa-p256}, ...).
+	 * @return whether the key supports decryption.
+	 * @since 1.1
 	 */
-	String getType();
+	boolean supportsDecryption();
+
+	/**
+	 * @return whether the key supports encryption.
+	 * @since 1.1
+	 */
+	boolean supportsEncryption();
+
+	/**
+	 * @return whether the key supports derivation.
+	 * @since 1.1
+	 */
+	boolean supportsDerivation();
+
+	/**
+	 * @return whether the key supports signing.
+	 * @since 1.1
+	 */
+	boolean supportsSigning();
 }

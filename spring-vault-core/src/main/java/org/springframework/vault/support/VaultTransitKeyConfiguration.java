@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,9 +30,19 @@ public class VaultTransitKeyConfiguration {
 	@JsonProperty("latest_version")
 	private final Integer latestVersion;
 
-	private VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion) {
+	@JsonProperty("min_decryption_version")
+	private final Integer minDecryptionVersion;
+
+	@JsonProperty("min_encryption_version")
+	private final Integer minEncryptionVersion;
+
+	private VaultTransitKeyConfiguration(Boolean deletionAllowed, Integer latestVersion,
+			Integer minDecryptionVersion, Integer minEncryptionVersion) {
+
 		this.deletionAllowed = deletionAllowed;
 		this.latestVersion = latestVersion;
+		this.minDecryptionVersion = minDecryptionVersion;
+		this.minEncryptionVersion = minEncryptionVersion;
 	}
 
 	/**
@@ -51,9 +61,28 @@ public class VaultTransitKeyConfiguration {
 
 	/**
 	 * @return latest key version
+	 * @deprecated since 1.1, property does not exist.
 	 */
+	@Deprecated
 	public Integer getLatestVersion() {
 		return latestVersion;
+	}
+
+	/**
+	 * @return the minimum version of ciphertext allowed to be decrypted.
+	 * @since 1.1
+	 */
+	public Integer getMinDecryptionVersion() {
+		return minDecryptionVersion;
+	}
+
+	/**
+	 * @return the minimum version of the key that can be used to encrypt plaintext, sign
+	 * payloads, or generate HMACs.
+	 * @since 1.1
+	 */
+	public Integer getMinEncryptionVersion() {
+		return minEncryptionVersion;
 	}
 
 	/**
@@ -64,6 +93,10 @@ public class VaultTransitKeyConfiguration {
 		private Boolean deletionAllowed;
 
 		private Integer latestVersion;
+
+		private Integer minDecryptionVersion;
+
+		private Integer minEncryptionVersion;
 
 		VaultTransitKeyConfigurationBuilder() {
 		}
@@ -84,9 +117,44 @@ public class VaultTransitKeyConfiguration {
 		 *
 		 * @param latestVersion key version.
 		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @deprecated since 1.1, property does not exist.
 		 */
+		@Deprecated
 		public VaultTransitKeyConfigurationBuilder latestVersion(int latestVersion) {
 			this.latestVersion = latestVersion;
+			return this;
+		}
+
+		/**
+		 * Specifies the minimum version of ciphertext allowed to be decrypted. Adjusting
+		 * this as part of a key rotation policy can prevent old copies of ciphertext from
+		 * being decrypted, should they fall into the wrong hands. For signatures, this
+		 * value controls the minimum version of signature that can be verified against.
+		 * For HMACs, this controls the minimum version of a key allowed to be used as the
+		 * key for verification.
+		 *
+		 * @param minDecryptionVersion key version.
+		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @since 1.1
+		 */
+		public VaultTransitKeyConfigurationBuilder minDecryptionVersion(
+				int minDecryptionVersion) {
+			this.minDecryptionVersion = minDecryptionVersion;
+			return this;
+		}
+
+		/**
+		 * Specifies the minimum version of the key that can be used to encrypt plaintext,
+		 * sign payloads, or generate HMACs. Must be 0 (which will use the latest version)
+		 * or a value greater or equal to {@link #minDecryptionVersion(int)}.
+		 *
+		 * @param minEncryptionVersion key version.
+		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @since 1.1
+		 */
+		public VaultTransitKeyConfigurationBuilder minEncryptionVersion(
+				int minEncryptionVersion) {
+			this.minEncryptionVersion = minEncryptionVersion;
 			return this;
 		}
 
@@ -96,7 +164,8 @@ public class VaultTransitKeyConfiguration {
 		 * @return a new {@link VaultTransitKeyConfiguration}.
 		 */
 		public VaultTransitKeyConfiguration build() {
-			return new VaultTransitKeyConfiguration(deletionAllowed, latestVersion);
+			return new VaultTransitKeyConfiguration(deletionAllowed, latestVersion,
+					minDecryptionVersion, minEncryptionVersion);
 		}
 	}
 }
