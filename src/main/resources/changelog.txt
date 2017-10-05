@@ -1,6 +1,31 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.M3
+-----------------------------------------
+* Add support to manage policies #10
+* Adapt Vault API changes in transit key value/configuration objects #124
+* Vault repository support #128
+* Unconfigured keystore password considers keystore as tampered bug #131
+* Support AppRole authentication pull mode #132
+* Add explicit automatic module name for Java 9 #141
+* Upgrade dependencies #144
+* Adapt NonNullFields annotation #145
+* Adapt to changed Spring Framework 5 documentation structure #147
+* Support ecdsa and ed25519 transit key metadata #149
+* Upgrade to Spring Framework 5 release versions #150
+* Remove own code in favor of Spring Data KeyValue #151
+* Upgrade dependencies #156
+* Merge repository support into Spring Vault Core JAR #157
+
+Changes in version 1.1.0.RELEASE
+-----------------------------------------
+* Adapt Vault API changes in transit key value/configuration objects #124
+* Add support for Batch Encryption/Decryption APIs #137
+* Skip Javadoc validation in Javadoc plugin #140
+* Add explicit automatic module name for Java 9 #141
+* Upgrade dependencies #154
+
 Changes in version 2.0.0.M2
 -----------------------------------------
 * Reactive Support #25
