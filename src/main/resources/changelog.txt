@@ -1,7 +1,7 @@
 Spring Vault Changelog
 =============================
 
-Changes in version 1.1.0.RC1
+Changes in version 1.1.0.RELEASE
 -----------------------------------------
 * Adapt Vault API changes in transit key value/configuration objects #124
 * Add support for Batch Encryption/Decryption APIs #137
