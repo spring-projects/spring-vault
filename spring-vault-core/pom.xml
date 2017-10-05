@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.vault</groupId>
 		<artifactId>spring-vault-parent</artifactId>
-		<version>1.1.0.RELEASE</version>
+		<version>1.1.1.BUILD-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-vault-core</artifactId>
