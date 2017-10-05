@@ -160,7 +160,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void createKeyShouldCreateEdKey() {
 
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.3")));
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest
 				.ofKeyType("ed25519");
@@ -616,7 +616,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void shouldExportEdKey() {
 
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.3")));
 
 		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
 
