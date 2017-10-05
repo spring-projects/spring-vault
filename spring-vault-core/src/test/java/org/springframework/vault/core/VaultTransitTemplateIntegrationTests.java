@@ -130,7 +130,15 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(mykey.isDeletionAllowed()).isFalse();
 		assertThat(mykey.isDerived()).isFalse();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
-		assertThat(mykey.isLatestVersion()).isTrue();
+		assertThat(mykey.getLatestVersion()).isEqualTo(1);
+
+		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0"))) {
+
+			assertThat(mykey.supportsDecryption()).isTrue();
+			assertThat(mykey.supportsEncryption()).isTrue();
+			assertThat(mykey.supportsDerivation()).isTrue();
+			assertThat(mykey.supportsSigning()).isFalse();
+		}
 	}
 
 	@Test
@@ -181,7 +189,32 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(mykey.isDeletionAllowed()).isFalse();
 		assertThat(mykey.isDerived()).isTrue();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
-		assertThat(mykey.isLatestVersion()).isTrue();
+		assertThat(mykey.getLatestVersion()).isEqualTo(1);
+	}
+
+	@Test
+	public void shouldConfigureKey() {
+
+		transitOperations.createKey("mykey");
+		transitOperations.rotate("mykey");
+		transitOperations.rotate("mykey");
+
+		VaultTransitKeyConfiguration configuration = VaultTransitKeyConfiguration
+				.builder().deletionAllowed(true).minDecryptionVersion(1)
+				.minEncryptionVersion(2).build();
+
+		transitOperations.configureKey("mykey", configuration);
+
+		VaultTransitKey mykey = transitOperations.getKey("mykey");
+
+		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
+
+		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.8.0"))) {
+			assertThat(mykey.getMinEncryptionVersion()).isEqualTo(2);
+		}
+		else {
+			assertThat(mykey.getMinEncryptionVersion()).isEqualTo(0);
+		}
 	}
 
 	@Test

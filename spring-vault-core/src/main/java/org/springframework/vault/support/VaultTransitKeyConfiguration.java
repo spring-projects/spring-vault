@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,20 @@ public class VaultTransitKeyConfiguration {
 	@Nullable
 	private final Boolean deletionAllowed;
 
-	@JsonProperty("latest_version")
+	@JsonProperty("min_decryption_version")
 	@Nullable
-	private final Integer latestVersion;
+	private final Integer minDecryptionVersion;
+
+	@JsonProperty("min_encryption_version")
+	@Nullable
+	private final Integer minEncryptionVersion;
 
 	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed,
-			@Nullable Integer latestVersion) {
+			@Nullable Integer minDecryptionVersion, @Nullable Integer minEncryptionVersion) {
 
 		this.deletionAllowed = deletionAllowed;
-		this.latestVersion = latestVersion;
+		this.minDecryptionVersion = minDecryptionVersion;
+		this.minEncryptionVersion = minEncryptionVersion;
 	}
 
 	/**
@@ -57,11 +62,22 @@ public class VaultTransitKeyConfiguration {
 	}
 
 	/**
-	 * @return latest key version
+	 * @return the minimum version of ciphertext allowed to be decrypted.
+	 * @since 1.1
 	 */
 	@Nullable
-	public Integer getLatestVersion() {
-		return latestVersion;
+	public Integer getMinDecryptionVersion() {
+		return minDecryptionVersion;
+	}
+
+	/**
+	 * @return the minimum version of the key that can be used to encrypt plaintext, sign
+	 * payloads, or generate HMACs.
+	 * @since 1.1
+	 */
+	@Nullable
+	public Integer getMinEncryptionVersion() {
+		return minEncryptionVersion;
 	}
 
 	/**
@@ -73,7 +89,10 @@ public class VaultTransitKeyConfiguration {
 		private Boolean deletionAllowed;
 
 		@Nullable
-		private Integer latestVersion;
+		private Integer minDecryptionVersion;
+
+		@Nullable
+		private Integer minEncryptionVersion;
 
 		VaultTransitKeyConfigurationBuilder() {
 		}
@@ -90,13 +109,35 @@ public class VaultTransitKeyConfiguration {
 		}
 
 		/**
-		 * Set the latest key version.
+		 * Specifies the minimum version of ciphertext allowed to be decrypted. Adjusting
+		 * this as part of a key rotation policy can prevent old copies of ciphertext from
+		 * being decrypted, should they fall into the wrong hands. For signatures, this
+		 * value controls the minimum version of signature that can be verified against.
+		 * For HMACs, this controls the minimum version of a key allowed to be used as the
+		 * key for verification.
 		 *
-		 * @param latestVersion key version.
+		 * @param minDecryptionVersion key version.
 		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @since 1.1
 		 */
-		public VaultTransitKeyConfigurationBuilder latestVersion(int latestVersion) {
-			this.latestVersion = latestVersion;
+		public VaultTransitKeyConfigurationBuilder minDecryptionVersion(
+				int minDecryptionVersion) {
+			this.minDecryptionVersion = minDecryptionVersion;
+			return this;
+		}
+
+		/**
+		 * Specifies the minimum version of the key that can be used to encrypt plaintext,
+		 * sign payloads, or generate HMACs. Must be 0 (which will use the latest version)
+		 * or a value greater or equal to {@link #minDecryptionVersion(int)}.
+		 *
+		 * @param minEncryptionVersion key version.
+		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @since 1.1
+		 */
+		public VaultTransitKeyConfigurationBuilder minEncryptionVersion(
+				int minEncryptionVersion) {
+			this.minEncryptionVersion = minEncryptionVersion;
 			return this;
 		}
 
@@ -106,7 +147,8 @@ public class VaultTransitKeyConfiguration {
 		 * @return a new {@link VaultTransitKeyConfiguration}.
 		 */
 		public VaultTransitKeyConfiguration build() {
-			return new VaultTransitKeyConfiguration(deletionAllowed, latestVersion);
+			return new VaultTransitKeyConfiguration(deletionAllowed,
+					minDecryptionVersion, minEncryptionVersion);
 		}
 	}
 }
