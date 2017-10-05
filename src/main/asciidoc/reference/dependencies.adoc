@@ -11,15 +11,15 @@ defined. In a Maven project you would declare this dependency in the
 [source, xml, subs="verbatim,attributes"]
 ----
 <dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.vault</groupId>
-            <artifactId>spring-vault-dependencies</artifactId>
-            <version>{version}</version>
-            <scope>import</scope>
-            <type>pom</type>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.vault</groupId>
+      <artifactId>spring-vault-dependencies</artifactId>
+      <version>{version}</version>
+      <scope>import</scope>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
 </dependencyManagement>
 ----
 ====

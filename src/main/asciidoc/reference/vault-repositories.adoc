@@ -6,6 +6,8 @@ and delete. Vault repositories apply Spring Data's repository concept on top of 
 A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining
 the Id property, paging and sorting.
 
+NOTE: Read more about Spring Data Repositories in the https://docs.spring.io/spring-data/commons/docs/current/reference/html/#repositories[Spring Data Commons reference documentation]. The reference documentation will give you an introduction to Spring Data repositories.
+
 [[vault.repositories.usage]]
 == Usage
 
@@ -45,7 +47,50 @@ public interface CredentialsRepository extends CrudRepository<Credentials, Strin
 ----
 ====
 
-As our repository extends `CrudRepository` it provides basic CRUD and query methods.
+As our repository extends `CrudRepository` it provides basic CRUD and query methods. Vault repositories
+require Spring Data components. Make sure to include `spring-data-commons` and `spring-data-keyvalue` artifacts in your class path.
+
+The easiest way to achive this, is by setting up dependency management and adding the artifacts to your `pom.xml`:
+
+Then add the following to `pom.xml` dependencies section.
+
+.Using the Spring Data BOM
+====
+[source, xml, subs="verbatim,attributes"]
+----
+<dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.vault</groupId>
+      <artifactId>spring-data-releasetrain</artifactId>
+      <version>{springDataVersion}</version>
+      <scope>import</scope>
+      <type>pom</type>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+
+<dependencies>
+
+  <!-- other dependency elements omitted -->
+    
+  <dependency>
+    <groupId>org.springframework.vault</groupId>
+    <artifactId>spring-vault-core</artifactId>
+    <version>{version}</version>
+  </dependency>
+
+  <dependency>
+    <groupId>org.springframework.data</groupId>
+    <artifactId>spring-data-keyvalue</artifactId>
+    <!-- Version inherited from the BOM -->
+  </dependency>
+
+</dependencies>
+----
+====
+
+
 The thing we need in between to glue things together is the according Spring configuration.
 
 .JavaConfig for Vault Repositories

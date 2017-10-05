@@ -16,7 +16,6 @@
 	<modules>
 		<module>spring-vault-dependencies</module>
 		<module>spring-vault-core</module>
-		<module>spring-vault-repository</module>
 		<module>spring-vault-distribution</module>
 	</modules>
 
@@ -745,6 +744,7 @@
 									<projectName>${project.name}</projectName>
 									<projectVersion>${project.version}</projectVersion>
 									<springVersion>${spring.version}</springVersion>
+									<springDataVersion>${spring-data-releasetrain.version}</springDataVersion>
 									<allow-uri-read>true</allow-uri-read>
 									<toclevels>3</toclevels>
 									<numbered>true</numbered>

@@ -31,6 +31,7 @@ import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.repository.MultipleSpringDataModulesIntegrationTests.MultipleModulesActiveTestConfiguration;
 import org.springframework.vault.repository.configuration.EnableVaultRepositories;

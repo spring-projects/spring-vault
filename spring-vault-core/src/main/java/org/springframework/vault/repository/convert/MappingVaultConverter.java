@@ -608,7 +608,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	protected Map<String, Object> writeMapInternal(Map<Object, Object> obj,
 			Map<String, Object> bson, TypeInformation<?> propertyType) {
 
-		for (Map.Entry<Object, Object> entry : obj.entrySet()) {
+		for (Entry<Object, Object> entry : obj.entrySet()) {
 
 			Object key = entry.getKey();
 			Object val = entry.getValue();
