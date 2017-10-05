@@ -1,12 +1,17 @@
 [[new-features]]
 == New & Noteworthy
 
+[[new-features.1-1-0]]
+=== What's new in Spring Vault 1.1.0
+
+* <<vault.authentication.awsiam,AWS IAM authentication>>.
+* Configuration of encryption/decryption versions for transit keys. 
+* Pull mode for <<vault.authentication.approle,AppRole authentication>>.
+* Transit batch encrypt and decrypt support.
+* TTL-based generic secret rotation. 
+
 [[new-features.1-0-0]]
 === What's new in Spring Vault 1.0
 
 * Initial Vault support.
 
-[[new-features.1-1-0]]
-=== What's new in Spring Vault 1.1.0
-
-* Transit batch encrypt and decrypt support.

@@ -3,6 +3,14 @@ Spring Vault Changelog
 
 Changes in version 1.1.0.RC1
 -----------------------------------------
+* Adapt Vault API changes in transit key value/configuration objects #124
+* Add support for Batch Encryption/Decryption APIs #137
+* Skip Javadoc validation in Javadoc plugin #140
+* Add explicit automatic module name for Java 9 #141
+* Upgrade dependencies #154
+
+Changes in version 1.1.0.RC1
+-----------------------------------------
 * Upgrade to Vault 0.8.1 #127
 * Allow Pull Mode when using the AppRoleAuthentication by sending on Ap… #133
 * Upgrade to Vault 0.8.2 #134
