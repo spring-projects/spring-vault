@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.11.RELEASE</spring.version>
+		<spring.version>4.3.12.RELEASE</spring.version>
 		<java.version>1.6</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -345,7 +345,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>4.3.12.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.13.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
@@ -489,7 +489,7 @@
 
 			<!--
 					Profile to be activated when building the distribution atrifacts.
-	
+
 					Generates reference documentation, aggregates JavaDoc etc. Has to be combined with
 					profiles "release" or "milestone" to deploy artifacts into the appropriate places.
 				-->
