@@ -518,6 +518,121 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
+	public void generateHmacShouldCreateHmac() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String ciphertext = transitOperations.generateHmac("ecdsa-key", "hello-world");
+		assertThat(ciphertext).startsWith("vault:v");
+	}
+
+	@Test
+	public void generateHmacWithCustomAlgorithmShouldCreateHmac() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String ciphertext = transitOperations.generateHmac("ecdsa-key", "hello-world", "sha2-512");
+		assertThat(ciphertext).startsWith("vault:v");
+	}
+
+	@Test(expected = VaultException.class)
+	public void generateHmacWithInvalidAlgorithmShouldFail() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		transitOperations.generateHmac("ecdsa-key", "hello-world", "blah-512");
+	}
+
+	@Test
+	public void signShouldCreateSignature() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world");
+		assertThat(signature).startsWith("vault:v");
+	}
+
+	@Test(expected = VaultException.class)
+	public void signWithInvalidKeyFormatShouldFail() {
+
+		transitOperations.createKey("mykey");
+
+		transitOperations.sign("mykey", "hello-world");
+	}
+
+	@Test
+	public void signWithCustomAlgorithShouldCreateSignature() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world", "sha2-512");
+		assertThat(signature).startsWith("vault:v");
+	}
+
+	@Test(expected = VaultException.class)
+	public void signWithInvalidAlgorithmShouldFail() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		transitOperations.sign("ecdsa-key", "hello-world", "blah-512");
+	}
+
+	@Test
+	public void shouldVerifyValidSignature() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world");
+		assertThat(signature).startsWith("vault:v");
+
+		boolean valid = transitOperations.verify("ecdsa-key", "hello-world", signature);
+		assertThat(valid).isTrue();
+	}
+
+	@Test
+	public void shouldVerifyValidSignatureWithCustomAlgorithm() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world", "sha2-512");
+		assertThat(signature).startsWith("vault:v");
+
+		transitOperations.verify("ecdsa-key", "hello-world", signature, "sha2-512");
+	}
+
+	@Test(expected = VaultException.class)
+	public void shouldFailToVerifyValidSignatureWithInvalidExistingCustomAlgorithm() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world");
+		assertThat(signature).startsWith("vault:v");
+
+		transitOperations.verify("ecdsa-key", "hello-world", signature, "sha-512");
+	}
+
+	@Test(expected = VaultException.class)
+	public void shouldFailToVerifyValidSignatureWithInvalidCustomAlgorithm() {
+
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		transitOperations.createKey("ecdsa-key", keyCreationRequest);
+
+		String signature = transitOperations.sign("ecdsa-key", "hello-world");
+		assertThat(signature).startsWith("vault:v");
+
+		transitOperations.verify("ecdsa-key", "hello-world", signature, "blah-512");
+	}
+
+	@Test
 	public void shouldCreateNewExportableKey() {
 
 		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));

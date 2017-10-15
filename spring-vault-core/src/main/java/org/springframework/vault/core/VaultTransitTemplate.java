@@ -49,12 +49,15 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Mark Paluch
  * @author Sven Schürmann
  * @author Praveendra Singh
+ * @author Luander Ribeiro
  */
 public class VaultTransitTemplate implements VaultTransitOperations {
 
 	private final VaultOperations vaultOperations;
 
 	private final String path;
+
+	private static final String DEFAULT_SIGN_ALGORITHM = "sha2-256";
 
 	public VaultTransitTemplate(VaultOperations vaultOperations, String path) {
 
@@ -338,6 +341,61 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return (String) vaultOperations
 				.write(String.format("%s/rewrap/%s", path, keyName), request)
 				.getRequiredData().get("ciphertext");
+	}
+
+	@Override
+	public String generateHmac(String keyName, String plainText) {
+		return generateHmac(keyName, plainText, DEFAULT_SIGN_ALGORITHM);
+	}
+
+	@Override
+	public String generateHmac(String keyName, String plainText, String algorithm) {
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(plainText, "Plain text must not be null");
+
+		Map<String, String> request = new LinkedHashMap<>();
+
+		request.put("input", Base64Utils.encodeToString(plainText.getBytes()));
+
+		return (String) vaultOperations.
+				write(String.format("%s/hmac/%s/%s", path, keyName, algorithm), request).getData()
+				.get("hmac");
+	}
+
+	public String sign(String keyName, String plainText) {
+		return sign(keyName, plainText, DEFAULT_SIGN_ALGORITHM);
+	}
+
+	public String sign(String keyName, String plainText, String algorithm) {
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(plainText, "Plain text must not be null");
+
+		Map<String, String> request = new LinkedHashMap<>();
+
+		request.put("input", Base64Utils.encodeToString(plainText.getBytes()));
+
+		return (String) vaultOperations.
+				write(String.format("%s/sign/%s/%s", path, keyName, algorithm), request).getData()
+				.get("signature");
+	}
+
+	public boolean verify(String keyName, String plainText, String signature) {
+		return verify(keyName, plainText, signature, DEFAULT_SIGN_ALGORITHM);
+	}
+
+	public boolean verify(String keyName, String plainText, String signature, String algorithm) {
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(signature, "Signature must not be null");
+		Assert.notNull(plainText, "Input must not be null");
+
+		Map<String, String> request = new LinkedHashMap<>();
+
+		request.put("signature", signature);
+		request.put("input", Base64Utils.encodeToString(plainText.getBytes()));
+
+		return (boolean) vaultOperations.
+				write(String.format("%s/verify/%s/%s", path, keyName, algorithm), request).getData()
+				.get("valid");
 	}
 
 	private static void applyTransitOptions(VaultTransitContext context,

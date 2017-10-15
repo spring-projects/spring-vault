@@ -222,4 +222,67 @@ public interface VaultTransitOperations {
 	 * @see #rotate(String)
 	 */
 	String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
+
+	/**
+	 * Generate HMAC digest of given data.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @return the digest of given data using sha2-256 hash algorithm and the named key.
+	 */
+	String generateHmac(String keyName, String plainText);
+
+	/**
+	 * Generate HMAC digest of given data.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @param algorithm Specify the algorithm to be used for signing. Supported algorithms are:
+	 *                  sha2-224, sha2-256, sha2-384, sha2-512
+	 * @return the digest of given data using the specified hash hash algorithm and the named key.
+	 */
+	String generateHmac(String keyName, String plainText, String algorithm);
+
+
+	/**
+	 * Sign a String using a key from the vault using the SHA-256 algorithm.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @return Signature of the payload
+	 */
+	String sign(String keyName, String plainText);
+
+	/**
+	 * Sign a String using a key from the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @param algorithm Specify the algorithm to be used for signing. Supported algorithms are:
+	 *                  sha2-224, sha2-256, sha2-384, sha2-512
+	 * @return Signature of the payload
+	 */
+	String sign(String keyName, String plainText, String algorithm);
+
+	/**
+	 * Verify the validity of a signature in the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @param signature Signature to be verified
+	 * @return true if the signature is valid, false otherwise
+	 */
+	boolean verify(String keyName, String plainText, String signature);
+
+	/**
+	 * Verify the validity of a signature in the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plainText must not be empty or {@literal null}.
+	 * @param signature Signature to be verified
+	 * @param algorithm Specify the algorithm to be used for signature verification.
+	 *                  Supported algorithms are: sha2-224, sha2-256, sha2-384, sha2-512
+	 * @return true if the signature is valid, false otherwise
+	 */
+	boolean verify(String keyName, String plainText, String signature, String algorithm);
 }
