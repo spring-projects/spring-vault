@@ -19,11 +19,16 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
+import org.springframework.vault.support.Signature;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionResult;
 import org.springframework.vault.support.VaultEncryptionResult;
+import org.springframework.vault.support.VaultHmacRequest;
+import org.springframework.vault.support.VaultSignRequest;
+import org.springframework.vault.support.VaultSignatureVerificationRequest;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -222,4 +227,61 @@ public interface VaultTransitOperations {
 	 * @see #rotate(String)
 	 */
 	String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
+
+	/**
+	 * Generate HMAC digest of given data.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be empty or {@literal null}.
+	 * @return the digest of given data using sha2-256 hash algorithm and the named key.
+	 */
+	Hmac generateHmac(String keyName, Plaintext plaintext);
+
+	/**
+	 * Generate HMAC digest of given data.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param request {@link VaultHmacRequest} must not be empty or {@literal null}.
+	 * @return the digest of given data using the specified hash algorithm and the named key.
+	 */
+	Hmac generateHmac(String keyName, VaultHmacRequest request);
+
+	/**
+	 * Sign a String using a key from the vault using the SHA-256 algorithm.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be empty or {@literal null}.
+	 * @return Signature of the payload
+	 */
+	Signature sign(String keyName, Plaintext plaintext);
+
+	/**
+	 * Sign a String using a key from the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param request {@link VaultSignRequest}
+	 * must not be empty or {@literal null}.
+	 * @return Signature of the payload
+	 */
+	Signature sign(String keyName, VaultSignRequest request);
+
+	/**
+	 * Verify the validity of a signature in the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be empty or {@literal null}.
+	 * @param signature Signature to be verified
+	 * @return true if the signature is valid, false otherwise
+	 */
+	boolean verify(String keyName, Plaintext plaintext, Signature signature);
+
+	/**
+	 * Verify the validity of a signature in the vault.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param request {@link VaultSignatureVerificationRequest}
+	 * must not be empty or {@literal null}.
+	 * @return true if the signature is valid, false otherwise
+	 */
+	boolean verify(String keyName, VaultSignatureVerificationRequest request);
 }
