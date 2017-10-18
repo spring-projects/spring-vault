@@ -44,12 +44,12 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		taskScheduler.afterPropertiesSet();
 	}
 
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 		taskScheduler.destroy();
 	}
 

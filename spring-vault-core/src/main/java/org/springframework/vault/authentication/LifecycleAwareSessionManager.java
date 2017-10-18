@@ -74,16 +74,33 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private static final Log logger = LogFactory
 			.getLog(LifecycleAwareSessionManager.class);
 
+	/**
+	 * Client authentication mechanism. Used to obtain a {@link VaultToken} or
+	 * {@link LoginToken}.
+	 */
 	private final ClientAuthentication clientAuthentication;
 
+	/**
+	 * HTTP client.
+	 */
 	private final RestOperations restOperations;
 
+	/**
+	 * Threading infrastructure for token renewal/refresh.
+	 */
 	private final TaskScheduler taskScheduler;
 
+	/**
+	 * Trigger to calculate the next renewal time.
+	 */
 	private final RefreshTrigger refreshTrigger;
 
 	private final Object lock = new Object();
 
+	/**
+	 * The token state: Contains the currently valid token that identifies the Vault
+	 * session.
+	 */
 	private volatile Optional<VaultToken> token = Optional.empty();
 
 	/**

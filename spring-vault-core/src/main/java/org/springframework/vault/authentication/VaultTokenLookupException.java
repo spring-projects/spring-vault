@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault;
+package org.springframework.vault.authentication;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.vault.VaultException;
 
 /**
- * The Spring Vault specific {@link NestedRuntimeException} implementation.
+ * Exception thrown if a token self-lookup fails via {@code auth/token/lookup-self}.
  *
  * @author Mark Paluch
+ * @since 2.0
  */
-@SuppressWarnings("serial")
-public class VaultException extends NestedRuntimeException {
+public class VaultTokenLookupException extends VaultException {
 
 	/**
 	 * Create a {@code VaultException} with the specified detail message.
 	 *
 	 * @param msg the detail message.
 	 */
-	public VaultException(String msg) {
+	public VaultTokenLookupException(String msg) {
 		super(msg);
-	}
-
-	/**
-	 * Create a {@code VaultException} with the specified detail message and nested
-	 * exception.
-	 *
-	 * @param msg the detail message.
-	 * @param cause the nested exception.
-	 */
-	public VaultException(String msg, Throwable cause) {
-		super(msg, cause);
 	}
 }

@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -65,7 +66,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	private LifecycleAwareSessionManager sessionManager;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
 				taskScheduler, restOperations);
 	}
@@ -127,7 +128,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldScheduleTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		sessionManager.getSessionToken();
 
@@ -137,7 +139,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldRunTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -154,9 +157,10 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReScheduleTokenRenewalAfterSucessfulRenewal() {
+	public void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -174,7 +178,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
 				taskScheduler, restOperations);
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 
@@ -188,7 +193,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		when(
 				restOperations.postForObject(anyString(), any(),
 						ArgumentMatchers.<Class> any())).thenThrow(
@@ -207,7 +213,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldObtainTokenIfNoTokenAvailable() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		sessionManager.renewToken();
 
@@ -219,7 +226,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void renewShouldReportFalseIfTokenRenewalFails() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		when(
 				restOperations.postForObject(anyString(),
 						ArgumentMatchers.<Object> any(), ArgumentMatchers.<Class> any()))
@@ -237,7 +245,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo", 60));
+		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
+				"foo".toCharArray(), Duration.ofMinutes(1)));
 		assertThat(nextExecutionTime).isBetween(
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(52)),
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(56)));
@@ -249,7 +258,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo", 2));
+		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
+				"foo".toCharArray(), Duration.ofSeconds(2)));
 		assertThat(nextExecutionTime).isBetween(
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2)));

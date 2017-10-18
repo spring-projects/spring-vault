@@ -15,11 +15,13 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -75,11 +77,10 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		Number ttl = (Number) data.get("ttl");
 
 		if (renewable != null && renewable) {
-			return LoginToken.renewable(token.toCharArray(),
-					ttl == null ? 0 : ttl.longValue());
+			return LoginToken.renewable(token.toCharArray(), getLeaseDuration(ttl));
 		}
 
-		return LoginToken.of(token.toCharArray(), ttl == null ? 0 : ttl.longValue());
+		return LoginToken.of(token.toCharArray(), getLeaseDuration(ttl));
 	}
 
 	private Map<String, Object> lookupSelf(VaultToken token) {
@@ -95,9 +96,13 @@ public class LoginTokenAdapter implements ClientAuthentication {
 			return entity.getBody().getData();
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format(
-					"Cannot self-lookup Token from Cubbyhole: %s %s", e.getStatusCode(),
+			throw new VaultTokenLookupException(String.format(
+					"Token self-lookup failed: %s %s", e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	private static Duration getLeaseDuration(@Nullable Number ttl) {
+		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
 }
