@@ -35,16 +35,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link VaultPropertySource} using multiple annotations.
- * 
+ *
  * @author Mark Paluch
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 public class VaultPropertySourceMultipleIntegrationTests {
 
-	@VaultPropertySources({
-			@VaultPropertySource(value = "secret/myapp/profile", propertyNamePrefix = "database."),
-			@VaultPropertySource("secret/myapp") })
+	@VaultPropertySource(value = "secret/myapp/profile", propertyNamePrefix = "database.")
+	@VaultPropertySource("secret/myapp")
 	static class Config extends VaultIntegrationTestConfiguration {
 	}
 
