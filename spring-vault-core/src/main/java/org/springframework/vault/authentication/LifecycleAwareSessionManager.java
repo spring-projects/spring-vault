@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
@@ -49,11 +51,15 @@ import org.springframework.web.client.RestOperations;
  * <p>
  * This {@link SessionManager} also implements {@link DisposableBean} to revoke the
  * {@link LoginToken} once it's not required anymore. Token revocation will stop regular
- * token refresh.
+ * token refresh. Tokens are only revoked only if the associated
+ * {@link ClientAuthentication} returned a {@link LoginToken}.
  * <p>
  * If Token renewal runs into a client-side error, it assumes the token was
  * revoked/expired and discards the token state so the next attempt will lead to another
  * login attempt.
+ * <p>
+ * By default, {@link VaultToken} are looked up in Vault to determine renewability and the
+ * remaining TTL, see {@link #setTokenSelfLookupEnabled(boolean)}.
  *
  * @author Mark Paluch
  * @author Steven Swor
@@ -98,10 +104,19 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 	private final Object lock = new Object();
 
 	/**
+	 * Controls whether to perform a token self-lookup using
+	 * {@code auth/token/lookup-self} for {@link VaultToken}s obtained from a
+	 * {@link ClientAuthentication}. Self-lookup determines whether a token is renewable
+	 * and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup requests
+	 * decrement token usage count by one. Skipped for {@link LoginToken}.
+	 */
+	private boolean tokenSelfLookupEnabled = true;
+
+	/**
 	 * The token state: Contains the currently valid token that identifies the Vault
 	 * session.
 	 */
-	private volatile Optional<VaultToken> token = Optional.empty();
+	private volatile Optional<TokenWrapper> token = Optional.empty();
 
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
@@ -142,16 +157,53 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		this.refreshTrigger = refreshTrigger;
 	}
 
+	/**
+	 * Returns whether token self-lookup is enabled to augment {@link VaultToken} obtained
+	 * from a {@link ClientAuthentication}. Self-lookup determines whether a token is
+	 * renewable and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup
+	 * requests decrement token usage count by one. Skipped for {@link LoginToken}.
+	 * <p/>
+	 * Self-lookup for tokens without a permission to access
+	 * {@code auth/token/lookup-self} will fail gracefully and continue without token
+	 * renewal.
+	 *
+	 * @return {@literal true} to enable self-lookup, {@literal false} to disable
+	 * self-lookup. Enabled by default.
+	 * @since 2.0
+	 */
+	public boolean isTokenSelfLookupEnabled() {
+		return tokenSelfLookupEnabled;
+	}
+
+	/**
+	 * Enables/disables token self-lookup. Self-lookup augments {@link VaultToken}
+	 * obtained from a {@link ClientAuthentication}. Self-lookup determines whether a
+	 * token is renewable and its TTL.
+	 *
+	 * @param tokenSelfLookupEnabled {@literal true} to enable self-lookup,
+	 * {@literal false} to disable self-lookup. Enabled by default.
+	 * @since 2.0
+	 */
+	public void setTokenSelfLookupEnabled(boolean tokenSelfLookupEnabled) {
+		this.tokenSelfLookupEnabled = tokenSelfLookupEnabled;
+	}
+
 	@Override
 	public void destroy() {
 
-		Optional<VaultToken> token = this.token;
+		Optional<TokenWrapper> token = this.token;
 		this.token = Optional.empty();
 
-		token.filter(LoginToken.class::isInstance).ifPresent(this::revoke);
+		token.filter(TokenWrapper::isRevocable).map(TokenWrapper::getToken)
+				.ifPresent(this::revoke);
 	}
 
-	private void revoke(VaultToken token) {
+	/**
+	 * Revoke a {@link VaultToken}.
+	 *
+	 * @param token the token to revoke, must not be {@literal null}.
+	 */
+	protected void revoke(VaultToken token) {
 
 		try {
 			restOperations.postForObject("auth/token/revoke-self", new HttpEntity<>(
@@ -183,7 +235,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 		try {
 			restOperations.postForObject("auth/token/renew-self", new HttpEntity<>(
-					VaultHttpHeaders.from(token.get())), Map.class);
+					VaultHttpHeaders.from(token.get().getToken())), Map.class);
 			return true;
 		}
 		catch (HttpStatusCodeException e) {
@@ -211,7 +263,26 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			synchronized (lock) {
 
 				if (!token.isPresent()) {
-					token = Optional.of(clientAuthentication.login());
+
+					VaultToken token = clientAuthentication.login();
+					TokenWrapper wrapper = new TokenWrapper(token,
+							token instanceof LoginToken);
+
+					if (isTokenSelfLookupEnabled()
+							&& !ClassUtils.isAssignableValue(LoginToken.class, token)) {
+						try {
+							token = LoginTokenAdapter.augmentWithSelfLookup(
+									this.restOperations, token);
+							wrapper = new TokenWrapper(token, false);
+						}
+						catch (VaultTokenLookupException e) {
+							logger.warn(String.format(
+									"Cannot enhance VaultToken to a LoginToken: %s",
+									e.getMessage()));
+						}
+					}
+
+					this.token = Optional.of(wrapper);
 
 					if (isTokenRenewable()) {
 						scheduleRenewal();
@@ -220,8 +291,8 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			}
 		}
 
-		return token.orElseThrow(() -> new IllegalStateException(
-				"Cannot obtain VaultToken"));
+		return token.map(TokenWrapper::getToken).orElseThrow(
+				() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
 
 	protected VaultToken login() {
@@ -230,7 +301,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	protected boolean isTokenRenewable() {
 
-		return token.filter(LoginToken.class::isInstance) //
+		return token.map(TokenWrapper::getToken)
+				.filter(LoginToken.class::isInstance)
+				//
 				.filter(it -> {
 
 					LoginToken loginToken = (LoginToken) it;
@@ -265,7 +338,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	private OneShotTrigger createTrigger() {
 		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token
-				.get()));
+				.map(TokenWrapper::getToken).get()));
 	}
 
 	/**
@@ -354,5 +427,19 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 			return new Date(System.currentTimeMillis() + milliseconds);
 		}
+	}
+
+	/**
+	 * Wraps a {@link VaultToken} and specifies whether the token is revocable on factory
+	 * shutdown.
+	 *
+	 * @since 2.0
+	 */
+	@RequiredArgsConstructor
+	@Getter
+	static class TokenWrapper {
+
+		private final VaultToken token;
+		private final boolean revocable;
 	}
 }

@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -28,12 +29,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager.FixedTimeoutRefreshTrigger;
 import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestOperations;
 
@@ -80,6 +85,46 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	public void shouldSelfLookupToken() {
+
+		VaultResponse vaultResponse = new VaultResponse();
+		vaultResponse.setData(Collections.singletonMap("ttl", 100));
+
+		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
+
+		when(
+				restOperations.exchange(anyString(), any(), any(),
+						ArgumentMatchers.<Class> any())).thenReturn(
+				new ResponseEntity<>(vaultResponse, HttpStatus.OK));
+
+		LoginToken sessionToken = (LoginToken) sessionManager.getSessionToken();
+		assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
+
+		verify(restOperations).exchange(eq("auth/token/lookup-self"), eq(HttpMethod.GET),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
+				any(Class.class));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void shouldContinueIfSelfLookupFails() {
+
+		VaultResponse vaultResponse = new VaultResponse();
+		vaultResponse.setData(Collections.singletonMap("ttl", 100));
+
+		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
+
+		when(
+				restOperations.exchange(anyString(), any(), any(),
+						ArgumentMatchers.<Class> any())).thenThrow(
+				new HttpClientErrorException(HttpStatus.FORBIDDEN));
+
+		VaultToken sessionToken = sessionManager.getSessionToken();
+		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
+	}
+
+	@Test
 	public void shouldRevokeLoginTokenOnDestroy() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
@@ -99,6 +144,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
+		sessionManager.setTokenSelfLookupEnabled(false);
 		sessionManager.renewToken();
 		sessionManager.destroy();
 

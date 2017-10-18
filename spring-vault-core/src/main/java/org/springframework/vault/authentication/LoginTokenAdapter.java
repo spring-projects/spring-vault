@@ -70,8 +70,13 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
+		return augmentWithSelfLookup(this.restOperations, token);
+	}
 
-		Map<String, Object> data = lookupSelf(token);
+	static LoginToken augmentWithSelfLookup(RestOperations restOperations,
+			VaultToken token) {
+
+		Map<String, Object> data = lookupSelf(restOperations, token);
 
 		Boolean renewable = (Boolean) data.get("renewable");
 		Number ttl = (Number) data.get("ttl");
@@ -83,7 +88,8 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		return LoginToken.of(token.toCharArray(), getLeaseDuration(ttl));
 	}
 
-	private Map<String, Object> lookupSelf(VaultToken token) {
+	private static Map<String, Object> lookupSelf(RestOperations restOperations,
+			VaultToken token) {
 
 		try {
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
