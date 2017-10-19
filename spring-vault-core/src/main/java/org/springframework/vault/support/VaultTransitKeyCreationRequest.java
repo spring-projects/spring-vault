@@ -48,7 +48,7 @@ public class VaultTransitKeyCreationRequest {
 	/**
 	 * Create a new {@link VaultTransitKeyCreationRequest} specifically for a {@code type}
 	 * .
-	 * @param the key type to use, must not be {@literal null} or empty.
+	 * @param type the key type to use, must not be {@literal null} or empty.
 	 * @return a new {@link VaultTransitKeyCreationRequest} for the given key {@code type}
 	 * .
 	 * @since 2.0

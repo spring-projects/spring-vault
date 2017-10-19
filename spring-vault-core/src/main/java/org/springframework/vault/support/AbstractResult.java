@@ -51,11 +51,11 @@ public abstract class AbstractResult<V> {
 	}
 
 	/**
-	 * Returns {@link true} if and only if the batch operation was completed successfully.
-	 * Use {@link #getCause()} to obtain the actual exception if the operation completed
-	 * with an error.
+	 * Returns {@literal true} if and only if the batch operation was completed
+	 * successfully. Use {@link #getCause()} to obtain the actual exception if the
+	 * operation completed with an error.
 	 *
-	 * @return {@link true} if the batch operation was completed successfully.
+	 * @return {@literal true} if the batch operation was completed successfully.
 	 */
 	public boolean isSuccessful() {
 		return exception == null;

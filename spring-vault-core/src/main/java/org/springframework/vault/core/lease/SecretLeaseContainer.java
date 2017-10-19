@@ -60,7 +60,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 /**
  * Event-based container to request secrets from Vault and renew the associated
  * {@link Lease}. Secrets can be rotated, depending on the requested
- * {@link RequestedSecret.Mode}.
+ * {@link RequestedSecret#getMode()}.
  *
  * Usage example:
  *

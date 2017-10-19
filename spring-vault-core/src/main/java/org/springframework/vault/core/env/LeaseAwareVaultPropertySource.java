@@ -208,7 +208,7 @@ public class LeaseAwareVaultPropertySource
 	 * map.
 	 *
 	 * @param data the map
-	 * @return
+	 * @return the flattened map.
 	 */
 	protected Map<String, String> toStringMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);

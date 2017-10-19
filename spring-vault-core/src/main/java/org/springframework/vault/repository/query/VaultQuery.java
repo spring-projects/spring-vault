@@ -96,7 +96,7 @@ public class VaultQuery {
 	 * Compose a new {@link VaultQuery} using predicates of {@literal this} and the
 	 * {@code other} query using logical {@code AND}.
 	 *
-	 * @param other must not be {@literal null}.
+	 * @param predicate must not be {@literal null}.
 	 * @return a new composed {@link VaultQuery}.
 	 * @see Predicate#and(Predicate)
 	 */
