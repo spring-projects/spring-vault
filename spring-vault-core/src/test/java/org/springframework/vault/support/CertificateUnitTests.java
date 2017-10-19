@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@
  */
 package org.springframework.vault.support;
 
-import java.security.KeyFactory;
 import java.security.KeyStore;
-import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,13 +26,13 @@ import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Unit tests for {@link CertificateBundle}.
+ * Unit tests for {@link Certificate}.
  *
  * @author Mark Paluch
  */
-public class CertificateBundleUnitTests {
+public class CertificateUnitTests {
 
-	CertificateBundle certificateBundle;
+	Certificate certificate;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -41,26 +40,33 @@ public class CertificateBundleUnitTests {
 		Map<String, String> data = new ObjectMapper().readValue(
 				getClass().getResource("/certificate.json"), Map.class);
 
-		certificateBundle = CertificateBundle.of(data.get("serial_number"),
-				data.get("certificate"), data.get("issuing_ca"), data.get("private_key"));
+		certificate = Certificate.of(data.get("serial_number"), data.get("certificate"),
+				data.get("issuing_ca"));
 	}
 
 	@Test
-	public void getPrivateKeySpecShouldCreatePrivateKey() throws Exception {
+	public void getX509CertificateShouldReturnCertificate() {
 
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		PrivateKey privateKey = kf.generatePrivate(certificateBundle.getPrivateKeySpec());
+		X509Certificate x509Certificate = certificate.getX509Certificate();
 
-		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
-		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo(
+				"CN=hello.example.com");
 	}
 
 	@Test
-	public void getAsKeystore() throws Exception {
+	public void getX509IssuerCertificateShouldReturnCertificate() {
 
-		KeyStore keyStore = certificateBundle.createKeyStore("mykey");
+		X509Certificate x509Certificate = certificate.getX509IssuerCertificate();
 
-		assertThat(keyStore.size()).isEqualTo(1);
-		assertThat(keyStore.getCertificateChain("mykey")).hasSize(2);
+		assertThat(x509Certificate.getSubjectDN().getName()).startsWith(
+				"CN=Intermediate CA Certificate");
+	}
+
+	@Test
+	public void getAsTrustStore() throws Exception {
+
+		KeyStore keyStore = certificate.createTrustStore();
+
+		assertThat(keyStore.size()).isEqualTo(2);
 	}
 }

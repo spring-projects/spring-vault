@@ -67,6 +67,29 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
+	/**
+	 * Create a {@link KeyStore} containing the {@link X509Certificate certificates}
+	 * stored with as {@code cert_0, cert_1...cert_N}.
+	 *
+	 * @param certificates
+	 * @return
+	 * @throws GeneralSecurityException
+	 * @throws IOException
+	 * @since 2.0
+	 */
+	static KeyStore createKeyStore(X509Certificate... certificates)
+			throws GeneralSecurityException, IOException {
+
+		KeyStore keyStore = createKeyStore();
+
+		int counter = 0;
+		for (X509Certificate certificate : certificates) {
+			keyStore.setCertificateEntry(String.format("cert_%d", counter++), certificate);
+		}
+
+		return keyStore;
+	}
+
 	static X509Certificate getCertificate(byte[] source) throws CertificateException,
 			IOException {
 

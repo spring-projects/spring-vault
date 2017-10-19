@@ -18,7 +18,6 @@ package org.springframework.vault.support;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 
@@ -38,24 +37,16 @@ import org.springframework.vault.VaultException;
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
  */
-public class CertificateBundle {
-
-	private final String serialNumber;
-
-	private final String certificate;
-
-	private final String issuingCaCertificate;
+public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
 
-	private CertificateBundle(@JsonProperty("serial_number") String serialNumber,
+	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate,
 			@JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("private_key") String privateKey) {
 
-		this.serialNumber = serialNumber;
-		this.certificate = certificate;
-		this.issuingCaCertificate = issuingCaCertificate;
+		super(serialNumber, certificate, issuingCaCertificate);
 		this.privateKey = privateKey;
 	}
 
@@ -82,27 +73,6 @@ public class CertificateBundle {
 	}
 
 	/**
-	 * @return the serial number.
-	 */
-	public String getSerialNumber() {
-		return this.serialNumber;
-	}
-
-	/**
-	 * @return encoded certificate (PEM or DER-encoded).
-	 */
-	public String getCertificate() {
-		return this.certificate;
-	}
-
-	/**
-	 * @return encoded certificate of the issuing CA (PEM or DER-encoded).
-	 */
-	public String getIssuingCaCertificate() {
-		return this.issuingCaCertificate;
-	}
-
-	/**
 	 * @return the private key (decrypted form, PEM or DER-encoded)
 	 */
 	public String getPrivateKey() {
@@ -124,41 +94,6 @@ public class CertificateBundle {
 		}
 		catch (IOException e) {
 			throw new VaultException("Cannot create KeySpec from private key", e);
-		}
-	}
-
-	/**
-	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate
-	 * is DER-encoded.
-	 *
-	 * @return the {@link X509Certificate}.
-	 */
-	public X509Certificate getX509Certificate() {
-
-		try {
-			byte[] bytes = Base64.decode(getCertificate());
-			return KeystoreUtil.getCertificate(bytes);
-		}
-		catch (IOException | CertificateException e) {
-			throw new VaultException("Cannot create Certificate from certificate", e);
-		}
-	}
-
-	/**
-	 * Retrieve the issuing CA certificate as {@link X509Certificate}. Only supported if
-	 * certificate is DER-encoded.
-	 *
-	 * @return the issuing CA {@link X509Certificate}.
-	 */
-	public X509Certificate getX509IssuerCertificate() {
-
-		try {
-			byte[] bytes = Base64.decode(getIssuingCaCertificate());
-			return KeystoreUtil.getCertificate(bytes);
-		}
-		catch (IOException | CertificateException e) {
-			throw new VaultException(
-					"Cannot create Certificate from issuing CA certificate", e);
 		}
 	}
 

@@ -9,15 +9,16 @@
 * <<vault.repositories,Vault repository support>> based on Spring Data KeyValue.
 * Transit batch encrypt and decrypt support.
 * Policy management for policies stored as JSON.
+* Support CSR signing, certificate revocation and CRL retrieval.
 
 [[new-features.1-1-0]]
 === What's new in Spring Vault 1.1.0
 
 * <<vault.authentication.awsiam,AWS IAM authentication>>.
-* Configuration of encryption/decryption versions for transit keys. 
+* Configuration of encryption/decryption versions for transit keys.
 * Pull mode for <<vault.authentication.approle,AppRole authentication>>.
 * Transit batch encrypt and decrypt support.
-* TTL-based generic secret rotation. 
+* TTL-based generic secret rotation.
 
 [[new-features.1-0-0]]
 === What's new in Spring Vault 1.0
