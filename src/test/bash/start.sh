@@ -12,4 +12,5 @@ pkill vault
 mkdir -p ${BASEDIR}/download
 ${BASEDIR}/src/test/bash/install_vault.sh
 ${BASEDIR}/src/test/bash/create_certificates.sh
+${BASEDIR}/src/test/bash/local_run_k8s.sh "./minikube" "./kubectl"
 ${BASEDIR}/src/test/bash/local_run_vault.sh &
