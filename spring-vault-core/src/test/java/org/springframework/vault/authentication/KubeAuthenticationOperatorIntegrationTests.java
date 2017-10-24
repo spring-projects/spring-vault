@@ -19,7 +19,6 @@ import static org.springframework.vault.util.Settings.findWorkDir;
 
 import java.io.File;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.util.Settings;
@@ -40,7 +39,6 @@ public class KubeAuthenticationOperatorIntegrationTests
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
-	@Ignore("TODO: Clarify integration testing with minikube")
 	public void authenticationStepsShouldLoginSuccessfully() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
@@ -56,7 +54,6 @@ public class KubeAuthenticationOperatorIntegrationTests
 	}
 
 	@Test
-	@Ignore("TODO: Clarify integration testing with minikube")
 	public void authenticationStepsLoginShouldFailBadRole() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
@@ -73,7 +70,6 @@ public class KubeAuthenticationOperatorIntegrationTests
 	}
 
 	@Test
-	@Ignore("TODO: Clarify integration testing with minikube")
 	public void authenticationStepsLoginShouldFailBadToken() {
 
 		ClassPathResource tokenResource = new ClassPathResource("kube-jwt-token");

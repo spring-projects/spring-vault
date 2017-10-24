@@ -3,7 +3,7 @@ language: java
 jdk:
   - oraclejdk8
 
-sudo: false
+sudo: required
 
 addons:
   apt:
@@ -33,9 +33,10 @@ before_install:
   - test ! -f ~/.m2/settings.xml || rm ~/.m2/settings.xml
 
 install:
+  - src/test/bash/minikube-ci-initialize.sh
   - src/test/bash/start.sh
 
-script: ./mvnw clean verify -P${PROFILE:-ci}
+script: ./mvnw clean verify -DMINIKUBE_IP=127.0.0.1 -P${PROFILE:-ci}
 
 after_script:
   - pkill vault

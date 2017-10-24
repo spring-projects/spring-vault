@@ -15,12 +15,11 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.junit.Assume.assumeTrue;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,8 +27,7 @@ import org.assertj.core.util.Files;
 import org.junit.Before;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.vault.util.Version;
 
 /**
  * Integration test base class for {@link KubeAuthentication} tests.
@@ -39,28 +37,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class KubeAuthenticationIntegrationTestBase
 		extends IntegrationTestSupport {
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-	private static String getMinikubeIpOrDefault(String defaultHost) {
-		final File configFile = new File(new File(System.getProperty("user.home")),
-				".minikube/machines/minikube/config.json");
-
-		if (configFile.exists()) {
-			try {
-				String content = Files.contentOf(configFile, StandardCharsets.UTF_8);
-				Map map = OBJECT_MAPPER.readValue(content, Map.class);
-				Map driver = (Map) map.getOrDefault("Driver", Collections.emptyMap());
-				return (String) driver.getOrDefault("IPAddress", defaultHost);
-			}
-			catch (IOException o) {
-				return defaultHost;
-			}
-		}
-		return defaultHost;
-	}
-
 	@Before
 	public void before() {
+
+        assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.8.3")));
 
 		if (!prepare().hasAuth("kubernetes")) {
 			prepare().mountAuth("kubernetes");
@@ -74,7 +54,7 @@ public abstract class KubeAuthenticationIntegrationTestBase
 							new File(workDir, "minikube/ca.crt"),
 							StandardCharsets.US_ASCII);
 
-					String ip = getMinikubeIpOrDefault("192.168.99.100");
+					String ip = System.getProperty("MINIKUBE_IP", "192.168.99.100");
 					String host = String.format("https://%s:8443", ip);
 
 					Map<String, String> kubeConfig = new HashMap<>();
