@@ -29,12 +29,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
+import org.springframework.vault.support.Signature;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionResult;
 import org.springframework.vault.support.VaultEncryptionResult;
+import org.springframework.vault.support.VaultHmacRequest;
 import org.springframework.vault.support.VaultMount;
+import org.springframework.vault.support.VaultSignRequest;
+import org.springframework.vault.support.VaultSignatureVerificationRequest;
 import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -523,8 +528,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String ciphertext = transitOperations.generateHmac("ecdsa-key", "hello-world");
-		assertThat(ciphertext).startsWith("vault:v");
+		Hmac hmac = transitOperations.generateHmac("ecdsa-key", Plaintext.of("hello-world"));
+		assertThat(hmac.getHmac()).startsWith("vault:v");
 	}
 
 	@Test
@@ -533,8 +538,13 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String ciphertext = transitOperations.generateHmac("ecdsa-key", "hello-world", "sha2-512");
-		assertThat(ciphertext).startsWith("vault:v");
+		VaultHmacRequest request = VaultHmacRequest.builder()
+				.input("hello-world")
+				.algorithm("sha2-512")
+				.build();
+
+		Hmac hmac = transitOperations.generateHmac("ecdsa-key", request);
+		assertThat(hmac.getHmac()).startsWith("vault:v");
 	}
 
 	@Test(expected = VaultException.class)
@@ -543,7 +553,12 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		transitOperations.generateHmac("ecdsa-key", "hello-world", "blah-512");
+		VaultHmacRequest request = VaultHmacRequest.builder()
+				.input("hello-world")
+				.algorithm("blah-512")
+				.build();
+
+		transitOperations.generateHmac("ecdsa-key", request);
 	}
 
 	@Test
@@ -552,8 +567,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world");
-		assertThat(signature).startsWith("vault:v");
+		Signature signature = transitOperations.sign("ecdsa-key", Plaintext.of("hello-world"));
+		assertThat(signature.getSignature()).startsWith("vault:v");
 	}
 
 	@Test(expected = VaultException.class)
@@ -561,7 +576,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 
 		transitOperations.createKey("mykey");
 
-		transitOperations.sign("mykey", "hello-world");
+		transitOperations.sign("mykey", Plaintext.of("hello-world"));
 	}
 
 	@Test
@@ -570,8 +585,13 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world", "sha2-512");
-		assertThat(signature).startsWith("vault:v");
+		VaultSignRequest request = VaultSignRequest.builder()
+				.input("hello-world")
+				.algorithm("sha2-512")
+				.build();
+
+		Signature signature = transitOperations.sign("ecdsa-key", request);
+		assertThat(signature.getSignature()).startsWith("vault:v");
 	}
 
 	@Test(expected = VaultException.class)
@@ -580,7 +600,12 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		transitOperations.sign("ecdsa-key", "hello-world", "blah-512");
+		VaultSignRequest request = VaultSignRequest.builder()
+				.input("hello-world")
+				.algorithm("blah-512")
+				.build();
+
+		transitOperations.sign("ecdsa-key", request);
 	}
 
 	@Test
@@ -589,10 +614,11 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world");
-		assertThat(signature).startsWith("vault:v");
+		Signature signature = transitOperations.sign("ecdsa-key", Plaintext.of("hello-world"));
+		assertThat(signature.getSignature()).startsWith("vault:v");
 
-		boolean valid = transitOperations.verify("ecdsa-key", "hello-world", signature);
+		boolean valid = transitOperations.verify("ecdsa-key",
+				Plaintext.of("hello-world"), signature);
 		assertThat(valid).isTrue();
 	}
 
@@ -602,22 +628,43 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world", "sha2-512");
-		assertThat(signature).startsWith("vault:v");
+		VaultSignRequest request = VaultSignRequest.builder()
+				.input("hello-world")
+				.algorithm("sha2-512")
+				.build();
 
-		transitOperations.verify("ecdsa-key", "hello-world", signature, "sha2-512");
+		Signature signature = transitOperations.sign("ecdsa-key", request);
+		assertThat(signature.getSignature()).startsWith("vault:v");
+
+		VaultSignatureVerificationRequest verificationRequest =
+				VaultSignatureVerificationRequest.builder()
+				.algorithm("sha2-512")
+				.input("hello-world")
+				.signature(signature)
+				.build();
+
+		boolean valid = transitOperations.verify("ecdsa-key", verificationRequest);
+		assertThat(valid).isTrue();
 	}
 
-	@Test(expected = VaultException.class)
+	@Test
 	public void shouldFailToVerifyValidSignatureWithInvalidExistingCustomAlgorithm() {
 
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world");
-		assertThat(signature).startsWith("vault:v");
+		Signature signature = transitOperations.sign("ecdsa-key", Plaintext.of("hello-world"));
+		assertThat(signature.getSignature()).startsWith("vault:v");
 
-		transitOperations.verify("ecdsa-key", "hello-world", signature, "sha-512");
+		VaultSignatureVerificationRequest verificationRequest =
+				VaultSignatureVerificationRequest.builder()
+						.algorithm("sha2-512")
+						.input("hello-world")
+						.signature(signature)
+						.build();
+
+		boolean valid = transitOperations.verify("ecdsa-key", verificationRequest);
+		assertThat(valid).isFalse();
 	}
 
 	@Test(expected = VaultException.class)
@@ -626,10 +673,17 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
 		transitOperations.createKey("ecdsa-key", keyCreationRequest);
 
-		String signature = transitOperations.sign("ecdsa-key", "hello-world");
-		assertThat(signature).startsWith("vault:v");
+		Signature signature = transitOperations.sign("ecdsa-key", Plaintext.of("hello-world"));
+		assertThat(signature.getSignature()).startsWith("vault:v");
 
-		transitOperations.verify("ecdsa-key", "hello-world", signature, "blah-512");
+		VaultSignatureVerificationRequest verificationRequest =
+				VaultSignatureVerificationRequest.builder()
+						.algorithm("blah-512")
+						.input("hello-world")
+						.signature(signature)
+						.build();
+
+		transitOperations.verify("ecdsa-key", verificationRequest);
 	}
 
 	@Test
