@@ -45,6 +45,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  * @author Vincent Le Nair
+ * @author Christophe Tafani-Dereeper
  * @see AppRoleAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth Backend:
@@ -94,16 +95,29 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			Assert.notNull(options.getRoleId(),
 					"RoleId must not be null for pull mode via AuthenticationSteps");
 
-			HttpEntity body = createHttpEntity(options.getInitialToken());
+			Assert.state(options.getInitialToken() != null || options.getUnwrappingToken() != null,
+					"One of InitialToken or UnwrappingToken must be set for pull mode via AuthenticationSteps");
 
-			return AuthenticationSteps
+			AuthenticationSteps.Node<VaultResponse> secretPullRequest = null;
+			if (options.getInitialToken() != null) {
+				HttpEntity body = createHttpEntity(options.getInitialToken());
+
+				secretPullRequest = AuthenticationSteps
 					.fromHttpRequest(
 							post("auth/{mount}/role/{role}/secret-id", options.getPath(),
 									options.getAppRole()).with(body).as(
-									VaultResponse.class))
-					//
-					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get(
-							"secret_id"))
+									VaultResponse.class));
+			}
+			else {
+				HttpEntity body = createHttpEntity(options.getUnwrappingToken());
+				secretPullRequest = AuthenticationSteps
+					.fromHttpRequest(
+							post("sys/wrapping/unwrap").with(body).as(
+									VaultResponse.class));
+			}
+
+			return secretPullRequest
+					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("secret_id"))
 					.map(secretId -> getAppRoleLogin(options.getRoleId(), secretId))
 					.login("auth/{mount}/login", options.getPath());
 		}
@@ -175,17 +189,38 @@ public class AppRoleAuthentication implements ClientAuthentication,
 	private String getSecretId() {
 
 		if (secretIdPullRequired(options)) {
-			try {
-				VaultResponse response = restOperations.postForObject(
-						"auth/{mount}/role/{role}/secret-id",
-						createHttpEntity(options.getInitialToken()), VaultResponse.class,
-						options.getPath(), options.getAppRole());
-				return (String) response.getRequiredData().get("secret_id");
+			// The secret ID needs to be pulled from Vault.
+			// Case 1: we use the initial authentication token
+			if (options.getInitialToken() != null) {
+				try {
+					VaultResponse response = restOperations.postForObject(
+							"auth/{mount}/role/{role}/secret-id",
+							createHttpEntity(options.getInitialToken()), VaultResponse.class,
+							options.getPath(), options.getAppRole());
+					return (String) response.getRequiredData().get("secret_id");
+				}
+				catch (HttpStatusCodeException e) {
+					throw new VaultException(String.format(
+							"Cannot get Secret id using AppRole: %s",
+							VaultResponses.getError(e.getResponseBodyAsString())));
+				}
 			}
-			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
-						"Cannot get Secret id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+			// Case 2: the secret ID needs to be unwrapped
+			else if (options.getUnwrappingToken() != null) {
+				try {
+					VaultResponse response = restOperations.postForObject(
+							"sys/wrapping/unwrap",
+							createHttpEntity(options.getUnwrappingToken()), VaultResponse.class,
+							options.getPath(), options.getAppRole());
+
+					return (String) response.getRequiredData().get("secret_id");
+				}
+				catch (HttpStatusCodeException e) {
+					throw new VaultException(String.format(
+							"Cannot unwrap Secret id using AppRole: %s",
+							VaultResponses.getError(e.getResponseBodyAsString())
+					));
+				}
 			}
 		}
 
@@ -193,7 +228,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 	}
 
 	private static boolean secretIdPullRequired(AppRoleAuthenticationOptions options) {
-		return options.getSecretId() == null && options.getInitialToken() != null;
+		return options.getSecretId() == null && (options.getInitialToken() != null || options.getUnwrappingToken() != null);
 	}
 
 	private static HttpEntity createHttpEntity(VaultToken token) {

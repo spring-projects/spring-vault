@@ -22,11 +22,18 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
+import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.anyOf;
@@ -40,6 +47,7 @@ import static org.junit.Assume.assumeThat;
  * Integration tests for {@link AppRoleAuthentication}.
  *
  * @author Mark Paluch
+ * @author Christophe Tafani-Dereeper
  */
 public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSupport {
 
@@ -126,6 +134,56 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 				prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
+	}
+
+	@Test
+	public void shouldAuthenticateWithWrappedSecretId() {
+		String roleId = getRoleId("no-secret-id");
+		// Simulate that an operator / CM tool created a wrapped secret ID response before the application starts up
+		String unwrappingToken = generateWrappedSecretIdResponse();
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.unwrappingToken(VaultToken.of(unwrappingToken))
+				.roleId(roleId)
+				.build();
+
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		assertThat(authentication.login()).isNotNull();
+	}
+
+	@Test(expected = VaultException.class)
+	public void shouldAuthenticateWithWrappedSecretIdFailIfUnwrappingTokenExpired() {
+		String roleId = getRoleId("no-secret-id");
+		String unwrappingToken = "incorrect-unwrapping-token";
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.unwrappingToken(VaultToken.of(unwrappingToken))
+				.roleId(roleId)
+				.build();
+
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
+				prepare().getRestTemplate());
+
+		authentication.login();
+	}
+
+	@Test
+	public void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
+		String roleId = getRoleId("no-secret-id");
+		String unwrappingToken = generateWrappedSecretIdResponse();
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.unwrappingToken(VaultToken.of(unwrappingToken))
+				.roleId(roleId)
+				.build();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
+				.getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
 	}
 
 	@Test(expected = VaultException.class)
@@ -239,5 +297,25 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 		return (String) getVaultOperations()
 				.read(String.format("auth/approle/role/%s/role-id", roleName)).getData()
 				.get("role_id");
+	}
+
+	@Nullable
+	private String generateWrappedSecretIdResponse() {
+		return getVaultOperations().doWithVault(new RestOperationsCallback<String>() {
+			@Nullable
+			@Override
+			public String doWithRestOperations(RestOperations restOperations) {
+				HttpHeaders headers = new HttpHeaders();
+				headers.set("X-Vault-Wrap-Ttl", "3600");
+				headers.set("X-Vault-Token", Settings.token().getToken());
+				HttpEntity<String> httpEntity = new HttpEntity<>(null, headers);
+
+				VaultResponse response  = restOperations.exchange("auth/approle/role/with-secret-id/secret-id",
+						HttpMethod.PUT, httpEntity, VaultResponse.class).getBody();
+
+				return response.getWrapInfo().get("token");
+			}
+		});
+
 	}
 }

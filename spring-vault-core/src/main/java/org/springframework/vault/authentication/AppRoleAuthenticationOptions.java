@@ -65,15 +65,22 @@ public class AppRoleAuthenticationOptions {
 	@Nullable
 	private final VaultToken initialToken;
 
+	/**
+	 * Token for unwrapping the secretId response
+	 */
+	@Nullable
+	private final VaultToken unwrappingToken;
+
 	private AppRoleAuthenticationOptions(String path, @Nullable String roleId,
 			@Nullable String secretId, @Nullable String appRole,
-			@Nullable VaultToken initialToken) {
+			@Nullable VaultToken initialToken, @Nullable VaultToken unwrappingToken) {
 
 		this.path = path;
 		this.roleId = roleId;
 		this.secretId = secretId;
 		this.appRole = appRole;
 		this.initialToken = initialToken;
+		this.unwrappingToken = unwrappingToken;
 	}
 
 	/**
@@ -125,6 +132,15 @@ public class AppRoleAuthenticationOptions {
 	}
 
 	/**
+	 * @return the token used to unwrap the roleId response.
+	 * @since 2.0
+	 */
+	@Nullable
+	public VaultToken getUnwrappingToken() {
+		return unwrappingToken;
+	}
+
+	/**
 	 * Builder for {@link AppRoleAuthenticationOptions}.
 	 */
 	public static class AppRoleAuthenticationOptionsBuilder {
@@ -140,6 +156,8 @@ public class AppRoleAuthenticationOptions {
 		private String appRole;
 
 		private VaultToken initialToken;
+
+		private VaultToken unwrappingToken;
 
 		AppRoleAuthenticationOptionsBuilder() {
 		}
@@ -218,6 +236,21 @@ public class AppRoleAuthenticationOptions {
 		}
 
 		/**
+		 * Configure a {@code unwrappingToken}.
+		 *
+		 * @param unwrappingToken must not be empty or {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @since 2.0
+		 */
+		public AppRoleAuthenticationOptionsBuilder unwrappingToken(VaultToken unwrappingToken) {
+
+			Assert.notNull(unwrappingToken, "UnwrappingToken must not be null");
+
+			this.unwrappingToken = unwrappingToken;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link AppRoleAuthenticationOptions} instance. Requires
 		 * {@link #roleId(String)} for push mode or {@link #appRole(String)} and
 		 * {@link #initialToken(VaultToken)} for pull mode to be configured.
@@ -247,7 +280,7 @@ public class AppRoleAuthenticationOptions {
 			}
 
 			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole,
-					initialToken);
+					initialToken, unwrappingToken);
 		}
 	}
 }

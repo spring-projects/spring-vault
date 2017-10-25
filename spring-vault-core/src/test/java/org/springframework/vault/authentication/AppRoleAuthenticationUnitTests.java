@@ -27,6 +27,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,6 +43,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  * @author Vincent Le Nair
+ * @author Christophe Tafani-Dereeper
  */
 public class AppRoleAuthenticationUnitTests {
 
@@ -173,5 +175,57 @@ public class AppRoleAuthenticationUnitTests {
 				.andRespond(withServerError());
 
 		new AppRoleAuthentication(options, restTemplate).login();
+	}
+
+	@Test
+	public void loginShouldUnwrapSecretIdResponse() {
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId("my_role_id")
+				.unwrappingToken(VaultToken.of("unwrapping_token"))
+				.build();
+
+		// Expect a first request to unwrap the response
+		mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+				.andExpect(header("X-Vault-Token", "unwrapping_token"))
+				.andExpect(method(HttpMethod.POST))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" +
+								"  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\"," +
+								"  \"lease_id\": \"\"," +
+								"  \"renewable\": false," +
+								"  \"lease_duration\": 0," +
+								"  \"data\": {" +
+								"    \"secret_id\": \"my_secret_id\"," +
+								"    \"secret_id_accessor\": \"my_secret_id_accessor\"" +
+								"  }," +
+								"  \"wrap_info\": null," +
+								"  \"warnings\": null," +
+								"  \"auth\": null" +
+								"}"
+						)
+				);
+
+		// Also expect a second request to retrieve a token
+		mockRest.expect(requestTo("/auth/approle/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("my_role_id"))
+				.andExpect(jsonPath("$.secret_id").value("my_secret_id"))
+				.andRespond(
+						withSuccess()
+						.contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+								+ "}")
+				);
+
+		AppRoleAuthentication auth = new AppRoleAuthentication(options, restTemplate);
+
+		VaultToken login = auth.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
+				Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 }
