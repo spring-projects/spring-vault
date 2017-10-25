@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.0.0.RELEASE</spring.version>
+		<spring.version>5.0.1.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Kay-RELEASE</spring-data-releasetrain.version>
 		<reactor.version>Bismuth-RELEASE</reactor.version>
 		<java.version>1.8</java.version>
@@ -384,11 +384,22 @@
 	<profiles>
 		<profile>
 
-			<id>spring5</id>
+			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.0.0.RELEASE</spring.version>
+				<spring.version>5.0.2.BUILD-SNAPSHOT</spring.version>
 			</properties>
+
+			<repositories>
+				<repository>
+					<id>spring-snapshots</id>
+					<name>Spring Snapshots</name>
+					<url>https://repo.spring.io/libs-snapshot</url>
+					<snapshots>
+						<enabled>true</enabled>
+					</snapshots>
+				</repository>
+			</repositories>
 		</profile>
 
 		<profile>
@@ -513,7 +524,7 @@
 
 			<!--
 					Profile to be activated when building the distribution atrifacts.
-	
+
 					Generates reference documentation, aggregates JavaDoc etc. Has to be combined with
 					profiles "release" or "milestone" to deploy artifacts into the appropriate places.
 				-->
