@@ -36,7 +36,7 @@ install:
   - src/test/bash/minikube_ci_initialize.sh
   - src/test/bash/start.sh
 
-script: ./travis_build.sh
+script: ./mvnw clean verify -DMINIKUBE_IP=$(./minikube ip) -P${PROFILE:-ci}
 
 after_script:
   - pkill vault
