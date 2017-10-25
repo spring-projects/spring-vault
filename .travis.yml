@@ -33,7 +33,7 @@ before_install:
   - test ! -f ~/.m2/settings.xml || rm ~/.m2/settings.xml
 
 install:
-  - src/test/bash/minikube-ci-initialize.sh
+  - src/test/bash/minikube_ci_initialize.sh
   - src/test/bash/start.sh
 
 script: ./mvnw clean verify -DMINIKUBE_IP=127.0.0.1 -P${PROFILE:-ci}

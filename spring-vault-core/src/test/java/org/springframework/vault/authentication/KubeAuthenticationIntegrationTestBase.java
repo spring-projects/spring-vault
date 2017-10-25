@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.assertj.core.util.Files;
 import org.junit.Before;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
@@ -40,7 +41,9 @@ public abstract class KubeAuthenticationIntegrationTestBase
 	@Before
 	public void before() {
 
-        assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.8.3")));
+		String minikubeIp = System.getProperty("MINIKUBE_IP");
+		assumeTrue(StringUtils.hasText(minikubeIp)
+				&& prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.8.3")));
 
 		if (!prepare().hasAuth("kubernetes")) {
 			prepare().mountAuth("kubernetes");
@@ -54,8 +57,7 @@ public abstract class KubeAuthenticationIntegrationTestBase
 							new File(workDir, "minikube/ca.crt"),
 							StandardCharsets.US_ASCII);
 
-					String ip = System.getProperty("MINIKUBE_IP", "192.168.99.100");
-					String host = String.format("https://%s:8443", ip);
+					String host = String.format("https://%s:8443", minikubeIp);
 
 					Map<String, String> kubeConfig = new HashMap<>();
 					kubeConfig.put("kubernetes_ca_cert", certificate);

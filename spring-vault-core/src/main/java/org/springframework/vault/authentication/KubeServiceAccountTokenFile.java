@@ -45,15 +45,15 @@ public class KubeServiceAccountTokenFile implements KubeJwtSupplier {
 		this(DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
 	}
 
-	public KubeServiceAccountTokenFile(final String fileName) {
+	public KubeServiceAccountTokenFile(String fileName) {
 		this(new FileSystemResource(fileName));
 	}
 
-	public KubeServiceAccountTokenFile(final File file) {
+	public KubeServiceAccountTokenFile(File file) {
 		this(new FileSystemResource(file));
 	}
 
-	public KubeServiceAccountTokenFile(final Resource resource) {
+	public KubeServiceAccountTokenFile(Resource resource) {
 		this.resource = resource;
 	}
 

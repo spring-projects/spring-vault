@@ -39,8 +39,7 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
-public class KubeAuthentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class KubeAuthentication implements ClientAuthentication {
 
 	private static final Log logger = LogFactory.getLog(KubeAuthentication.class);
 
@@ -78,17 +77,6 @@ public class KubeAuthentication
 		return login;
 	}
 
-	public static AuthenticationSteps createAuthenticationSteps(
-			KubeAuthenticationOptions options) {
-
-		Assert.notNull(options, "KubeAuthenticationOptions must not be null");
-
-		return AuthenticationSteps
-				.fromSupplier(() -> getKubeLogin(options.getRole(),
-						options.getJwtSupplier().getKubeJwt())) //
-				.login("auth/{mount}/login", options.getPath());
-	}
-
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingKubernetes();
@@ -114,10 +102,5 @@ public class KubeAuthentication
 			throw new VaultException(String.format("Cannot login using kubernetes: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
-	}
-
-	@Override
-	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(options);
 	}
 }
