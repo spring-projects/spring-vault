@@ -27,7 +27,6 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -179,9 +178,9 @@ public class AppRoleAuthenticationUnitTests {
 
 	@Test
 	public void loginShouldUnwrapSecretIdResponse() {
+
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("my_role_id")
-				.unwrappingToken(VaultToken.of("unwrapping_token"))
+				.roleId("my_role_id").unwrappingToken(VaultToken.of("unwrapping_token"))
 				.build();
 
 		// Expect a first request to unwrap the response
@@ -189,21 +188,19 @@ public class AppRoleAuthenticationUnitTests {
 				.andExpect(header("X-Vault-Token", "unwrapping_token"))
 				.andExpect(method(HttpMethod.POST))
 				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" +
-								"  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\"," +
-								"  \"lease_id\": \"\"," +
-								"  \"renewable\": false," +
-								"  \"lease_duration\": 0," +
-								"  \"data\": {" +
-								"    \"secret_id\": \"my_secret_id\"," +
-								"    \"secret_id_accessor\": \"my_secret_id_accessor\"" +
-								"  }," +
-								"  \"wrap_info\": null," +
-								"  \"warnings\": null," +
-								"  \"auth\": null" +
-								"}"
-						)
-				);
+						withSuccess()
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{"
+										+ "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
+										+ "  \"lease_id\": \"\","
+										+ "  \"renewable\": false,"
+										+ "  \"lease_duration\": 0,"
+										+ "  \"data\": {"
+										+ "    \"secret_id\": \"my_secret_id\","
+										+ "    \"secret_id_accessor\": \"my_secret_id_accessor\""
+										+ "  }," + "  \"wrap_info\": null,"
+										+ "  \"warnings\": null," + "  \"auth\": null"
+										+ "}"));
 
 		// Also expect a second request to retrieve a token
 		mockRest.expect(requestTo("/auth/approle/login"))
@@ -212,11 +209,10 @@ public class AppRoleAuthenticationUnitTests {
 				.andExpect(jsonPath("$.secret_id").value("my_secret_id"))
 				.andRespond(
 						withSuccess()
-						.contentType(MediaType.APPLICATION_JSON)
-						.body("{"
-								+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
-								+ "}")
-				);
+								.contentType(MediaType.APPLICATION_JSON)
+								.body("{"
+										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+										+ "}"));
 
 		AppRoleAuthentication auth = new AppRoleAuthentication(options, restTemplate);
 

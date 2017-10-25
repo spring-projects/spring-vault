@@ -216,9 +216,9 @@ public class AppRoleAuthenticationIntegrationTests extends IntegrationTestSuppor
 	public void shouldAuthenticatePushModeWithProvidedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
-		final String secretId = "hello_world";
+		String secretId = "hello_world";
 
-		final VaultResponse customSecretIdResponse = getVaultOperations().write(
+		VaultResponse customSecretIdResponse = getVaultOperations().write(
 				"auth/approle/role/with-secret-id/custom-secret-id",
 				Collections.singletonMap("secret_id", secretId));
 

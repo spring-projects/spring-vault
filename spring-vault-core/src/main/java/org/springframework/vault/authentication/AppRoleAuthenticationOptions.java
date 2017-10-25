@@ -29,6 +29,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @author Vincent Le Nair
+ * @author Christophe Tafani-Dereeper
  * @see AppRoleAuthentication
  * @see #builder()
  */
