@@ -17,6 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultToken;
@@ -45,6 +47,8 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Christophe Tafani-Dereeper
  */
 public class AppRoleAuthenticationUnitTests {
+
+	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	private RestTemplate restTemplate;
 	private MockRestServiceServer mockRest;
@@ -177,30 +181,31 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldUnwrapSecretIdResponse() {
+	public void loginShouldUnwrapSecretIdResponse() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("my_role_id").unwrappingToken(VaultToken.of("unwrapping_token"))
-				.build();
+				.roleId("my_role_id")
+				.secretId(SecretId.wrapped(VaultToken.of("unwrapping_token"))).build();
+
+		String wrappedResponse = "{"
+				+ "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
+				+ "  \"lease_id\": \"\"," + "  \"renewable\": false,"
+				+ "  \"lease_duration\": 0," + "  \"data\": {"
+				+ "    \"secret_id\": \"my_secret_id\","
+				+ "    \"secret_id_accessor\": \"my_secret_id_accessor\"" + "  },"
+				+ "  \"wrap_info\": null," + "  \"warnings\": null," + "  \"auth\": null"
+				+ "}";
 
 		// Expect a first request to unwrap the response
-		mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+		mockRest.expect(requestTo("/cubbyhole/response"))
 				.andExpect(header("X-Vault-Token", "unwrapping_token"))
-				.andExpect(method(HttpMethod.POST))
+				.andExpect(method(HttpMethod.GET))
 				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
-										+ "  \"lease_id\": \"\","
-										+ "  \"renewable\": false,"
-										+ "  \"lease_duration\": 0,"
-										+ "  \"data\": {"
-										+ "    \"secret_id\": \"my_secret_id\","
-										+ "    \"secret_id_accessor\": \"my_secret_id_accessor\""
-										+ "  }," + "  \"wrap_info\": null,"
-										+ "  \"warnings\": null," + "  \"auth\": null"
-										+ "}"));
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{\"data\":{\"response\":"
+										+ OBJECT_MAPPER
+												.writeValueAsString(wrappedResponse)
+										+ "} }"));
 
 		// Also expect a second request to retrieve a token
 		mockRest.expect(requestTo("/auth/approle/login"))

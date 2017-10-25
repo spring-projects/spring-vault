@@ -27,13 +27,22 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
+import org.springframework.vault.authentication.AppRoleTokens.AbsentSecretId;
+import org.springframework.vault.authentication.AppRoleTokens.Provided;
+import org.springframework.vault.authentication.AppRoleTokens.Pull;
+import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
+import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
@@ -90,41 +99,104 @@ public class AppRoleAuthentication implements ClientAuthentication,
 
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
 
-		if (secretIdPullRequired(options)) {
+		RoleId roleId = options.getRoleId();
+		SecretId secretId = options.getSecretId();
 
-			Assert.notNull(options.getRoleId(),
-					"RoleId must not be null for pull mode via AuthenticationSteps");
+		if ((roleId instanceof Wrapped || roleId instanceof Pull)
+				&& (secretId instanceof Wrapped || secretId instanceof Pull)) {
 
-			Assert.state(options.getInitialToken() != null || options.getUnwrappingToken() != null,
-					"One of InitialToken or UnwrappingToken must be set for pull mode via AuthenticationSteps");
-
-			AuthenticationSteps.Node<VaultResponse> secretPullRequest = null;
-			if (options.getInitialToken() != null) {
-				HttpEntity body = createHttpEntity(options.getInitialToken());
-
-				secretPullRequest = AuthenticationSteps
-					.fromHttpRequest(
-							post("auth/{mount}/role/{role}/secret-id", options.getPath(),
-									options.getAppRole()).with(body).as(
-									VaultResponse.class));
-			}
-			else {
-				HttpEntity body = createHttpEntity(options.getUnwrappingToken());
-				secretPullRequest = AuthenticationSteps
-					.fromHttpRequest(
-							post("sys/wrapping/unwrap").with(body).as(
-									VaultResponse.class));
-			}
-
-			return secretPullRequest
-					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("secret_id"))
-					.map(secretId -> getAppRoleLogin(options.getRoleId(), secretId))
-					.login("auth/{mount}/login", options.getPath());
+			throw new IllegalArgumentException(
+					"RoleId and SecretId are both configured to obtain their values from initial Vault request. AuthenticationSteps supports currently only fetching of a single element.");
 		}
 
-		return AuthenticationSteps.fromSupplier(
-				() -> getAppRoleLogin(options.getRoleId(), options.getSecretId())) //
-				.login("auth/{mount}/login", options.getPath());
+		return getAuthenticationSteps(options, roleId, secretId).login(
+				"auth/{mount}/login", options.getPath());
+	}
+
+	private static Node<?> getAuthenticationSteps(AppRoleAuthenticationOptions options,
+			RoleId roleId, SecretId secretId) {
+
+		if (roleId instanceof Pull || roleId instanceof Wrapped) {
+
+			Node<VaultResponse> steps;
+
+			if (roleId instanceof Pull) {
+
+				HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
+
+				steps = AuthenticationSteps.fromHttpRequest(get(
+						"auth/{mount}/role/{role}/role-id", options.getPath(),
+						options.getAppRole()).with(headers).as(VaultResponse.class));
+			}
+			else {
+				steps = unwrapResponse(((Wrapped) roleId).getInitialToken());
+			}
+
+			return steps.map(
+					vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"role_id")).map(
+					roleIdToken -> {
+
+						return getAppRoleLoginBody(
+								roleIdToken,
+								secretId instanceof Provided ? ((Provided) secretId)
+										.getValue() : null);
+					});
+		}
+
+		if (secretId instanceof Pull || secretId instanceof Wrapped) {
+
+			Node<VaultResponse> steps;
+
+			if (secretId instanceof Pull) {
+				HttpHeaders headers = createHttpHeaders(((Pull) secretId)
+						.getInitialToken());
+
+				steps = AuthenticationSteps.fromHttpRequest(post(
+						"auth/{mount}/role/{role}/secret-id", options.getPath(),
+						options.getAppRole()).with(headers).as(VaultResponse.class));
+			}
+			else {
+				steps = unwrapResponse(((Wrapped) secretId).getInitialToken());
+			}
+
+			return steps.map(
+					vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"secret_id")).map(
+					secretIdToken -> {
+
+						return getAppRoleLoginBody(
+								roleId instanceof Provided ? ((Provided) roleId)
+										.getValue() : null, secretIdToken);
+					});
+		}
+
+		if (roleId instanceof Provided) {
+
+			return AuthenticationSteps.fromSupplier(() -> {
+
+				return getAppRoleLoginBody(((Provided) roleId).getValue(),
+						secretId instanceof Provided ? ((Provided) secretId).getValue()
+								: null);
+			});
+		}
+
+		throw new IllegalArgumentException(String.format(
+				"Provided RoleId/SecretId setup not supported. RoleId: %s, SecretId: %s",
+				roleId, secretId));
+	}
+
+	private static Node<VaultResponse> unwrapResponse(VaultToken token) {
+
+		return AuthenticationSteps.fromHttpRequest(
+				get("cubbyhole/response").with(createHttpHeaders(token)).as(
+						VaultResponse.class)).map(
+				vaultResponse -> {
+
+					Map<String, Object> data = vaultResponse.getRequiredData();
+					return VaultResponses.unwrap((String) data.get("response"),
+							VaultResponse.class);
+				});
 	}
 
 	@Override
@@ -139,10 +211,8 @@ public class AppRoleAuthentication implements ClientAuthentication,
 
 	private VaultToken createTokenUsingAppRole() {
 
-		String roleId = getRoleId();
-		String secretId = getSecretId();
-
-		Map<String, String> login = getAppRoleLogin(roleId, secretId);
+		Map<String, String> login = getAppRoleLoginBody(options.getRoleId(),
+				options.getSecretId());
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
@@ -161,16 +231,23 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		}
 	}
 
-	private String getRoleId() {
+	private String getRoleId(RoleId roleId) {
 
-		if (roleIdPullRequired(options)) {
+		if (roleId instanceof Provided) {
+			return ((Provided) roleId).getValue();
+		}
+
+		if (roleId instanceof Pull) {
+
+			VaultToken token = ((Pull) roleId).getInitialToken();
 
 			try {
-				ResponseEntity<VaultResponse> response = restOperations.exchange(
+
+				ResponseEntity<VaultResponse> entity = restOperations.exchange(
 						"auth/{mount}/role/{role}/role-id", HttpMethod.GET,
-						createHttpEntity(options.getInitialToken()), VaultResponse.class,
-						options.getPath(), options.getAppRole());
-				return (String) response.getBody().getRequiredData().get("role_id");
+						createHttpEntity(token), VaultResponse.class, options.getPath(),
+						options.getAppRole());
+				return (String) entity.getBody().getRequiredData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultException(String.format(
@@ -179,66 +256,107 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			}
 		}
 
-		return options.getRoleId();
-	}
+		if (roleId instanceof Wrapped) {
 
-	private static boolean roleIdPullRequired(AppRoleAuthenticationOptions options) {
-		return options.getRoleId() == null;
-	}
+			VaultToken token = ((Wrapped) roleId).getInitialToken();
 
-	private String getSecretId() {
+			try {
 
-		if (secretIdPullRequired(options)) {
-			// The secret ID needs to be pulled from Vault.
-			// Case 1: we use the initial authentication token
-			if (options.getInitialToken() != null) {
-				try {
-					VaultResponse response = restOperations.postForObject(
-							"auth/{mount}/role/{role}/secret-id",
-							createHttpEntity(options.getInitialToken()), VaultResponse.class,
-							options.getPath(), options.getAppRole());
-					return (String) response.getRequiredData().get("secret_id");
-				}
-				catch (HttpStatusCodeException e) {
-					throw new VaultException(String.format(
-							"Cannot get Secret id using AppRole: %s",
-							VaultResponses.getError(e.getResponseBodyAsString())));
-				}
+				ResponseEntity<VaultResponse> entity = restOperations.exchange(
+						"cubbyhole/response", HttpMethod.GET, createHttpEntity(token),
+						VaultResponse.class);
+
+				Map<String, Object> data = entity.getBody().getRequiredData();
+				VaultResponse response = VaultResponses.unwrap(
+						(String) data.get("response"), VaultResponse.class);
+
+				return (String) response.getRequiredData().get("role_id");
 			}
-			// Case 2: the secret ID needs to be unwrapped
-			else if (options.getUnwrappingToken() != null) {
-				try {
-					VaultResponse response = restOperations.postForObject(
-							"sys/wrapping/unwrap",
-							createHttpEntity(options.getUnwrappingToken()), VaultResponse.class,
-							options.getPath(), options.getAppRole());
-
-					return (String) response.getRequiredData().get("secret_id");
-				}
-				catch (HttpStatusCodeException e) {
-					throw new VaultException(String.format(
-							"Cannot unwrap Secret id using AppRole: %s",
-							VaultResponses.getError(e.getResponseBodyAsString())
-					));
-				}
+			catch (HttpStatusCodeException e) {
+				throw new VaultException(String.format(
+						"Cannot unwrap Role id using AppRole: %s",
+						VaultResponses.getError(e.getResponseBodyAsString())));
 			}
 		}
 
-		return options.getSecretId();
+		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
 	}
 
-	private static boolean secretIdPullRequired(AppRoleAuthenticationOptions options) {
-		return options.getSecretId() == null && (options.getInitialToken() != null || options.getUnwrappingToken() != null);
+	private String getSecretId(SecretId secretId) {
+
+		if (secretId instanceof Provided) {
+			return ((Provided) secretId).getValue();
+		}
+
+		if (secretId instanceof Pull) {
+
+			VaultToken token = ((Pull) secretId).getInitialToken();
+
+			try {
+				VaultResponse response = restOperations.postForObject(
+						"auth/{mount}/role/{role}/secret-id", createHttpEntity(token),
+						VaultResponse.class, options.getPath(), options.getAppRole());
+				return (String) response.getRequiredData().get("secret_id");
+			}
+			catch (HttpStatusCodeException e) {
+				throw new VaultException(String.format(
+						"Cannot get Secret id using AppRole: %s",
+						VaultResponses.getError(e.getResponseBodyAsString())));
+			}
+		}
+
+		if (secretId instanceof Wrapped) {
+
+			VaultToken token = ((Wrapped) secretId).getInitialToken();
+
+			try {
+
+				ResponseEntity<VaultResponse> entity = restOperations.exchange(
+						"cubbyhole/response", HttpMethod.GET, createHttpEntity(token),
+						VaultResponse.class);
+
+				Map<String, Object> data = entity.getBody().getRequiredData();
+				VaultResponse response = VaultResponses.unwrap(
+						(String) data.get("response"), VaultResponse.class);
+
+				return (String) response.getRequiredData().get("secret_id");
+			}
+			catch (HttpStatusCodeException e) {
+				throw new VaultException(String.format(
+						"Cannot unwrap Role id using AppRole: %s",
+						VaultResponses.getError(e.getResponseBodyAsString())));
+			}
+		}
+
+		throw new IllegalArgumentException("Unknown SecretId configuration: " + secretId);
 	}
 
-	private static HttpEntity createHttpEntity(VaultToken token) {
+	private static HttpHeaders createHttpHeaders(VaultToken token) {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("X-Vault-Token", token.getToken());
-		return new HttpEntity<String>(null, headers);
+
+		return headers;
 	}
 
-	private static Map<String, String> getAppRoleLogin(String roleId,
+	private static HttpEntity createHttpEntity(VaultToken token) {
+		return new HttpEntity<String>(null, createHttpHeaders(token));
+	}
+
+	private Map<String, String> getAppRoleLoginBody(RoleId roleId, SecretId secretId) {
+
+		Map<String, String> login = new HashMap<>();
+
+		login.put("role_id", getRoleId(roleId));
+
+		if (!ClassUtils.isAssignableValue(AbsentSecretId.class, secretId)) {
+			login.put("secret_id", getSecretId(secretId));
+		}
+
+		return login;
+	}
+
+	private static Map<String, String> getAppRoleLoginBody(String roleId,
 			@Nullable String secretId) {
 
 		Map<String, String> login = new HashMap<>();
