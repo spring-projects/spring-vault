@@ -23,6 +23,7 @@ import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.Signature;
+import org.springframework.vault.support.SignatureValidation;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionResult;
 import org.springframework.vault.support.VaultEncryptionResult;
@@ -40,6 +41,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Mark Paluch
  * @author Sven Schürmann
  * @author Praveendra Singh
+ * @author Luander Ribeiro
  * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
  * Secret Backend</a>
  */
@@ -229,59 +231,77 @@ public interface VaultTransitOperations {
 	String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
 
 	/**
-	 * Generate HMAC digest of given data.
+	 * Create a HMAC using {@code keyName} of given {@link Plaintext} using the default
+	 * hash algorithm. The key can be of any type supported by transit; the raw key will
+	 * be marshaled into bytes to be used for the HMAC function. If the key is of a type
+	 * that supports rotation, the latest (current) version will be used.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be {@literal null}.
+	 * @return the digest of given data the default hash algorithm and the named key.
+	 * @since 2.0
+	 */
+	Hmac getHmac(String keyName, Plaintext plaintext);
+
+	/**
+	 * Create a HMAC using {@code keyName} of given {@link VaultHmacRequest} using the
+	 * default hash algorithm. The key can be of any type supported by transit; the raw
+	 * key will be marshaled into bytes to be used for the HMAC function. If the key is of
+	 * a type that supports rotation, configured {@link VaultHmacRequest#getKeyVersion()}
+	 * will be used.
+	 *
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param request the {@link VaultHmacRequest}, must not be {@literal null}.
+	 * @return the digest of given data the default hash algorithm and the named key.
+	 * @since 2.0
+	 */
+	Hmac getHmac(String keyName, VaultHmacRequest request);
+
+	/**
+	 * Create a cryptographic signature using {@code keyName} of the given
+	 * {@link Plaintext} and the default hash algorithm. The key must be of a type that
+	 * supports signing.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
-	 * @return the digest of given data using sha2-256 hash algorithm and the named key.
-	 */
-	Hmac generateHmac(String keyName, Plaintext plaintext);
-
-	/**
-	 * Generate HMAC digest of given data.
-	 *
-	 * @param keyName must not be empty or {@literal null}.
-	 * @param request {@link VaultHmacRequest} must not be empty or {@literal null}.
-	 * @return the digest of given data using the specified hash algorithm and the named key.
-	 */
-	Hmac generateHmac(String keyName, VaultHmacRequest request);
-
-	/**
-	 * Sign a String using a key from the vault using the SHA-256 algorithm.
-	 *
-	 * @param keyName must not be empty or {@literal null}.
-	 * @param plaintext must not be empty or {@literal null}.
-	 * @return Signature of the payload
+	 * @return Signature for {@link Plaintext}.
+	 * @since 2.0
 	 */
 	Signature sign(String keyName, Plaintext plaintext);
 
 	/**
-	 * Sign a String using a key from the vault.
+	 * Create a cryptographic signature using {@code keyName} of the given
+	 * {@link VaultSignRequest} and the specified hash algorithm. The key must be of a
+	 * type that supports signing.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param request {@link VaultSignRequest}
-	 * must not be empty or {@literal null}.
-	 * @return Signature of the payload
+	 * @param request {@link VaultSignRequest} must not be empty or {@literal null}.
+	 * @return Signature for {@link VaultSignRequest}.
+	 * @since 2.0
 	 */
 	Signature sign(String keyName, VaultSignRequest request);
 
 	/**
-	 * Verify the validity of a signature in the vault.
+	 * Verify the cryptographic signature using {@code keyName} of the given
+	 * {@link Plaintext} and {@link Signature}.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param plaintext must not be empty or {@literal null}.
-	 * @param signature Signature to be verified
-	 * @return true if the signature is valid, false otherwise
+	 * @param plaintext must not be {@literal null}.
+	 * @param signature Signature to be verified, must not be {@literal null}.
+	 * @return {@literal true} if the signature is valid, {@literal false} otherwise.
+	 * @since 2.0
 	 */
 	boolean verify(String keyName, Plaintext plaintext, Signature signature);
 
 	/**
-	 * Verify the validity of a signature in the vault.
+	 * Verify the cryptographic signature using {@code keyName} of the given
+	 * {@link VaultSignRequest}.
 	 *
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param request {@link VaultSignatureVerificationRequest}
-	 * must not be empty or {@literal null}.
-	 * @return true if the signature is valid, false otherwise
+	 * @param request {@link VaultSignatureVerificationRequest} must not be
+	 * {@literal null}.
+	 * @return the resulting {@link SignatureValidation}.
+	 * @since 2.0
 	 */
-	boolean verify(String keyName, VaultSignatureVerificationRequest request);
+	SignatureValidation verify(String keyName, VaultSignatureVerificationRequest request);
 }

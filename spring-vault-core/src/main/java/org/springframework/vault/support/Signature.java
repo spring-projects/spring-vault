@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,72 +16,41 @@
 package org.springframework.vault.support;
 
 import lombok.EqualsAndHashCode;
-import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
+import lombok.ToString;
 
-import java.util.Arrays;
+import org.springframework.util.Assert;
 
 /**
- * Value object representing Signature with an optional {@link VaultTransitContext}.
+ * Value object representing a Signature.
  *
  * @author Luander Ribeiro
+ * @author Mark Paluch
+ * @since 2.0
  */
 @EqualsAndHashCode
+@ToString
 public class Signature {
 
-    private final String signature;
+	private final String signature;
 
-    private final VaultTransitContext context;
+	private Signature(String signature) {
+		this.signature = signature;
+	}
 
-    private Signature(String signature, VaultTransitContext context) {
-        this.signature = signature;
-        this.context = context;
-    }
+	/**
+	 * Factory method to create a {@link Signature} from the given {@code signature}.
+	 *
+	 * @param signature the signature, must not be {@literal null} or empty.
+	 * @return the {@link Signature} encapsulating {@code signature}.
+	 */
+	public static Signature of(String signature) {
 
-    /**
-     * Factory method to create {@link Signature} from the given {@code signature}.
-     *
-     * @param signature the signature, must not be {@literal null} or empty.
-     * @return the {@link Signature} for {@code signature}.
-     */
-    public static Signature of(byte[] signature) {
+		Assert.hasText(signature, "Signature must not be null or empty");
 
-        Assert.isTrue(!ObjectUtils.isEmpty(signature),
-                "Signature must not be null or empty");
+		return new Signature(signature);
+	}
 
-        return new Signature(Arrays.toString(signature), VaultTransitContext.empty());
-    }
-
-    /**
-     * Factory method to create {@link Signature} from the given {@code signature}.
-     *
-     * @param signature the signature, must not be {@literal null} or empty.
-     * @return the {@link Signature} for {@code signature}.
-     */
-    public static Signature of(String signature) {
-
-        Assert.hasText(signature, "Signature must not be null or empty");
-
-        return new Signature(signature, VaultTransitContext.empty());
-    }
-
-    public String getSignature() {
-        return signature;
-    }
-
-    public VaultTransitContext getContext() {
-        return context;
-    }
-
-    /**
-     * Create a new {@link Signature} object from this signature associated with the
-     * given {@link VaultTransitContext}.
-     *
-     * @param context transit context.
-     * @return the new {@link Signature} object.
-     */
-    public Signature with(VaultTransitContext context) {
-        return new Signature(getSignature(), context);
-    }
+	public String getSignature() {
+		return signature;
+	}
 }
-

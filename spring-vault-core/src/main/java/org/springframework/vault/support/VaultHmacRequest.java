@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,151 +15,137 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 
 /**
  * Request for a HMAC Digest.
  *
  * @author Luander Ribeiro
+ * @author Mark Paluch
+ * @since 2.0
  */
 public class VaultHmacRequest {
 
-    @JsonProperty("key_version")
-    private final int keyVersion;
+	private final Plaintext plaintext;
 
-    private final String algorithm;
+	private final @Nullable String algorithm;
 
-    private final String input;
+	private final @Nullable Integer keyVersion;
 
-    @JsonIgnore
-    private final VaultTransitContext context;
+	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm,
+			@Nullable Integer keyVersion) {
 
-    private VaultHmacRequest(int keyVersion, String algorithm,
-                             String input, VaultTransitContext context) {
-        this.algorithm = algorithm;
-        this.input = Base64Utils.encodeToString(input.getBytes());
-        this.keyVersion = keyVersion;
-        this.context = context;
-    }
+		this.algorithm = algorithm;
+		this.plaintext = plaintext;
+		this.keyVersion = keyVersion;
+	}
 
-    /**
-     * @return New instance of {@link VaultHmacRequest.VaultHmacRequestBuilder}
-     */
-    public static VaultHmacRequestBuilder builder() {
-        return new VaultHmacRequestBuilder();
-    }
+	/**
+	 * @return a new instance of {@link VaultHmacRequestBuilder}.
+	 */
+	public static VaultHmacRequestBuilder builder() {
+		return new VaultHmacRequestBuilder();
+	}
 
-    /**
-     * Create a new {@link VaultHmacRequest} specifically for an {@code input}.
-     * Uses {@code sha2-256} algorithm.
-     *
-     * @return a new {@link VaultHmacRequest} for the given {@code input}.
-     */
-    public static VaultHmacRequest ofInput(Plaintext input) {
-        return builder().input(input).build();
-    }
+	/**
+	 * Create a new {@link VaultHmacRequest} given {@link Plaintext}. Uses the default
+	 * signature algorithm.
+	 *
+	 * @return a new {@link VaultHmacRequest} for the given {@link Plaintext input}.
+	 */
+	public static VaultHmacRequest create(Plaintext input) {
+		return builder().plaintext(input).build();
+	}
 
-    /**
-     * @return Algorithm used for creating the digest.
-     */
-    public String getAlgorithm() {
-        return algorithm;
-    }
+	/**
+	 * @return plain text input used as basis to generate the digest.
+	 */
+	public Plaintext getPlaintext() {
+		return plaintext;
+	}
 
-    /**
-     * @return plain text input used as basis to generate the digest.
-     */
-    public String getInput() {
-        return input;
-    }
+	/**
+	 * @return algorithm used for creating the digest or {@literal null} to use the
+	 * default algorithm.
+	 */
+	@Nullable
+	public String getAlgorithm() {
+		return algorithm;
+	}
 
-    /**
-     * @return Version of the key used. If not set the latest version is used.
-     */
-    public int getKeyVersion() {
-        return keyVersion;
-    }
+	/**
+	 * @return version of the key used or {@literal null} to use the the latest version.
+	 */
+	@Nullable
+	public Integer getKeyVersion() {
+		return keyVersion;
+	}
 
-    public VaultTransitContext getContext() {
-        return context;
-    }
+	/**
+	 * Builder to build a {@link VaultHmacRequest}.
+	 */
+	public static class VaultHmacRequestBuilder {
 
-    public static class VaultHmacRequestBuilder {
+		private @Nullable Plaintext plaintext;
 
-        private int keyVersion;
+		private @Nullable String algorithm;
 
-        private String algorithm = "sha2-256";
+		private @Nullable Integer keyVersion;
 
-        private Plaintext input;
+		/**
+		 * Configure the input to be used to create the digest.
+		 *
+		 * @param input base input to create the digest, must not be {@literal null}.
+		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 */
+		public VaultHmacRequestBuilder plaintext(Plaintext input) {
 
-        private VaultTransitContext context;
+			Assert.notNull(input, "Plaintext must not be null");
 
-        /**
-         * Configure the algorithm to be used for the operation.
-         *
-         * @param algorithm Specify the algorithm to be used for the operation. If not set,
-         *                  sha2-256 is used.
-         *                  Supported algorithms are:
-         *                  sha2-224, sha2-256, sha2-384, sha2-512
-         * @return {@code this}
-         */
-        public VaultHmacRequestBuilder algorithm(String algorithm) {
-            this.algorithm = algorithm;
-            return this;
-        }
+			this.plaintext = input;
+			return this;
+		}
 
-        /**
-         * Configure the input to be used to create the digest.
-         *
-         * @param input base input to create the digest, must not be empty or {@literal null}.
-         * @return {@code this}.
-         */
-        public VaultHmacRequestBuilder input(Plaintext input) {
-            this.input = input;
-            this.context = input.getContext();
-            return this;
-        }
+		/**
+		 * Configure the algorithm to be used for the operation.
+		 *
+		 * @param algorithm Specify the algorithm to be used for the operation. Supported
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 */
+		public VaultHmacRequestBuilder algorithm(String algorithm) {
 
-        /**
-         * Configure the input to be used to create the digest.
-         *
-         * @param input base input to create the digest, must not be empty or {@literal null}.
-         * @return {@code this}
-         */
-        public VaultHmacRequestBuilder input(String input) {
-            this.input = Plaintext.of(input);
-            this.context = VaultTransitContext.empty();
-            return this;
-        }
+			Assert.hasText(algorithm, "Algorithm must not be null or empty");
 
-        /**
-         * Configure the version to be used for the operation.
-         *
-         * @param version key version to be used. If not set, uses the latest version.
-         * @return {@code this} {@link VaultHmacRequest.VaultHmacRequestBuilder}.
-         */
-        public VaultHmacRequestBuilder keyVersion(int version) {
-            this.keyVersion = version;
-            return this;
-        }
+			this.algorithm = algorithm;
+			return this;
+		}
 
-        /**
-         * Build a new {@link VaultHmacRequest} instance. Requires
-         * {@link #input(String)} or {@link #input(Plaintext)} to be configured.
-         *
-         * @return a new {@link VaultHmacRequest}.
-         */
-        public VaultHmacRequest build() {
+		/**
+		 * Configure the key version to be used for the operation.
+		 *
+		 * @param version key version to be used. If not set, uses the latest version.
+		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 */
+		public VaultHmacRequestBuilder keyVersion(int version) {
 
-            Assert.notNull(input, "Input must not be empty");
+			this.keyVersion = version;
+			return this;
+		}
 
-            return new VaultHmacRequest(keyVersion, algorithm, input.asString(), context);
-        }
+		/**
+		 * Build a new {@link VaultHmacRequest} instance. Requires
+		 * {@link #plaintext(Plaintext)} to be configured.
+		 *
+		 * @return a new {@link VaultHmacRequest}.
+		 */
+		public VaultHmacRequest build() {
 
+			Assert.notNull(plaintext, "Plaintext input must not be null");
 
-
-    }
+			return new VaultHmacRequest(plaintext, algorithm, keyVersion);
+		}
+	}
 }

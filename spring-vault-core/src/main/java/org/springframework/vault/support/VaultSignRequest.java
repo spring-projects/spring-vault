@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,121 +15,111 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 
 /**
  * Request for a signature creation request.
  *
  * @author Luander Ribeiro
+ * @author Mark Paluch
+ * @since 2.0
  */
 public class VaultSignRequest {
 
-    private final String algorithm;
+	private final Plaintext plaintext;
 
-    private final String input;
+	private final @Nullable String algorithm;
 
-    @JsonIgnore
-    private final VaultTransitContext context;
+	private VaultSignRequest(Plaintext plaintext, @Nullable String algorithm) {
 
-    private VaultSignRequest(String algorithm, String input, VaultTransitContext context) {
-        this.algorithm = algorithm;
-        this.input = Base64Utils.encodeToString(input.getBytes());
-        this.context = context;
-    }
+		this.plaintext = plaintext;
+		this.algorithm = algorithm;
+	}
 
-    /**
-     * @return New instance of {@link VaultSignRequest.VaultSignRequestBuilder}
-     */
-    public static VaultSignRequestBuilder builder() {
-        return new VaultSignRequestBuilder();
-    }
+	/**
+	 * @return a new instance of {@link VaultSignRequestBuilder}.
+	 */
+	public static VaultSignRequestBuilder builder() {
+		return new VaultSignRequestBuilder();
+	}
 
-    /**
-     * Create a new {@link VaultSignRequest} specifically for an {@code input}.
-     * Uses {@code sha2-256} algorithm.
-     *
-     * @return a new {@link VaultSignRequest} for the given {@code input}.
-     */
-    public static VaultSignRequest ofInput(Plaintext input) {
-        return builder().input(input).build();
-    }
+	/**
+	 * Create a new {@link VaultSignRequest} given {@link Plaintext}. Uses the default
+	 * algorithm.
+	 *
+	 * @return a new {@link VaultSignRequest} for the given {@link Plaintext input}.
+	 */
+	public static VaultSignRequest create(Plaintext input) {
+		return builder().plaintext(input).build();
+	}
 
-    /**
-     * @return Algorithm used for creating the digest.
-     */
-    public String getAlgorithm() {
-        return algorithm;
-    }
+	/**
+	 * @return plain text input used as basis to generate the signature.
+	 */
+	public Plaintext getPlaintext() {
+		return plaintext;
+	}
 
-    /**
-     * @return plain text input used as basis to generate the digest.
-     */
-    public String getInput() {
-        return input;
-    }
+	/**
+	 * @return algorithm used for creating the signature or {@literal null} to use the
+	 * default algorithm.
+	 */
+	@Nullable
+	public String getAlgorithm() {
+		return algorithm;
+	}
 
-    public VaultTransitContext getContext() {
-        return context;
-    }
+	/**
+	 * Builder to build a {@link VaultSignRequest}.
+	 */
+	public static class VaultSignRequestBuilder {
 
-    public static class VaultSignRequestBuilder {
+		private @Nullable Plaintext plaintext;
 
-        private String algorithm = "sha2-256";
+		private @Nullable String algorithm;
 
-        private Plaintext input;
+		/**
+		 * Configure the input to be used to create the signature.
+		 *
+		 * @param input base input to create the signature, must not be {@literal null}.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 */
+		public VaultSignRequestBuilder plaintext(Plaintext input) {
 
-        private VaultTransitContext context;
+			Assert.notNull(input, "Plaintext must not be null");
 
-        /**
-         * Configure the algorithm to be used for the operation.
-         *
-         * @param algorithm Specify the algorithm to be used for the operation. If not set,
-         *                  sha2-256 is used.
-         *                  Supported algorithms are:
-         *                  sha2-224, sha2-256, sha2-384, sha2-512
-         * @return {@code this}
-         */
-        public VaultSignRequestBuilder algorithm(String algorithm) {
-            this.algorithm = algorithm;
-            this.context = VaultTransitContext.empty();
-            return this;
-        }
+			this.plaintext = input;
+			return this;
+		}
 
-        /**
-         * Configure the input to be used to create the digest.
-         *
-         * @param input base input to create the digest, must not be empty or {@literal null}.
-         * @return {@code this}.
-         */
-        public VaultSignRequestBuilder input(Plaintext input) {
-            this.input = input;
-            this.context = input.getContext();
-            return this;
-        }
+		/**
+		 * Configure the algorithm to be used for the operation.
+		 *
+		 * @param algorithm Specify the algorithm to be used for the operation. Supported
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 */
+		public VaultSignRequestBuilder algorithm(String algorithm) {
 
-        /**
-         * Configure the input to be used to create the digest.
-         *
-         * @param input base input to create the digest, must not be empty or {@literal null}.
-         * @return {@code this}
-         */
-        public VaultSignRequestBuilder input(String input) {
-            this.input = Plaintext.of(input);
-            return this;
-        }
+			Assert.hasText(algorithm, "Algorithm must not be null or empty");
 
-        /**
-         * Build a new {@link VaultHmacRequest} instance. Requires
-         * {@link #input(String)} or {@link #input(Plaintext)} to be configured.
-         *
-         * @return a new {@link VaultHmacRequest}.
-         */
-        public VaultSignRequest build() {
-            Assert.notNull(input, "Input must not be empty");
+			this.algorithm = algorithm;
+			return this;
+		}
 
-            return new VaultSignRequest(algorithm, input.asString(), context);
-        }
-    }
+		/**
+		 * Build a new {@link VaultSignRequest} instance. Requires
+		 * {@link #plaintext(Plaintext)} to be configured.
+		 *
+		 * @return a new {@link VaultSignRequest}.
+		 */
+		public VaultSignRequest build() {
+
+			Assert.notNull(plaintext, "Plaintext input must not be null");
+
+			return new VaultSignRequest(plaintext, algorithm);
+		}
+	}
 }

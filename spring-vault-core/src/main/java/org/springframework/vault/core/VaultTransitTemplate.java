@@ -35,6 +35,7 @@ import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
 import org.springframework.vault.support.RawTransitKey;
 import org.springframework.vault.support.Signature;
+import org.springframework.vault.support.SignatureValidation;
 import org.springframework.vault.support.TransitKeyType;
 import org.springframework.vault.support.VaultDecryptionResult;
 import org.springframework.vault.support.VaultEncryptionResult;
@@ -61,8 +62,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	private final VaultOperations vaultOperations;
 
 	private final String path;
-
-	private static final String DEFAULT_SIGN_ALGORITHM = "sha2-256";
 
 	public VaultTransitTemplate(VaultOperations vaultOperations, String path) {
 
@@ -349,33 +348,48 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public Hmac generateHmac(String keyName, Plaintext plaintext) {
+	public Hmac getHmac(String keyName, Plaintext plaintext) {
 
+		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
-		VaultHmacRequest request = VaultHmacRequest.ofInput(plaintext);
+		VaultHmacRequest request = VaultHmacRequest.create(plaintext);
 
-		return generateHmac(keyName, request);
+		return getHmac(keyName, request);
 	}
 
 	@Override
-	public Hmac generateHmac(String keyName, VaultHmacRequest hmacRequest) {
+	public Hmac getHmac(String keyName, VaultHmacRequest hmacRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notNull(hmacRequest, "Request must not be null");
+		Assert.notNull(hmacRequest, "HMAC request must not be null");
 
-		String hmac = (String) vaultOperations.
-				write(String.format("%s/hmac/%s", path, keyName), hmacRequest).getData()
-				.get("hmac");
-		return toHmac(hmac, hmacRequest.getContext());
+		Map<String, Object> request = new LinkedHashMap<>();
+		request.put("input",
+				Base64Utils.encodeToString(hmacRequest.getPlaintext().getPlaintext()));
+
+		if (StringUtils.hasText(hmacRequest.getAlgorithm())) {
+			request.put("algorithm", hmacRequest.getAlgorithm());
+		}
+
+		if (hmacRequest.getKeyVersion() != null) {
+			request.put("key_version ", hmacRequest.getKeyVersion());
+		}
+
+		String hmac = (String) vaultOperations
+				.write(String.format("%s/hmac/%s", path, keyName), request)
+				.getRequiredData().get("hmac");
+
+		return Hmac.of(hmac);
 	}
 
 	@Override
 	public Signature sign(String keyName, Plaintext plaintext) {
 
+		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
-		VaultSignRequest request = VaultSignRequest.ofInput(plaintext);
+		VaultSignRequest request = VaultSignRequest.create(plaintext);
 
 		return sign(keyName, request);
 	}
@@ -384,36 +398,67 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public Signature sign(String keyName, VaultSignRequest signRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.notNull(signRequest, "Plain text must not be null");
+		Assert.notNull(signRequest, "Sign request must not be null");
 
-		String signature = (String) vaultOperations.
-				write(String.format("%s/sign/%s", path, keyName), signRequest).getData()
-				.get("signature");
-		return toSignature(signature, signRequest.getContext());
+		Map<String, Object> request = new LinkedHashMap<>();
+		request.put("input",
+				Base64Utils.encodeToString(signRequest.getPlaintext().getPlaintext()));
+
+		if (StringUtils.hasText(signRequest.getAlgorithm())) {
+			request.put("algorithm", signRequest.getAlgorithm());
+		}
+
+		String signature = (String) vaultOperations
+				.write(String.format("%s/sign/%s", path, keyName), request)
+				.getRequiredData().get("signature");
+
+		return Signature.of(signature);
 	}
 
 	@Override
 	public boolean verify(String keyName, Plaintext plainText, Signature signature) {
 
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(plainText, "Plaintext must not be null");
 		Assert.notNull(signature, "Signature must not be null");
-		Assert.notNull(plainText, "Input must not be null");
 
-		VaultSignatureVerificationRequest request =
-				VaultSignatureVerificationRequest.builder()
-						.input(plainText)
-						.signature(signature)
-						.build();
-		return verify(keyName, request);
+		VaultSignatureVerificationRequest request = VaultSignatureVerificationRequest
+				.create(plainText, signature);
+		return verify(keyName, request).isValid();
 	}
 
 	@Override
-	public boolean verify(String keyName, VaultSignatureVerificationRequest request) {
+	public SignatureValidation verify(String keyName,
+			VaultSignatureVerificationRequest verificationRequest) {
 
-		Assert.notNull(request, "Request must not be null");
+		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.notNull(verificationRequest,
+				"Signature verification request must not be null");
 
-		return (boolean) vaultOperations.
-				write(String.format("%s/verify/%s", path, keyName), request).getData()
-				.get("valid");
+		Map<String, Object> request = new LinkedHashMap<>();
+		request.put("input", Base64Utils.encodeToString(verificationRequest
+				.getPlaintext().getPlaintext()));
+
+		if (verificationRequest.getHmac() != null) {
+			request.put("hmac", verificationRequest.getHmac().getHmac());
+		}
+
+		if (verificationRequest.getSignature() != null) {
+			request.put("signature", verificationRequest.getSignature().getSignature());
+		}
+
+		if (StringUtils.hasText(verificationRequest.getAlgorithm())) {
+			request.put("algorithm", verificationRequest.getAlgorithm());
+		}
+
+		Map<String, Object> response = vaultOperations.write(
+				String.format("%s/verify/%s", path, keyName), request).getRequiredData();
+
+		if (response.containsKey("valid") && Boolean.valueOf("" + response.get("valid"))) {
+			return SignatureValidation.valid();
+		}
+
+		return SignatureValidation.invalid();
 	}
 
 	private static void applyTransitOptions(VaultTransitContext context,
@@ -504,16 +549,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	private static Plaintext toPlaintext(byte[] plaintext, VaultTransitContext context) {
 		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
-				.of(plaintext);
-	}
-
-	private static Hmac toHmac(String plaintext, VaultTransitContext context) {
-		return context != null ? Hmac.of(plaintext).with(context) : Hmac
-				.of(plaintext);
-	}
-
-	private static Signature toSignature(String plaintext, VaultTransitContext context) {
-		return context != null ? Signature.of(plaintext).with(context) : Signature
 				.of(plaintext);
 	}
 
