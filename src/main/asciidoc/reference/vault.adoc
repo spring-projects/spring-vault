@@ -30,3 +30,5 @@ include::vault-repositories.adoc[]
 include::client-support.adoc[]
 
 include::authentication.adoc[]
+
+include::misc.adoc[]

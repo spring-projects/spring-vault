@@ -83,6 +83,14 @@
 			<optional>true</optional>
 		</dependency>
 
+		<!-- Spring Security -->
+
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-crypto</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- HTTP clients -->
 
 		<dependency>

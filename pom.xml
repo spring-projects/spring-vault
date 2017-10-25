@@ -130,6 +130,16 @@
 				<scope>import</scope>
 			</dependency>
 
+
+			<!-- Spring Security -->
+			<dependency>
+				<groupId>org.springframework.security</groupId>
+				<artifactId>spring-security-bom</artifactId>
+				<version>5.0.0.RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<!-- Testing -->
 
 			<dependency>

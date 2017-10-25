@@ -12,6 +12,7 @@
 * Support CSR signing, certificate revocation and CRL retrieval.
 * <<vault.authentication.kubernetes,Kubernetes authentication>>.
 * RoleId/SecretId unwrapping for <<vault.authentication.approle,AppRole authentication>>.
+* <<vault.misc.spring-security,Spring Security integration>> with transit backend-based `BytesKeyGenerator` and `BytesEncryptor`.
 
 [[new-features.1-1-0]]
 === What's new in Spring Vault 1.1.0
