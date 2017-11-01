@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 # Taken from https://github.com/aaron-prindle/minikube-travis-example/blob/master/minikube-ci-initialize.sh
 # Thanks to https://github.com/aaron-prindle
 #

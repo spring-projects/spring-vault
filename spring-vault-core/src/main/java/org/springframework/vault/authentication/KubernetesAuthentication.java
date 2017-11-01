@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2017 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
@@ -29,32 +30,36 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Kubernetes implementation of {@link ClientAuthentication}. {@link KubeAuthentication}
- * uses a Kubernetes Service Account JSON Web Token to login into Vault. JWT and Role are
- * sent in the login request to Vault to obtain a {@link VaultToken}.
+ * Kubernetes implementation of {@link ClientAuthentication}.
+ * {@link KubernetesAuthentication} uses a Kubernetes Service Account JSON Web Token to
+ * login into Vault. JWT and Role are sent in the login request to Vault to obtain a
+ * {@link VaultToken}.
  *
  * @author Michal Budzyn
- * @see KubeAuthenticationOptions
+ * @author Mark Paluch
+ * @since 2.0
+ * @see KubernetesAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
-public class KubeAuthentication implements ClientAuthentication {
+public class KubernetesAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory.getLog(KubeAuthentication.class);
+	private static final Log logger = LogFactory.getLog(KubernetesAuthentication.class);
 
-	private final KubeAuthenticationOptions options;
+	private final KubernetesAuthenticationOptions options;
 
 	private final RestOperations restOperations;
 
 	/**
-	 * Create a {@link KubeAuthentication} using {@link KubeAuthenticationOptions} and
-	 * {@link RestOperations}.
+	 * Create a {@link KubernetesAuthentication} using
+	 * {@link KubernetesAuthenticationOptions} and {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public KubeAuthentication(KubeAuthenticationOptions options,
+	public KubernetesAuthentication(KubernetesAuthenticationOptions options,
 			RestOperations restOperations) {
 
 		Assert.notNull(options, "KubeAuthenticationOptions must not be null");
@@ -64,28 +69,29 @@ public class KubeAuthentication implements ClientAuthentication {
 		this.restOperations = restOperations;
 	}
 
-	private static Map<String, String> getKubeLogin(String role, String jwt) {
+	/**
+	 * Creates a {@link AuthenticationSteps} for kubernetes authentication given
+	 * {@link KubernetesAuthenticationOptions}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for kubernetes authentication.
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			KubernetesAuthenticationOptions options) {
 
-		Assert.hasText(role, "role must not be empty");
-		Assert.hasText(role, "jwt must not be empty");
+		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 
-		Map<String, String> login = new HashMap<>();
-
-		login.put("jwt", jwt);
-		login.put("role", role);
-
-		return login;
+		String token = options.getJwtSupplier().get();
+		return AuthenticationSteps.fromSupplier(
+				() -> getKubernetesLogin(options.getRole(), token)) //
+				.login("auth/{mount}/login", options.getPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
-		return createTokenUsingKubernetes();
-	}
 
-	private VaultToken createTokenUsingKubernetes() {
-
-		Map<String, String> login = getKubeLogin(options.getRole(),
-				options.getJwtSupplier().getKubeJwt());
+		Map<String, String> login = getKubernetesLogin(options.getRole(), options
+				.getJwtSupplier().get());
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
@@ -102,5 +108,23 @@ public class KubeAuthentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using kubernetes: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(this.options);
+	}
+
+	private static Map<String, String> getKubernetesLogin(String role, String jwt) {
+
+		Assert.hasText(role, "Role must not be empty");
+		Assert.hasText(role, "JWT must not be empty");
+
+		Map<String, String> login = new HashMap<>();
+
+		login.put("jwt", jwt);
+		login.put("role", role);
+
+		return login;
 	}
 }

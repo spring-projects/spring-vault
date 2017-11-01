@@ -15,19 +15,25 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.function.Supplier;
+
 /**
  * Interface to obtain a Kubernetes Service Account Token for Kubernetes authentication.
- * Implementations are used by {@link KubeAuthentication}.
+ * Implementations are used by {@link KubernetesAuthentication}.
  *
  * @author Michal Budzyn
- * @see KubeAuthentication
+ * @author Mark Paluch
+ * @since 2.0
+ * @see KubernetesAuthentication
  */
-public interface KubeJwtSupplier {
+@FunctionalInterface
+public interface KubernetesJwtSupplier extends Supplier<String> {
 
 	/**
 	 * Get a JWT for Kubernetes authentication.
 	 *
 	 * @return the Kubernetes Service Account JWT.
 	 */
-	String getKubeJwt();
+	@Override
+	String get();
 }

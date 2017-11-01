@@ -10,6 +10,7 @@
 * Transit batch encrypt and decrypt support.
 * Policy management for policies stored as JSON.
 * Support CSR signing, certificate revocation and CRL retrieval.
+* <<vault.authentication.kubernetes,Kubernetes authentication>>.
 * RoleId/SecretId unwrapping for <<vault.authentication.approle,AppRole authentication>>.
 
 [[new-features.1-1-0]]

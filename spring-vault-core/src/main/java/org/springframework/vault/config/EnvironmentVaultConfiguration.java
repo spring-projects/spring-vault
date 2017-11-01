@@ -32,23 +32,23 @@ import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
-import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.IpAddressUserId;
-import org.springframework.vault.authentication.KubeAuthentication;
-import org.springframework.vault.authentication.KubeAuthenticationOptions;
-import org.springframework.vault.authentication.KubeJwtSupplier;
-import org.springframework.vault.authentication.KubeServiceAccountTokenFile;
+import org.springframework.vault.authentication.KubernetesAuthentication;
+import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
+import org.springframework.vault.authentication.KubernetesJwtSupplier;
+import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -138,7 +138,7 @@ import org.springframework.web.client.RestOperations;
  * @see AwsEc2Authentication
  * @see ClientCertificateAuthentication
  * @see CubbyholeAuthentication
- * @see KubeAuthentication
+ * @see KubernetesAuthentication
  */
 @Configuration
 public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration implements
@@ -339,14 +339,18 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 		String tokenFile = getProperty("vault.kubernetes.service-account-token-file");
 		if (!StringUtils.hasText(tokenFile)) {
-			tokenFile = KubeServiceAccountTokenFile.DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE;
+			tokenFile = KubernetesServiceAccountTokenFile.DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE;
 		}
-		KubeJwtSupplier jwtSupplier = new KubeServiceAccountTokenFile(tokenFile);
+		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(
+				tokenFile);
 
-		KubeAuthenticationOptions authenticationOptions = KubeAuthenticationOptions
-				.builder().role(role).jwtSupplier(jwtSupplier).build();
+		KubernetesAuthenticationOptions authenticationOptions = KubernetesAuthenticationOptions
+				.builder() //
+				.role(role) //
+				.jwtSupplier(jwtSupplier) //
+				.build();
 
-		return new KubeAuthentication(authenticationOptions, restOperations());
+		return new KubernetesAuthentication(authenticationOptions, restOperations());
 	}
 
 	@Nullable

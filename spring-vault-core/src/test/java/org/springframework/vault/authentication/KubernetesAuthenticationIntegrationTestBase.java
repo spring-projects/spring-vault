@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.junit.Assume.assumeTrue;
-import static org.springframework.vault.util.Settings.findWorkDir;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -25,18 +22,22 @@ import java.util.Map;
 
 import org.assertj.core.util.Files;
 import org.junit.Before;
+
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
 
+import static org.junit.Assume.assumeTrue;
+import static org.springframework.vault.util.Settings.findWorkDir;
+
 /**
- * Integration test base class for {@link KubeAuthentication} tests.
+ * Integration test base class for {@link KubernetesAuthentication} tests.
  *
  * @author Michal Budzyn
  */
-public abstract class KubeAuthenticationIntegrationTestBase
-		extends IntegrationTestSupport {
+public abstract class KubernetesAuthenticationIntegrationTestBase extends
+		IntegrationTestSupport {
 
 	@Before
 	public void before() {
@@ -49,13 +50,12 @@ public abstract class KubeAuthenticationIntegrationTestBase
 			prepare().mountAuth("kubernetes");
 		}
 
-		prepare().getVaultOperations()
-				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
+		prepare().getVaultOperations().doWithSession(
+				(RestOperationsCallback<Object>) restOperations -> {
 					File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(
-							new File(workDir, "minikube/ca.crt"),
-							StandardCharsets.US_ASCII);
+					String certificate = Files.contentOf(new File(workDir,
+							"minikube/ca.crt"), StandardCharsets.US_ASCII);
 
 					String host = String.format("https://%s:8443", minikubeIp);
 
@@ -73,7 +73,6 @@ public abstract class KubeAuthenticationIntegrationTestBase
 
 					return restOperations.postForEntity("auth/kubernetes/role/my-role",
 							roleData, Map.class);
-
 				});
 	}
 }

@@ -534,6 +534,47 @@ See also:
 * https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
+[[vault.authentication.kubernetes]]
+== Kubernetes authentication
+
+Vault supports since 0.8.3 https://www.vaultproject.io/docs/auth/kubernetes.html[kubernetes]
+-based authentication using Kubernetes tokens.
+
+Using Kubernetes authentication requires a Kubernetes Service Account Token,
+usually mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`. The file contains
+the token which is read and sent to Vault. Vault verifies its validity using Kubernets' API
+during login.
+
+Configuring Kubernetes authentication requires at least the role name to be provided:
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
+                .role(…).build();
+
+        return new KubernetesAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+You can configure the authentication via `KubernetesAuthenticationOptions`.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Using the Kubernetes auth backend]
+* https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
 [[vault.authentication.steps]]
 == Authentication Steps
