@@ -34,6 +34,7 @@ before_install:
 
 install:
   - src/test/bash/minikube_ci_initialize.sh
+  - src/test/bash/local_run_k8s.sh "./minikube" "./kubectl"
   - src/test/bash/start.sh
 
 script: ./mvnw clean verify -DMINIKUBE_IP=$(./minikube ip) -P${PROFILE:-ci}
