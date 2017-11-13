@@ -121,7 +121,7 @@ public class AppIdAuthenticationOptions {
 		 */
 		public AppIdAuthenticationOptionsBuilder appId(String appId) {
 
-			Assert.hasText(path, "AppId must not be empty");
+			Assert.hasText(appId, "AppId must not be empty");
 
 			this.appId = appId;
 			return this;
