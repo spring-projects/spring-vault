@@ -5,11 +5,6 @@ CMD_KUBECTL=${2:-kubectl}
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ ! -d "work" ]; then
-  echo "work directory could not be found."
-  exit 1
-fi
-
 mkdir -p work/minikube
 SERVICE_ACCOUNT_TOKEN_FILE=work/minikube/hello-minikube-token
 SERVICE_ACCOUNT_CA_CRT=work/minikube/ca.crt
