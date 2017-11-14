@@ -45,7 +45,7 @@ public class AppIdAuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -54,7 +54,7 @@ public class AppIdAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithStaticUserId() throws Exception {
+	public void loginShouldObtainTokenWithStaticUserId() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("hello") //
@@ -77,7 +77,7 @@ public class AppIdAuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("hello") //

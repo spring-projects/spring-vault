@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IpAddressUserIdTests {
 
 	@Test
-	public void shouldGenerateUppercaseSha256HexString() throws Exception {
+	public void shouldGenerateUppercaseSha256HexString() {
 
 		String userId = new IpAddressUserId().createUserId();
 

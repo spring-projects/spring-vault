@@ -46,7 +46,7 @@ public class ClientCertificateAuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -56,7 +56,7 @@ public class ClientCertificateAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainToken() throws Exception {
+	public void loginShouldObtainToken() {
 
 		mockRest.expect(requestTo("/auth/cert/login"))
 				.andExpect(method(HttpMethod.POST))
@@ -80,7 +80,7 @@ public class ClientCertificateAuthenticationUnitTests {
 	}
 
 	@Test(expected = VaultException.class)
-	public void loginShouldFail() throws Exception {
+	public void loginShouldFail() {
 
 		mockRest.expect(requestTo("/auth/cert/login")) //
 				.andRespond(withServerError());

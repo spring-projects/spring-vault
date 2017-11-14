@@ -53,7 +53,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());

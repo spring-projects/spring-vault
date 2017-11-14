@@ -107,21 +107,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsIam() {
 
-		Map<String, String> login = new HashMap<>();
-
-		login.put("iam_http_request_method", "POST");
-		login.put("iam_request_url", Base64Utils.encodeToString(options.getEndpointUri()
-				.toString().getBytes()));
-		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
-
-		String headerJson = getSignedHeaders(options);
-
-		login.put("iam_request_headers",
-				Base64Utils.encodeToString(headerJson.getBytes()));
-
-		if (!StringUtils.isEmpty(options.getRole())) {
-			login.put("role", options.getRole());
-		}
+		Map<String, String> login = createRequestBody(this.options);
 
 		try {
 
@@ -152,6 +138,34 @@ public class AwsIamAuthentication implements ClientAuthentication {
 			throw new VaultException(String.format("Cannot login using AWS-IAM: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+	}
+
+	/**
+	 * Create the request body to perform a Vault login using the AWS-IAM authentication
+	 * method.
+	 * 
+	 * @param options must not be {@literal null}.
+	 * @return the map containing body key-value pairs.
+	 */
+	protected static Map<String, String> createRequestBody(
+			AwsIamAuthenticationOptions options) {
+
+		Map<String, String> login = new HashMap<>();
+
+		login.put("iam_http_request_method", "POST");
+		login.put("iam_request_url", Base64Utils.encodeToString(options.getEndpointUri()
+				.toString().getBytes()));
+		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
+
+		String headerJson = getSignedHeaders(options);
+
+		login.put("iam_request_headers",
+				Base64Utils.encodeToString(headerJson.getBytes()));
+
+		if (!StringUtils.isEmpty(options.getRole())) {
+			login.put("role", options.getRole());
+		}
+		return login;
 	}
 
 	private static String getSignedHeaders(AwsIamAuthenticationOptions options) {

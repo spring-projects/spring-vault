@@ -51,7 +51,9 @@ public class AwsIamAuthenticationOptions {
 	private final AWSCredentialsProvider credentialsProvider;
 
 	/**
-	 * EC2 instance role name. May be {@literal null} if none.
+	 * Name of the role against which the login is being attempted. If role is not
+	 * specified, the friendly name (i.e., role name or username) of the IAM principal
+	 * authenticated. If a matching role is not found, login fails.
 	 */
 	@Nullable
 	private final String role;
@@ -194,7 +196,7 @@ public class AwsIamAuthenticationOptions {
 		}
 
 		/**
-		 * Configure the name of the role against which the login is being attempted.If
+		 * Configure the name of the role against which the login is being attempted. If
 		 * role is not specified, the friendly name (i.e., role name or username) of the
 		 * IAM principal authenticated. If a matching role is not found, login fails.
 		 *

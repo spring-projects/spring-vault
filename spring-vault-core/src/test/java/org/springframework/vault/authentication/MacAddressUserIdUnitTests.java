@@ -34,7 +34,7 @@ import static org.junit.Assume.assumeTrue;
 public class MacAddressUserIdUnitTests {
 
 	@Test
-	public void shouldGenerateUppercaseSha256HexString() throws Exception {
+	public void shouldGenerateUppercaseSha256HexString() {
 
 		String userId = new MacAddressUserId().createUserId();
 
