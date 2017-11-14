@@ -15,8 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
+
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
 
 /**
  * Static Token-based {@link ClientAuthentication} method.
@@ -59,12 +67,26 @@ public class TokenAuthentication implements ClientAuthentication,
 	 * {@link VaultToken}.
 	 *
 	 * @param token must not be {@literal null}.
+	 * @param selfLookup {@literal true} to perform a self-lookup using the given
+	 * {@link VaultToken}. Self-lookup will create a {@link LoginToken} and provide
+	 * renewability and TTL.
 	 * @return {@link AuthenticationSteps} for token authentication.
 	 * @since 2.0
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(VaultToken token) {
+	public static AuthenticationSteps createAuthenticationSteps(VaultToken token,
+			boolean selfLookup) {
 
 		Assert.notNull(token, "VaultToken must not be null");
+
+		if (selfLookup) {
+
+			HttpRequest<VaultResponse> httpRequest = get("auth/token/lookup-self").with(
+					VaultHttpHeaders.from(token)).as(VaultResponse.class);
+
+			return AuthenticationSteps.fromHttpRequest(httpRequest).login(
+					response -> LoginTokenUtil.from(token.toCharArray(),
+							response.getRequiredData()));
+		}
 
 		return AuthenticationSteps.just(token);
 	}
@@ -76,6 +98,10 @@ public class TokenAuthentication implements ClientAuthentication,
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(this.token);
+		return createAuthenticationSteps(this.token, false);
+	}
+
+	private static Duration getLeaseDuration(@Nullable Number ttl) {
+		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
 }

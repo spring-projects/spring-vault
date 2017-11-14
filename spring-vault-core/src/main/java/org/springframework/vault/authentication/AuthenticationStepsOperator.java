@@ -131,7 +131,10 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 							String.format(
 									"Cannot retrieve VaultToken from authentication chain. Got instead %s",
 									stateObject));
-				});
+				})
+				.onErrorMap(
+						t -> new VaultException(
+								"Cannot retrieve VaultToken from authentication chain", t));
 	}
 
 	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
