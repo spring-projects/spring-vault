@@ -58,10 +58,10 @@
 
 	<properties>
 		<httpclient.version>4.5.3</httpclient.version>
-		<httpcore.version>4.4.7</httpcore.version>
-		<netty.version>4.1.16.Final</netty.version>
+		<httpcore.version>4.4.8</httpcore.version>
+		<netty.version>4.1.17.Final</netty.version>
 		<okhttp3.version>3.9.0</okhttp3.version>
-		<jackson.version>2.9.1</jackson.version>
+		<jackson.version>2.9.2</jackson.version>
 	</properties>
 
 	<dependencyManagement>
@@ -120,7 +120,7 @@
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-core</artifactId>
-				<version>1.11.208</version>
+				<version>1.11.228</version>
 				<optional>true</optional>
 			</dependency>
 
@@ -204,7 +204,6 @@
 							</execution>
 						</executions>
 					</plugin>
-
 				</plugins>
 			</build>
 
