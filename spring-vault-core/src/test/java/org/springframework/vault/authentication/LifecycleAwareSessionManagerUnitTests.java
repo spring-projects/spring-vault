@@ -16,6 +16,8 @@
 package org.springframework.vault.authentication;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
@@ -32,6 +34,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager.FixedTimeoutRefreshTrigger;
 import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestOperations;
@@ -157,6 +160,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 	public void shouldReScheduleTokenRenewalAfterSucessfulRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.renewable("login", 5));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), 10)));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -166,6 +171,44 @@ public class LifecycleAwareSessionManagerUnitTests {
 		runnableCaptor.getValue().run();
 
 		verify(taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
+	}
+
+	@Test
+	public void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
+
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), 5));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), 2)));
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+
+		sessionManager.getSessionToken();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+
+		runnableCaptor.getValue().run();
+
+		verify(taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
+	}
+
+	@Test
+	public void shouldReLoginIfRenewalTtlExceedsThreshold() {
+
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), 5),
+				LoginToken.renewable("bar".toCharArray(), 5));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), 2)));
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		sessionManager.getSessionToken();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		runnableCaptor.getValue().run();
+
+		assertThat(sessionManager.getSessionToken()).isEqualTo(
+				LoginToken.renewable("bar".toCharArray(), 5));
+
+		verify(clientAuthentication, times(2)).login();
 	}
 
 	@Test
@@ -253,5 +296,19 @@ public class LifecycleAwareSessionManagerUnitTests {
 		assertThat(nextExecutionTime).isBetween(
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2)));
+	}
+
+	private static VaultResponse fromToken(LoginToken loginToken) {
+
+		Map<String, Object> auth = new HashMap<String, Object>();
+
+		auth.put("client_token", loginToken.getToken());
+		auth.put("renewable", loginToken.isRenewable());
+		auth.put("lease_duration", loginToken.getLeaseDuration());
+
+		VaultResponse response = new VaultResponse();
+		response.setAuth(auth);
+
+		return response;
 	}
 }
