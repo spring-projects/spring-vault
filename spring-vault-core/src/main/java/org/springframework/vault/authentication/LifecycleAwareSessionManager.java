@@ -30,6 +30,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.http.HttpEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
@@ -38,6 +39,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
@@ -228,14 +230,41 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 		logger.info("Renewing token");
 
+		Optional<TokenWrapper> token = this.token;
 		if (!token.isPresent()) {
 			getSessionToken();
 			return false;
 		}
 
+		TokenWrapper wrapper = token.get();
+
 		try {
-			restOperations.postForObject("auth/token/renew-self", new HttpEntity<>(
-					VaultHttpHeaders.from(token.get().getToken())), Map.class);
+
+			VaultResponse vaultResponse = restOperations.postForObject(
+					"auth/token/renew-self",
+					new HttpEntity<>(VaultHttpHeaders.from(token.get().getToken())),
+					VaultResponse.class);
+
+			LoginToken renewed = LoginTokenUtil.from(vaultResponse.getRequiredAuth());
+
+			Duration validTtlThreshold = refreshTrigger.getValidTtlThreshold(renewed);
+			if (renewed.getLeaseDuration().compareTo(validTtlThreshold) <= 0) {
+
+				if (logger.isDebugEnabled()) {
+					logger.info(String
+							.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
+									renewed.getLeaseDuration(), validTtlThreshold));
+				}
+				else {
+					logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
+				}
+
+				this.token = Optional.empty();
+				return false;
+			}
+
+			this.token = Optional.of(new TokenWrapper(renewed, wrapper.revocable));
+
 			return true;
 		}
 		catch (HttpStatusCodeException e) {
@@ -244,7 +273,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 				logger.debug(String
 						.format("Cannot refresh token, resetting token and performing re-login: %s",
 								VaultResponses.getError(e.getResponseBodyAsString())));
-				token = Optional.empty();
+				this.token = Optional.empty();
 				return false;
 			}
 
@@ -299,6 +328,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		return clientAuthentication.login();
 	}
 
+	/**
+	 * @return {@literal true} if the token is renewable.
+	 */
 	protected boolean isTokenRenewable() {
 
 		return token.map(TokenWrapper::getToken)
@@ -333,12 +365,16 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			}
 		};
 
-		taskScheduler.schedule(task, createTrigger());
+		Optional<TokenWrapper> token = this.token;
+
+		token.ifPresent(tokenWrapper -> taskScheduler.schedule(task,
+				createTrigger(tokenWrapper)));
 	}
 
-	private OneShotTrigger createTrigger() {
-		return new OneShotTrigger(refreshTrigger.nextExecutionTime((LoginToken) token
-				.map(TokenWrapper::getToken).get()));
+	private OneShotTrigger createTrigger(TokenWrapper tokenWrapper) {
+
+		return new OneShotTrigger(
+				refreshTrigger.nextExecutionTime((LoginToken) tokenWrapper.getToken()));
 	}
 
 	/**
@@ -352,6 +388,7 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 		private final Date nextExecutionTime;
 
+		@Nullable
 		public Date nextExecutionTime(TriggerContext triggerContext) {
 
 			if (fired.compareAndSet(false, true)) {
@@ -364,17 +401,28 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 
 	/**
 	 * Common interface for trigger objects that determine the next execution time of a
-	 * refresh task that they get associated with.
+	 * refresh task.
 	 */
 	public interface RefreshTrigger {
 
 		/**
 		 * Determine the next execution time according to the given trigger context.
+		 *
 		 * @param loginToken login token encapsulating renewability and lease duration.
 		 * @return the next execution time as defined by the trigger, or {@code null} if
 		 * the trigger won't fire anymore
 		 */
 		Date nextExecutionTime(LoginToken loginToken);
+
+		/**
+		 * Returns the minimum TTL duration to consider a token valid after renewal.
+		 * Tokens with a shorter TTL are revoked and considered expired.
+		 *
+		 * @param loginToken the login token after renewal.
+		 * @return minimum TTL {@link Duration} to consider a token valid.
+		 * @since 2.0
+		 */
+		Duration getValidTtlThreshold(LoginToken loginToken);
 	}
 
 	/**
@@ -389,10 +437,12 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 		private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
 		private final Duration duration;
+		private final Duration validTtlThreshold;
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
 		 * {@code timeout} before the {@link LoginToken} expires
+		 *
 		 * @param timeout timeout value, non-negative long value.
 		 * @param timeUnit must not be {@literal null}.
 		 */
@@ -403,20 +453,40 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
 
 			this.duration = Duration.ofMillis(timeUnit.toMillis(timeout));
+			this.validTtlThreshold = Duration.ofMillis(timeUnit.toMillis(timeout) + 2000);
 		}
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
-		 * {@code timeout} before the {@link LoginToken} expires
+		 * {@code timeout} before the {@link LoginToken} expires. Valid TTL threshold is
+		 * set to two seconds longer to compensate for timing issues during scheduling.
+		 *
 		 * @param timeout timeout value.
 		 * @since 2.0
 		 */
 		public FixedTimeoutRefreshTrigger(Duration timeout) {
+			this(timeout, timeout.plus(Duration.ofSeconds(2)));
+		}
+
+		/**
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
+		 * {@code timeout} before the {@link LoginToken} expires.
+		 *
+		 * @param timeout timeout value.
+		 * @param validTtlThreshold minimum TTL duration to consider a Token as valid.
+		 * Tokens with a shorter TTL are not used anymore. Should be greater than
+		 * {@code timeout} to prevent token expiry.
+		 * @since 2.0
+		 */
+		public FixedTimeoutRefreshTrigger(Duration timeout, Duration validTtlThreshold) {
 
 			Assert.isTrue(timeout.toMillis() >= 0,
 					"Timeout duration must be greater or equal to zero");
 
+			Assert.notNull(validTtlThreshold, "Valid TTL threshold must not be null");
+
 			this.duration = timeout;
+			this.validTtlThreshold = validTtlThreshold;
 		}
 
 		@Override
@@ -426,6 +496,11 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					.getLeaseDuration().toMillis() - duration.toMillis());
 
 			return new Date(System.currentTimeMillis() + milliseconds);
+		}
+
+		@Override
+		public Duration getValidTtlThreshold(LoginToken loginToken) {
+			return validTtlThreshold;
 		}
 	}
 
