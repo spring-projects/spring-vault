@@ -537,8 +537,7 @@ See also:
 [[vault.authentication.kubernetes]]
 == Kubernetes authentication
 
-Vault supports since 0.8.3 https://www.vaultproject.io/docs/auth/kubernetes.html[kubernetes]
--based authentication using Kubernetes tokens.
+Vault supports since 0.8.3 https://www.vaultproject.io/docs/auth/kubernetes.html[kubernetes]-based authentication using Kubernetes tokens.
 
 Using Kubernetes authentication requires a Kubernetes Service Account Token,
 usually mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`. The file contains
@@ -647,7 +646,7 @@ VaultToken token = executor.login();
 
 == Token Lifecycle
 
-Vault's tokens can be associated with a time to live. Tokens obtained by an authentication method 
+Vault's tokens can be associated with a time to live. Tokens obtained by an authentication method
 are intended to be used as long as the session is active and should not expire while the application is active.
 
 Spring Vault provides with {self-docs-root}api/org/springframework/vault/authentication/LifecycleAwareSessionManager.html[`LifecycleAwareSessionManager`] a session manager that can renew the token until it reaches its terminal TTL to then perform another login to obtain the next token which is associated with the session.
@@ -659,4 +658,4 @@ Depending on the authentication method, a login can create two kinds of tokens:
 
 Authentication methods such as {self-docs-root}api/org/springframework/vault/authentication/TokenAuthentication.html[`TokenAuthentication`] just create a `VaultToken` which does not carry any renewability/TTL details. `LifecycleAwareSessionManager` will run a self-lookup on the token to retrieve renewability and TTL from Vault.
 
-Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down. 
+Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.
