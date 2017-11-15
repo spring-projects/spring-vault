@@ -1,6 +1,22 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.RC1
+-----------------------------------------
+* Support CSR signing, certificate revocation and CRL retrieval #125
+* Support Kubernetes authentication #143
+* Extend Transit API to Support Hashing and Signing Operations #148
+* Provide AuthenticationSteps for token authentication with self-lookup #158
+* Perodic tokens are not refreshed #161
+* Extend Transit API to support Hashing and Signing Operations #162
+* CubbyholeAuthentication doesn't allow unwrapping of something else than a token #164
+* Add the ability to use response wrapping for AppRole secretId responses #165
+* Implementation of Auth Backend with Kubernetes Service Account Token #166
+* Upgrade to Spring Framework 5.0.1 #167
+* Fixing assert to verify the correct variable #170
+* TravisCI build broken #171
+* Upgrade to Vault 0.9.0 #172
+
 Changes in version 2.0.0.M3
 -----------------------------------------
 * Add support to manage policies #10
