@@ -173,9 +173,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 					VaultResponse.class);
 			LoginToken renewed = LoginTokenUtil.from(vaultResponse.getAuth());
 
-			long validTtlThreshold = refreshTrigger.getValidTtlThreshold(renewed);
-			if (renewed.getLeaseDuration() <= TimeUnit.MILLISECONDS
-					.toSeconds(validTtlThreshold)) {
+			long validTtlThreshold = TimeUnit.MILLISECONDS.toSeconds(refreshTrigger
+					.getValidTtlThreshold(renewed));
+			if (renewed.getLeaseDuration() <= validTtlThreshold) {
 
 				if (logger.isDebugEnabled()) {
 					logger.info(String
