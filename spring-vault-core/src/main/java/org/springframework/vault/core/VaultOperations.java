@@ -81,8 +81,8 @@ public interface VaultOperations {
 	VaultPkiOperations opsForPki(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret
-	 * backends that do not require a request body.
+	 * Read from a Vault path. Reading data using this method is suitable for API
+	 * calls/secret backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -100,7 +100,7 @@ public interface VaultOperations {
 	<T> VaultResponseSupport<T> read(String path, Class<T> responseType);
 
 	/**
-	 * Enumerate keys from a secret backend.
+	 * Enumerate keys from a Vault path.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -108,16 +108,16 @@ public interface VaultOperations {
 	List<String> list(String path);
 
 	/**
-	 * Write to a secret backend.
+	 * Write to a Vault path.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
-	 * @return the configuration data. May be empty but never {@literal null}.
+	 * @return the response, may be empty but never {@literal null}.
 	 */
 	VaultResponse write(String path, Object body);
 
 	/**
-	 * Delete a path in the secret backend.
+	 * Delete a path.
 	 *
 	 * @param path must not be {@literal null}.
 	 */
