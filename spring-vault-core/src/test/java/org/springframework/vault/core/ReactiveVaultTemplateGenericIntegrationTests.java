@@ -136,7 +136,6 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 		StepVerifier.create(vaultOperations.list("secret").collectList())
 				.consumeNextWith(actual -> assertThat(actual).contains("mykey"))
 				.verifyComplete();
-
 	}
 
 	@Test
@@ -149,6 +148,17 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 		StepVerifier.create(vaultOperations.delete("secret/mykey")).verifyComplete();
 
 		StepVerifier.create(vaultOperations.read("secret/mykey")).verifyComplete();
+	}
+
+	@Test
+	public void writeShouldReturnResponse() {
+
+		StepVerifier.create(vaultOperations.write("auth/token/create"))
+				.assertNext(response -> {
+
+					assertThat(response.getAuth()).isNotNull();
+
+				}).verifyComplete();
 	}
 
 	static class Person {

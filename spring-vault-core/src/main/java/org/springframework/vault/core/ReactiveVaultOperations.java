@@ -21,6 +21,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -78,10 +79,20 @@ public interface ReactiveVaultOperations {
 	 * Write to a secret backend.
 	 *
 	 * @param path must not be {@literal null}.
+	 * @return the configuration data. May be empty but never {@literal null}.
+	 */
+	default Mono<VaultResponse> write(String path) {
+		return write(path, null);
+	}
+
+	/**
+	 * Write to a secret backend.
+	 *
+	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
 	 * @return the configuration data. May be empty but never {@literal null}.
 	 */
-	Mono<Void> write(String path, Object body);
+	Mono<VaultResponse> write(String path, @Nullable Object body);
 
 	/**
 	 * Delete a path in the secret backend.

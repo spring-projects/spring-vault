@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.SessionManager;
@@ -45,6 +46,7 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
 
@@ -141,12 +143,19 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
-	public Mono<Void> write(String path, Object body) {
+	public Mono<VaultResponse> write(String path, @Nullable Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return sessionClient.post().uri(path).syncBody(body).exchange()
-				.flatMap(mapResponse(VaultResponse.class, path)).then();
+		RequestBodySpec uri = sessionClient.post().uri(path);
+		Mono<ClientResponse> exchange;
+		if (body != null) {
+			exchange = uri.syncBody(body).exchange();
+		}
+		else {
+			exchange = uri.exchange();
+		}
+		return exchange.flatMap(mapResponse(VaultResponse.class, path));
 	}
 
 	@Override
