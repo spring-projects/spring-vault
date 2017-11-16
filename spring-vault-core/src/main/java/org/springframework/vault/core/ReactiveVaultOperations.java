@@ -49,8 +49,8 @@ import org.springframework.web.reactive.function.client.WebClientException;
 public interface ReactiveVaultOperations {
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret
-	 * backends that do not require a request body.
+	 * Read from a Vault path. Reading data using this method is suitable for API
+	 * calls/secret backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
@@ -58,8 +58,8 @@ public interface ReactiveVaultOperations {
 	Mono<VaultResponse> read(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret
-	 * backends that do not require a request body.
+	 * Read from a Vault path. Reading data using this method is suitable for API
+	 * calls/secret backends that do not require a request body.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
@@ -68,7 +68,7 @@ public interface ReactiveVaultOperations {
 	<T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType);
 
 	/**
-	 * Enumerate keys from a secret backend.
+	 * Enumerate keys from a Vault path.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
@@ -76,26 +76,26 @@ public interface ReactiveVaultOperations {
 	Flux<String> list(String path);
 
 	/**
-	 * Write to a secret backend.
+	 * Write to a Vault path.
 	 *
 	 * @param path must not be {@literal null}.
-	 * @return the configuration data. May be empty but never {@literal null}.
+	 * @return the response. May be empty if the response has no body.
 	 */
 	default Mono<VaultResponse> write(String path) {
 		return write(path, null);
 	}
 
 	/**
-	 * Write to a secret backend.
+	 * Write to a Vault path.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
-	 * @return the configuration data. May be empty but never {@literal null}.
+	 * @return the response. May be empty if the response has no body.
 	 */
 	Mono<VaultResponse> write(String path, @Nullable Object body);
 
 	/**
-	 * Delete a path in the secret backend.
+	 * Delete a path.
 	 *
 	 * @param path must not be {@literal null}.
 	 */
