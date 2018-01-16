@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.DefaultSchemePortResolver;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
@@ -242,6 +243,9 @@ public class ClientHttpRequestFactoryFactory {
 					.build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+
+			// Support redirects
+			httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
