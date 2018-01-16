@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultPkiOperations}.
- * 
+ *
  * @author Mark Paluch
  */
 public class VaultPkiTemplate implements VaultPkiOperations {
@@ -41,7 +41,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	/**
 	 * Create a new {@link VaultPkiTemplate} given {@link VaultPkiOperations} and the
 	 * mount {@code path}.
-	 * 
+	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */

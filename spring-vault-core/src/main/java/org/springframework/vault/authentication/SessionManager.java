@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.springframework.vault.support.VaultToken;
  * {@link SessionManager} is used by {@link org.springframework.vault.core.VaultTemplate}
  * to initiate a session. Implementing classes usually use {@link ClientAuthentication} to
  * log into Vault and obtain tokens.
- * 
+ *
  * @author Mark Paluch
  * @see SimpleSessionManager
  * @see ClientAuthentication
@@ -33,7 +33,7 @@ public interface SessionManager {
 
 	/**
 	 * Obtain a session token.
-	 * 
+	 *
 	 * @return a session token.
 	 */
 	VaultToken getSessionToken();

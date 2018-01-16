@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 the original author or authors.
+ * Copyright 2016-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.vault.support.VaultCertificateResponse;
  * private key and CSR, submitting to a CA, and waiting for a verification and signing
  * process to complete. Vault's built-in authentication and authorization mechanisms
  * provide the verification functionality.
- * 
+ *
  * @author Mark Paluch
  * @see <a href=
  * "https://www.vaultproject.io/docs/secrets/pki/index.html">https://www.vaultproject.io/docs/secrets/pki/index.html</a>
