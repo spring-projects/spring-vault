@@ -17,10 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +34,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.vault.authentication.LifecycleAwareSessionManager.FixedTimeoutRefreshTrigger;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -331,32 +328,6 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		assertThat(sessionManager.renewToken()).isFalse();
 		verify(clientAuthentication, times(1)).login();
-	}
-
-	@Test
-	public void shouldScheduleNextExecutionTimeCorrectly() {
-
-		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
-				TimeUnit.SECONDS);
-
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
-				"foo".toCharArray(), Duration.ofMinutes(1)));
-		assertThat(nextExecutionTime).isBetween(
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(52)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(56)));
-	}
-
-	@Test
-	public void shouldScheduleNextExecutionIfValidityLessThanTimeout() {
-
-		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
-				TimeUnit.SECONDS);
-
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
-				"foo".toCharArray(), Duration.ofSeconds(2)));
-		assertThat(nextExecutionTime).isBetween(
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2)));
 	}
 
 	private static VaultResponse fromToken(LoginToken loginToken) {
