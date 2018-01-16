@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class Policy {
 
 	/**
 	 * Create an empty {@link Policy} without rules.
-	 * 
+	 *
 	 * @return an empty {@link Policy}.
 	 */
 	public static Policy empty() {
@@ -87,7 +87,7 @@ public class Policy {
 
 	/**
 	 * Create a {@link Policy} from one or more {@code rules}.
-	 * 
+	 *
 	 * @param rules must not be {@literal null}.
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
@@ -101,7 +101,7 @@ public class Policy {
 
 	/**
 	 * Create a {@link Policy} from one or more {@code rules}.
-	 * 
+	 *
 	 * @param rules must not be {@literal null}.
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
@@ -116,7 +116,7 @@ public class Policy {
 	 * Create a new {@link Policy} object containing all configured rules and add the
 	 * given {@link Rule} to the new policy object. If the given {@link Rule} matches an
 	 * existing rule path, the exiting rule will be overridden by the new rule object.
-	 * 
+	 *
 	 * @param rule must not be {@literal null}.
 	 * @return the new {@link Policy} object containing all configured rules and the given
 	 * {@link Rule}.
@@ -139,7 +139,7 @@ public class Policy {
 	/**
 	 * Lookup a {@link Rule} by its path. Returns {@literal null} if the rule was not
 	 * found.
-	 * 
+	 *
 	 * @param path must not be {@literal null}.
 	 * @return the {@link Rule} or {@literal null}, if not found.
 	 */
@@ -160,7 +160,7 @@ public class Policy {
 	/**
 	 * Value object representing a rule for a certain path. Rule equality is considered by
 	 * comparing only the path segment to guarante uniqueness within a {@link Set}.
-	 * 
+	 *
 	 * @author Mark Paluch
 	 */
 	@EqualsAndHashCode(of = "path")
@@ -306,7 +306,7 @@ public class Policy {
 
 			/**
 			 * Associate a {@code path} with the rule.
-			 * 
+			 *
 			 * @param path must not be {@literal null} or empty.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -321,7 +321,7 @@ public class Policy {
 			/**
 			 * Configure a {@link Capability} for the rule. Capabilities are added when
 			 * calling this method and do not replace already configured capabilities.
-			 * 
+			 *
 			 * @param capability must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -336,7 +336,7 @@ public class Policy {
 			/**
 			 * Configure capabilities. apabilities are added when calling this method and
 			 * do not replace already configured capabilities.
-			 * 
+			 *
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -354,7 +354,7 @@ public class Policy {
 			 * resolves capabilities using {@link BuiltinCapabilities}. Capabilities are
 			 * added when calling this method and do not replace already configured
 			 * capabilities.
-			 * 
+			 *
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 * @throws IllegalArgumentException if the capability cannot be resolved to a
@@ -393,7 +393,7 @@ public class Policy {
 
 			/**
 			 * Configure a min TTL for response wrapping.
-			 * 
+			 *
 			 * @param ttl must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -407,7 +407,7 @@ public class Policy {
 
 			/**
 			 * Configure a max TTL for response wrapping.
-			 * 
+			 *
 			 * @param ttl must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -424,7 +424,7 @@ public class Policy {
 			 * Allowing parameter values replaces previously configured allowed parameter
 			 * values. Empty {@code values} allow all values for the given parameter
 			 * {@code name}.
-			 * 
+			 *
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
@@ -443,7 +443,7 @@ public class Policy {
 			 * Configure denied parameter values given {@code name} and {@code values}.
 			 * Denying parameter values replaces previously configured denied parameter
 			 * values. Empty {@code values} deny parameter usage.
-			 * 
+			 *
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
@@ -461,7 +461,7 @@ public class Policy {
 			/**
 			 * Build the {@link Rule} object. Requires a configured {@link #path(String)}
 			 * and at least one {@link #capability(Capability)}.
-			 * 
+			 *
 			 * @return the new {@link Rule} object.
 			 */
 			public Rule build() {
@@ -568,7 +568,7 @@ public class Policy {
 
 		/**
 		 * Find a {@link Capability} by its name. The name is compared case-insensitive.
-		 * 
+		 *
 		 * @param value must not be {@literal null}.
 		 * @return the {@link Capability} or {@literal null}, if not found.
 		 */
