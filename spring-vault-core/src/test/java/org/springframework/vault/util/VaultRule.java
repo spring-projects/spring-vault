@@ -29,6 +29,7 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Vault rule to ensure a running and prepared Vault.
@@ -66,13 +67,15 @@ public class VaultRule extends ExternalResource {
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(sslConfiguration);
+		WebClient webClient = TestWebClientFactory.create(sslConfiguration);
 
 		VaultTemplate vaultTemplate = new VaultTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				restTemplate.getRequestFactory(), new PreparingSessionManager());
 
 		this.token = Settings.token();
-		this.prepareVault = new PrepareVault(
+
+		this.prepareVault = new PrepareVault(webClient,
 				TestRestTemplateFactory.create(sslConfiguration), vaultTemplate);
 		this.vaultEndpoint = vaultEndpoint;
 	}

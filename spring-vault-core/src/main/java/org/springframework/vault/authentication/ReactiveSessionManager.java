@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2018 the original author or authors.
+ * Copyright 2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,27 @@ import reactor.core.publisher.Mono;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * {@link VaultTokenSupplier} provides a {@link VaultToken} to be used for authenticated
- * Vault access. Implementing classes usually use a login method to login and return a
- * {@link VaultToken} implementing {@link #getVaultToken()}.
+ * Strategy interface that encapsulates the creation and management of Vault sessions
+ * based on {@link VaultToken} used by reactive components.
+ * <p>
+ * {@link ReactiveSessionManager} is used by
+ * {@link org.springframework.vault.core.ReactiveVaultTemplate} to initiate a session.
+ * Implementing classes usually use {@link VaultTokenSupplier} to log into Vault and
+ * obtain tokens.
  *
  * @author Mark Paluch
+ * @see CachingVaultTokenSupplier
+ * @see VaultTokenSupplier
  * @since 2.0
  */
-@FunctionalInterface
-public interface VaultTokenSupplier {
+public interface ReactiveSessionManager extends VaultTokenSupplier {
 
 	/**
-	 * Return a {@link VaultToken}. This can declare a Vault login flow to obtain a
-	 * {@link VaultToken token}.
+	 * Obtain a session token.
 	 *
-	 * @return a {@link Mono} with the {@link VaultToken}.
+	 * @return a session token.
 	 */
-	Mono<VaultToken> getVaultToken();
+	default Mono<VaultToken> getSessionToken() {
+		return getVaultToken();
+	}
 }

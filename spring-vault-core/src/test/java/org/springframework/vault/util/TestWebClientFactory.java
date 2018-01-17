@@ -15,8 +15,6 @@
  */
 package org.springframework.vault.util;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.ReactiveVaultClients;
@@ -33,11 +31,8 @@ public class TestWebClientFactory {
 
 	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
 
-	private static final AtomicReference<ClientHttpConnector> connectorCache = new AtomicReference<ClientHttpConnector>();
-
 	/**
-	 * Create a new {@link WebClient} using the {@link SslConfiguration}. The underlying
-	 * {@link WebClient} is cached. See
+	 * Create a new {@link WebClient} using the {@link SslConfiguration}. See
 	 * {@link ReactiveVaultClients#createWebClient(VaultEndpoint, ClientHttpConnector)} to
 	 * create {@link WebClient} for a given {@link ClientHttpConnector}.
 	 *
@@ -49,7 +44,6 @@ public class TestWebClientFactory {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
 
 		try {
-			initializeClientHttpConnector(sslConfiguration);
 			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT,
 					ClientHttpConnectorFactory.create(new ClientOptions(),
 							sslConfiguration));
@@ -57,18 +51,5 @@ public class TestWebClientFactory {
 		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
-	}
-
-	private static void initializeClientHttpConnector(SslConfiguration sslConfiguration)
-			throws Exception {
-
-		if (connectorCache.get() != null) {
-			// return;
-		}
-
-		ClientHttpConnector clientHttpConnector = ClientHttpConnectorFactory.create(
-				new ClientOptions(), sslConfiguration);
-
-		// connectorCache.compareAndSet(null, clientHttpConnector);
 	}
 }

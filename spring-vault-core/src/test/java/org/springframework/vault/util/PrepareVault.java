@@ -29,6 +29,7 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Vault preparation utility class. This class allows preparing Vault for integration
@@ -43,9 +44,12 @@ public class PrepareVault {
 	private final VaultOperations vaultOperations;
 
 	private final VaultSysOperations adminOperations;
+	private WebClient webClient;
 
-	public PrepareVault(RestTemplate restTemplate, VaultOperations vaultOperations) {
+	public PrepareVault(WebClient webClient, RestTemplate restTemplate,
+			VaultOperations vaultOperations) {
 
+		this.webClient = webClient;
 		this.restTemplate = restTemplate;
 		this.vaultOperations = vaultOperations;
 		this.adminOperations = vaultOperations.opsForSys();
@@ -184,5 +188,9 @@ public class PrepareVault {
 
 	public RestTemplate getRestTemplate() {
 		return restTemplate;
+	}
+
+	public WebClient getWebClient() {
+		return webClient;
 	}
 }
