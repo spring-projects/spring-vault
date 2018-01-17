@@ -63,7 +63,7 @@ public class VaultPropertySourceUnitTests {
 				vaultTemplate, "secret/myapp", PropertyTransformers.noop());
 
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
-		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo("1");
+		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo(1);
 		assertThat(vaultPropertySource.getProperty("complex.key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("empty")).isNull();
 		assertThat(vaultPropertySource.containsProperty("empty")).isFalse();
@@ -82,7 +82,7 @@ public class VaultPropertySourceUnitTests {
 		assertThat(vaultPropertySource.containsProperty("key")).isFalse();
 		assertThat(vaultPropertySource.getProperty("database.key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("key")).isNull();
-		assertThat(vaultPropertySource.getProperty("database.integer")).isEqualTo("1");
+		assertThat(vaultPropertySource.getProperty("database.integer")).isEqualTo(1);
 		assertThat(vaultPropertySource.getProperty("database.complex.key")).isEqualTo(
 				"value");
 	}

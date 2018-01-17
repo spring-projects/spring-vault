@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,20 +39,17 @@ import org.springframework.util.StringUtils;
  * <p>
  * Input:
  *
- * <pre>
- * <code>
- *     {"key": {"nested: "value"}, "another.key": ["one", "two"] }
- * </code>
+ * <pre class="code">
+ *     {"key": {"nested: 1}, "another.key": ["one", "two"] }
  * </pre>
  *
  * <br>
  * Result
  *
- * <pre>
- * <code> key.nested=value
+ * <pre class="code">
+ *  key.nested=1
  *  another.key[0]=one
  *  another.key[1]=two
- * </code>
  * </pre>
  *
  * @author Mark Paluch
@@ -67,19 +66,42 @@ public abstract class JsonMapFlattener {
 	 * @param inputMap must not be {@literal null}.
 	 * @return the resulting {@link Map}.
 	 */
-	public static Map<String, String> flatten(Map<String, ? extends Object> inputMap) {
+	public static Map<String, Object> flatten(Map<String, ? extends Object> inputMap) {
+
+		Assert.notNull(inputMap, "Input Map must not be null");
+
+		Map<String, Object> resultMap = new LinkedHashMap<>();
+
+		doFlatten("", inputMap.entrySet().iterator(), resultMap, UnaryOperator.identity());
+
+		return resultMap;
+	}
+
+	/**
+	 * Flatten a hierarchical {@link Map} into a flat {@link Map} with key names using
+	 * property dot notation.
+	 *
+	 * @param inputMap must not be {@literal null}.
+	 * @return the resulting {@link Map}.
+	 * @since 2.0
+	 */
+	public static Map<String, String> flattenToStringMap(
+			Map<String, ? extends Object> inputMap) {
 
 		Assert.notNull(inputMap, "Input Map must not be null");
 
 		Map<String, String> resultMap = new LinkedHashMap<>();
 
-		doFlatten("", inputMap.entrySet().iterator(), resultMap);
+		doFlatten("", inputMap.entrySet().iterator(), resultMap, it -> it == null ? null
+				: it.toString());
 
 		return resultMap;
 	}
 
 	private static void doFlatten(String propertyPrefix,
-			Iterator<? extends Entry<String, ?>> inputMap, Map<String, String> resultMap) {
+			Iterator<? extends Entry<String, ?>> inputMap,
+			Map<String, ? extends Object> resultMap,
+			Function<Object, Object> valueTransformer) {
 
 		if (StringUtils.hasText(propertyPrefix)) {
 			propertyPrefix = propertyPrefix + ".";
@@ -89,35 +111,38 @@ public abstract class JsonMapFlattener {
 
 			Entry<String, ? extends Object> entry = inputMap.next();
 			flattenElement(propertyPrefix.concat(entry.getKey()), entry.getValue(),
-					resultMap);
+					resultMap, valueTransformer);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
 	private static void flattenElement(String propertyPrefix, @Nullable Object source,
-			Map<String, String> resultMap) {
+			Map<String, ?> resultMap, Function<Object, Object> valueTransformer) {
 
 		if (source instanceof Iterable) {
-			flattenCollection(propertyPrefix, (Iterable<Object>) source, resultMap);
+			flattenCollection(propertyPrefix, (Iterable<Object>) source, resultMap,
+					valueTransformer);
 			return;
 		}
 
 		if (source instanceof Map) {
 			doFlatten(propertyPrefix, ((Map<String, ?>) source).entrySet().iterator(),
-					resultMap);
+					resultMap, valueTransformer);
 			return;
 		}
 
-		resultMap.put(propertyPrefix, source == null ? null : source.toString());
+		((Map) resultMap).put(propertyPrefix, valueTransformer.apply(source));
 	}
 
 	private static void flattenCollection(String propertyPrefix,
-			Iterable<Object> iterable, Map<String, String> resultMap) {
+			Iterable<Object> iterable, Map<String, ?> resultMap,
+			Function<Object, Object> valueTransformer) {
 
 		int counter = 0;
 
 		for (Object element : iterable) {
-			flattenElement(propertyPrefix + "[" + counter + "]", element, resultMap);
+			flattenElement(propertyPrefix + "[" + counter + "]", element, resultMap,
+					valueTransformer);
 			counter++;
 		}
 	}

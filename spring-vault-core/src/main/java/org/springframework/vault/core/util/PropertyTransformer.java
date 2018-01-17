@@ -38,7 +38,7 @@ public interface PropertyTransformer {
 	 * @param input must not be {@literal null}.
 	 * @return transformed properties.
 	 */
-	Map<String, String> transformProperties(Map<String, String> input);
+	Map<String, Object> transformProperties(Map<String, Object> input);
 
 	/**
 	 * Return a composed transformer function that first applies this filter, and then

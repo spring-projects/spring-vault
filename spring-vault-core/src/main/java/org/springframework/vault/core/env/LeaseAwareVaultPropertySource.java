@@ -60,7 +60,7 @@ public class LeaseAwareVaultPropertySource
 
 	private final RequestedSecret requestedSecret;
 
-	private final Map<String, String> properties = new ConcurrentHashMap<>();
+	private final Map<String, Object> properties = new ConcurrentHashMap<>();
 
 	private final PropertyTransformer propertyTransformer;
 
@@ -174,7 +174,7 @@ public class LeaseAwareVaultPropertySource
 	 * @param properties reference to property storage of this property source.
 	 */
 	protected void handleLeaseEvent(SecretLeaseEvent leaseEvent,
-			Map<String, String> properties) {
+			Map<String, Object> properties) {
 
 		if (leaseEvent.getSource() != getRequestedSecret()) {
 			return;
@@ -189,7 +189,7 @@ public class LeaseAwareVaultPropertySource
 		if (leaseEvent instanceof SecretLeaseCreatedEvent) {
 
 			SecretLeaseCreatedEvent created = (SecretLeaseCreatedEvent) leaseEvent;
-			properties.putAll(doTransformProperties(toStringMap(created.getSecrets())));
+			properties.putAll(doTransformProperties(flattenMap(created.getSecrets())));
 		}
 	}
 
@@ -199,18 +199,32 @@ public class LeaseAwareVaultPropertySource
 	 * @param properties must not be {@literal null}.
 	 * @return the transformed properties.
 	 */
-	protected Map<String, String> doTransformProperties(Map<String, String> properties) {
+	protected Map<String, Object> doTransformProperties(Map<String, Object> properties) {
 		return this.propertyTransformer.transformProperties(properties);
 	}
 
 	/**
-	 * Utility method converting a {@code String/Object} map to a {@code String/String}
-	 * map.
+	 * Utility method converting a {@code String/Object} map to a flat
+	 * {@code String/String} map. Nested objects are represented with property paths.
 	 *
 	 * @param data the map
 	 * @return the flattened map.
+	 * @deprecated since 2.0, use {@link #flattenMap(Map)} to retain JSON data types.
 	 */
+	@Deprecated
 	protected Map<String, String> toStringMap(Map<String, Object> data) {
+		return JsonMapFlattener.flattenToStringMap(data);
+	}
+
+	/**
+	 * Utility method converting a {@code String/Object} map to a flat
+	 * {@code String/Object} map. Nested objects are represented with property path keys.
+	 *
+	 * @param data the map
+	 * @return the flattened map.
+	 * @since 2.0
+	 */
+	protected Map<String, Object> flattenMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);
 	}
 }

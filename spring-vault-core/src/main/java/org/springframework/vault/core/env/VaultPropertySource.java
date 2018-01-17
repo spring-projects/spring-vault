@@ -50,7 +50,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	private final String path;
 
-	private final Map<String, String> properties = new LinkedHashMap<>();
+	private final Map<String, Object> properties = new LinkedHashMap<>();
 
 	private final PropertyTransformer propertyTransformer;
 
@@ -122,7 +122,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 				logger.debug(String.format("Fetching properties from Vault at %s", path));
 			}
 
-			Map<String, String> properties = doGetProperties(path);
+			Map<String, Object> properties = doGetProperties(path);
 
 			if (properties != null) {
 				this.properties.putAll(doTransformProperties(properties));
@@ -154,7 +154,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @throws VaultException on problems retrieving properties
 	 */
 	@Nullable
-	protected Map<String, String> doGetProperties(String path) throws VaultException {
+	protected Map<String, Object> doGetProperties(String path) throws VaultException {
 
 		VaultResponse vaultResponse = this.source.read(path);
 
@@ -166,7 +166,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 			return null;
 		}
 
-		return toStringMap(vaultResponse.getData());
+		return flattenMap(vaultResponse.getData());
 	}
 
 	/**
@@ -175,18 +175,32 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @param properties must not be {@literal null}.
 	 * @return the transformed properties.
 	 */
-	protected Map<String, String> doTransformProperties(Map<String, String> properties) {
+	protected Map<String, Object> doTransformProperties(Map<String, Object> properties) {
 		return this.propertyTransformer.transformProperties(properties);
 	}
 
 	/**
-	 * Utility method converting a {@code String/Object} map to a {@code String/String}
-	 * map.
+	 * Utility method converting a {@code String/Object} map to a flat
+	 * {@code String/String} map.
 	 *
 	 * @param data the map
 	 * @return the flattened map.
+	 * @deprecated since 2.0, use {@link #flattenMap(Map)} to retain JSON data types.
 	 */
+	@Deprecated
 	protected Map<String, String> toStringMap(Map<String, Object> data) {
+		return JsonMapFlattener.flattenToStringMap(data);
+	}
+
+	/**
+	 * Utility method converting a {@code String/Object} map to a flat
+	 * {@code String/Object} map. Nested objects are represented with property path keys.
+	 *
+	 * @param data the map
+	 * @return the flattened map.
+	 * @since 2.0
+	 */
+	protected Map<String, Object> flattenMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);
 	}
 }

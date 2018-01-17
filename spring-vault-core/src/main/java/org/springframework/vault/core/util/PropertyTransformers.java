@@ -66,10 +66,9 @@ public abstract class PropertyTransformers {
 			return new PropertyTransformerSupport() {
 
 				@Override
-				public Map<String, String> transformProperties(
-						Map<String, String> input) {
+				public Map<String, Object> transformProperties(Map<String, Object> input) {
 
-					Map<String, String> processed = that.transformProperties(input);
+					Map<String, Object> processed = that.transformProperties(input);
 					return after.transformProperties(processed);
 				}
 			};
@@ -95,7 +94,7 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, String> transformProperties(Map<String, String> input) {
+		public Map<String, Object> transformProperties(Map<String, Object> input) {
 			return input;
 		}
 	}
@@ -118,12 +117,12 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, String> transformProperties(Map<String, String> input) {
+		public Map<String, Object> transformProperties(Map<String, Object> input) {
 
-			Map<String, String> target = new LinkedHashMap<>(input.size(),
+			Map<String, Object> target = new LinkedHashMap<>(input.size(),
 					1);
 
-			for (Entry<String, String> entry : input.entrySet()) {
+			for (Entry<String, Object> entry : input.entrySet()) {
 
 				if (entry.getValue() == null) {
 					continue;
@@ -163,12 +162,12 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, String> transformProperties(Map<String, String> input) {
+		public Map<String, Object> transformProperties(Map<String, Object> input) {
 
-			Map<String, String> target = new LinkedHashMap<>(input.size(),
+			Map<String, Object> target = new LinkedHashMap<>(input.size(),
 					1);
 
-			for (Entry<String, String> entry : input.entrySet()) {
+			for (Entry<String, Object> entry : input.entrySet()) {
 				target.put(propertyNamePrefix + entry.getKey(), entry.getValue());
 			}
 

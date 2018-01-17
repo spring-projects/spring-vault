@@ -34,9 +34,9 @@ public class JsonMapFlattenerUnitTests {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void shouldPreserveFlatMap() throws Exception {
+	public void shouldPreserveFlatMap() {
 
-		Map<String, String> result = JsonMapFlattener.flatten(Collections.singletonMap(
+		Map<String, Object> result = JsonMapFlattener.flatten(Collections.singletonMap(
 				"key", "value"));
 		assertThat(result).containsEntry("key", "value");
 	}
@@ -45,10 +45,10 @@ public class JsonMapFlattenerUnitTests {
 	public void shouldFlattenNestedObject() throws Exception {
 
 		Map<String, Object> map = objectMapper.readValue(
-				"{\"key\": { \"nested\":\"value\"} }", Map.class);
-		Map<String, String> result = JsonMapFlattener.flatten(map);
+				"{\"key\": { \"nested\":true} }", Map.class);
+		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
-		assertThat(result).containsEntry("key.nested", "value");
+		assertThat(result).containsEntry("key.nested", true);
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class JsonMapFlattenerUnitTests {
 
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": { \"nested\": {\"anotherLevel\": \"value\"} } }", Map.class);
-		Map<String, String> result = JsonMapFlattener.flatten(map);
+		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key.nested.anotherLevel", "value");
 	}
@@ -67,7 +67,7 @@ public class JsonMapFlattenerUnitTests {
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": [\"one\", \"two\"], \"dotted.key\": [\"one\", \"two\"] }",
 				Map.class);
-		Map<String, String> result = JsonMapFlattener.flatten(map);
+		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key[0]", "one").containsEntry("key[1]", "two");
 		assertThat(result).containsEntry("dotted.key[0]", "one").containsEntry(
@@ -80,7 +80,7 @@ public class JsonMapFlattenerUnitTests {
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}] }",
 				Map.class);
-		Map<String, String> result = JsonMapFlattener.flatten(map);
+		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key[0].nested", "value").containsEntry(
 				"key[1].nested", "other-value");
@@ -93,7 +93,7 @@ public class JsonMapFlattenerUnitTests {
 				.readValue(
 						"{\"key\": { \"level1\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}]} }",
 						Map.class);
-		Map<String, String> result = JsonMapFlattener.flatten(map);
+		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key.level1[0].nested", "value").containsEntry(
 				"key.level1[1].nested", "other-value");
