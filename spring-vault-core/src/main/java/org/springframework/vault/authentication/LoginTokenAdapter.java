@@ -108,7 +108,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		}
 	}
 
-	private static Duration getLeaseDuration(@Nullable Number ttl) {
+	static Duration getLeaseDuration(@Nullable Number ttl) {
 		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
 }

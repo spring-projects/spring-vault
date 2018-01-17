@@ -171,6 +171,21 @@ public class LoginToken extends VaultToken {
 	 * @return the created {@link VaultToken}
 	 * @since 2.0
 	 */
+	public static LoginToken renewable(VaultToken token, Duration leaseDuration) {
+
+		Assert.notNull(token, "Token must not be null");
+
+		return renewable(token.toCharArray(), leaseDuration);
+	}
+
+	/**
+	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
+	 *
+	 * @param token must not be {@literal null}.
+	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
+	 * @return the created {@link VaultToken}
+	 * @since 2.0
+	 */
 	public static LoginToken renewable(char[] token, Duration leaseDuration) {
 
 		Assert.notNull(token, "Token must not be null");
