@@ -27,6 +27,7 @@ import java.util.Map;
  *
  * @author Mark Paluch
  */
+@FunctionalInterface
 public interface PropertyTransformer {
 
 	/**
@@ -38,7 +39,7 @@ public interface PropertyTransformer {
 	 * @param input must not be {@literal null}.
 	 * @return transformed properties.
 	 */
-	Map<String, Object> transformProperties(Map<String, Object> input);
+	Map<String, Object> transformProperties(Map<String, ? extends Object> input);
 
 	/**
 	 * Return a composed transformer function that first applies this filter, and then
@@ -47,5 +48,7 @@ public interface PropertyTransformer {
 	 * @return a composed transformer that first applies this function and then applies
 	 * the {@code after} transformer.
 	 */
-	PropertyTransformer andThen(PropertyTransformer after);
+	default PropertyTransformer andThen(PropertyTransformer after) {
+		return input -> after.transformProperties(transformProperties(input));
+	}
 }

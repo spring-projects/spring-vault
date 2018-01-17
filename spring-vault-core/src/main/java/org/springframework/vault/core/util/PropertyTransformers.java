@@ -54,32 +54,10 @@ public abstract class PropertyTransformers {
 	}
 
 	/**
-	 * Implementation support class for classes implementing {@link PropertyTransformer}.
-	 */
-	abstract static class PropertyTransformerSupport implements PropertyTransformer {
-
-		@Override
-		public PropertyTransformer andThen(final PropertyTransformer after) {
-
-			final PropertyTransformer that = this;
-
-			return new PropertyTransformerSupport() {
-
-				@Override
-				public Map<String, Object> transformProperties(Map<String, Object> input) {
-
-					Map<String, Object> processed = that.transformProperties(input);
-					return after.transformProperties(processed);
-				}
-			};
-		}
-	}
-
-	/**
 	 * {@link PropertyTransformer} that passes the given properties through without
 	 * returning changed properties.
 	 */
-	static class NoOpPropertyTransformer extends PropertyTransformerSupport {
+	static class NoOpPropertyTransformer implements PropertyTransformer {
 
 		static NoOpPropertyTransformer INSTANCE = new NoOpPropertyTransformer();
 
@@ -94,15 +72,15 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, Object> input) {
-			return input;
+		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+			return (Map) input;
 		}
 	}
 
 	/**
 	 * {@link PropertyTransformer} to remove {@literal null}-value properties.
 	 */
-	static class RemoveNullProperties extends PropertyTransformerSupport {
+	static class RemoveNullProperties implements PropertyTransformer {
 
 		static RemoveNullProperties INSTANCE = new RemoveNullProperties();
 
@@ -117,12 +95,12 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, Object> input) {
+		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
 
 			Map<String, Object> target = new LinkedHashMap<>(input.size(),
 					1);
 
-			for (Entry<String, Object> entry : input.entrySet()) {
+			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 
 				if (entry.getValue() == null) {
 					continue;
@@ -138,7 +116,7 @@ public abstract class PropertyTransformers {
 	/**
 	 * {@link PropertyTransformer} that adds a prefix to each key name.
 	 */
-	static class KeyPrefixPropertyTransformer extends PropertyTransformerSupport {
+	static class KeyPrefixPropertyTransformer implements PropertyTransformer {
 
 		private final String propertyNamePrefix;
 
@@ -162,17 +140,16 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, Object> input) {
+		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
 
 			Map<String, Object> target = new LinkedHashMap<>(input.size(),
 					1);
 
-			for (Entry<String, Object> entry : input.entrySet()) {
+			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 				target.put(propertyNamePrefix + entry.getKey(), entry.getValue());
 			}
 
 			return target;
 		}
 	}
-
 }

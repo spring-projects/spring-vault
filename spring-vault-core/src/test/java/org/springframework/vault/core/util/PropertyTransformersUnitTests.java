@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class PropertyTransformersUnitTests {
 
-	Map<String, Object> properties = Collections.singletonMap("key", "value");
+	Map<String, String> properties = Collections.singletonMap("key", "value");
 
 	@Test
 	public void propertyNamePrefix() {
