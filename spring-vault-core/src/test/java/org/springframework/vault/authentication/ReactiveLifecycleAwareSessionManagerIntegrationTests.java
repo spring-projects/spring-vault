@@ -44,11 +44,13 @@ import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.TestWebClientFactory;
+import org.springframework.vault.util.Version;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.Assume.assumeTrue;
 import static org.springframework.vault.util.Settings.createSslConfiguration;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
@@ -64,6 +66,8 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 
 	@Before
 	public void before() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		taskScheduler.afterPropertiesSet();
 
@@ -154,8 +158,8 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient) {
 			@Override
 			public Mono<VaultToken> getVaultToken() throws VaultException {
-				getTokenCounter.incrementAndGet();
-				return super.getVaultToken();
+				return super.getVaultToken().doAfterTerminate(
+						getTokenCounter::incrementAndGet);
 			}
 		};
 
@@ -165,7 +169,7 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 		VaultToken firstToken = sessionManager.getSessionToken().block();
 		VaultToken cached = sessionManager.getSessionToken().block();
 
-		TimeUnit.SECONDS.sleep(3);
+		TimeUnit.SECONDS.sleep(5);
 		VaultToken nextToken = sessionManager.getSessionToken().block();
 
 		assertThat(firstToken).isNotNull().isEqualTo(cached);

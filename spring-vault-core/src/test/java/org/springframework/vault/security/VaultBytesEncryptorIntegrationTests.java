@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,15 @@
  */
 package org.springframework.vault.security;
 
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.vault.core.VaultTransitOperations;
+import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,17 +38,46 @@ public class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport 
 
 	private VaultTransitOperations transit;
 
+	private Version vaultVersion;
+
 	@Before
 	public void before() {
 
 		transit = prepare().getVaultOperations().opsForTransit();
+		vaultVersion = prepare().getVersion();
 
 		if (!prepare().hasSecret("transit")) {
 			prepare().mountSecret("transit");
 		}
 
-		if (!transit.getKeys().contains(KEY_NAME)) {
-			transit.createKey(KEY_NAME);
+		removeKeys();
+		transit.createKey(KEY_NAME);
+	}
+
+	private void removeKeys() {
+
+		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+			List<String> keys = transit.getKeys();
+			keys.forEach(this::deleteKey);
+		}
+		else {
+			deleteKey(KEY_NAME);
+		}
+	}
+
+	private void deleteKey(String keyName) {
+
+		try {
+			transit.configureKey(keyName, VaultTransitKeyConfiguration.builder()
+					.deletionAllowed(true).build());
+		}
+		catch (Exception e) {
+		}
+
+		try {
+			transit.deleteKey(keyName);
+		}
+		catch (Exception e) {
 		}
 	}
 

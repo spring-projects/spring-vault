@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 the original author or authors.
+ * Copyright 2017-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultBytesKeyGenerator}.
@@ -31,6 +33,8 @@ public class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSuppo
 
 	@Before
 	public void before() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
 
 		if (!prepare().hasSecret("transit")) {
 			prepare().mountSecret("transit");
