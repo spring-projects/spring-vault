@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 import org.assertj.core.util.Files;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -148,6 +149,7 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 	}
 
 	@Test
+	@Ignore("Run me manually, I take some seconds to complete")
 	public void shouldRenewTokenAfterExpiry() throws InterruptedException {
 
 		SslConfiguration sslConfiguration = prepareCertAuthenticationMethod();
