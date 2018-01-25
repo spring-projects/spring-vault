@@ -1,6 +1,18 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.RC2
+-----------------------------------------
+* Provide AuthenticationSteps for token authentication with self-lookup #158
+* Investigate on a reactive integration with LifecycleAwareSessionManager #159
+* Retain JSON datatypes in PropertySource #169
+* LifecycleAwareSessionManager does not perform a re-login if token_max_ttl is reached #176
+* Return Mono<VaultResponse> for ReactiveVaultOperations#write() #177
+* RoleId and SecretID in AppRoleAuthenticationOptions not visible #179
+* Support Vault HA with redirects #184
+* Add VaultBytesEncryptor and VaultRandomBytesKeyGenerator #187
+* Upgrade dependencies #189
+
 Changes in version 2.0.0.RC1
 -----------------------------------------
 * Support CSR signing, certificate revocation and CRL retrieval #125
