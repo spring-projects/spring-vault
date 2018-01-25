@@ -18,9 +18,10 @@ too slow the data repository can also slow down or stop completely until network
 
 Spring Vault's reactive client support is built on top of <<vault.authentication.steps,composable authentication steps>> and Spring's functional `WebClient` via Reactor Netty, which features a fully non-blocking, event-driven HTTP client.
 
-It exposes `VaultTokenSupplier` as supplier of `VaultToken` to authenticate HTTP requests and `ReactiveVaultOperations`
-as the primary entry point. The core configuration of `VaultEndpoint`, `ClientOptions` and
-<<vault.client-ssl,SSL>> are reused across the various client implementation.
+It exposes `VaultTokenSupplier` as supplier of `VaultToken` to authenticate HTTP requests
+and `ReactiveVaultOperations` as the primary entry point. The core configuration of
+`VaultEndpoint`, `ClientOptions` and <<vault.client-ssl,SSL>> are reused across the
+various client implementation.
 
 The class `ReactiveVaultTemplate`, located in the package `org.springframework.vault.core`,
 is the central class of the Spring's reactive Vault support providing a rich feature set to
@@ -112,8 +113,8 @@ The reactive client requires a non-blocking token supplier whose contract is def
 in `VaultTokenSupplier`. Tokens can be static or obtained through a
 <<vault.authentication.steps,declared authentication flow>>.
 Vault login should not occur on each authenticated Vault interaction but
-must be reused throughout a session. This aspect is handled by a
-session manager implementing `VaultTokenSupplier`.
+the session token should be kept across a session. This aspect is handled by a
+session manager implementing `ReactiveSessionManager`, such as `ReactiveLifecycleAwareSessionManager`.
 
 [[vault.core.reactive.executioncallback]]
 == Execution callbacks
@@ -128,10 +129,10 @@ to perform uncommon operations that we've not exposed as methods on `ReactiveVau
 
 Here is a list of execute callback methods.
 
-* `<T> T` *doWithVault* `(Function<WebClient, ? super T> clientCallback)` Composes a reactive
+* `<T> T` *doWithVault* `(Function<WebClient, ? extends T> clientCallback)` Composes a reactive
 sequence the given `WebClient`, allows to interact with Vault without a session context.
 
-* `<T> T` *doWithSession* `(Function<WebClient, ? super T> clientCallback)` Composes a reactive
+* `<T> T` *doWithSession* `(Function<WebClient, ? extends T> clientCallback)` Composes a reactive
 sequence the given `WebClient`, allows to interact with Vault in an authenticated session.
 
 Here is an example that uses the callback to initialize Vault:

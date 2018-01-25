@@ -170,7 +170,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <V, T extends Publisher<V>> T doWithVault(
-			Function<WebClient, ? super T> clientCallback) throws VaultException,
+			Function<WebClient, ? extends T> clientCallback) throws VaultException,
 			WebClientException {
 
 		Assert.notNull(clientCallback, "Client callback must not be null");
@@ -186,7 +186,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <V, T extends Publisher<V>> T doWithSession(
-			Function<WebClient, ? super T> sessionCallback) throws VaultException,
+			Function<WebClient, ? extends T> sessionCallback) throws VaultException,
 			WebClientException {
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");

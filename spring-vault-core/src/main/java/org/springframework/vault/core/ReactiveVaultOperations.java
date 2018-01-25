@@ -114,7 +114,7 @@ public interface ReactiveVaultOperations {
 	 * {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
 	<V, T extends Publisher<V>> T doWithVault(
-			Function<WebClient, ? super T> clientCallback) throws VaultException,
+			Function<WebClient, ? extends T> clientCallback) throws VaultException,
 			WebClientException;
 
 	/**
@@ -129,6 +129,6 @@ public interface ReactiveVaultOperations {
 	 * {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
 	<V, T extends Publisher<V>> T doWithSession(
-			Function<WebClient, ? super T> sessionCallback) throws VaultException,
+			Function<WebClient, ? extends T> sessionCallback) throws VaultException,
 			WebClientException;
 }

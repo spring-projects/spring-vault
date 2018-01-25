@@ -5,7 +5,7 @@
 === What's new in Spring Vault 2.0
 
 * Authentication steps DSL to <<vault.authentication.steps,compose authentication flows>>.
-* Reactive Vault client via `ReactiveVaultOperations`.
+* <<vault.core.reactive.template,Reactive Vault client>> via `ReactiveVaultOperations`.
 * <<vault.repositories,Vault repository support>> based on Spring Data KeyValue.
 * Transit batch encrypt and decrypt support.
 * Policy management for policies stored as JSON.

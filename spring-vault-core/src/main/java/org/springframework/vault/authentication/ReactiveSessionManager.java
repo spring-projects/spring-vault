@@ -30,7 +30,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  * @see CachingVaultTokenSupplier
- * @see VaultTokenSupplier
+ * @see ReactiveLifecycleAwareSessionManager
  * @since 2.0
  */
 public interface ReactiveSessionManager extends VaultTokenSupplier {
