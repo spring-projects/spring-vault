@@ -61,7 +61,7 @@ Then add the following to `pom.xml` dependencies section.
 <dependencyManagement>
   <dependencies>
     <dependency>
-      <groupId>org.springframework.vault</groupId>
+      <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-releasetrain</artifactId>
       <version>{springDataVersion}</version>
       <scope>import</scope>
@@ -73,7 +73,7 @@ Then add the following to `pom.xml` dependencies section.
 <dependencies>
 
   <!-- other dependency elements omitted -->
-    
+
   <dependency>
     <groupId>org.springframework.vault</groupId>
     <artifactId>spring-vault-core</artifactId>
