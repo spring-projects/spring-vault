@@ -206,8 +206,8 @@ public class AwsIamAuthentication implements ClientAuthentication {
 		headers.put(HttpHeaders.CONTENT_LENGTH, "" + REQUEST_BODY.length());
 		headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
-		if (StringUtils.hasText(options.getServerName())) {
-			headers.put("X-Vault-AWS-IAM-Server-ID", options.getServerName());
+		if (StringUtils.hasText(options.getServerId())) {
+			headers.put("X-Vault-AWS-IAM-Server-ID", options.getServerId());
 		}
 
 		return headers;

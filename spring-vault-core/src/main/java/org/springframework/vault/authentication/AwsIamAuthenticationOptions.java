@@ -28,8 +28,9 @@ import org.springframework.util.Assert;
  * Authentication options for {@link AwsIamAuthentication}.
  * <p>
  * Authentication options provide the path, a {@link AWSCredentialsProvider} optional role
- * and server name. {@link AwsIamAuthenticationOptions} can be constructed using
- * {@link #builder()}. Instances of this class are immutable once constructed.
+ * and server name ({@literal Vault-AWS-IAM-Server-ID} header).
+ * {@link AwsIamAuthenticationOptions} can be constructed using {@link #builder()}.
+ * Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @since 1.1
@@ -60,10 +61,10 @@ public class AwsIamAuthenticationOptions {
 
 	/**
 	 * Server name to mitigate risk of replay attacks, preferably set to Vault server's
-	 * DNS name.
+	 * DNS name. Used for {@literal Vault-AWS-IAM-Server-ID} header.
 	 */
 	@Nullable
-	private final String serverName;
+	private final String serverId;
 
 	/**
 	 * STS server URI.
@@ -72,12 +73,12 @@ public class AwsIamAuthenticationOptions {
 
 	private AwsIamAuthenticationOptions(String path,
 			AWSCredentialsProvider credentialsProvider, @Nullable String role,
-			@Nullable String serverName, URI endpointUri) {
+			@Nullable String serverId, URI endpointUri) {
 
 		this.path = path;
 		this.credentialsProvider = credentialsProvider;
 		this.role = role;
-		this.serverName = serverName;
+		this.serverId = serverId;
 		this.endpointUri = endpointUri;
 	}
 
@@ -112,11 +113,24 @@ public class AwsIamAuthenticationOptions {
 
 	/**
 	 * @return Server name to mitigate risk of replay attacks, preferably set to Vault
-	 * server's DNS name, may be {@literal null}.
+	 * server's DNS name, may be {@literal null}. Used for
+	 * {@literal Vault-AWS-IAM-Server-ID} header.
+	 * @since 2.0
 	 */
 	@Nullable
+	public String getServerId() {
+		return serverId;
+	}
+
+	/**
+	 * @return Server name to mitigate risk of replay attacks, preferably set to Vault
+	 * server's DNS name, may be {@literal null}.
+	 * @deprecated since 2.0, renamed to {@link #getServerId()}.
+	 */
+	@Nullable
+	@Deprecated
 	public String getServerName() {
-		return serverName;
+		return serverId;
 	}
 
 	/**
@@ -140,7 +154,7 @@ public class AwsIamAuthenticationOptions {
 		private String role;
 
 		@Nullable
-		private String serverName;
+		private String serverId;
 
 		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
 
@@ -212,6 +226,23 @@ public class AwsIamAuthenticationOptions {
 		}
 
 		/**
+		 * Configure a server name (used for {@literal Vault-AWS-IAM-Server-ID}) that is
+		 * included in the signature to mitigate the risk of replay attacks. Preferably
+		 * use the Vault server DNS name.
+		 *
+		 * @param serverId must not be {@literal null} or empty.
+		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @since 2.1
+		 */
+		public AwsIamAuthenticationOptionsBuilder serverId(String serverId) {
+
+			Assert.hasText(serverId, "Server name must not be null or empty");
+
+			this.serverId = serverId;
+			return this;
+		}
+
+		/**
 		 * Configure a server name that is included in the signature to mitigate the risk
 		 * of replay attacks. Preferably use the Vault server DNS name.
 		 *
@@ -219,11 +250,7 @@ public class AwsIamAuthenticationOptions {
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 */
 		public AwsIamAuthenticationOptionsBuilder serverName(String serverName) {
-
-			Assert.hasText(serverName, "Server name must not be null or empty");
-
-			this.serverName = serverName;
-			return this;
+			return serverId(serverName);
 		}
 
 		/**
@@ -252,7 +279,7 @@ public class AwsIamAuthenticationOptions {
 					"Credentials or CredentialProvider must not be null");
 
 			return new AwsIamAuthenticationOptions(path, credentialsProvider, role,
-					serverName, endpointUri);
+					serverId, endpointUri);
 		}
 	}
 }
