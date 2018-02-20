@@ -1,6 +1,17 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.0.RELEASE
+-----------------------------------------
+* Consider renaming AwsIamAuthenticationOptions#serverName to serverId #191
+* Upgrade to Vault 0.9.3 #192
+* Add tests for profile based @VaultPropertySource #193
+* Upgrade to Spring Framework 5.0.4 #194
+* Upgrade to Reactor Bismuth SR6 #195
+* Upgrade to Netty 4.1.21.Final #196
+* Upgrade to AWS SDK 1.11.280 #197
+* Upgrade to Spring Data Kay SR4 #199
+
 Changes in version 2.0.0.RC2
 -----------------------------------------
 * Provide AuthenticationSteps for token authentication with self-lookup #158
