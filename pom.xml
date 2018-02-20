@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>2.0.0.BUILD-SNAPSHOT</version>
+	<version>2.0.0.RELEASE</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -46,7 +46,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-		<tag>HEAD</tag>
+		<tag>2.0.0.RELEASE</tag>
 	</scm>
 
 	<issueManagement>
@@ -99,7 +99,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>2.0.0.BUILD-SNAPSHOT</version>
+				<version>2.0.0.RELEASE</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -382,12 +382,8 @@
 
 	<repositories>
 		<repository>
-			<id>spring-snapshots</id>
-			<name>Spring Snapshots</name>
-			<url>https://repo.spring.io/libs-snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
+			<id>spring-libs-release</id>
+			<url>https://repo.spring.io/libs-release</url>
 		</repository>
 	</repositories>
 
@@ -397,13 +393,12 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.0.2.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.0.5.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
 				<repository>
-					<id>spring-snapshots</id>
-					<name>Spring Snapshots</name>
+					<id>spring-libs-snapshot</id>
 					<url>https://repo.spring.io/libs-snapshot</url>
 					<snapshots>
 						<enabled>true</enabled>
