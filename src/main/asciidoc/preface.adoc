@@ -52,7 +52,7 @@ for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS a
 [[requirements]]
 == Requirements
 
-Spring Vault 1.x binaries requires JDK level 8.0 and above, and http://spring.io/docs[Spring Framework] {springVersion} and above.
+Spring Vault 2.x binaries requires JDK level 8.0 and above, and http://spring.io/docs[Spring Framework] {springVersion} and above.
 
 In terms of Vault, https://www.vaultproject.io/[Vault] at least 0.5.
 
