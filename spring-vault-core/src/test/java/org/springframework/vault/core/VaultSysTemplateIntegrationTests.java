@@ -153,6 +153,16 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(root).isEqualTo(Policy.empty());
 	}
 
+	@Test
+	public void shouldReadAbsentRootPolicy() {
+
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+
+		Policy root = adminOperations.getPolicy("absent-policy");
+
+		assertThat(root).isNull();
+	}
+
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldReadDefaultPolicy() {
 
