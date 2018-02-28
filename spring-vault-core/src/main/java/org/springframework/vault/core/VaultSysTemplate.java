@@ -216,11 +216,19 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		return vaultOperations.doWithSession(restOperations -> {
 
-			ResponseEntity<VaultResponse> response = restOperations.getForEntity(
-					"sys/policy/{name}", VaultResponse.class, name);
+			ResponseEntity<VaultResponse> response;
 
-			if (response.getStatusCode() == HttpStatus.NOT_FOUND) {
-				return null;
+			try {
+				response = restOperations.getForEntity("sys/policy/{name}",
+						VaultResponse.class, name);
+			}
+			catch (HttpStatusCodeException e) {
+
+				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return null;
+				}
+
+				throw e;
 			}
 
 			String rules = (String) response.getBody().getRequiredData().get("rules");
