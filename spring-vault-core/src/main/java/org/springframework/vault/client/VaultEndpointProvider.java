@@ -22,6 +22,7 @@ package org.springframework.vault.client;
  * @author Mark Paluch
  * @since 1.1
  */
+@FunctionalInterface
 public interface VaultEndpointProvider {
 
 	/**

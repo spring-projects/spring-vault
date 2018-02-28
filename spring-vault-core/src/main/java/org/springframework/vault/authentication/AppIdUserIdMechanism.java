@@ -23,6 +23,7 @@ package org.springframework.vault.authentication;
  * @author Mark Paluch
  * @see AppIdAuthentication
  */
+@FunctionalInterface
 public interface AppIdUserIdMechanism {
 
 	/**
