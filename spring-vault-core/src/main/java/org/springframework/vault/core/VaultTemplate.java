@@ -52,9 +52,9 @@ import org.springframework.web.client.RestTemplate;
  */
 public class VaultTemplate implements InitializingBean, VaultOperations, DisposableBean {
 
-	private final RestTemplate sessionTemplate;
+	private final RestTemplate statelessTemplate;
 
-	private final RestTemplate plainTemplate;
+	private final RestTemplate sessionTemplate;
 
 	@Nullable
 	private SessionManager sessionManager;
@@ -82,9 +82,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		VaultEndpointProvider endpointProvider = SimpleVaultEndpointProvider
 				.of(vaultEndpoint);
 
-		this.sessionTemplate = createSessionTemplate(endpointProvider, requestFactory);
-		this.plainTemplate = VaultClients.createRestTemplate(vaultEndpoint,
-				requestFactory);
+		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
+		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
 	}
 
 	/**
@@ -107,33 +106,66 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
 	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param clientHttpRequestFactory must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 1.1
 	 */
 	public VaultTemplate(VaultEndpointProvider endpointProvider,
-			ClientHttpRequestFactory clientHttpRequestFactory,
-			SessionManager sessionManager) {
+			ClientHttpRequestFactory requestFactory, SessionManager sessionManager) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
-		Assert.notNull(clientHttpRequestFactory,
-				"ClientHttpRequestFactory must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
 
-		this.sessionTemplate = createSessionTemplate(endpointProvider,
-				clientHttpRequestFactory);
-		this.plainTemplate = VaultClients.createRestTemplate(endpointProvider,
-				clientHttpRequestFactory);
+		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
+		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
 	}
 
-	private RestTemplate createSessionTemplate(VaultEndpointProvider endpointProvider,
+	/**
+	 * Create a {@link RestTemplate} to be used by {@link VaultTemplate} for Vault
+	 * communication given {@link VaultEndpointProvider} and
+	 * {@link ClientHttpRequestFactory}. {@link VaultEndpointProvider} is used to
+	 * contribute host and port details for relative URLs typically used by the Template
+	 * API. Subclasses may override this method to customize the {@link RestTemplate}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate} used for Vault communication.
+	 * @since 2.1
+	 */
+	protected RestTemplate doCreateRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(endpointProvider,
-				requestFactory);
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+
+		return VaultClients.createRestTemplate(endpointProvider, requestFactory);
+	}
+
+	/**
+	 * Create a session-bound {@link RestTemplate} to be used by {@link VaultTemplate} for
+	 * Vault communication given {@link VaultEndpointProvider} and
+	 * {@link ClientHttpRequestFactory} for calls that require an authenticated context.
+	 * {@link VaultEndpointProvider} is used to contribute host and port details for
+	 * relative URLs typically used by the Template API. Subclasses may override this
+	 * method to customize the {@link RestTemplate}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate} used for Vault communication.
+	 * @since 2.1
+	 */
+	protected RestTemplate doCreateSessionTemplate(
+			VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+
+		RestTemplate restTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 
 		restTemplate.getInterceptors().add(
 				(request, body, execution) -> {
@@ -291,7 +323,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
 		try {
-			return clientCallback.doWithRestOperations(plainTemplate);
+			return clientCallback.doWithRestOperations(statelessTemplate);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);

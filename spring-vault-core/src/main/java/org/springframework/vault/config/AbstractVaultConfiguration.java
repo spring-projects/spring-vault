@@ -157,7 +157,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * Construct a {@link RestOperations} object configured for Vault usage.
+	 * Construct a {@link RestOperations} object configured for Vault session management
+	 * and authentication usage.
 	 *
 	 * @return the {@link RestOperations} to be used for Vault access.
 	 * @see #vaultEndpointProvider()

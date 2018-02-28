@@ -56,12 +56,15 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
  *
  * @author Mark Paluch
  * @see SessionManager
+ * @since 2.0
  */
 public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private final WebClient statelessClient;
 
 	private final WebClient sessionClient;
+
+	private final VaultTokenSupplier vaultTokenSupplier;
 
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpoint},
@@ -91,6 +94,51 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 		Assert.notNull(vaultTokenSupplier, "AuthenticationSupplier must not be null");
 
+		this.vaultTokenSupplier = vaultTokenSupplier;
+		this.statelessClient = doCreateWebClient(endpointProvider, connector);
+		this.sessionClient = doCreateSessionWebClient(endpointProvider, connector);
+	}
+
+	/**
+	 * Create a {@link WebClient} to be used by {@link ReactiveVaultTemplate} for Vault
+	 * communication given {@link VaultEndpointProvider} and {@link ClientHttpConnector}.
+	 * {@link VaultEndpointProvider} is used to contribute host and port details for
+	 * relative URLs typically used by the Template API. Subclasses may override this
+	 * method to customize the {@link WebClient}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @return the {@link WebClient} used for Vault communication.
+	 * @since 2.1
+	 */
+	protected WebClient doCreateWebClient(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(connector, "ClientHttpConnector must not be null");
+
+		return ReactiveVaultClients.createWebClient(endpointProvider, connector);
+	}
+
+	/**
+	 * Create a session-bound {@link WebClient} to be used by {@link VaultTemplate} for
+	 * Vault communication given {@link VaultEndpointProvider} and
+	 * {@link ClientHttpConnector} for calls that require an authenticated context.
+	 * {@link VaultEndpointProvider} is used to contribute host and port details for
+	 * relative URLs typically used by the Template API. Subclasses may override this
+	 * method to customize the {@link WebClient}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @return the {@link WebClient} used for Vault communication.
+	 * @since 2.1
+	 */
+	protected WebClient doCreateSessionWebClient(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(connector, "ClientHttpConnector must not be null");
+
 		ExchangeFilterFunction filter = ofRequestProcessor(request -> vaultTokenSupplier
 				.getVaultToken().map(token -> {
 
@@ -99,10 +147,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 					}).build();
 				}));
 
-		this.statelessClient = ReactiveVaultClients.createWebClient(endpointProvider,
-				connector);
-		this.sessionClient = ReactiveVaultClients
-				.createWebClient(endpointProvider, connector).mutate().filter(filter)
+		return doCreateWebClient(endpointProvider, connector).mutate().filter(filter)
 				.build();
 	}
 

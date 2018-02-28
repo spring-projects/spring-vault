@@ -39,6 +39,7 @@ import org.springframework.web.reactive.function.client.WebClientException;
  * session}.
  *
  * @author Mark Paluch
+ * @since 2.0
  * @see ReactiveVaultOperations#doWithSession(Function)
  * @see ReactiveVaultOperations#doWithVault(Function)
  * @see WebClient
