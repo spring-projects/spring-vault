@@ -25,6 +25,7 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  */
+@FunctionalInterface
 public interface ClientAuthentication {
 
 	/**

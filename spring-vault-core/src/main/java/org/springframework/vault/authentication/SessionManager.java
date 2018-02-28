@@ -29,6 +29,7 @@ import org.springframework.vault.support.VaultToken;
  * @see SimpleSessionManager
  * @see ClientAuthentication
  */
+@FunctionalInterface
 public interface SessionManager {
 
 	/**

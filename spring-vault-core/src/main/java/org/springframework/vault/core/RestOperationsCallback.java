@@ -23,6 +23,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  */
+@FunctionalInterface
 public interface RestOperationsCallback<T> {
 
 	/**
