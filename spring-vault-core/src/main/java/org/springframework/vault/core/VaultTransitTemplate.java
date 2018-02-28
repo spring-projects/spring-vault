@@ -63,6 +63,13 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	private final String path;
 
+	/**
+	 * Create a new {@link VaultTransitTemplate} given {@link VaultOperations} and the
+	 * mount {@code path}.
+	 *
+	 * @param vaultOperations must not be {@literal null}.
+	 * @param path must not be empty or {@literal null}.
+	 */
 	public VaultTransitTemplate(VaultOperations vaultOperations, String path) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");

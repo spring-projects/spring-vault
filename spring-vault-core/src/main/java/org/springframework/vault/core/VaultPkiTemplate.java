@@ -43,8 +43,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	private final String path;
 
 	/**
-	 * Create a new {@link VaultPkiTemplate} given {@link VaultPkiOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultPkiTemplate} given {@link VaultOperations} and the mount
+	 * {@code path}.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
