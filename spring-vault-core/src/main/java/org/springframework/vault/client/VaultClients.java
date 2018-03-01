@@ -184,6 +184,10 @@ public class VaultClients {
 		 */
 		private String prepareUriTemplate(String uriTemplate) {
 
+			if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
+				return uriTemplate;
+			}
+
 			if (getBaseUrl() != null) {
 				if (uriTemplate.startsWith("/") && getBaseUrl().endsWith("/")) {
 					return uriTemplate.substring(1);
