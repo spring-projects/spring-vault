@@ -208,15 +208,20 @@ public class VaultClients {
 	}
 
 	/**
-	 * Strip/add leading slashes from {@code uriTemplate} depending on wheter the base
-	 * url* has a trailing slash.
+	 * Strip/add leading slashes from {@code uriTemplate} depending on whether the base
+	 * url has a trailing slash.
 	 *
 	 * @param uriTemplate
 	 * @return
 	 */
 	static String prepareUriTemplate(@Nullable String baseUrl, String uriTemplate) {
 
+		if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
+			return uriTemplate;
+		}
+
 		if (baseUrl != null) {
+
 			if (uriTemplate.startsWith("/") && baseUrl.endsWith("/")) {
 				return uriTemplate.substring(1);
 			}
