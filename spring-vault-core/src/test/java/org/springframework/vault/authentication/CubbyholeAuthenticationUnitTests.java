@@ -50,7 +50,7 @@ public class CubbyholeAuthenticationUnitTests {
 	private MockRestServiceServer mockRest;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -132,7 +132,7 @@ public class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLoginUsingStoredLogin() throws Exception {
+	public void shouldLoginUsingStoredLogin() {
 
 		mockRest.expect(requestTo("/cubbyhole/token")).andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
@@ -153,7 +153,7 @@ public class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldRetrieveRenewabulityUsingStoredLogin() throws Exception {
+	public void shouldRetrieveRenewabilityUsingStoredLogin() {
 
 		mockRest.expect(requestTo("/cubbyhole/token")).andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
@@ -185,7 +185,7 @@ public class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldFailUsingStoredLoginNoData() throws Exception {
+	public void shouldFailUsingStoredLoginNoData() {
 
 		mockRest.expect(requestTo("/cubbyhole/token")).andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
@@ -208,7 +208,7 @@ public class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldFailUsingStoredMultipleEntries() throws Exception {
+	public void shouldFailUsingStoredMultipleEntries() {
 
 		mockRest.expect(requestTo("/cubbyhole/token")).andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))

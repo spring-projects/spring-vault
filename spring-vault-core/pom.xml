@@ -140,6 +140,28 @@
 			</exclusions>
 		</dependency>
 
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-iam</artifactId>
+			<optional>true</optional>
+			<exclusions>
+				<exclusion>
+					<groupId>com.fasterxml.jackson.core</groupId>
+					<artifactId>jackson-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.google.auth</groupId>
+			<artifactId>google-auth-library-oauth2-http</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<!-- Testing -->
 
 		<dependency>

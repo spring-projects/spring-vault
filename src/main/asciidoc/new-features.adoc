@@ -1,6 +1,10 @@
 [[new-features]]
 == New & Noteworthy
 
+[[new-features.2-1-0]]
+=== What's new in Spring Vault 2.1
+* <<vault.authentication.gcpgce,GCP Compute>> and <<vault.authentication.gcpiam,GCP IAM>> authentication.
+
 [[new-features.2-0-0]]
 === What's new in Spring Vault 2.0
 

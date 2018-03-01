@@ -375,6 +375,112 @@ See also:
 * https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth backend]
 * http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
 
+[[vault.authentication.gcpgce]]
+== GCP-GCE authentication
+
+The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
+auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+
+GCP GCE (Google Compute Engine) authentication creates a signature in the form of a
+JSON Web Token (JWT) for a service account. A JWT for a Compute Engine instance
+is obtained from the GCE  metadata service using https://cloud.google.com/compute/docs/instances/verifying-instance-identity[Instance identification].
+This API creates a JSON Web Token that can be used to confirm the instance identity.
+
+Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats GCP as a Trusted Third Party and uses the
+cryptographically signed dynamic metadata information that uniquely
+represents each GCP service account.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        GcpComputeAuthenticationOptions options = GcpComputeAuthenticationOptions.builder()
+				.role(…).build();
+
+		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options,
+				restOperations());
+    }
+
+    // …
+}
+----
+====
+
+`GcpIamAuthenticationOptions` requires the Google Cloud Java SDK dependency
+(`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`)
+as the authentication implementation uses Google APIs for credentials and JWT signing.
+
+You can configure the authentication via `GcpIamAuthenticationOptions`.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://cloud.google.com/compute/docs/instances/verifying-instance-identity[GCP Documentation: Verifying the Identity of Instances]
+
+[[vault.authentication.gcpiam]]
+== GCP-IAM authentication
+
+The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
+auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+
+GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT)
+for a service account. A JWT for a service account is obtained by
+calling GCP IAM's https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM
+and proves thereby its identity. This Vault backend treats GCP as a Trusted Third Party.
+
+IAM credentials can be obtained from either the runtime environment
+or supplied externally as e.g. JSON. JSON is the preferred form as it
+carries the project id and service account identifier required for calling
+``projects.serviceAccounts.signJwt``.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
+				.role(…).credential(GoogleCredentials.getApplicationDefault()).build();
+
+		GcpIamAuthentication authentication = new GcpIamAuthentication(options,
+				restOperations());
+    }
+
+    // …
+}
+----
+====
+
+`GcpIamAuthenticationOptions` requires the Google Cloud Java SDK dependency
+(`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`)
+as the authentication implementation uses Google APIs for credentials and JWT signing.
+
+You can configure the authentication via `GcpIamAuthenticationOptions`.
+
+NOTE: Google credentials require an OAuth 2 token maintaining the token lifecycle. All API
+is synchronous therefore, `GcpIamAuthentication` does not support `AuthenticationSteps` which is
+required for reactive usage.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[GCP Documentation: projects.serviceAccounts.signJwt][[vault.authentication.gcpiam]]
+
 [[vault.authentication.clientcert]]
 == TLS certificate authentication
 

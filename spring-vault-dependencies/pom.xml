@@ -124,6 +124,21 @@
 				<optional>true</optional>
 			</dependency>
 
+			<!-- GCP SDK -->
+			<dependency>
+				<groupId>com.google.apis</groupId>
+				<artifactId>google-api-services-iam</artifactId>
+				<version>v1-rev233-1.23.0</version>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
+				<groupId>com.google.auth</groupId>
+				<artifactId>google-auth-library-oauth2-http</artifactId>
+				<version>0.9.0</version>
+				<optional>true</optional>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
