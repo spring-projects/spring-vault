@@ -72,15 +72,15 @@ import org.springframework.web.client.RestOperations;
  * 		.requestRotatingSecret("mysql/creds/my-role");
  * container.addLeaseListener(new LeaseListenerAdapter() {
  * 	&#64;Override
- * 	public void onLeaseEvent(LeaseEvent leaseEvent) {
+ * 	public void onLeaseEvent(SecretLeaseEvent secretLeaseEvent) {
  *
- * 		if (requestedSecret == leaseEvent.getSource()) {
+ * 		if (requestedSecret == secretLeaseEvent.getSource()) {
  *
- * 			if (leaseEvent instanceof LeaseCreatedEvent) {
+ * 			if (secretLeaseEvent instanceof SecretLeaseCreatedEvent) {
  *
  * 			}
  *
- * 			if (leaseEvent instanceof LeaseExpiredEvent) {
+ * 			if (secretLeaseEvent instanceof SecretLeaseExpiredEvent) {
  *
  * 			}
  * 		}
