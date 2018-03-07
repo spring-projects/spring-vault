@@ -9,19 +9,13 @@ env:
   matrix:
     - VAULT_VER=0.5.2
     - VAULT_VER=0.6.0
-    - VAULT_VER=0.6.1
-    - VAULT_VER=0.6.2
-    - VAULT_VER=0.6.3
-    - VAULT_VER=0.6.4
     - VAULT_VER=0.6.5
-    - VAULT_VER=0.7.2
+    - VAULT_VER=0.7.0
     - VAULT_VER=0.7.3
     - VAULT_VER=0.8.0
-    - VAULT_VER=0.8.1
-    - VAULT_VER=0.8.2
     - VAULT_VER=0.8.3
     - VAULT_VER=0.9.0
-    - VAULT_VER=0.9.3
+    - VAULT_VER=0.9.5
     - PROFILE=springNext
 
 before_install:
