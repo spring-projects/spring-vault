@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledFuture;
@@ -30,8 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
-
-import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -54,8 +52,11 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
+
+import lombok.extern.apachecommons.CommonsLog;
 
 /**
  * Event-based container to request secrets from Vault and renew the associated
@@ -561,8 +562,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			onError(requestedSecret,
 					lease,
-					new VaultException(String.format("Cannot renew lease: %s",
-							VaultResponses.getError(e.getResponseBodyAsString()))));
+					new VaultHttpException(String.format("Cannot renew lease: %s",
+							VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode()));
 		}
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);
@@ -631,8 +632,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		catch (HttpStatusCodeException e) {
 			onError(requestedSecret,
 					lease,
-					new VaultException(String.format("Cannot revoke lease: %s",
-							VaultResponses.getError(e.getResponseBodyAsString()))));
+					new VaultHttpException(String.format("Cannot revoke lease: %s",
+							VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode()));
 		}
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);

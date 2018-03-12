@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -31,11 +27,17 @@ import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultHttpException;
+import org.springframework.vault.exceptions.VaultRemoteException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 /**
  * Reactive implementation of Lifecycle-aware {@link ReactiveSessionManager session
@@ -222,11 +224,11 @@ public class ReactiveLifecycleAwareSessionManager extends
 								return EMPTY;
 							}
 
-							return Mono.error(new VaultException(VaultResponses
-									.getError(e.getResponseBodyAsString())));
+							return Mono.error(new VaultHttpException(VaultResponses
+									.getError(e.getResponseBodyAsString()), e.getStatusCode()));
 						})
 				.onErrorMap(WebClientException.class,
-						e -> new VaultException("Cannot refresh token", e))
+						e -> new VaultRemoteException("Cannot refresh token", e))
 				.map(TokenWrapper::getToken);
 	}
 

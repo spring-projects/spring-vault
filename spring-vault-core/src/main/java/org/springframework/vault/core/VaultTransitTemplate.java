@@ -30,6 +30,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultRemoteException;
 import org.springframework.vault.support.Ciphertext;
 import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
@@ -495,7 +496,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 				Map<String, String> data = batchData.get(i);
 				if (StringUtils.hasText(data.get("error"))) {
-					encrypted = new VaultEncryptionResult(new VaultException(
+					encrypted = new VaultEncryptionResult(new VaultRemoteException(
 							data.get("error")));
 				}
 				else {
@@ -504,7 +505,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				}
 			}
 			else {
-				encrypted = new VaultEncryptionResult(new VaultException(
+				encrypted = new VaultEncryptionResult(new VaultRemoteException(
 						"No result for plaintext #" + i));
 			}
 
@@ -529,7 +530,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 				Map<String, String> data = batchData.get(i);
 				if (StringUtils.hasText(data.get("error"))) {
-					encrypted = new VaultDecryptionResult(new VaultException(
+					encrypted = new VaultDecryptionResult(new VaultRemoteException(
 							data.get("error")));
 				}
 				else {
@@ -539,7 +540,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				}
 			}
 			else {
-				encrypted = new VaultDecryptionResult(new VaultException(
+				encrypted = new VaultDecryptionResult(new VaultRemoteException(
 						"No result for ciphertext #" + i));
 			}
 
