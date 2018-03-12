@@ -15,7 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.springframework.vault.VaultException;
+import org.springframework.http.HttpStatus;
+import org.springframework.vault.exceptions.VaultHttpException;
 
 /**
  * Exception thrown if a token self-lookup fails via {@code auth/token/lookup-self}.
@@ -23,14 +24,14 @@ import org.springframework.vault.VaultException;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultTokenLookupException extends VaultException {
+public class VaultTokenLookupException extends VaultHttpException {
 
 	/**
 	 * Create a {@code VaultException} with the specified detail message.
 	 *
 	 * @param msg the detail message.
 	 */
-	public VaultTokenLookupException(String msg) {
-		super(msg);
+	public VaultTokenLookupException(String msg, HttpStatus httpStatus) {
+		super(msg, httpStatus);
 	}
 }

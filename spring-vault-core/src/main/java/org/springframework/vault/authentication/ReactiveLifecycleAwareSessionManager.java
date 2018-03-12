@@ -409,7 +409,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						e -> {
 							return new VaultTokenLookupException(String.format(
 									"Token self-lookup failed: %s %s", e.getStatusCode(),
-									VaultResponses.getError(e.getResponseBodyAsString())));
+									VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
 						});
 	}
 
