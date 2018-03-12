@@ -300,12 +300,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			Lease lease;
 
-			if (StringUtils.hasText(secrets.getLeaseId())) {
+			if (isRotatingGenericSecret(requestedSecret, secrets)) {
+				lease = Lease.fromTimeToLive(secrets.getLeaseDuration());
+			} else if (StringUtils.hasText(secrets.getLeaseId())) {
 				lease = Lease.of(secrets.getLeaseId(), secrets.getLeaseDuration(),
 						secrets.isRenewable());
-			}
-			else if (isRotatingGenericSecret(requestedSecret, secrets)) {
-				lease = Lease.fromTimeToLive(secrets.getLeaseDuration());
 			}
 			else {
 				lease = Lease.none();
@@ -737,7 +736,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				return true;
 			}
 
-			if (!lease.hasLeaseId() && requestedSecret.getMode() == Mode.ROTATE) {
+			if (requestedSecret.getMode() == Mode.ROTATE) {
 				return true;
 			}
 
