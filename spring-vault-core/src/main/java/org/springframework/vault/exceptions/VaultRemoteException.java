@@ -21,7 +21,9 @@ import org.springframework.vault.VaultException;
  * An exception related to a call to Vault. Normally these are related to
  * Http Codes, via the subclass  {@link VaultHttpException} implementation.
  *
- * @author Mark Paluch
+ * Other common (non Http failure) causes might be unexpected content returned from Vault.
+ *
+ * @author Michael Bell
  */
 @SuppressWarnings("serial")
 public class VaultRemoteException extends VaultException {

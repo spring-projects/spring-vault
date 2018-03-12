@@ -15,14 +15,13 @@
  */
 package org.springframework.vault.exceptions;
 
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
- * The Spring Vault specific {@link NestedRuntimeException} implementation.
+ * Represents an Http Call to Vault that resulted in a failure (usually non 200/204) response.
+ * Typical causes are a Vault server error, authorization/authentication failures, bad requests.
  *
- * @author Mark Paluch
+ * @author Michael Bell
  */
 @SuppressWarnings("serial")
 public class VaultHttpException extends VaultRemoteException {

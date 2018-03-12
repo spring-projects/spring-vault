@@ -15,12 +15,12 @@
  */
 package org.springframework.vault.exceptions;
 
-import org.springframework.core.NestedRuntimeException;
 import org.springframework.vault.VaultException;
 
 /**
  * An exception that is Spring Vault Client specific, but not related to
- * a remote call to Vault
+ * a remote call to Vault. Common causes include message conversion failures,
+ * incorrect/impossible parameters.
  *
  * @author Michael Bell
  */
