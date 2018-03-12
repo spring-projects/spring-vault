@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Value object representing a certificate bundle consisting of a private key, the
@@ -93,7 +94,7 @@ public class CertificateBundle extends Certificate {
 			return KeystoreUtil.getRSAKeySpec(bytes);
 		}
 		catch (IOException e) {
-			throw new VaultException("Cannot create KeySpec from private key", e);
+			throw new VaultClientException("Cannot create KeySpec from private key", e);
 		}
 	}
 
@@ -114,7 +115,7 @@ public class CertificateBundle extends Certificate {
 					getX509Certificate(), getX509IssuerCertificate());
 		}
 		catch (GeneralSecurityException | IOException e) {
-			throw new VaultException("Cannot create KeyStore", e);
+			throw new VaultClientException("Cannot create KeyStore", e);
 		}
 	}
 }

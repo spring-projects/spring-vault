@@ -85,8 +85,8 @@ public abstract class AbstractResult<V> {
 		if (isSuccessful()) {
 			return get0();
 		}
-
-		throw new VaultException(exception.getMessage());
+		// Mark: This seemed wrong, and lost information
+		throw exception;
 	}
 
 	/**

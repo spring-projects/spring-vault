@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Mechanism to generate a UserId based on the Mac address. {@link MacAddressUserId}
@@ -128,7 +129,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 							"Cannot determine NetworkInterface"));
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new VaultClientException("While creating userId", e);
 		}
 
 	}
@@ -172,7 +173,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			return Optional.ofNullable(it.getHardwareAddress());
 		}
 		catch (SocketException e) {
-			throw new IllegalStateException(String
+			throw new VaultClientException(String
 					.format("Cannot determine hardware address for %s", it.getName()));
 		}
 	}

@@ -35,6 +35,7 @@ import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.core.ReactiveVaultTemplate;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -137,7 +138,7 @@ public abstract class AbstractReactiveVaultConfiguration extends
 			return CachingVaultTokenSupplier.of(stepsOperator);
 		}
 
-		throw new IllegalStateException(
+		throw new VaultClientException(
 				String.format(
 						"Cannot construct VaultTokenSupplier from %s. "
 								+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",

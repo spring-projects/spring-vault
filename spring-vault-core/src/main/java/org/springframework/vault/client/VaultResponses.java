@@ -33,6 +33,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -60,11 +62,11 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s: %s", e.getStatusCode(),
-					message));
+			return new VaultHttpException(String.format("Status %s: %s", e.getStatusCode(),
+					message), e.getStatusCode());
 		}
 
-		return new VaultException(String.format("Status %s", e.getStatusCode()));
+		return new VaultHttpException(String.format("Status %s", e.getStatusCode()), e.getStatusCode());
 	}
 
 	/**
@@ -86,11 +88,11 @@ public abstract class VaultResponses {
 			String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s: %s", statusCode, path,
-					message));
+			return new VaultHttpException(String.format("Status %s %s: %s", statusCode, path,
+					message), statusCode);
 		}
 
-		return new VaultException(String.format("Status %s %s", statusCode, path));
+		return new VaultHttpException(String.format("Status %s %s", statusCode, path), statusCode);
 	}
 
 	/**
@@ -188,7 +190,7 @@ public abstract class VaultResponses {
 			});
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new VaultClientException("While mapping object", e);
 		}
 	}
 }

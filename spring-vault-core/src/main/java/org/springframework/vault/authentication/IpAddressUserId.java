@@ -19,6 +19,8 @@ package org.springframework.vault.authentication;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import org.springframework.vault.exceptions.VaultClientException;
+
 /**
  * Mechanism to generate a SHA-256 hashed and hex-encoded representation of the IP
  * address. Can be calculated with {@code echo -n 192.168.99.1 | sha256sum}.
@@ -34,7 +36,7 @@ public class IpAddressUserId implements AppIdUserIdMechanism {
 			return Sha256.toSha256(InetAddress.getLocalHost().getHostAddress());
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new VaultClientException("While creating userId", e);
 		}
 	}
 }

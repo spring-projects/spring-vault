@@ -25,6 +25,7 @@ import reactor.ipc.netty.resources.PoolResources;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 
@@ -87,7 +88,7 @@ public class ClientHttpConnectorFactory {
 			}
 		}
 		catch (GeneralSecurityException | IOException e) {
-			throw new IllegalStateException(e);
+			throw new VaultClientException("While configuring ssl", e);
 		}
 	}
 }

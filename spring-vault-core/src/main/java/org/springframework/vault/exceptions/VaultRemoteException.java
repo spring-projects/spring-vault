@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault;
+package org.springframework.vault.exceptions;
 
-import org.springframework.core.NestedRuntimeException;
+import org.springframework.vault.VaultException;
 
 /**
- * The Spring Vault specific {@link NestedRuntimeException} implementation.
+ * An exception related to a call to Vault. Normally these are related to
+ * Http Codes, via the subclass  {@link VaultHttpException} implementation.
  *
  * @author Mark Paluch
  */
 @SuppressWarnings("serial")
-public class VaultException extends NestedRuntimeException {
+public class VaultRemoteException extends VaultException {
+
 
 	/**
 	 * Create a {@code VaultException} with the specified detail message.
 	 *
 	 * @param msg the detail message.
 	 */
-	public VaultException(String msg) {
+	public VaultRemoteException(String msg) {
 		super(msg);
 	}
 
@@ -41,7 +43,7 @@ public class VaultException extends NestedRuntimeException {
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
-	public VaultException(String msg, Throwable cause) {
+	public VaultRemoteException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
 

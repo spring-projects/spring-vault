@@ -24,6 +24,7 @@ import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * SSL configuration.
@@ -455,7 +456,7 @@ public class SslConfiguration {
 
 		@Override
 		public InputStream getInputStream() throws IOException {
-			throw new UnsupportedOperationException("Empty resource");
+			throw new VaultClientException("Empty resource");
 		}
 	}
 }

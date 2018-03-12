@@ -31,6 +31,8 @@ import org.springframework.vault.authentication.AuthenticationSteps.MapStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultRemoteException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -127,13 +129,13 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 						return LoginTokenUtil.from(response.getAuth());
 					}
 
-					throw new IllegalStateException(
+					throw new VaultException(
 							String.format(
 									"Cannot retrieve VaultToken from authentication chain. Got instead %s",
 									stateObject));
 				})
 				.onErrorMap(
-						t -> new VaultException(
+						t -> t instanceof VaultException ? t : new VaultException(
 								"Cannot retrieve VaultToken from authentication chain", t));
 	}
 

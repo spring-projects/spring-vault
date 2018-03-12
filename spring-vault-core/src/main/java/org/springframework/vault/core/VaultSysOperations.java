@@ -146,7 +146,7 @@ public interface VaultSysOperations {
 	 *
 	 * @return the {@link Policy} or {@literal null}, if the policy was not found.
 	 * @since 2.0
-	 * @throws UnsupportedOperationException if the policy is represented as HCL.
+	 * @throws org.springframework.vault.exceptions.VaultClientException if the policy is represented as HCL.
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
 	 * /sys/policy/{name}</a>
 	 */

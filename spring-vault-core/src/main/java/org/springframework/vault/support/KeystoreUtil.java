@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.vault.exceptions.VaultClientException;
+
 /**
  * Keystore utility to create a {@link KeyStore} containing a {@link CertificateBundle}
  * with the certificate chain and its private key.
@@ -169,7 +171,7 @@ class KeystoreUtil {
 
 		Asn1Object sequence = parser.read();
 		if (sequence.getType() != DerParser.SEQUENCE) {
-			throw new IllegalStateException("Invalid DER: not a sequence");
+			throw new VaultClientException("Invalid DER: not a sequence");
 		}
 
 		// Parse inside the sequence
@@ -272,7 +274,7 @@ class KeystoreUtil {
 			int tag = in.read();
 
 			if (tag == -1) {
-				throw new IllegalStateException(
+				throw new VaultClientException(
 						"Invalid DER: stream too short, missing tag");
 			}
 
@@ -281,7 +283,7 @@ class KeystoreUtil {
 			byte[] value = new byte[length];
 			int n = in.read(value);
 			if (n < length) {
-				throw new IllegalStateException(
+				throw new VaultClientException(
 						"Invalid DER: stream too short, missing value");
 			}
 
@@ -308,7 +310,7 @@ class KeystoreUtil {
 
 			int i = in.read();
 			if (i == -1) {
-				throw new IllegalStateException("Invalid DER: length missing");
+				throw new VaultClientException("Invalid DER: length missing");
 			}
 
 			// A single byte short length
@@ -320,14 +322,14 @@ class KeystoreUtil {
 
 			// We can't handle length longer than 4 bytes
 			if (i >= 0xFF || num > 4) {
-				throw new IllegalStateException("Invalid DER: length field too big (" + i
+				throw new VaultClientException("Invalid DER: length field too big (" + i
 						+ ")");
 			}
 
 			byte[] bytes = new byte[num];
 			int n = in.read(bytes);
 			if (n < num) {
-				throw new IllegalStateException("Invalid DER: length too short");
+				throw new VaultClientException("Invalid DER: length too short");
 			}
 
 			return new BigInteger(1, bytes).intValue();
@@ -401,7 +403,7 @@ class KeystoreUtil {
 		DerParser getParser() throws IOException {
 
 			if (!isConstructed()) {
-				throw new IllegalStateException(
+				throw new VaultClientException(
 						"Invalid DER: can't parse primitive entity");
 			}
 
@@ -416,7 +418,7 @@ class KeystoreUtil {
 		BigInteger getInteger() {
 
 			if (type != DerParser.INTEGER) {
-				throw new IllegalStateException("Invalid DER: object is not integer");
+				throw new VaultClientException("Invalid DER: object is not integer");
 			}
 
 			return new BigInteger(value);

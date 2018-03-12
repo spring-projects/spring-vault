@@ -22,6 +22,7 @@ import java.net.URI;
 import lombok.EqualsAndHashCode;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Value object that defines Vault connection coordinates.
@@ -92,7 +93,7 @@ public class VaultEndpoint implements Serializable {
 					: uri.getPort());
 		}
 		catch (MalformedURLException e) {
-			throw new IllegalArgumentException(String.format(
+			throw new VaultClientException(String.format(
 					"Can't retrieve default port from %s", uri), e);
 		}
 		vaultEndpoint.setScheme(uri.getScheme());

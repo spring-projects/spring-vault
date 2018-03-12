@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.lang.Nullable;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Value object to bind generic Vault HTTP API responses.
@@ -81,7 +82,7 @@ public class VaultResponseSupport<T> {
 			return auth;
 		}
 
-		throw new IllegalStateException("Auth field is empty");
+		throw new VaultClientException("Auth field is empty");
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class VaultResponseSupport<T> {
 			return data;
 		}
 
-		throw new IllegalStateException("Data field is empty");
+		throw new VaultClientException("Data field is empty");
 	}
 
 	/**

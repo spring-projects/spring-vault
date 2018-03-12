@@ -37,6 +37,8 @@ import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -135,8 +137,8 @@ public class AwsIamAuthentication implements ClientAuthentication {
 			return LoginTokenUtil.from(response.getAuth());
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using AWS-IAM: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+			throw new VaultHttpException(String.format("Cannot login using AWS-IAM: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
 		}
 	}
 
@@ -194,7 +196,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 			return OBJECT_MAPPER.writeValueAsString(map);
 		}
 		catch (JsonProcessingException e) {
-			throw new IllegalStateException("Cannot serialize headers to JSON", e);
+			throw new VaultClientException("Cannot serialize headers to JSON", e);
 		}
 	}
 
