@@ -192,7 +192,11 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 */
 	protected Mono<VaultToken> renewToken() {
 
-		logger.info("Renewing token");
+		Optional<VaultToken> vaultToken = listener.onSessionRenewalNeeded();
+		if (vaultToken.isPresent()) {
+			token.set(Mono.just(new TokenWrapper(vaultToken.get(), false)));
+			return Mono.just(vaultToken.get());
+		}
 
 		Mono<TokenWrapper> tokenWrapper = ReactiveLifecycleAwareSessionManager.this.token
 				.get();
@@ -218,7 +222,8 @@ public class ReactiveLifecycleAwareSessionManager extends
 												VaultResponses.getError(e
 														.getResponseBodyAsString())));
 
-								dropCurrentToken();
+
+								failedToRenew();
 								return EMPTY;
 							}
 
@@ -227,6 +232,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						})
 				.onErrorMap(WebClientException.class,
 						e -> new VaultException("Cannot refresh token", e))
+				.doOnSuccess(this::successfullyRenewed)
 				.map(TokenWrapper::getToken);
 	}
 
@@ -262,10 +268,27 @@ public class ReactiveLifecycleAwareSessionManager extends
 						logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
 					}
 
-					dropCurrentToken();
+					failedToRenew();
 
 					return EMPTY;
 				});
+	}
+
+	private void failedToRenew() {
+		try {
+			listener.onSessionRenewalFailure();
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
+		}
+		dropCurrentToken();
+	}
+
+	private void successfullyRenewed(final TokenWrapper t) {
+		try {
+			listener.onSessionRenewalSuccess(t.getToken());
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
+		}
 	}
 
 	private void dropCurrentToken() {

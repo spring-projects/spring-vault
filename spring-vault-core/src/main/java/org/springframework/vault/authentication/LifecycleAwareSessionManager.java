@@ -19,6 +19,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.swing.text.html.Option;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -171,7 +173,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	protected boolean renewToken() {
 
-		logger.info("Renewing token");
+		Optional<VaultToken> listenerToken = listener.onSessionRenewalNeeded();
+		if (listenerToken.isPresent()) {
+			// Dubious logic
+			token = Optional.of(new TokenWrapper(listenerToken.get(), false));
+			return true;
+		}
 
 		Optional<TokenWrapper> token = this.token;
 		if (!token.isPresent()) {
@@ -202,13 +209,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				else {
 					logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
 				}
-
-				this.token = Optional.empty();
+				failedToRenew();
 				return false;
 			}
 
 			this.token = Optional.of(new TokenWrapper(renewed, wrapper.revocable));
-
+			successfullyRenewed();
 			return true;
 		}
 		catch (HttpStatusCodeException e) {
@@ -217,7 +223,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				logger.debug(String
 						.format("Cannot refresh token, resetting token and performing re-login: %s",
 								VaultResponses.getError(e.getResponseBodyAsString())));
-				this.token = Optional.empty();
+				failedToRenew();
 				return false;
 			}
 
@@ -225,6 +231,23 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (RestClientException e) {
 			throw new VaultException("Cannot refresh token", e);
+		}
+	}
+
+	private void failedToRenew() {
+		try {
+			listener.onSessionRenewalFailure();
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
+		}
+		token = Optional.empty();
+	}
+
+	private void successfullyRenewed() {
+		try {
+			listener.onSessionRenewalSuccess(token.map(tokenWrapper -> tokenWrapper.token).orElse(null));
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
 		}
 	}
 

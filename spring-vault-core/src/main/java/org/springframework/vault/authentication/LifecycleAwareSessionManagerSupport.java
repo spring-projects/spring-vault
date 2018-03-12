@@ -20,16 +20,16 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Support class to build Lifecycle-aware Session Manager implementations, defining common
@@ -50,6 +50,8 @@ public abstract class LifecycleAwareSessionManagerSupport {
 
 	private static final RefreshTrigger DEFAULT_TRIGGER = new FixedTimeoutRefreshTrigger(
 			REFRESH_PERIOD_BEFORE_EXPIRY, TimeUnit.SECONDS);
+
+	protected final SessionManagerListener listener;
 
 	/**
 	 * Logger available to subclasses.
@@ -94,12 +96,28 @@ public abstract class LifecycleAwareSessionManagerSupport {
 	 */
 	public LifecycleAwareSessionManagerSupport(TaskScheduler taskScheduler,
 			RefreshTrigger refreshTrigger) {
+		this(taskScheduler, refreshTrigger, new LoggingSessionListener());
+	}
+
+	/**
+	 * Create a {@link LifecycleAwareSessionManager} given {@link TaskScheduler},
+	 * {@link RefreshTrigger}, {@link SessionManagerListener}
+	 *
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param refreshTrigger must not be {@literal null}.
+	 * @param sessionManagerListener must not be {@literal null}.
+	 */
+	public LifecycleAwareSessionManagerSupport(TaskScheduler taskScheduler,
+											   RefreshTrigger refreshTrigger,
+											   SessionManagerListener sessionManagerListener) {
 
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
+		Assert.notNull(sessionManagerListener, "SessionManagerListener must not be null");
 
 		this.taskScheduler = taskScheduler;
 		this.refreshTrigger = refreshTrigger;
+		this.listener = sessionManagerListener;
 	}
 
 	/**
