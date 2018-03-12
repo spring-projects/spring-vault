@@ -243,7 +243,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 				return VaultResponses.unwrap(rules, Policy.class);
 			}
 
-			throw new VaultClientException("Cannot parse policy in HCL format");
+			throw new UnsupportedOperationException("Cannot parse policy in HCL format");
 		});
 	}
 

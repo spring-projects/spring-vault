@@ -28,7 +28,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultUnsealStatus;
@@ -164,7 +163,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(root).isNull();
 	}
 
-	@Test(expected = VaultClientException.class)
+	@Test(expected = UnsupportedOperationException.class)
 	public void shouldReadDefaultPolicy() {
 
 		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
