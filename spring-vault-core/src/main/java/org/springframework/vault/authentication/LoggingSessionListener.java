@@ -21,7 +21,7 @@ public class LoggingSessionListener implements SessionManagerListener {
     }
 
     @Override
-    public void onSessionRenewalFailure(final VaultToken oldToken) {
+    public void onSessionRenewalFailure() {
         logger.debug("Failed to successfully remove token!");
     }
 }
