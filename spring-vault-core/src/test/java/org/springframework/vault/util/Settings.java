@@ -18,6 +18,7 @@ package org.springframework.vault.util;
 import java.io.File;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
@@ -69,7 +70,7 @@ public class Settings {
 			searchLevel = searchLevel.getParentFile();
 		}
 
-		throw new IllegalStateException(String.format(
+		throw new VaultClientException(String.format(
 				"Cannot find work directory in %s or any parent directories",
 				directory.getAbsoluteFile()));
 	}

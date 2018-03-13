@@ -15,12 +15,14 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
+
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -37,13 +39,12 @@ import org.springframework.vault.authentication.AppRoleTokens.Pull;
 import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
@@ -105,7 +106,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		if ((roleId instanceof Wrapped || roleId instanceof Pull)
 				&& (secretId instanceof Wrapped || secretId instanceof Pull)) {
 
-			throw new IllegalArgumentException(
+			throw new VaultClientException(
 					"RoleId and SecretId are both configured to obtain their values from initial Vault request. AuthenticationSteps supports currently only fetching of a single element.");
 		}
 
@@ -181,7 +182,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			});
 		}
 
-		throw new IllegalArgumentException(String.format(
+		throw new VaultClientException(String.format(
 				"Provided RoleId/SecretId setup not supported. RoleId: %s, SecretId: %s",
 				roleId, secretId));
 	}
@@ -226,8 +227,8 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			return LoginTokenUtil.from(response.getAuth());
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using AppRole: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+			throw new VaultHttpException(String.format("Cannot login using AppRole: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 
@@ -250,9 +251,9 @@ public class AppRoleAuthentication implements ClientAuthentication,
 				return (String) entity.getBody().getRequiredData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
+				throw new VaultHttpException(String.format(
 						"Cannot get Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
@@ -273,13 +274,13 @@ public class AppRoleAuthentication implements ClientAuthentication,
 				return (String) response.getRequiredData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
+				throw new VaultHttpException(String.format(
 						"Cannot unwrap Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
-		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
+		throw new VaultClientException("Unknown RoleId configuration: " + roleId);
 	}
 
 	private String getSecretId(SecretId secretId) {
@@ -299,9 +300,9 @@ public class AppRoleAuthentication implements ClientAuthentication,
 				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
+				throw new VaultHttpException(String.format(
 						"Cannot get Secret id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
@@ -322,13 +323,13 @@ public class AppRoleAuthentication implements ClientAuthentication,
 				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
+				throw new VaultHttpException(String.format(
 						"Cannot unwrap Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())));
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
-		throw new IllegalArgumentException("Unknown SecretId configuration: " + secretId);
+		throw new VaultClientException("Unknown SecretId configuration: " + secretId);
 	}
 
 	private static HttpHeaders createHttpHeaders(VaultToken token) {

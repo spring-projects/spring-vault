@@ -51,6 +51,7 @@ import lombok.EqualsAndHashCode;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.Policy.PolicyDeserializer;
 import org.springframework.vault.support.Policy.PolicySerializer;
 
@@ -373,7 +374,7 @@ public class Policy {
 							Capability capability = BuiltinCapabilities.find(value);
 
 							if (capability == null) {
-								throw new IllegalArgumentException("Cannot resolve "
+								throw new VaultClientException("Cannot resolve "
 										+ value + " to a capability");
 							}
 							return capability;
@@ -741,7 +742,7 @@ public class Policy {
 					return Duration.ofHours(Long.parseLong(matcher.group(1)));
 				}
 
-				throw new IllegalArgumentException("Unsupported duration value: " + value);
+				throw new VaultClientException("Unsupported duration value: " + value);
 			}
 		}
 

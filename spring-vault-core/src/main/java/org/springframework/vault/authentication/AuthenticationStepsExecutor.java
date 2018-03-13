@@ -30,6 +30,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -104,10 +105,13 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				}
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultException(String.format(
+				throw new VaultHttpException(String.format(
 						"HTTP request %s in state %s failed with Status %s and body %s",
 						o, state, e.getStatusCode(),
-						VaultResponses.getError(e.getResponseBodyAsString())));
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
+			}
+			catch (VaultException e) {
+				throw e;
 			}
 			catch (RuntimeException e) {
 				throw new VaultException(String.format(
@@ -126,7 +130,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 			return LoginTokenUtil.from(response.getAuth());
 		}
 
-		throw new IllegalStateException(String.format(
+		throw new VaultException(String.format(
 				"Cannot retrieve VaultToken from authentication chain. Got instead %s",
 				state));
 	}

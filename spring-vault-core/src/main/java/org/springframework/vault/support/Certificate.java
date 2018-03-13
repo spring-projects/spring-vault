@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Value object representing a certificate consisting of the certificate and the issuer
@@ -106,7 +107,7 @@ public class Certificate {
 			return KeystoreUtil.getCertificate(bytes);
 		}
 		catch (IOException | CertificateException e) {
-			throw new VaultException("Cannot create Certificate from certificate", e);
+			throw new VaultClientException("Cannot create Certificate from certificate", e);
 		}
 	}
 
@@ -123,7 +124,7 @@ public class Certificate {
 			return KeystoreUtil.getCertificate(bytes);
 		}
 		catch (IOException | CertificateException e) {
-			throw new VaultException(
+			throw new VaultClientException(
 					"Cannot create Certificate from issuing CA certificate", e);
 		}
 	}
@@ -141,7 +142,7 @@ public class Certificate {
 					getX509IssuerCertificate());
 		}
 		catch (GeneralSecurityException | IOException e) {
-			throw new VaultException("Cannot create KeyStore", e);
+			throw new VaultClientException("Cannot create KeyStore", e);
 		}
 	}
 }

@@ -51,6 +51,7 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
@@ -108,11 +109,8 @@ public class ClientHttpRequestFactoryFactory {
 				return Netty.usingNetty(options, sslConfiguration);
 			}
 		}
-		catch (GeneralSecurityException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IOException e) {
-			throw new IllegalStateException(e);
+		catch (GeneralSecurityException | IOException e) {
+			throw new VaultClientException("While configuring ClientRequestFactory", e);
 		}
 
 		if (hasSslConfiguration(sslConfiguration)) {

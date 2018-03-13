@@ -35,6 +35,7 @@ import org.springframework.data.repository.query.parser.Part;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
 import org.springframework.data.repository.query.parser.Part.Type;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
@@ -162,7 +163,7 @@ public class VaultQueryCreator extends
 			return new Criteria<>(accessor.nextString(parameters),
 					(value, it) -> !it.equals(value));
 		default:
-			throw new IllegalArgumentException("Unsupported keyword!");
+			throw new VaultClientException("Unsupported keyword!");
 		}
 	}
 

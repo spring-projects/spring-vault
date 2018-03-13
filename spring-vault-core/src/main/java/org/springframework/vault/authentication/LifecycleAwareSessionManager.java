@@ -30,6 +30,8 @@ import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultHttpException;
+import org.springframework.vault.exceptions.VaultRemoteException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -221,10 +223,10 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				return false;
 			}
 
-			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
+			throw new VaultHttpException(VaultResponses.getError(e.getResponseBodyAsString()), e);
 		}
 		catch (RestClientException e) {
-			throw new VaultException("Cannot refresh token", e);
+			throw new VaultRemoteException("Cannot refresh token");
 		}
 	}
 

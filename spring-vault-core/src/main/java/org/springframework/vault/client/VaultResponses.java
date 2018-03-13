@@ -33,6 +33,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -60,11 +62,11 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s: %s", e.getStatusCode(),
-					message));
+			return new VaultHttpException(String.format("Status %s: %s", e.getStatusCode(),
+					message), e);
 		}
 
-		return new VaultException(String.format("Status %s", e.getStatusCode()));
+		return new VaultHttpException(String.format("Status %s", e.getStatusCode()), e);
 	}
 
 	/**
@@ -78,19 +80,30 @@ public abstract class VaultResponses {
 
 		Assert.notNull(e, "HttpStatusCodeException must not be null");
 
-		return buildException(e.getStatusCode(), path,
+		return buildException(e, path,
 				VaultResponses.getError(e.getResponseBodyAsString()));
 	}
 
-	public static VaultException buildException(HttpStatus statusCode, String path,
+	public static VaultException buildException(HttpStatusCodeException e, String path,
 			String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s: %s", statusCode, path,
-					message));
+			return new VaultHttpException(String.format("Status %s %s: %s", e.getStatusCode(), path,
+					message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s", statusCode, path));
+		return new VaultHttpException(String.format("Status %s %s", e.getStatusCode(), path), e);
+	}
+
+	public static VaultException buildException(HttpStatus status, String path,
+												String message) {
+
+		if (StringUtils.hasText(message)) {
+			return new VaultHttpException(String.format("Status %s %s: %s",status, path,
+					message), status);
+		}
+
+		return new VaultHttpException(String.format("Status %s %s",status, path), status);
 	}
 
 	/**
@@ -188,7 +201,7 @@ public abstract class VaultResponses {
 			});
 		}
 		catch (IOException e) {
-			throw new IllegalStateException(e);
+			throw new VaultClientException("While mapping object", e);
 		}
 	}
 }

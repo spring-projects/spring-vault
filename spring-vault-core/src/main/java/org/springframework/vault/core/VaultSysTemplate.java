@@ -39,6 +39,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.exceptions.VaultClientException;
+import org.springframework.vault.exceptions.VaultHttpException;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
@@ -228,7 +230,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 					return null;
 				}
 
-				throw e;
+				throw new VaultHttpException(String.format("While getting policy %s", name), e);
 			}
 
 			String rules = (String) response.getBody().getRequiredData().get("rules");
@@ -257,7 +259,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			rules = OBJECT_MAPPER.writeValueAsString(policy);
 		}
 		catch (IOException e) {
-			throw new VaultException("Cannot serialize policy to JSON", e);
+			throw new VaultClientException("Cannot serialize policy to JSON", e);
 		}
 
 		vaultOperations.doWithSession(restOperations -> {

@@ -46,6 +46,7 @@ import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.exceptions.VaultClientException;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
@@ -174,7 +175,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			return VaultEndpoint.from(URI.create(uri));
 		}
 
-		throw new IllegalStateException("Vault URI (vault.uri) is null");
+		throw new VaultClientException("Vault URI (vault.uri) is null");
 	}
 
 	@Override
@@ -233,7 +234,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		case KUBERNETES:
 			return kubeAuthentication();
 		default:
-			throw new IllegalStateException(String.format(
+			throw new VaultClientException(String.format(
 					"Vault authentication method %s is not supported with %s",
 					authenticationMethod, getClass().getSimpleName()));
 		}

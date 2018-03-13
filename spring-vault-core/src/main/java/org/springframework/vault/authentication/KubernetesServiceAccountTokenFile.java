@@ -25,6 +25,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StreamUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.exceptions.VaultClientException;
 
 /**
  * Mechanism to retrieve a Kubernetes service account token.
@@ -96,7 +97,7 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 			this.token = readToken(resource);
 		}
 		catch (IOException e) {
-			throw new VaultException(String.format(
+			throw new VaultClientException(String.format(
 					"Kube JWT token retrieval from %s failed", resource), e);
 		}
 	}
