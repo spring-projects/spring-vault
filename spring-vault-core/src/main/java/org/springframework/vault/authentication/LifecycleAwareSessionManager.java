@@ -173,13 +173,6 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	protected boolean renewToken() {
 
-		Optional<VaultToken> listenerToken = listener.onSessionRenewalNeeded();
-		if (listenerToken.isPresent()) {
-			// Dubious logic
-			token = Optional.of(new TokenWrapper(listenerToken.get(), false));
-			return true;
-		}
-
 		Optional<TokenWrapper> token = this.token;
 		if (!token.isPresent()) {
 			getSessionToken();
@@ -219,36 +212,25 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (HttpStatusCodeException e) {
 
-			if (e.getStatusCode().is4xxClientError()) {
-				logger.debug(String
-						.format("Cannot refresh token, resetting token and performing re-login: %s",
-								VaultResponses.getError(e.getResponseBodyAsString())));
-				failedToRenew();
-				return false;
-			}
-
-			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
+		if (e.getStatusCode().is4xxClientError()) {
+			logger.debug(String
+					.format("Cannot refresh token, resetting token and performing re-login: %s",
+							VaultResponses.getError(e.getResponseBodyAsString())));
+			failedToRenew();
+			return false;
 		}
+
+		throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
+	}
 		catch (RestClientException e) {
-			throw new VaultException("Cannot refresh token", e);
-		}
+		throw new VaultException("Cannot refresh token", e);
 	}
+}
 
-	private void failedToRenew() {
-		try {
-			listener.onSessionRenewalFailure();
-		} catch (RuntimeException e) {
-			logger.error("Error in listener", e);
-		}
+	@Override
+	protected void failedToRenew() {
+		super.failedToRenew();
 		token = Optional.empty();
-	}
-
-	private void successfullyRenewed() {
-		try {
-			listener.onSessionRenewalSuccess(token.map(tokenWrapper -> tokenWrapper.token).orElse(null));
-		} catch (RuntimeException e) {
-			logger.error("Error in listener", e);
-		}
 	}
 
 	@Override

@@ -178,6 +178,22 @@ public abstract class LifecycleAwareSessionManagerSupport {
 		return loginToken.getLeaseDuration().compareTo(validTtlThreshold) <= 0;
 	}
 
+	protected void failedToRenew() {
+		try {
+			listener.onSessionRenewalFailure();
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
+		}
+	}
+
+	protected void successfullyRenewed() {
+		try {
+			listener.onSessionRenewalSuccess();
+		} catch (RuntimeException e) {
+			logger.error("Error in listener", e);
+		}
+	}
+
 	/**
 	 * This one-shot trigger creates only one execution time to trigger an execution only
 	 * once.

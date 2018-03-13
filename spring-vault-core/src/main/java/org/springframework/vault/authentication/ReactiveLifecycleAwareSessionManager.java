@@ -20,10 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Mono;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
@@ -36,6 +32,10 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 /**
  * Reactive implementation of Lifecycle-aware {@link ReactiveSessionManager session
@@ -192,12 +192,6 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 */
 	protected Mono<VaultToken> renewToken() {
 
-		Optional<VaultToken> vaultToken = listener.onSessionRenewalNeeded();
-		if (vaultToken.isPresent()) {
-			token.set(Mono.just(new TokenWrapper(vaultToken.get(), false)));
-			return Mono.just(vaultToken.get());
-		}
-
 		Mono<TokenWrapper> tokenWrapper = ReactiveLifecycleAwareSessionManager.this.token
 				.get();
 
@@ -232,7 +226,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						})
 				.onErrorMap(WebClientException.class,
 						e -> new VaultException("Cannot refresh token", e))
-				.doOnSuccess(this::successfullyRenewed)
+				.doOnSuccess(t -> successfullyRenewed())
 				.map(TokenWrapper::getToken);
 	}
 
@@ -274,22 +268,12 @@ public class ReactiveLifecycleAwareSessionManager extends
 				});
 	}
 
-	private void failedToRenew() {
-		try {
-			listener.onSessionRenewalFailure();
-		} catch (RuntimeException e) {
-			logger.error("Error in listener", e);
-		}
+	@Override
+	protected void failedToRenew() {
+		super.failedToRenew();
 		dropCurrentToken();
 	}
 
-	private void successfullyRenewed(final TokenWrapper t) {
-		try {
-			listener.onSessionRenewalSuccess(t.getToken());
-		} catch (RuntimeException e) {
-			logger.error("Error in listener", e);
-		}
-	}
 
 	private void dropCurrentToken() {
 
