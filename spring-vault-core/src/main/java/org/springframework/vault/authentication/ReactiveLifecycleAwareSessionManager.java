@@ -225,7 +225,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 							}
 
 							return Mono.error(new VaultHttpException(VaultResponses
-									.getError(e.getResponseBodyAsString()), e.getStatusCode()));
+									.getError(e.getResponseBodyAsString()), e));
 						})
 				.onErrorMap(WebClientException.class,
 						e -> new VaultRemoteException("Cannot refresh token", e))
@@ -411,7 +411,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						e -> {
 							return new VaultTokenLookupException(String.format(
 									"Token self-lookup failed: %s %s", e.getStatusCode(),
-									VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+									VaultResponses.getError(e.getResponseBodyAsString())), e);
 						});
 	}
 

@@ -16,6 +16,8 @@
 package org.springframework.vault.exceptions;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Represents an Http Call to Vault that resulted in a failure (usually non 200/204) response.
@@ -28,25 +30,25 @@ public class VaultHttpException extends VaultRemoteException {
 	private final HttpStatus httpStatus;
 
 	/**
-	 * Create a {@code VaultException} with the specified detail message.
-	 *
-	 * @param msg the detail message.
-	 */
-	public VaultHttpException(String msg, HttpStatus httpStatus) {
-		super(msg);
-		this.httpStatus = httpStatus;
-	}
-
-	/**
 	 * Create a {@code VaultException} with the specified detail message and nested
 	 * exception.
 	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
-	public VaultHttpException(String msg, Throwable cause, HttpStatus httpStatus) {
+	public VaultHttpException(String msg, final HttpStatusCodeException cause) {
 		super(msg, cause);
-		this.httpStatus = httpStatus;
+		this.httpStatus = cause.getStatusCode();
+	}
+
+	public VaultHttpException(final String msg, final WebClientResponseException e) {
+		super(msg);
+		this.httpStatus = e.getStatusCode();
+	}
+
+	public VaultHttpException(final String msg, final HttpStatus status) {
+		super(msg);
+		this.httpStatus = status;
 	}
 
 	public HttpStatus getHttpStatus() {

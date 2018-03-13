@@ -228,7 +228,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format("Cannot login using AppRole: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 
@@ -253,7 +253,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			catch (HttpStatusCodeException e) {
 				throw new VaultHttpException(String.format(
 						"Cannot get Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
@@ -276,7 +276,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			catch (HttpStatusCodeException e) {
 				throw new VaultHttpException(String.format(
 						"Cannot unwrap Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
@@ -302,7 +302,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			catch (HttpStatusCodeException e) {
 				throw new VaultHttpException(String.format(
 						"Cannot get Secret id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 
@@ -325,7 +325,7 @@ public class AppRoleAuthentication implements ClientAuthentication,
 			catch (HttpStatusCodeException e) {
 				throw new VaultHttpException(String.format(
 						"Cannot unwrap Role id using AppRole: %s",
-						VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
 

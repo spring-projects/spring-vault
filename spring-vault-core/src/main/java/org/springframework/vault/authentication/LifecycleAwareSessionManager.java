@@ -223,7 +223,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				return false;
 			}
 
-			throw new VaultHttpException(VaultResponses.getError(e.getResponseBodyAsString()), e.getStatusCode());
+			throw new VaultHttpException(VaultResponses.getError(e.getResponseBodyAsString()), e);
 		}
 		catch (RestClientException e) {
 			throw new VaultRemoteException("Cannot refresh token");

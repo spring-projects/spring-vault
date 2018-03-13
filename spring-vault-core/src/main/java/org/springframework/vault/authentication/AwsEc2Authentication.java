@@ -187,7 +187,7 @@ public class AwsEc2Authentication implements ClientAuthentication,
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format("Cannot login using AWS-EC2: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 
@@ -217,7 +217,7 @@ public class AwsEc2Authentication implements ClientAuthentication,
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format(
 					"Cannot obtain Identity Document from %s",
-					options.getIdentityDocumentUri()), e, e.getStatusCode());
+					options.getIdentityDocumentUri()), e);
 		}
 		catch (RestClientException e) {
 			throw new VaultRemoteException(String.format(

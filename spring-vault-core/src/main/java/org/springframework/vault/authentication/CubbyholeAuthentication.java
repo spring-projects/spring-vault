@@ -227,7 +227,7 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format(
 					"Cannot retrieve Token from Cubbyhole: %s %s", e.getStatusCode(),
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 

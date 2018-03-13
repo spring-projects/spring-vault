@@ -563,7 +563,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			onError(requestedSecret,
 					lease,
 					new VaultHttpException(String.format("Cannot renew lease: %s",
-							VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode()));
+							VaultResponses.getError(e.getResponseBodyAsString())), e));
 		}
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);
@@ -633,7 +633,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			onError(requestedSecret,
 					lease,
 					new VaultHttpException(String.format("Cannot revoke lease: %s",
-							VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode()));
+							VaultResponses.getError(e.getResponseBodyAsString())), e));
 		}
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);

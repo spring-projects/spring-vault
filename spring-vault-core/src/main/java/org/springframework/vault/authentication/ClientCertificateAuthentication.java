@@ -91,7 +91,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication,
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format(
 					"Cannot login using TLS certificates: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 }

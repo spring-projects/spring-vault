@@ -114,7 +114,7 @@ public class AppIdAuthentication implements ClientAuthentication,
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format("Cannot login using app-id: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 

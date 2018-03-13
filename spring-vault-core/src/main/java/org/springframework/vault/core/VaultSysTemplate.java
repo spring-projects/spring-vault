@@ -230,7 +230,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 					return null;
 				}
 
-				throw new VaultHttpException(String.format("While getting policy %s", name), e, e.getStatusCode());
+				throw new VaultHttpException(String.format("While getting policy %s", name), e);
 			}
 
 			String rules = (String) response.getBody().getRequiredData().get("rules");

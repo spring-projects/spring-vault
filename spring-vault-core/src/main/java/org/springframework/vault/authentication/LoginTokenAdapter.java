@@ -104,7 +104,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		catch (HttpStatusCodeException e) {
 			throw new VaultTokenLookupException(String.format(
 					"Token self-lookup failed: %s %s", e.getStatusCode(),
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 

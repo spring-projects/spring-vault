@@ -107,7 +107,7 @@ public class KubernetesAuthentication implements ClientAuthentication,
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format("Cannot login using kubernetes: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 

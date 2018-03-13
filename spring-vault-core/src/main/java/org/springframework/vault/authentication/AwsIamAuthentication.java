@@ -138,7 +138,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultHttpException(String.format("Cannot login using AWS-IAM: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e.getStatusCode());
+					VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 
