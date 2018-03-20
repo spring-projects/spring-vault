@@ -291,6 +291,34 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 		verify(tokenSupplier, times(2)).getVaultToken();
 	}
 
+	@Test
+	public void shouldReLoginIfRenewFails() {
+
+		when(tokenSupplier.getVaultToken())
+				.thenReturn(
+						Mono.just(LoginToken.renewable("login".toCharArray(),
+								Duration.ofSeconds(5))),
+						Mono.just(LoginToken.renewable("bar".toCharArray(),
+								Duration.ofSeconds(5))));
+		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
+				Mono.error(new RuntimeException("foo")));
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+				.verifyComplete();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		runnableCaptor.getValue().run();
+
+		sessionManager
+				.getSessionToken()
+				.as(StepVerifier::create)
+				.expectNext(
+						LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
+				.verifyComplete();
+
+		verify(tokenSupplier, times(2)).getVaultToken();
+	}
+
 	private static VaultResponse fromToken(LoginToken loginToken) {
 
 		Map<String, Object> auth = new HashMap<>();

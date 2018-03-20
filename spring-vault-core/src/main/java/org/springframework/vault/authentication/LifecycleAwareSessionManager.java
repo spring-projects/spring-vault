@@ -33,7 +33,6 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -213,18 +212,26 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (HttpStatusCodeException e) {
 
+			logger.debug(String.format(
+					"Cannot renew token, resetting token and performing re-login: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
+			this.token = Optional.empty();
+
 			if (e.getStatusCode().is4xxClientError()) {
-				logger.debug(String
-						.format("Cannot refresh token, resetting token and performing re-login: %s",
-								VaultResponses.getError(e.getResponseBodyAsString())));
-				this.token = Optional.empty();
 				return false;
 			}
 
-			throw new VaultException(VaultResponses.getError(e.getResponseBodyAsString()));
+			throw new VaultException(String.format("Cannot renew token: %s",
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
-		catch (RestClientException e) {
-			throw new VaultException("Cannot refresh token", e);
+		catch (RuntimeException e) {
+
+			logger.debug(String.format(
+					"Cannot renew token, resetting token and performing re-login: %s",
+					e.toString()));
+			this.token = Optional.empty();
+
+			throw new VaultException("Cannot renew token", e);
 		}
 	}
 
