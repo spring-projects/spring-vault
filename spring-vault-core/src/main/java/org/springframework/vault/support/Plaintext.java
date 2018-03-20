@@ -18,7 +18,6 @@ package org.springframework.vault.support;
 import lombok.EqualsAndHashCode;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * Value object representing plaintext with an optional {@link VaultTransitContext}.
@@ -44,13 +43,12 @@ public class Plaintext {
 	/**
 	 * Factory method to create {@link Plaintext} from a byte sequence.
 	 *
-	 * @param plaintext the plaintext to encrypt, must not be {@literal null} or empty.
+	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
 	public static Plaintext of(byte[] plaintext) {
 
-		Assert.isTrue(!ObjectUtils.isEmpty(plaintext),
-				"Plaintext must not be null or empty");
+		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		return new Plaintext(plaintext, VaultTransitContext.empty());
 	}
@@ -60,12 +58,12 @@ public class Plaintext {
 	 * {@link String} is encoded to {@code byte} using the default
 	 * {@link java.nio.charset.Charset}.
 	 *
-	 * @param plaintext the plaintext to encrypt, must not be {@literal null} or empty.
+	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
 	public static Plaintext of(String plaintext) {
 
-		Assert.hasText(plaintext, "Plaintext must not be null or empty");
+		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		return of(plaintext.getBytes());
 	}
