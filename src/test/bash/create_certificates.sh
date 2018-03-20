@@ -24,11 +24,11 @@ fi
 
 KEYTOOL=keytool
 
-if [  ! -x "${KEYTOOL}" ] ; then
+if [  ! -x "$(which keytool)" ] ; then
    KEYTOOL=${JAVA_HOME}/bin/keytool
 fi
 
-if [  ! -x "${KEYTOOL}" ] ; then
+if [  ! -x "$(which ${KEYTOOL})" ] ; then
    echo "[ERROR] No keytool in PATH/JAVA_HOME"
    exit 1
 fi
