@@ -69,7 +69,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
  *
- * final RequestedSecret requestedSecret = container
+ * RequestedSecret requestedSecret = container
  * 		.requestRotatingSecret("mysql/creds/my-role");
  * container.addLeaseListener(new LeaseListenerAdapter() {
  * 	&#64;Override
@@ -373,7 +373,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				lease = Lease.none();
 			}
 
-			potentiallyScheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
+			if (renewalScheduler.isLeaseRenewable(lease, requestedSecret)) {
+				scheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
+			}
+			else if (renewalScheduler.isLeaseRotateOnly(lease, requestedSecret)) {
+				scheduleLeaseRotation(requestedSecret, lease, renewalScheduler);
+			}
+
 			onSecretsObtained(requestedSecret, lease, secrets.getRequiredData());
 		}
 	}
@@ -470,34 +476,18 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 	}
 
-	void potentiallyScheduleLeaseRenewal(final RequestedSecret requestedSecret,
-			final Lease lease, final LeaseRenewalScheduler leaseRenewal) {
+	void scheduleLeaseRenewal(RequestedSecret requestedSecret, Lease lease,
+			LeaseRenewalScheduler leaseRenewal) {
 
-		if (!leaseRenewal.isLeaseRenewable(lease, requestedSecret)) {
-			return;
-		}
+		logRenewalCandidate(requestedSecret, lease, "renewal");
 
-		if (log.isDebugEnabled()) {
+		leaseRenewal.scheduleRenewal(requestedSecret, leaseToRenew -> {
 
-			if (lease.hasLeaseId()) {
-				log.debug(String.format("Secret %s with Lease %s qualified for renewal",
-						requestedSecret.getPath(), lease.getLeaseId()));
-			}
-			else {
-				log.debug(String.format(
-						"Secret %s with cache hint is qualified for renewal",
-						requestedSecret.getPath()));
-			}
-
-		}
-
-		leaseRenewal.scheduleRenewal(requestedSecret, lease1 -> {
-
-			Lease newLease = doRenewLease(requestedSecret, lease1);
+			Lease newLease = doRenewLease(requestedSecret, leaseToRenew);
 
 			if (!Lease.none().equals(newLease)) {
 
-				potentiallyScheduleLeaseRenewal(requestedSecret, newLease, leaseRenewal);
+				scheduleLeaseRenewal(requestedSecret, newLease, leaseRenewal);
 
 				onAfterLeaseRenewed(requestedSecret, newLease);
 			}
@@ -505,6 +495,35 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			return newLease;
 		}, lease, getMinRenewal(), getExpiryThreshold());
 
+	}
+
+	void scheduleLeaseRotation(RequestedSecret requestedSecret, Lease lease,
+			LeaseRenewalScheduler leaseRenewal) {
+
+		logRenewalCandidate(requestedSecret, lease, "rotation");
+
+		leaseRenewal.scheduleRenewal(requestedSecret, leaseToRotate -> {
+
+			onLeaseExpired(requestedSecret, leaseToRotate);
+
+			return Lease.none(); // rotation creates a new lease.
+			}, lease, getMinRenewal(), getExpiryThreshold());
+	}
+
+	private static void logRenewalCandidate(RequestedSecret requestedSecret, Lease lease,
+			String action) {
+
+		if (log.isDebugEnabled()) {
+
+			if (lease.hasLeaseId()) {
+				log.debug(String.format("Secret %s with Lease %s qualified for %s",
+						requestedSecret.getPath(), lease.getLeaseId(), action));
+			}
+			else {
+				log.debug(String.format("Secret %s with cache hint is qualified for %s",
+						requestedSecret.getPath(), action));
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -539,7 +558,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * @param lease the lease.
 	 * @return the new lease or {@literal null} if expired/secret cannot be rotated.
 	 */
-	protected Lease doRenewLease(final RequestedSecret requestedSecret, final Lease lease) {
+	protected Lease doRenewLease(RequestedSecret requestedSecret, Lease lease) {
 
 		try {
 			Lease renewed = lease.hasLeaseId() ? renew(lease) : lease;
@@ -572,7 +591,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	@SuppressWarnings("unchecked")
-	private Lease renew(final Lease lease) {
+	private Lease renew(Lease lease) {
 
 		ResponseEntity<Map<String, Object>> entity = operations
 				.doWithSession(restOperations -> (ResponseEntity) restOperations
@@ -615,7 +634,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * @param lease must not be {@literal null}.
 	 */
 	@SuppressWarnings("unchecked")
-	protected void doRevokeLease(RequestedSecret requestedSecret, final Lease lease) {
+	protected void doRevokeLease(RequestedSecret requestedSecret, Lease lease) {
 
 		try {
 
@@ -673,9 +692,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		 * prevent too many renewals in a very short timeframe.
 		 * @param expiryThreshold duration to renew before {@link Lease}.
 		 */
-		void scheduleRenewal(final RequestedSecret requestedSecret,
-				final RenewLease renewLease, final Lease lease,
-				final Duration minRenewal, final Duration expiryThreshold) {
+		void scheduleRenewal(RequestedSecret requestedSecret, RenewLease renewLease,
+				Lease lease, Duration minRenewal, Duration expiryThreshold) {
 
 			if (log.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
@@ -723,6 +741,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 					}
 
 					try {
+
+						// Renew lease may call scheduleRenewal(…) with a different lease
+						// Id to alter set up its own renewal schedule. If it's the old
+						// lease, then renewLease() outcome controls the current LeaseId.
 						currentLeaseRef
 								.compareAndSet(lease, renewLease.renewLease(lease));
 					}
@@ -796,6 +818,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		public Lease getLease() {
 			return currentLeaseRef.get();
+		}
+
+		private boolean isLeaseRotateOnly(Lease lease, RequestedSecret requestedSecret) {
+
+			if (lease == null) {
+				return false;
+			}
+
+			return lease.hasLeaseId() && !lease.isRenewable()
+					&& requestedSecret.getMode() == Mode.ROTATE;
 		}
 	}
 
