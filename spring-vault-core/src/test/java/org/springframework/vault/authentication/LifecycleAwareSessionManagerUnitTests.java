@@ -39,6 +39,7 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -251,6 +252,26 @@ public class LifecycleAwareSessionManagerUnitTests {
 				.thenReturn(
 						fromToken(LoginToken.of("foo".toCharArray(),
 								Duration.ofSeconds(2))));
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		sessionManager.getSessionToken();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		runnableCaptor.getValue().run();
+
+		assertThat(sessionManager.getSessionToken()).isEqualTo(
+				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
+
+		verify(clientAuthentication, times(2)).login();
+	}
+
+	@Test
+	public void shouldReLoginIfRenewalFails() {
+
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
+				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenThrow(new ResourceAccessException("Connection refused"));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		sessionManager.getSessionToken();

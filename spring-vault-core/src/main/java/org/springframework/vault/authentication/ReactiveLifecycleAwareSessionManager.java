@@ -211,23 +211,36 @@ public class ReactiveLifecycleAwareSessionManager extends
 						WebClientResponseException.class,
 						e -> {
 
+							dropCurrentToken();
+
 							if (e.getStatusCode().is4xxClientError()) {
 
 								logger.debug(String
-										.format("Cannot refresh token, resetting token and performing re-login: %s",
+										.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
 												VaultResponses.getError(e
 														.getResponseBodyAsString())));
 
-								dropCurrentToken();
 								return EMPTY;
 							}
 
-							return Mono.error(new VaultException(VaultResponses
-									.getError(e.getResponseBodyAsString())));
+							logger.debug(String
+									.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
+											e.toString()));
+
+							return Mono.error(new VaultException(String.format(
+									"Cannot renew token: %s",
+									VaultResponses.getError(e.getResponseBodyAsString()))));
 						})
-				.onErrorMap(WebClientException.class,
-						e -> new VaultException("Cannot refresh token", e))
-				.map(TokenWrapper::getToken);
+				.onErrorMap(
+						e -> {
+
+							dropCurrentToken();
+							logger.debug(String
+									.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
+											e.toString()));
+
+							return new VaultException("Cannot renew token", e);
+						}).map(TokenWrapper::getToken);
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
