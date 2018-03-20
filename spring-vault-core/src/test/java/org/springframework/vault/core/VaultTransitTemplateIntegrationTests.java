@@ -296,6 +296,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	@Test
 	public void encryptShouldEncryptEmptyValues() {
 
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
 
