@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -213,6 +214,43 @@ public class SecretLeaseContainerUnitTests {
 		captor.getValue().run();
 		verifyZeroInteractions(scheduledFuture);
 		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+	}
+
+	@Test
+	public void shouldRotateNonRenewableLease() {
+
+		final List<SecretLeaseEvent> events = new ArrayList<SecretLeaseEvent>();
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
+				scheduledFuture);
+
+		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(
+				createSecrets("key", "value", false),
+				createSecrets("key", "value2", false));
+
+		secretLeaseContainer.addRequestedSecret(RequestedSecret.rotating(requestedSecret
+				.getPath()));
+		secretLeaseContainer.addLeaseListener(new LeaseListenerAdapter() {
+			@Override
+			public void onLeaseEvent(SecretLeaseEvent leaseEvent) {
+				events.add(leaseEvent);
+			}
+		});
+
+		secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(taskScheduler).schedule(captor.capture(), any(Trigger.class));
+
+		captor.getValue().run();
+		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+
+		assertThat(events).hasSize(3);
+		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
+		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
+		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
+
+		SecretLeaseCreatedEvent rotated = (SecretLeaseCreatedEvent) events.get(2);
+		assertThat(rotated.getSecrets()).containsEntry("key", "value2");
 	}
 
 	@Test
@@ -521,13 +559,17 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	private VaultResponse createSecrets() {
+		return createSecrets("key", "value", true);
+	}
+
+	private VaultResponse createSecrets(String key, String value, boolean renewable) {
 
 		VaultResponse secrets = new VaultResponse();
 
 		secrets.setLeaseId("lease");
-		secrets.setRenewable(true);
+		secrets.setRenewable(renewable);
 		secrets.setLeaseDuration(100);
-		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+		secrets.setData(Collections.singletonMap(key, (Object) value));
 
 		return secrets;
 	}

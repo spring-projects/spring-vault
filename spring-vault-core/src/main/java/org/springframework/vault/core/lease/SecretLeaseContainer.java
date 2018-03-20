@@ -311,7 +311,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				lease = Lease.none();
 			}
 
-			potentiallyScheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
+			if (renewalScheduler.isLeaseRenewable(lease, requestedSecret)) {
+				scheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
+			}
+			else if (renewalScheduler.isLeaseRotateOnly(lease, requestedSecret)) {
+				scheduleLeaseRotation(requestedSecret, lease, renewalScheduler);
+			}
+
 			onSecretsObtained(requestedSecret, lease, secrets.getData());
 		}
 	}
@@ -408,26 +414,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		}
 	}
 
-	void potentiallyScheduleLeaseRenewal(final RequestedSecret requestedSecret,
-			final Lease lease, final LeaseRenewalScheduler leaseRenewal) {
+	void scheduleLeaseRenewal(final RequestedSecret requestedSecret, final Lease lease,
+			final LeaseRenewalScheduler leaseRenewal) {
 
-		if (!leaseRenewal.isLeaseRenewable(lease, requestedSecret)) {
-			return;
-		}
-
-		if (log.isDebugEnabled()) {
-
-			if (lease.hasLeaseId()) {
-				log.debug(String.format("Secret %s with Lease %s qualified for renewal",
-						requestedSecret.getPath(), lease.getLeaseId()));
-			}
-			else {
-				log.debug(String.format(
-						"Secret %s with cache hint is qualified for renewal",
-						requestedSecret.getPath()));
-			}
-
-		}
+		logRenewalCandidate(requestedSecret, lease, "renewal");
 
 		leaseRenewal.scheduleRenewal(requestedSecret, new RenewLease() {
 
@@ -438,8 +428,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 				if (!Lease.none().equals(newLease)) {
 
-					potentiallyScheduleLeaseRenewal(requestedSecret, newLease,
-							leaseRenewal);
+					scheduleLeaseRenewal(requestedSecret, newLease, leaseRenewal);
 
 					onAfterLeaseRenewed(requestedSecret, newLease);
 				}
@@ -447,6 +436,39 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				return newLease;
 			}
 		}, lease, getMinRenewalSeconds(), getExpiryThresholdSeconds());
+	}
+
+	void scheduleLeaseRotation(final RequestedSecret requestedSecret, final Lease lease,
+			final LeaseRenewalScheduler leaseRenewal) {
+
+		logRenewalCandidate(requestedSecret, lease, "rotation");
+
+		leaseRenewal.scheduleRenewal(requestedSecret, new RenewLease() {
+
+			@Override
+			public Lease renewLease(Lease lease) {
+
+				onLeaseExpired(requestedSecret, lease);
+
+				return Lease.none();
+			}
+		}, lease, getMinRenewalSeconds(), getExpiryThresholdSeconds());
+	}
+
+	private static void logRenewalCandidate(RequestedSecret requestedSecret, Lease lease,
+			String action) {
+
+		if (log.isDebugEnabled()) {
+
+			if (lease.hasLeaseId()) {
+				log.debug(String.format("Secret %s with Lease %s qualified for %s",
+						requestedSecret.getPath(), lease.getLeaseId(), action));
+			}
+			else {
+				log.debug(String.format("Secret %s with cache hint is qualified for %s",
+						requestedSecret.getPath(), action));
+			}
+		}
 	}
 
 	// -------------------------------------------------------------------------
@@ -674,6 +696,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 					}
 
 					try {
+
+						// Renew lease may call scheduleRenewal(…) with a different lease
+						// Id to alter set up its own renewal schedule. If it's the old
+						// lease, then renewLease() outcome controls the current LeaseId.
 						currentLeaseRef
 								.compareAndSet(lease, renewLease.renewLease(lease));
 					}
@@ -746,6 +772,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		public Lease getLease() {
 			return currentLeaseRef.get();
+		}
+
+		private boolean isLeaseRotateOnly(Lease lease, RequestedSecret requestedSecret) {
+
+			if (lease == null) {
+				return false;
+			}
+
+			return lease.hasLeaseId() && !lease.isRenewable()
+					&& requestedSecret.getMode() == Mode.ROTATE;
 		}
 	}
 
