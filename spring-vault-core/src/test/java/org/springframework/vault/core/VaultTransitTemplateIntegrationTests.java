@@ -247,6 +247,24 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
+	public void encryptShouldEncryptEmptyValues() {
+
+		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
+				.convergentEncryption(true).derived(true).build());
+
+		VaultTransitContext context = VaultTransitContext.builder()
+				.context("blubb".getBytes()) //
+				.nonce("123456789012".getBytes()) //
+				.build();
+
+		Ciphertext ciphertext = transitOperations.encrypt("mykey",
+				Plaintext.of("").with(context));
+
+		assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
+		assertThat(ciphertext.getContext()).isEqualTo(context);
+	}
+
+	@Test
 	public void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
