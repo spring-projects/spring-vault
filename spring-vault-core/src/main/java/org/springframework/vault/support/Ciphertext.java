@@ -64,10 +64,13 @@ public class Ciphertext {
 	 * Create a new {@link Ciphertext} object from this ciphertext associated with the
 	 * given {@link VaultTransitContext}.
 	 *
-	 * @param context transit context.
+	 * @param context transit context, must not be {@literal null}.
 	 * @return the new {@link Ciphertext} object.
 	 */
 	public Ciphertext with(VaultTransitContext context) {
+
+		Assert.notNull(context, "VaultTransitContext must not be null");
+
 		return new Ciphertext(getCiphertext(), context);
 	}
 }
