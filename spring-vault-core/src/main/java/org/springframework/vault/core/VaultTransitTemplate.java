@@ -404,10 +404,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 					encrypted = new VaultDecryptionResult(new VaultException(
 							data.get("error")));
 				}
-				else {
+				else if (StringUtils.hasText(data.get("plaintext"))) {
 					encrypted = new VaultDecryptionResult(toPlaintext(
 							Base64Utils.decodeFromString(data.get("plaintext")),
 							ciphertext.getContext()));
+				} else {
+					encrypted = new VaultDecryptionResult(toPlaintext("",ciphertext.getContext()));
 				}
 			}
 			else {
@@ -427,6 +429,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	private static Plaintext toPlaintext(byte[] plaintext, VaultTransitContext context) {
+		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
+				.of(plaintext);
+	}
+
+	private static Plaintext toPlaintext(String plaintext, VaultTransitContext context) {
 		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
 				.of(plaintext);
 	}

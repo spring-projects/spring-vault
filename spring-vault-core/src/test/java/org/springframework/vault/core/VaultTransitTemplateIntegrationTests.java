@@ -503,4 +503,40 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(decrypted.get(1).isSuccessful()).isEqualTo(false);
 		assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
 	}
+
+	@Test
+    public void shouldBatchDecryptEmptyPlaintext() {
+        assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+
+        transitOperations.createKey("mykey");
+
+        Ciphertext empty = transitOperations.encrypt("mykey", Plaintext.of(""));
+
+        List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+                Arrays.asList(empty));
+
+        assertThat(decrypted.get(0).getAsString()).isEqualTo("");
+    }
+
+    @Test
+    public void shouldBatchDecryptEmpltyPlaintextWithContext() {
+
+        assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+
+        VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+                .derived(true) //
+                .build();
+
+        transitOperations.createKey("mykey", request);
+
+        Plaintext empty = Plaintext.of("").with(
+                VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+        List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+                Arrays.asList(empty));
+        List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+                Arrays.asList(encrypted.get(0).get()));
+
+        assertThat(decrypted.get(0).get()).isEqualTo(empty);
+    }
 }
