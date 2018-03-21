@@ -106,7 +106,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 				Collections.singletonMap("plaintext",
 						Base64.encodeBase64String("that message is secret".getBytes())));
 
-		assertThat((String) response.getData().get("ciphertext")).isNotEmpty();
+		assertThat((String) response.getRequiredData().get("ciphertext")).isNotEmpty();
 	}
 
 	@Test
@@ -120,9 +120,9 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		VaultResponse decrypted = vaultOperations.write(
 				"transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext",
-						response.getData().get("ciphertext")));
+						response.getRequiredData().get("ciphertext")));
 
-		assertThat((String) decrypted.getData().get("plaintext")).isEqualTo(
+		assertThat((String) decrypted.getRequiredData().get("plaintext")).isEqualTo(
 				Base64.encodeBase64String("that message is secret".getBytes()));
 	}
 }

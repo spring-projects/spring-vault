@@ -59,6 +59,7 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  * @author Praveendra Singh
  * @author Luander Ribeiro
+ * @author Mikko Koli
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -547,43 +548,43 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-    public void shouldBatchDecryptEmptyPlaintext() {
-        assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	public void shouldBatchDecryptEmptyPlaintext() {
 
-        transitOperations.createKey("mykey");
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
-        Ciphertext empty = transitOperations.encrypt("mykey", Plaintext.of(""));
+		transitOperations.createKey("mykey");
 
-        List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
-                Arrays.asList(empty));
+		Ciphertext empty = transitOperations.encrypt("mykey", Plaintext.empty());
 
-        assertThat(decrypted.get(0).getAsString()).isEqualTo("");
-    }
+		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+				Collections.singletonList(empty));
 
-    @Test
-    public void shouldBatchDecryptEmpltyPlaintextWithContext() {
+		assertThat(decrypted.get(0).getAsString()).isEqualTo("");
+	}
 
-        assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@Test
+	public void shouldBatchDecryptEmptyPlaintextWithContext() {
 
-        VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
-                .derived(true) //
-                .build();
+		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
 
-        transitOperations.createKey("mykey", request);
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+				.derived(true) //
+				.build();
 
-        Plaintext empty = Plaintext.of("").with(
-                VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		transitOperations.createKey("mykey", request);
 
-        List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
-                Arrays.asList(empty));
-        List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
-                Arrays.asList(encrypted.get(0).get()));
+		Plaintext empty = Plaintext.empty().with(
+				VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-        assertThat(decrypted.get(0).get()).isEqualTo(empty);
-    }
+		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+				Collections.singletonList(empty));
+		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+				Collections.singletonList(encrypted.get(0).get()));
 
+		assertThat(decrypted.get(0).get()).isEqualTo(empty);
+	}
 
-    @Test
+	@Test
 	public void generateHmacShouldCreateHmac() {
 
 		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
