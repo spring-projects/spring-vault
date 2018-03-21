@@ -51,7 +51,6 @@ import static org.junit.Assume.assumeTrue;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
-
 	@Autowired
 	private VaultOperations vaultOperations;
 

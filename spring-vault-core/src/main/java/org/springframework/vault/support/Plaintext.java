@@ -30,6 +30,9 @@ import org.springframework.util.Assert;
 @EqualsAndHashCode
 public class Plaintext {
 
+	private static final Plaintext EMPTY = new Plaintext(new byte[0],
+			VaultTransitContext.empty());
+
 	private final byte[] plaintext;
 
 	private final VaultTransitContext context;
@@ -41,6 +44,16 @@ public class Plaintext {
 	}
 
 	/**
+	 * Factory method to create an empty {@link Plaintext}.
+	 *
+	 * @return the empty {@link Plaintext} object.
+	 * @since 1.1.2
+	 */
+	public static Plaintext empty() {
+		return EMPTY;
+	}
+
+	/**
 	 * Factory method to create {@link Plaintext} from a byte sequence.
 	 *
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
@@ -49,6 +62,10 @@ public class Plaintext {
 	public static Plaintext of(byte[] plaintext) {
 
 		Assert.notNull(plaintext, "Plaintext must not be null");
+
+		if (plaintext.length == 0) {
+			return empty();
+		}
 
 		return new Plaintext(plaintext, null);
 	}
@@ -64,6 +81,10 @@ public class Plaintext {
 	public static Plaintext of(String plaintext) {
 
 		Assert.notNull(plaintext, "Plaintext must not be null");
+
+		if (plaintext.length() == 0) {
+			return empty();
+		}
 
 		return of(plaintext.getBytes());
 	}

@@ -47,6 +47,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Mark Paluch
  * @author Sven Schürmann
  * @author Praveendra Singh
+ * @author Mikko Koli
  */
 public class VaultTransitTemplate implements VaultTransitOperations {
 
@@ -249,7 +250,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		byte[] plaintext = decrypt(keyName, ciphertext.getCiphertext(),
 				ciphertext.getContext());
 
-		return toPlaintext(plaintext, ciphertext.getContext());
+		return Plaintext.of(plaintext).with(ciphertext.getContext());
 	}
 
 	@Override
@@ -397,20 +398,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 			VaultDecryptionResult encrypted;
 			Ciphertext ciphertext = batchRequest.get(i);
-			if (batchData.size() > i) {
 
-				Map<String, String> data = batchData.get(i);
-				if (StringUtils.hasText(data.get("error"))) {
-					encrypted = new VaultDecryptionResult(new VaultException(
-							data.get("error")));
-				}
-				else if (StringUtils.hasText(data.get("plaintext"))) {
-					encrypted = new VaultDecryptionResult(toPlaintext(
-							Base64Utils.decodeFromString(data.get("plaintext")),
-							ciphertext.getContext()));
-				} else {
-					encrypted = new VaultDecryptionResult(toPlaintext("",ciphertext.getContext()));
-				}
+			if (batchData.size() > i) {
+				encrypted = getDecryptionResult(batchData.get(i), ciphertext);
 			}
 			else {
 				encrypted = new VaultDecryptionResult(new VaultException(
@@ -423,19 +413,26 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return result;
 	}
 
+	private static VaultDecryptionResult getDecryptionResult(Map<String, String> data,
+			Ciphertext ciphertext) {
+
+		if (StringUtils.hasText(data.get("error"))) {
+			return new VaultDecryptionResult(new VaultException(data.get("error")));
+		}
+
+		if (StringUtils.hasText(data.get("plaintext"))) {
+
+			byte[] plaintext = Base64Utils.decodeFromString(data.get("plaintext"));
+			return new VaultDecryptionResult(Plaintext.of(plaintext).with(
+					ciphertext.getContext()));
+		}
+
+		return new VaultDecryptionResult(Plaintext.empty().with(ciphertext.getContext()));
+	}
+
 	private static Ciphertext toCiphertext(String ciphertext, VaultTransitContext context) {
 		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext
 				.of(ciphertext);
-	}
-
-	private static Plaintext toPlaintext(byte[] plaintext, VaultTransitContext context) {
-		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
-				.of(plaintext);
-	}
-
-	private static Plaintext toPlaintext(String plaintext, VaultTransitContext context) {
-		return context != null ? Plaintext.of(plaintext).with(context) : Plaintext
-				.of(plaintext);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -522,5 +519,4 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		private String name;
 	}
-
 }
