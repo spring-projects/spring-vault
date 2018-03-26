@@ -8,12 +8,12 @@ public class LoggingSessionListener implements SessionManagerListener {
 
 
     @Override
-    public void onSessionRenewalSuccess(final SessionManager sessionManager) {
+    public void onSessionRenewalSuccess() {
         logger.debug("Successfully renewed token!");
     }
 
     @Override
-    public void onSessionRenewalFailure(SessionManager sessionManager) {
+    public void onSessionRenewalFailure() {
         logger.debug("Failed to successfully remove token!");
     }
 }
