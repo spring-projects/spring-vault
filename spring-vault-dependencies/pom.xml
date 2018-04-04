@@ -63,6 +63,8 @@
 		<okhttp3.version>3.9.1</okhttp3.version>
 		<jackson.version>2.9.5</jackson.version>
 		<aws-java-sdk.version>1.11.308</aws-java-sdk.version>
+		<google-api-services-iam.version>v1-rev241-1.23.0</google-api-services-iam.version>
+		<google-auth-library-oauth2-http.version>0.9.0</google-auth-library-oauth2-http.version>
 	</properties>
 
 	<dependencyManagement>
@@ -129,14 +131,14 @@
 			<dependency>
 				<groupId>com.google.apis</groupId>
 				<artifactId>google-api-services-iam</artifactId>
-				<version>v1-rev233-1.23.0</version>
+				<version>${google-api-services-iam.version}</version>
 				<optional>true</optional>
 			</dependency>
 
 			<dependency>
 				<groupId>com.google.auth</groupId>
 				<artifactId>google-auth-library-oauth2-http</artifactId>
-				<version>0.9.0</version>
+				<version>${google-auth-library-oauth2-http.version}</version>
 				<optional>true</optional>
 			</dependency>
 
