@@ -62,6 +62,7 @@
 		<netty.version>4.1.22.Final</netty.version>
 		<okhttp3.version>3.9.1</okhttp3.version>
 		<jackson.version>2.9.5</jackson.version>
+		<aws-java-sdk.version>1.11.308</aws-java-sdk.version>
 	</properties>
 
 	<dependencyManagement>
@@ -120,7 +121,7 @@
 			<dependency>
 				<groupId>com.amazonaws</groupId>
 				<artifactId>aws-java-sdk-core</artifactId>
-				<version>1.11.280</version>
+				<version>${aws-java-sdk.version}</version>
 				<optional>true</optional>
 			</dependency>
 
