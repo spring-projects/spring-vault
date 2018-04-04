@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>4.3.12.RELEASE</spring.version>
+		<spring.version>4.3.15.RELEASE</spring.version>
 		<java.version>1.6</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -346,7 +346,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>4.3.13.BUILD-SNAPSHOT</spring.version>
+				<spring.version>4.3.16.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
@@ -364,7 +364,7 @@
 			<id>spring5</id>
 
 			<properties>
-				<spring.version>5.0.0.RELEASE</spring.version>
+				<spring.version>5.0.5.RELEASE</spring.version>
 			</properties>
 		</profile>
 
