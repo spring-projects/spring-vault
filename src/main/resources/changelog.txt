@@ -1,6 +1,25 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.1.RELEASE
+-----------------------------------------
+* VaultSysTemplate.getPolicyName should not throw an exception for not found policies #202
+* Mark VaultEndpointProvider as functional interface #204
+* PrefixAwareUriTemplateHandler adds leading slash to absolute URIs #206
+* Fix Javadoc example code in SecretLeaseContainer #209
+* Upgrade to Vault 0.9.5 #212
+* Upgrade to Spring Data Kay SR5 #213
+* Upgrade to Reactor Bismuth SR7 #214
+* Rotate non-renewable secrets #215
+* Client sending Vault an expired token resulting in failures of all Vault calls #222
+* Batch decryption fails if plaintext is empty #223
+* Upgrade to Spring Framework 5.0.5.RELEASE #227
+* Upgrade to netty 4.1.22.Final #232
+* Upgrade to Jackson 2.9.5 #234
+* Upgrade to Spring Data Kay SR6 #235
+* Upgrade to Spring Security 5.0.3 #236
+* Upgrade to AWS Java SDK 1.11.308 #237
+
 Changes in version 2.0.0.RELEASE
 -----------------------------------------
 * Consider renaming AwsIamAuthenticationOptions#serverName to serverId #191
