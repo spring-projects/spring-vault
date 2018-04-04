@@ -61,7 +61,7 @@
 		<httpcore.version>4.4.9</httpcore.version>
 		<netty.version>4.1.21.Final</netty.version>
 		<okhttp3.version>3.9.1</okhttp3.version>
-		<jackson.version>2.9.4</jackson.version>
+		<jackson.version>2.9.5</jackson.version>
 		<aws-java-sdk.version>1.11.308</aws-java-sdk.version>
 	</properties>
 
