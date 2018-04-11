@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.util;
 
+import java.util.Collections;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.VaultOperations;
@@ -46,6 +48,13 @@ public class PrepareVault {
 	private final VaultSysOperations adminOperations;
 	private WebClient webClient;
 
+	/**
+	 * Create a new {@link PrepareVault} object.
+	 *
+	 * @param webClient must not be {@literal null}.
+	 * @param restTemplate must not be {@literal null}.
+	 * @param vaultOperations must not be {@literal null}.
+	 */
 	public PrepareVault(WebClient webClient, RestTemplate restTemplate,
 			VaultOperations vaultOperations) {
 
@@ -84,9 +93,9 @@ public class PrepareVault {
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
 	 *
-	 * @param tokenId
-	 * @param policy
-	 * @return
+	 * @param tokenId must not be {@literal null}.
+	 * @param policy must not be {@literal null}.
+	 * @return the created {@link VaultToken}.
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
 
@@ -104,7 +113,7 @@ public class PrepareVault {
 	/**
 	 * Check whether Vault is available (vault created and unsealed).
 	 *
-	 * @return
+	 * @return {@literal true} if Vault is available (vault created and unsealed).
 	 */
 	public boolean isAvailable() {
 		return adminOperations.isInitialized() && !adminOperations.health().isSealed();
@@ -113,7 +122,7 @@ public class PrepareVault {
 	/**
 	 * Mount an auth backend.
 	 *
-	 * @param authBackend
+	 * @param authBackend must not be {@literal null} or empty.
 	 */
 	public void mountAuth(String authBackend) {
 
@@ -125,8 +134,8 @@ public class PrepareVault {
 	/**
 	 * Check whether a auth-backend is enabled.
 	 *
-	 * @param authBackend
-	 * @return
+	 * @param authBackend must not be {@literal null} or empty.
+	 * @return {@literal true} if a auth-backend is enabled.
 	 */
 	public boolean hasAuth(String authBackend) {
 
@@ -138,7 +147,7 @@ public class PrepareVault {
 	/**
 	 * Mount an secret backend.
 	 *
-	 * @param secretBackend
+	 * @param secretBackend must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
 
@@ -150,8 +159,8 @@ public class PrepareVault {
 	/**
 	 * Check whether a auth-backend is enabled.
 	 *
-	 * @param secretBackend
-	 * @return
+	 * @param secretBackend must not be {@literal null} or empty.
+	 * @return {@literal true} if a auth-backend is enabled.
 	 */
 	public boolean hasSecret(String secretBackend) {
 
@@ -180,6 +189,18 @@ public class PrepareVault {
 		}
 
 		return Version.parse("0.0.0");
+	}
+
+	/**
+	 * Disable Vault versioning Key-Value backend (kv version 2).
+	 */
+	public void disableGenericVersioning() {
+
+		vaultOperations.opsForSys().unmount("secret");
+
+		VaultMount kv = VaultMount.builder().type("kv")
+				.config(Collections.singletonMap("versioned", false)).build();
+		vaultOperations.opsForSys().mount("secret", kv);
 	}
 
 	public VaultOperations getVaultOperations() {

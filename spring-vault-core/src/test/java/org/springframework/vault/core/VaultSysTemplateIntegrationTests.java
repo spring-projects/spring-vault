@@ -57,7 +57,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	private VaultSysOperations adminOperations;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 
 		vaultVersion = prepare().getVersion();
 
@@ -72,8 +72,6 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(mounts).containsKey("secret/");
 
 		VaultMount secret = mounts.get("secret/");
-		assertThat(Arrays.asList("generic secret storage", "key/value secret storage"))
-				.contains(secret.getDescription());
 		assertThat(Arrays.asList("kv", "generic")).contains(secret.getType());
 	}
 
