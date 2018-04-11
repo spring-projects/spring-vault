@@ -207,6 +207,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	public VaultPkiOperations opsForPki() {
+		return opsForPki("pki");
+	}
+
+	@Override
+	public VaultPkiOperations opsForPki(String path) {
+		return new VaultPkiTemplate(this, path);
+	}
+
+	@Override
 	public VaultSysOperations opsForSys() {
 		return new VaultSysTemplate(this);
 	}
@@ -226,15 +236,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		return new VaultTransitTemplate(this, path);
 	}
 
-	@Override
-	public VaultPkiOperations opsForPki() {
-		return opsForPki("pki");
-	}
-
-	@Override
-	public VaultPkiOperations opsForPki(String path) {
-		return new VaultPkiTemplate(this, path);
-	}
 
 	@Override
 	public VaultResponse read(String path) {

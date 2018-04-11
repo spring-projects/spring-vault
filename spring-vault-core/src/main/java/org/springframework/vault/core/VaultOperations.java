@@ -44,6 +44,20 @@ import org.springframework.web.client.RestClientException;
 public interface VaultOperations {
 
 	/**
+	 * @return the operations interface to interact with the Vault PKI backend.
+	 */
+	VaultPkiOperations opsForPki();
+
+	/**
+	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a different path
+	 * than {@code pki}.
+	 *
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault PKI backend.
+	 */
+	VaultPkiOperations opsForPki(String path);
+
+	/**
 	 * @return the operations interface administrative Vault access.
 	 */
 	VaultSysOperations opsForSys();
@@ -66,20 +80,6 @@ public interface VaultOperations {
 	 * @return the operations interface to interact with the Vault transit backend.
 	 */
 	VaultTransitOperations opsForTransit(String path);
-
-	/**
-	 * @return the operations interface to interact with the Vault PKI backend.
-	 */
-	VaultPkiOperations opsForPki();
-
-	/**
-	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a different path
-	 * than {@code pki}.
-	 *
-	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault PKI backend.
-	 */
-	VaultPkiOperations opsForPki(String path);
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
