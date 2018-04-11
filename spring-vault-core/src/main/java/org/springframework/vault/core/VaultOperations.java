@@ -44,6 +44,15 @@ import org.springframework.web.client.RestClientException;
 public interface VaultOperations {
 
 	/**
+	 * Return {@link VaultVersionedKeyValueOperations}.
+	 *
+	 * @param path the mount path
+	 * @return the operations interface to interact with the versioned Vault Key/Value
+	 * (version 2) backend.
+	 */
+	VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
+
+	/**
 	 * @return the operations interface to interact with the Vault PKI backend.
 	 */
 	VaultPkiOperations opsForPki();

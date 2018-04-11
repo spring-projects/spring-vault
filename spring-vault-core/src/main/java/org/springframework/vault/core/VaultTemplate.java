@@ -207,6 +207,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	public VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path) {
+		return new VaultVersionedKeyValueTemplate(this, path);
+	}
+
+	@Override
 	public VaultPkiOperations opsForPki() {
 		return opsForPki("pki");
 	}

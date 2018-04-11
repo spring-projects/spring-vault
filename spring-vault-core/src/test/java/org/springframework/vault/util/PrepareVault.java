@@ -16,6 +16,7 @@
 package org.springframework.vault.util;
 
 import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -150,10 +151,25 @@ public class PrepareVault {
 	 * @param secretBackend must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
+		mountSecret(secretBackend, secretBackend, Collections.emptyMap());
+	}
+
+	/**
+	 * Mount an secret backend {@code secretBackend} at {@code path}.
+	 *
+	 * @param secretBackend must not be {@literal null} or empty.
+	 * @param path must not be {@literal null} or empty.
+	 * @param config must not be {@literal null}.
+	 */
+	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
+		Assert.hasText(path, "Mount path must not be empty");
+		Assert.notNull(config, "Configuration must not be null");
 
-		adminOperations.mount(secretBackend, VaultMount.create(secretBackend));
+		VaultMount mount = VaultMount.builder().type(secretBackend).config(config)
+				.build();
+		adminOperations.mount(path, mount);
 	}
 
 	/**
@@ -201,6 +217,15 @@ public class PrepareVault {
 		VaultMount kv = VaultMount.builder().type("kv")
 				.config(Collections.singletonMap("versioned", false)).build();
 		vaultOperations.opsForSys().mount("secret", kv);
+	}
+
+	public void mountVersionedKvBackend() {
+
+		mountSecret("kv", "versioned", Collections.emptyMap());
+		vaultOperations.write(
+				"sys/mounts/versioned/tune",
+				Collections.singletonMap("options",
+						Collections.singletonMap("version", "2")));
 	}
 
 	public VaultOperations getVaultOperations() {

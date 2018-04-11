@@ -96,6 +96,7 @@ public class VaultRule extends ExternalResource {
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(
 					VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
+				this.prepareVault.mountVersionedKvBackend();
 			}
 
 			this.token = Settings.token();
