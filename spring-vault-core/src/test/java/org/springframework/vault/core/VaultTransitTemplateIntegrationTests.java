@@ -684,17 +684,6 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void signWithInvalidAlgorithmShouldFail() {
-
-		String keyName = createEcdsaP256Key();
-
-		VaultSignRequest request = VaultSignRequest.builder()
-				.plaintext(Plaintext.of("hello-world")).algorithm("blah-512").build();
-
-		transitOperations.sign(keyName, request);
-	}
-
 	@Test
 	public void shouldVerifyValidSignature() {
 
@@ -744,42 +733,6 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		SignatureValidation valid = transitOperations
 				.verify(keyName, verificationRequest);
 		assertThat(valid).isEqualTo(SignatureValidation.valid());
-	}
-
-	@Test
-	public void shouldFailToVerifyValidSignatureWithInvalidExistingCustomAlgorithm() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
-
-		String keyName = createEcdsaP256Key();
-
-		Plaintext plaintext = Plaintext.of("hello-world");
-		Signature signature = transitOperations.sign(keyName, plaintext);
-
-		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest
-				.builder().algorithm("sha2-512").plaintext(plaintext)
-				.signature(signature).build();
-
-		SignatureValidation valid = transitOperations
-				.verify(keyName, verificationRequest);
-		assertThat(valid).isEqualTo(SignatureValidation.invalid());
-	}
-
-	@Test(expected = VaultException.class)
-	public void shouldFailToVerifyValidSignatureWithInvalidCustomAlgorithm() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
-
-		String keyName = createEcdsaP256Key();
-
-		Plaintext plaintext = Plaintext.of("hello-world");
-		Signature signature = transitOperations.sign(keyName, plaintext);
-
-		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest
-				.builder().algorithm("blah-512").plaintext(plaintext)
-				.signature(signature).build();
-
-		transitOperations.verify(keyName, verificationRequest);
 	}
 
 	@Test

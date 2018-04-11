@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.util;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -32,11 +31,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Vault rule to ensure a running and prepared Vault.
+ * Vault rule to ensure a running and prepared Vault. Prepared means unsealed, having a
+ * non-versioning key-value backend mounted at {@code secret/} and a {@link VaultToken}
+ * with {@code root} privileges.
  *
  * @author Mark Paluch
+ * @see Settings#token()
  */
 public class VaultRule extends ExternalResource {
+
+	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse("0.10.0");
 
 	private final VaultEndpoint vaultEndpoint;
 
@@ -83,15 +87,27 @@ public class VaultRule extends ExternalResource {
 	@Override
 	public void before() {
 
-		Socket socket = null;
-		try {
+		assertRunningVault();
 
-			socket = new Socket();
+		if (!this.prepareVault.isAvailable()) {
+			this.token = prepareVault.initializeVault();
+			this.prepareVault.createToken(Settings.token().getToken(), "root");
+
+			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(
+					VERSIONING_INTRODUCED_WITH)) {
+				this.prepareVault.disableGenericVersioning();
+			}
+
+			this.token = Settings.token();
+		}
+	}
+
+	private void assertRunningVault() {
+
+		try (Socket socket = new Socket()) {
 
 			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
 					vaultEndpoint.getPort()));
-			socket.close();
-
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
@@ -99,23 +115,11 @@ public class VaultRule extends ExternalResource {
 							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
 							vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
-		finally {
-			if (socket != null) {
-				try {
-					socket.close();
-				}
-				catch (IOException e) {
-				}
-			}
-		}
-
-		if (!this.prepareVault.isAvailable()) {
-			this.token = prepareVault.initializeVault();
-			this.prepareVault.createToken(Settings.token().getToken(), "root");
-			this.token = Settings.token();
-		}
 	}
 
+	/**
+	 * @return the {@link PrepareVault} object.
+	 */
 	public PrepareVault prepare() {
 		return prepareVault;
 	}
