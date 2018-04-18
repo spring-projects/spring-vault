@@ -42,6 +42,7 @@ public class VaultTokenRequest {
 
 	private final Map<String, String> meta;
 
+	@JsonProperty("no_parent")
 	private final boolean noParent;
 
 	@JsonProperty("no_default_policy")
