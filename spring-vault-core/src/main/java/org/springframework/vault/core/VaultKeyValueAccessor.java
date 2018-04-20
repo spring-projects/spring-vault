@@ -134,18 +134,20 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 
 			JsonNode jsonNode = response.getRequiredData().at("/data");
 
-			try {
-
-				I data = mapper.reader().readValue(jsonNode.traverse(), deserializeAs);
-
-				return mappingFunction.apply(response, data);
-			}
-			catch (IOException e) {
-				throw new VaultException("Cannot deserialize response", e);
-			}
+			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}
 
 		return null;
+	}
+
+	<T> T deserialize(JsonNode jsonNode, Class<T> type) {
+
+		try {
+			return mapper.reader().readValue(jsonNode.traverse(), type);
+		}
+		catch (IOException e) {
+			throw new VaultException("Cannot deserialize response", e);
+		}
 	}
 
 	@Nullable

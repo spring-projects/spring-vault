@@ -41,7 +41,7 @@ public class VaultResponseSupport<T> {
 	private T data;
 
 	@Nullable
-	private Map<String, String> metadata;
+	private Map<String, Object> metadata;
 
 	@JsonProperty("wrap_info")
 	@Nullable
@@ -123,7 +123,7 @@ public class VaultResponseSupport<T> {
 	 * @return request metadata.
 	 */
 	@Nullable
-	public Map<String, String> getMetadata() {
+	public Map<String, Object> getMetadata() {
 		return metadata;
 	}
 
@@ -131,7 +131,7 @@ public class VaultResponseSupport<T> {
 	 *
 	 * @param metadata request metadata.
 	 */
-	public void setMetadata(@Nullable Map<String, String> metadata) {
+	public void setMetadata(@Nullable Map<String, Object> metadata) {
 		this.metadata = metadata;
 	}
 

@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -33,6 +35,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
@@ -56,34 +59,50 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implem
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public VaultVersionedKeyValueTemplate(VaultOperations vaultOperations, String path) {
-
 		super(vaultOperations, path);
 	}
 
-	@Override
 	@Nullable
+	@Override
+	@SuppressWarnings("unchecked")
 	public Versioned<Map<String, Object>> get(String path, Version version) {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
 
-		String secretPath = version.isVersioned() ? String.format(
-"%s?version=%d",
-				createDataPath(path), version.getVersion())
-				: createDataPath(path);
+		return (Versioned) doRead(path, version, Map.class);
+	}
 
-		VaultResponse response = doWithSession((restOperations, httpHeaders) -> {
+	@Nullable
+	@Override
+	public <T> Versioned<T> get(String path, Version version, Class<T> responseType) {
+
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(version, "Version must not be null");
+		Assert.notNull(responseType, "Response type must not be null");
+
+		return doRead(path, version, responseType);
+	}
+
+	@Nullable
+	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
+
+		String secretPath = version.isVersioned() ? String.format("%s?version=%d",
+				createDataPath(path), version.getVersion()) : createDataPath(path);
+
+		VersionedResponse response = doWithSession((restOperations, httpHeaders) -> {
 
 			try {
 				return restOperations.exchange(secretPath, HttpMethod.GET,
-						new HttpEntity<>(httpHeaders), VaultResponse.class).getBody();
+						new HttpEntity<>(httpHeaders), VersionedResponse.class).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 
 				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
 					if (e.getResponseBodyAsString().contains("deletion_time")) {
+
 						return VaultResponses.unwrap(e.getResponseBodyAsString(),
-								VaultResponse.class);
+								VersionedResponse.class);
 					}
 
 					return null;
@@ -97,10 +116,12 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implem
 			return null;
 		}
 
-		Map<String, Object> responseData = response.getRequiredData();
-		Metadata metadata = getMetadata((Map) responseData.get("metadata"));
+		VaultResponseSupport<JsonNode> data = response.getRequiredData();
+		Metadata metadata = getMetadata(data.getMetadata());
 
-		return Versioned.create((Map<String, Object>) responseData.get("data"), metadata);
+		T body = deserialize(data.getRequiredData(), responseType);
+
+		return Versioned.create(body, metadata);
 	}
 
 	@Override
@@ -206,5 +227,9 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implem
 
 		doWrite(createBackendPath("destroy", path),
 				Collections.singletonMap("versions", versions));
+	}
+
+	private static class VersionedResponse extends
+			VaultResponseSupport<VaultResponseSupport<JsonNode>> {
 	}
 }

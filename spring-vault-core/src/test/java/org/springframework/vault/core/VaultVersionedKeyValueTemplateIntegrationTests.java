@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+import lombok.Data;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -74,6 +75,21 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 		assertThat(metadata.getCreatedAt()).isBetween(Instant.now().minusSeconds(60),
 				Instant.now().plusSeconds(60));
 		assertThat(metadata.getDeletedAt()).isNull();
+	}
+
+	@Test
+	public void shouldCreateComplexVersionedSecret() {
+
+		Person person = new Person();
+		person.setFirstname("Walter");
+		person.setLastname("White");
+
+		String key = UUID.randomUUID().toString();
+		versionedOperations.put(key, Versioned.create(person));
+
+		Versioned<Person> versioned = versionedOperations.get(key, Person.class);
+
+		assertThat(versioned.getData()).isEqualTo(person);
 	}
 
 	@Test
@@ -208,5 +224,12 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getMetadata().isDestroyed()).isTrue();
 		assertThat(versioned.getMetadata().getDeletedAt()).isNull();
+	}
+
+	@Data
+	static class Person {
+
+		String firstname;
+		String lastname;
 	}
 }

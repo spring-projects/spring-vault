@@ -56,7 +56,32 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Nullable
-	Versioned<Map<String, Object>> get(String path, Version version);
+	<T> Versioned<T> get(String path, Version version);
+
+	/**
+	 * Read the most recent secret at {@code path} and deserialize the secret to the given
+	 * {@link Class responseType}.
+	 *
+	 * @param path must not be {@literal null}.
+	 * @param responseType must not be {@literal null}.
+	 * @return the data. May be {@literal null} if the path does not exist.
+	 */
+	@Nullable
+	default <T> Versioned<T> get(String path, Class<T> responseType) {
+		return get(path, Version.unversioned(), responseType);
+	}
+
+	/**
+	 * Read the requested {@link Version} of the secret at {@code path} and deserialize
+	 * the secret to the given {@link Class responseType}.
+	 *
+	 * @param path must not be {@literal null}.
+	 * @param version must not be {@literal null}.
+	 * @param responseType must not be {@literal null}.
+	 * @return the data. May be {@literal null} if the path does not exist.
+	 */
+	@Nullable
+	<T> Versioned<T> get(String path, Version version, Class<T> responseType);
 
 	/**
 	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body} may be
