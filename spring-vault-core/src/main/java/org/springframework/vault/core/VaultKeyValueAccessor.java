@@ -42,10 +42,11 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Base class for {@link VaultVersionedKeyValueTemplate} and other Vault KV-accessing
- * helpers, defining common
+ * Base class for {@link VaultVersionedKeyValueTemplate} and {@link VaultKeyValueTemplate}
+ * and other Vault KV-accessing helpers, defining common
  * <p/>
- * Not intended to be used directly. See {@link VaultVersionedKeyValueTemplate}.
+ * Not intended to be used directly. See {@link VaultVersionedKeyValueTemplate} and
+ * {@link VaultKeyValueTemplate}.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -151,7 +152,7 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 	}
 
 	@Nullable
-	<T> T doRead(String path, ParameterizedTypeReference<T> typeReference) {
+	private <T> T doRead(String path, ParameterizedTypeReference<T> typeReference) {
 
 		return doRead((restOperations, httpEntity) -> {
 			return restOperations.exchange(path, HttpMethod.GET, httpEntity,

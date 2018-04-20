@@ -23,9 +23,14 @@ import org.springframework.vault.support.VaultResponseSupport;
  * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
  * backend. Paths used in this operations interface are relative and outgoing requests
  * prepend paths with the according operation-specific prefix.
+ * <p/>
+ * This API supports both, versioned and unversioned key-value backends. Versioned usage
+ * is limited as updates requiring compare-and-set (CAS) are not possible. Use
+ * {@link VaultVersionedKeyValueOperations} in such cases instead.
  *
  * @author Mark Paluch
  * @since 2.1
+ * @see VaultVersionedKeyValueOperations
  */
 public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport {
 

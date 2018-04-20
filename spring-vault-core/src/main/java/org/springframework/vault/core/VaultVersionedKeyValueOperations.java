@@ -34,6 +34,7 @@ import org.springframework.vault.support.Versioned.Version;
  *
  * @author Mark Paluch
  * @since 2.1
+ * @see VaultKeyValueOperations
  */
 public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperationsSupport {
 
