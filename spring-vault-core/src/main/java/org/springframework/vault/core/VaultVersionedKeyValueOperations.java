@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
@@ -36,16 +35,7 @@ import org.springframework.vault.support.Versioned.Version;
  * @author Mark Paluch
  * @since 2.1
  */
-public interface VaultVersionedKeyValueOperations {
-
-	/**
-	 * Enumerate keys from a Vault path.
-	 *
-	 * @param path must not be {@literal null}.
-	 * @return the data. May be {@literal null} if the path does not exist.
-	 */
-	@Nullable
-	List<String> list(String path);
+public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperationsSupport {
 
 	/**
 	 * Read the most recent secret at {@code path}.
@@ -54,8 +44,8 @@ public interface VaultVersionedKeyValueOperations {
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Nullable
-	default Versioned<Map<String, Object>> read(String path) {
-		return read(path, Version.unversioned());
+	default Versioned<Map<String, Object>> get(String path) {
+		return get(path, Version.unversioned());
 	}
 
 	/**
@@ -66,7 +56,7 @@ public interface VaultVersionedKeyValueOperations {
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Nullable
-	Versioned<Map<String, Object>> read(String path, Version version);
+	Versioned<Map<String, Object>> get(String path, Version version);
 
 	/**
 	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body} may be
@@ -77,14 +67,7 @@ public interface VaultVersionedKeyValueOperations {
 	 * @param body must not be {@literal null}.
 	 * @return the resulting {@link Metadata}.
 	 */
-	Metadata write(String path, Object body);
-
-	/**
-	 * Delete latest version of the secret at {@code path}.
-	 *
-	 * @param path must not be {@literal null}.
-	 */
-	void delete(String path);
+	Metadata put(String path, Object body);
 
 	/**
 	 * Delete one or more {@link Version versions} of the secret at {@code path}.

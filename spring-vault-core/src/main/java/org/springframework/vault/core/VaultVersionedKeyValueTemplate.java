@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -43,11 +45,8 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Mark Paluch
  * @since 2.1
  */
-public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOperations {
-
-	private final VaultOperations vaultOperations;
-
-	private final String path;
+public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implements
+		VaultVersionedKeyValueOperations {
 
 	/**
 	 * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
@@ -58,34 +57,26 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 	 */
 	public VaultVersionedKeyValueTemplate(VaultOperations vaultOperations, String path) {
 
-		Assert.notNull(vaultOperations, "VaultOperations must not be null");
-		Assert.hasText(path, "Path must not be empty");
-
-		this.vaultOperations = vaultOperations;
-		this.path = path;
-	}
-
-	@Nullable
-	@Override
-	public List<String> list(String path) {
-		return vaultOperations.list(createBackendPath("metadata", path));
+		super(vaultOperations, path);
 	}
 
 	@Override
 	@Nullable
-	public Versioned<Map<String, Object>> read(String path, Version version) {
+	public Versioned<Map<String, Object>> get(String path, Version version) {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
 
 		String secretPath = version.isVersioned() ? String.format(
-				"%s/data/%s?version=%d", this.path, path, version.getVersion())
+"%s?version=%d",
+				createDataPath(path), version.getVersion())
 				: createDataPath(path);
 
-		VaultResponse response = vaultOperations.doWithSession(restOperations -> {
+		VaultResponse response = doWithSession((restOperations, httpHeaders) -> {
 
 			try {
-				return restOperations.getForObject(secretPath, VaultResponse.class);
+				return restOperations.exchange(secretPath, HttpMethod.GET,
+						new HttpEntity<>(httpHeaders), VaultResponse.class).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -113,7 +104,7 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 	}
 
 	@Override
-	public Metadata write(String path, Object body) {
+	public Metadata put(String path, Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -133,7 +124,7 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 			data.put("data", body);
 		}
 
-		VaultResponse response = vaultOperations.write(createDataPath(path), data);
+		VaultResponse response = doWrite(createDataPath(path), data);
 
 		return getMetadata(response.getRequiredData());
 	}
@@ -172,14 +163,6 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 	}
 
 	@Override
-	public void delete(String path) {
-
-		Assert.hasText(path, "Path must not be empty");
-
-		vaultOperations.delete(createDataPath(path));
-	}
-
-	@Override
 	public void delete(String path, Version... versionsToDelete) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -192,7 +175,7 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		vaultOperations.write(createBackendPath("delete", path),
+		doWrite(createBackendPath("delete", path),
 				Collections.singletonMap("versions", versions));
 	}
 
@@ -209,7 +192,7 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		vaultOperations.write(createBackendPath("undelete", path),
+		doWrite(createBackendPath("undelete", path),
 				Collections.singletonMap("versions", versions));
 	}
 
@@ -221,15 +204,7 @@ public class VaultVersionedKeyValueTemplate implements VaultVersionedKeyValueOpe
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		vaultOperations.write(createBackendPath("destroy", path),
+		doWrite(createBackendPath("destroy", path),
 				Collections.singletonMap("versions", versions));
-	}
-
-	private String createDataPath(String path) {
-		return createBackendPath("data", path);
-	}
-
-	private String createBackendPath(String segment, String path) {
-		return String.format("%s/%s/%s", this.path, segment, path);
 	}
 }

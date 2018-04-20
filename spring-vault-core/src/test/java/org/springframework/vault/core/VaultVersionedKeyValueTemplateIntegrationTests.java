@@ -68,7 +68,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		Metadata metadata = versionedOperations.write(key, Versioned.create(secret));
+		Metadata metadata = versionedOperations.put(key, Versioned.create(secret));
 
 		assertThat(metadata.isDestroyed()).isFalse();
 		assertThat(metadata.getCreatedAt()).isBetween(Instant.now().minusSeconds(60),
@@ -83,11 +83,11 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Versioned.create(secret, Version.unversioned()));
+		versionedOperations.put(key, Versioned.create(secret, Version.unversioned()));
 
 		// this should fail
 		assertThatThrownBy(
-				() -> versionedOperations.write(key,
+				() -> versionedOperations.put(key,
 						Versioned.create(secret, Version.unversioned())))
 				.isExactlyInstanceOf(VaultException.class).hasMessageContaining(
 						"check-and-set parameter did not match the current version");
@@ -100,9 +100,9 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Versioned.create(secret));
+		versionedOperations.put(key, Versioned.create(secret));
 
-		Versioned<Map<String, Object>> loaded = versionedOperations.read(key);
+		Versioned<Map<String, Object>> loaded = versionedOperations.get(key);
 
 		assertThat(loaded.getData()).isEqualTo(secret);
 		assertThat(loaded.getMetadata()).isNotNull();
@@ -115,7 +115,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, secret);
+		versionedOperations.put(key, secret);
 
 		assertThat(versionedOperations.list("")).contains(key);
 	}
@@ -125,12 +125,12 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.write(key, Collections.singletonMap("key", "v2"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		assertThat(versionedOperations.read(key, Version.from(1)).getData()).isEqualTo(
+		assertThat(versionedOperations.get(key, Version.from(1)).getData()).isEqualTo(
 				Collections.singletonMap("key", "v1"));
-		assertThat(versionedOperations.read(key, Version.from(2)).getData()).isEqualTo(
+		assertThat(versionedOperations.get(key, Version.from(2)).getData()).isEqualTo(
 				Collections.singletonMap("key", "v2"));
 	}
 
@@ -139,12 +139,12 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.write(key, Collections.singletonMap("key", "v2"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
 		versionedOperations.delete(key);
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.read(key);
+		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
@@ -158,13 +158,13 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.write(key, Collections.singletonMap("key", "v2"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
 		versionedOperations.delete(key, Version.from(2));
 		versionedOperations.undelete(key, Version.from(2));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.read(key);
+		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
 
 		assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v2"));
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
@@ -177,12 +177,12 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.write(key, Collections.singletonMap("key", "v2"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
 		versionedOperations.delete(key, Version.from(1));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.read(key,
+		Versioned<Map<String, Object>> versioned = versionedOperations.get(key,
 				Version.from(1));
 
 		assertThat(versioned.getData()).isNull();
@@ -197,12 +197,12 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.write(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.write(key, Collections.singletonMap("key", "v2"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
 		versionedOperations.destroy(key, Version.from(2));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.read(key);
+		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));

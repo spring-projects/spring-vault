@@ -17,7 +17,6 @@ package org.springframework.vault.core;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -207,6 +206,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	public VaultKeyValueOperations opsForKeyValue(String path) {
+		return new VaultKeyValueTemplate(this, path);
+	}
+
+	@Override
 	public VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path) {
 		return new VaultVersionedKeyValueTemplate(this, path);
 	}
@@ -240,7 +244,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	public VaultTransitOperations opsForTransit(String path) {
 		return new VaultTransitTemplate(this, path);
 	}
-
 
 	@Override
 	public VaultResponse read(String path) {
@@ -366,9 +369,5 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 				throw VaultResponses.buildException(e, path);
 			}
 		});
-	}
-
-	private static class VaultListResponse extends
-			VaultResponseSupport<Map<String, Object>> {
 	}
 }
