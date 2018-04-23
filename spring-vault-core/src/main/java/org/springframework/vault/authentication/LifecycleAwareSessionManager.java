@@ -144,6 +144,9 @@ public class LifecycleAwareSessionManager implements SessionManager, DisposableB
 			logger.warn(String.format("Cannot revoke VaultToken: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+		catch (RuntimeException e) {
+			logger.warn("Cannot revoke VaultToken: %s", e);
+		}
 	}
 
 	/**
