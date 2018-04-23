@@ -157,6 +157,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			logger.warn(String.format("Cannot revoke VaultToken: %s",
 					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
+		catch (RuntimeException e) {
+			logger.warn("Cannot revoke VaultToken: %s", e);
+		}
 	}
 
 	/**
