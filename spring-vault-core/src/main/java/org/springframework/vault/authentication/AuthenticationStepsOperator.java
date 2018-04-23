@@ -133,7 +133,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 									stateObject));
 				})
 				.onErrorMap(
-						t -> new VaultException(
+						t -> new VaultLoginException(
 								"Cannot retrieve VaultToken from authentication chain", t));
 	}
 

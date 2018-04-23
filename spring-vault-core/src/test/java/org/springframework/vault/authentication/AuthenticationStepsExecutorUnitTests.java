@@ -108,7 +108,7 @@ public class AuthenticationStepsExecutorUnitTests {
 
 		assertThatExceptionOfType(VaultException.class)
 				.isThrownBy(() -> login(steps))
-				.withMessage(
+				.withMessageContaining(
 						"HTTP request POST /auth/{path}/login AS class org.springframework.vault.support.VaultResponse "
 								+ "in state null failed with Status 400 and body foo");
 	}

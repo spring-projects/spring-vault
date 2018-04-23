@@ -23,10 +23,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -104,9 +103,8 @@ public class KubernetesAuthentication implements ClientAuthentication,
 
 			return LoginTokenUtil.from(response.getAuth());
 		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using kubernetes: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+		catch (RestClientException e) {
+			throw VaultLoginException.create("Kubernetes", e);
 		}
 	}
 

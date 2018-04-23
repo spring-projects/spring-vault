@@ -36,10 +36,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -134,16 +133,15 @@ public class AwsIamAuthentication implements ClientAuthentication {
 
 			return LoginTokenUtil.from(response.getAuth());
 		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using AWS-IAM: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+		catch (RestClientException e) {
+			throw VaultLoginException.create("AWS-IAM", e);
 		}
 	}
 
 	/**
 	 * Create the request body to perform a Vault login using the AWS-IAM authentication
 	 * method.
-	 * 
+	 *
 	 * @param options must not be {@literal null}.
 	 * @return the map containing body key-value pairs.
 	 */

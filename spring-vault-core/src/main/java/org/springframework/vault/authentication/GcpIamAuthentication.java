@@ -150,7 +150,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 			return response.getSignedJwt();
 		}
 		catch (IOException e) {
-			throw new VaultException("Cannot sign JWT", e);
+			throw new VaultLoginException("Cannot sign JWT", e);
 		}
 	}
 

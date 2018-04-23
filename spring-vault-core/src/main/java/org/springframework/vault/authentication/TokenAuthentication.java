@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import java.time.Duration;
-
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -99,9 +96,5 @@ public class TokenAuthentication implements ClientAuthentication,
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
 		return createAuthenticationSteps(this.token, false);
-	}
-
-	private static Duration getLeaseDuration(@Nullable Number ttl) {
-		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
 }

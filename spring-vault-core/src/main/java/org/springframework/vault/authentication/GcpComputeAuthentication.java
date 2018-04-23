@@ -153,7 +153,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport implem
 			return response.getBody();
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultException("Cannot obtain signed identity", e);
+			throw new VaultLoginException("Cannot obtain signed identity", e);
 		}
 	}
 

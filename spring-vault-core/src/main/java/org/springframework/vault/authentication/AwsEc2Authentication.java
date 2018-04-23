@@ -28,10 +28,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -183,9 +181,8 @@ public class AwsEc2Authentication implements ClientAuthentication,
 
 			return LoginTokenUtil.from(response.getAuth());
 		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using AWS-EC2: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+		catch (RestClientException e) {
+			throw VaultLoginException.create("AWS-EC2", e);
 		}
 	}
 
@@ -213,7 +210,7 @@ public class AwsEc2Authentication implements ClientAuthentication,
 			return login;
 		}
 		catch (RestClientException e) {
-			throw new VaultException(String.format(
+			throw new VaultLoginException(String.format(
 					"Cannot obtain Identity Document from %s",
 					options.getIdentityDocumentUri()), e);
 		}

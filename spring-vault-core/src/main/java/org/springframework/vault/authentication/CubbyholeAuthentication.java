@@ -32,7 +32,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
@@ -222,10 +222,8 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 
 			return entity.getBody().getData();
 		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format(
-					"Cannot retrieve Token from Cubbyhole: %s %s", e.getStatusCode(),
-					VaultResponses.getError(e.getResponseBodyAsString())));
+		catch (RestClientException e) {
+			throw VaultLoginException.create("Cubbyhole", e);
 		}
 	}
 
@@ -263,7 +261,7 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultException(
+			throw new VaultLoginException(
 					String.format(
 							"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
 							options.getPath()));
@@ -274,7 +272,7 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 			return VaultToken.of(token);
 		}
 
-		throw new VaultException(
+		throw new VaultLoginException(
 				String.format(
 						"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
 						options.getPath()));
