@@ -67,18 +67,32 @@ public class ClientHttpRequestFactoryFactory {
 	private static final Log logger = LogFactory
 			.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
-			"org.apache.http.client.HttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
 
-	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent(
-			"okhttp3.OkHttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
 
-	private static final boolean NETTY_PRESENT = ClassUtils.isPresent(
-			"io.netty.channel.nio.NioEventLoopGroup",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean NETTY_PRESENT = isPresent(
+			"io.netty.channel.nio.NioEventLoopGroup", "io.netty.handler.ssl.SslContext",
+			"io.netty.handler.codec.http.HttpClientCodec");
 
+	/**
+	 * Checks for presence of all {@code classNames} using this class' classloader.
+	 *
+	 * @param classNames
+	 * @return {@literal true} if all classes are present; {@literal false} if at least
+	 * one class cannot be found.
+	 */
+	private static boolean isPresent(String... classNames) {
+
+		for (String className : classNames) {
+			if (!ClassUtils.isPresent(className,
+					ClientHttpRequestFactoryFactory.class.getClassLoader())) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
