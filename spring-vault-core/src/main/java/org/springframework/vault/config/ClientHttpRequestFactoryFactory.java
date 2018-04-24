@@ -69,21 +69,34 @@ public class ClientHttpRequestFactoryFactory {
 	private static final Log logger = LogFactory
 			.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
-			"org.apache.http.client.HttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
 
-	private static final boolean OKHTTP_PRESENT = ClassUtils.isPresent(
-			"com.squareup.okhttp.OkHttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean OKHTTP_PRESENT = isPresent("com.squareup.okhttp.OkHttpClient");
 
-	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent(
-			"okhttp3.OkHttpClient",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
 
-	private static final boolean NETTY_PRESENT = ClassUtils.isPresent(
-			"io.netty.channel.nio.NioEventLoopGroup",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
+	private static final boolean NETTY_PRESENT = isPresent(
+			"io.netty.channel.nio.NioEventLoopGroup", "io.netty.handler.ssl.SslContext",
+			"io.netty.handler.codec.http.HttpClientCodec");
+
+	/**
+	 * Checks for presence of all {@code classNames} using this class' classloader.
+	 *
+	 * @param classNames
+	 * @return {@literal true} if all classes are present; {@literal false} if at least
+	 * one class cannot be found.
+	 */
+	private static boolean isPresent(String... classNames) {
+
+		for (String className : classNames) {
+			if (!ClassUtils.isPresent(className,
+					ClientHttpRequestFactoryFactory.class.getClassLoader())) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
@@ -137,11 +150,11 @@ public class ClientHttpRequestFactoryFactory {
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = sslConfiguration.getKeyStore() != null ? createKeyManagerFactory(
-						sslConfiguration.getKeyStoreConfiguration()).getKeyManagers()
+				sslConfiguration.getKeyStoreConfiguration()).getKeyManagers()
 				: null;
 
 		TrustManager[] trustManagers = sslConfiguration.getTrustStore() != null ? createTrustManagerFactory(
-						sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
+				sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
 				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -151,14 +164,12 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static KeyManagerFactory createKeyManagerFactory(
-			KeyStoreConfiguration keyStoreConfiguration)
-			throws GeneralSecurityException,
+			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
 			IOException {
 
-		KeyStore keyStore = KeyStore
-				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
-						? keyStoreConfiguration.getStoreType()
-						: KeyStore.getDefaultType());
+		KeyStore keyStore = KeyStore.getInstance(StringUtils
+				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
+				.getStoreType() : KeyStore.getDefaultType());
 
 		loadKeyStore(keyStoreConfiguration, keyStore);
 
@@ -172,14 +183,12 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static TrustManagerFactory createTrustManagerFactory(
-			KeyStoreConfiguration keyStoreConfiguration)
-			throws GeneralSecurityException,
+			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
 			IOException {
 
-		KeyStore trustStore = KeyStore
-				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
-						? keyStoreConfiguration.getStoreType()
-						: KeyStore.getDefaultType());
+		KeyStore trustStore = KeyStore.getInstance(StringUtils
+				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
+				.getStoreType() : KeyStore.getDefaultType());
 
 		loadKeyStore(keyStoreConfiguration, trustStore);
 
@@ -334,13 +343,14 @@ public class ClientHttpRequestFactoryFactory {
 						.forClient();
 
 				if (sslConfiguration.getTrustStore() != null) {
-					sslContextBuilder.trustManager(createTrustManagerFactory(
-							sslConfiguration.getTrustStoreConfiguration()));
+					sslContextBuilder
+							.trustManager(createTrustManagerFactory(sslConfiguration
+									.getTrustStoreConfiguration()));
 				}
 
 				if (sslConfiguration.getKeyStore() != null) {
-					sslContextBuilder.keyManager(createKeyManagerFactory(
-							sslConfiguration.getKeyStoreConfiguration()));
+					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration
+							.getKeyStoreConfiguration()));
 				}
 
 				requestFactory.setSslContext(sslContextBuilder.sslProvider(
