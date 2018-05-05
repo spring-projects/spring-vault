@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.VaultRule;
 
@@ -31,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
- * Integration tests for {@link VaultKeyValueTemplate}.
+ * Integration tests for {@link VaultKeyValue2Template}.
  *
  * @author Mark Paluch
  */
@@ -39,13 +40,15 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 		IntegrationTestSupport {
 
 	private final String path;
+	private final KeyValueBackend apiVersion;
 
 	@Autowired
 	VaultOperations vaultOperations;
 	VaultKeyValueOperations kvOperations;
 
-	AbstractVaultKeyValueTemplateIntegrationTests(String path) {
+	AbstractVaultKeyValueTemplateIntegrationTests(String path, KeyValueBackend apiVersion) {
 		this.path = path;
+		this.apiVersion = apiVersion;
 	}
 
 	@Before
@@ -54,7 +57,12 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
 				VaultRule.VERSIONING_INTRODUCED_WITH));
 
-		kvOperations = vaultOperations.opsForKeyValue(path);
+		kvOperations = vaultOperations.opsForKeyValue(path, apiVersion);
+	}
+
+	@Test
+	public void shouldReportExpectedApiVersion() {
+		assertThat(kvOperations.getApiVersion()).isEqualTo(apiVersion);
 	}
 
 	@Test

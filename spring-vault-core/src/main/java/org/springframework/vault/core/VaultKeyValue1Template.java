@@ -15,8 +15,10 @@
  */
 package org.springframework.vault.core;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -24,24 +26,38 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Default implementation of {@link VaultKeyValueOperations}.
+ * Default implementation of {@link VaultKeyValueOperations} for the Key/Value backend
+ * version 1.
  *
  * @author Mark Paluch
  * @since 2.1
+ * @see KeyValueBackend#KV_1
  */
-public class VaultKeyValueTemplate extends VaultKeyValueAccessor implements
+class VaultKeyValue1Template extends VaultKeyValueAccessor implements
 		VaultKeyValueOperations {
 
+	private final VaultOperations vaultOperations;
+	private final String path;
+
 	/**
-	 * Create a new {@link VaultKeyValueTemplate} given {@link VaultOperations} and the
+	 * Create a new {@link VaultKeyValue1Template} given {@link VaultOperations} and the
 	 * mount {@code path}.
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
-	public VaultKeyValueTemplate(VaultOperations vaultOperations, String path) {
+	public VaultKeyValue1Template(VaultOperations vaultOperations, String path) {
 
 		super(vaultOperations, path);
+
+		this.vaultOperations = vaultOperations;
+		this.path = path;
+	}
+
+	@Nullable
+	@Override
+	public List<String> list(String path) {
+		return vaultOperations.list(createDataPath(path));
 	}
 
 	@Nullable
@@ -88,6 +104,21 @@ public class VaultKeyValueTemplate extends VaultKeyValueAccessor implements
 
 		Assert.hasText(path, "Path must not be empty");
 
-		doWrite(createDataPath(path), Collections.singletonMap("data", body));
+		doWrite(createDataPath(path), body);
+	}
+
+	@Override
+	public KeyValueBackend getApiVersion() {
+		return KeyValueBackend.KV_1;
+	}
+
+	@Override
+	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
+		return response.getRequiredData();
+	}
+
+	@Override
+	String createDataPath(String path) {
+		return String.format("%s/%s", this.path, path);
 	}
 }

@@ -54,4 +54,39 @@ public interface VaultKeyValueOperationsSupport {
 	 * @param path must not be {@literal null}.
 	 */
 	void delete(String path);
+
+	/**
+	 * @return the used API version.
+	 */
+	KeyValueBackend getApiVersion();
+
+	/**
+	 * Enumeration of supported Key/Value backend API versions.
+	 */
+	enum KeyValueBackend {
+
+		/**
+		 * Key/Value backend version 1 (unversioned).
+		 */
+		KV_1,
+
+		/**
+		 * K/V backend version 2 (versioned).
+		 */
+		KV_2;
+
+		/**
+		 * @return the K/V version 1 (unversioned).
+		 */
+		public static KeyValueBackend unversioned() {
+			return KV_1;
+		}
+
+		/**
+		 * @return the K/V version 2 (versioned).
+		 */
+		public static KeyValueBackend versioned() {
+			return KV_2;
+		}
+	}
 }

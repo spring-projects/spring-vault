@@ -37,6 +37,7 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -206,8 +207,18 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public VaultKeyValueOperations opsForKeyValue(String path) {
-		return new VaultKeyValueTemplate(this, path);
+	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
+
+		switch (apiVersion) {
+		case KV_1:
+			return new VaultKeyValue1Template(this, path);
+		case KV_2:
+			return new VaultKeyValue2Template(this, path);
+		}
+
+		throw new UnsupportedOperationException(String.format(
+				"Key/Value backend version %s not supported", apiVersion));
+
 	}
 
 	@Override

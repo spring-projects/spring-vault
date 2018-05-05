@@ -23,13 +23,14 @@ import org.junit.runner.RunWith;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Integration tests for {@link VaultKeyValueTemplate} using the non-versioned key-value
- * backend.
+ * Integration tests for {@link VaultKeyValue2Template} using the non-versioned Key/Value
+ * (k/v version 1) backend.
  *
  * @author Mark Paluch
  */
@@ -39,7 +40,7 @@ public class VaultKeyValueTemplateIntegrationTests extends
 		AbstractVaultKeyValueTemplateIntegrationTests {
 
 	public VaultKeyValueTemplateIntegrationTests() {
-		super("secret");
+		super("secret", KeyValueBackend.unversioned());
 	}
 
 	@Test

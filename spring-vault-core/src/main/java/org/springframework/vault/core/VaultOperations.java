@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.RestClientException;
@@ -46,12 +47,12 @@ public interface VaultOperations {
 	/**
 	 * Return {@link VaultKeyValueOperations}.
 	 *
-	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault Key/Value (version 2)
-	 * backend.
+	 * @param path the mount path, must not be empty or {@literal null}.
+	 * @param apiVersion API version to use, must not be {@literal null}.
+	 * @return the operations interface to interact with the Vault Key/Value backend.
 	 * @since 2.1
 	 */
-	VaultKeyValueOperations opsForKeyValue(String path);
+	VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
 
 	/**
 	 * Return {@link VaultVersionedKeyValueOperations}.

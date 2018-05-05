@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
@@ -48,8 +47,10 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Mark Paluch
  * @since 2.1
  */
-public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implements
+public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements
 		VaultVersionedKeyValueOperations {
+
+	private final VaultOperations vaultOperations;
 
 	/**
 	 * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
@@ -59,7 +60,10 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implem
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public VaultVersionedKeyValueTemplate(VaultOperations vaultOperations, String path) {
+
 		super(vaultOperations, path);
+
+		this.vaultOperations = vaultOperations;
 	}
 
 	@Nullable
@@ -90,11 +94,12 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValueAccessor implem
 		String secretPath = version.isVersioned() ? String.format("%s?version=%d",
 				createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		VersionedResponse response = doWithSession((restOperations, httpHeaders) -> {
+		VersionedResponse response = vaultOperations.doWithSession(restOperations -> {
 
 			try {
 				return restOperations.exchange(secretPath, HttpMethod.GET,
-						new HttpEntity<>(httpHeaders), VersionedResponse.class).getBody();
+ null,
+						VersionedResponse.class).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 

@@ -16,17 +16,15 @@
 package org.springframework.vault.core;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,16 +40,16 @@ import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Base class for {@link VaultVersionedKeyValueTemplate} and {@link VaultKeyValueTemplate}
- * and other Vault KV-accessing helpers, defining common
+ * Base class for {@link VaultVersionedKeyValueTemplate} and
+ * {@link VaultKeyValue2Template} and other Vault KV-accessing helpers, defining common
  * <p/>
  * Not intended to be used directly. See {@link VaultVersionedKeyValueTemplate} and
- * {@link VaultKeyValueTemplate}.
+ * {@link VaultKeyValue2Template}.
  *
  * @author Mark Paluch
  * @since 2.1
  */
-public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
+abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	private final VaultOperations vaultOperations;
 
@@ -66,7 +64,7 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
-	public VaultKeyValueAccessor(VaultOperations vaultOperations, String path) {
+	VaultKeyValueAccessor(VaultOperations vaultOperations, String path) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(path, "Path must not be empty");
@@ -76,43 +74,23 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 		this.mapper = extractObjectMapper(vaultOperations);
 	}
 
-	@Nullable
-	@Override
-	@SuppressWarnings("unchecked")
-	public List<String> list(String path) {
-
-		String pathToUse = path.equals("/") ? "" : path.endsWith("/") ? path
-				: (path + "/");
-
-		VaultListResponse read = doRead((restOperations, httpEntity) -> {
-			return restOperations.exchange(String.format("%s?list=true",
-					createBackendPath("metadata", pathToUse)), HttpMethod.GET,
-					httpEntity, VaultListResponse.class);
-		});
-
-		if (read == null) {
-			return Collections.emptyList();
-		}
-
-		return (List<String>) read.getRequiredData().get("keys");
-	}
-
 	@Override
 	public void delete(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		doWithSession(((restOperations, httpHeaders) -> {
+		vaultOperations.doWithSession((restOperations -> {
 			restOperations.exchange(createDataPath(path), HttpMethod.DELETE,
-					new HttpEntity<>(httpHeaders), Void.class);
+ null,
+					Void.class);
 
 			return null;
 		}));
 	}
 
 	/**
-	 * Read a secret at {@code path} and deserialize the nested {@literal data} element to
-	 * the given {@link Class type}.
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
+	 * given {@link Class type}.
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param deserializeAs must not be {@literal null}.
@@ -133,7 +111,7 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 
 		if (response != null) {
 
-			JsonNode jsonNode = response.getRequiredData().at("/data");
+			JsonNode jsonNode = getJsonNode(response);
 
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}
@@ -141,6 +119,29 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 		return null;
 	}
 
+	/**
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
+	 * given {@link ParameterizedTypeReference type}.
+	 * 
+	 * @param path must not be {@literal null} or empty.
+	 * @param typeReference must not be {@literal null}
+	 * @return mapped value.
+	 */
+	@Nullable
+	<T> T doRead(String path, ParameterizedTypeReference<T> typeReference) {
+
+		return doRead((restOperations) -> {
+			return restOperations.exchange(path, HttpMethod.GET, null, typeReference);
+		});
+	}
+
+	/**
+	 * Deserialize a {@link JsonNode} to the requested {@link Class type}.
+	 * 
+	 * @param jsonNode must not be {@literal null}.
+	 * @param type must not be {@literal null}.
+	 * @return the deserialized object.
+	 */
 	<T> T deserialize(JsonNode jsonNode, Class<T> type) {
 
 		try {
@@ -151,23 +152,21 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 		}
 	}
 
+	/**
+	 * Perform a read action within a callback that gets access to a session-bound
+	 * {@link RestOperations} object. {@link HttpStatusCodeException} with
+	 * {@link HttpStatus#NOT_FOUND} are translated to a {@literal null} response.
+	 * 
+	 * @param callback must not be {@literal null}.
+	 * @return can be {@literal null}.
+	 */
 	@Nullable
-	private <T> T doRead(String path, ParameterizedTypeReference<T> typeReference) {
+	<T> T doRead(Function<RestOperations, ResponseEntity<T>> callback) {
 
-		return doRead((restOperations, httpEntity) -> {
-			return restOperations.exchange(path, HttpMethod.GET, httpEntity,
-					typeReference);
-		});
-	}
-
-	@Nullable
-	private <T> T doRead(
-			BiFunction<RestOperations, HttpEntity<?>, ResponseEntity<T>> callback) {
-
-		return doWithSession((restOperations, headers) -> {
+		return vaultOperations.doWithSession((restOperations) -> {
 
 			try {
-				return callback.apply(restOperations, new HttpEntity<>(headers))
+				return callback.apply(restOperations)
 						.getBody();
 			}
 			catch (HttpStatusCodeException e) {
@@ -181,6 +180,13 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 		});
 	}
 
+	/**
+	 * Write the {@code body} to the given Vault {@code path}.
+	 * 
+	 * @param path must not be {@literal null} or empty.
+	 * @param body
+	 * @return the response of this write action.
+	 */
 	@Nullable
 	VaultResponse doWrite(String path, Object body) {
 
@@ -188,9 +194,9 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 
 		try {
 
-			return doWithSession((restOperations, httpHeaders) -> {
+			return vaultOperations.doWithSession((restOperations) -> {
 				return restOperations.exchange(path, HttpMethod.POST,
-						new HttpEntity<>(body, httpHeaders), VaultResponse.class)
+						new HttpEntity<>(body), VaultResponse.class)
 						.getBody();
 			});
 		}
@@ -199,25 +205,19 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 		}
 	}
 
-	@Nullable
-	<T> T doWithSession(BiFunction<RestOperations, HttpHeaders, T> callback) {
+	/**
+	 * Return the {@link JsonNode} that contains the actual response body.
+	 * 
+	 * @param response
+	 * @return
+	 */
+	abstract JsonNode getJsonNode(VaultResponseSupport<JsonNode> response);
 
-		return vaultOperations.doWithSession(restOperations -> {
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("X-Vault-Kv-Client", "v2");
-
-			return callback.apply(restOperations, headers);
-		});
-	}
-
-	String createDataPath(String path) {
-		return createBackendPath("data", path);
-	}
-
-	String createBackendPath(String segment, String path) {
-		return String.format("%s/%s/%s", this.path, segment, path);
-	}
+	/**
+	 * @param path must not be {@literal null} or empty.
+	 * @return backend path representing the data path.
+	 */
+	abstract String createDataPath(String path);
 
 	private static ObjectMapper extractObjectMapper(VaultOperations vaultOperations) {
 
@@ -231,7 +231,6 @@ public abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSu
 						Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template
 								.getMessageConverters()
 								.stream()
-								//
 								.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
 								.map(AbstractJackson2HttpMessageConverter.class::cast) //
 								.findFirst();

@@ -31,6 +31,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  * @since 2.1
  * @see VaultVersionedKeyValueOperations
+ * @see KeyValueBackend
  */
 public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport {
 
