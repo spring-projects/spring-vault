@@ -43,6 +43,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -122,6 +123,23 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		VaultToken sessionToken = sessionManager.getSessionToken();
 		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
+	}
+
+	@Test
+	public void shouldTranslateExceptionOnTokenRenewal() {
+
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofMinutes(5)));
+		when(restOperations.postForObject(anyString(), any(HttpEntity.class), any()))
+				.thenThrow(
+						new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
+								"Some server error"));
+
+		sessionManager.getSessionToken();
+		assertThatThrownBy(() -> sessionManager.renewToken())
+				.isInstanceOf(VaultTokenRenewalException.class)
+				.hasCauseInstanceOf(HttpServerErrorException.class)
+				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
 	}
 
 	@Test

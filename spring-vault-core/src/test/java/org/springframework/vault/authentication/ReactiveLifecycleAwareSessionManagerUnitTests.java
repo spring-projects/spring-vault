@@ -155,6 +155,30 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	public void tokenRenewalShouldMapException() {
+
+		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
+
+		when(responseSpec.bodyToMono((Class) any())).thenReturn(
+				Mono.error(new WebClientResponseException("Some server error", 500,
+						"Some server error", null, null, null)));
+
+		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
+				.verifyComplete();
+		sessionManager
+				.renewToken()
+				.as(StepVerifier::create)
+				.consumeErrorWith(
+						exception -> {
+							assertThat(exception)
+									.isInstanceOf(VaultTokenRenewalException.class)
+									.hasCauseInstanceOf(WebClientResponseException.class)
+									.hasMessageContaining(
+											"Cannot renew token: Status 500 Some server error");
+						}).verify();
+	}
+
+	@Test
 	public void shouldRevokeLoginTokenOnDestroy() {
 
 		mockToken(VaultToken.of("login"));

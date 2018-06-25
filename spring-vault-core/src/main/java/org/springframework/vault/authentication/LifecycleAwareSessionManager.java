@@ -27,7 +27,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -154,8 +153,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 					VaultHttpHeaders.from(token)), Map.class);
 		}
 		catch (HttpStatusCodeException e) {
-			logger.warn(String.format("Cannot revoke VaultToken: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+			logger.warn(format("Cannot revoke VaultToken", e));
 		}
 		catch (RuntimeException e) {
 			logger.warn("Cannot revoke VaultToken: %s", e);
@@ -215,17 +213,18 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (HttpStatusCodeException e) {
 
-			logger.debug(String.format(
-					"Cannot renew token, resetting token and performing re-login: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
 			this.token = Optional.empty();
 
+			String message = "Cannot renew token, resetting token and performing re-login";
+
 			if (e.getStatusCode().is4xxClientError()) {
+				logger.warn(format(message, e));
 				return false;
 			}
 
-			throw new VaultException(String.format("Cannot renew token: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())));
+			logger.debug(format(message, e));
+
+			throw new VaultTokenRenewalException(format("Cannot renew token", e), e);
 		}
 		catch (RuntimeException e) {
 
@@ -234,7 +233,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 					e.toString()));
 			this.token = Optional.empty();
 
-			throw new VaultException("Cannot renew token", e);
+			throw new VaultTokenRenewalException("Cannot renew token", e);
 		}
 	}
 
@@ -329,6 +328,10 @@ getRefreshTrigger().nextExecutionTime(
 				(LoginToken) tokenWrapper.getToken()));
 	}
 
+	private static String format(String message, HttpStatusCodeException e) {
+		return String.format("%s: Status %s %s %s", message, e.getStatusCode(),
+				e.getStatusText(), VaultResponses.getError(e.getResponseBodyAsString()));
+	}
 
 	/**
 	 * Wraps a {@link VaultToken} and specifies whether the token is revocable on factory

@@ -34,7 +34,6 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
@@ -171,8 +170,13 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 		return webClient.post().uri("auth/token/revoke-self").headers(httpHeaders -> {
 			httpHeaders.addAll(VaultHttpHeaders.from(token));
-		}).retrieve().bodyToMono(String.class)
-				.onErrorResume(WebClientException.class, e -> {
+		}).retrieve().bodyToMono(String.class).then()
+				.onErrorResume(WebClientResponseException.class, e -> {
+
+					logger.warn(format("Could not revoke token", e));
+
+					return Mono.empty();
+				}).onErrorResume(Exception.class, e -> {
 
 					logger.warn("Could not revoke token", e);
 
@@ -213,25 +217,21 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 							dropCurrentToken();
 
+							String message = "Cannot renew token, resetting token and performing re-login on next token access";
+
 							if (e.getStatusCode().is4xxClientError()) {
 
-								logger.debug(String
-										.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
-												VaultResponses.getError(e
-														.getResponseBodyAsString())));
-
+								logger.warn(format(message, e));
 								return EMPTY;
 							}
 
-							logger.debug(String
-									.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
-											e.toString()));
+							logger.debug(format(message, e));
 
-							return Mono.error(new VaultException(String.format(
-									"Cannot renew token: %s",
-									VaultResponses.getError(e.getResponseBodyAsString()))));
+							return Mono.error(new VaultTokenRenewalException(format(
+									"Cannot renew token", e), e));
 						})
 				.onErrorMap(
+						it -> !VaultTokenRenewalException.class.isInstance(it),
 						e -> {
 
 							dropCurrentToken();
@@ -239,11 +239,11 @@ public class ReactiveLifecycleAwareSessionManager extends
 									.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
 											e.toString()));
 
-							return new VaultException("Cannot renew token", e);
+							return new VaultTokenRenewalException("Cannot renew token", e);
 						}).map(TokenWrapper::getToken);
 	}
 
-	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
+	Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
 
 		Mono<VaultResponse> exchange = webClient
 				.post()
@@ -420,10 +420,14 @@ public class ReactiveLifecycleAwareSessionManager extends
 				.onErrorMap(
 						WebClientResponseException.class,
 						e -> {
-							return new VaultTokenLookupException(String.format(
-									"Token self-lookup failed: %s %s", e.getStatusCode(),
-									VaultResponses.getError(e.getResponseBodyAsString())));
+							return new VaultTokenLookupException(format(
+									"Token self-lookup", e), e);
 						});
+	}
+
+	private static String format(String message, WebClientResponseException e) {
+		return String.format("%s: Status %s %s %s", message, e.getStatusCode(),
+				e.getStatusText(), VaultResponses.getError(e.getResponseBodyAsString()));
 	}
 
 	/**

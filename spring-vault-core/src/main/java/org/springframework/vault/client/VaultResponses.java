@@ -60,25 +60,26 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s: %s", e.getStatusCode(),
-					message));
+			return new VaultException(String.format("Status %s %s: %s",
+					e.getStatusCode(), e.getStatusText(), message));
 		}
 
-		return new VaultException(String.format("Status %s", e.getStatusCode()));
+		return new VaultException(String.format("Status %s %s", e.getStatusCode(),
+				e.getStatusText()));
 	}
 
 	/**
 	 * Build a {@link VaultException} given {@link HttpStatusCodeException} and request
 	 * {@code path}.
 	 * @param e must not be {@literal null}.
-	 * @param path
+	 * @param path must not be {@literal null}.
 	 * @return the {@link VaultException}.
 	 */
 	public static VaultException buildException(HttpStatusCodeException e, String path) {
 
 		Assert.notNull(e, "HttpStatusCodeException must not be null");
 
-		return buildException(e.getStatusCode(), path,
+		return buildException(e.getStatusCode(), e.getStatusText(), path,
 				VaultResponses.getError(e.getResponseBodyAsString()));
 	}
 
@@ -91,6 +92,18 @@ public abstract class VaultResponses {
 		}
 
 		return new VaultException(String.format("Status %s %s", statusCode, path));
+	}
+
+	private static VaultException buildException(HttpStatus statusCode,
+			String statusText, String path, String message) {
+
+		if (StringUtils.hasText(message)) {
+			return new VaultException(String.format("Status %s %s %s: %s", statusCode,
+					statusText, path, message));
+		}
+
+		return new VaultException(String.format("Status %s %s %s", statusCode,
+				statusText, path));
 	}
 
 	/**
