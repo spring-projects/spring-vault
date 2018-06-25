@@ -243,7 +243,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						}).map(TokenWrapper::getToken);
 	}
 
-	Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
+	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
 
 		Mono<VaultResponse> exchange = webClient
 				.post()
@@ -338,7 +338,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 	/**
 	 * @return {@literal true} if the token is renewable.
 	 */
-	private static boolean isTokenRenewable(VaultToken token) {
+	protected boolean isTokenRenewable(VaultToken token) {
 
 		return Optional.of(token)
 				.filter(LoginToken.class::isInstance)
@@ -384,7 +384,8 @@ public class ReactiveLifecycleAwareSessionManager extends
 				(LoginToken) token));
 	}
 
-	static Mono<VaultToken> augmentWithSelfLookup(WebClient webClient, VaultToken token) {
+	private static Mono<VaultToken> augmentWithSelfLookup(WebClient webClient,
+			VaultToken token) {
 
 		Mono<Map<String, Object>> data = lookupSelf(webClient, token);
 
