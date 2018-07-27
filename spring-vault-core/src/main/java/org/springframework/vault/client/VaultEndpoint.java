@@ -21,13 +21,15 @@ import java.net.URI;
 
 import lombok.EqualsAndHashCode;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Value object that defines Vault connection coordinates.
  * <p>
- * A {@link VaultEndpoint} defines the hostname, TCP port and the protocol scheme (HTTP or
- * HTTPS).
+ * A {@link VaultEndpoint} defines the hostname, TCP port, the protocol scheme (HTTP or
+ * HTTPS), and the context path prefix. The path defaults to {@link #API_VERSION}.
  *
  * @author Mark Paluch
  */
@@ -50,6 +52,11 @@ public class VaultEndpoint implements Serializable {
 	 * Protocol scheme. Can be either "http" or "https".
 	 */
 	private String scheme = "https";
+
+	/**
+	 * Context path of the Vault server. Defaults to {@link #API_VERSION}.
+	 */
+	private String path = API_VERSION;
 
 	/**
 	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
@@ -97,7 +104,20 @@ public class VaultEndpoint implements Serializable {
 		}
 		vaultEndpoint.setScheme(uri.getScheme());
 
+		String path = getPath(uri);
+
+		if (StringUtils.hasText(path)) {
+			vaultEndpoint.setPath(path);
+		}
+
 		return vaultEndpoint;
+	}
+
+	@Nullable
+	private static String getPath(URI uri) {
+
+		String path = uri.getPath();
+		return path != null && path.startsWith("/") ? path.substring(1) : path;
 	}
 
 	/**
@@ -153,6 +173,28 @@ public class VaultEndpoint implements Serializable {
 	}
 
 	/**
+	 * @return the context path prefix.
+	 * @since 2.1
+	 */
+	public String getPath() {
+		return path;
+	}
+
+	/**
+	 * @param path context path prefix. Must not be {@literal null} or empty and must not
+	 * start with a leading slash.
+	 * @since 2.1
+	 */
+	public void setPath(String path) {
+
+		Assert.hasText(path, "Path must not be null or empty");
+		Assert.isTrue(!path.startsWith("/"),
+				() -> String.format("Path %s must not start with a leading slash", path));
+
+		this.path = path;
+	}
+
+	/**
 	 * Build the Vault {@link URI} based on the given {@code path}.
 	 *
 	 * @param path must not be empty or {@literal null}.
@@ -173,7 +215,7 @@ public class VaultEndpoint implements Serializable {
 		Assert.hasText(path, "Path must not be empty");
 
 		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(),
-				API_VERSION, path);
+				getPath(), path);
 	}
 
 	@Override

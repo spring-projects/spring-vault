@@ -41,11 +41,12 @@ public class VaultEndpointUnitTests {
 	@Test
 	public void shouldCreateEndpointFromURI() {
 
-		VaultEndpoint endpoint = VaultEndpoint.from(URI.create("http://127.0.0.1:443"));
+		VaultEndpoint endpoint = VaultEndpoint.from(URI.create("http://127.0.0.1:443/"));
 
 		assertThat(endpoint.getScheme()).isEqualTo("http");
 		assertThat(endpoint.getHost()).isEqualTo("127.0.0.1");
 		assertThat(endpoint.getPort()).isEqualTo(443);
+		assertThat(endpoint.getPath()).isEqualTo(VaultEndpoint.API_VERSION);
 	}
 
 	@Test
@@ -56,5 +57,17 @@ public class VaultEndpointUnitTests {
 		assertThat(endpoint.getScheme()).isEqualTo("http");
 		assertThat(endpoint.getHost()).isEqualTo("127.0.0.1");
 		assertThat(endpoint.getPort()).isEqualTo(80);
+		assertThat(endpoint.getPath()).isEqualTo(VaultEndpoint.API_VERSION);
+	}
+
+	@Test
+	public void shouldCreateEndpointWithPath() {
+
+		VaultEndpoint endpoint = VaultEndpoint.from(URI
+				.create("http://127.0.0.1/context"));
+
+		assertThat(endpoint.getPath()).isEqualTo("context");
+		assertThat(endpoint.createUri("foo")).isEqualTo(
+				URI.create("http://127.0.0.1:80/context/foo"));
 	}
 }
