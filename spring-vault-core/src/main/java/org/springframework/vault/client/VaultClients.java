@@ -152,13 +152,13 @@ public class VaultClients {
 		}
 
 		@Override
-		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
-			return super.expandInternal(prepareUriTemplate(uriTemplate), uriVariables);
+		public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
+			return super.expand(prepareUriTemplate(uriTemplate), uriVariables);
 		}
 
 		@Override
-		protected URI expandInternal(String uriTemplate, Object... uriVariables) {
-			return super.expandInternal(prepareUriTemplate(uriTemplate), uriVariables);
+		public URI expand(String uriTemplate, Object... uriVariableValues) {
+			return super.expand(prepareUriTemplate(uriTemplate), uriVariableValues);
 		}
 
 		@Override
