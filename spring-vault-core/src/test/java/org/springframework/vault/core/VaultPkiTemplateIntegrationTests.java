@@ -20,7 +20,12 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
+import java.security.cert.X509Certificate;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,6 +111,23 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getSerialNumber()).isNotEmpty();
 		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
 				.isEqualTo("CN=hello.example.com");
+	}
+
+	@Test
+	public void issueCertificateWithTtlShouldCreateCertificate() {
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+				.ttl(Duration.ofHours(48)).commonName("hello.example.com").build();
+
+		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
+				"testrole", request);
+
+		X509Certificate certificate = certificateResponse.getData().getX509Certificate();
+
+		Instant now = Instant.now();
+		assertThat(certificate.getNotAfter()).isAfter(
+				Date.from(now.plus(40, ChronoUnit.HOURS))).isBefore(
+				Date.from(now.plus(50, ChronoUnit.HOURS)));
 	}
 
 	@Test
