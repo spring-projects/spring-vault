@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -176,7 +177,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		}
 
 		if (certificateRequest.getTtl() != null) {
-			request.put("ttl", certificateRequest.getTtl());
+			request.put("ttl", certificateRequest.getTtl().get(ChronoUnit.SECONDS));
 		}
 
 		if (certificateRequest.isExcludeCommonNameFromSubjectAltNames()) {
