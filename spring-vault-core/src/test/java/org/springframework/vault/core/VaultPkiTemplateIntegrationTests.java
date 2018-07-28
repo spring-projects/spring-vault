@@ -46,8 +46,10 @@ import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assume.assumeTrue;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -58,6 +60,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
+
+	private static final Version NO_TTL_UNIT_REQUIRED_FROM = Version.parse("0.7.3");
 
 	@Autowired
 	private VaultOperations vaultOperations;
@@ -115,6 +119,9 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	public void issueCertificateWithTtlShouldCreateCertificate() {
+
+		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
+				NO_TTL_UNIT_REQUIRED_FROM));
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
 				.ttl(Duration.ofHours(48)).commonName("hello.example.com").build();
