@@ -78,7 +78,6 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 
 		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
 
-		assertThat(metadata.getPath()).isEqualTo("sys/wrapping/wrap");
 		assertThat(metadata.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(metadata.getToken()).isNotNull();
 		assertThat(metadata.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
@@ -94,7 +93,6 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 
 		WrappedMetadata lookup = wrappingOperations.lookup(metadata.getToken());
 
-		assertThat(lookup.getPath()).isEqualTo("sys/wrapping/wrap");
 		assertThat(lookup.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(lookup.getToken()).isNotNull();
 		assertThat(lookup.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
@@ -149,7 +147,6 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 
 		WrappedMetadata rewrap = wrappingOperations.rewrap(metadata.getToken());
 
-		assertThat(rewrap.getPath()).isEqualTo("sys/wrapping/wrap");
 		assertThat(rewrap.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(rewrap.getToken()).isNotEqualTo(metadata.getToken());
 		assertThat(rewrap.getCreationTime()).isBefore(Instant.now().plusSeconds(60))

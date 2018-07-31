@@ -18,6 +18,7 @@ package org.springframework.vault.support;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -41,35 +42,35 @@ public class WrappedMetadata {
 	 * @param token must not be {@literal null}.
 	 * @param ttl must not be {@literal null}.
 	 * @param creationTime must not be {@literal null}.
-	 * @param path must not be {@literal null}.
+	 * @param path can be {@literal null}.
 	 */
 	public WrappedMetadata(VaultToken token, Duration ttl, Instant creationTime,
-			String path) {
+			@Nullable String path) {
 
 		Assert.notNull(token, "VaultToken must not be null");
 		Assert.notNull(ttl, "TTL duration must not be null");
 		Assert.notNull(creationTime, "Creation time must not be null");
-		Assert.notNull(path, "Path  must not be null");
 
 		this.token = token;
+		this.ttl = ttl;
 		this.creationTime = creationTime;
 		this.path = path;
-		this.ttl = ttl;
 	}
 
 	public VaultToken getToken() {
 		return token;
 	}
 
+	public Duration getTtl() {
+		return ttl;
+	}
+
 	public Instant getCreationTime() {
 		return creationTime;
 	}
 
+	@Nullable
 	public String getPath() {
 		return path;
-	}
-
-	public Duration getTtl() {
-		return ttl;
 	}
 }
