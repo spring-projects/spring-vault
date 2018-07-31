@@ -103,6 +103,13 @@ public interface VaultOperations {
 	VaultTransitOperations opsForTransit(String path);
 
 	/**
+	 * @return the operations interface to interact with the Vault system/wrapping
+	 * endpoints.
+	 * @since 2.1
+	 */
+	VaultWrappingOperations opsForWrapping();
+
+	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
 	 * calls/secret backends that do not require a request body.
 	 *

@@ -257,6 +257,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	public VaultWrappingOperations opsForWrapping() {
+		return new VaultWrappingTemplate(this);
+	}
+
+	@Override
 	public VaultResponse read(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -267,9 +272,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
-	public <T> VaultResponseSupport<T> read(final String path, final Class<T> responseType) {
+	public <T> VaultResponseSupport<T> read(String path, Class<T> responseType) {
 
-		final ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
+		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
 		try {
@@ -320,7 +325,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public void delete(final String path) {
+	public void delete(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -364,7 +369,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Nullable
-	private <T> T doRead(final String path, final Class<T> responseType) {
+	private <T> T doRead(String path, Class<T> responseType) {
 
 		return doWithSession(restOperations -> {
 
