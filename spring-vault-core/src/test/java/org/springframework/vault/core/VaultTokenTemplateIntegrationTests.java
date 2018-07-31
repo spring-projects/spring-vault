@@ -50,10 +50,11 @@ public class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
 	private VaultOperations vaultOperations;
+
 	private VaultTokenOperations tokenOperations;
 
 	@Before
-	public void before() throws Exception {
+	public void before() {
 		tokenOperations = vaultOperations.opsForToken();
 	}
 
