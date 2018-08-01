@@ -3,8 +3,11 @@
 
 [[new-features.2-1-0]]
 === What's new in Spring Vault 2.1
+
 * <<vault.authentication.gcpgce,GCP Compute>> and <<vault.authentication.gcpiam,GCP IAM>> authentication.
-* Template API support for versioned and unversioned Key/Value backends.
+* Template API support for versioned and unversioned Key/Value backends and for Vault wrapping operations.
+* Support full pull mode in reactive AppRole authentication.
+* Improved Exception hierarchy for Vault login failures.
 
 [[new-features.2-0-0]]
 === What's new in Spring Vault 2.0
