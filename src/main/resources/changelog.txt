@@ -1,6 +1,57 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.0.M1
+-----------------------------------------
+* Support for Google IAM Authentication  #126
+* Introduce template methods to customize RestTemplate #200
+* Provide a richer subclass strata of VaultException #203
+* Mark VaultEndpointProvider as functional interface #204
+* PrefixAwareUriTemplateHandler adds leading slash to absolute URIs #206
+* Introduce VaultWrappingTemplate to abstract wrapping operations #208
+* Fix Javadoc example code in SecretLeaseContainer #209
+* Upgrade to Vault 0.9.5 #212
+* Upgrade to Spring Data Kay SR5 #213
+* Upgrade to Reactor Bismuth SR7 #214
+* Rotate non-renewable secrets #215
+* Client sending Vault an expired token resulting in failures of all Vault calls #222
+* Batch decryption fails if plaintext is empty #223
+* Upgrade to Spring Framework 5.0.5.RELEASE #227
+* Upgrade to Jackson 2.9.5 #234
+* Upgrade to Spring Data Kay SR6 #235
+* Upgrade to Spring Security 5.0.3 #236
+* Upgrade to AWS Java SDK 1.11.308 #237
+* Upgrade to Google IAM v1-rev241-1.23.0 #238
+* Add support for versioned Key-Value secrets #239
+* Upgrade to Vault 0.10.0 #240
+* VaultTokenRequest noParent field serializes incorrectly in JSON #243
+* Key/Value backend not usable with Vault 0.10.0 (versioning enabled) and @VaultPropertySource #245
+* Provide Key-Value backend API #246
+* Extend VaultVersionedKeyValueOperations with typed read #247
+* ClientHttpRequestFactoryFactory checks for wrong Netty class on path (Spring Data Redis conflict) #249
+* Upgrade to Vault 0.10.1 #250
+* Upgrade to Spring Framework 5.0.6 #251
+* Upgrade to netty 4.1.25.Final #254
+* Increase log level on token renewing errors when using CubbyHoleAuthentication #257
+* Upgrade to Vault 0.10.3 #258
+* Support full pull mode in AppRoleAuthentication through AuthenticationSteps #259
+* Allow customization of Vault path prefixes #260
+* Issuing PKI certificate with TTL results in Vault error due to number format #263
+* Upgrade to Apache HttpClient 4.5.6 #266
+* Upgrade to HttpCore 4.4.10 #267
+* Upgrade to Netty 4.1.28.Final #268
+* Upgrade to OkHttp 3.11.0 #269
+* Upgrade to Jackson 2.9.6 #270
+* Upgrade to AWS SDK 1.11.376 #271
+* Upgrade to Google IAM v1-rev254-1.23.0 #272
+* Upgrade to Google OAuth 0.10.0 #273
+* Generate subject alt name in local certificate #274
+* Add zipWith step to AuthenticationSteps #275
+* Upgrade to Reactor Bismuth SR10 #277
+* Upgrade to Spring Data Kay SR9 #278
+* Upgrade to Spring Framework 5.0.8 #279
+* Apply Spring CSS to reference documentation #280
+
 Changes in version 2.0.1.RELEASE
 -----------------------------------------
 * VaultSysTemplate.getPolicyName should not throw an exception for not found policies #202
