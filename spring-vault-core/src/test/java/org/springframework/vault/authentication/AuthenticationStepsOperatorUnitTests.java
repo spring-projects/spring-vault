@@ -27,6 +27,7 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
+import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -101,6 +102,46 @@ public class AuthenticationStepsOperatorUnitTests {
 				"cert").as(VaultResponse.class));
 
 		StepVerifier.create(login(steps, webClient)).expectError().verify();
+	}
+
+	@Test
+	public void zipWithShouldRequestTwoItems() {
+
+		ClientHttpRequest leftRequest = new MockClientHttpRequest(HttpMethod.GET,
+				"/auth/login/left");
+		MockClientHttpResponse leftResponse = new MockClientHttpResponse(HttpStatus.OK);
+		leftResponse.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		leftResponse.setBody("{" + "\"request_id\": \"left\"}");
+
+		ClientHttpRequest rightRequest = new MockClientHttpRequest(HttpMethod.GET,
+				"/auth/login/right");
+		MockClientHttpResponse rightResponse = new MockClientHttpResponse(HttpStatus.OK);
+		rightResponse.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		rightResponse.setBody("{" + "\"request_id\": \"right\"}");
+
+		ClientHttpConnector connector = (method, uri, fn) -> {
+
+			if (uri.toString().contains("left")) {
+				return fn.apply(leftRequest).then(Mono.just(leftResponse));
+			}
+
+			return fn.apply(rightRequest).then(Mono.just(rightResponse));
+		};
+
+		WebClient webClient = WebClient.builder().clientConnector(connector).build();
+
+		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post(
+				"/auth/login/left").as(VaultResponse.class));
+
+		Node<VaultResponse> right = AuthenticationSteps.fromHttpRequest(post(
+				"/auth/login/right").as(VaultResponse.class));
+
+		AuthenticationSteps steps = left.zipWith(right).login(
+				it -> VaultToken.of(it.getLeft().getRequestId() + "-"
+						+ it.getRight().getRequestId()));
+
+		StepVerifier.create(login(steps, webClient))
+				.expectNext(VaultToken.of("left-right")).verifyComplete();
 	}
 
 	private Mono<VaultToken> login(AuthenticationSteps steps) {

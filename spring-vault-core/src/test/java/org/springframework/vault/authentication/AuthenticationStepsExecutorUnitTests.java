@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.VaultResponse;
@@ -163,6 +164,34 @@ public class AuthenticationStepsExecutorUnitTests {
 				.login("/auth/cert/login");
 
 		assertThat(login(steps)).isEqualTo(VaultToken.of("foo-token"));
+	}
+
+	@Test
+	public void zipWithShouldRequestTwoItems() {
+
+		mockRest.expect(requestTo("/auth/login/left"))
+				.andExpect(method(HttpMethod.POST))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"request_id\": \"left\"}"));
+
+		mockRest.expect(requestTo("/auth/login/right"))
+				.andExpect(method(HttpMethod.POST))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"request_id\": \"right\"}"));
+
+		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post(
+				"/auth/login/left").as(VaultResponse.class));
+
+		Node<VaultResponse> right = AuthenticationSteps.fromHttpRequest(post(
+				"/auth/login/right").as(VaultResponse.class));
+
+		AuthenticationSteps steps = left.zipWith(right).login(
+				it -> VaultToken.of(it.getLeft().getRequestId() + "-"
+						+ it.getRight().getRequestId()));
+
+		assertThat(login(steps)).isEqualTo(VaultToken.of("left-right"));
 	}
 
 	private VaultToken login(AuthenticationSteps steps) {

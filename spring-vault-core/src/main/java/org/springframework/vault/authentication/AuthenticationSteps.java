@@ -87,7 +87,7 @@ public class AuthenticationSteps {
 
 	private static final Node<Object> HEAD = new Node<>();
 
-	final List<Node<?>> steps = new ArrayList<>();
+	final List<Node<?>> steps;
 
 	/**
 	 * Create a flow definition using a provided {@link VaultToken}.
@@ -146,6 +146,12 @@ public class AuthenticationSteps {
 	}
 
 	AuthenticationSteps(PathAware pathAware) {
+		this.steps = getChain(pathAware);
+	}
+
+	static List<Node<?>> getChain(PathAware pathAware) {
+
+		List<Node<?>> steps = new ArrayList<>();
 
 		PathAware current = pathAware;
 		do {
@@ -164,6 +170,8 @@ public class AuthenticationSteps {
 		while (!Objects.equals(current, AuthenticationSteps.HEAD));
 
 		Collections.reverse(steps);
+
+		return steps;
 	}
 
 	/**
@@ -187,6 +195,20 @@ public class AuthenticationSteps {
 			Assert.notNull(mappingFunction, "Mapping function must not be null");
 
 			return new MapStep<>(mappingFunction, this);
+		}
+
+		/**
+		 * Combine the result from this {@link Node} and another into a {@link Pair}.
+		 *
+		 * @return the next {@link Node}.
+		 * @since 2.1
+		 */
+		public <R> Node<Pair<T, R>> zipWith(Node<? extends R> other) {
+
+			Assert.notNull(other, "Other node must not be null");
+			Assert.isInstanceOf(PathAware.class, other, "Other node must be PathAware");
+
+			return new ZipStep<>(this, (PathAware) other);
 		}
 
 		/**
@@ -469,6 +491,32 @@ public class AuthenticationSteps {
 
 	@Value
 	@EqualsAndHashCode(callSuper = false)
+	static class ZipStep<L, R> extends Node<Pair<L, R>> implements PathAware {
+
+		@NonNull
+		Node<?> left;
+
+		@NonNull
+		List<Node<?>> right;
+
+		public ZipStep(Node<?> left, PathAware right) {
+			this.left = left;
+			this.right = getChain(right);
+		}
+
+		@Override
+		public Node<?> getPrevious() {
+			return left;
+		}
+
+		@Override
+		public String toString() {
+			return "Zip";
+		}
+	}
+
+	@Value
+	@EqualsAndHashCode(callSuper = false)
 	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 	static class OnNextStep<T> extends Node<T> implements PathAware {
 
@@ -510,5 +558,53 @@ public class AuthenticationSteps {
 
 	interface PathAware {
 		Node<?> getPrevious();
+	}
+
+	/**
+	 * A tuple of two things.
+	 *
+	 * @param <L>
+	 * @param <R>
+	 * @since 2.1
+	 */
+	public static class Pair<L, R> {
+
+		private final L left;
+
+		private final R right;
+
+		private Pair(L left, R right) {
+			this.left = left;
+			this.right = right;
+		}
+
+		/**
+		 * Create a new {@link Pair} given {@code left} and {@code right} values.
+		 *
+		 * @param left
+		 * @param right
+		 * @return the {@link Pair}.
+		 */
+		public static <L, R> Pair<L, R> of(L left, R right) {
+			return new Pair<>(left, right);
+		}
+
+		/**
+		 * Type-safe way to get the fist object of this {@link Pair}.
+		 *
+		 * @return The first object
+		 */
+		public L getLeft() {
+			return left;
+		}
+
+		/**
+		 * Type-safe way to get the second object of this {@link Pair}.
+		 *
+		 * @return The second object
+		 */
+		public R getRight() {
+			return right;
+		}
 	}
 }

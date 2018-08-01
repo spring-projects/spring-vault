@@ -30,7 +30,9 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestN
 import org.springframework.vault.authentication.AuthenticationSteps.MapStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
+import org.springframework.vault.authentication.AuthenticationSteps.Pair;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
+import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -76,39 +78,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	@SuppressWarnings("unchecked")
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
-		Mono<Object> state = Mono.just(Undefinded.INSTANCE);
-
-		for (Node<?> o : chain.steps) {
-
-			if (logger.isDebugEnabled()) {
-				logger.debug(String
-						.format("Executing %s with current state %s", o, state));
-			}
-
-			if (o instanceof HttpRequestNode) {
-				state = state.flatMap(stateObject -> doHttpRequest(
-						(HttpRequestNode<Object>) o, stateObject));
-			}
-
-			if (o instanceof AuthenticationSteps.MapStep) {
-				state = state.map(stateObject -> doMapStep((MapStep<Object, Object>) o,
-						stateObject));
-			}
-
-			if (o instanceof OnNextStep) {
-				state = state.doOnNext(stateObject -> doOnNext((OnNextStep<Object>) o,
-						stateObject));
-			}
-
-			if (o instanceof AuthenticationSteps.SupplierStep<?>) {
-				state = state
-						.map(stateObject -> doSupplierStep((SupplierStep<Object>) o));
-			}
-
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Executed %s with current state %s", o, state));
-			}
-		}
+		Mono<Object> state = createMono(chain.steps);
 
 		return state
 				.map(stateObject -> {
@@ -137,12 +107,59 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 								"Cannot retrieve VaultToken from authentication chain", t));
 	}
 
+	private Mono<Object> createMono(Iterable<Node<?>> steps) {
+
+		Mono<Object> state = Mono.just(Undefinded.INSTANCE);
+
+		for (Node<?> o : steps) {
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String
+						.format("Executing %s with current state %s", o, state));
+			}
+
+			if (o instanceof HttpRequestNode) {
+				state = state.flatMap(stateObject -> doHttpRequest(
+						(HttpRequestNode<Object>) o, stateObject));
+			}
+
+			if (o instanceof MapStep) {
+				state = state.map(stateObject -> doMapStep((MapStep<Object, Object>) o,
+						stateObject));
+			}
+
+			if (o instanceof ZipStep) {
+				state = state.zipWith(doZipStep((ZipStep<Object, Object>) o)).map(
+						it -> Pair.of(it.getT1(), it.getT2()));
+			}
+
+			if (o instanceof OnNextStep) {
+				state = state.doOnNext(stateObject -> doOnNext((OnNextStep<Object>) o,
+						stateObject));
+			}
+
+			if (o instanceof SupplierStep<?>) {
+				state = state
+						.map(stateObject -> doSupplierStep((SupplierStep<Object>) o));
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Executed %s with current state %s", o, state));
+			}
+		}
+		return state;
+	}
+
 	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
 		return supplierStep.get();
 	}
 
 	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
 		return o.apply(state);
+	}
+
+	private Mono<Object> doZipStep(ZipStep<Object, Object> o) {
+		return createMono(o.getRight());
 	}
 
 	private static Object doOnNext(OnNextStep<Object> o, Object state) {

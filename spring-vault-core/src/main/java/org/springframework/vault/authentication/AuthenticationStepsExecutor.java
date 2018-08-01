@@ -28,7 +28,9 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestN
 import org.springframework.vault.authentication.AuthenticationSteps.MapStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
+import org.springframework.vault.authentication.AuthenticationSteps.Pair;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
+import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -72,9 +74,32 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	public VaultToken login() throws VaultException {
 
+
+		Iterable<Node<?>> steps = chain.steps;
+
+		Object state = evaluate(steps);
+
+		if (state instanceof VaultToken) {
+			return (VaultToken) state;
+		}
+
+		if (state instanceof VaultResponse) {
+
+			VaultResponse response = (VaultResponse) state;
+			Assert.state(response.getAuth() != null, "Auth field must not be null");
+			return LoginTokenUtil.from(response.getAuth());
+		}
+
+		throw new IllegalStateException(String.format(
+				"Cannot retrieve VaultToken from authentication chain. Got instead %s",
+				state));
+	}
+
+	private Object evaluate(Iterable<Node<?>> steps) {
+
 		Object state = null;
 
-		for (Node<?> o : chain.steps) {
+		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug(String
@@ -86,15 +111,19 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 					state = doHttpRequest((HttpRequestNode<Object>) o, state);
 				}
 
-				if (o instanceof AuthenticationSteps.MapStep) {
+				if (o instanceof MapStep) {
 					state = doMapStep((MapStep<Object, Object>) o, state);
+				}
+
+				if (o instanceof ZipStep) {
+					state = doZipStep((ZipStep<Object, Object>) o, state);
 				}
 
 				if (o instanceof OnNextStep) {
 					state = doOnNext((OnNextStep<Object>) o, state);
 				}
 
-				if (o instanceof AuthenticationSteps.SupplierStep<?>) {
+				if (o instanceof SupplierStep<?>) {
 					state = doSupplierStep((SupplierStep<Object>) o);
 				}
 
@@ -114,21 +143,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 						"Authentication execution failed in %s", o), e);
 			}
 		}
-
-		if (state instanceof VaultToken) {
-			return (VaultToken) state;
-		}
-
-		if (state instanceof VaultResponse) {
-
-			VaultResponse response = (VaultResponse) state;
-			Assert.state(response.getAuth() != null, "Auth field must not be null");
-			return LoginTokenUtil.from(response.getAuth());
-		}
-
-		throw new IllegalStateException(String.format(
-				"Cannot retrieve VaultToken from authentication chain. Got instead %s",
-				state));
+		return state;
 	}
 
 	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
@@ -137,6 +152,12 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
 		return o.apply(state);
+	}
+
+	private Object doZipStep(ZipStep<Object, Object> o, Object state) {
+
+		Object result = evaluate(o.getRight());
+		return Pair.of(state, result);
 	}
 
 	private static Object doOnNext(OnNextStep<Object> o, Object state) {
