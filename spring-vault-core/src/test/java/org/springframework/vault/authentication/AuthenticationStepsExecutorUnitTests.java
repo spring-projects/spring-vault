@@ -51,6 +51,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 public class AuthenticationStepsExecutorUnitTests {
 
 	private RestTemplate restTemplate;
+
 	private MockRestServiceServer mockRest;
 
 	@Before

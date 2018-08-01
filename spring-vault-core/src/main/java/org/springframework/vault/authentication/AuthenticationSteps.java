@@ -149,6 +149,12 @@ public class AuthenticationSteps {
 		this.steps = getChain(pathAware);
 	}
 
+	/**
+	 * Return a {@link List} of node given a {@link PathAware} starting point.
+	 *
+	 * @param pathAware must not be {@literal null}.
+	 * @return
+	 */
 	static List<Node<?>> getChain(PathAware pathAware) {
 
 		List<Node<?>> steps = new ArrayList<>();
@@ -499,7 +505,7 @@ public class AuthenticationSteps {
 		@NonNull
 		List<Node<?>> right;
 
-		public ZipStep(Node<?> left, PathAware right) {
+		ZipStep(Node<?> left, PathAware right) {
 			this.left = left;
 			this.right = getChain(right);
 		}
@@ -522,6 +528,7 @@ public class AuthenticationSteps {
 
 		@NonNull
 		Consumer<? super T> consumer;
+
 		@NonNull
 		Node<?> previous;
 
@@ -543,6 +550,7 @@ public class AuthenticationSteps {
 
 		@NonNull
 		Supplier<T> supplier;
+
 		@NonNull
 		Node<?> previous;
 
@@ -581,8 +589,8 @@ public class AuthenticationSteps {
 		/**
 		 * Create a new {@link Pair} given {@code left} and {@code right} values.
 		 *
-		 * @param left
-		 * @param right
+		 * @param left the left value.
+		 * @param right the right value.
 		 * @return the {@link Pair}.
 		 */
 		public static <L, R> Pair<L, R> of(L left, R right) {
