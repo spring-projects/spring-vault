@@ -28,6 +28,7 @@
 		<dist.id>spring-vault</dist.id>
 		<project.root>${basedir}</project.root>
 		<shared.resources>${project.build.directory}/shared-resources</shared.resources>
+		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
 		<java-module-name />
@@ -547,6 +548,13 @@
 
 			<dependencies>
 				<dependency>
+					<groupId>org.springframework.doc-resources</groupId>
+					<artifactId>spring-doc-resources</artifactId>
+					<version>0.1.1-SNAPSHOT</version>
+					<scope>provided</scope>
+					<type>zip</type>
+				</dependency>
+				<dependency>
 					<groupId>org.springframework.data.build</groupId>
 					<artifactId>spring-data-build-resources</artifactId>
 					<version>2.0.0.RELEASE</version>
@@ -560,33 +568,55 @@
 				<plugins>
 
 					<!--
-						Unpacks the content of spring-data-build-resources into the shared resources folder.
+					Provide shared resources for Javadoc and Asciidoc.
 					-->
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-dependency-plugin</artifactId>
 						<executions>
+
 							<execution>
 								<id>unpack-shared-resources</id>
 								<goals>
 									<goal>unpack-dependencies</goal>
 								</goals>
 								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>org.springframework.data
+									</includeGroupIds>
+									<includeArtifactIds>spring-data-build-resources
+									</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${shared.resources}
+									</outputDirectory>
+								</configuration>
 							</execution>
+
+							<execution>
+								<id>unpack-doc-resource</id>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<phase>generate-resources</phase>
+								<configuration>
+									<includeGroupIds>org.springframework.doc-resources
+									</includeGroupIds>
+									<includeArtifactIds>spring-doc-resources
+									</includeArtifactIds>
+									<includeTypes>zip</includeTypes>
+									<excludeTransitive>true</excludeTransitive>
+									<outputDirectory>${doc.resources}
+									</outputDirectory>
+								</configuration>
+							</execution>
+
 						</executions>
-						<configuration>
-							<includeGroupIds>org.springframework.data</includeGroupIds>
-							<includeArtifactIds>spring-data-build-resources
-							</includeArtifactIds>
-							<includeTypes>zip</includeTypes>
-							<excludeTransitive>true</excludeTransitive>
-							<outputDirectory>${shared.resources}</outputDirectory>
-						</configuration>
 					</plugin>
 
 					<!--
-						Configures JavaDoc generation.
+					Configures JavaDoc generation.
 					-->
 
 					<plugin>
@@ -603,82 +633,147 @@
 						</executions>
 					</plugin>
 
-					<!--
-						Copies all namespaces schemas to target/schemas flatten the directory structure.
-						Depended on by the site.xml assembly descriptor.
-					-->
-
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<executions>
-
-							<execution>
-								<id>copy-documentation-resources</id>
-								<phase>generate-resources</phase>
-								<configuration>
-									<target>
-										<copy todir="${project.root}/target/site/reference/html">
-											<fileset dir="${shared.resources}/asciidoc" erroronmissingdir="false">
-												<include name="**/*.css" />
-											</fileset>
-											<flattenmapper />
-										</copy>
-										<copy todir="${project.root}/target/site/reference/html/images">
-											<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-												<include name="**/*.png" />
-												<include name="**/*.gif" />
-												<include name="**/*.jpg" />
-											</fileset>
-											<flattenmapper />
-										</copy>
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-
-							<execution>
-								<id>collect-schema-files</id>
-								<phase>process-resources</phase>
-								<configuration>
-									<target>
-										<copy todir="${project.build.directory}/schemas">
-											<fileset dir="${basedir}" erroronmissingdir="false">
-												<include name="**/src/main/resources/**/config/spring-*.xsd" />
-											</fileset>
-											<flattenmapper />
-										</copy>
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-
-							<execution>
-								<id>rename-reference-docs</id>
-								<phase>process-resources</phase>
-								<configuration>
-									<target>
-										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
-										<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
-									</target>
-								</configuration>
-								<goals>
-									<goal>run</goal>
-								</goals>
-							</execution>
-
-						</executions>
-
-					</plugin>
-
 				</plugins>
 
 				<pluginManagement>
 					<plugins>
+
+						<!--
+							Copies all namespaces schemas to target/schemas flatten the directory structure.
+							Depended on by the site.xml assembly descriptor.
+						-->
+
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-antrun-plugin</artifactId>
+							<executions>
+
+								<execution>
+									<id>copy-documentation-resources</id>
+									<phase>generate-resources</phase>
+									<configuration>
+										<target>
+											<copy todir="${project.root}/target/site/reference/html/images">
+												<fileset
+														dir="${basedir}/src/main/asciidoc"
+														erroronmissingdir="false">
+													<include name="**/*.png"/>
+													<include name="**/*.gif"/>
+													<include name="**/*.jpg"/>
+												</fileset>
+												<flattenmapper/>
+											</copy>
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
+
+								<execution>
+									<id>collect-schema-files</id>
+									<phase>process-resources</phase>
+									<configuration>
+										<target>
+											<copy todir="${project.build.directory}/schemas">
+												<fileset dir="${basedir}"
+														 erroronmissingdir="false">
+													<include
+															name="**/src/main/resources/**/config/spring-*.xsd"/>
+												</fileset>
+												<flattenmapper/>
+											</copy>
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
+
+								<execution>
+									<id>create-docs-working-directory</id>
+									<phase>generate-resources</phase>
+									<configuration>
+										<target>
+											<copy failonerror="false"
+												  file="${project.build.directory}/doc-resources/stylesheets/spring.css"
+												  tofile="${project.build.directory}/working/stylesheets/spring.css"/>
+											<copy failonerror="false"
+												  file="${project.build.directory}/doc-resources/html/docinfo.html"
+												  tofile="${project.build.directory}/working/docinfo.html"/>
+											<copy failonerror="false"
+												  file="${project.build.directory}/doc-resources/html/docinfo-footer.html"
+												  tofile="${project.build.directory}/working/docinfo-footer.html"/>
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working/tocbot-3.0.2">
+												<fileset
+														dir="${project.build.directory}/doc-resources/javascript/tocbot-3.0.2"
+														includes="**"/>
+											</copy>
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working">
+												<fileset
+														dir="${project.root}/src/main/asciidoc"
+														includes="**"/>
+											</copy>
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working/images">
+												<fileset
+														dir="${project.root}/src/main/asciidoc/images"
+														includes="**"/>
+											</copy>
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
+
+								<execution>
+									<id>rename-reference-docs</id>
+									<phase>prepare-package</phase>
+									<configuration>
+										<target>
+											<!-- Copy files for the single-file HTML version -->
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.html"
+												  tofile="${project.root}/target/site/reference/html/index.html"/>
+											<copy failonerror="false"
+												  todir="${project.root}/target/site/reference/html/images">
+												<fileset
+														dir="${project.build.directory}/generated-docs/images">
+													<include name="*.*"/>
+												</fileset>
+											</copy>
+											<copy failonerror="false"
+												  todir="${project.root}/target/site/reference/html/tocbot-3.0.2">
+												<fileset
+														dir="${project.build.directory}/generated-docs/tocbot-3.0.2">
+													<include name="*.*"/>
+												</fileset>
+											</copy>
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/stylesheets/spring.css"
+												  tofile="${project.root}/target/site/reference/html/stylesheets/spring.css"/>
+											<!-- Copy and rename the Epub file -->
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.pdf"
+												  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
+											<!-- Copy and rename the PDF file -->
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.epub"
+												  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
+
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
+
+							</executions>
+
+						</plugin>
 
 						<!--
 							Asciidoctor
@@ -703,14 +798,19 @@
 
 								<execution>
 									<id>html</id>
-									<phase>generate-resources</phase>
+									<phase>process-resources</phase>
 									<goals>
 										<goal>process-asciidoc</goal>
 									</goals>
 									<configuration>
+										<sourceDirectory>
+											${project.build.directory}/working
+										</sourceDirectory>
+										<sourceDocumentName>index.adoc
+										</sourceDocumentName>
 										<backend>html5</backend>
 										<outputDirectory>
-											${project.root}/target/site/reference/html
+											${project.build.directory}/generated-docs
 										</outputDirectory>
 										<sectids>false</sectids>
 										<sourceHighlighter>prettify</sourceHighlighter>
@@ -718,7 +818,10 @@
 											<linkcss>true</linkcss>
 											<icons>font</icons>
 											<sectanchors>true</sectanchors>
+											<stylesdir>./stylesheets</stylesdir>
 											<stylesheet>spring.css</stylesheet>
+											<docinfo>shared</docinfo>
+											<toc>left</toc>
 										</attributes>
 									</configuration>
 								</execution>
@@ -730,7 +833,16 @@
 										<goal>process-asciidoc</goal>
 									</goals>
 									<configuration>
+										<sourceDirectory>
+											${project.build.directory}/working
+										</sourceDirectory>
+										<sourceDocumentName>index.adoc
+										</sourceDocumentName>
 										<backend>epub3</backend>
+										<outputDirectory>
+											${project.build.directory}/generated-docs
+										</outputDirectory>
+										<sectids>false</sectids>
 										<sourceHighlighter>coderay</sourceHighlighter>
 									</configuration>
 								</execution>
@@ -742,7 +854,16 @@
 										<goal>process-asciidoc</goal>
 									</goals>
 									<configuration>
+										<sourceDirectory>
+											${project.build.directory}/working
+										</sourceDirectory>
+										<sourceDocumentName>index.adoc
+										</sourceDocumentName>
 										<backend>pdf</backend>
+										<outputDirectory>
+											${project.build.directory}/generated-docs
+										</outputDirectory>
+										<sectids>false</sectids>
 										<sourceHighlighter>coderay</sourceHighlighter>
 									</configuration>
 								</execution>
@@ -750,9 +871,6 @@
 							</executions>
 
 							<configuration>
-								<sourceDirectory>${project.root}/src/main/asciidoc
-								</sourceDirectory>
-								<sourceDocumentName>index.adoc</sourceDocumentName>
 								<doctype>book</doctype>
 								<attributes>
 									<version>${project.version}</version>
@@ -761,7 +879,7 @@
 									<springVersion>${spring.version}</springVersion>
 									<springDataVersion>${spring-data-releasetrain.version}</springDataVersion>
 									<allow-uri-read>true</allow-uri-read>
-									<toclevels>3</toclevels>
+									<toclevels>4</toclevels>
 									<numbered>true</numbered>
 								</attributes>
 							</configuration>

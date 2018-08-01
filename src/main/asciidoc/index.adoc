@@ -2,8 +2,14 @@
 Mark Paluch;
 :revnumber: {version}
 :revdate: {localdate}
-:toc: macro
-:toc-placement!:
+:linkcss:
+:doctype: book
+:docinfo: shared
+:toc: left
+:toclevels: 4
+:source-highlighter: prettify
+:icons: font
+:imagesdir: images
 :spring-framework-docs: https://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/
 :self-docs-root: https://docs.spring.io/spring-vault/docs/{version}/
 

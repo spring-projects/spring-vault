@@ -7,7 +7,7 @@ This document is the reference guide for Spring Vault. It explains Vault concept
 
 This part of the reference documentation explains the core functionality offered by Spring Vault.
 
-<<vault.core>> introduces the Vault module feature set.
+<<vault.core, Vault support>> introduces the Vault module feature set.
 
 == Document Structure
 
