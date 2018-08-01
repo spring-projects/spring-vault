@@ -22,7 +22,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>5.0.6.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Kay-SR6</spring-data-releasetrain.version>
-		<reactor.version>Bismuth-SR7</reactor.version>
+		<reactor.version>Bismuth-SR10</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
