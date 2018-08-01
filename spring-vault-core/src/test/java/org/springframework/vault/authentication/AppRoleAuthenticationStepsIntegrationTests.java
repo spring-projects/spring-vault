@@ -75,6 +75,19 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
+	public void shouldAuthenticateWithFullPullMode() {
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.appRole("with-secret-id").initialToken(Settings.token()).build();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
+						.getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
+	}
+
+	@Test
 	public void authenticationStepsShouldAuthenticateWithPullSecretId() {
 
 		String roleId = getRoleId("with-secret-id");

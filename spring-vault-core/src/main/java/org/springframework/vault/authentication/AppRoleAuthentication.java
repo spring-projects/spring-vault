@@ -102,88 +102,74 @@ public class AppRoleAuthentication implements ClientAuthentication,
 		RoleId roleId = options.getRoleId();
 		SecretId secretId = options.getSecretId();
 
-		if ((roleId instanceof Wrapped || roleId instanceof Pull)
-				&& (secretId instanceof Wrapped || secretId instanceof Pull)) {
-
-			throw new IllegalArgumentException(
-					"RoleId and SecretId are both configured to obtain their values from initial Vault request. AuthenticationSteps supports currently only fetching of a single element.");
-		}
-
 		return getAuthenticationSteps(options, roleId, secretId).login(
 				"auth/{mount}/login", options.getPath());
 	}
 
-	private static Node<?> getAuthenticationSteps(AppRoleAuthenticationOptions options,
+	private static Node<Map<String, String>> getAuthenticationSteps(
+			AppRoleAuthenticationOptions options,
 			RoleId roleId, SecretId secretId) {
 
-		if (roleId instanceof Pull || roleId instanceof Wrapped) {
+		Node<String> roleIdSteps = getRoleIdSteps(options, roleId);
+		Node<String> secretIdSteps = getSecretIdSteps(options, secretId);
 
-			Node<VaultResponse> steps;
+		return roleIdSteps.zipWith(secretIdSteps).map(
+				it -> getAppRoleLoginBody(it.getLeft(), it.getRight()));
+	}
 
-			if (roleId instanceof Pull) {
-
-				HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
-
-				steps = AuthenticationSteps.fromHttpRequest(get(
-						"auth/{mount}/role/{role}/role-id", options.getPath(),
-						options.getAppRole()).with(headers).as(VaultResponse.class));
-			}
-			else {
-				steps = unwrapResponse(((Wrapped) roleId).getInitialToken());
-			}
-
-			return steps.map(
-					vaultResponse -> (String) vaultResponse.getRequiredData().get(
-							"role_id")).map(
-					roleIdToken -> {
-
-						return getAppRoleLoginBody(
-								roleIdToken,
-								secretId instanceof Provided ? ((Provided) secretId)
-										.getValue() : null);
-					});
-		}
-
-		if (secretId instanceof Pull || secretId instanceof Wrapped) {
-
-			Node<VaultResponse> steps;
-
-			if (secretId instanceof Pull) {
-				HttpHeaders headers = createHttpHeaders(((Pull) secretId)
-						.getInitialToken());
-
-				steps = AuthenticationSteps.fromHttpRequest(post(
-						"auth/{mount}/role/{role}/secret-id", options.getPath(),
-						options.getAppRole()).with(headers).as(VaultResponse.class));
-			}
-			else {
-				steps = unwrapResponse(((Wrapped) secretId).getInitialToken());
-			}
-
-			return steps.map(
-					vaultResponse -> (String) vaultResponse.getRequiredData().get(
-							"secret_id")).map(
-					secretIdToken -> {
-
-						return getAppRoleLoginBody(
-								roleId instanceof Provided ? ((Provided) roleId)
-										.getValue() : null, secretIdToken);
-					});
-		}
+	private static Node<String> getRoleIdSteps(AppRoleAuthenticationOptions options,
+			RoleId roleId) {
 
 		if (roleId instanceof Provided) {
-
-			return AuthenticationSteps.fromSupplier(() -> {
-
-				return getAppRoleLoginBody(((Provided) roleId).getValue(),
-						secretId instanceof Provided ? ((Provided) secretId).getValue()
-								: null);
-			});
+			return AuthenticationSteps.fromSupplier(((Provided) roleId)::getValue);
 		}
 
-		throw new IllegalArgumentException(String.format(
-				"Provided RoleId/SecretId setup not supported. RoleId: %s, SecretId: %s",
-				roleId, secretId));
+		if (roleId instanceof Pull) {
+
+			HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
+
+			return AuthenticationSteps.fromHttpRequest(
+					get("auth/{mount}/role/{role}/role-id", options.getPath(),
+							options.getAppRole()).with(headers).as(VaultResponse.class))
+					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"role_id"));
+		}
+
+		if (roleId instanceof Wrapped) {
+			return unwrapResponse(((Wrapped) roleId).getInitialToken()).map(
+					vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"role_id"));
+		}
+
+		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
+	}
+
+	private static Node<String> getSecretIdSteps(AppRoleAuthenticationOptions options,
+			SecretId secretId) {
+
+		if (secretId instanceof Provided) {
+			return AuthenticationSteps.fromSupplier(((Provided) secretId)::getValue);
+		}
+
+		if (secretId instanceof Pull) {
+			HttpHeaders headers = createHttpHeaders(((Pull) secretId).getInitialToken());
+
+			return AuthenticationSteps.fromHttpRequest(
+					post("auth/{mount}/role/{role}/secret-id", options.getPath(),
+							options.getAppRole()).with(headers).as(VaultResponse.class))
+					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"secret_id"));
+		}
+
+		if (secretId instanceof Wrapped) {
+
+			return unwrapResponse(((Wrapped) secretId).getInitialToken()).map(
+					vaultResponse -> (String) vaultResponse.getRequiredData().get(
+							"secret_id"));
+		}
+
+		throw new IllegalArgumentException("Unknown SecretId configuration: " + secretId);
+
 	}
 
 	private static Node<VaultResponse> unwrapResponse(VaultToken token) {

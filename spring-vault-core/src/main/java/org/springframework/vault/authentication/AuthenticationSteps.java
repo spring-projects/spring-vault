@@ -29,6 +29,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.FieldDefaults;
 
@@ -575,6 +576,8 @@ public class AuthenticationSteps {
 	 * @param <R>
 	 * @since 2.1
 	 */
+	@EqualsAndHashCode
+	@ToString
 	public static class Pair<L, R> {
 
 		private final L left;
