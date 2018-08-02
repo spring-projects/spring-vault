@@ -333,7 +333,7 @@ getRefreshTrigger().nextExecutionTime(
 	}
 
 	private static String format(String message, HttpStatusCodeException e) {
-		return String.format("%s: Status %s %s %s", message, e.getStatusCode(),
+		return String.format("%s: Status %s %s %s", message, e.getRawStatusCode(),
 				e.getStatusText(), VaultResponses.getError(e.getResponseBodyAsString()));
 	}
 

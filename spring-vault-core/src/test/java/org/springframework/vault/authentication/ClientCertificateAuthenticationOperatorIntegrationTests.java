@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
@@ -27,6 +28,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
+@Ignore("See https://github.com/spring-projects/spring-vault/issues/281 and https://github.com/reactor/reactor-netty/issues/407")
 public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 

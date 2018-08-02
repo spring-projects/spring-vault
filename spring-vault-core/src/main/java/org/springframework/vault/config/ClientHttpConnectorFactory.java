@@ -17,11 +17,10 @@ package org.springframework.vault.config;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.concurrent.atomic.AtomicLong;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
-import reactor.ipc.netty.resources.PoolResources;
+import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -41,8 +40,6 @@ import static org.springframework.vault.config.ClientHttpRequestFactoryFactory.h
  */
 public class ClientHttpConnectorFactory {
 
-	private static final AtomicLong POOL_COUNTER = new AtomicLong();
-
 	/**
 	 * Create a {@link ClientHttpConnector} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
@@ -54,21 +51,23 @@ public class ClientHttpConnectorFactory {
 	public static ClientHttpConnector create(ClientOptions options,
 			SslConfiguration sslConfiguration) {
 
-		return new ReactorClientHttpConnector(builder -> {
+		HttpClient client = HttpClient.create();
 
-			if (hasSslConfiguration(sslConfiguration)) {
+		if (hasSslConfiguration(sslConfiguration)) {
 
-				builder.sslSupport(sslContextBuilder -> {
-					configureSsl(sslConfiguration, sslContextBuilder);
-				}).poolResources(
-						PoolResources.elastic("vault-http-"
-								+ POOL_COUNTER.incrementAndGet()));
-			}
+			SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
+			configureSsl(sslConfiguration, sslContextBuilder);
 
-			builder.sslHandshakeTimeout(options.getConnectionTimeout());
-			builder.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-					Math.toIntExact(options.getConnectionTimeout().toMillis()));
-		});
+			client = client.secure(builder -> {
+				builder.sslContext(sslContextBuilder);
+			});
+		}
+
+		client = client.tcpConfiguration(it -> it.option(
+				ChannelOption.CONNECT_TIMEOUT_MILLIS,
+				Math.toIntExact(options.getConnectionTimeout().toMillis())));
+
+		return new ReactorClientHttpConnector(client);
 	}
 
 	private static void configureSsl(SslConfiguration sslConfiguration,

@@ -61,7 +61,7 @@ public abstract class VaultResponses {
 
 		if (StringUtils.hasText(message)) {
 			return new VaultException(String.format("Status %s %s: %s",
-					e.getStatusCode(), e.getStatusText(), message));
+					e.getRawStatusCode(), e.getStatusText(), message));
 		}
 
 		return new VaultException(String.format("Status %s %s", e.getStatusCode(),
@@ -98,11 +98,12 @@ public abstract class VaultResponses {
 			String statusText, String path, String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s %s: %s", statusCode,
+			return new VaultException(String.format("Status %s %s %s: %s",
+					statusCode.value(),
 					statusText, path, message));
 		}
 
-		return new VaultException(String.format("Status %s %s %s", statusCode,
+		return new VaultException(String.format("Status %s %s %s", statusCode.value(),
 				statusText, path));
 	}
 
