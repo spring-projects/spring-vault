@@ -35,6 +35,7 @@ import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -592,11 +593,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	@SuppressWarnings("unchecked")
 	private Lease renew(Lease lease) {
+		final Map<String, String> leaseRenewalData = new HashMap<>();
+		leaseRenewalData.put("lease_id", lease.getLeaseId());
+		leaseRenewalData.put("increment", Long.toString(lease.getLeaseDuration().getSeconds()));
+
+		HttpEntity<Object> leaseRenewalEntity = new HttpEntity<>(leaseRenewalData);
+
 
 		ResponseEntity<Map<String, Object>> entity = operations
 				.doWithSession(restOperations -> (ResponseEntity) restOperations
-						.exchange("sys/renew/{leaseId}", HttpMethod.PUT, null, Map.class,
-								lease.getLeaseId()));
+						.exchange("sys/renew", HttpMethod.PUT, leaseRenewalEntity, Map.class));
 
 		Assert.state(entity != null && entity.getBody() != null,
 				"Renew response must not be null");
