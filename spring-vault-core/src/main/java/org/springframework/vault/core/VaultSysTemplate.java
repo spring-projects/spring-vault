@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.Data;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -69,7 +70,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static final Health HEALTH = new Health();
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	private static final ObjectMapper OBJECT_MAPPER;
+
+	static {
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.enable(SerializationFeature.INDENT_OUTPUT);
+		OBJECT_MAPPER = mapper;
+	}
 
 	private final VaultOperations vaultOperations;
 
@@ -83,6 +91,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
 		this.vaultOperations = vaultOperations;
+
 	}
 
 	@Override
