@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.1.0.RC1</spring.version>
+		<spring.version>5.1.0.RC2</spring.version>
 		<spring-data-releasetrain.version>Kay-SR9</spring-data-releasetrain.version>
 		<reactor.version>Californium-M1</reactor.version>
 		<java.version>1.8</java.version>
@@ -398,7 +398,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.0.7.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.1.0.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
