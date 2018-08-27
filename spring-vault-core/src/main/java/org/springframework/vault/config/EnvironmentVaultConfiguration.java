@@ -32,6 +32,8 @@ import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.AzureMsiAuthentication;
+import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
@@ -96,7 +98,7 @@ import org.springframework.web.client.RestOperations;
  * </li>
  * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
  * supported authentication methods are:
- * {@literal TOKEN, APPID, APPROLE, AWS_EC2, CERT, CUBBYHOLE})</li>
+ * {@literal TOKEN, APPID, APPROLE, AZURE, AWS_EC2, CERT, CUBBYHOLE})</li>
  * <li>Token authentication
  * <ul>
  * <li>Vault Token: {@code vault.token}</li>
@@ -117,6 +119,10 @@ import org.springframework.web.client.RestOperations;
  * <ul>
  * <li>RoleId: {@code vault.aws-ec2.role-id}</li>
  * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (optional)</li>
+ * </ul>
+ * <li>Azure MSI authentication
+ * <ul>
+ * <li>Role: {@code vault.azure-msi.role}</li>
  * </ul>
  * <li>Client Certificate authentication
  * <ul>
@@ -226,6 +232,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			return appRoleAuthentication();
 		case AWS_EC2:
 			return awsEc2Authentication();
+		case AZURE:
+			return azureMsiAuthentication();
 		case CERT:
 			return new ClientCertificateAuthentication(restOperations());
 		case CUBBYHOLE:
@@ -318,6 +326,18 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 				restOperations());
 	}
 
+	protected ClientAuthentication azureMsiAuthentication() {
+
+		String roleId = getProperty("vault.azure-msi.role");
+		Assert.hasText(roleId,
+				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
+
+		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
+				.role(roleId).build();
+
+		return new AzureMsiAuthentication(options, restOperations());
+	}
+
 	protected ClientAuthentication cubbyholeAuthentication() {
 
 		String token = getEnvironment().getProperty("vault.token");
@@ -370,6 +390,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	}
 
 	enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AWS_EC2, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPID, APPROLE, AZURE, AWS_EC2, CERT, CUBBYHOLE, KUBERNETES;
 	}
 }

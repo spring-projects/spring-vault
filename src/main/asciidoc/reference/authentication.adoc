@@ -375,6 +375,52 @@ See also:
 * https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth backend]
 * http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
 
+[[vault.authentication.azuremsi]]
+== Azure (MSI) authentication
+
+The https://www.vaultproject.io/docs/auth/azure.html[azure]
+auth backend provides a secure introduction mechanism
+for Azure VM instances, allowing automated retrieval of a Vault
+token. Unlike most Vault authentication backends, this backend
+does not require first-deploying, or provisioning security-sensitive
+credentials (tokens, username/password, client certificates, etc.).
+Instead, it treats Azure as a Trusted Third Party and uses the
+managed service identity and instance metadata information that can be
+bound to a VM instance
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
+                    .role(…).build();
+
+        return new AzureMsiAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+Azure authentication requires details about the VM environment (subscription Id,
+resource group name, VM name). These details can be either configured through
+`AzureMsiAuthenticationOptionsBuilder`.
+If left unconfigured, `AzureMsiAuthentication` queries Azure's instance metadata service to
+obtain these details.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the Azure auth backend]
+* https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview[Azure Documentation: Managed Service Identity]
+
 [[vault.authentication.gcpgce]]
 == GCP-GCE authentication
 
