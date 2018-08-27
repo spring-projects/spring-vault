@@ -19,7 +19,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
@@ -34,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.VaultException;
@@ -216,8 +214,9 @@ public class SecretLeaseContainerUnitTests {
 	public void shouldRenewLease() {
 
 		prepareRenewal();
+
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(getResponseEntity("new_lease", true, 70, HttpStatus.OK));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		secretLeaseContainer.start();
 
@@ -308,7 +307,7 @@ public class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(getResponseEntity("new_lease", true, 5, HttpStatus.OK));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
 
 		secretLeaseContainer.start();
 
@@ -334,7 +333,7 @@ public class SecretLeaseContainerUnitTests {
 
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(first, second);
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(getResponseEntity("new_lease", true, 5, HttpStatus.OK));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
 
 		secretLeaseContainer.requestRotatingSecret("my-secret");
 
@@ -410,7 +409,7 @@ public class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(getResponseEntity("new_lease", true, 70, HttpStatus.OK));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		secretLeaseContainer.start();
 
@@ -552,23 +551,6 @@ public class SecretLeaseContainerUnitTests {
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(createSecrets());
 
 		secretLeaseContainer.addRequestedSecret(requestedSecret);
-	}
-
-	private ResponseEntity<Map<String, Object>> getResponseEntity(String leaseId,
-			Boolean renewable, Integer leaseDuration, HttpStatus httpStatus) {
-
-		Map<String, Object> body = new HashMap<String, Object>();
-		body.put("lease_id", leaseId);
-		body.put("renewable", renewable);
-		body.put("lease_duration", leaseDuration);
-
-		return getEntity(body, httpStatus);
-	}
-
-	private ResponseEntity<Map<String, Object>> getEntity(Map<String, Object> body,
-			HttpStatus status) {
-
-		return new ResponseEntity<Map<String, Object>>(body, status);
 	}
 
 	private VaultResponse createSecrets() {

@@ -35,10 +35,7 @@ import lombok.extern.apachecommons.CommonsLog;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
@@ -48,7 +45,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
-import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
@@ -117,6 +113,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @see RequestedSecret
  * @see SecretLeaseEventPublisher
  * @see Lease
+ * @see LeaseEndpoints
  */
 @CommonsLog
 public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
@@ -136,6 +133,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	private final Map<RequestedSecret, LeaseRenewalScheduler> renewals = new ConcurrentHashMap<>();
 
 	private final VaultOperations operations;
+
+	private LeaseEndpoints leaseEndpoints = LeaseEndpoints.Legacy;
 
 	private Duration minRenewal = Duration.ofSeconds(10);
 
@@ -176,6 +175,22 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		this.operations = operations;
 		setTaskScheduler(taskScheduler);
+	}
+
+	/**
+	 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
+	 * {@link LeaseEndpoints} encapsulates differences between Vault versions that affect
+	 * the location of renewal/revocation endpoints.
+	 *
+	 * @param leaseEndpoints must not be {@literal null}.
+	 * @since 2.1
+	 * @see LeaseEndpoints
+	 */
+	public void setLeaseEndpoints(LeaseEndpoints leaseEndpoints) {
+
+		Assert.notNull(leaseEndpoints, "LeaseEndpoints must not be null");
+
+		this.leaseEndpoints = leaseEndpoints;
 	}
 
 	/**
@@ -595,33 +610,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	@SuppressWarnings("unchecked")
 	private Lease renew(Lease lease) {
 
-		HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
-
-		ResponseEntity<Map<String, Object>> entity = operations
-				.doWithSession(restOperations -> (ResponseEntity) restOperations
-						.exchange("sys/renew", HttpMethod.PUT, leaseRenewalEntity, Map.class));
-
-		Assert.state(entity != null && entity.getBody() != null,
-				"Renew response must not be null");
-
-		Map<String, Object> body = entity.getBody();
-		String leaseId = (String) body.get("lease_id");
-		Number leaseDuration = (Number) body.get("lease_duration");
-		boolean renewable = (Boolean) body.get("renewable");
-
-		return Lease.of(leaseId, leaseDuration != null ? leaseDuration.longValue() : 0,
-				renewable);
+		return operations.doWithSession(restOperations -> leaseEndpoints.renew(lease,
+				restOperations));
 	}
 
-	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {
-
-		Map<String, String> leaseRenewalData = new HashMap<>();
-		leaseRenewalData.put("lease_id", lease.getLeaseId());
-		leaseRenewalData.put("increment",
-				Long.toString(lease.getLeaseDuration().getSeconds()));
-
-		return new HttpEntity<>(leaseRenewalData);
-	}
 
 	/**
 	 * Hook method called when a {@link Lease} expires. The default implementation is to
@@ -654,9 +646,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
 			operations
-					.doWithSession((RestOperationsCallback<ResponseEntity<Map<String, Object>>>) restOperations -> (ResponseEntity) restOperations
-							.exchange("sys/revoke/{leaseId}", HttpMethod.PUT, null,
-									Map.class, lease.getLeaseId()));
+.doWithSession(restOperations -> {
+				leaseEndpoints.revoke(lease, restOperations);
+				return null;
+			});
 
 			onAfterLeaseRevocation(requestedSecret, lease);
 		}
