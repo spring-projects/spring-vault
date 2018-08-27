@@ -151,12 +151,14 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Configure the Identity Document {@link URI}.
 		 *
-		 * @param identityDocumentUri must not be empty or {@literal null}.
+		 * @param identityDocumentUri must not be {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI
 		 */
 		public AwsEc2AuthenticationOptionsBuilder identityDocumentUri(
 				URI identityDocumentUri) {
+
+			Assert.notNull(identityDocumentUri, "Identity document URI must not be null");
 
 			this.identityDocumentUri = identityDocumentUri;
 			return this;

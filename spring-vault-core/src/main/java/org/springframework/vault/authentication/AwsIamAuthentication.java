@@ -83,7 +83,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 	/**
 	 * Create a new {@link AwsIamAuthentication} specifying
 	 * {@link AwsIamAuthenticationOptions}, a Vault and an AWS-Metadata-specific
-	 * {@link RestOperations} .
+	 * {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.

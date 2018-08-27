@@ -74,7 +74,7 @@ public class AwsEc2Authentication implements ClientAuthentication,
 	/**
 	 * Create a new {@link AwsEc2Authentication} specifying
 	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
-	 * {@link RestOperations} .
+	 * {@link RestOperations}.
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
