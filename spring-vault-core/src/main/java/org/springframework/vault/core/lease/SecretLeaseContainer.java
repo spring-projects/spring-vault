@@ -113,6 +113,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  *
  * @author Mark Paluch
  * @author Steven Swor
+ * @author Erik Lindblom
  * @see RequestedSecret
  * @see SecretLeaseEventPublisher
  * @see Lease
@@ -593,12 +594,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	@SuppressWarnings("unchecked")
 	private Lease renew(Lease lease) {
-		final Map<String, String> leaseRenewalData = new HashMap<>();
-		leaseRenewalData.put("lease_id", lease.getLeaseId());
-		leaseRenewalData.put("increment", Long.toString(lease.getLeaseDuration().getSeconds()));
 
-		HttpEntity<Object> leaseRenewalEntity = new HttpEntity<>(leaseRenewalData);
-
+		HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
 
 		ResponseEntity<Map<String, Object>> entity = operations
 				.doWithSession(restOperations -> (ResponseEntity) restOperations
@@ -614,6 +611,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 		return Lease.of(leaseId, leaseDuration != null ? leaseDuration.longValue() : 0,
 				renewable);
+	}
+
+	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {
+
+		Map<String, String> leaseRenewalData = new HashMap<>();
+		leaseRenewalData.put("lease_id", lease.getLeaseId());
+		leaseRenewalData.put("increment",
+				Long.toString(lease.getLeaseDuration().getSeconds()));
+
+		return new HttpEntity<>(leaseRenewalData);
 	}
 
 	/**
