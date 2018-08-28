@@ -13,8 +13,8 @@ Vault can manage static and dynamic secrets such as application data, username/p
 
 For a comprehensive treatment of all the Spring Vault features, please refer to:
 
-* the http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/[User Guide]
-* the http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/api/[JavaDocs] have extensive comments in them as well.
+* the https://docs.spring.io/spring-vault/docs/current/reference/html/[User Guide]
+* the https://docs.spring.io/spring-vault/docs/current/api/[JavaDocs] have extensive comments in them as well.
 * the home page of http://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
 * for more detailed questions, use http://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
 
@@ -24,13 +24,13 @@ Specifically for Spring applications:
 
 * JavaConfig for Vault Client
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.backends.generic[secrets] secured with SSL
-* http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.token[Token],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.appid[AppId],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.approle[AppRole],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.clientcert[Client Certificate],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
+* Obtain https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.client-ssl[secrets] secured with SSL
+* https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.token[Token],
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.appid[AppId],
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.approle[AppRole],
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.clientcert[Client Certificate],
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 Spring Boot users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault Config], an optimized integration with Vault to provide encrypted Vault properties inside Spring Boot applications.
