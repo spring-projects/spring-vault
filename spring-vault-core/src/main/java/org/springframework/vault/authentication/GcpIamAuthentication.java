@@ -125,8 +125,8 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 	protected String signJwt() {
 
-		String projectId = credential.getServiceAccountProjectId();
-		String serviceAccount = credential.getServiceAccountId();
+		String projectId = options.getProjectIdProvider().getProjectId(credential);
+		String serviceAccount = options.getServiceAccountIdProvider().getServiceAccountId(credential);
 		Map<String, Object> jwtPayload = getJwtPayload(options, serviceAccount);
 
 		Iam iam = new Builder(httpTransport, JSON_FACTORY, credential)
