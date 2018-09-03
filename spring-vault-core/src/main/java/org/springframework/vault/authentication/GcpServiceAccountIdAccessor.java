@@ -26,11 +26,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
  * @see GcpIamAuthentication
  */
 @FunctionalInterface
-public interface GcpServiceAccountIdProvider {
+public interface GcpServiceAccountIdAccessor {
 
 	/**
 	 * Get a the service account id (email) to be placed in the signed JWT.
 	 *
+	 * @param credential credential object to obtain the service account id from.
 	 * @return the service account id to use.
 	 */
 	String getServiceAccountId(GoogleCredential credential);

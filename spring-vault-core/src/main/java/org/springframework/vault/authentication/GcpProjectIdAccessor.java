@@ -15,26 +15,25 @@
  */
 package org.springframework.vault.authentication;
 
-import org.springframework.util.StringUtils;
-
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 
 /**
- * Default implementation to obtain a GCP project id for GCP IAM authentication.
- * Used by {@link GcpIamAuthentication}.
+ * Interface to obtain a GCP project id for GCP IAM authentication. Implementations are
+ * used by {@link GcpIamAuthentication}.
  *
  * @author Magnus Jungsbluth
+ * @author Mark Paluch
  * @since 2.1
  * @see GcpIamAuthentication
  */
-public class DefaultGcpProjectIdProvider implements GcpProjectIdProvider {
+@FunctionalInterface
+public interface GcpProjectIdAccessor {
 
-    @Override
-    public String getProjectId(GoogleCredential credential) {
-        if (StringUtils.isEmpty(credential.getServiceAccountProjectId())) {
-            return "-";
-        } else {
-            return credential.getServiceAccountProjectId();
-        }
-    }
+	/**
+	 * Get a the GCP project id to used in Google Cloud IAM API calls.
+	 *
+	 * @param credential the credential object to obtain the project id from.
+	 * @return the service account id to use.
+	 */
+	String getProjectId(GoogleCredential credential);
 }

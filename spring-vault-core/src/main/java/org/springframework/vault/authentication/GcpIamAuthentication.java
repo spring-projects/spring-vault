@@ -50,6 +50,7 @@ import org.springframework.web.client.RestOperations;
  * {@link GcpIamAuthentication} uses Google Java API that uses synchronous API.
  *
  * @author Mark Paluch
+ * @author Magnus Jungsbluth
  * @since 2.1
  * @see GcpIamAuthenticationOptions
  * @see HttpTransport
@@ -125,8 +126,8 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 	protected String signJwt() {
 
-		String projectId = options.getProjectIdProvider().getProjectId(credential);
-		String serviceAccount = options.getServiceAccountIdProvider().getServiceAccountId(credential);
+		String projectId = getProjectId();
+		String serviceAccount = getServiceAccountId();
 		Map<String, Object> jwtPayload = getJwtPayload(options, serviceAccount);
 
 		Iam iam = new Builder(httpTransport, JSON_FACTORY, credential)
@@ -152,6 +153,14 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 		catch (IOException e) {
 			throw new VaultLoginException("Cannot sign JWT", e);
 		}
+	}
+
+	private String getServiceAccountId() {
+		return options.getServiceAccountIdAccessor().getServiceAccountId(credential);
+	}
+
+	private String getProjectId() {
+		return options.getProjectIdAccessor().getProjectId(credential);
 	}
 
 	private static Map<String, Object> getJwtPayload(GcpIamAuthenticationOptions options,

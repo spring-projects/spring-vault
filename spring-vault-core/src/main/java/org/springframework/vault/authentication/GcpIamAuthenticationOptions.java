@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
  * constructed.
  *
  * @author Mark Paluch
+ * @author Magnus Jungsbluth
  * @see GcpIamAuthentication
  * @see #builder()
  * @since 2.1
@@ -65,26 +66,27 @@ public class GcpIamAuthenticationOptions {
 	private final Clock clock;
 
 	/**
-	 * Provide the service account id to use as sub/iss claims
+	 * Provide the service account id to use as sub/iss claims.
 	 */
-	private final GcpServiceAccountIdProvider serviceAccountIdSupplier;
+	private final GcpServiceAccountIdAccessor serviceAccountIdAccessor;
 
 	/**
-	 * The GCP project id to use in GCP IAM API calls
+	 * The GCP project id to use in GCP IAM API calls.
 	 */
-	private final GcpProjectIdProvider projectIdSupplier;
+	private final GcpProjectIdAccessor projectIdAccessor;
 
 	private GcpIamAuthenticationOptions(String path,
 			GcpCredentialSupplier credentialSupplier, String role, Duration jwtValidity,
-			Clock clock, GcpServiceAccountIdProvider serviceAccountIdSupplier, GcpProjectIdProvider projectIdSupplier) {
+			Clock clock, GcpServiceAccountIdAccessor serviceAccountIdSupplier,
+			GcpProjectIdAccessor projectIdAccessor) {
 
 		this.path = path;
 		this.credentialSupplier = credentialSupplier;
 		this.role = role;
 		this.jwtValidity = jwtValidity;
 		this.clock = clock;
-		this.serviceAccountIdSupplier = serviceAccountIdSupplier;
-		this.projectIdSupplier = projectIdSupplier;
+		this.serviceAccountIdAccessor = serviceAccountIdSupplier;
+		this.projectIdAccessor = projectIdAccessor;
 	}
 
 	/**
@@ -130,17 +132,19 @@ public class GcpIamAuthenticationOptions {
 	}
 
 	/**
-	 * Provide the service account id to use as sub/iss claims
+	 * @return the service account id to use as sub/iss claims.
+	 * @since 2.1
 	 */
-	public GcpServiceAccountIdProvider getServiceAccountIdProvider() {
-		return serviceAccountIdSupplier;
+	public GcpServiceAccountIdAccessor getServiceAccountIdAccessor() {
+		return serviceAccountIdAccessor;
 	}
 
 	/**
-	 * The GCP project id to use in GCP IAM API calls
+	 * @return GCP project id accessor to obtain the project id of GCP IAM API calls.
+	 * @since 2.1
 	 */
-	public GcpProjectIdProvider getProjectIdProvider() {
-		return projectIdSupplier;
+	public GcpProjectIdAccessor getProjectIdAccessor() {
+		return projectIdAccessor;
 	}
 
 	/**
@@ -160,9 +164,9 @@ public class GcpIamAuthenticationOptions {
 
 		private Clock clock = Clock.systemDefaultZone();
 
-		private GcpServiceAccountIdProvider serviceAccountIdProvider = new DefaultGcpServiceAccountIdProvider();
+		private GcpServiceAccountIdAccessor serviceAccountIdAccessor = DefaultGcpCredentialAccessors.INSTANCE;
 
-		private GcpProjectIdProvider projectIdProvider = new DefaultGcpProjectIdProvider();
+		private GcpProjectIdAccessor projectIdAccessor = DefaultGcpCredentialAccessors.INSTANCE;
 
 		GcpIamAuthenticationOptionsBuilder() {
 		}
@@ -198,7 +202,7 @@ public class GcpIamAuthenticationOptions {
 		}
 
 		/**
-		 * Configure an {@link GcpCredentialSupplier}, required to create a signed JWT.
+		 * Configure a {@link GcpCredentialSupplier}, required to create a signed JWT.
 		 * Alternatively, configure static {@link #credential(GoogleCredential)
 		 * credentials}.
 		 *
@@ -216,57 +220,72 @@ public class GcpIamAuthenticationOptions {
 		}
 
 		/**
-		 * Configure an explicit service account id to use in GCP IAM calls. If none is configured, falls back to using
-		 * {@link GoogleCredential#getServiceAccountId()}.
+		 * Configure an explicit service account id to use in GCP IAM calls. If none is
+		 * configured, falls back to using {@link GoogleCredential#getServiceAccountId()}.
 		 *
 		 * @param serviceAccountId the service account id (email) to use
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
+		 * @since 2.1
 		 */
 		public GcpIamAuthenticationOptionsBuilder serviceAccountId(String serviceAccountId) {
+
 			Assert.notNull(serviceAccountId, "Service account id may not be null");
 
-			return serviceAccountIdProvider((GoogleCredential credential) -> serviceAccountId);
+			return serviceAccountIdAccessor((GoogleCredential credential) -> serviceAccountId);
 		}
 
 		/**
-		 * Configure an {@link GcpServiceAccountIdProvider} to obtain the service account id used in GCP IAM calls.
-		 * If none is configured, falls back to using {@link GoogleCredential#getServiceAccountId()}.
+		 * Configure an {@link GcpServiceAccountIdAccessor} to obtain the service account
+		 * id used in GCP IAM calls. If none is configured, falls back to using
+		 * {@link GoogleCredential#getServiceAccountId()}.
 		 *
-		 * @param serviceAccountIdProvider the service account id provider to use
+		 * @param serviceAccountIdAccessor the service account id provider to use
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
-		 * @see GcpServiceAccountIdProvider
+		 * @see GcpServiceAccountIdAccessor
+		 * @since 2.1
 		 */
-		public GcpIamAuthenticationOptionsBuilder serviceAccountIdProvider(GcpServiceAccountIdProvider serviceAccountIdProvider) {
-			Assert.notNull(serviceAccountIdProvider, "GcpServiceAccountIdProvider must not be null");
+		GcpIamAuthenticationOptionsBuilder serviceAccountIdAccessor(
+				GcpServiceAccountIdAccessor serviceAccountIdAccessor) {
 
-			this.serviceAccountIdProvider = serviceAccountIdProvider;
+			Assert.notNull(serviceAccountIdAccessor,
+					"GcpServiceAccountIdAccessor must not be null");
+
+			this.serviceAccountIdAccessor = serviceAccountIdAccessor;
 			return this;
 		}
 
 		/**
-		 * Configure an explicit GCP project id to use in GCP IAM API calls. If none is configured, falls back using
+		 * Configure an explicit GCP project id to use in GCP IAM API calls. If none is
+		 * configured, falls back using
 		 * {@link GoogleCredential#getServiceAccountProjectId()}.
 		 *
 		 * @param projectId the GCP project id to use in GCP IAM API calls
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
+		 * @since 2.1
 		 */
 		public GcpIamAuthenticationOptionsBuilder projectId(String projectId) {
+
 			Assert.notNull(projectId, "GCP project id must not be null");
 
-			return projectIdProvider((GoogleCredential credential) -> projectId);
+			return projectIdAccessor((GoogleCredential credential) -> projectId);
 		}
 
 		/**
-		 * Configure an {@link GcpProjectIdProvider} to use in GCP IAM API calls. If none is configured, falls back using
+		 * Configure an {@link GcpProjectIdAccessor} to use in GCP IAM API calls. If none
+		 * is configured, falls back using
 		 * {@link GoogleCredential#getServiceAccountProjectId()}.
 		 *
-		 * @param projectIdProvider the GCP project id supplier to use in GCP IAM API calls
+		 * @param projectIdAccessor the GCP project id supplier to use in GCP IAM API
+		 * calls
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
+		 * @since 2.1
 		 */
-		public GcpIamAuthenticationOptionsBuilder projectIdProvider(GcpProjectIdProvider projectIdProvider) {
-			Assert.notNull(projectIdProvider, "GcpProjectIdProvider must not be null");
+		GcpIamAuthenticationOptionsBuilder projectIdAccessor(
+				GcpProjectIdAccessor projectIdAccessor) {
 
-			this.projectIdProvider = projectIdProvider;
+			Assert.notNull(projectIdAccessor, "GcpProjectIdAccessor must not be null");
+
+			this.projectIdAccessor = projectIdAccessor;
 			return this;
 		}
 
@@ -325,7 +344,7 @@ public class GcpIamAuthenticationOptions {
 			Assert.notNull(role, "Role must not be null");
 
 			return new GcpIamAuthenticationOptions(path, credentialSupplier, role,
-					jwtValidity, clock, serviceAccountIdProvider, projectIdProvider);
+					jwtValidity, clock, serviceAccountIdAccessor, projectIdAccessor);
 		}
 	}
 }
