@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
 import org.junit.Before;
@@ -162,5 +163,9 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	@EqualsAndHashCode
 	static class Secret {
 		final String key;
+
+		Secret(@JsonProperty("key") String key) {
+			this.key = key;
+		}
 	}
 }

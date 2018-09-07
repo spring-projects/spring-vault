@@ -153,7 +153,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.9.0</version>
+				<version>3.11.0</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -174,7 +174,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>2.13.0</version>
+				<version>2.21.0</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -254,13 +254,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.5.1</version>
+					<version>3.8.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.0.2</version>
+					<version>3.1.0</version>
 					<configuration>
 						<archive>
 							<manifestEntries>
@@ -275,7 +275,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.19.1</version>
+					<version>2.22.0</version>
 				</plugin>
 
 				<plugin>
@@ -287,7 +287,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>2.10.4</version>
+					<version>3.0.1</version>
 					<configuration>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
@@ -300,7 +300,7 @@
 						</stylesheetfile>
 						<!-- copies doc-files subdirectory which contains image resources -->
 						<docfilessubdirs>true</docfilessubdirs>
-						<additionalparam>-Xdoclint:none</additionalparam>
+						<doclint>none</doclint>
 						<links>
 							<link>https://docs.spring.io/spring-data/commons/docs/current/api</link>
 							<link>https://docs.spring.io/spring-data/keyvalue/docs/current/api</link>
@@ -326,18 +326,18 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>2.10</version>
+					<version>3.1.1</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.5.1</version>
+					<version>3.7.1</version>
 					<dependencies>
 						<dependency><!-- add support for ssh/scp -->
 							<groupId>org.apache.maven.wagon</groupId>
 							<artifactId>wagon-ssh</artifactId>
-							<version>1.0</version>
+							<version>3.1.0</version>
 						</dependency>
 					</dependencies>
 				</plugin>
@@ -351,7 +351,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.16</version>
+					<version>1.17</version>
 				</plugin>
 
 				<plugin>
@@ -369,13 +369,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-assembly-plugin</artifactId>
-					<version>2.6</version>
+					<version>3.1.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>wagon-maven-plugin</artifactId>
-					<version>1.0</version>
+					<version>2.0.0</version>
 				</plugin>
 
 			</plugins>
