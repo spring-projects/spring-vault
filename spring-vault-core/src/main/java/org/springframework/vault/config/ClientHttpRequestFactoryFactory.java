@@ -22,6 +22,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
@@ -29,6 +30,7 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslProvider;
@@ -137,21 +139,26 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	static SSLContext getSSLContext(SslConfiguration sslConfiguration)
+	static SSLContext getSSLContext(SslConfiguration sslConfiguration,
+			TrustManager[] trustManagers)
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = sslConfiguration.getKeyStoreConfiguration()
 				.isPresent() ? createKeyManagerFactory(
 				sslConfiguration.getKeyStoreConfiguration()).getKeyManagers() : null;
 
-		TrustManager[] trustManagers = sslConfiguration.getTrustStoreConfiguration()
-				.isPresent() ? createTrustManagerFactory(
-				sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;
-
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(keyManagers, trustManagers, null);
 
 		return sslContext;
+	}
+
+	private static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
+			throws GeneralSecurityException, IOException {
+
+		return sslConfiguration.getTrustStoreConfiguration().isPresent() ? createTrustManagerFactory(
+				sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
+				: null;
 	}
 
 	static KeyManagerFactory createKeyManagerFactory(
@@ -229,7 +236,8 @@ public class ClientHttpRequestFactoryFactory {
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
-				SSLContext sslContext = getSSLContext(sslConfiguration);
+				SSLContext sslContext = getSSLContext(sslConfiguration,
+						getTrustManagers(sslConfiguration));
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
 						sslContext);
 				httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
@@ -269,8 +277,19 @@ public class ClientHttpRequestFactoryFactory {
 			Builder builder = new Builder();
 
 			if (hasSslConfiguration(sslConfiguration)) {
-				builder.sslSocketFactory(getSSLContext(sslConfiguration)
-						.getSocketFactory());
+
+				TrustManager[] trustManagers = getTrustManagers(sslConfiguration);
+
+				if (trustManagers.length != 1
+						|| !(trustManagers[0] instanceof X509TrustManager)) {
+					throw new IllegalStateException("Unexpected default trust managers:"
+							+ Arrays.toString(trustManagers));
+				}
+
+				X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
+				SSLContext sslContext = getSSLContext(sslConfiguration, trustManagers);
+
+				builder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
 			}
 
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(),
