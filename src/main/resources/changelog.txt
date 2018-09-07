@@ -1,6 +1,26 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.0.RC1
+-----------------------------------------
+* Adapt to rewritten Reactor Netty #281
+* Use request body to pass lease id for renewal calls #282
+* Add support for Azure Auth Method #284
+* Configure service account id and project id explicitly #287
+* Pretty-print JSON for policy creation #288
+* Upgrade to Spring Framework 5.0 RC2 #290
+* Fix reference documentation links #291
+* Upgrade to Vault 0.11 #292
+* Upgrade to netty 4.1.29.Final #293
+* Upgrade to Google IAM v1-rev259-1.25.0 #294
+* Upgrade to AWS SDK 1.11.404 #295
+* Upgrade to Vault 0.11.1 #296
+* Upgrade to Reactor Californium RC1 #297
+* Upgrade to Spring Data Lovelace RC2 #298
+* Upgrade to Spring Framework 5.1 RC3 #300
+* Assert Java 11 compatibility #301
+* Upgrade Maven plugins to enable builds on Java 11 #302
+
 Changes in version 2.1.0.M1
 -----------------------------------------
 * Support for Google IAM Authentication  #126
