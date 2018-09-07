@@ -20,11 +20,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.keyvalue.core.KeyValueOperations;
 import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.repository.query.EvaluationContextProvider;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
+import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.PartTree;
+import org.springframework.data.spel.EvaluationContextProvider;
 import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
@@ -48,7 +49,7 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 	 */
 	@SuppressWarnings("unchecked")
 	public VaultPartTreeQuery(QueryMethod queryMethod,
-			EvaluationContextProvider evaluationContextProvider,
+			QueryMethodEvaluationContextProvider evaluationContextProvider,
 			KeyValueOperations keyValueOperations,
 			Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 

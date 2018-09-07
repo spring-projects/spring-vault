@@ -183,16 +183,19 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		// make sure id property is set before all other properties
 		Object idValue;
 
-		if (idProperty != null && documentAccessor.hasValue(idProperty)) {
+		if (entity.requiresPropertyPopulation()) {
+			if (idProperty != null && !entity.isConstructorArgument(idProperty)
+					&& documentAccessor.hasValue(idProperty)) {
 
-			idValue = readIdValue(idProperty, documentAccessor);
-			accessor.setProperty(idProperty, idValue);
+				idValue = readIdValue(idProperty, documentAccessor);
+				accessor.setProperty(idProperty, idValue);
+			}
+
+			VaultPropertyValueProvider valueProvider = new VaultPropertyValueProvider(
+					documentAccessor);
+
+			readProperties(entity, accessor, idProperty, documentAccessor, valueProvider);
 		}
-
-		VaultPropertyValueProvider valueProvider = new VaultPropertyValueProvider(
-				documentAccessor);
-
-		readProperties(entity, accessor, idProperty, documentAccessor, valueProvider);
 
 		return instance;
 	}
