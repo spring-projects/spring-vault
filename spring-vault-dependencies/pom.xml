@@ -63,7 +63,7 @@
 		<okhttp3.version>3.11.0</okhttp3.version>
 		<jackson.version>2.9.6</jackson.version>
 		<aws-java-sdk.version>1.11.376</aws-java-sdk.version>
-		<google-api-services-iam.version>v1-rev254-1.23.0</google-api-services-iam.version>
+		<google-api-services-iam.version>v1-rev259-1.25.0</google-api-services-iam.version>
 		<google-auth-library-oauth2-http.version>0.10.0</google-auth-library-oauth2-http.version>
 	</properties>
 
