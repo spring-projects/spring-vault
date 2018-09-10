@@ -1,6 +1,34 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.0.2.RELEASE
+-----------------------------------------
+* Provide a richer subclass strata of VaultException #203
+* Release Spring Vault 2.0.1.RELEASE #229
+* Upgrade to Vault 0.10.0 #240
+* VaultTokenRequest noParent field serializes incorrectly in JSON #243
+* ClientHttpRequestFactoryFactory checks for wrong Netty class on path (Spring Data Redis conflict) #249
+* Upgrade to Spring Framework 5.0.6 #251
+* Upgrade to netty 4.1.25.Final #254
+* Upgrade to Vault 0.10.3 #258
+* Issuing PKI certificate with TTL results in Vault error due to number format #263
+* Upgrade to Apache HttpClient 4.5.6 #266
+* Upgrade to HttpCore 4.4.10 #267
+* Upgrade to Netty 4.1.28.Final #268
+* Upgrade to Jackson 2.9.6 #270
+* Upgrade to AWS SDK 1.11.376 #271
+* Generate subject alt name in local certificate #274
+* Add support for Azure Auth Method #284
+* Pretty-print JSON for policy creation #288
+* Upgrade to Spring Framework 5.0.8 #289
+* Fix reference documentation links #291
+* Upgrade to netty 4.1.29.Final #293
+* Upgrade to AWS SDK 1.11.404 #295
+* Upgrade to Reactor Bismuth SR11 #299
+* Upgrade to Spring Framework 5.0.9 #303
+* Upgrade to Spring Security 5.0.7 #305
+* Upgrade to Spring Data Kay SR10 #306
+
 Changes in version 2.0.1.RELEASE
 -----------------------------------------
 * VaultSysTemplate.getPolicyName should not throw an exception for not found policies #202
