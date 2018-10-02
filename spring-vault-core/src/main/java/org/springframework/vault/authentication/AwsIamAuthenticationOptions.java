@@ -67,19 +67,33 @@ public class AwsIamAuthenticationOptions {
 	private final String serverId;
 
 	/**
+	 * Vault namespace.
+	 * Used for {@literal Vault-Namespace} header.
+	 */
+	@Nullable
+	private final String namespace;
+
+	/**
 	 * STS server URI.
 	 */
 	private final URI endpointUri;
 
 	private AwsIamAuthenticationOptions(String path,
 			AWSCredentialsProvider credentialsProvider, @Nullable String role,
-			@Nullable String serverId, URI endpointUri) {
+			@Nullable String serverId, @Nullable String namespace, URI endpointUri) {
 
 		this.path = path;
 		this.credentialsProvider = credentialsProvider;
 		this.role = role;
 		this.serverId = serverId;
+		this.namespace = namespace;
 		this.endpointUri = endpointUri;
+	}
+
+	private AwsIamAuthenticationOptions(String path,
+			AWSCredentialsProvider credentialsProvider, @Nullable String role,
+			@Nullable String serverId, URI endpointUri) {
+		this(path, credentialsProvider, role, serverId, null, endpointUri);
 	}
 
 	/**
@@ -134,6 +148,17 @@ public class AwsIamAuthenticationOptions {
 	}
 
 	/**
+	 * @return Vault namespace.
+	 * May be {@literal null}. Used for
+	 * {@literal Vault-Namespace} header.
+	 * @since 2.0
+	 */
+	@Nullable
+	public String getNamespace() {
+		return namespace;
+	}
+
+	/**
 	 * @return STS server URI.
 	 */
 	public URI getEndpointUri() {
@@ -155,6 +180,9 @@ public class AwsIamAuthenticationOptions {
 
 		@Nullable
 		private String serverId;
+
+		@Nullable
+		private String namespace;
 
 		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
 
@@ -254,6 +282,22 @@ public class AwsIamAuthenticationOptions {
 		}
 
 		/**
+		 * Namespace (used for {@literal Vault-Namespace}) that is
+		 * included in the signature. 
+		 *
+		 * @param namespace must not be {@literal null} or empty.
+		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @since 2.1
+		 */
+		public AwsIamAuthenticationOptionsBuilder namespace(String namespace) {
+
+			Assert.hasText(namespace, "Namespace must not be null or empty");
+
+			this.namespace = namespace;
+			return this;
+		}
+
+		/**
 		 * Configure an endpoint URI of the STS API, defaults to
 		 * {@literal https://sts.amazonaws.com/}.
 		 *
@@ -279,7 +323,7 @@ public class AwsIamAuthenticationOptions {
 					"Credentials or CredentialProvider must not be null");
 
 			return new AwsIamAuthenticationOptions(path, credentialsProvider, role,
-					serverId, endpointUri);
+					serverId, namespace, endpointUri);
 		}
 	}
 }
