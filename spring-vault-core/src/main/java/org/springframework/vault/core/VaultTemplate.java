@@ -61,6 +61,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private final boolean dedicatedSessionManager;
 
+	private String namespace = null;
+
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint} and
 	 * {@link ClientAuthentication}.
@@ -145,6 +147,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		return VaultClients.createRestTemplate(endpointProvider, requestFactory);
 	}
 
+	public VaultTemplate namespace(String namespace) {
+		this.namespace = namespace;
+		return this;
+	}
+
 	/**
 	 * Create a session-bound {@link RestTemplate} to be used by {@link VaultTemplate} for
 	 * Vault communication given {@link VaultEndpointProvider} and
@@ -174,6 +181,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 					request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
 							sessionManager.getSessionToken().getToken());
+
+					if(null != namespace) {
+						request.getHeaders().add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
+					}
 
 					return execution.execute(request, body);
 				});

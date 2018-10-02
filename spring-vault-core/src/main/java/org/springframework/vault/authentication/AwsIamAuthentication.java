@@ -30,8 +30,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.StringUtils;
@@ -106,7 +108,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsIam() {
 
-		Map<String, String> login = createRequestBody(this.options);
+		HttpEntity<?> login = createHttpEntity();
 
 		try {
 
@@ -210,4 +212,21 @@ public class AwsIamAuthentication implements ClientAuthentication {
 
 		return headers;
 	}
+
+	private HttpHeaders createHttpHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+
+		if (StringUtils.hasText(options.getNamespace())) {
+			headers.set("X-Vault-Namespace", options.getNamespace());
+		}
+
+		return headers;
+	}
+
+	private HttpEntity createHttpEntity() {
+		Map<String, String> login = createRequestBody(options);
+		return new HttpEntity<>(login, createHttpHeaders());
+	}
+
+
 }
