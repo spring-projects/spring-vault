@@ -1,6 +1,14 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.0.RELEASE
+-----------------------------------------
+* Upgrade to Reactor Californium GA #309
+* Upgrade to Spring Framework 5.1 GA #310
+* Upgrade to Spring Data Lovelace GA #311
+* Upgrade to netty 4.1.30.Final #312
+* Upgrade to Jackson 2.9.7 #313
+
 Changes in version 2.1.0.RC1
 -----------------------------------------
 * Adapt to rewritten Reactor Netty #281
