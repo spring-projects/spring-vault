@@ -68,7 +68,7 @@ public class KubernetesAuthenticationOptions {
 	}
 
 	/**
-	 * @return the path of the aws authentication backend mount.
+	 * @return the path of the kubernetes authentication backend mount.
 	 */
 	public String getPath() {
 		return path;
