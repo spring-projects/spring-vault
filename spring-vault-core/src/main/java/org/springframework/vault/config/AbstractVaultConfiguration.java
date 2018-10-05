@@ -144,7 +144,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 *
 	 * @return the {@link ThreadPoolTaskScheduler} to use. Must not be {@literal null}.
 	 */
-	@Bean
+	@Bean("vaultThreadPoolTaskScheduler")
 	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
 
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
