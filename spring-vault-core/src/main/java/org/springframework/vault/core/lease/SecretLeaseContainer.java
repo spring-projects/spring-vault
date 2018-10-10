@@ -589,22 +589,43 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			return renewed;
 		}
-		catch (HttpStatusCodeException e) {
-
-			if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-				onLeaseExpired(requestedSecret, lease);
-			}
-
-			onError(requestedSecret,
-					lease,
-					new VaultException(String.format("Cannot renew lease: %s",
-							VaultResponses.getError(e.getResponseBodyAsString()))));
-		}
 		catch (RuntimeException e) {
-			onError(requestedSecret, lease, e);
+
+			HttpStatusCodeException httpException = potentiallyUnwrapHttpStatusCodeException(e);
+
+			if (httpException != null) {
+
+				if (httpException.getStatusCode() == HttpStatus.BAD_REQUEST) {
+					onLeaseExpired(requestedSecret, lease);
+				}
+
+				onError(requestedSecret,
+						lease,
+						new VaultException(String.format("Cannot renew lease: %s",
+								VaultResponses.getError(httpException
+										.getResponseBodyAsString()))));
+			}
+			else {
+				onError(requestedSecret, lease, e);
+			}
 		}
 
 		return Lease.none();
+	}
+
+	@Nullable
+	private HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(
+			RuntimeException e) {
+
+		if (e instanceof HttpStatusCodeException) {
+			return (HttpStatusCodeException) e;
+		}
+
+		if (e.getCause() instanceof HttpStatusCodeException) {
+			return (HttpStatusCodeException) e.getCause();
+		}
+
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
