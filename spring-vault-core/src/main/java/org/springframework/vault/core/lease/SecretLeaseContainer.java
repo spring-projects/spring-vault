@@ -517,6 +517,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			return renewed;
 		}
+		catch (VaultException e) {
+
+			// Workaround as there is no HttpStatusCodeException attached.
+			if (e.getMessage().contains("Status 400")) {
+				onLeaseExpired(requestedSecret, lease);
+			}
+
+			onError(requestedSecret, lease,
+					new VaultException(String.format("Cannot renew lease: %s", e)));
+		}
 		catch (HttpStatusCodeException e) {
 
 			if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
