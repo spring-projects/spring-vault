@@ -38,6 +38,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.domain.Lease;
@@ -498,6 +499,23 @@ public class SecretLeaseContainerUnitTests {
 				any(BeforeSecretLeaseRevocationEvent.class));
 		verify(leaseListenerAdapter).onLeaseEvent(
 				any(AfterSecretLeaseRevocationEvent.class));
+	}
+
+	@Test
+	public void expiredLeaseShouldRenew() {
+
+		prepareRenewal();
+
+		VaultException exception = VaultResponses
+				.buildException(new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class))).thenThrow(
+				exception);
+
+		secretLeaseContainer.doRenewLease(requestedSecret, Lease.of("foo", 1, true));
+
+		verify(leaseListenerAdapter).onLeaseEvent(any(SecretLeaseExpiredEvent.class));
+		verify(vaultOperations).doWithSession(any(RestOperationsCallback.class));
 	}
 
 	@Test
