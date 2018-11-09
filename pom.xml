@@ -23,7 +23,7 @@
 		<spring.version>5.1.2.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Lovelace-RELEASE
 		</spring-data-releasetrain.version>
-		<reactor.version>Californium-RELEASE</reactor.version>
+		<reactor.version>Californium-SR2</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
