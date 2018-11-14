@@ -1,6 +1,17 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.1.RELEASE
+-----------------------------------------
+* Fix aws -> kubernetes typo #317
+* Rename threadPoolTaskScheduler bean to vaultThreadPoolTaskScheduler #318
+* Expired leases do are not rotated on secret renewal #319
+* Upgrade to Spring Framework 5.1.2.RELEASE #323
+* Upgrade to Reactor Californium SR2 #324
+* Upgrade to Vault 1.0.0-beta1 #325
+* Upgrade to Spring Data Lovelace SR2 #326
+* Upgrade to netty 4.1.31.Final #331
+
 Changes in version 2.1.0.RELEASE
 -----------------------------------------
 * Upgrade to Reactor Californium GA #309
