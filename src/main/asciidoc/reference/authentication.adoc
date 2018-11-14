@@ -386,7 +386,7 @@ does not require first-deploying, or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats Azure as a Trusted Third Party and uses the
 managed service identity and instance metadata information that can be
-bound to a VM instance
+bound to a VM instance.
 
 ====
 [source,java]
@@ -439,6 +439,8 @@ Instead, it treats GCP as a Trusted Third Party and uses the
 cryptographically signed dynamic metadata information that uniquely
 represents each GCP service account.
 
+You can configure the authentication via `GcpComputeAuthenticationOptions`.
+
 ====
 [source,java]
 ----
@@ -462,11 +464,6 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-`GcpIamAuthenticationOptions` requires the Google Cloud Java SDK dependency
-(`com.google.apis:google-api-services-iam` and `com.google.auth:google-auth-library-oauth2-http`)
-as the authentication implementation uses Google APIs for credentials and JWT signing.
-
-You can configure the authentication via `GcpIamAuthenticationOptions`.
 
 See also:
 
