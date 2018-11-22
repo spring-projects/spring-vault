@@ -6,7 +6,7 @@
 ###########################################################################
 
 
-VAULT_VER="${VAULT_VER:-1.0.0-beta2}"
+VAULT_VER="${VAULT_VER:-1.0.0-rc1}"
 UNAME=$(uname -s |  tr '[:upper:]' '[:lower:]')
 VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_amd64.zip"
 IGNORE_CERTS="${IGNORE_CERTS:-no}"
