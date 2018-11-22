@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Collections;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -80,9 +82,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		return writeAndReturn(
-				String.format("auth/token/renew/%s", vaultToken.getToken()), null,
-				VaultTokenResponse.class);
+		return writeAndReturn("auth/token/renew", vaultToken, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -90,8 +90,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("auth/token/revoke/%s", vaultToken.getToken()),
-				VaultTokenResponse.class);
+		writeToken("auth/token/revoke", vaultToken, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -99,8 +98,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultToken, "VaultToken must not be null");
 
-		write(String.format("auth/token/revoke-orphan/%s", vaultToken.getToken()),
-				VaultTokenResponse.class);
+		writeToken("auth/token/revoke-orphan", vaultToken, VaultTokenResponse.class);
 	}
 
 	private <T extends VaultResponseSupport<?>> T writeAndReturn(String path,
@@ -126,21 +124,23 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		return response;
 	}
 
-	private void write(String path, Class<?> responseType) {
+	@Nullable
+	private void writeToken(String path, VaultToken token, Class<?> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 
 		vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				restOperations.exchange(path, HttpMethod.POST, HttpEntity.EMPTY,
+				restOperations.exchange(path, HttpMethod.POST, new HttpEntity<>(
+						Collections.singletonMap("token", token.getToken())),
 						responseType);
+
+				return null;
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e, path);
 			}
-
-			return null;
 		});
 	}
 }
