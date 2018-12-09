@@ -269,7 +269,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		return doRead(path, VaultResponse.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	@Nullable
 	public <T> VaultResponseSupport<T> read(String path, Class<T> responseType) {
