@@ -159,7 +159,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		return doRead(path, VaultResponse.class);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType) {
 
@@ -213,7 +212,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <V, T extends Publisher<V>> T doWithVault(
 			Function<WebClient, ? extends T> clientCallback) throws VaultException,
 			WebClientException {
@@ -229,7 +227,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <V, T extends Publisher<V>> T doWithSession(
 			Function<WebClient, ? extends T> sessionCallback) throws VaultException,
 			WebClientException {
