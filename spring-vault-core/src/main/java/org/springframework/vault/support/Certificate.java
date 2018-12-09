@@ -24,6 +24,7 @@ import java.security.cert.X509Certificate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
+import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 
 /**
@@ -102,7 +103,7 @@ public class Certificate {
 	public X509Certificate getX509Certificate() {
 
 		try {
-			byte[] bytes = Base64.decode(getCertificate());
+			byte[] bytes = Base64Utils.decodeFromString(getCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
 		catch (IOException | CertificateException e) {
@@ -119,7 +120,7 @@ public class Certificate {
 	public X509Certificate getX509IssuerCertificate() {
 
 		try {
-			byte[] bytes = Base64.decode(getIssuingCaCertificate());
+			byte[] bytes = Base64Utils.decodeFromString(getIssuingCaCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
 		catch (IOException | CertificateException e) {
