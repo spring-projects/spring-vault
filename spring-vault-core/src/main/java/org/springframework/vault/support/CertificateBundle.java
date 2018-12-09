@@ -24,6 +24,7 @@ import java.security.spec.KeySpec;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
+import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 
 /**
@@ -89,7 +90,7 @@ public class CertificateBundle extends Certificate {
 	public KeySpec getPrivateKeySpec() {
 
 		try {
-			byte[] bytes = Base64.decode(getPrivateKey());
+			byte[] bytes = Base64Utils.decodeFromString(getPrivateKey());
 			return KeystoreUtil.getRSAKeySpec(bytes);
 		}
 		catch (IOException e) {
