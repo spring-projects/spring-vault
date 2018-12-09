@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -38,6 +39,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 
 /**
  * @author Mark Paluch
@@ -89,27 +91,12 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@Override
 	public VaultResponse read(VaultToken token) {
 
-		return vaultOperations.doWithVault(restOperations -> {
-
-			HttpHeaders headers = VaultHttpHeaders.from(token);
-			try {
-				return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST,
-						new HttpEntity<>(headers), VaultResponse.class).getBody();
-			}
-			catch (HttpStatusCodeException e) {
-
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-					return null;
-				}
-
-				if (e.getStatusCode() == HttpStatus.BAD_REQUEST
-						&& e.getResponseBodyAsString().contains("does not exist")) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, "sys/wrapping/unwrap");
-			}
-		});
+		return doUnwrap(
+				token,
+				(restOperations, entity) -> {
+					return restOperations.exchange("sys/wrapping/unwrap",
+							HttpMethod.POST, entity, VaultResponse.class).getBody();
+				});
 	}
 
 	@Nullable
@@ -119,12 +106,23 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
+		return doUnwrap(
+				token,
+				(restOperations, entity) -> {
+					return restOperations.exchange("sys/wrapping/unwrap",
+							HttpMethod.POST, entity, ref).getBody();
+				});
+	}
+
+	@Nullable
+	private <T extends VaultResponseSupport<?>> T doUnwrap(VaultToken token,
+			BiFunction<RestOperations, HttpEntity<?>, T> requestFunction) {
+
 		return vaultOperations.doWithVault(restOperations -> {
 
-			HttpHeaders headers = VaultHttpHeaders.from(token);
 			try {
-				return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST,
-						new HttpEntity<>(headers), ref).getBody();
+				return requestFunction.apply(restOperations, new HttpEntity<>(
+						VaultHttpHeaders.from(token)));
 			}
 			catch (HttpStatusCodeException e) {
 
