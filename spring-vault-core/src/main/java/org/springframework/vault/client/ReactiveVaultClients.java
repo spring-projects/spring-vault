@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.client;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.StringDecoder;
@@ -23,6 +25,8 @@ import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.http.codec.json.Jackson2JsonDecoder;
 import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.Assert;
+import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilderFactory;
@@ -88,5 +92,32 @@ public class ReactiveVaultClients {
 
 		return WebClient.builder().uriBuilderFactory(uriBuilderFactory)
 				.exchangeStrategies(strategies).clientConnector(connector).build();
+	}
+
+	/**
+	 * Create a {@link ExchangeFilterFunction} that associates each request with a
+	 * {@code X-Vault-Namespace} header if the header is not present.
+	 *
+	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
+	 * @return the {@link ExchangeFilterFunction} to register with {@link WebClient}.
+	 * @see VaultHttpHeaders#VAULT_NAMESPACE
+	 * @since 2.2
+	 */
+	public static ExchangeFilterFunction namespace(String namespace) {
+
+		Assert.hasText(namespace, "Vault Namespace must not be empty!");
+
+		return ExchangeFilterFunction.ofRequestProcessor(request -> {
+
+			return Mono.fromSupplier(() -> {
+
+				return ClientRequest.from(request).headers(headers -> {
+
+					if (!headers.containsKey(VaultHttpHeaders.VAULT_NAMESPACE)) {
+						headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
+					}
+				}).build();
+			});
+		});
 	}
 }

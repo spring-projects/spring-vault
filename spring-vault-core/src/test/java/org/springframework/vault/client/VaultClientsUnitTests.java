@@ -19,13 +19,21 @@ import java.net.URI;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
- * Unit tests for
- * {@link org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler}.
+ * Unit tests for {@link org.springframework.vault.client.VaultClients}.
  *
  * @author Mark Paluch
  */
@@ -54,5 +62,43 @@ public class VaultClientsUnitTests {
 
 		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1)
 				.hasPath("/path/bar");
+	}
+
+	@Test
+	public void shouldApplyNamespace() {
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate();
+		restTemplate.getInterceptors().add(
+				VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+
+		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
+
+		mockRest.expect(requestTo("/auth/foo")).andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
+				.andRespond(withSuccess());
+
+		restTemplate.getForEntity("/auth/foo", String.class);
+	}
+
+	@Test
+	public void shouldAllowNamespaceOverride() {
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate();
+		restTemplate.getInterceptors().add(
+				VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+
+		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
+
+		mockRest.expect(requestTo("/auth/foo")).andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "baz"))
+				.andRespond(withSuccess());
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "baz");
+
+		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers),
+				String.class);
 	}
 }

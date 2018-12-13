@@ -31,6 +31,13 @@ public abstract class VaultHttpHeaders {
 	 */
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
+	/**
+	 * The HTTP {@code X-Vault-Namespace} header field name.
+	 *
+	 * @since 2.2
+	 */
+	public static final String VAULT_NAMESPACE = "X-Vault-Namespace";
+
 	private VaultHttpHeaders() {
 	}
 

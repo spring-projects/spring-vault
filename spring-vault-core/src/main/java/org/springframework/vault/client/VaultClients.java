@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
@@ -27,6 +28,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.DefaultUriTemplateHandler;
@@ -126,6 +128,32 @@ public class VaultClients {
 				(request, body, execution) -> execution.execute(request, body));
 
 		return restTemplate;
+	}
+
+	/**
+	 * Create a {@link ClientHttpRequestInterceptor} that associates each request with a
+	 * {@code X-Vault-Namespace} header if the header is not present.
+	 *
+	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
+	 * @return the {@link ClientHttpRequestInterceptor} to register with
+	 * {@link RestTemplate}.
+	 * @see VaultHttpHeaders#VAULT_NAMESPACE
+	 * @since 2.2
+	 */
+	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
+
+		Assert.hasText(namespace, "Vault Namespace must not be empty!");
+
+		return (request, body, execution) -> {
+
+			HttpHeaders headers = request.getHeaders();
+
+			if (!headers.containsKey(VaultHttpHeaders.VAULT_NAMESPACE)) {
+				headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
+			}
+
+			return execution.execute(request, body);
+		};
 	}
 
 	private static DefaultUriTemplateHandler createUriTemplateHandler(
