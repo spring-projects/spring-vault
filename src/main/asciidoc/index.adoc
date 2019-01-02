@@ -13,7 +13,7 @@ Mark Paluch;
 :spring-framework-docs: https://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/
 :self-docs-root: https://docs.spring.io/spring-vault/docs/{version}/
 
-(C) 2016-2018 The original authors.
+(C) 2016-2019 The original authors.
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 
