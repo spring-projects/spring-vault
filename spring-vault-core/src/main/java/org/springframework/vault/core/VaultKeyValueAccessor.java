@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2018-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	/**
 	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
 	 * given {@link ParameterizedTypeReference type}.
-	 * 
+	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @param typeReference must not be {@literal null}
 	 * @return mapped value.
@@ -137,7 +137,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	/**
 	 * Deserialize a {@link JsonNode} to the requested {@link Class type}.
-	 * 
+	 *
 	 * @param jsonNode must not be {@literal null}.
 	 * @param type must not be {@literal null}.
 	 * @return the deserialized object.
@@ -156,7 +156,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * Perform a read action within a callback that gets access to a session-bound
 	 * {@link RestOperations} object. {@link HttpStatusCodeException} with
 	 * {@link HttpStatus#NOT_FOUND} are translated to a {@literal null} response.
-	 * 
+	 *
 	 * @param callback must not be {@literal null}.
 	 * @return can be {@literal null}.
 	 */
@@ -182,7 +182,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	/**
 	 * Write the {@code body} to the given Vault {@code path}.
-	 * 
+	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @param body
 	 * @return the response of this write action.
@@ -207,7 +207,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	/**
 	 * Return the {@link JsonNode} that contains the actual response body.
-	 * 
+	 *
 	 * @param response
 	 * @return
 	 */
