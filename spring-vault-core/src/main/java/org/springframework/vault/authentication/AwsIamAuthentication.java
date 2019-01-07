@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import com.amazonaws.DefaultRequest;
 import com.amazonaws.auth.AWS4Signer;
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.http.HttpMethodName;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,7 +66,8 @@ import org.springframework.web.client.RestOperations;
  * href="http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:
  * GetCallerIdentity</a>
  */
-public class AwsIamAuthentication implements ClientAuthentication {
+public class AwsIamAuthentication implements ClientAuthentication,
+		AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsIamAuthentication.class);
 
@@ -98,9 +100,43 @@ public class AwsIamAuthentication implements ClientAuthentication {
 		this.vaultRestOperations = vaultRestOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for AWS-IAM authentication given
+	 * {@link AwsIamAuthenticationOptions}. The resulting {@link AuthenticationSteps}
+	 * reuse eagerly-fetched {@link AWSCredentials} to prevent blocking I/O during
+	 * authentication.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for AWS-IAM authentication.
+	 * @since 2.2
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			AwsIamAuthenticationOptions options) {
+
+		Assert.notNull(options, "AwsIamAuthenticationOptions must not be null");
+
+		AWSCredentials credentials = options.getCredentialsProvider().getCredentials();
+
+		return createAuthenticationSteps(options, credentials);
+	}
+
+	protected static AuthenticationSteps createAuthenticationSteps(
+			AwsIamAuthenticationOptions options, AWSCredentials credentials) {
+
+		return AuthenticationSteps.fromSupplier(
+				() -> createRequestBody(options, credentials)) //
+				.login("auth/{mount}/login", options.getPath());
+	}
+
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingAwsIam();
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(this.options, this.options
+				.getCredentialsProvider().getCredentials());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -147,6 +183,19 @@ public class AwsIamAuthentication implements ClientAuthentication {
 	 */
 	protected static Map<String, String> createRequestBody(
 			AwsIamAuthenticationOptions options) {
+		return createRequestBody(options, options.getCredentialsProvider()
+				.getCredentials());
+	}
+
+	/**
+	 * Create the request body to perform a Vault login using the AWS-IAM authentication
+	 * method.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return the map containing body key-value pairs.
+	 */
+	private static Map<String, String> createRequestBody(
+			AwsIamAuthenticationOptions options, AWSCredentials credentials) {
 
 		Map<String, String> login = new HashMap<>();
 
@@ -155,7 +204,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 				.toString().getBytes()));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 
-		String headerJson = getSignedHeaders(options);
+		String headerJson = getSignedHeaders(options, credentials);
 
 		login.put("iam_request_headers",
 				Base64Utils.encodeToString(headerJson.getBytes()));
@@ -166,7 +215,8 @@ public class AwsIamAuthentication implements ClientAuthentication {
 		return login;
 	}
 
-	private static String getSignedHeaders(AwsIamAuthenticationOptions options) {
+	private static String getSignedHeaders(AwsIamAuthenticationOptions options,
+			AWSCredentials credentials) {
 
 		Map<String, String> headers = createIamRequestHeaders(options);
 
@@ -180,7 +230,7 @@ public class AwsIamAuthentication implements ClientAuthentication {
 		request.setEndpoint(options.getEndpointUri());
 
 		signer.setServiceName(request.getServiceName());
-		signer.sign(request, options.getCredentialsProvider().getCredentials());
+		signer.sign(request, credentials);
 
 		Map<String, Object> map = new LinkedHashMap<>();
 
