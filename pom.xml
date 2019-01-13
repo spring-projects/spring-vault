@@ -20,7 +20,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.version>5.1.2.RELEASE</spring.version>
+		<spring.version>5.1.4.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Lovelace-SR2
 		</spring-data-releasetrain.version>
 		<reactor.version>Californium-SR2</reactor.version>
