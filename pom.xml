@@ -403,7 +403,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.1.1.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.1.5.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
