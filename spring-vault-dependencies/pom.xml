@@ -61,7 +61,7 @@
 		<httpcore.version>4.4.10</httpcore.version>
 		<netty.version>4.1.31.Final</netty.version>
 		<okhttp3.version>3.11.0</okhttp3.version>
-		<jackson.version>2.9.7</jackson.version>
+		<jackson.version>2.9.8</jackson.version>
 		<aws-java-sdk.version>1.11.404</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev259-1.25.0</google-api-services-iam.version>
 		<google-auth-library-oauth2-http.version>0.10.0</google-auth-library-oauth2-http.version>
