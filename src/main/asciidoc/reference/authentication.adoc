@@ -52,6 +52,11 @@ NOTE: Token authentication is the default authentication method.
 If a token is disclosed an unintended party, it gains access to Vault and
 can access secrets for the intended client.
 
+Typically, Token authentication is used in scenarios in which the token is created and renewed
+externally (such as https://github.com/hashicorp/vault-service-broker[HashiCorp Vault service broker]).
+Depending on the actual setup, you may or may not want token renewal and revocation.
+See <<vault.authentication.session,`LifecycleAwareSessionManager`>> for details about TTL and token revocation.
+
 ====
 [source,java]
 ----
@@ -793,6 +798,7 @@ VaultToken token = executor.login();
 ----
 ====
 
+[[vault.authentication.session]]
 == Token Lifecycle
 
 Vault's tokens can be associated with a time to live. Tokens obtained by an authentication method
@@ -806,5 +812,6 @@ Depending on the authentication method, a login can create two kinds of tokens:
 * {self-docs-root}api/org/springframework/vault/support/LoginToken.html[`LoginToken`]: Token associated with renewability/TTL.
 
 Authentication methods such as {self-docs-root}api/org/springframework/vault/authentication/TokenAuthentication.html[`TokenAuthentication`] just create a `VaultToken` which does not carry any renewability/TTL details. `LifecycleAwareSessionManager` will run a self-lookup on the token to retrieve renewability and TTL from Vault.
+`VaultToken` are renewed periodically if self-lookup is enabled. Note that `VaultToken` are never revoked, only `LoginToken` are revoked.
 
 Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.

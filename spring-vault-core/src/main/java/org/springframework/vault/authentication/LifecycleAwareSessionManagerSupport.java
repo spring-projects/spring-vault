@@ -71,7 +71,7 @@ public abstract class LifecycleAwareSessionManagerSupport {
 	 * {@code auth/token/lookup-self} for {@link VaultToken}s obtained from a
 	 * {@link ClientAuthentication}. Self-lookup determines whether a token is renewable
 	 * and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup requests
-	 * decrement token usage count by one. Skipped for {@link LoginToken}.
+	 * decrement token usage count by one.
 	 */
 	private boolean tokenSelfLookupEnabled = true;
 
