@@ -195,7 +195,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	/**
 	 * Sets the amount of seconds that is at least required before renewing a lease.
-	 * {@code minRenewalSeconds} prevents renewals to happen too often.
+	 * {@code minRenewalSeconds} prevents renewals from happening too often.
 	 *
 	 * @param minRenewalSeconds number of seconds that is at least required before
 	 * renewing a {@link Lease}, must not be negative.
@@ -207,8 +207,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	/**
-	 * Sets the amount of seconds that is at least required before renewing a lease.
-	 * {@code minRenewal} prevents renewals to happen too often.
+	 * Sets the amount {@link Duration} that is at least required before renewing a lease.
+	 * {@code minRenewal} prevents renewals from happening too often.
 	 *
 	 * @param minRenewal duration that is at least required before renewing a
 	 * {@link Lease}, must not be {@literal null} or negative.
@@ -224,7 +224,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	/**
-	 * Set the expiry threshold. {@link Lease} is renewed the given seconds before it
+	 * Set the expiry threshold. A {@link Lease} is renewed the given seconds before it
 	 * expires.
 	 *
 	 * @param expiryThresholdSeconds number of seconds before {@link Lease} expiry, must
@@ -238,7 +238,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	}
 
 	/**
-	 * Set the expiry threshold. {@link Lease} is renewed the given time before it
+	 * Set the expiry threshold. A {@link Lease} is renewed the given time before it
 	 * expires.
 	 *
 	 * @param expiryThreshold duration before {@link Lease} expiry, must not be
@@ -635,7 +635,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 				restOperations));
 	}
 
-
 	/**
 	 * Hook method called when a {@link Lease} expires. The default implementation is to
 	 * notify {@link LeaseListener}. Implementations can override this method in
@@ -666,8 +665,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
-			operations
-.doWithSession(restOperations -> {
+			operations.doWithSession(restOperations -> {
 				leaseEndpoints.revoke(lease, restOperations);
 				return null;
 			});
