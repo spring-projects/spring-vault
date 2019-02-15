@@ -51,6 +51,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -134,6 +135,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 
 	private final VaultOperations operations;
 
+	private final KeyValueDelegate keyValueDelegate;
+
 	private LeaseEndpoints leaseEndpoints = LeaseEndpoints.Legacy;
 
 	private Duration minRenewal = Duration.ofSeconds(10);
@@ -159,6 +162,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		Assert.notNull(operations, "VaultOperations must not be null");
 
 		this.operations = operations;
+		this.keyValueDelegate = new KeyValueDelegate(this.operations);
 	}
 
 	/**
@@ -174,6 +178,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 
 		this.operations = operations;
+		this.keyValueDelegate = new KeyValueDelegate(this.operations);
 		setTaskScheduler(taskScheduler);
 	}
 
@@ -559,6 +564,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 			RequestedSecret requestedSecret) {
 
 		try {
+
+			if (keyValueDelegate.isVersioned(requestedSecret.getPath())) {
+				return keyValueDelegate.getSecret(requestedSecret.getPath());
+			}
+
 			return this.operations.read(requestedSecret.getPath());
 		}
 		catch (RuntimeException e) {
@@ -628,7 +638,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	private Lease renew(Lease lease) {
 
 		return operations.doWithSession(restOperations -> leaseEndpoints.renew(lease,

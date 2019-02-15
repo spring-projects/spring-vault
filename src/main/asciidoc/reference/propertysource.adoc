@@ -99,6 +99,8 @@ public class AppConfig {
 
 NOTE: Secrets obtained from `generic` secret backends are associated with a TTL (`refresh_interval`) but not a lease Id. Spring Vault's ``PropertySource`` rotates generic secrets when reaching its TTL.
 
+NOTE: You can use `@VaultPropertySource` to obtain the newest secret version from the versioned Key-Value backend. Make sure to not include the `data/` segment in the path.
+
 In certain situations, it may not be possible or practical to tightly control
 property source ordering when using `@VaultPropertySource` annotations.
 For example, if the `@Configuration` classes above were registered via

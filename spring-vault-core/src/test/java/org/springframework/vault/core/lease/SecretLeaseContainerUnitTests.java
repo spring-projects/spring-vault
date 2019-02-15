@@ -50,7 +50,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
@@ -471,7 +470,8 @@ public class SecretLeaseContainerUnitTests {
 
 		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
 		verify(taskScheduler).schedule(captor.capture(), any(Trigger.class));
-		verify(vaultOperations).read(anyString());
+		verify(vaultOperations).read(eq("sys/internal/ui/mounts/my-secret"));
+		verify(vaultOperations).read(eq("my-secret"));
 
 		secretLeaseContainer.stop();
 

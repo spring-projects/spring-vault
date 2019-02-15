@@ -29,6 +29,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.JsonMapFlattener;
@@ -49,6 +50,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	private static final Log logger = LogFactory.getLog(VaultPropertySource.class);
 
 	private final String path;
+
+	private final KeyValueDelegate keyValueDelegate;
 
 	private final Map<String, Object> properties = new LinkedHashMap<>();
 
@@ -106,8 +109,9 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
 		this.path = path;
-		this.propertyTransformer = propertyTransformer
-				.andThen(PropertyTransformers.removeNullProperties());
+		this.keyValueDelegate = new KeyValueDelegate(vaultOperations, LinkedHashMap::new);
+		this.propertyTransformer = propertyTransformer.andThen(PropertyTransformers
+				.removeNullProperties());
 
 		loadProperties();
 	}
@@ -156,7 +160,14 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	@Nullable
 	protected Map<String, Object> doGetProperties(String path) throws VaultException {
 
-		VaultResponse vaultResponse = this.source.read(path);
+		VaultResponse vaultResponse;
+
+		if (this.keyValueDelegate.isVersioned(path)) {
+			vaultResponse = this.keyValueDelegate.getSecret(path);
+		}
+		else {
+			vaultResponse = this.source.read(path);
+		}
 
 		if (vaultResponse == null || vaultResponse.getData() == null) {
 			if (logger.isDebugEnabled()) {
