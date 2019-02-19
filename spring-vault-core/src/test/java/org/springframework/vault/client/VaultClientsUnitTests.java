@@ -19,6 +19,7 @@ import java.net.URI;
 
 import org.junit.Test;
 
+import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class VaultClientsUnitTests {
 
 	@Test
-	public void shouldPrefixRelativeUrl() {
+	public void uriHandlerShouldPrefixRelativeUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
@@ -44,10 +45,35 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void shouldNotPrefixAbsoluteUrl() {
+	public void uriHandlerShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
+				() -> localhost);
+
+		URI uri = handler.expand("https://foo/path/{bar}", "bar");
+
+		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1)
+				.hasPath("/path/bar");
+	}
+
+	@Test
+	public void uriBuilderShouldPrefixRelativeUrl() {
+
+		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
+				() -> localhost);
+
+		URI uri = handler.expand("/path/{bar}", "bar");
+
+		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/v1/path/bar");
+	}
+
+	@Test
+	public void uriBuilderShouldNotPrefixAbsoluteUrl() {
+
+		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
 				() -> localhost);
 
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
