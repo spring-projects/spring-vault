@@ -219,6 +219,10 @@ public class VaultClients {
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
 
+			if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
+				return UriComponentsBuilder.fromUriString(uriTemplate);
+			}
+
 			VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
 
 			String baseUri = toBaseUri(endpoint);
