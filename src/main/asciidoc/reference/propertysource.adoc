@@ -107,5 +107,5 @@ For example, if the `@Configuration` classes above were registered via
 component-scanning, the ordering is difficult to predict.
 In such cases - and if overriding is important - it is recommended that the
 user fall back to using the programmatic PropertySource API.
-See http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
+See https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
+https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.

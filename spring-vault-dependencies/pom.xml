@@ -10,13 +10,13 @@
 	<name>spring-vault-dependencies</name>
 	<description>Spring Vault Dependencies</description>
 
-	<url>http://projects.spring.io/spring-vault/</url>
+	<url>https://projects.spring.io/spring-vault/</url>
 
 	<inceptionYear>2016</inceptionYear>
 
 	<organization>
 		<name>Pivotal Software, Inc.</name>
-		<url>http://www.spring.io</url>
+		<url>https://www.spring.io</url>
 	</organization>
 
 	<scm>
@@ -182,7 +182,7 @@
 				<repository>
 					<id>repo.spring.io</id>
 					<name>Spring Milestone Repository</name>
-					<url>http://repo.spring.io/libs-milestone-local</url>
+					<url>https://repo.spring.io/libs-milestone-local</url>
 				</repository>
 			</distributionManagement>
 
