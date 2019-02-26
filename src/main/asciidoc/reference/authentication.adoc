@@ -378,7 +378,7 @@ You can configure the authentication via `AwsIamAuthenticationOptions`.
 See also:
 
 * https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth backend]
-* http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
+* https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
 
 [[vault.authentication.azuremsi]]
 == Azure (MSI) authentication
