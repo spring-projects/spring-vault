@@ -7,7 +7,7 @@ source to obtain configuration properties using Spring's {spring-framework-docs}
 
 NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A `VaultPropertySource` must be initialized at that time to retrieve properties from Vault.
 
-NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud-incubator/spring-cloud-vault-config[Spring Cloud Vault]'s
+NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault]'s
 configuration integration that initializes various property sources during application startup.
 
 == Registering `VaultPropertySource`
