@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>2.1.2.BUILD-SNAPSHOT</version>
+	<version>2.1.2.RELEASE</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -38,7 +36,7 @@
 		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
-		<java-module-name/>
+		<java-module-name />
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -54,7 +52,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-		<tag>HEAD</tag>
+		<tag>2.1.2.RELEASE</tag>
 	</scm>
 
 	<issueManagement>
@@ -107,7 +105,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>2.1.2.BUILD-SNAPSHOT</version>
+				<version>2.1.2.RELEASE</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -401,11 +399,8 @@
 
 	<repositories>
 		<repository>
-			<id>spring-libs-snapshot</id>
-			<url>https://repo.spring.io/libs-snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
+			<id>spring-libs-release</id>
+			<url>https://repo.spring.io/libs-release</url>
 		</repository>
 	</repositories>
 
@@ -695,14 +690,12 @@
 									<configuration>
 										<target>
 											<copy todir="${project.root}/target/site/reference/html/images">
-												<fileset
-														dir="${basedir}/src/main/asciidoc"
-														erroronmissingdir="false">
-													<include name="**/*.png"/>
-													<include name="**/*.gif"/>
-													<include name="**/*.jpg"/>
+												<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
+													<include name="**/*.png" />
+													<include name="**/*.gif" />
+													<include name="**/*.jpg" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -717,12 +710,10 @@
 									<configuration>
 										<target>
 											<copy todir="${project.build.directory}/schemas">
-												<fileset dir="${basedir}"
-														 erroronmissingdir="false">
-													<include
-															name="**/src/main/resources/**/config/spring-*.xsd"/>
+												<fileset dir="${basedir}" erroronmissingdir="false">
+													<include name="**/src/main/resources/**/config/spring-*.xsd" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -736,32 +727,17 @@
 									<phase>generate-resources</phase>
 									<configuration>
 										<target>
-											<copy failonerror="false"
-												  file="${project.build.directory}/doc-resources/stylesheets/spring.css"
-												  tofile="${project.build.directory}/working/stylesheets/spring.css"/>
-											<copy failonerror="false"
-												  file="${project.build.directory}/doc-resources/html/docinfo.html"
-												  tofile="${project.build.directory}/working/docinfo.html"/>
-											<copy failonerror="false"
-												  file="${project.build.directory}/doc-resources/html/docinfo-footer.html"
-												  tofile="${project.build.directory}/working/docinfo-footer.html"/>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working/tocbot-3.0.2">
-												<fileset
-														dir="${project.build.directory}/doc-resources/javascript/tocbot-3.0.2"
-														includes="**"/>
+											<copy failonerror="false" file="${project.build.directory}/doc-resources/stylesheets/spring.css" tofile="${project.build.directory}/working/stylesheets/spring.css" />
+											<copy failonerror="false" file="${project.build.directory}/doc-resources/html/docinfo.html" tofile="${project.build.directory}/working/docinfo.html" />
+											<copy failonerror="false" file="${project.build.directory}/doc-resources/html/docinfo-footer.html" tofile="${project.build.directory}/working/docinfo-footer.html" />
+											<copy failonerror="false" todir="${project.build.directory}/working/tocbot-3.0.2">
+												<fileset dir="${project.build.directory}/doc-resources/javascript/tocbot-3.0.2" includes="**" />
 											</copy>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working">
-												<fileset
-														dir="${project.root}/src/main/asciidoc"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working">
+												<fileset dir="${project.root}/src/main/asciidoc" includes="**" />
 											</copy>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working/images">
-												<fileset
-														dir="${project.root}/src/main/asciidoc/images"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working/images">
+												<fileset dir="${project.root}/src/main/asciidoc/images" includes="**" />
 											</copy>
 										</target>
 									</configuration>
@@ -776,34 +752,22 @@
 									<configuration>
 										<target>
 											<!-- Copy files for the single-file HTML version -->
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.html"
-												  tofile="${project.root}/target/site/reference/html/index.html"/>
-											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/images">
-												<fileset
-														dir="${project.build.directory}/generated-docs/images">
-													<include name="*.*"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.html" tofile="${project.root}/target/site/reference/html/index.html" />
+											<copy failonerror="false" todir="${project.root}/target/site/reference/html/images">
+												<fileset dir="${project.build.directory}/generated-docs/images">
+													<include name="*.*" />
 												</fileset>
 											</copy>
-											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/tocbot-3.0.2">
-												<fileset
-														dir="${project.build.directory}/generated-docs/tocbot-3.0.2">
-													<include name="*.*"/>
+											<copy failonerror="false" todir="${project.root}/target/site/reference/html/tocbot-3.0.2">
+												<fileset dir="${project.build.directory}/generated-docs/tocbot-3.0.2">
+													<include name="*.*" />
 												</fileset>
 											</copy>
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/stylesheets/spring.css"
-												  tofile="${project.root}/target/site/reference/html/stylesheets/spring.css"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/stylesheets/spring.css" tofile="${project.root}/target/site/reference/html/stylesheets/spring.css" />
 											<!-- Copy and rename the Epub file -->
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.pdf"
-												  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
 											<!-- Copy and rename the PDF file -->
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.epub"
-												  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
 
 										</target>
 									</configuration>
