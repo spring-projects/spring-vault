@@ -63,7 +63,7 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Backend: aws
  * (IAM)</a>
  * @see <a
- * href="http://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:
+ * href="https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:
  * GetCallerIdentity</a>
  */
 public class AwsIamAuthentication implements ClientAuthentication,

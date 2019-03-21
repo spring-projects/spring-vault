@@ -52,7 +52,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport implements
 		ClientAuthentication, AuthenticationStepsFactory {
 
-	public static final String COMPUTE_METADATA_URL_TEMPLATE = "http://metadata/computeMetadata/v1/instance/service-accounts/{serviceAccount}/identity"
+	public static final String COMPUTE_METADATA_URL_TEMPLATE = "https://metadata/computeMetadata/v1/instance/service-accounts/{serviceAccount}/identity"
 			+ "?audience={audience}&format={format}";
 
 	private final GcpComputeAuthenticationOptions options;

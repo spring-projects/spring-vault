@@ -54,7 +54,7 @@ public class GcpComputeAuthenticationUnitTests {
 	private void setupMocks() {
 
 		mockRest.expect(
-				requestTo("http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://localhost:8200/vault/dev-role&format=full"))
+				requestTo("https://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://localhost:8200/vault/dev-role&format=full"))
 				.andExpect(method(HttpMethod.GET))
 				.andRespond(
 						withSuccess().contentType(MediaType.TEXT_PLAIN).body("my-jwt"));
