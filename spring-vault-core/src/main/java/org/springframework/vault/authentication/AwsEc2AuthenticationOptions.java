@@ -33,7 +33,7 @@ import org.springframework.util.Assert;
 public class AwsEc2AuthenticationOptions {
 
 	public static final URI DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI = URI
-			.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
+			.create("https://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
 
 	public static final String DEFAULT_AWS_AUTHENTICATION_PATH = "aws-ec2";
 

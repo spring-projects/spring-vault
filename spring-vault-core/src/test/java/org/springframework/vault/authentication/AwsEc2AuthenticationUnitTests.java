@@ -61,7 +61,7 @@ public class AwsEc2AuthenticationUnitTests {
 	public void shouldObtainIdentityDocument() throws Exception {
 
 		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				requestTo("https://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
@@ -78,7 +78,7 @@ public class AwsEc2AuthenticationUnitTests {
 				.role("ami").build();
 
 		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				requestTo("https://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
@@ -123,7 +123,7 @@ public class AwsEc2AuthenticationUnitTests {
 	public void loginShouldFailWhileObtainingIdentityDocument() throws Exception {
 
 		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				requestTo("https://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
 		new AwsEc2Authentication(restTemplate).login();

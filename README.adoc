@@ -1,6 +1,6 @@
-image::https://spring.io/badges/spring-vault/prerelease.svg[link=http://projects.spring.io/spring-vault#quick-start]
+image::https://spring.io/badges/spring-vault/prerelease.svg[link=https://projects.spring.io/spring-vault#quick-start]
 
-image::https://spring.io/badges/spring-vault/snapshot.svg[link=http://projects.spring.io/spring-vault#quick-start]
+image::https://spring.io/badges/spring-vault/snapshot.svg[link=https://projects.spring.io/spring-vault#quick-start]
 
 = Spring Vault
 
@@ -13,10 +13,10 @@ Vault can manage static and dynamic secrets such as application data, username/p
 
 For a comprehensive treatment of all the Spring Vault features, please refer to:
 
-* the http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/[User Guide]
-* the http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/api/[JavaDocs] have extensive comments in them as well.
-* the home page of http://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
-* for more detailed questions, use http://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
+* the https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/[User Guide]
+* the https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/api/[JavaDocs] have extensive comments in them as well.
+* the home page of https://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
+* for more detailed questions, use https://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
 
 == Features
 
@@ -24,13 +24,13 @@ Specifically for Spring applications:
 
 * JavaConfig for Vault Client
 * Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.backends.generic[secrets] secured with SSL
-* http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.token[Token],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.appid[AppId],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.approle[AppRole],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.clientcert[Client Certificate],
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
-http://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
+* Obtain https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.backends.generic[secrets] secured with SSL
+* https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.token[Token],
+https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.appid[AppId],
+https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.approle[AppRole],
+https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.clientcert[Client Certificate],
+https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
+https://docs.spring.io/spring-vault/docs/current-SNAPSHOT/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 Spring Boot users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault Config], an optimized integration with Vault to provide encrypted Vault properties inside Spring Boot applications.
@@ -66,7 +66,7 @@ If you'd rather like the latest snapshots of the upcoming major version, use our
 <repository>
   <id>spring-libs-snapshot</id>
   <name>Spring Snapshot Repository</name>
-  <url>http://repo.spring.io/libs-snapshot</url>
+  <url>https://repo.spring.io/libs-snapshot</url>
 </repository>
 ----
 ====
@@ -292,13 +292,13 @@ that on it will try to build asciidoc sources from
 
 === Working with the code
 If you don't have an IDE preference we would recommend that you use
-http://www.springsource.com/developer/sts[Spring Tools Suite] or
-http://eclipse.org[Eclipse] when working with the code. We use the
-http://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
+https://www.springsource.com/developer/sts[Spring Tools Suite] or
+https://eclipse.org[Eclipse] when working with the code. We use the
+https://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools
 should also work without issue as long as they use Maven 3.3.3 or better.
 
 ==== Importing into eclipse with m2eclipse
-We recommend the http://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
+We recommend the https://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with
 eclipse. If you don't already have m2eclipse installed it is available from the "eclipse
 marketplace".
 
@@ -352,7 +352,7 @@ added after the original pull request but before a merge.
   you can import formatter settings using the
   `eclipse-code-formatter.xml` file from the
   https://raw.githubusercontent.com/spring-framework/spring-vault/master/etc/ide/eclipse-code-formatter.xml[project]. If using IntelliJ, you can use the
-  http://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
+  https://plugins.jetbrains.com/plugin/6546[Eclipse Code Formatter
   Plugin] to import the same file.
 * Make sure all new `.java` files to have a Javadoc class comment with at least an
   `@author` tag identifying you, and preferably at least a paragraph on what the class is
@@ -364,6 +364,6 @@ added after the original pull request but before a merge.
 * Please include unit tests.
 * If no-one else is using your branch, please rebase it against the current master (or
   other target branch in the main project).
-* When writing a commit message please follow http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions],
+* When writing a commit message please follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions],
   if you are fixing an existing issue please add `Fixes gh-XXXX` at the end of the commit
   message (where XXXX is the issue number).
