@@ -77,7 +77,7 @@ public class EnvironmentVaultConfigurationUnitTests {
 	public void shouldConfigureSsl() {
 
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("vault.ssl.key-store", "http://foo.bar");
+		map.put("vault.ssl.key-store", "https://foo.bar");
 		map.put("vault.ssl.trust-store", "classpath:certificate.json");
 
 		MapPropertySource propertySource = new MapPropertySource("shouldConfigureSsl",
