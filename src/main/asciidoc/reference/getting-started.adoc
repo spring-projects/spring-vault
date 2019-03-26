@@ -3,7 +3,7 @@
 
 Spring Vault support requires Vault 0.5 or higher and Java SE 6 or higher.
 An easy way to bootstrap setting up a working environment is to create a
-Spring based project in http://spring.io/tools/sts[STS].
+Spring based project in https://spring.io/tools/sts[STS].
 
 First you need to set up a running Vault server.
 Refer to the https://www.vaultproject.io/intro/[Vault] for an explanation on how to startup a Vault instance.
@@ -42,13 +42,13 @@ Milestone repository to your maven `pom.xml` which is at the same level of your 
     <repository>
         <id>spring-milestone</id>
         <name>Spring Maven MILESTONE Repository</name>
-        <url>http://repo.spring.io/libs-milestone</url>
+        <url>https://repo.spring.io/libs-milestone</url>
     </repository>
 </repositories>
 ----
 ====
 
-The repository is also http://repo.spring.io/milestone/org/springframework/vault/[browseable here].
+The repository is also https://repo.spring.io/milestone/org/springframework/vault/[browseable here].
 
 If you are using a SNAPSHOT, you will also need to add the location of the Spring
 Snapshot repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
@@ -60,13 +60,13 @@ Snapshot repository to your maven `pom.xml` which is at the same level of your `
     <repository>
         <id>spring-snapshot</id>
         <name>Spring Maven SNAPSHOT Repository</name>
-        <url>http://repo.spring.io/libs-snapshot</url>
+        <url>https://repo.spring.io/libs-snapshot</url>
     </repository>
 </repositories>
 ----
 ====
 
-The repository is also http://repo.spring.io/snapshot/org/springframework/vault/[browseable here].
+The repository is also https://repo.spring.io/snapshot/org/springframework/vault/[browseable here].
 
 Create a simple `Secrets` class to persist:
 
@@ -491,8 +491,8 @@ For example, if the `@Configuration` classes above were registered via
 component-scanning, the ordering is difficult to predict.
 In such cases - and if overriding is important - it is recommended that the
 user fall back to using the programmatic PropertySource API.
-See http://docs.spring.io/spring-framework/docs/{springVersion}/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
-http://docs.spring.io/spring/docs/{springVersion}/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
+See https://docs.spring.io/spring-framework/docs/{springVersion}/javadoc-api/org/springframework/core/env/ConfigurableEnvironment.html[`ConfigurableEnvironment`] and
+https://docs.spring.io/spring/docs/{springVersion}/javadoc-api/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`] for details.
 
 
 [[vault.core.executioncallback]]

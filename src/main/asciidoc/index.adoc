@@ -4,7 +4,7 @@ Mark Paluch;
 :revdate: {localdate}
 :toc: macro
 :toc-placement!:
-:spring-framework-docs: http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/
+:spring-framework-docs: https://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/
 
 (C) 2016-2018 The original authors.
 
