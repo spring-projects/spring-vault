@@ -2,7 +2,7 @@
 = Client support
 
 Spring Vault supports a various HTTP clients to access Vault's HTTP API. Spring Vault uses
-http://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/remoting.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault.
+https://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/html/remoting.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault.
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
 
