@@ -236,7 +236,7 @@ public class VaultClients {
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
 		return endpoint.getScheme() + "://" + endpoint.getHost() + ":"
-				+ endpoint.getPort() + "/v1";
+				+ endpoint.getPort() + "/" + endpoint.getPath() + "/v1";
 	}
 
 	/**
