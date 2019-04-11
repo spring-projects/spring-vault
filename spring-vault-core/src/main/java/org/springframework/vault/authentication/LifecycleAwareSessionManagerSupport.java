@@ -165,7 +165,7 @@ public abstract class LifecycleAwareSessionManagerSupport {
 	 * once.
 	 */
 	@RequiredArgsConstructor
-	static class OneShotTrigger implements Trigger {
+	protected static class OneShotTrigger implements Trigger {
 
 		private final AtomicBoolean fired = new AtomicBoolean();
 

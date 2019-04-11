@@ -131,11 +131,23 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * The token state: Contains the currently valid token that identifies the Vault
+	 * session.
+	 */
+	protected Optional<TokenWrapper> getToken() {
+		return token;
+	}
+
+	protected void setToken(Optional<TokenWrapper> token) {
+		this.token = token;
+	}
+
 	@Override
 	public void destroy() {
 
-		Optional<TokenWrapper> token = this.token;
-		this.token = Optional.empty();
+		Optional<TokenWrapper> token = getToken();
+		setToken(Optional.empty());
 
 		token.filter(TokenWrapper::isRevocable).map(TokenWrapper::getToken)
 				.ifPresent(this::revoke);
@@ -173,7 +185,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		logger.info("Renewing token");
 
-		Optional<TokenWrapper> token = this.token;
+		Optional<TokenWrapper> token = getToken();
 		if (!token.isPresent()) {
 			getSessionToken();
 			return false;
@@ -184,7 +196,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (HttpStatusCodeException e) {
 
-			this.token = Optional.empty();
+			setToken(Optional.empty());
 
 			String message = "Cannot renew token, resetting token and performing re-login";
 
@@ -202,7 +214,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			logger.debug(String.format(
 					"Cannot renew token, resetting token and performing re-login: %s",
 					e.toString()));
-			this.token = Optional.empty();
+			setToken(Optional.empty());
 
 			throw new VaultTokenRenewalException("Cannot renew token", e);
 		}
@@ -229,11 +241,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
 			}
 
-			this.token = Optional.empty();
+			setToken(Optional.empty());
 			return false;
 		}
 
-		this.token = Optional.of(new TokenWrapper(renewed, wrapper.revocable));
+		setToken(Optional.of(new TokenWrapper(renewed, wrapper.revocable)));
 
 		return true;
 	}
@@ -241,17 +253,17 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	@Override
 	public VaultToken getSessionToken() {
 
-		if (!token.isPresent()) {
+		if (!getToken().isPresent()) {
 
 			synchronized (lock) {
 
-				if (!token.isPresent()) {
+				if (!getToken().isPresent()) {
 					doGetSessionToken();
 				}
 			}
 		}
 
-		return token.map(TokenWrapper::getToken).orElseThrow(
+		return getToken().map(TokenWrapper::getToken).orElseThrow(
 				() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
 
@@ -274,7 +286,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 		}
 
-		this.token = Optional.of(wrapper);
+		setToken(Optional.of(wrapper));
 
 		if (isTokenRenewable()) {
 			scheduleRenewal();
@@ -290,7 +302,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	protected boolean isTokenRenewable() {
 
-		return token.map(TokenWrapper::getToken)
+		return getToken().map(TokenWrapper::getToken)
 				.filter(LoginToken.class::isInstance)
 				//
 				.filter(it -> {
@@ -307,8 +319,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		Runnable task = () -> {
 			try {
-				if (LifecycleAwareSessionManager.this.token.isPresent()
-						&& isTokenRenewable()) {
+				if (getToken().isPresent() && isTokenRenewable()) {
 					if (renewToken()) {
 						scheduleRenewal();
 					}
@@ -319,7 +330,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 		};
 
-		Optional<TokenWrapper> token = this.token;
+		Optional<TokenWrapper> token = getToken();
 
 		token.ifPresent(tokenWrapper -> getTaskScheduler().schedule(task,
 				createTrigger(tokenWrapper)));
@@ -327,8 +338,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 	private OneShotTrigger createTrigger(TokenWrapper tokenWrapper) {
 
-		return new OneShotTrigger(
-getRefreshTrigger().nextExecutionTime(
+		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime(
 				(LoginToken) tokenWrapper.getToken()));
 	}
 
@@ -345,7 +355,7 @@ getRefreshTrigger().nextExecutionTime(
 	 */
 	@RequiredArgsConstructor
 	@Getter
-	static class TokenWrapper {
+	protected static class TokenWrapper {
 
 		private final VaultToken token;
 		private final boolean revocable;
