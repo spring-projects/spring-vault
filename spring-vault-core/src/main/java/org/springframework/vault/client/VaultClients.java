@@ -156,12 +156,6 @@ public class VaultClients {
 		};
 	}
 
-	private static DefaultUriTemplateHandler createUriTemplateHandler(
-			VaultEndpointProvider endpointProvider) {
-
-		return new PrefixAwareUriTemplateHandler(endpointProvider);
-	}
-
 	public static UriBuilderFactory createUriBuilderFactory(
 			VaultEndpointProvider endpointProvider) {
 		return new PrefixAwareUriBuilderFactory(endpointProvider);
@@ -235,8 +229,9 @@ public class VaultClients {
 	}
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
-		return endpoint.getScheme() + "://" + endpoint.getHost() + ":"
-				+ endpoint.getPort() + "/v1";
+
+		return String.format("%s://%s:%s/%s", endpoint.getScheme(), endpoint.getHost(),
+				endpoint.getPort(), endpoint.getPath());
 	}
 
 	/**

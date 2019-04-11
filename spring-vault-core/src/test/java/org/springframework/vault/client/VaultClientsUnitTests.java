@@ -127,4 +127,17 @@ public class VaultClientsUnitTests {
 		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers),
 				String.class);
 	}
+
+	@Test
+	public void shouldApplyBasepath() {
+
+		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
+		localhost.setPath("foo/v1");
+		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
+				() -> localhost);
+
+		URI uri = handler.expand("/path/{bar}", "bar");
+
+		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/foo/v1/path/bar");
+	}
 }
