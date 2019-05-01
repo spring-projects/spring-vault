@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.annotation;
 
+import org.junit.After;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -23,10 +24,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.vault.annotation.VaultPropertySource.Renewal.RENEW;
 
 /**
  * Unit test for {@link VaultPropertySource}.
@@ -42,6 +47,11 @@ public class VaultPropertySourceUnitTests {
 		VaultTemplate vaultTemplate() {
 			return Mockito.mock(VaultTemplate.class);
 		}
+
+		@Bean
+		SecretLeaseContainer secretLeaseContainer() {
+			return Mockito.mock(SecretLeaseContainer.class);
+		}
 	}
 
 	@Configuration
@@ -54,6 +64,21 @@ public class VaultPropertySourceUnitTests {
 	@Profile("dev")
 	@VaultPropertySource("bar")
 	static class DevProfile {
+	}
+
+	@Configuration
+	@VaultPropertySource("foo/${my_property}")
+	static class NonRenewableConfig {
+	}
+
+	@Configuration
+	@VaultPropertySource(value = "foo/${my_property}", renewal = RENEW)
+	static class RenewableConfig {
+	}
+
+	@After
+	public void tearDown() {
+		System.clearProperty("my_property");
 	}
 
 	@Test
@@ -90,5 +115,43 @@ public class VaultPropertySourceUnitTests {
 		verify(templateMock).afterPropertiesSet();
 		verify(templateMock).read("foo");
 		verify(templateMock, never()).read("bar");
+	}
+
+	@Test
+	public void shouldResolvePlaceholderForNonRenewablePropertySource() {
+
+		System.setProperty("my_property", "non-renewable");
+
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+
+		ctx.register(Config.class);
+		ctx.register(NonRenewableConfig.class);
+		ctx.refresh();
+
+		VaultTemplate templateMock = ctx.getBean(VaultTemplate.class);
+
+		verify(templateMock).afterPropertiesSet();
+		verify(templateMock).read("sys/internal/ui/mounts/foo/non-renewable");
+		verify(templateMock).read("foo/non-renewable");
+		verifyNoMoreInteractions(templateMock);
+	}
+
+	@Test
+	public void shouldResolvePlaceholderForRenewablePropertySource() throws Exception {
+
+		System.setProperty("my_property", "renewable");
+
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+
+		ctx.register(Config.class);
+		ctx.register(RenewableConfig.class);
+		ctx.refresh();
+
+		SecretLeaseContainer leaseContainerMock = ctx.getBean(SecretLeaseContainer.class);
+		verify(leaseContainerMock).afterPropertiesSet();
+		verify(leaseContainerMock).addLeaseListener(any());
+		verify(leaseContainerMock).addRequestedSecret(
+				RequestedSecret.renewable("foo/renewable"));
+		verifyNoMoreInteractions(leaseContainerMock);
 	}
 }
