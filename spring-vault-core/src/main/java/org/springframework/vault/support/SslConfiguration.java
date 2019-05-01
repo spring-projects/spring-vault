@@ -151,6 +151,20 @@ public class SslConfiguration {
 	}
 
 	/**
+	 * Create a new {@link SslConfiguration} for the given {@link KeyStoreConfiguration
+	 * trust store}.
+	 *
+	 @param trustStore must not be {@literal null}.
+	 * @return a new {@link SslConfiguration} with {@link KeyStoreConfiguration trust
+	 * store configuration} applied.
+	 * @since 2.2
+	 * @see java.security.KeyStore
+	 */
+	public static SslConfiguration forTrustStore(KeyStoreConfiguration trustStore) {
+		return unconfigured().withTrustStore(trustStore);
+	}
+
+	/**
 	 * Create a new {@link SslConfiguration} for the given key store with the default
 	 * {@link KeyStore} type.
 	 *
@@ -181,7 +195,39 @@ public class SslConfiguration {
 	 */
 	public static SslConfiguration forKeyStore(Resource keyStore,
 			@Nullable char[] keyStorePassword) {
-		return forKeyStore(keyStore, keyStorePassword, KeyConfiguration.unconfigured());
+		return forKeyStore(new KeyStoreConfiguration(keyStore, keyStorePassword,
+				DEFAULT_KEYSTORE_TYPE), KeyConfiguration.unconfigured());
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given {@link KeyStoreConfiguration
+	 * key store}.
+	 *
+	 * @param keyStore resource pointing to an existing key store, must not be
+	 * {@literal null}.
+	 * @return the created {@link SslConfiguration}.
+	 * @since 2.2
+	 * @see java.security.KeyStore
+	 */
+	public static SslConfiguration forKeyStore(KeyStoreConfiguration keyStore) {
+		return forKeyStore(keyStore, KeyConfiguration.unconfigured());
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} for the given {@link KeyStoreConfiguration
+	 * key store} and {@link KeyConfiguration}.
+	 *
+	 * @param keyStore resource pointing to an existing key store, must not be
+	 * {@literal null}.
+	 * @param keyConfiguration the configuration for a specific key in
+	 * {@code keyStoreConfiguration} to use.
+	 * @return the created {@link SslConfiguration}.
+	 * @since 2.2
+	 * @see java.security.KeyStore
+	 */
+	public static SslConfiguration forKeyStore(KeyStoreConfiguration keyStore,
+			KeyConfiguration keyConfiguration) {
+		return unconfigured().withKeyStore(keyStore, keyConfiguration);
 	}
 
 	/**
@@ -246,8 +292,9 @@ public class SslConfiguration {
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public SslConfiguration create(Resource keyStore, @Nullable char[] keyStorePassword,
-			Resource trustStore, @Nullable char[] trustStorePassword) {
+	public static SslConfiguration create(Resource keyStore,
+			@Nullable char[] keyStorePassword, Resource trustStore,
+			@Nullable char[] trustStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.isTrue(keyStore.exists(),
@@ -458,11 +505,12 @@ public class SslConfiguration {
 		 *
 		 * @param resource resource referencing the key store, must not be {@literal null}
 		 * .
-		 * @param storePassword key store password, must not be {@literal null}.
+		 * @param storePassword key store password, may be {@literal null}.
 		 * @return the {@link KeyStoreConfiguration} for {@code resource}.
 		 * @since 2.0
 		 */
-		public static KeyStoreConfiguration of(Resource resource, char[] storePassword) {
+		public static KeyStoreConfiguration of(Resource resource,
+				@Nullable char[] storePassword) {
 			return new KeyStoreConfiguration(resource, storePassword,
 					DEFAULT_KEYSTORE_TYPE);
 		}
