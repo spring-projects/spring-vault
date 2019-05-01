@@ -24,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -42,8 +43,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 public class VaultPropertySourceIntegrationTests {
 
-	@VaultPropertySource({ "secret/myapp", "secret/myapp/profile" })
+	@Import({ Partial1.class, Partial2.class })
 	static class Config extends VaultIntegrationTestConfiguration {
+	}
+
+	@VaultPropertySource({ "secret/myapp", "secret/myapp/profile" })
+	static class Partial1 {
+	}
+
+	@VaultPropertySource("secret/generic")
+	static class Partial2 {
 	}
 
 	@Autowired
@@ -63,6 +72,8 @@ public class VaultPropertySourceIntegrationTests {
 
 		vaultOperations.write("secret/myapp",
 				Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/generic",
+				Collections.singletonMap("generic", "generic-value"));
 		vaultOperations.write("secret/myapp/profile",
 				Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
@@ -72,6 +83,7 @@ public class VaultPropertySourceIntegrationTests {
 
 		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
 		assertThat(env.getProperty("myprofile")).isEqualTo("myprofilevalue");
+		assertThat(env.getProperty("generic")).isEqualTo("generic-value");
 	}
 
 	@Test

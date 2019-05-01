@@ -97,11 +97,13 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		Assert.notNull(annotationMetadata, "AnnotationMetadata must not be null!");
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null!");
 
-		registry.registerBeanDefinition("VaultPropertySourceRegistrar",
-				BeanDefinitionBuilder //
-						.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
-						.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
-						.getBeanDefinition());
+		if (!registry.isBeanNameInUse("VaultPropertySourceRegistrar")) {
+			registry.registerBeanDefinition("VaultPropertySourceRegistrar",
+					BeanDefinitionBuilder //
+							.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
+							.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
+							.getBeanDefinition());
+		}
 
 		Set<AnnotationAttributes> propertySources = attributesForRepeatable(
 				annotationMetadata, VaultPropertySources.class.getName(),
@@ -135,10 +137,17 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref,
 						renewal, propertyTransformer, propertyPath);
 
-				registry.registerBeanDefinition("vaultPropertySource#" + counter,
-						beanDefinition);
+				do {
+					String beanName = "vaultPropertySource#" + counter;
 
-				counter++;
+					if (!registry.isBeanNameInUse(beanName)) {
+						registry.registerBeanDefinition(beanName, beanDefinition);
+						break;
+					}
+
+					counter++;
+				}
+				while (true);
 			}
 		}
 	}
