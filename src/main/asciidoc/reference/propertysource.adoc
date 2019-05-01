@@ -99,6 +99,27 @@ public class AppConfig {
 
 NOTE: Secrets obtained from `generic` secret backends are associated with a TTL (`refresh_interval`) but not a lease Id. Spring Vault's ``PropertySource`` rotates generic secrets when reaching its TTL.
 
+
+Any `${…​}` placeholders present in a `@VaultPropertySource` path are resolved against the set of property sources already registered against the environment, as the following example shows:
+
+
+.Declaring a `@VaultPropertySource` path using placeholders
+====
+[source,java]
+----
+@Configuration
+@VaultPropertySource(value = "aws/creds/${my.placeholder:fallback/value}",
+                     propertyNamePrefix = "aws.",
+                     renewal = Renewal.ROTATE)
+public class AppConfig {
+}
+----
+====
+
+Assuming that `my.placeholder` is present in one of the property sources already registered (for example, system properties or environment variables), the placeholder is resolved to the corresponding value.
+If not, then `fallback/value` is used as a default.
+If no default is specified and a property cannot be resolved, an `IllegalArgumentException` is thrown.
+
 In certain situations, it may not be possible or practical to tightly control
 property source ordering when using `@VaultPropertySource` annotations.
 For example, if the `@Configuration` classes above were registered via

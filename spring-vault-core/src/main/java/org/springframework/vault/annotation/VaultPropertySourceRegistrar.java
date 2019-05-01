@@ -28,9 +28,11 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotationMetadata;
@@ -55,7 +57,14 @@ import org.springframework.vault.core.util.PropertyTransformers;
  * @author Mark Paluch
  */
 class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
-		BeanFactoryPostProcessor {
+		BeanFactoryPostProcessor, EnvironmentAware {
+
+	private @Nullable Environment environment;
+
+	@Override
+	public void setEnvironment(Environment environment) {
+		this.environment = environment;
+	}
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory)
@@ -82,7 +91,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 
 		for (PropertySource<?> vaultPropertySource : propertySources) {
 
-			if (propertySources.contains(vaultPropertySource.getName())) {
+			if (mutablePropertySources.contains(vaultPropertySource.getName())) {
 				continue;
 			}
 
@@ -135,7 +144,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 				}
 
 				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref,
-						renewal, propertyTransformer, propertyPath);
+						renewal, propertyTransformer,
+						potentiallyResolveRequiredPlaceholders(propertyPath));
 
 				do {
 					String beanName = "vaultPropertySource#" + counter;
@@ -150,6 +160,11 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 				while (true);
 			}
 		}
+	}
+
+	private String potentiallyResolveRequiredPlaceholders(String expression) {
+		return this.environment != null ? this.environment
+				.resolveRequiredPlaceholders(expression) : expression;
 	}
 
 	private AbstractBeanDefinition createBeanDefinition(String ref, Renewal renewal,
