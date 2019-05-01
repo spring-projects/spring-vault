@@ -61,11 +61,17 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 	}
 
 	static SslConfiguration prepareCertAuthenticationMethod() {
+		return prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+				.unconfigured());
+	}
+
+	static SslConfiguration prepareCertAuthenticationMethod(
+			SslConfiguration.KeyConfiguration keyConfiguration) {
 
 		SslConfiguration original = createSslConfiguration();
 
 		return new SslConfiguration(KeyStoreConfiguration.of(new FileSystemResource(
 				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
-				original.getTrustStoreConfiguration());
+				keyConfiguration, original.getTrustStoreConfiguration());
 	}
 }

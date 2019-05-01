@@ -78,18 +78,24 @@ to set SSL settings only for Spring Vault.
 ----
 
 SslConfiguration sslConfiguration = new SslConfiguration(               <1>
-                new FileSystemResource("client-cert.jks"), "changeit",
-                new FileSystemResource("truststore.jks"), "changeit");
+                new FileSystemResource("client-cert.jks"), "changeit".toCharArray(),
+                new FileSystemResource("truststore.jks"), "changeit".toCharArray());
 
 SslConfiguration.forTrustStore(new FileSystemResource("keystore.jks"),  <2>
                                       "changeit")
 
 SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <3>
-                                      "changeit")
+                                      "changeit".toCharArray())
+
+SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
+                                      "changeit".toCharArray()
+                                      KeyConfiguration.of("key-password".toCharArray(),
+                                      "my-key-alias"))
 ----
 <1> Full configuration.
 <2> Configuring only trust store settings.
 <3> Configuring only key store settings.
+<3> Configuring only key store settings with providing a key-configuration.
 ====
 
 Please note that providing `SslConfiguration` can be only

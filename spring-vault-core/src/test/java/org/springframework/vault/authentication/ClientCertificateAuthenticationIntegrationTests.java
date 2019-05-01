@@ -22,6 +22,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.support.ClientOptions;
+import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
@@ -50,6 +51,46 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
+	}
+
+	@Test
+	public void shouldSelectKey() {
+
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(),
+						prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+								.of("changeit".toCharArray(), "1")));
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				restTemplate);
+		VaultToken login = authentication.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+	}
+
+	@Test(expected = NestedRuntimeException.class)
+	public void shouldSelectInvalidKey() {
+
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
+				.create(new ClientOptions(),
+						prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+								.of("changeit".toCharArray(), "2")));
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(
+				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				restTemplate);
+		authentication.login();
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void shouldProvideInvalidKeyPassword() {
+
+		ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of(
+						"wrong".toCharArray(), "1")));
 	}
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we

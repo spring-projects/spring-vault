@@ -18,18 +18,29 @@ package org.springframework.vault.config;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProxySelector;
+import java.net.Socket;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.Principal;
+import java.security.PrivateKey;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.KeyManagerFactorySpi;
+import javax.net.ssl.ManagerFactoryParameters;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509TrustManager;
 
 import io.netty.handler.ssl.SslContextBuilder;
@@ -56,6 +67,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
+
+import static org.springframework.vault.support.SslConfiguration.KeyConfiguration;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
@@ -95,6 +108,7 @@ public class ClientHttpRequestFactoryFactory {
 
 		return true;
 	}
+
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
@@ -140,12 +154,13 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	static SSLContext getSSLContext(SslConfiguration sslConfiguration,
-			TrustManager[] trustManagers)
-			throws GeneralSecurityException, IOException {
+			TrustManager[] trustManagers) throws GeneralSecurityException, IOException {
 
+		KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
 		KeyManager[] keyManagers = sslConfiguration.getKeyStoreConfiguration()
 				.isPresent() ? createKeyManagerFactory(
-				sslConfiguration.getKeyStoreConfiguration()).getKeyManagers() : null;
+				sslConfiguration.getKeyStoreConfiguration(), keyConfiguration)
+				.getKeyManagers() : null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(keyManagers, trustManagers, null);
@@ -162,8 +177,8 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	static KeyManagerFactory createKeyManagerFactory(
-			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
-			IOException {
+			KeyStoreConfiguration keyStoreConfiguration, KeyConfiguration keyConfiguration)
+			throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = KeyStore.getInstance(StringUtils
 				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
@@ -173,9 +188,19 @@ public class ClientHttpRequestFactoryFactory {
 
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory
 				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-		keyManagerFactory.init(keyStore,
-				keyStoreConfiguration.getStorePassword() == null ? new char[0]
-						: keyStoreConfiguration.getStorePassword());
+
+		char[] keyPasswordToUse = keyConfiguration.getKeyPassword();
+
+		if (keyPasswordToUse == null) {
+			keyPasswordToUse = keyStoreConfiguration.getStorePassword() == null ? new char[0]
+					: keyStoreConfiguration.getStorePassword();
+		}
+
+		keyManagerFactory.init(keyStore, keyPasswordToUse);
+
+		if (StringUtils.hasText(keyConfiguration.getKeyAlias())) {
+			return new KeySelectingKeyManagerFactory(keyManagerFactory, keyConfiguration);
+		}
 
 		return keyManagerFactory;
 	}
@@ -325,8 +350,9 @@ public class ClientHttpRequestFactoryFactory {
 				}
 
 				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration
-							.getKeyStoreConfiguration()));
+					sslContextBuilder.keyManager(createKeyManagerFactory(
+							sslConfiguration.getKeyStoreConfiguration(),
+							sslConfiguration.getKeyConfiguration()));
 				}
 
 				requestFactory.setSslContext(sslContextBuilder.sslProvider(
@@ -339,6 +365,91 @@ public class ClientHttpRequestFactoryFactory {
 					.toMillis()));
 
 			return requestFactory;
+		}
+	}
+
+	static class KeySelectingKeyManagerFactory extends KeyManagerFactory {
+
+		KeySelectingKeyManagerFactory(KeyManagerFactory factory,
+				KeyConfiguration keyConfiguration) {
+			super(new KeyManagerFactorySpi() {
+				@Override
+				protected void engineInit(KeyStore keyStore, char[] chars)
+						throws KeyStoreException, NoSuchAlgorithmException,
+						UnrecoverableKeyException {
+					factory.init(keyStore, chars);
+				}
+
+				@Override
+				protected void engineInit(
+						ManagerFactoryParameters managerFactoryParameters)
+						throws InvalidAlgorithmParameterException {
+					factory.init(managerFactoryParameters);
+				}
+
+				@Override
+				protected KeyManager[] engineGetKeyManagers() {
+
+					KeyManager[] keyManagers = factory.getKeyManagers();
+
+					if (keyManagers.length == 1
+							&& keyManagers[0] instanceof X509ExtendedKeyManager) {
+
+						return new KeyManager[] { new KeySelectingX509KeyManager(
+								(X509ExtendedKeyManager) keyManagers[0], keyConfiguration) };
+					}
+
+					return keyManagers;
+				}
+			}, factory.getProvider(), factory.getAlgorithm());
+		}
+	}
+
+	private static class KeySelectingX509KeyManager extends X509ExtendedKeyManager {
+
+		private final X509ExtendedKeyManager delegate;
+		private final KeyConfiguration keyConfiguration;
+
+		KeySelectingX509KeyManager(X509ExtendedKeyManager delegate,
+				KeyConfiguration keyConfiguration) {
+			this.delegate = delegate;
+			this.keyConfiguration = keyConfiguration;
+		}
+
+		@Override
+		public String[] getClientAliases(String keyType, Principal[] issuers) {
+			return delegate.getClientAliases(keyType, issuers);
+		}
+
+		@Override
+		public String chooseClientAlias(String[] keyType, Principal[] issuers,
+				Socket socket) {
+			return keyConfiguration.getKeyAlias();
+		}
+
+		public String chooseEngineClientAlias(String[] keyType, Principal[] issuers,
+				SSLEngine engine) {
+			return keyConfiguration.getKeyAlias();
+		}
+
+		@Override
+		public String[] getServerAliases(String keyType, Principal[] issuers) {
+			return delegate.getServerAliases(keyType, issuers);
+		}
+
+		@Override
+		public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
+			return delegate.chooseServerAlias(keyType, issuers, socket);
+		}
+
+		@Override
+		public X509Certificate[] getCertificateChain(String alias) {
+			return delegate.getCertificateChain(alias);
+		}
+
+		@Override
+		public PrivateKey getPrivateKey(String alias) {
+			return delegate.getPrivateKey(alias);
 		}
 	}
 }

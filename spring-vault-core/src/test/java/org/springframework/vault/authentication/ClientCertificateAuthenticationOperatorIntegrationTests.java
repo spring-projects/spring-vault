@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.test.StepVerifier;
 
+import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.TestWebClientFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -28,7 +28,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
-@Ignore("See https://github.com/spring-projects/spring-vault/issues/281 and https://github.com/reactor/reactor-netty/issues/407")
 public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 
@@ -42,5 +41,40 @@ public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
+	}
+
+	@Test
+	public void shouldSelectKey() {
+
+		WebClient webClient = TestWebClientFactory
+				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+						.of("changeit".toCharArray(), "1")));
+
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
+				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
+
+		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
+	}
+
+	@Test
+	public void shouldSelectInvalidKey() {
+
+		WebClient webClient = TestWebClientFactory
+				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+						.of("changeit".toCharArray(), "2")));
+
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
+				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
+
+		StepVerifier.create(operator.getVaultToken()).verifyError(
+				VaultLoginException.class);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void shouldProvideInvalidKeyPassword() {
+
+		TestWebClientFactory
+				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+						.of("wrong".toCharArray(), "1")));
 	}
 }

@@ -81,8 +81,9 @@ public class ClientHttpConnectorFactory {
 			}
 
 			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-				sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration
-						.getKeyStoreConfiguration()));
+				sslContextBuilder.keyManager(createKeyManagerFactory(
+						sslConfiguration.getKeyStoreConfiguration(),
+						sslConfiguration.getKeyConfiguration()));
 			}
 		}
 		catch (GeneralSecurityException | IOException e) {
