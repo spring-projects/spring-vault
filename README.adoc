@@ -29,8 +29,9 @@ Specifically for Spring applications:
 https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.appid[AppId],
 https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.approle[AppRole],
 https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.clientcert[Client Certificate],
-https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.cubbyhole[Cubbyhole], and
-https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.cubbyhole[Cubbyhole], 
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.awsec2[AWS-EC2] authentication, and
+https://docs.spring.io/spring-vault/docs/current/reference/html/#vault.authentication.awsiam[AWS-IAM] authentication
 * Bootstrap application context: a parent context for the main application that can be trained to do anything
 
 Spring Boot users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault Config], an optimized integration with Vault to provide encrypted Vault properties inside Spring Boot applications.
