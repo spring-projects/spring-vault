@@ -32,6 +32,9 @@ import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.AwsIamAuthentication;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AzureMsiAuthentication;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -52,6 +55,11 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.web.client.RestOperations;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Configuration using Spring's {@link org.springframework.core.env.Environment} to
@@ -232,6 +240,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			return appRoleAuthentication();
 		case AWS_EC2:
 			return awsEc2Authentication();
+		case AWS_IAM:
+			return awsIamAuthentication();
 		case AZURE:
 			return azureMsiAuthentication();
 		case CERT:
@@ -326,6 +336,67 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 				restOperations());
 	}
 
+	protected ClientAuthentication awsIamAuthentication() {
+
+		AWSCredentialsProvider credentialsProvider = AwsCredentialProvider
+				.getAwsCredentialsProvider();
+
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
+				.builder();
+
+		String roleId = getProperty("vault.aws-iam.role-id");
+		if (StringUtils.hasText(roleId )) {
+			builder.role(roleId);
+		}
+
+		String serverId = getProperty("vault.aws-iam.server-id");
+		if (StringUtils.hasText(serverId)) {
+			builder.serverName(serverId);
+		}
+
+		String awsPath = getProperty("vault.aws-iam.aws-path");
+		builder.path(awsPath)
+				.credentialsProvider(credentialsProvider);
+
+		AwsIamAuthenticationOptions options = builder
+				.credentialsProvider(credentialsProvider).build();
+
+		return new AwsIamAuthentication(options, restOperations());
+	}
+
+	private static class AwsCredentialProvider {
+
+		private static AWSCredentialsProvider getAwsCredentialsProvider() {
+
+			DefaultAWSCredentialsProviderChain backingCredentialsProvider = DefaultAWSCredentialsProviderChain
+					.getInstance();
+
+			// Eagerly fetch credentials preventing lag during the first, actual login.
+			AWSCredentials firstAccess = backingCredentialsProvider.getCredentials();
+
+			AtomicReference<AWSCredentials> once = new AtomicReference<>(firstAccess);
+
+			return new AWSCredentialsProvider() {
+
+				@Override
+				public AWSCredentials getCredentials() {
+
+					if (once.compareAndSet(firstAccess, null)) {
+						return firstAccess;
+					}
+
+					return backingCredentialsProvider.getCredentials();
+				}
+
+				@Override
+				public void refresh() {
+					backingCredentialsProvider.refresh();
+				}
+			};
+		}
+
+	}
+
 	protected ClientAuthentication azureMsiAuthentication() {
 
 		String roleId = getProperty("vault.azure-msi.role");
@@ -390,6 +461,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	}
 
 	enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AZURE, AWS_EC2, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPID, APPROLE, AZURE, AWS_EC2, AWS_IAM, CERT, CUBBYHOLE, KUBERNETES;
 	}
 }
