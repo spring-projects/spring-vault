@@ -26,7 +26,7 @@
 		<json-path.version>2.4.0</json-path.version>
 		<junit.version>4.12</junit.version>
 		<mockito-core.version>2.23.4</mockito-core.version>
-		<spring.version>5.1.5.RELEASE</spring.version>
+		<spring.version>5.2.0.M2</spring.version>
 		<spring-data-releasetrain.version>Lovelace-SR5</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.1.4.RELEASE</spring-security-bom.version>
 		<reactor.version>Dysprosium-M1</reactor.version>
