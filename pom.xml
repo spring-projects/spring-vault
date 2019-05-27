@@ -29,7 +29,7 @@
 		<spring.version>5.1.5.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Lovelace-SR5</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.1.4.RELEASE</spring-security-bom.version>
-		<reactor.version>Californium-SR5</reactor.version>
+		<reactor.version>Dysprosium-M1</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
