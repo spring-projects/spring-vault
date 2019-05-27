@@ -71,7 +71,7 @@ public class VaultRepositoryConfigurationExtension extends
 		RootBeanDefinition mappingContextDefinition = createVaultMappingContext(configurationSource);
 		mappingContextDefinition.setSource(configurationSource.getSource());
 
-		registerIfNotAlreadyRegistered(mappingContextDefinition, registry,
+		registerIfNotAlreadyRegistered(() -> mappingContextDefinition, registry,
 				VAULT_MAPPING_CONTEXT_BEAN_NAME, configurationSource);
 
 		// register Adapter
@@ -86,7 +86,7 @@ public class VaultRepositoryConfigurationExtension extends
 		vaultKeyValueAdapterDefinition
 				.setConstructorArgumentValues(constructorArgumentValuesForVaultKeyValueAdapter);
 
-		registerIfNotAlreadyRegistered(vaultKeyValueAdapterDefinition, registry,
+		registerIfNotAlreadyRegistered(() -> vaultKeyValueAdapterDefinition, registry,
 				VAULT_ADAPTER_BEAN_NAME, configurationSource);
 
 		Optional<String> keyValueTemplateName = configurationSource
@@ -97,10 +97,9 @@ public class VaultRepositoryConfigurationExtension extends
 				&& getDefaultKeyValueTemplateRef().equals(keyValueTemplateName.get())
 				&& !registry.containsBeanDefinition(keyValueTemplateName.get())) {
 
-			AbstractBeanDefinition beanDefinition = getDefaultKeyValueTemplateBeanDefinition(configurationSource);
-
-			registerIfNotAlreadyRegistered(beanDefinition, registry,
-					keyValueTemplateName.get(), configurationSource.getSource());
+			registerIfNotAlreadyRegistered(
+					() -> getDefaultKeyValueTemplateBeanDefinition(configurationSource),
+					registry, keyValueTemplateName.get(), configurationSource.getSource());
 		}
 
 		super.registerBeansForRoot(registry, configurationSource);
