@@ -50,13 +50,20 @@ public class VaultMount {
 	 */
 	private final Map<String, Object> config;
 
+	/**
+	 * Mount type specific options.
+	 */
+	private final Map<String, String> options;
+
 	VaultMount(@JsonProperty("type") String type,
 			@Nullable @JsonProperty("description") String description,
-			@Nullable @JsonProperty("config") Map<String, Object> config) {
+			@Nullable @JsonProperty("config") Map<String, Object> config,
+			@Nullable @JsonProperty("options") Map<String, String> options) {
 
 		this.type = type;
 		this.description = description;
 		this.config = config != null ? config : Collections.emptyMap();
+		this.options = options != null ? options : Collections.emptyMap();
 	}
 
 	/**
@@ -100,6 +107,14 @@ public class VaultMount {
 	}
 
 	/**
+	 * @return mount type specific options.
+	 */
+	@Nullable
+	public Map<String, String> getOptions() {
+		return options;
+	}
+
+	/**
 	 * Builder to build a {@link VaultMount}.
 	 */
 	public static class VaultMountBuilder {
@@ -111,6 +126,8 @@ public class VaultMount {
 		private String description;
 
 		private Map<String, Object> config = Collections.emptyMap();
+
+		private Map<String, String> options = Collections.emptyMap();
 
 		VaultMountBuilder() {
 		}
@@ -156,6 +173,20 @@ public class VaultMount {
 		}
 
 		/**
+		 * Set mount type specific options for this mount.
+		 *
+		 * @param options mount type specific options for this mount.
+		 * @return {@literal this} {@link VaultMountBuilder}.
+		 */
+		public VaultMountBuilder options(Map<String, String> options) {
+
+			Assert.notNull(options, "Options map must not be null");
+
+			this.options = options;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link VaultMount} instance. Requires {@link #type(String)} to be
 		 * configured.
 		 *
@@ -166,7 +197,7 @@ public class VaultMount {
 			Assert.notNull(type, "Type must not be null");
 			Assert.hasText(type, "Type must not be empty or null");
 
-			return new VaultMount(type, description, config);
+			return new VaultMount(type, description, config, options);
 		}
 	}
 }
