@@ -415,7 +415,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.1.5.BUILD-SNAPSHOT</spring.version>
+				<spring.version>5.2.0.BUILD-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
