@@ -15,9 +15,15 @@
  */
 package org.springframework.vault.repository.mapping;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.junit.Test;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.spel.ExtensionAwareEvaluationContextProvider;
+import org.springframework.data.spel.spi.EvaluationContextExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,6 +54,21 @@ public class BasicVaultPersistentEntityUnitTests {
 		assertThat(persistentEntity.getIdProperty()).isNotNull();
 	}
 
+	@Test
+	public void shouldEvaluateExpression() {
+
+		VaultPersistentEntity<?> persistentEntity = mappingContext
+				.getPersistentEntity(ExpressionEntity.class);
+
+		persistentEntity
+				.setEvaluationContextProvider(new ExtensionAwareEvaluationContextProvider(
+						Collections.singletonList(new SampleExtension())));
+
+		assertThat(persistentEntity.getSecretBackend()).isEqualTo("collectionName");
+
+		assertThat(persistentEntity.getKeySpace()).isEqualTo("collectionName/foo");
+	}
+
 	static class IdProperty {
 		String id, username;
 	}
@@ -57,4 +78,26 @@ public class BasicVaultPersistentEntityUnitTests {
 		String username;
 	}
 
+	@Secret(backend = "#{myProperty}", value = "#{myKeySpace}")
+	static class ExpressionEntity {
+		@Id
+		String username;
+	}
+
+	static class SampleExtension implements EvaluationContextExtension {
+
+		@Override
+		public String getExtensionId() {
+			return "sampleExtension";
+		}
+
+		@Override
+		public Map<String, Object> getProperties() {
+
+			Map<String, Object> properties = new LinkedHashMap<>();
+			properties.put("myProperty", "collectionName");
+			properties.put("myKeySpace", "foo");
+			return properties;
+		}
+	}
 }

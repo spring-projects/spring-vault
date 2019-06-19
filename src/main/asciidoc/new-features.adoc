@@ -4,6 +4,7 @@
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2
 * Support for Key-Value v2 (versioned backend) secrets through `@VaultPropertySource`.
+* SpEL support in `@Secret`.
 
 [[new-features.2-1-0]]
 === What's new in Spring Vault 2.1

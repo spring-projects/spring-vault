@@ -18,6 +18,11 @@ package org.springframework.vault.repository.mapping;
 import org.springframework.data.keyvalue.core.mapping.BasicKeyValuePersistentEntity;
 import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
 import org.springframework.data.util.TypeInformation;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.common.LiteralExpression;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,9 +35,13 @@ public class BasicVaultPersistentEntity<T> extends
 		BasicKeyValuePersistentEntity<T, VaultPersistentProperty> implements
 		VaultPersistentEntity<T> {
 
-	private final String keyspace;
+	private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
-	private final String secretBackend;
+	private final @Nullable String backend;
+	private final @Nullable Expression backendExpression;
+
+	private final @Nullable String keyspace;
+	private final @Nullable Expression keyspaceExpression;
 
 	/**
 	 * Creates new {@link BasicVaultPersistentEntity}.
@@ -46,26 +55,55 @@ public class BasicVaultPersistentEntity<T> extends
 
 		Secret annotation = findAnnotation(Secret.class);
 
-		String keyspace = super.getKeySpace();
-		String secretBackend = "secret";
+		if (annotation != null && StringUtils.hasText(annotation.backend())) {
 
-		if (annotation != null) {
-			if (StringUtils.hasText(annotation.backend())) {
-				secretBackend = annotation.backend();
-			}
+			this.backend = annotation.backend();
+			this.backendExpression = detectExpression(this.backend);
+
+			this.keyspace = super.getKeySpace();
+			this.keyspaceExpression = detectExpression(this.keyspace);
 		}
+		else {
+			this.backend = "secret";
+			this.backendExpression = null;
 
-		this.secretBackend = secretBackend;
-		this.keyspace = String.format("%s/%s", secretBackend, keyspace);
+			this.keyspace = super.getKeySpace();
+			this.keyspaceExpression = null;
+		}
+	}
+
+	/**
+	 * Returns a SpEL {@link Expression} if the given {@link String} is actually an
+	 * expression that does not evaluate to a {@link LiteralExpression} (indicating that
+	 * no subsequent evaluation is necessary).
+	 *
+	 * @param potentialExpression can be {@literal null}
+	 * @return
+	 */
+	@Nullable
+	private static Expression detectExpression(String potentialExpression) {
+
+		Expression expression = PARSER.parseExpression(potentialExpression,
+				ParserContext.TEMPLATE_EXPRESSION);
+		return expression instanceof LiteralExpression ? null : expression;
 	}
 
 	@Override
 	public String getKeySpace() {
-		return keyspace;
+		return String.format("%s/%s", getSecretBackend(), doGetKeySpace());
+	}
+
+	private String doGetKeySpace() {
+		return keyspaceExpression == null //
+		? keyspace //
+				: keyspaceExpression.getValue(getEvaluationContext(null), String.class);
 	}
 
 	@Override
 	public String getSecretBackend() {
-		return secretBackend;
+
+		return backendExpression == null //
+		? backend //
+				: backendExpression.getValue(getEvaluationContext(null), String.class);
 	}
 }

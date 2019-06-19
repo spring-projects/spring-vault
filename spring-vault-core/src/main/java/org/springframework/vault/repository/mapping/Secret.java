@@ -40,14 +40,17 @@ import org.springframework.data.keyvalue.annotation.KeySpace;
 public @interface Secret {
 
 	/**
-	 * The prefix to distinguish between domain types.
+	 * The prefix to distinguish between domain types. The attribute supports SpEL
+	 * expressions to dynamically calculate the keyspace based on a per-operation basis.
+	 *
 	 * @see KeySpace
 	 */
 	@AliasFor(annotation = KeySpace.class, attribute = "value")
 	String value() default "";
 
 	/**
-	 * Secret backend mount, defaults to {@literal secret}.
+	 * Secret backend mount, defaults to {@literal secret}. The attribute supports SpEL
+	 * expressions to dynamically calculate the backend based on a per-operation basis.
 	 */
 	String backend() default "secret";
 }
