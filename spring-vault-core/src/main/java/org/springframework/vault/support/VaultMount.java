@@ -108,6 +108,8 @@ public class VaultMount {
 
 	/**
 	 * @return mount type specific options.
+	 *
+	 * @since 2.2
 	 */
 	@Nullable
 	public Map<String, String> getOptions() {
@@ -177,6 +179,8 @@ public class VaultMount {
 		 *
 		 * @param options mount type specific options for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
+		 *
+		 * @since 2.2
 		 */
 		public VaultMountBuilder options(Map<String, String> options) {
 

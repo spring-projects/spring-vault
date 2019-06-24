@@ -152,6 +152,11 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 		VaultResponse response = doWrite(createDataPath(path), data);
 
+		if (response == null) {
+			throw new IllegalStateException(
+				"VaultVersionedKeyValueOperations cannot be used with a kv version 1 mount");
+		}
+
 		return getMetadata(response.getRequiredData());
 	}
 
