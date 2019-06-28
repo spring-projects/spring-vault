@@ -181,11 +181,7 @@ public class ClientHttpRequestFactoryFactory {
 			KeyStoreConfiguration keyStoreConfiguration, KeyConfiguration keyConfiguration)
 			throws GeneralSecurityException, IOException {
 
-		KeyStore keyStore = KeyStore.getInstance(StringUtils
-				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
-				.getStoreType() : KeyStore.getDefaultType());
-
-		loadKeyStore(keyStoreConfiguration, keyStore);
+		KeyStore keyStore = getKeyStore(keyStoreConfiguration);
 
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory
 				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
@@ -206,15 +202,23 @@ public class ClientHttpRequestFactoryFactory {
 		return keyManagerFactory;
 	}
 
+	static KeyStore getKeyStore(KeyStoreConfiguration keyStoreConfiguration)
+			throws KeyStoreException, IOException, NoSuchAlgorithmException,
+			CertificateException {
+
+		KeyStore keyStore = KeyStore.getInstance(StringUtils
+				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
+				.getStoreType() : KeyStore.getDefaultType());
+
+		loadKeyStore(keyStoreConfiguration, keyStore);
+		return keyStore;
+	}
+
 	static TrustManagerFactory createTrustManagerFactory(
 			KeyStoreConfiguration keyStoreConfiguration) throws GeneralSecurityException,
 			IOException {
 
-		KeyStore trustStore = KeyStore.getInstance(StringUtils
-				.hasText(keyStoreConfiguration.getStoreType()) ? keyStoreConfiguration
-				.getStoreType() : KeyStore.getDefaultType());
-
-		loadKeyStore(keyStoreConfiguration, trustStore);
+		KeyStore trustStore = getKeyStore(keyStoreConfiguration);
 
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
 				.getInstance(TrustManagerFactory.getDefaultAlgorithm());

@@ -16,7 +16,7 @@ too slow the data repository can also slow down or stop completely until network
 
 == Reactive Vault Client
 
-Spring Vault's reactive client support is built on top of <<vault.authentication.steps,composable authentication steps>> and Spring's functional `WebClient` via Reactor Netty, which features a fully non-blocking, event-driven HTTP client.
+Spring Vault's reactive client support is built on top of <<vault.authentication.steps,composable authentication steps>> and Spring's functional `WebClient` via Reactor Netty or Jetty, which feature both a fully non-blocking, event-driven HTTP client.
 
 It exposes `VaultTokenSupplier` as supplier of `VaultToken` to authenticate HTTP requests
 and `ReactiveVaultOperations` as the primary entry point. The core configuration of

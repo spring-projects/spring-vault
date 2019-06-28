@@ -6,12 +6,17 @@ Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Va
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
 
-Spring Vault supports following HTTP clients:
+Spring Vault supports following HTTP imperative clients:
 
 * Java's builtin `HttpURLConnection` (default client)
 * Apache Http Components
 * Netty
 * OkHttp 3
+
+Spring Vault's reactive integration supports the following reactive HTTP clients:
+
+* Reactor Netty
+* Jetty
 
 Using a specific client requires the according dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
@@ -61,6 +66,28 @@ dependencies to your project. You can omit the version number if using
 <dependency>
   <groupId>com.squareup.okhttp3</groupId>
   <artifactId>okhttp</artifactId>
+</dependency>
+----
+====
+
+.Reactor Netty
+====
+[source, xml]
+----
+<dependency>
+  <groupId>io.projectreactor.netty</groupId>
+  <artifactId>reactor-netty</artifactId>
+</dependency>
+----
+====
+
+.Jetty
+====
+[source, xml]
+----
+<dependency>
+  <groupId>org.eclipse.jetty</groupId>
+  <artifactId>jetty-reactive-httpclient</artifactId>
 </dependency>
 ----
 ====
