@@ -31,12 +31,12 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
-import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -92,11 +92,31 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
-		Assert.notNull(vaultTokenSupplier, "AuthenticationSupplier must not be null");
+		Assert.notNull(vaultTokenSupplier, "VaultTokenSupplier must not be null");
 
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = doCreateWebClient(endpointProvider, connector);
 		this.sessionClient = doCreateSessionWebClient(endpointProvider, connector);
+	}
+
+	/**
+	 * Create a new {@link ReactiveVaultTemplate} through a {@link WebClientBuilder}, and
+	 * {@link VaultTokenSupplier}.
+	 *
+	 * @param webClientBuilder must not be {@literal null}.
+	 * @param vaultTokenSupplier must not be {@literal null}
+	 * @since 2.2
+	 */
+	public ReactiveVaultTemplate(WebClientBuilder webClientBuilder,
+			VaultTokenSupplier vaultTokenSupplier) {
+
+		Assert.notNull(webClientBuilder, "WebClientBuilder must not be null");
+		Assert.notNull(vaultTokenSupplier, "VaultTokenSupplier must not be null");
+
+		this.vaultTokenSupplier = vaultTokenSupplier;
+		this.statelessClient = webClientBuilder.build();
+		this.sessionClient = webClientBuilder.build().mutate().filter(getSessionFilter())
+				.build();
 	}
 
 	/**
@@ -117,7 +137,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
-		return ReactiveVaultClients.createWebClient(endpointProvider, connector);
+		return WebClientBuilder.builder().httpConnector(connector)
+				.endpointProvider(endpointProvider).build();
 	}
 
 	/**
@@ -139,16 +160,21 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
-		ExchangeFilterFunction filter = ofRequestProcessor(request -> vaultTokenSupplier
-				.getVaultToken().map(token -> {
+		ExchangeFilterFunction filter = getSessionFilter();
+
+		return WebClientBuilder.builder().httpConnector(connector)
+				.endpointProvider(endpointProvider).filter(filter).build();
+	}
+
+	private ExchangeFilterFunction getSessionFilter() {
+
+		return ofRequestProcessor(request -> vaultTokenSupplier.getVaultToken().map(
+				token -> {
 
 					return ClientRequest.from(request).headers(headers -> {
 						headers.set(VaultHttpHeaders.VAULT_TOKEN, token.getToken());
 					}).build();
 				}));
-
-		return doCreateWebClient(endpointProvider, connector).mutate().filter(filter)
-				.build();
 	}
 
 	@Override

@@ -15,21 +15,10 @@
  */
 package org.springframework.vault.config;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-
-import io.netty.channel.ChannelOption;
-import io.netty.handler.ssl.SslContextBuilder;
-import reactor.netty.http.client.HttpClient;
-
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-
-import static org.springframework.vault.config.ClientHttpRequestFactoryFactory.createKeyManagerFactory;
-import static org.springframework.vault.config.ClientHttpRequestFactoryFactory.createTrustManagerFactory;
-import static org.springframework.vault.config.ClientHttpRequestFactoryFactory.hasSslConfiguration;
 
 /**
  * Factory for {@link ClientHttpConnector} that supports
@@ -37,7 +26,11 @@ import static org.springframework.vault.config.ClientHttpRequestFactoryFactory.h
  *
  * @author Mark Paluch
  * @since 2.0
+ * @deprecated since 2.2, use
+ * {@link org.springframework.vault.client.ClientHttpConnectorFactory} as the
+ * functionality was moved to the {@code org.springframework.vault.client} package.
  */
+@Deprecated
 public class ClientHttpConnectorFactory {
 
 	/**
@@ -50,44 +43,7 @@ public class ClientHttpConnectorFactory {
 	 */
 	public static ClientHttpConnector create(ClientOptions options,
 			SslConfiguration sslConfiguration) {
-
-		HttpClient client = HttpClient.create();
-
-		if (hasSslConfiguration(sslConfiguration)) {
-
-			SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
-			configureSsl(sslConfiguration, sslContextBuilder);
-
-			client = client.secure(builder -> {
-				builder.sslContext(sslContextBuilder);
-			});
-		}
-
-		client = client.tcpConfiguration(it -> it.option(
-				ChannelOption.CONNECT_TIMEOUT_MILLIS,
-				Math.toIntExact(options.getConnectionTimeout().toMillis())));
-
-		return new ReactorClientHttpConnector(client);
-	}
-
-	private static void configureSsl(SslConfiguration sslConfiguration,
-			SslContextBuilder sslContextBuilder) {
-
-		try {
-
-			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-				sslContextBuilder.trustManager(createTrustManagerFactory(sslConfiguration
-						.getTrustStoreConfiguration()));
-			}
-
-			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-				sslContextBuilder.keyManager(createKeyManagerFactory(
-						sslConfiguration.getKeyStoreConfiguration(),
-						sslConfiguration.getKeyConfiguration()));
-			}
-		}
-		catch (GeneralSecurityException | IOException e) {
-			throw new IllegalStateException(e);
-		}
+		return org.springframework.vault.client.ClientHttpConnectorFactory.create(
+				options, sslConfiguration);
 	}
 }

@@ -25,14 +25,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.SimpleSessionManager;
+import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -125,6 +126,28 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
+	 * Create a new {@link VaultTemplate} through a {@link RestTemplateBuilder} and
+	 * {@link SessionManager}.
+	 *
+	 * @param restTemplateBuilder must not be {@literal null}.
+	 * @param sessionManager must not be {@literal null}.
+	 * @since 2.2
+	 */
+	public VaultTemplate(RestTemplateBuilder restTemplateBuilder,
+			SessionManager sessionManager) {
+
+		Assert.notNull(restTemplateBuilder, "RestTemplateBuilder must not be null");
+		Assert.notNull(sessionManager, "SessionManager must not be null");
+
+		this.sessionManager = sessionManager;
+		this.dedicatedSessionManager = false;
+
+		this.statelessTemplate = restTemplateBuilder.build();
+		this.sessionTemplate = restTemplateBuilder.build();
+		this.sessionTemplate.getInterceptors().add(getSessionInterceptor());
+	}
+
+	/**
 	 * Create a {@link RestTemplate} to be used by {@link VaultTemplate} for Vault
 	 * communication given {@link VaultEndpointProvider} and
 	 * {@link ClientHttpRequestFactory}. {@link VaultEndpointProvider} is used to
@@ -139,10 +162,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	protected RestTemplate doCreateRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
-		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
-
-		return VaultClients.createRestTemplate(endpointProvider, requestFactory);
+		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
+				.requestFactory(requestFactory).build();
 	}
 
 	/**
@@ -162,23 +183,26 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
-		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+		return RestTemplateBuilder
+				.builder()
+				.endpointProvider(endpointProvider)
+				.requestFactory(requestFactory)
+				.customizer(
+						restTemplate -> restTemplate.getInterceptors().add(
+								getSessionInterceptor())).build();
+	}
 
-		RestTemplate restTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
+	private ClientHttpRequestInterceptor getSessionInterceptor() {
 
-		restTemplate.getInterceptors().add(
-				(request, body, execution) -> {
+		return (request, body, execution) -> {
 
-					Assert.notNull(sessionManager, "SessionManager must not be null");
+			Assert.notNull(sessionManager, "SessionManager must not be null");
 
-					request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
-							sessionManager.getSessionToken().getToken());
+			request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
+					sessionManager.getSessionToken().getToken());
 
-					return execution.execute(request, body);
-				});
-
-		return restTemplate;
+			return execution.execute(request, body);
+		};
 	}
 
 	/**

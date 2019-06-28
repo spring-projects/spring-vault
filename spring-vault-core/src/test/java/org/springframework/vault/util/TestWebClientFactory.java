@@ -17,9 +17,9 @@ package org.springframework.vault.util;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.config.ClientHttpConnectorFactory;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -46,8 +46,7 @@ public class TestWebClientFactory {
 		try {
 			ClientHttpConnector connector = ClientHttpConnectorFactory.create(
 					new ClientOptions(), sslConfiguration);
-			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT,
- connector);
+			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT, connector);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);

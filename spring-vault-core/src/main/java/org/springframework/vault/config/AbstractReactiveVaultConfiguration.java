@@ -33,7 +33,10 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.VaultEndpointProvider;
+import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
@@ -63,6 +66,21 @@ public abstract class AbstractReactiveVaultConfiguration extends
 		AbstractVaultConfiguration {
 
 	/**
+	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
+	 * and {@link ClientHttpConnector}. May be overridden by subclasses.
+	 *
+	 * @return the {@link WebClientBuilder}.
+	 * @see #vaultEndpointProvider()
+	 * @see #clientHttpConnector()
+	 * @since 2.2
+	 */
+	protected WebClientBuilder webClientBuilder(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector httpConnector) {
+		return WebClientBuilder.builder().endpointProvider(endpointProvider)
+				.httpConnector(httpConnector);
+	}
+
+	/**
 	 * Create a {@link ReactiveVaultTemplate}.
 	 *
 	 * @return the {@link ReactiveVaultTemplate}.
@@ -72,8 +90,8 @@ public abstract class AbstractReactiveVaultConfiguration extends
 	 */
 	@Bean
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
-		return new ReactiveVaultTemplate(vaultEndpoint(), clientHttpConnector(),
-				reactiveSessionManager());
+		return new ReactiveVaultTemplate(webClientBuilder(vaultEndpointProvider(),
+				clientHttpConnector()), reactiveSessionManager());
 	}
 
 	/**

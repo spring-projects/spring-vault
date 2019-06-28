@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault.config;
+package org.springframework.vault.client;
 
 import org.junit.Test;
 
@@ -25,10 +25,9 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory.HttpComponents;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory.Netty;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory.OkHttp3;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory.HttpComponents;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory.Netty;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory.OkHttp3;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.util.Settings;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -95,8 +94,8 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET,
-					null, String.class);
+			ResponseEntity<String> responseEntity = template.exchange(url,
+					HttpMethod.GET, null, String.class);
 			return responseEntity.getBody();
 		}
 		catch (HttpStatusCodeException e) {

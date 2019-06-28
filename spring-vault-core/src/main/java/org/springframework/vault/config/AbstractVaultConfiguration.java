@@ -30,6 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
@@ -76,6 +78,22 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public abstract ClientAuthentication clientAuthentication();
 
 	/**
+	 * Create a {@link RestTemplateBuilder} initialized with {@link VaultEndpointProvider}
+	 * and {@link ClientHttpRequestFactory}. May be overridden by subclasses.
+	 *
+	 * @return the {@link RestTemplateBuilder}.
+	 * @see #vaultEndpointProvider()
+	 * @see #clientHttpRequestFactoryWrapper()
+	 * @since 2.2
+	 */
+	protected RestTemplateBuilder restTemplateBuilder(
+			VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory) {
+		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
+				.requestFactory(requestFactory);
+	}
+
+	/**
 	 * Create a {@link VaultTemplate}.
 	 *
 	 * @return the {@link VaultTemplate}.
@@ -85,8 +103,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-		return new VaultTemplate(vaultEndpointProvider(),
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory(),
+		return new VaultTemplate(restTemplateBuilder(vaultEndpointProvider(),
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory()),
 				sessionManager());
 	}
 

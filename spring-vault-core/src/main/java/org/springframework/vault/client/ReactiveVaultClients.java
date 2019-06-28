@@ -73,6 +73,26 @@ public class ReactiveVaultClients {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
+		return createWebClientBuilder(endpointProvider, connector).build();
+	}
+
+	/**
+	 * Create a {@link WebClient.Builder} configured with {@link VaultEndpoint} and
+	 * {@link ClientHttpConnector}. The client accepts relative URIs without a leading
+	 * slash that are expanded to use {@link VaultEndpoint}.
+	 * <p>
+	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @return the prepared {@link WebClient.Builder}.
+	 */
+	static WebClient.Builder createWebClientBuilder(
+			VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(connector, "ClientHttpConnector must not be null");
+
 		UriBuilderFactory uriBuilderFactory = VaultClients
 				.createUriBuilderFactory(endpointProvider);
 
@@ -83,7 +103,7 @@ public class ReactiveVaultClients {
 
 					cc.decoder(new ByteArrayDecoder());
 					cc.decoder(new Jackson2JsonDecoder());
-					cc.decoder(StringDecoder.allMimeTypes(false));
+					cc.decoder(StringDecoder.allMimeTypes());
 
 					cc.encoder(new ByteArrayEncoder());
 					cc.encoder(new Jackson2JsonEncoder());
@@ -91,7 +111,7 @@ public class ReactiveVaultClients {
 				}).build();
 
 		return WebClient.builder().uriBuilderFactory(uriBuilderFactory)
-				.exchangeStrategies(strategies).clientConnector(connector).build();
+				.exchangeStrategies(strategies).clientConnector(connector);
 	}
 
 	/**
