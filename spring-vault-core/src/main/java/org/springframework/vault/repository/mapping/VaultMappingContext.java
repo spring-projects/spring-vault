@@ -69,7 +69,7 @@ public class VaultMappingContext extends
 		@Override
 		public String resolveKeySpace(Class<?> type) {
 
-			Assert.notNull(type, "Type must not be null!");
+			Assert.notNull(type, "Type must not be null");
 			return StringUtils
 					.uncapitalize(ClassUtils.getUserClass(type).getSimpleName());
 		}

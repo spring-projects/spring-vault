@@ -48,7 +48,7 @@ class SecretDocumentAccessor {
 	 */
 	SecretDocumentAccessor(SecretDocument document) {
 
-		Assert.notNull(document, "SecretDocument must not be null!");
+		Assert.notNull(document, "SecretDocument must not be null");
 
 		this.document = document;
 		this.body = document.getBody();
@@ -64,8 +64,8 @@ class SecretDocumentAccessor {
 	 */
 	private SecretDocumentAccessor(SecretDocument document, Map<String, Object> body) {
 
-		Assert.notNull(document, "SecretDocument must not be null!");
-		Assert.notNull(body, "Body must not be null!");
+		Assert.notNull(document, "SecretDocument must not be null");
+		Assert.notNull(body, "Body must not be null");
 
 		this.document = document;
 		this.body = body;
@@ -82,7 +82,7 @@ class SecretDocumentAccessor {
 	 */
 	void put(VaultPersistentProperty prop, @Nullable Object value) {
 
-		Assert.notNull(prop, "VaultPersistentProperty must not be null!");
+		Assert.notNull(prop, "VaultPersistentProperty must not be null");
 		String fieldName = prop.getName();
 
 		if (prop.isIdProperty()) {
@@ -158,7 +158,7 @@ class SecretDocumentAccessor {
 	 */
 	boolean hasValue(VaultPersistentProperty property) {
 
-		Assert.notNull(property, "Property must not be null!");
+		Assert.notNull(property, "Property must not be null");
 
 		if (property.isIdProperty()) {
 			return StringUtils.hasText(this.document.getId());

@@ -348,7 +348,7 @@ public class Versioned<T> {
 			 */
 			public MetadataBuilder version(Version version) {
 
-				Assert.notNull(version, "Version must not be null!");
+				Assert.notNull(version, "Version must not be null");
 
 				this.version = version;
 				return this;

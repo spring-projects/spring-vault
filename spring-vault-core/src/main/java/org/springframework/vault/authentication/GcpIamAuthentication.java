@@ -105,9 +105,9 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 		super(restOperations);
 
-		Assert.notNull(options, "GcpIamAuthenticationOptions must not be null!");
-		Assert.notNull(restOperations, "RestOperations must not be null!");
-		Assert.notNull(httpTransport, "HttpTransport must not be null!");
+		Assert.notNull(options, "GcpIamAuthenticationOptions must not be null");
+		Assert.notNull(restOperations, "RestOperations must not be null");
+		Assert.notNull(httpTransport, "HttpTransport must not be null");
 
 		this.options = options;
 		this.httpTransport = httpTransport;

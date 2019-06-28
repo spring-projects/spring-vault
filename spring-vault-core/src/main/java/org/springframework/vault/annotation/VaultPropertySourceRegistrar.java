@@ -103,8 +103,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 	public void registerBeanDefinitions(AnnotationMetadata annotationMetadata,
 			BeanDefinitionRegistry registry) {
 
-		Assert.notNull(annotationMetadata, "AnnotationMetadata must not be null!");
-		Assert.notNull(registry, "BeanDefinitionRegistry must not be null!");
+		Assert.notNull(annotationMetadata, "AnnotationMetadata must not be null");
+		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 
 		if (!registry.isBeanNameInUse("VaultPropertySourceRegistrar")) {
 			registry.registerBeanDefinition("VaultPropertySourceRegistrar",

@@ -263,7 +263,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object readCollectionOrArray(TypeInformation<?> targetType, List sourceValue) {
 
-		Assert.notNull(targetType, "Target type must not be null!");
+		Assert.notNull(targetType, "Target type must not be null");
 
 		Class<?> collectionType = targetType.getType();
 
@@ -301,7 +301,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * Reads the given {@link Map} into a {@link Map}. will recursively resolve nested
 	 * {@link Map}s as well.
 	 *
-	 * @param type the {@link Map} {@link TypeInformation} to be used to unmarshall this
+	 * @param type the {@link Map} {@link TypeInformation} to be used to unmarshal this
 	 * {@link Map}.
 	 * @param sourceMap must not be {@literal null}
 	 * @return
@@ -310,7 +310,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	protected Map<Object, Object> readMap(TypeInformation<?> type,
 			Map<String, Object> sourceMap) {
 
-		Assert.notNull(sourceMap, "Source map must not be null!");
+		Assert.notNull(sourceMap, "Source map must not be null");
 
 		Class<?> mapType = typeMapper.readType(sourceMap, type).getType();
 
@@ -593,8 +593,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	protected Map<String, Object> createMap(Map<Object, Object> map,
 			VaultPersistentProperty property) {
 
-		Assert.notNull(map, "Given map must not be null!");
-		Assert.notNull(property, "PersistentProperty must not be null!");
+		Assert.notNull(map, "Given map must not be null");
+		Assert.notNull(property, "PersistentProperty must not be null");
 
 		return writeMapInternal(map, new LinkedHashMap<>(), property.getTypeInformation());
 	}

@@ -147,7 +147,7 @@ public abstract class VaultResponses {
 	@SuppressWarnings("unchecked")
 	public static String getError(String json) {
 
-		Assert.notNull(json, "Error JSON must not be null!");
+		Assert.notNull(json, "Error JSON must not be null");
 
 		if (json.contains("\"errors\":")) {
 
