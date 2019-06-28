@@ -30,6 +30,7 @@ import org.springframework.util.Assert;
  * Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
+ * @author Maciej Drozdzowski
  * @see #builder()
  */
 public class VaultMount {
@@ -108,7 +109,6 @@ public class VaultMount {
 
 	/**
 	 * @return mount type specific options.
-	 *
 	 * @since 2.2
 	 */
 	@Nullable
@@ -179,7 +179,6 @@ public class VaultMount {
 		 *
 		 * @param options mount type specific options for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
-		 *
 		 * @since 2.2
 		 */
 		public VaultMountBuilder options(Map<String, String> options) {

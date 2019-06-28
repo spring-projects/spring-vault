@@ -37,7 +37,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.VaultRule;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.READ;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.UPDATE;
@@ -46,6 +46,7 @@ import static org.springframework.vault.support.Policy.BuiltinCapabilities.UPDAT
  * Integration tests for {@link VaultSysTemplate} through {@link VaultSysOperations}.
  *
  * @author Mark Paluch
+ * @author Maciej Drozdzowski
  */
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -103,16 +104,16 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void mountShouldMountKv1Secret() {
 
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(
-			VaultRule.VERSIONING_INTRODUCED_WITH));
+		assumeTrue(vaultVersion
+				.isGreaterThanOrEqualTo(VaultRule.VERSIONING_INTRODUCED_WITH));
 
 		if (adminOperations.getMounts().containsKey("kVv1/")) {
 			adminOperations.unmount("kVv1");
 		}
 
 		VaultMount mount = VaultMount.builder().type("kv")
-			.config(Collections.singletonMap("default_lease_ttl",  "1h"))
-			.description("hello, world").build();
+				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.description("hello, world").build();
 
 		adminOperations.mount("kVv1", mount);
 
@@ -125,9 +126,6 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(kVv1.getConfig()).containsEntry("default_lease_ttl", 3600);
 		assertThat(kVv1.getType()).isEqualTo("kv");
 
-		// a versioned write (kv put) will fail for a kv (default version: 1, not versioned) store
-		// make sure regular VaultTemplate.write/read operations work
-
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
@@ -138,17 +136,17 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	public void mountShouldMountKv2Secret() {
 
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(
-			VaultRule.VERSIONING_INTRODUCED_WITH));
+		assumeTrue(vaultVersion
+				.isGreaterThanOrEqualTo(VaultRule.VERSIONING_INTRODUCED_WITH));
 
 		if (adminOperations.getMounts().containsKey("kVv2/")) {
 			adminOperations.unmount("kVv2");
 		}
 
 		VaultMount mount = VaultMount.builder().type("kv")
-			.config(Collections.singletonMap("default_lease_ttl", "1h"))
-			.options(Collections.singletonMap("version", "2"))
-			.description("hello, world").build();
+				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.options(Collections.singletonMap("version", "2"))
+				.description("hello, world").build();
 
 		adminOperations.mount("kVv2", mount);
 
@@ -162,12 +160,12 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(kVv2.getType()).isEqualTo("kv");
 		assertThat(kVv2.getOptions()).containsEntry("version", "2");
 
-		VaultVersionedKeyValueOperations versionedOperations =
-			vaultOperations.opsForVersionedKeyValue("kVv2");
+		VaultVersionedKeyValueOperations versionedOperations = vaultOperations
+				.opsForVersionedKeyValue("kVv2");
 
 		versionedOperations.put("secret/mykey", Collections.singletonMap("key", "value"));
-		assertThat(versionedOperations.get("secret/mykey").getData())
-			.containsEntry("key", "value");
+		assertThat(versionedOperations.get("secret/mykey").getData()).containsEntry(
+				"key", "value");
 	}
 
 	@Test

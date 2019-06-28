@@ -45,6 +45,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * Default implementation of {@link VaultVersionedKeyValueOperations}.
  *
  * @author Mark Paluch
+ * @author Maciej Drozdzowski
  * @since 2.1
  */
 public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements
@@ -97,8 +98,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		VersionedResponse response = vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				return restOperations.exchange(secretPath, HttpMethod.GET,
- null,
+				return restOperations.exchange(secretPath, HttpMethod.GET, null,
 						VersionedResponse.class).getBody();
 			}
 			catch (HttpStatusCodeException e) {
@@ -154,7 +154,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 		if (response == null) {
 			throw new IllegalStateException(
-				"VaultVersionedKeyValueOperations cannot be used with a kv version 1 mount");
+					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount");
 		}
 
 		return getMetadata(response.getRequiredData());
