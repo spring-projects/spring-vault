@@ -25,6 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -34,6 +35,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.vault.authentication.event.AfterLoginEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.LoginFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -49,6 +61,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
@@ -69,12 +82,23 @@ public class LifecycleAwareSessionManagerUnitTests {
 	@Mock
 	private RestOperations restOperations;
 
+	@Mock
+	private AuthenticationListener listener;
+
+	@Mock
+	private AuthenticationErrorListener errorListener;
+
+	@Captor
+	private ArgumentCaptor<AuthenticationEvent> captor;
+
 	private LifecycleAwareSessionManager sessionManager;
 
 	@Before
 	public void before() {
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
 				taskScheduler, restOperations);
+		sessionManager.addAuthenticationListener(listener);
+		sessionManager.addErrorListener(errorListener);
 	}
 
 	@Test
@@ -83,6 +107,18 @@ public class LifecycleAwareSessionManagerUnitTests {
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
 		assertThat(sessionManager.getSessionToken()).isEqualTo(LoginToken.of("login"));
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+	}
+
+	@Test
+	public void loginShouldFail() {
+
+		when(clientAuthentication.login()).thenThrow(new VaultLoginException("foo"));
+
+		assertThatThrownBy(() -> sessionManager.getSessionToken()).isInstanceOf(
+				VaultLoginException.class);
+		verifyZeroInteractions(listener);
+		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
 
 	@Test
@@ -105,6 +141,10 @@ public class LifecycleAwareSessionManagerUnitTests {
 		verify(restOperations).exchange(eq("auth/token/lookup-self"), eq(HttpMethod.GET),
 				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
 				any(Class.class));
+
+		verify(listener).onAuthenticationEvent(captor.capture());
+		AfterLoginEvent event = (AfterLoginEvent) captor.getValue();
+		assertThat(event.getSource()).isSameAs(sessionToken);
 	}
 
 	@Test
@@ -123,6 +163,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		VaultToken sessionToken = sessionManager.getSessionToken();
 		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(errorListener).onAuthenticationError(any());
 	}
 
 	@Test
@@ -150,11 +192,13 @@ public class LifecycleAwareSessionManagerUnitTests {
 		sessionManager.renewToken();
 		sessionManager.destroy();
 
-		verify(restOperations)
-				.postForObject(
-						eq("auth/token/revoke-self"),
-						eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken
-								.of("login")))), any(Class.class));
+		verify(restOperations).postForObject(eq("auth/token/revoke-self"),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
+				any(Class.class));
+
+		verify(listener)
+				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
 	}
 
 	@Test
@@ -167,6 +211,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 		sessionManager.destroy();
 
 		verifyZeroInteractions(restOperations);
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(listener);
 	}
 
 	@Test
@@ -182,11 +228,15 @@ public class LifecycleAwareSessionManagerUnitTests {
 		sessionManager.renewToken();
 		sessionManager.destroy();
 
-		verify(restOperations)
-				.postForObject(
-						eq("auth/token/revoke-self"),
-						eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken
-								.of("login")))), any(Class.class));
+		verify(restOperations).postForObject(eq("auth/token/revoke-self"),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
+				any(Class.class));
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(listener)
+				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verifyNoMoreInteractions(listener);
+		verify(errorListener).onAuthenticationError(
+				any(LoginTokenRevocationFailedEvent.class));
 	}
 
 	@Test
@@ -205,6 +255,10 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(
+						fromToken(LoginToken.of("foo".toCharArray(),
+								Duration.ofSeconds(10))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -218,6 +272,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken.renewable(
 						"login", 5)))), any(Class.class));
 		verify(clientAuthentication, times(1)).login();
+		verify(listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
+		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
 	}
 
 	@Test
@@ -280,6 +336,8 @@ public class LifecycleAwareSessionManagerUnitTests {
 				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
 
 		verify(clientAuthentication, times(2)).login();
+		verify(listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
 	}
 
 	@Test

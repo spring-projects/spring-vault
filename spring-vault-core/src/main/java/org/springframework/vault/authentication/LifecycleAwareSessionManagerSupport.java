@@ -41,7 +41,8 @@ import org.springframework.vault.support.VaultToken;
  * @author Mark Paluch
  * @since 2.0
  */
-public abstract class LifecycleAwareSessionManagerSupport {
+public abstract class LifecycleAwareSessionManagerSupport extends
+		AuthenticationEventPublisher {
 
 	/**
 	 * Refresh 5 seconds before the token expires.

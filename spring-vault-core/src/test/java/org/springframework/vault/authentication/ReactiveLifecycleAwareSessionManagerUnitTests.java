@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import reactor.core.publisher.Mono;
@@ -31,6 +32,16 @@ import reactor.test.StepVerifier;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.vault.authentication.event.AfterLoginEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.LoginFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -47,6 +58,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -81,6 +94,15 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	@Mock
 	ResponseSpec responseSpec;
 
+	@Mock
+	private AuthenticationListener listener;
+
+	@Mock
+	private AuthenticationErrorListener errorListener;
+
+	@Captor
+	private ArgumentCaptor<AuthenticationEvent> captor;
+
 	private ReactiveLifecycleAwareSessionManager sessionManager;
 
 	@Before
@@ -100,6 +122,8 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		sessionManager = new ReactiveLifecycleAwareSessionManager(tokenSupplier,
 				taskScheduler, webClient);
+		sessionManager.addAuthenticationListener(listener);
+		sessionManager.addErrorListener(errorListener);
 	}
 
 	@Test
@@ -109,6 +133,18 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		sessionManager.getSessionToken().as(StepVerifier::create)
 				.expectNext(LoginToken.of("login")).verifyComplete();
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+	}
+
+	@Test
+	public void loginShouldFail() {
+
+		when(tokenSupplier.getVaultToken()).thenReturn(
+				Mono.error(new VaultLoginException("foo")));
+
+		sessionManager.getSessionToken().as(StepVerifier::create).verifyError();
+		verifyZeroInteractions(listener);
+		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
 
 	@Test
@@ -134,6 +170,9 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 						}).verifyComplete();
 
 		verify(webClient.get()).uri("auth/token/lookup-self");
+		verify(listener).onAuthenticationEvent(captor.capture());
+		AfterLoginEvent event = (AfterLoginEvent) captor.getValue();
+		assertThat(event.getSource()).isInstanceOf(LoginToken.class);
 	}
 
 	@Test
@@ -152,6 +191,8 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 		sessionManager.getSessionToken().as(StepVerifier::create).assertNext(it -> {
 			assertThat(it).isExactlyInstanceOf(VaultToken.class);
 		}).verifyComplete();
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(errorListener).onAuthenticationError(any());
 	}
 
 	@Test
@@ -181,6 +222,26 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	@Test
 	public void shouldRevokeLoginTokenOnDestroy() {
 
+		VaultResponse vaultResponse = new VaultResponse();
+		vaultResponse.setData(Collections.singletonMap("ttl", 100));
+
+		mockToken(LoginToken.of("login"));
+		when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("OK"));
+
+		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
+				.verifyComplete();
+
+		sessionManager.destroy();
+
+		verify(webClient.post()).uri("auth/token/revoke-self");
+		verify(listener)
+				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
+	}
+
+	@Test
+	public void shouldNotRevokeRegularTokenOnDestroy() {
+
 		mockToken(VaultToken.of("login"));
 
 		sessionManager.setTokenSelfLookupEnabled(false);
@@ -190,6 +251,8 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		verify(webClient, never()).post();
 		verify(webClient.post(), never()).uri("auth/token/revoke-self");
+		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(listener);
 	}
 
 	@Test
@@ -245,6 +308,8 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 		verify(webClient.post()).uri("auth/token/renew-self");
 
 		verify(tokenSupplier, times(1)).getVaultToken();
+		verify(listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
+		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
 	}
 
 	@Test
@@ -313,6 +378,8 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 				.verifyComplete();
 
 		verify(tokenSupplier, times(2)).getVaultToken();
+		verify(listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
 	}
 
 	@Test

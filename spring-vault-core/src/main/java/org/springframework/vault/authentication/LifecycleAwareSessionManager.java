@@ -27,6 +27,19 @@ import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.event.AfterLoginEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.LoginFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -54,6 +67,10 @@ import org.springframework.web.client.RestOperations;
  * By default, {@link VaultToken} are looked up in Vault to determine renewability and the
  * remaining TTL, see {@link #setTokenSelfLookupEnabled(boolean)}.
  * <p>
+ * The session manager dispatches authentication events to {@link AuthenticationListener}
+ * and {@link AuthenticationErrorListener}. Event notifications are dispatched either on
+ * the calling {@link Thread} or worker threads used for background renewal.
+ * <p>
  * This class is thread-safe.
  *
  * @author Mark Paluch
@@ -61,6 +78,7 @@ import org.springframework.web.client.RestOperations;
  * @see LoginToken
  * @see SessionManager
  * @see TaskScheduler
+ * @see AuthenticationEventPublisher
  */
 public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSupport
 		implements SessionManager, DisposableBean {
@@ -161,14 +179,14 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	protected void revoke(VaultToken token) {
 
 		try {
+			dispatch(new BeforeLoginTokenRevocationEvent(token));
 			restOperations.postForObject("auth/token/revoke-self", new HttpEntity<>(
 					VaultHttpHeaders.from(token)), Map.class);
-		}
-		catch (HttpStatusCodeException e) {
-			logger.warn(format("Cannot revoke VaultToken", e));
+			dispatch(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
 			logger.warn("Cannot revoke VaultToken: %s", e);
+			dispatch(new LoginTokenRevocationFailedEvent(token, e));
 		}
 	}
 
@@ -191,8 +209,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			return false;
 		}
 
+		TokenWrapper tokenWrapper = token.get();
 		try {
-			return doRenew(token.get());
+			return doRenew(tokenWrapper);
 		}
 		catch (HttpStatusCodeException e) {
 
@@ -201,7 +220,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			String message = "Cannot renew token, resetting token and performing re-login";
 
 			if (e.getStatusCode().is4xxClientError()) {
+
 				logger.warn(format(message, e));
+				dispatch(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), e));
 				return false;
 			}
 
@@ -222,6 +243,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 	private boolean doRenew(TokenWrapper wrapper) {
 
+		dispatch(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
 		VaultResponse vaultResponse = restOperations.postForObject(
 				"auth/token/renew-self",
 				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)),
@@ -229,10 +251,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getRequiredAuth());
 
-		Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(renewed);
-		if (renewed.getLeaseDuration().compareTo(validTtlThreshold) <= 0) {
+		if (isExpired(renewed)) {
 
 			if (logger.isDebugEnabled()) {
+				Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(
+						renewed);
 				logger.info(String
 						.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
 								renewed.getLeaseDuration(), validTtlThreshold));
@@ -242,10 +265,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 
 			setToken(Optional.empty());
+			dispatch(new LoginTokenExpiredEvent(renewed));
 			return false;
 		}
 
 		setToken(Optional.of(new TokenWrapper(renewed, wrapper.revocable)));
+		dispatch(new AfterLoginTokenRenewedEvent(renewed));
 
 		return true;
 	}
@@ -269,7 +294,15 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 	private void doGetSessionToken() {
 
-		VaultToken token = clientAuthentication.login();
+		VaultToken token;
+
+		try {
+			token = clientAuthentication.login();
+		}
+		catch (VaultException e) {
+			dispatch(new LoginFailedEvent(clientAuthentication, e));
+			throw e;
+		}
 
 		TokenWrapper wrapper = new TokenWrapper(token, token instanceof LoginToken);
 
@@ -283,10 +316,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			catch (VaultTokenLookupException e) {
 				logger.warn(String.format(
 						"Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
+				dispatch(new AuthenticationErrorEvent(token, e));
 			}
 		}
 
 		setToken(Optional.of(wrapper));
+		dispatch(new AfterLoginEvent(token));
 
 		if (isTokenRenewable()) {
 			scheduleRenewal();
@@ -318,8 +353,16 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		logger.info("Scheduling Token renewal");
 
 		Runnable task = () -> {
+			Optional<TokenWrapper> tokenWrapper = getToken();
+
+			if (!tokenWrapper.isPresent()) {
+				return;
+			}
+
+			VaultToken token = tokenWrapper.get().getToken();
+
 			try {
-				if (getToken().isPresent() && isTokenRenewable()) {
+				if (isTokenRenewable()) {
 					if (renewToken()) {
 						scheduleRenewal();
 					}
@@ -327,6 +370,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 			catch (Exception e) {
 				logger.error("Cannot renew VaultToken", e);
+				dispatch(new LoginTokenRenewalFailedEvent(token, e));
 			}
 		};
 

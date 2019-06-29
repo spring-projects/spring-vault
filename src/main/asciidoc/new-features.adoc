@@ -6,6 +6,7 @@
 * Support for Key-Value v2 (versioned backend) secrets through `@VaultPropertySource`.
 * SpEL support in `@Secret`.
 * Add support for Jetty as reactive HttpClient.
+* `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
 
 [[new-features.2-1-0]]
 === What's new in Spring Vault 2.1

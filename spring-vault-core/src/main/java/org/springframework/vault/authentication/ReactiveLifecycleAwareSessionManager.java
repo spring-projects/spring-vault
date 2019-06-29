@@ -29,6 +29,18 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.event.AfterLoginEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.LoginFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -58,6 +70,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  * By default, {@link VaultToken} are looked up in Vault to determine renewability and the
  * remaining TTL, see {@link #setTokenSelfLookupEnabled(boolean)}.
  * <p>
+ * The session manager dispatches authentication events to {@link AuthenticationListener}
+ * and {@link AuthenticationErrorListener}.
+ * <p>
  * This class is thread-safe and uses lock-free synchronization.
  *
  * @author Mark Paluch
@@ -65,6 +80,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  * @see LoginToken
  * @see ReactiveSessionManager
  * @see TaskScheduler
+ * @see AuthenticationEventPublisher
  */
 public class ReactiveLifecycleAwareSessionManager extends
 		LifecycleAwareSessionManagerSupport implements ReactiveSessionManager,
@@ -168,17 +184,27 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 */
 	protected Mono<Void> revoke(VaultToken token) {
 
-		return webClient.post().uri("auth/token/revoke-self").headers(httpHeaders -> {
-			httpHeaders.addAll(VaultHttpHeaders.from(token));
-		}).retrieve().bodyToMono(String.class).then()
+		return webClient
+				.post()
+				.uri("auth/token/revoke-self")
+				.headers(httpHeaders -> {
+					httpHeaders.addAll(VaultHttpHeaders.from(token));
+				})
+				.retrieve()
+				.bodyToMono(String.class)
+				.doOnSubscribe(
+						ignore -> dispatch(new BeforeLoginTokenRevocationEvent(token)))
+				.doOnNext(ignore -> dispatch(new AfterLoginTokenRevocationEvent(token)))
 				.onErrorResume(WebClientResponseException.class, e -> {
 
 					logger.warn(format("Could not revoke token", e));
+					dispatch(new LoginTokenRevocationFailedEvent(token, e));
 
 					return Mono.empty();
 				}).onErrorResume(Exception.class, e -> {
 
 					logger.warn("Could not revoke token", e);
+					dispatch(new LoginTokenRevocationFailedEvent(token, e));
 
 					return Mono.empty();
 				}).then();
@@ -198,8 +224,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 		logger.info("Renewing token");
 
-		Mono<TokenWrapper> tokenWrapper = ReactiveLifecycleAwareSessionManager.this.token
-				.get();
+		Mono<TokenWrapper> tokenWrapper = this.token.get();
 
 		if (tokenWrapper == TERMINATED) {
 			return tokenWrapper.map(TokenWrapper::getToken);
@@ -209,8 +234,12 @@ public class ReactiveLifecycleAwareSessionManager extends
 			return getVaultToken();
 		}
 
-		return tokenWrapper
-				.flatMap(this::doRenew)
+		return tokenWrapper.flatMap(this::doRenewToken).map(TokenWrapper::getToken);
+	}
+
+	private Mono<TokenWrapper> doRenewToken(TokenWrapper wrapper) {
+
+		return doRenew(wrapper)
 				.onErrorResume(
 						WebClientResponseException.class,
 						e -> {
@@ -222,6 +251,8 @@ public class ReactiveLifecycleAwareSessionManager extends
 							if (e.getStatusCode().is4xxClientError()) {
 
 								logger.warn(format(message, e));
+								dispatch(new LoginTokenRenewalFailedEvent(wrapper
+										.getToken(), e));
 								return EMPTY;
 							}
 
@@ -231,7 +262,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 									"Cannot renew token", e), e));
 						})
 				.onErrorMap(
-						it -> !VaultTokenRenewalException.class.isInstance(it),
+						it -> !(it instanceof VaultTokenRenewalException),
 						e -> {
 
 							dropCurrentToken();
@@ -240,7 +271,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 											e.toString()));
 
 							return new VaultTokenRenewalException("Cannot renew token", e);
-						}).map(TokenWrapper::getToken);
+						});
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
@@ -254,13 +285,17 @@ public class ReactiveLifecycleAwareSessionManager extends
 				.bodyToMono(VaultResponse.class);
 
 		return exchange
-				.flatMap(response -> {
+				.doOnSubscribe(
+						ignore -> dispatch(new BeforeLoginTokenRenewedEvent(tokenWrapper
+								.getToken())))
+				.handle((response, sink) -> {
 
 					LoginToken renewed = LoginTokenUtil.from(response.getRequiredAuth());
 
 					if (!isExpired(renewed)) {
-						return Mono
-								.just(new TokenWrapper(renewed, tokenWrapper.revocable));
+						sink.next(new TokenWrapper(renewed, tokenWrapper.revocable));
+						dispatch(new AfterLoginTokenRenewedEvent(renewed));
+						return;
 					}
 
 					if (logger.isDebugEnabled()) {
@@ -276,8 +311,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 					}
 
 					dropCurrentToken();
-
-					return EMPTY;
+					dispatch(new LoginTokenExpiredEvent(renewed));
 				});
 	}
 
@@ -299,11 +333,16 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 			Mono<TokenWrapper> obtainToken = clientAuthentication.getVaultToken()
 					.flatMap(this::doSelfLookup) //
-					.doOnNext(it -> {
+					.onErrorMap(it -> {
+						dispatch(new LoginFailedEvent(clientAuthentication, it));
+						return it;
+					}).doOnNext(it -> {
 
 						if (isTokenRenewable(it.getToken())) {
 							scheduleRenewal(it.getToken());
 						}
+
+						dispatch(new AfterLoginEvent(it.getToken()));
 					});
 
 			this.token.compareAndSet(tokenWrapper, obtainToken.cache());
@@ -327,7 +366,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 						logger.warn(String.format(
 								"Cannot enhance VaultToken to a LoginToken: %s",
 								e.getMessage()));
-
+						dispatch(new AuthenticationErrorEvent(token, e));
 						return Mono.just(token);
 					}).map(it -> new TokenWrapper(it, false));
 		}
@@ -361,17 +400,21 @@ public class ReactiveLifecycleAwareSessionManager extends
 				Mono<TokenWrapper> tokenWrapper = ReactiveLifecycleAwareSessionManager.this.token
 						.get();
 
-				if (tokenWrapper == EMPTY || tokenWrapper == TERMINATED) {
+				if (tokenWrapper == Mono.<TokenWrapper> empty()
+						|| tokenWrapper == TERMINATED) {
 					return;
 				}
 
 				if (isTokenRenewable(token)) {
-					renewToken().subscribe(this::scheduleRenewal,
-							e -> logger.error("Cannot renew VaultToken", e));
+					renewToken().subscribe(this::scheduleRenewal, e -> {
+						logger.error("Cannot renew VaultToken", e);
+						dispatch(new LoginTokenRenewalFailedEvent(token, e));
+					});
 				}
 			}
 			catch (Exception e) {
 				logger.error("Cannot renew VaultToken", e);
+				dispatch(new LoginTokenRenewalFailedEvent(token, e));
 			}
 		};
 
