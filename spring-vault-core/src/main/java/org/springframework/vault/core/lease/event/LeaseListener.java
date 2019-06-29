@@ -20,6 +20,7 @@ package org.springframework.vault.core.lease.event;
  *
  * @author Mark Paluch
  */
+@FunctionalInterface
 public interface LeaseListener {
 
 	/**

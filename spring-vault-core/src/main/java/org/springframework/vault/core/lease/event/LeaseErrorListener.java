@@ -23,10 +23,11 @@ package org.springframework.vault.core.lease.event;
  *
  * @author Mark Paluch
  */
+@FunctionalInterface
 public interface LeaseErrorListener {
 
 	/**
-	 * Callback for a {@link SecretLeaseEvent}
+	 * Callback for a {@link SecretLeaseEvent}.
 	 *
 	 * @param leaseEvent the event object, must not be {@literal null}.
 	 * @param exception the thrown {@link Exception}.

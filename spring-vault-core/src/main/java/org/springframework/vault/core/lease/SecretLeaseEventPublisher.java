@@ -117,11 +117,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 */
 	protected void onSecretsObtained(RequestedSecret requestedSecret, Lease lease,
 			Map<String, Object> body) {
-
-		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(new SecretLeaseCreatedEvent(requestedSecret,
-					lease, body));
-		}
+		dispatch(new SecretLeaseCreatedEvent(requestedSecret, lease, body));
 	}
 
 	/**
@@ -133,11 +129,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param lease must not be {@literal null}.
 	 */
 	protected void onAfterLeaseRenewed(RequestedSecret requestedSecret, Lease lease) {
-
-		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(new AfterSecretLeaseRenewedEvent(requestedSecret,
-					lease));
-		}
+		dispatch(new AfterSecretLeaseRenewedEvent(requestedSecret, lease));
 	}
 
 	/**
@@ -149,11 +141,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param lease must not be {@literal null}.
 	 */
 	protected void onBeforeLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
-
-		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(new BeforeSecretLeaseRevocationEvent(
-					requestedSecret, lease));
-		}
+		dispatch(new BeforeSecretLeaseRevocationEvent(requestedSecret, lease));
 	}
 
 	/**
@@ -165,11 +153,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param lease must not be {@literal null}.
 	 */
 	protected void onAfterLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
-
-		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener.onLeaseEvent(new AfterSecretLeaseRevocationEvent(
-					requestedSecret, lease));
-		}
+		dispatch(new AfterSecretLeaseRevocationEvent(requestedSecret, lease));
 	}
 
 	/**
@@ -181,11 +165,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param lease must not be {@literal null}.
 	 */
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
-
-		for (LeaseListener leaseListener : leaseListeners) {
-			leaseListener
-					.onLeaseEvent(new SecretLeaseExpiredEvent(requestedSecret, lease));
-		}
+		dispatch(new SecretLeaseExpiredEvent(requestedSecret, lease));
 	}
 
 	/**
@@ -199,10 +179,30 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 */
 	protected void onError(RequestedSecret requestedSecret, @Nullable Lease lease,
 			Exception e) {
+		dispatch(new SecretLeaseErrorEvent(requestedSecret, lease, e));
+	}
 
-		for (LeaseErrorListener leaseErrorListener : leaseErrorListeners) {
-			leaseErrorListener.onLeaseError(new SecretLeaseErrorEvent(requestedSecret,
-					lease, e), e);
+	/**
+	 * Dispatch the event to all {@link LeaseListener}s.
+	 *
+	 * @param leaseEvent the event to dispatch.
+	 */
+	void dispatch(SecretLeaseEvent leaseEvent) {
+
+		for (LeaseListener listener : leaseListeners) {
+			listener.onLeaseEvent(leaseEvent);
+		}
+	}
+
+	/**
+	 * Dispatch the event to all {@link LeaseErrorListener}s.
+	 *
+	 * @param errorEvent the event to dispatch.
+	 */
+	void dispatch(SecretLeaseErrorEvent errorEvent) {
+
+		for (LeaseErrorListener listener : leaseErrorListeners) {
+			listener.onLeaseError(errorEvent, (Exception) errorEvent.getException());
 		}
 	}
 
