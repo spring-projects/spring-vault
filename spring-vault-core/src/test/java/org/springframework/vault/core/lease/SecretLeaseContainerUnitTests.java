@@ -285,20 +285,22 @@ class SecretLeaseContainerUnitTests {
 		verifyZeroInteractions(scheduledFuture);
 		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
-		ArgumentCaptor<SecretLeaseCreatedEvent> createdEvents = ArgumentCaptor
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor
 				.forClass(SecretLeaseCreatedEvent.class);
 		verify(leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
 
-		List<SecretLeaseCreatedEvent> events = createdEvents.getAllValues();
+		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
 		assertThat(events).hasSize(3);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(0).getSecrets()).containsOnlyKeys("key");
+		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets())
+				.containsOnlyKeys("key");
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
 
 		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(2).getSecrets()).containsOnlyKeys("foo");
+		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets())
+				.containsOnlyKeys("foo");
 	}
 
 	@Test
@@ -344,20 +346,22 @@ class SecretLeaseContainerUnitTests {
 		captor.getValue().run();
 		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
-		ArgumentCaptor<SecretLeaseCreatedEvent> createdEvents = ArgumentCaptor
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor
 				.forClass(SecretLeaseCreatedEvent.class);
 		verify(leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
 
-		List<SecretLeaseCreatedEvent> events = createdEvents.getAllValues();
+		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
 		assertThat(events).hasSize(3);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(0).getSecrets()).containsOnlyKeys("key");
+		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets())
+				.containsOnlyKeys("key");
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
 
 		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(2).getSecrets()).containsOnlyKeys("foo");
+		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets())
+				.containsOnlyKeys("foo");
 	}
 
 	@Test
