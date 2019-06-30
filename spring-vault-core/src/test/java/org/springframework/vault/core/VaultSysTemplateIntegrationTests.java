@@ -21,24 +21,24 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.vault.support.Policy.Rule;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.VaultRule;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.READ;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.UPDATE;
 
@@ -48,27 +48,22 @@ import static org.springframework.vault.support.Policy.BuiltinCapabilities.UPDAT
  * @author Mark Paluch
  * @author Maciej Drozdzowski
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
+class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
-	private Version vaultVersion;
+	VaultSysOperations adminOperations;
 
-	private VaultSysOperations adminOperations;
-
-	@Before
-	public void before() {
-
-		vaultVersion = prepare().getVersion();
-
+	@BeforeEach
+	void before() {
 		adminOperations = vaultOperations.opsForSys();
 	}
 
 	@Test
-	public void getMountsShouldContainSecretBackend() {
+	void getMountsShouldContainSecretBackend() {
 
 		Map<String, VaultMount> mounts = adminOperations.getMounts();
 
@@ -79,7 +74,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void mountShouldMountGenericSecret() {
+	void mountShouldMountGenericSecret() {
 
 		if (adminOperations.getMounts().containsKey("other/")) {
 			adminOperations.unmount("other");
@@ -102,10 +97,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void mountShouldMountKv1Secret() {
-
-		assumeTrue(vaultVersion
-				.isGreaterThanOrEqualTo(VaultRule.VERSIONING_INTRODUCED_WITH));
+	@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
+	void mountShouldMountKv1Secret() {
 
 		if (adminOperations.getMounts().containsKey("kVv1/")) {
 			adminOperations.unmount("kVv1");
@@ -134,10 +127,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void mountShouldMountKv2Secret() {
-
-		assumeTrue(vaultVersion
-				.isGreaterThanOrEqualTo(VaultRule.VERSIONING_INTRODUCED_WITH));
+	@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
+	void mountShouldMountKv2Secret() {
 
 		if (adminOperations.getMounts().containsKey("kVv2/")) {
 			adminOperations.unmount("kVv2");
@@ -169,7 +160,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void getAuthMountsShouldContainSecretBackend() {
+	void getAuthMountsShouldContainSecretBackend() {
 
 		Map<String, VaultMount> mounts = adminOperations.getAuthMounts();
 
@@ -181,7 +172,7 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void authMountShouldMountGenericSecret() {
+	void authMountShouldMountGenericSecret() {
 
 		if (adminOperations.getAuthMounts().containsKey("other/")) {
 			adminOperations.authUnmount("other");
@@ -202,9 +193,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldEnumeratePolicyNames() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+	@RequiresVaultVersion("0.6.1")
+	void shouldEnumeratePolicyNames() {
 
 		List<String> policyNames = adminOperations.getPolicyNames();
 
@@ -212,9 +202,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldReadRootPolicy() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+	@RequiresVaultVersion("0.6.1")
+	void shouldReadRootPolicy() {
 
 		Policy root = adminOperations.getPolicy("root");
 
@@ -222,27 +211,25 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldReadAbsentRootPolicy() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
+	@RequiresVaultVersion("0.6.1")
+	void shouldReadAbsentRootPolicy() {
 
 		Policy root = adminOperations.getPolicy("absent-policy");
 
 		assertThat(root).isNull();
 	}
 
-	@Test(expected = UnsupportedOperationException.class)
-	public void shouldReadDefaultPolicy() {
+	@Test
+	@RequiresVaultVersion("0.6.1")
+	void shouldReadDefaultPolicy() {
 
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.1")));
-
-		adminOperations.getPolicy("default");
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
+				() -> adminOperations.getPolicy("default"));
 	}
 
 	@Test
-	public void shouldCreatePolicy() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0")));
+	@RequiresVaultVersion("0.7.0")
+	void shouldCreatePolicy() {
 
 		Rule rule = Rule.builder().path("foo").capabilities(READ, UPDATE)
 				.minWrappingTtl(Duration.ofSeconds(100))
@@ -257,9 +244,8 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldDeletePolicy() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.0")));
+	@RequiresVaultVersion("0.6.0")
+	void shouldDeletePolicy() {
 
 		Rule rule = Rule.builder().path("foo").capabilities(READ).build();
 
@@ -271,12 +257,12 @@ public class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void isInitializedShouldReturnTrue() {
+	void isInitializedShouldReturnTrue() {
 		assertThat(adminOperations.isInitialized()).isTrue();
 	}
 
 	@Test
-	public void getUnsealStatusShouldReturnStatus() {
+	void getUnsealStatusShouldReturnStatus() {
 
 		VaultUnsealStatus unsealStatus = adminOperations.getUnsealStatus();
 

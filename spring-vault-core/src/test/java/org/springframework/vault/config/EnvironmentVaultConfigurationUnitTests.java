@@ -18,8 +18,8 @@ package org.springframework.vault.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.SslConfiguration;
@@ -41,11 +41,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = { "vault.uri=https://localhost:8123",
 		"vault.token=my-token", "vault.ssl.key-store-password=key store password",
 		"vault.ssl.trust-store-password=trust store password" })
-public class EnvironmentVaultConfigurationUnitTests {
+class EnvironmentVaultConfigurationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
@@ -53,18 +53,18 @@ public class EnvironmentVaultConfigurationUnitTests {
 	}
 
 	@Autowired
-	private EnvironmentVaultConfiguration configuration;
+	EnvironmentVaultConfiguration configuration;
 
 	@Autowired
-	private ConfigurableEnvironment configurableEnvironment;
+	ConfigurableEnvironment configurableEnvironment;
 
 	@Test
-	public void shouldConfigureEndpoint() {
+	void shouldConfigureEndpoint() {
 		assertThat(configuration.vaultEndpoint().getPort()).isEqualTo(8123);
 	}
 
 	@Test
-	public void shouldConfigureTokenAuthentication() {
+	void shouldConfigureTokenAuthentication() {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 
@@ -73,7 +73,7 @@ public class EnvironmentVaultConfigurationUnitTests {
 	}
 
 	@Test
-	public void shouldConfigureSsl() {
+	void shouldConfigureSsl() {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("vault.ssl.key-store", "classpath:certificate.json");

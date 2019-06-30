@@ -18,7 +18,7 @@ package org.springframework.vault.authentication;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.vault.util.IntegrationTestSupport;
 
@@ -30,7 +30,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 public abstract class AppIdAuthenticationIntegrationTestBase extends
 		IntegrationTestSupport {
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		if (!prepare().hasAuth("app-id")) {

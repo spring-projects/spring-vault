@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.vault.support.VaultToken;
@@ -33,13 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class CubbyholeAuthenticationOperatorIntegrationTests extends
+class CubbyholeAuthenticationOperatorIntegrationTests extends
 		CubbyholeAuthenticationIntegrationTestBase {
 
-	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
+	private WebClient webClient = TestWebClientFactory.create(Settings
+			.createSslConfiguration());
 
 	@Test
-	public void authenticationStepsShouldCreateWrappedToken() {
+	void authenticationStepsShouldCreateWrappedToken() {
 
 		Map<String, String> wrapInfo = prepareWrappedToken();
 

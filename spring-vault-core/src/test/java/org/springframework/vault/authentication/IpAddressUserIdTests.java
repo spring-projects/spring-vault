@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class IpAddressUserIdTests {
+class IpAddressUserIdTests {
 
 	@Test
-	public void shouldGenerateUppercaseSha256HexString() {
+	void shouldGenerateUppercaseSha256HexString() {
 
 		String userId = new IpAddressUserId().createUserId();
 

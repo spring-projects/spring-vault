@@ -17,8 +17,8 @@ package org.springframework.vault.core.env;
 
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
@@ -30,10 +30,10 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.PrepareVault;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration test for secrets retrieved from a versioned Key-Value backend using
@@ -43,7 +43,8 @@ import static org.junit.Assume.assumeTrue;
  * @see SecretLeaseContainer
  * @see org.springframework.vault.core.env.VaultPropertySource
  */
-public class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
+@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
+class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 
 	@VaultPropertySource("versioned/my/path")
 	@Configuration
@@ -55,14 +56,10 @@ public class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSup
 	static class RotatingSecret {
 	}
 
-	@BeforeClass
-	public static void beforeClass() {
+	@BeforeAll
+	static void beforeClass(VaultInitializer initializer) {
 
-		VaultRule vaultRule = new VaultRule();
-		vaultRule.before();
-		PrepareVault prepare = vaultRule.prepare();
-		assumeTrue(prepare.getVersion().isGreaterThanOrEqualTo(
-				VaultRule.VERSIONING_INTRODUCED_WITH));
+		PrepareVault prepare = initializer.prepare();
 
 		VaultKeyValueOperations versionedKv = prepare.getVaultOperations()
 				.opsForKeyValue("versioned",
@@ -72,7 +69,7 @@ public class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSup
 	}
 
 	@Test
-	public void shouldRetrieveNonLeasedSecret() {
+	void shouldRetrieveNonLeasedSecret() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				VaultIntegrationTestConfiguration.class, NonRotatingSecret.class);
@@ -84,7 +81,7 @@ public class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSup
 	}
 
 	@Test
-	public void shouldRetrieveRotatingSecret() {
+	void shouldRetrieveRotatingSecret() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				VaultIntegrationTestConfiguration.class, RotatingSecret.class);

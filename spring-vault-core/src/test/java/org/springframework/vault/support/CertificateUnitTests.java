@@ -20,8 +20,8 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class CertificateUnitTests {
+class CertificateUnitTests {
 
 	Certificate certificate;
 
 	@SuppressWarnings("unchecked")
-	@Before
-	public void before() throws Exception {
+	@BeforeEach
+	void before() throws Exception {
 		Map<String, String> data = new ObjectMapper().readValue(
 				getClass().getResource("/certificate.json"), Map.class);
 
@@ -45,7 +45,7 @@ public class CertificateUnitTests {
 	}
 
 	@Test
-	public void getX509CertificateShouldReturnCertificate() {
+	void getX509CertificateShouldReturnCertificate() {
 
 		X509Certificate x509Certificate = certificate.getX509Certificate();
 
@@ -54,7 +54,7 @@ public class CertificateUnitTests {
 	}
 
 	@Test
-	public void getX509IssuerCertificateShouldReturnCertificate() {
+	void getX509IssuerCertificateShouldReturnCertificate() {
 
 		X509Certificate x509Certificate = certificate.getX509IssuerCertificate();
 
@@ -63,7 +63,7 @@ public class CertificateUnitTests {
 	}
 
 	@Test
-	public void getAsTrustStore() throws Exception {
+	void getAsTrustStore() throws Exception {
 
 		KeyStore keyStore = certificate.createTrustStore();
 

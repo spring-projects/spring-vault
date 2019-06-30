@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -39,15 +39,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
+class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
+
+	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
 	@Test
-	public void readShouldReturnAbsentKey() throws Exception {
+	void readShouldReturnAbsentKey() {
 
 		VaultResponse read = vaultOperations.read("secret/absent");
 
@@ -55,7 +57,7 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void readShouldReturnExistingKey() throws Exception {
+	void readShouldReturnExistingKey() {
 
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
@@ -65,9 +67,9 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void readShouldReturnNestedPropertiesKey() throws Exception {
+	void readShouldReturnNestedPropertiesKey() throws Exception {
 
-		Map map = new ObjectMapper()
+		Map map = OBJECT_MAPPER
 				.readValue(
 						"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
 						Map.class);
@@ -80,7 +82,7 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void readShouldReturnNestedObjects() throws Exception {
+	void readShouldReturnNestedObjects() throws Exception {
 
 		Map map = new ObjectMapper().readValue(
 				"{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
@@ -96,7 +98,7 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void readObjectShouldReadDomainClass() throws Exception {
+	void readObjectShouldReadDomainClass() {
 
 		Map<String, String> data = new HashMap<String, String>();
 		data.put("firstname", "Walter");
@@ -114,7 +116,7 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void listShouldReturnExistingKey() throws Exception {
+	void listShouldReturnExistingKey() {
 
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
@@ -123,7 +125,7 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void deleteShouldRemoveKey() throws Exception {
+	void deleteShouldRemoveKey() {
 
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
@@ -136,13 +138,22 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	static class Person {
 
 		String firstname;
+
 		String password;
 
-		public String getFirstname() {
+		void setFirstname(String firstname) {
+			this.firstname = firstname;
+		}
+
+		void setPassword(String password) {
+			this.password = password;
+		}
+
+		String getFirstname() {
 			return firstname;
 		}
 
-		public String getPassword() {
+		String getPassword() {
 			return password;
 		}
 	}

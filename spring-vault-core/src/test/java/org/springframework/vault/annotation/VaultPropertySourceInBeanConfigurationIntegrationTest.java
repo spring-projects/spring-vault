@@ -19,18 +19,19 @@ import java.util.Collections;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.VaultExtension;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +40,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@ExtendWith(VaultExtension.class)
 @ContextConfiguration
 public class VaultPropertySourceInBeanConfigurationIntegrationTest {
 
@@ -55,20 +57,17 @@ public class VaultPropertySourceInBeanConfigurationIntegrationTest {
 	@Autowired
 	ClientClass clientClass;
 
-	@BeforeClass
-	public static void beforeClass() {
+	@BeforeAll
+	static void beforeClass(VaultInitializer initializer) {
 
-		VaultRule rule = new VaultRule();
-		rule.before();
-
-		VaultOperations vaultOperations = rule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = initializer.prepare().getVaultOperations();
 
 		vaultOperations.write("secret/myapp",
 				Collections.singletonMap("myapp", "myvalue"));
 	}
 
 	@Test
-	public void clientClassShouldContainResolvedProperty() {
+	void clientClassShouldContainResolvedProperty() {
 		assertThat(clientClass.getMyapp()).isEqualTo("myvalue");
 	}
 

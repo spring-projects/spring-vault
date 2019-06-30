@@ -24,17 +24,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 
-import static org.junit.Assume.assumeNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test base class for {@link CubbyholeAuthentication} tests.
  *
  * @author Mark Paluch
  */
-public abstract class CubbyholeAuthenticationIntegrationTestBase extends
+abstract class CubbyholeAuthenticationIntegrationTestBase extends
 		IntegrationTestSupport {
 
-	protected Map<String, String> prepareWrappedToken() {
+	Map<String, String> prepareWrappedToken() {
 
 		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
 				.doWithSession(
@@ -51,7 +51,7 @@ public abstract class CubbyholeAuthenticationIntegrationTestBase extends
 		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
 
 		// Response Wrapping requires Vault 0.6.0+
-		assumeNotNull(wrapInfo);
+		assertThat(wrapInfo).isNotNull();
 		return wrapInfo;
 	}
 }

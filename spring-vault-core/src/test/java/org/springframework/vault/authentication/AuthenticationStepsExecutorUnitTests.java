@@ -17,8 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.net.URI;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -48,14 +48,14 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  */
-public class AuthenticationStepsExecutorUnitTests {
+class AuthenticationStepsExecutorUnitTests {
 
-	private RestTemplate restTemplate;
+	RestTemplate restTemplate;
 
-	private MockRestServiceServer mockRest;
+	MockRestServiceServer mockRest;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -65,7 +65,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void justTokenShouldLogin() {
+	void justTokenShouldLogin() {
 
 		AuthenticationSteps steps = AuthenticationSteps.just(VaultToken.of("my-token"));
 
@@ -73,7 +73,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void supplierOfStringShouldLoginWithMap() {
+	void supplierOfStringShouldLoginWithMap() {
 
 		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token")
 				.login(VaultToken::of);
@@ -82,7 +82,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void justLoginRequestShouldLogin() {
+	void justLoginRequestShouldLogin() {
 
 		mockRest.expect(requestTo("/auth/cert/login"))
 				.andExpect(method(HttpMethod.POST))
@@ -100,7 +100,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void justLoginShouldFail() {
+	void justLoginShouldFail() {
 
 		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
 				.andRespond(withBadRequest().body("foo"));
@@ -116,7 +116,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void initialRequestWithMapShouldLogin() {
+	void initialRequestWithMapShouldLogin() {
 
 		mockRest.expect(requestTo("somewhere/else")).andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("foo"));
@@ -141,7 +141,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void requestWithHeadersShouldLogin() {
+	void requestWithHeadersShouldLogin() {
 
 		mockRest.expect(requestTo("somewhere/else")) //
 				.andExpect(header("foo", "bar")) //
@@ -168,7 +168,7 @@ public class AuthenticationStepsExecutorUnitTests {
 	}
 
 	@Test
-	public void zipWithShouldRequestTwoItems() {
+	void zipWithShouldRequestTwoItems() {
 
 		mockRest.expect(requestTo("/auth/login/left"))
 				.andExpect(method(HttpMethod.POST))

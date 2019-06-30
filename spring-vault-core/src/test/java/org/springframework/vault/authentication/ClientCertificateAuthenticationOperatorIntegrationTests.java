@@ -15,12 +15,14 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.TestWebClientFactory;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using
@@ -28,11 +30,11 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationOperatorIntegrationTests extends
+class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
-	public void authenticationStepsShouldLoginSuccessfully() {
+	void authenticationStepsShouldLoginSuccessfully() {
 
 		WebClient webClient = TestWebClientFactory
 				.create(prepareCertAuthenticationMethod());
@@ -44,7 +46,7 @@ public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 	}
 
 	@Test
-	public void shouldSelectKey() {
+	void shouldSelectKey() {
 
 		WebClient webClient = TestWebClientFactory
 				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
@@ -57,7 +59,7 @@ public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 	}
 
 	@Test
-	public void shouldSelectInvalidKey() {
+	void shouldSelectInvalidKey() {
 
 		WebClient webClient = TestWebClientFactory
 				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
@@ -70,11 +72,12 @@ public class ClientCertificateAuthenticationOperatorIntegrationTests extends
 				VaultLoginException.class);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void shouldProvideInvalidKeyPassword() {
-
-		TestWebClientFactory
-				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
-						.of("wrong".toCharArray(), "1")));
+	@Test
+	void shouldProvideInvalidKeyPassword() {
+		assertThatIllegalStateException()
+				.isThrownBy(
+						() -> TestWebClientFactory
+								.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+										.of("wrong".toCharArray(), "1"))));
 	}
 }

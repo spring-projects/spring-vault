@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -29,17 +29,19 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication}.
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationIntegrationTests extends
+class ClientCertificateAuthenticationIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	void shouldLoginSuccessfully() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), prepareCertAuthenticationMethod());
@@ -54,7 +56,7 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 	}
 
 	@Test
-	public void shouldSelectKey() {
+	void shouldSelectKey() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(),
@@ -70,8 +72,8 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	@Test(expected = NestedRuntimeException.class)
-	public void shouldSelectInvalidKey() {
+	@Test
+	void shouldSelectInvalidKey() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(),
@@ -82,27 +84,31 @@ public class ClientCertificateAuthenticationIntegrationTests extends
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
 				restTemplate);
-		authentication.login();
+
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
+				authentication::login);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void shouldProvideInvalidKeyPassword() {
+	@Test
+	void shouldProvideInvalidKeyPassword() {
 
-		ClientHttpRequestFactoryFactory.create(new ClientOptions(),
-				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of(
-						"wrong".toCharArray(), "1")));
+		assertThatIllegalStateException().isThrownBy(
+				() -> ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+						prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+								.of("wrong".toCharArray(), "1"))));
 	}
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
 	// receive a VaultException here.
-	@Test(expected = NestedRuntimeException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), Settings.createSslConfiguration());
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		new ClientCertificateAuthentication(restTemplate).login();
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
+				() -> new ClientCertificateAuthentication(restTemplate).login());
 	}
 }

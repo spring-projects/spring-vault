@@ -17,19 +17,20 @@ package org.springframework.vault.annotation;
 
 import java.util.Collections;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.VaultExtension;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,7 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@ExtendWith(VaultExtension.class)
 @ContextConfiguration
 public class VaultPropertySourceMultipleIntegrationTests {
 
@@ -56,13 +58,10 @@ public class VaultPropertySourceMultipleIntegrationTests {
 	@Value("${myapp}")
 	String myapp;
 
-	@BeforeClass
-	public static void beforeClass() {
+	@BeforeAll
+	static void beforeClass(VaultInitializer initializer) {
 
-		VaultRule rule = new VaultRule();
-		rule.before();
-
-		VaultOperations vaultOperations = rule.prepare().getVaultOperations();
+		VaultOperations vaultOperations = initializer.prepare().getVaultOperations();
 
 		vaultOperations.write("secret/myapp",
 				Collections.singletonMap("myapp", "myvalue"));
@@ -71,14 +70,14 @@ public class VaultPropertySourceMultipleIntegrationTests {
 	}
 
 	@Test
-	public void environmentShouldResolveProperties() {
+	void environmentShouldResolveProperties() {
 
 		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
 		assertThat(env.getProperty("database.myprofile")).isEqualTo("myprofilevalue");
 	}
 
 	@Test
-	public void valueShouldInjectProperty() {
+	void valueShouldInjectProperty() {
 		assertThat(myapp).isEqualTo("myvalue");
 	}
 }

@@ -18,7 +18,7 @@ package org.springframework.vault.authentication;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -27,10 +27,8 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.Version;
-
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link AppRoleAuthentication}.
@@ -38,15 +36,13 @@ import static org.junit.Assume.assumeTrue;
  * @author Mark Paluch
  * @author Christophe Tafani-Dereeper
  */
-public class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
+@RequiresVaultVersion(AppRoleAuthenticationIntegrationTestBase.SUITABLE_FOR_APP_ROLE_TESTS)
+class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
-	private static Version SUITABLE_FOR_APP_ROLE_TESTS = Version.parse("0.6.2");
+	static final String SUITABLE_FOR_APP_ROLE_TESTS = "0.6.2";
 
-	@Before
+	@BeforeEach
 	public void before() {
-
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				SUITABLE_FOR_APP_ROLE_TESTS));
 
 		if (!prepare().hasAuth("approle")) {
 			prepare().mountAuth("approle");
@@ -74,17 +70,17 @@ public class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSup
 			});
 	}
 
-	protected VaultOperations getVaultOperations() {
+	VaultOperations getVaultOperations() {
 		return prepare().getVaultOperations();
 	}
 
-	protected String getRoleId(String roleName) {
+	String getRoleId(String roleName) {
 		return (String) getVaultOperations()
 				.read(String.format("auth/approle/role/%s/role-id", roleName)).getData()
 				.get("role_id");
 	}
 
-	protected VaultToken generateWrappedSecretIdResponse() {
+	VaultToken generateWrappedSecretIdResponse() {
 
 		return getVaultOperations().doWithVault(
 				restOperations -> {
@@ -99,7 +95,7 @@ public class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSup
 				});
 	}
 
-	protected VaultToken generateWrappedRoleIdResponse() {
+	VaultToken generateWrappedRoleIdResponse() {
 
 		return getVaultOperations().doWithVault(
 				restOperations -> {

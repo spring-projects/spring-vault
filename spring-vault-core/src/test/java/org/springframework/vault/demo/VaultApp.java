@@ -43,12 +43,12 @@ public class VaultApp {
 		vaultTemplate.delete("secret/myapp");
 	}
 
-	public static class Secrets {
+	static class Secrets {
 
 		String username;
 		String password;
 
-		public String getUsername() {
+		String getUsername() {
 			return username;
 		}
 

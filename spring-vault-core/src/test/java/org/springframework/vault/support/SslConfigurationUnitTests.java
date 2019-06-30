@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class SslConfigurationUnitTests {
+class SslConfigurationUnitTests {
 
 	@Test
-	public void shouldCreateSslConfiguration() {
+	void shouldCreateSslConfiguration() {
 
 		SslConfiguration sslConfiguration = Settings.createSslConfiguration();
 
@@ -40,7 +40,7 @@ public class SslConfigurationUnitTests {
 	}
 
 	@Test
-	public void shouldCreateEmptySslConfiguration() {
+	void shouldCreateEmptySslConfiguration() {
 
 		SslConfiguration sslConfiguration = SslConfiguration.unconfigured();
 
@@ -49,7 +49,7 @@ public class SslConfigurationUnitTests {
 	}
 
 	@Test
-	public void shouldCreateConfiguration() {
+	void shouldCreateConfiguration() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource(
 				"certificate.json"));

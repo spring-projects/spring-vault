@@ -15,23 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Version;
-
-import static org.junit.Assume.assumeTrue;
+import org.springframework.vault.util.RequiresVaultVersion;
 
 /**
  * Integration test base class for {@link TokenAuthentication} tests.
  *
  * @author Mark Paluch
  */
-public abstract class TokenAuthenticationIntegrationTestBase extends
+@RequiresVaultVersion("0.6.4")
+abstract class TokenAuthenticationIntegrationTestBase extends
 		IntegrationTestSupport {
 
-	@Before
-	public void before() {
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.4")));
-	}
 }

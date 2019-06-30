@@ -23,13 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.test.StepVerifier;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.util.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,20 +39,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
+class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
-	private ReactiveVaultOperations vaultOperations;
+	ReactiveVaultOperations vaultOperations;
 
 	@Test
-	public void readShouldReturnAbsentKey() {
+	void readShouldReturnAbsentKey() {
 		StepVerifier.create(vaultOperations.read("secret/absent")).verifyComplete();
 	}
 
 	@Test
-	public void readShouldReturnExistingKey() {
+	void readShouldReturnExistingKey() {
 
 		StepVerifier.create(
 				vaultOperations.write("secret/mykey",
@@ -67,7 +67,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void readShouldReturnNestedPropertiesKey() throws IOException {
+	void readShouldReturnNestedPropertiesKey() throws IOException {
 
 		Map map = new ObjectMapper()
 				.readValue(
@@ -89,7 +89,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void readShouldReturnNestedObjects() throws IOException {
+	void readShouldReturnNestedObjects() throws IOException {
 
 		Map map = new ObjectMapper().readValue(
 				"{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
@@ -108,7 +108,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void readObjectShouldReadDomainClass() {
+	void readObjectShouldReadDomainClass() {
 
 		Map<String, String> data = new HashMap<>();
 		data.put("firstname", "Walter");
@@ -127,7 +127,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void listShouldReturnExistingKey() {
+	void listShouldReturnExistingKey() {
 
 		StepVerifier.create(
 				vaultOperations.write("secret/mykey",
@@ -139,7 +139,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void deleteShouldRemoveKey() {
+	void deleteShouldRemoveKey() {
 
 		StepVerifier.create(
 				vaultOperations.write("secret/mykey",
@@ -151,7 +151,7 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void writeShouldReturnResponse() {
+	void writeShouldReturnResponse() {
 
 		StepVerifier.create(vaultOperations.write("auth/token/create"))
 				.assertNext(response -> {
@@ -166,11 +166,19 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 		String firstname;
 		String password;
 
-		public String getFirstname() {
+		void setFirstname(String firstname) {
+			this.firstname = firstname;
+		}
+
+		void setPassword(String password) {
+			this.password = password;
+		}
+
+		String getFirstname() {
 			return firstname;
 		}
 
-		public String getPassword() {
+		String getPassword() {
 			return password;
 		}
 	}

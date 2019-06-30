@@ -18,8 +18,8 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -32,6 +32,8 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -46,15 +48,16 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Vincent Le Nair
  * @author Christophe Tafani-Dereeper
  */
-public class AppRoleAuthenticationUnitTests {
+class AppRoleAuthenticationUnitTests {
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -64,7 +67,7 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainToken() {
+	void loginShouldObtainToken() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
@@ -88,7 +91,7 @@ public class AppRoleAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldPullRoleIdAndSecretId() throws Exception {
+	void loginShouldPullRoleIdAndSecretId() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("app_role").initialToken(VaultToken.of("initial_token")).build();
@@ -123,23 +126,27 @@ public class AppRoleAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void optionsShouldRequireTokenOrRoleIdIfNothingIsSet() {
-		AppRoleAuthenticationOptions.builder().build();
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void optionsShouldRequireTokenOrRoleIdIfTokenIsSet() {
-		AppRoleAuthenticationOptions.builder().initialToken(VaultToken.of("foo")).build();
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void optionsShouldRequireTokenOrRoleIdIfAppRoleIdIsSet() {
-		AppRoleAuthenticationOptions.builder().appRole("app_role").build();
+	@Test
+	void optionsShouldRequireTokenOrRoleIdIfNothingIsSet() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> AppRoleAuthenticationOptions.builder().build());
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithoutSecretId() {
+	void optionsShouldRequireTokenOrRoleIdIfTokenIsSet() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> AppRoleAuthenticationOptions.builder()
+						.initialToken(VaultToken.of("foo")).build());
+	}
+
+	@Test
+	void optionsShouldRequireTokenOrRoleIdIfAppRoleIdIsSet() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> AppRoleAuthenticationOptions.builder().appRole("app_role").build());
+	}
+
+	@Test
+	void loginShouldObtainTokenWithoutSecretId() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
@@ -167,8 +174,8 @@ public class AppRoleAuthenticationUnitTests {
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("hello") //
@@ -177,11 +184,12 @@ public class AppRoleAuthenticationUnitTests {
 		mockRest.expect(requestTo("/auth/approle/login")) //
 				.andRespond(withServerError());
 
-		new AppRoleAuthentication(options, restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new AppRoleAuthentication(options, restTemplate).login());
 	}
 
 	@Test
-	public void loginShouldUnwrapSecretIdResponse() throws Exception {
+	void loginShouldUnwrapSecretIdResponse() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId("my_role_id")

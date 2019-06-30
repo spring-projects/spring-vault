@@ -17,7 +17,7 @@ package org.springframework.vault.client;
 
 import java.nio.charset.StandardCharsets;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.vault.VaultException;
@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultResponsesUnitTests {
+class VaultResponsesUnitTests {
 
 	@Test
-	public void shouldBuildException() {
+	void shouldBuildException() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, "Bad Request");
@@ -45,7 +45,7 @@ public class VaultResponsesUnitTests {
 	}
 
 	@Test
-	public void shouldBuildExceptionWithErrorMessage() {
+	void shouldBuildExceptionWithErrorMessage() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, "Bad Request",
@@ -57,7 +57,7 @@ public class VaultResponsesUnitTests {
 	}
 
 	@Test
-	public void shouldBuildExceptionWithPath() {
+	void shouldBuildExceptionWithPath() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, "Bad Request");
@@ -68,7 +68,7 @@ public class VaultResponsesUnitTests {
 	}
 
 	@Test
-	public void shouldBuildExceptionWithPathAndErrorMessage() {
+	void shouldBuildExceptionWithPathAndErrorMessage() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(
 				HttpStatus.BAD_REQUEST, "Bad Request",

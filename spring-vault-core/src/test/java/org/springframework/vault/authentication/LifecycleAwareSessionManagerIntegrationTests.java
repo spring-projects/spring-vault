@@ -19,9 +19,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -39,22 +39,22 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Mark Paluch
  */
-public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
+class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
 
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		taskScheduler.afterPropertiesSet();
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		taskScheduler.destroy();
 	}
 
 	@Test
-	public void shouldLogin() {
+	void shouldLogin() {
 
 		LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
@@ -67,7 +67,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 
 	// Expect no exception to be thrown.
 	@Test
-	public void shouldRenewToken() {
+	void shouldRenewToken() {
 
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
 				.opsForToken();
@@ -100,7 +100,7 @@ public class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTes
 	}
 
 	@Test
-	public void shouldRevokeOnDisposal() {
+	void shouldRevokeOnDisposal() {
 
 		final LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);

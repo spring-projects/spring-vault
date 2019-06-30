@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.spel.ExtensionAwareEvaluationContextProvider;
@@ -32,12 +32,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class BasicVaultPersistentEntityUnitTests {
+class BasicVaultPersistentEntityUnitTests {
 
 	private VaultMappingContext mappingContext = new VaultMappingContext();
 
 	@Test
-	public void shouldSetIdPropertyThroughName() {
+	void shouldSetIdPropertyThroughName() {
 
 		VaultPersistentEntity<?> persistentEntity = mappingContext
 				.getPersistentEntity(IdProperty.class);
@@ -46,7 +46,7 @@ public class BasicVaultPersistentEntityUnitTests {
 	}
 
 	@Test
-	public void shouldSetIdPropertyThroughAnnotation() {
+	void shouldSetIdPropertyThroughAnnotation() {
 
 		VaultPersistentEntity<?> persistentEntity = mappingContext
 				.getPersistentEntity(ExplicitId.class);
@@ -55,7 +55,7 @@ public class BasicVaultPersistentEntityUnitTests {
 	}
 
 	@Test
-	public void shouldEvaluateExpression() {
+	void shouldEvaluateExpression() {
 
 		VaultPersistentEntity<?> persistentEntity = mappingContext
 				.getPersistentEntity(ExpressionEntity.class);
@@ -69,17 +69,17 @@ public class BasicVaultPersistentEntityUnitTests {
 		assertThat(persistentEntity.getKeySpace()).isEqualTo("collectionName/foo");
 	}
 
-	static class IdProperty {
+	private static class IdProperty {
 		String id, username;
 	}
 
-	static class ExplicitId {
+	private static class ExplicitId {
 		@Id
 		String username;
 	}
 
 	@Secret(backend = "#{myProperty}", value = "#{myKeySpace}")
-	static class ExpressionEntity {
+	private static class ExpressionEntity {
 		@Id
 		String username;
 	}

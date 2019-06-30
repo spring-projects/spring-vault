@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.annotation;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -38,7 +38,7 @@ import static org.springframework.vault.annotation.VaultPropertySource.Renewal.R
  *
  * @author Mark Paluch
  */
-public class VaultPropertySourceUnitTests {
+class VaultPropertySourceUnitTests {
 
 	@Configuration
 	static class Config {
@@ -76,13 +76,13 @@ public class VaultPropertySourceUnitTests {
 	static class RenewableConfig {
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		System.clearProperty("my_property");
 	}
 
 	@Test
-	public void shouldNotEnablePropertySource() {
+	void shouldNotEnablePropertySource() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
@@ -98,7 +98,7 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void shouldEnablePropertySourceByProfile() {
+	void shouldEnablePropertySourceByProfile() {
 
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 
@@ -118,7 +118,7 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void shouldResolvePlaceholderForNonRenewablePropertySource() {
+	void shouldResolvePlaceholderForNonRenewablePropertySource() {
 
 		System.setProperty("my_property", "non-renewable");
 
@@ -137,7 +137,7 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void shouldResolvePlaceholderForRenewablePropertySource() throws Exception {
+	void shouldResolvePlaceholderForRenewablePropertySource() throws Exception {
 
 		System.setProperty("my_property", "renewable");
 

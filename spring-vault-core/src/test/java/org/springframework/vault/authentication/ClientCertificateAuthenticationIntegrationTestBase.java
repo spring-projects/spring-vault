@@ -21,7 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.vault.core.RestOperationsCallback;
@@ -40,7 +40,7 @@ import static org.springframework.vault.util.Settings.findWorkDir;
 public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 		IntegrationTestSupport {
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		if (!prepare().hasAuth("cert")) {

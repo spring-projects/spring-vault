@@ -19,14 +19,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.Ciphertext;
 import org.springframework.vault.support.Hmac;
@@ -46,11 +46,12 @@ import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultTransitTemplate} through
@@ -61,26 +62,27 @@ import static org.junit.Assume.assumeTrue;
  * @author Luander Ribeiro
  * @author Mikko Koli
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
+class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
-	private static final Version BATCH_INTRODUCED_IN_VERSION = Version.parse("0.6.5");
+	static final String KEY_EXPORT_INTRODUCED_IN_VERSION = "0.6.5";
 
-	private static final Version SIGN_VERIFY_INTRODUCED_IN_VERSION = Version
-			.parse("0.6.2");
+	static final String BATCH_INTRODUCED_IN_VERSION = "0.6.5";
 
-	private static final Version ED25519_INTRODUCED_IN_VERSION = Version.parse("0.7.3");
+	static final String SIGN_VERIFY_INTRODUCED_IN_VERSION = "0.6.2";
+
+	static final String ED25519_INTRODUCED_IN_VERSION = "0.7.3";
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
-	private VaultTransitOperations transitOperations;
+	VaultTransitOperations transitOperations;
 
-	private Version vaultVersion;
+	Version vaultVersion;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		transitOperations = vaultOperations.opsForTransit();
 
@@ -93,8 +95,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		removeKeys();
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		removeKeys();
 	}
 
@@ -131,7 +133,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateKey() {
+	void createKeyShouldCreateKey() {
 
 		transitOperations.createKey("mykey");
 
@@ -155,9 +157,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateEcDsaKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+	@RequiresVaultVersion("0.6.4")
+	void createKeyShouldCreateEcDsaKey() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -168,9 +169,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateEdKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(ED25519_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateEdKey() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest
 				.ofKeyType("ed25519");
@@ -184,7 +184,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void createKeyShouldCreateKeyWithOptions() {
+	void createKeyShouldCreateKeyWithOptions() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.convergentEncryption(true) //
@@ -203,7 +203,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldConfigureKey() {
+	void shouldConfigureKey() {
 
 		transitOperations.createKey("mykey");
 		transitOperations.rotate("mykey");
@@ -228,9 +228,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldEnumerateKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4")));
+	@RequiresVaultVersion("0.6.4")
+	void shouldEnumerateKey() {
 
 		assertThat(transitOperations.getKeys()).isEmpty();
 
@@ -240,14 +239,14 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void getKeyShouldReturnNullIfKeyNotExists() {
+	void getKeyShouldReturnNullIfKeyNotExists() {
 
 		VaultTransitKey key = transitOperations.getKey("hello-world");
 		assertThat(key).isNull();
 	}
 
 	@Test
-	public void deleteKeyShouldFailIfKeyNotExists() {
+	void deleteKeyShouldFailIfKeyNotExists() {
 
 		try {
 			transitOperations.deleteKey("hello-world");
@@ -259,7 +258,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void deleteKeyShouldDeleteKey() {
+	void deleteKeyShouldDeleteKey() {
 
 		transitOperations.createKey("mykey");
 		transitOperations.configureKey("mykey", VaultTransitKeyConfiguration.builder()
@@ -270,7 +269,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldCreateCiphertext() {
+	void encryptShouldCreateCiphertext() {
 
 		transitOperations.createKey("mykey");
 
@@ -279,7 +278,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldCreateCiphertextWithNonceAndContext() {
+	void encryptShouldCreateCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -295,9 +294,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldEncryptEmptyValues() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void encryptShouldEncryptEmptyValues() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -315,7 +313,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
+	void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -333,7 +331,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void decryptShouldCreatePlaintext() {
+	void decryptShouldCreatePlaintext() {
 
 		transitOperations.createKey("mykey");
 
@@ -344,7 +342,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void decryptShouldCreatePlaintextWithNonceAndContext() {
+	void decryptShouldCreatePlaintextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -362,7 +360,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
+	void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -381,7 +379,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptAndRewrapShouldCreateCiphertext() {
+	void encryptAndRewrapShouldCreateCiphertext() {
 
 		transitOperations.createKey("mykey");
 
@@ -394,7 +392,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldEncryptBinaryPlaintext() {
+	void shouldEncryptBinaryPlaintext() {
 
 		transitOperations.createKey("mykey");
 
@@ -410,7 +408,7 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
+	void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
 
 		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
 				.convergentEncryption(true).derived(true).build());
@@ -429,9 +427,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchEncrypt() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchEncrypt() {
 
 		transitOperations.createKey("mykey");
 
@@ -443,9 +440,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchDecrypt() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecrypt() {
 
 		transitOperations.createKey("mykey");
 
@@ -465,9 +461,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchEncryptWithContext() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchEncryptWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -489,9 +484,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchDecryptWithContext() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -515,9 +509,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchDecryptWithWrongContext() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptWithWrongContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -548,9 +541,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchDecryptEmptyPlaintext() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptEmptyPlaintext() {
 
 		transitOperations.createKey("mykey");
 
@@ -563,9 +555,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldBatchDecryptEmptyPlaintextWithContext() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(BATCH_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptEmptyPlaintextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
 				.derived(true) //
@@ -585,9 +576,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void generateHmacShouldCreateHmac() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacShouldCreateHmac() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -596,9 +586,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void generateHmacShouldCreateHmacForRotatedKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacShouldCreateHmacForRotatedKey() {
 
 		String keyName = createEcdsaP256Key();
 		transitOperations.rotate(keyName);
@@ -611,9 +600,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void generateHmacWithCustomAlgorithmShouldCreateHmac() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacWithCustomAlgorithmShouldCreateHmac() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -624,21 +612,21 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(hmac.getHmac()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void generateHmacWithInvalidAlgorithmShouldFail() {
+	@Test
+	void generateHmacWithInvalidAlgorithmShouldFail() {
 
 		String keyName = createEcdsaP256Key();
 
 		VaultHmacRequest request = VaultHmacRequest.builder()
 				.plaintext(Plaintext.of("hello-world")).algorithm("blah-512").build();
 
-		transitOperations.getHmac(keyName, request);
+		assertThatThrownBy(() -> transitOperations.getHmac(keyName, request))
+				.isInstanceOf(VaultException.class);
 	}
 
 	@Test
-	public void signShouldCreateSignature() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signShouldCreateSignature() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -648,9 +636,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void signShouldCreateSignatureUsingEd25519() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(ED25519_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void signShouldCreateSignatureUsingEd25519() {
 
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest
 				.ofKeyType("ed25519");
@@ -661,18 +648,19 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void signWithInvalidKeyFormatShouldFail() {
+	@Test
+	void signWithInvalidKeyFormatShouldFail() {
 
 		transitOperations.createKey("mykey");
 
-		transitOperations.sign("mykey", Plaintext.of("hello-world"));
+		assertThatThrownBy(
+				() -> transitOperations.sign("mykey", Plaintext.of("hello-world")))
+				.isInstanceOf(VaultException.class);
 	}
 
 	@Test
-	public void signWithCustomAlgorithmShouldCreateSignature() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signWithCustomAlgorithmShouldCreateSignature() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -685,9 +673,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldVerifyValidSignature() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidSignature() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -699,9 +686,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldVerifyValidHmac() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidHmac() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -714,9 +700,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldVerifyValidSignatureWithCustomAlgorithm() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(SIGN_VERIFY_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidSignatureWithCustomAlgorithm() {
 
 		String keyName = createEcdsaP256Key();
 
@@ -736,9 +721,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldCreateNewExportableKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldCreateNewExportableKey() {
 
 		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
 		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
@@ -753,9 +737,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldCreateNotExportableKeyByDefault() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldCreateNotExportableKeyByDefault() {
 
 		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
 
@@ -768,9 +751,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldExportEncryptionKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldExportEncryptionKey() {
 
 		vaultOperations.write("transit/keys/export",
 				Collections.singletonMap("exportable", true));
@@ -783,21 +765,21 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 		assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
 	}
 
-	@Test(expected = VaultException.class)
-	public void shouldNotAllowExportSigningKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldNotAllowExportSigningKey() {
 
 		vaultOperations.write("transit/keys/export",
 				Collections.singletonMap("exportable", true));
 
-		transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY);
+		assertThatThrownBy(
+				() -> transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY))
+				.isInstanceOf(VaultException.class);
 	}
 
 	@Test
-	public void shouldExportHmacKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldExportHmacKey() {
 
 		vaultOperations.write("transit/keys/export",
 				Collections.singletonMap("exportable", true));
@@ -811,9 +793,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldExportEcDsaKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.5")));
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldExportEcDsaKey() {
 
 		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
 
@@ -832,9 +813,8 @@ public class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldExportEdKey() {
-
-		assumeTrue(vaultVersion.isGreaterThanOrEqualTo(ED25519_INTRODUCED_IN_VERSION));
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void shouldExportEdKey() {
 
 		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
 

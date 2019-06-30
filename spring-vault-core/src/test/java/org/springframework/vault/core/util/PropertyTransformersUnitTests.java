@@ -18,19 +18,19 @@ package org.springframework.vault.core.util;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Mark Paluch
  */
-public class PropertyTransformersUnitTests {
+class PropertyTransformersUnitTests {
 
 	Map<String, String> properties = Collections.singletonMap("key", "value");
 
 	@Test
-	public void propertyNamePrefix() {
+	void propertyNamePrefix() {
 
 		PropertyTransformer propertyTransformer = PropertyTransformers
 				.propertyNamePrefix("my-prefix.");
@@ -40,7 +40,7 @@ public class PropertyTransformersUnitTests {
 	}
 
 	@Test
-	public void propertyNamePrefixChaining() {
+	void propertyNamePrefixChaining() {
 
 		PropertyTransformer propertyTransformer = PropertyTransformers
 				.propertyNamePrefix("my-prefix.").andThen(
@@ -51,7 +51,7 @@ public class PropertyTransformersUnitTests {
 	}
 
 	@Test
-	public void longChaining() {
+	void longChaining() {
 
 		PropertyTransformer last = PropertyTransformers.propertyNamePrefix("last.")
 				.andThen(PropertyTransformers.noop());

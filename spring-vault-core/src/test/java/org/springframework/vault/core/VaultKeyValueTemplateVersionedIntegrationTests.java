@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.core;
 
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 
 /**
@@ -27,12 +27,12 @@ import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBac
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultKeyValueTemplateVersionedIntegrationTests extends
+class VaultKeyValueTemplateVersionedIntegrationTests extends
 		AbstractVaultKeyValueTemplateIntegrationTests {
 
-	public VaultKeyValueTemplateVersionedIntegrationTests() {
+	VaultKeyValueTemplateVersionedIntegrationTests() {
 		super("versioned", KeyValueBackend.versioned());
 	}
 }

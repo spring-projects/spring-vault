@@ -20,30 +20,33 @@ import java.util.Map;
 import java.util.UUID;
 
 import lombok.Data;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultKeyValue2Template}.
  *
  * @author Mark Paluch
  */
-public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
+@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
+abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 		IntegrationTestSupport {
 
 	private final String path;
+
 	private final KeyValueBackend apiVersion;
 
 	@Autowired
 	VaultOperations vaultOperations;
+
 	VaultKeyValueOperations kvOperations;
 
 	AbstractVaultKeyValueTemplateIntegrationTests(String path, KeyValueBackend apiVersion) {
@@ -51,22 +54,18 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 		this.apiVersion = apiVersion;
 	}
 
-	@Before
-	public void before() {
-
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				VaultRule.VERSIONING_INTRODUCED_WITH));
-
+	@BeforeEach
+	void before() {
 		kvOperations = vaultOperations.opsForKeyValue(path, apiVersion);
 	}
 
 	@Test
-	public void shouldReportExpectedApiVersion() {
+	void shouldReportExpectedApiVersion() {
 		assertThat(kvOperations.getApiVersion()).isEqualTo(apiVersion);
 	}
 
 	@Test
-	public void shouldCreateSecret() {
+	void shouldCreateSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 
@@ -78,7 +77,7 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldReadSecret() {
+	void shouldReadSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 
@@ -90,14 +89,14 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldReadAbsentSecret() {
+	void shouldReadAbsentSecret() {
 
 		assertThat(kvOperations.get("absent")).isNull();
 		assertThat(kvOperations.get("absent", Person.class)).isNull();
 	}
 
 	@Test
-	public void shouldReadComplexSecret() {
+	void shouldReadComplexSecret() {
 
 		Person person = new Person();
 		person.setFirstname("Walter");
@@ -112,7 +111,7 @@ public abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldDeleteSecret() {
+	void shouldDeleteSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 

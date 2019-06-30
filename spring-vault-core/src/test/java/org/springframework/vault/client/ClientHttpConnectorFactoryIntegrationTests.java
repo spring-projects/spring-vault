@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.vault.support.ClientOptions;
@@ -32,12 +32,12 @@ import static org.springframework.vault.client.ClientHttpConnectorFactory.Reacto
  *
  * @author Mark Paluch
  */
-public class ClientHttpConnectorFactoryIntegrationTests {
+class ClientHttpConnectorFactoryIntegrationTests {
 
-	private final String url = new VaultEndpoint().createUriString("sys/health");
+	final String url = new VaultEndpoint().createUriString("sys/health");
 
 	@Test
-	public void reactorNettyClientShouldWork() {
+	void reactorNettyClientShouldWork() {
 
 		ClientHttpConnector factory = ReactorNetty.usingReactorNetty(new ClientOptions(),
 				Settings.createSslConfiguration());
@@ -50,7 +50,7 @@ public class ClientHttpConnectorFactoryIntegrationTests {
 	}
 
 	@Test
-	public void jettyClientShouldWork() {
+	void jettyClientShouldWork() {
 
 		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(),
 				Settings.createSslConfiguration());

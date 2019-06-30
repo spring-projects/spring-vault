@@ -18,11 +18,11 @@ package org.springframework.vault.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 
@@ -34,17 +34,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultKeyValueTemplateIntegrationTests extends
+class VaultKeyValueTemplateIntegrationTests extends
 		AbstractVaultKeyValueTemplateIntegrationTests {
 
-	public VaultKeyValueTemplateIntegrationTests() {
+	VaultKeyValueTemplateIntegrationTests() {
 		super("secret", KeyValueBackend.unversioned());
 	}
 
 	@Test
-	public void shouldReadSecretWithTtl() {
+	void shouldReadSecretWithTtl() {
 
 		Map<String, Object> secret = new HashMap<>();
 		secret.put("key", "value");

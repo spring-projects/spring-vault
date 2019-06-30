@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.repository.mapping;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,12 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultMappingContextUnitTests {
+class VaultMappingContextUnitTests {
 
 	VaultMappingContext context = new VaultMappingContext();
 
 	@Test
-	public void shouldCreatePersistentEntity() {
+	void shouldCreatePersistentEntity() {
 
 		VaultPersistentEntity<?> entity = context.getPersistentEntity(Person.class);
 
@@ -39,7 +39,7 @@ public class VaultMappingContextUnitTests {
 	}
 
 	@Test
-	public void shouldDetermineKeyspace() {
+	void shouldDetermineKeyspace() {
 
 		assertThat(context.getRequiredPersistentEntity(Login.class).getSecretBackend())
 				.isEqualTo("secret");

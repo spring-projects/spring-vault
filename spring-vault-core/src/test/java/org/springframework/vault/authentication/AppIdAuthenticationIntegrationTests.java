@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
@@ -24,17 +24,18 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link AppIdAuthentication}.
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationIntegrationTests extends
+class AppIdAuthenticationIntegrationTests extends
 		AppIdAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	void shouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
@@ -51,8 +52,8 @@ public class AppIdAuthenticationIntegrationTests extends
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //
@@ -62,7 +63,8 @@ public class AppIdAuthenticationIntegrationTests extends
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
 				.createSslConfiguration());
 
-		new AppIdAuthentication(options, restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new AppIdAuthentication(options, restTemplate).login());
 
 	}
 }

@@ -18,7 +18,7 @@ package org.springframework.vault.repository.query;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.repository.query.DefaultParameters;
@@ -28,18 +28,19 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit test for {@link VaultQueryCreator}.
  *
  * @author Mark Paluch
  */
-public class VaultQueryCreatorUnitTests {
+class VaultQueryCreatorUnitTests {
 
 	private VaultMappingContext mappingContext = new VaultMappingContext();
 
 	@Test
-	public void greaterThan() {
+	void greaterThan() {
 
 		VaultQuery query = createQuery("findByIdGreaterThan", "5");
 
@@ -47,7 +48,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void greaterThanOrEqual() {
+	void greaterThanOrEqual() {
 
 		VaultQuery query = createQuery("findByIdGreaterThanEqual", "5");
 
@@ -55,7 +56,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void lessThan() {
+	void lessThan() {
 
 		VaultQuery query = createQuery("findByIdLessThan", "5");
 
@@ -63,7 +64,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void lessThanOrEqual() {
+	void lessThanOrEqual() {
 
 		VaultQuery query = createQuery("findByIdLessThanEqual", "5");
 
@@ -71,7 +72,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void between() {
+	void between() {
 
 		VaultQuery query = createQuery("findByIdIsBetween", "5", "7");
 
@@ -79,7 +80,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void in() {
+	void in() {
 
 		VaultQuery query = createQuery("findByIdIn", Arrays.asList("2", "3"));
 
@@ -87,7 +88,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void negateIn() {
+	void negateIn() {
 
 		VaultQuery query = createQuery("findByIdNotIn", Arrays.asList("2", "3"));
 
@@ -95,7 +96,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void startingWith() {
+	void startingWith() {
 
 		VaultQuery query = createQuery("findByIdStartsWith", "Walter");
 
@@ -103,7 +104,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void endingWith() {
+	void endingWith() {
 
 		VaultQuery query = createQuery("findByIdEndsWith", "White");
 
@@ -111,7 +112,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void containing() {
+	void containing() {
 
 		VaultQuery query = createQuery("findByIdContaining", "er Wh");
 
@@ -119,7 +120,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void negateContaining() {
+	void negateContaining() {
 
 		VaultQuery query = createQuery("findByIdNotContaining", "er Wh");
 
@@ -127,7 +128,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void regex() {
+	void regex() {
 
 		VaultQuery query = createQuery("findByIdMatches", "Wa(.*)r");
 
@@ -135,7 +136,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void isTrue() {
+	void isTrue() {
 
 		VaultQuery query = createQuery("findByIdIsTrue", "");
 
@@ -143,7 +144,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void isFalse() {
+	void isFalse() {
 
 		VaultQuery query = createQuery("findByIdIsFalse", "");
 
@@ -151,7 +152,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void simpleProperty() {
+	void simpleProperty() {
 
 		VaultQuery query = createQuery("findById", "Walter");
 
@@ -159,7 +160,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void negateSimpleProperty() {
+	void negateSimpleProperty() {
 
 		VaultQuery query = createQuery("findByIdNot", "Walter");
 
@@ -167,7 +168,7 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void greaterThanOrEquals() {
+	void greaterThanOrEquals() {
 
 		VaultQuery query = createQuery("findByIdGreaterThanOrIdIs", "5", "2");
 
@@ -175,16 +176,17 @@ public class VaultQueryCreatorUnitTests {
 	}
 
 	@Test
-	public void greaterThanAndLessThan() {
+	void greaterThanAndLessThan() {
 
 		VaultQuery query = createQuery("findByIdGreaterThanAndIdLessThan", "2", "5");
 
 		assertThat(query.getPredicate()).accepts("3", "4").rejects("2", "5", "6");
 	}
 
-	@Test(expected = InvalidDataAccessApiUsageException.class)
-	public void failsForNonIdProperties() {
-		createQuery("findByName", "");
+	@Test
+	void failsForNonIdProperties() {
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
+				() -> createQuery("findByName", ""));
 	}
 
 	VaultQuery createQuery(String methodName, String value) {
@@ -231,7 +233,7 @@ public class VaultQueryCreatorUnitTests {
 		return queryCreator.createQuery().getCriteria();
 	}
 
-	static interface dummy {
+	private static interface dummy {
 
 		Object someUnrelatedMethod(String arg);
 
@@ -240,7 +242,7 @@ public class VaultQueryCreatorUnitTests {
 		Object someUnrelatedMethod(String from, String to);
 	}
 
-	static class Credentials {
+	private static class Credentials {
 
 		String id, name;
 	}

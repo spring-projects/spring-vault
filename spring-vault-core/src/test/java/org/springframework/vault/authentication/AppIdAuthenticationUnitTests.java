@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -28,6 +28,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -39,13 +40,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationUnitTests {
+class AppIdAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -54,7 +56,7 @@ public class AppIdAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithStaticUserId() {
+	void loginShouldObtainTokenWithStaticUserId() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("hello") //
@@ -65,8 +67,9 @@ public class AppIdAuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.app_id").value("hello"))
 				.andExpect(jsonPath("$.user_id").value("world"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options,
 				restTemplate);
@@ -76,8 +79,8 @@ public class AppIdAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("hello") //
@@ -87,6 +90,7 @@ public class AppIdAuthenticationUnitTests {
 		mockRest.expect(requestTo("/auth/app-id/login")) //
 				.andRespond(withServerError());
 
-		new AppIdAuthentication(options, restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new AppIdAuthentication(options, restTemplate).login());
 	}
 }

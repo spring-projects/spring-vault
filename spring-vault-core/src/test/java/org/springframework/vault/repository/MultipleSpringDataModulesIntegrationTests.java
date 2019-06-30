@@ -18,9 +18,9 @@ package org.springframework.vault.repository;
 import java.util.List;
 
 import lombok.Data;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.repository.MultipleSpringDataModulesIntegrationTests.MultipleModulesActiveTestConfiguration;
@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MultipleModulesActiveTestConfiguration.class)
 public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 
@@ -64,13 +64,13 @@ public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSu
 	@Autowired
 	VaultTemplate vaultTemplate;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		vaultRepository.deleteAll();
 	}
 
 	@Test
-	public void loadAndSave() {
+	void loadAndSave() {
 
 		Person person = new Person();
 		person.setId("foo-key");
@@ -85,7 +85,7 @@ public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSu
 	}
 
 	@Test
-	public void loadAndSaveMapRepository() {
+	void loadAndSaveMapRepository() {
 
 		vaultRepository.findAll().forEach(vaultRepository::delete);
 

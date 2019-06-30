@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Mark Paluch
  */
-public class CanConnect {
+class CanConnect {
 
 	/**
 	 * Performs a check whether a connection can be established to the

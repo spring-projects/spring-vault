@@ -17,7 +17,7 @@ package org.springframework.vault.client;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -38,10 +38,10 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class VaultClientsUnitTests {
+class VaultClientsUnitTests {
 
 	@Test
-	public void uriHandlerShouldPrefixRelativeUrl() {
+	void uriHandlerShouldPrefixRelativeUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
@@ -53,7 +53,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void uriHandlerShouldNotPrefixAbsoluteUrl() {
+	void uriHandlerShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
@@ -66,7 +66,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void uriBuilderShouldPrefixRelativeUrl() {
+	void uriBuilderShouldPrefixRelativeUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
@@ -78,7 +78,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void uriBuilderShouldNotPrefixAbsoluteUrl() {
+	void uriBuilderShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
@@ -91,7 +91,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void shouldApplyNamespace() {
+	void shouldApplyNamespace() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(
@@ -108,7 +108,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void shouldAllowNamespaceOverride() {
+	void shouldAllowNamespaceOverride() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(
@@ -129,7 +129,7 @@ public class VaultClientsUnitTests {
 	}
 
 	@Test
-	public void shouldApplyBasepath() {
+	void shouldApplyBasepath() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		localhost.setPath("foo/v1");

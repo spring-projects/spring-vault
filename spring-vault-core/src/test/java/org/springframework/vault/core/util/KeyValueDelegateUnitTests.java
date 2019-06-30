@@ -17,7 +17,7 @@ package org.springframework.vault.core.util;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 
@@ -30,10 +30,10 @@ import static org.springframework.vault.core.util.KeyValueDelegate.getKeyValue2P
  *
  * @author Mark Paluch
  */
-public class KeyValueDelegateUnitTests {
+class KeyValueDelegateUnitTests {
 
 	@Test
-	public void getKeyValue2PathShouldConstructKeyValue2BackendPath() {
+	void getKeyValue2PathShouldConstructKeyValue2BackendPath() {
 
 		String path = getKeyValue2Path("foo/bar/versioned/", "foo/bar/versioned/my/key");
 
@@ -41,7 +41,7 @@ public class KeyValueDelegateUnitTests {
 	}
 
 	@Test
-	public void getKeyValue2PathShouldIgnoreNotMatchingPath() {
+	void getKeyValue2PathShouldIgnoreNotMatchingPath() {
 
 		String path = getKeyValue2Path("unknown/", "foo/bar/versioned/my/key");
 
@@ -49,7 +49,7 @@ public class KeyValueDelegateUnitTests {
 	}
 
 	@Test
-	public void shouldConsiderKeyValueVersion() {
+	void shouldConsiderKeyValueVersion() {
 
 		assertThat(
 				MountInfo.from("foo", Collections.singletonMap("version", "1"))

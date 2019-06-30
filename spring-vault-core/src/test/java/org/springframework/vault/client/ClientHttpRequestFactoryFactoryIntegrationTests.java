@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.client;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,12 +40,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  *
  * @author Mark Paluch
  */
-public class ClientHttpRequestFactoryFactoryIntegrationTests {
+class ClientHttpRequestFactoryFactoryIntegrationTests {
 
-	private final String url = new VaultEndpoint().createUriString("sys/health");
+	String url = new VaultEndpoint().createUriString("sys/health");
 
 	@Test
-	public void httpComponentsClientShouldWork() throws Exception {
+	void httpComponentsClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(
 				new ClientOptions(), Settings.createSslConfiguration());
@@ -60,7 +60,7 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	}
 
 	@Test
-	public void nettyClientShouldWork() throws Exception {
+	void nettyClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
 				Settings.createSslConfiguration());
@@ -76,7 +76,7 @@ public class ClientHttpRequestFactoryFactoryIntegrationTests {
 	}
 
 	@Test
-	public void okHttp3ClientShouldWork() throws Exception {
+	void okHttp3ClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = OkHttp3.usingOkHttp3(new ClientOptions(),
 				Settings.createSslConfiguration());

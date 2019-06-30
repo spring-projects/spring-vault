@@ -47,7 +47,8 @@ public class PrepareVault {
 	private final VaultOperations vaultOperations;
 
 	private final VaultSysOperations adminOperations;
-	private WebClient webClient;
+
+	private final WebClient webClient;
 
 	/**
 	 * Create a new {@link PrepareVault} object.
@@ -161,7 +162,7 @@ public class PrepareVault {
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	public void mountSecret(String secretBackend, String path, Map<String, Object> config) {
+	private void mountSecret(String secretBackend, String path, Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");

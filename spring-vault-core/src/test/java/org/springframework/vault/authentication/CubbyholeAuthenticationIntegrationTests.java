@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
@@ -33,11 +33,11 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Mark Paluch
  */
-public class CubbyholeAuthenticationIntegrationTests extends
+class CubbyholeAuthenticationIntegrationTests extends
 		CubbyholeAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldCreateWrappedToken() {
+	void shouldCreateWrappedToken() {
 
 		Map<String, String> wrapInfo = prepareWrappedToken();
 
@@ -55,7 +55,7 @@ public class CubbyholeAuthenticationIntegrationTests extends
 	}
 
 	@Test
-	public void loginShouldFail() {
+	void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();

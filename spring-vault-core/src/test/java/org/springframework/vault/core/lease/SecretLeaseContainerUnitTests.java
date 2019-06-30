@@ -24,13 +24,13 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
@@ -65,33 +65,32 @@ import static org.mockito.Mockito.when;
  * @author Mark Paluch
  * @author Steven Swor
  */
-@RunWith(MockitoJUnitRunner.class)
-public class SecretLeaseContainerUnitTests {
+@ExtendWith(MockitoExtension.class)
+class SecretLeaseContainerUnitTests {
 
 	@Mock
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
 	@Mock
-	private TaskScheduler taskScheduler;
+	TaskScheduler taskScheduler;
 
 	@Mock
-	private ScheduledFuture scheduledFuture;
+	ScheduledFuture scheduledFuture;
 
 	@Mock
-	private LeaseListenerAdapter leaseListenerAdapter;
+	LeaseListenerAdapter leaseListenerAdapter;
 
 	@Captor
-	private ArgumentCaptor<SecretLeaseEvent> captor;
+	ArgumentCaptor<SecretLeaseEvent> captor;
 
-	private RequestedSecret requestedSecret = RequestedSecret.renewable("my-secret");
+	RequestedSecret requestedSecret = RequestedSecret.renewable("my-secret");
 
-	private RequestedSecret rotatingGenericSecret = RequestedSecret
-			.rotating("rotating-generic");
+	RequestedSecret rotatingGenericSecret = RequestedSecret.rotating("rotating-generic");
 
-	private SecretLeaseContainer secretLeaseContainer;
+	SecretLeaseContainer secretLeaseContainer;
 
-	@Before
-	public void before() throws Exception {
+	@BeforeEach
+	void before() throws Exception {
 
 		secretLeaseContainer = new SecretLeaseContainer(vaultOperations, taskScheduler);
 		secretLeaseContainer.addLeaseListener(leaseListenerAdapter);
@@ -100,7 +99,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldSetProperties() {
+	void shouldSetProperties() {
 
 		secretLeaseContainer.setMinRenewal(Duration.ofMinutes(2));
 		secretLeaseContainer.setExpiryThreshold(Duration.ofMinutes(3));
@@ -112,7 +111,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldWorkIfNoSecretsRequested() {
+	void shouldWorkIfNoSecretsRequested() {
 
 		secretLeaseContainer.start();
 
@@ -120,7 +119,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldWorkIfNoSecretsFound() {
+	void shouldWorkIfNoSecretsFound() {
 
 		secretLeaseContainer.start();
 
@@ -130,7 +129,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldAcceptSecretsWithoutLease() {
+	void shouldAcceptSecretsWithoutLease() {
 
 		VaultResponse secrets = new VaultResponse();
 		secrets.setData(Collections.singletonMap("key", (Object) "value"));
@@ -152,7 +151,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldAcceptSecretsWithStaticLease() {
+	void shouldAcceptSecretsWithStaticLease() {
 
 		VaultResponse secrets = new VaultResponse();
 		secrets.setLeaseId("lease");
@@ -176,7 +175,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldPropagateErrorsToListenerOnInitialRetrieval() {
+	void shouldPropagateErrorsToListenerOnInitialRetrieval() {
 
 		VaultException e = new VaultException("error");
 		when(vaultOperations.read(requestedSecret.getPath())).thenThrow(e);
@@ -196,7 +195,7 @@ public class SecretLeaseContainerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldAcceptSecretsWithRenewableLease() {
+	void shouldAcceptSecretsWithRenewableLease() {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
 				scheduledFuture);
@@ -210,7 +209,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldRenewLease() {
+	void shouldRenewLease() {
 
 		prepareRenewal();
 
@@ -228,7 +227,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldRotateNonRenewableLease() {
+	void shouldRotateNonRenewableLease() {
 
 		final List<SecretLeaseEvent> events = new ArrayList<SecretLeaseEvent>();
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
@@ -265,7 +264,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldRotateGenericSecret() {
+	void shouldRotateGenericSecret() {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
 				scheduledFuture);
@@ -302,7 +301,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldNotRenewExpiringLease() {
+	void shouldNotRenewExpiringLease() {
 
 		prepareRenewal();
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
@@ -321,7 +320,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldNotRotateExpiringLease() {
+	void shouldNotRotateExpiringLease() {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
 				scheduledFuture);
@@ -361,7 +360,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void scheduleRenewalShouldApplyExpiryThreshold() {
+	void scheduleRenewalShouldApplyExpiryThreshold() {
 
 		prepareRenewal();
 
@@ -377,7 +376,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldPublishRenewalErrors() {
+	void shouldPublishRenewalErrors() {
 
 		prepareRenewal();
 		when(vaultOperations.doWithSession(any(RestOperationsCallback.class))).thenThrow(
@@ -403,7 +402,7 @@ public class SecretLeaseContainerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void subsequentScheduleRenewalShouldApplyExpiryThreshold() {
+	void subsequentScheduleRenewalShouldApplyExpiryThreshold() {
 
 		prepareRenewal();
 
@@ -430,7 +429,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void scheduleRenewalShouldTriggerOnlyOnce() {
+	void scheduleRenewalShouldTriggerOnlyOnce() {
 
 		prepareRenewal();
 
@@ -446,7 +445,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void subsequentStartShouldNoOp() {
+	void subsequentStartShouldNoOp() {
 
 		prepareRenewal();
 
@@ -462,7 +461,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void canceledRenewalShouldSkipRenewal() {
+	void canceledRenewalShouldSkipRenewal() {
 
 		prepareRenewal();
 
@@ -483,7 +482,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldDisableRenewalOnDisposal() throws Exception {
+	void shouldDisableRenewalOnDisposal() throws Exception {
 
 		prepareRenewal();
 
@@ -500,7 +499,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldNotRevokeSecretsWithoutLease() throws Exception {
+	void shouldNotRevokeSecretsWithoutLease() throws Exception {
 
 		VaultResponse secrets = new VaultResponse();
 		secrets.setData(Collections.singletonMap("key", (Object) "value"));
@@ -521,7 +520,7 @@ public class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
-	public void shouldRequestRotatingGenericSecrets() {
+	void shouldRequestRotatingGenericSecrets() {
 
 		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
 				scheduledFuture);

@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
@@ -27,6 +27,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link AppRoleAuthentication} using
@@ -35,11 +36,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Christophe Tafani-Dereeper
  */
-public class AppRoleAuthenticationStepsIntegrationTests extends
+class AppRoleAuthenticationStepsIntegrationTests extends
 		AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
-	public void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
+	void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
 		VaultToken unwrappingToken = generateWrappedSecretIdResponse();
@@ -55,7 +56,7 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	public void authenticationStepsShouldAuthenticateWithWrappedRoleId() {
+	void authenticationStepsShouldAuthenticateWithWrappedRoleId() {
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
@@ -75,7 +76,7 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	public void shouldAuthenticateWithFullPullMode() {
+	void shouldAuthenticateWithFullPullMode() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("with-secret-id").initialToken(Settings.token()).build();
@@ -88,7 +89,7 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	public void authenticationStepsShouldAuthenticateWithPullSecretId() {
+	void authenticationStepsShouldAuthenticateWithPullSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
 
@@ -104,7 +105,7 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	public void authenticationStepsShouldAuthenticateWithPullRoleId() {
+	void authenticationStepsShouldAuthenticateWithPullRoleId() {
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
@@ -121,8 +122,8 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 		assertThat(executor.login()).isNotNull();
 	}
 
-	@Test(expected = VaultException.class)
-	public void authenticationStepsShouldAuthenticatePullModeFailsWithWrongSecretId() {
+	@Test
+	void authenticationStepsShouldAuthenticatePullModeFailsWithWrongSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
 
@@ -133,11 +134,11 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
 						.getRestTemplate());
 
-		assertThat(executor.login()).isNotNull();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(executor::login);
 	}
 
 	@Test
-	public void authenticationStepsShouldAuthenticatePushModeWithProvidedSecretId() {
+	void authenticationStepsShouldAuthenticatePushModeWithProvidedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
 		String secretId = "hello_world_two";
@@ -161,7 +162,7 @@ public class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	public void authenticationStepsShouldAuthenticatePushMode() {
+	void authenticationStepsShouldAuthenticatePushMode() {
 
 		String roleId = getRoleId("with-secret-id");
 

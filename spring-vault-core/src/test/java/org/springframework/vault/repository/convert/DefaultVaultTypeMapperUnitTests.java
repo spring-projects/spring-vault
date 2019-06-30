@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.data.convert.ConfigurableTypeInformationMapper;
 import org.springframework.data.convert.SimpleTypeInformationMapper;
@@ -34,21 +34,23 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class DefaultVaultTypeMapperUnitTests {
+class DefaultVaultTypeMapperUnitTests {
 
 	ConfigurableTypeInformationMapper configurableTypeInformationMapper = new ConfigurableTypeInformationMapper(
 			Collections.singletonMap(String.class, "1"));
+
 	SimpleTypeInformationMapper simpleTypeInformationMapper = new SimpleTypeInformationMapper();
+
 	DefaultVaultTypeMapper typeMapper = new DefaultVaultTypeMapper();
 
 	@Test
-	public void defaultInstanceWritesClasses() {
+	void defaultInstanceWritesClasses() {
 
 		writesTypeToField(new LinkedHashMap<>(), String.class, String.class.getName());
 	}
 
 	@Test
-	public void defaultInstanceReadsClasses() {
+	void defaultInstanceReadsClasses() {
 
 		Map<String, Object> document = new LinkedHashMap<>();
 		document.put(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, String.class.getName());
@@ -57,7 +59,7 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void writesMapKeyForType() {
+	void writesMapKeyForType() {
 
 		typeMapper = new DefaultVaultTypeMapper(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
 				Collections.singletonList(configurableTypeInformationMapper));
@@ -67,7 +69,7 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void writesClassNamesForUnmappedValuesIfConfigured() {
+	void writesClassNamesForUnmappedValuesIfConfigured() {
 
 		typeMapper = new DefaultVaultTypeMapper(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
 				Arrays.asList(configurableTypeInformationMapper,
@@ -77,7 +79,7 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void readsTypeForMapKey() {
+	void readsTypeForMapKey() {
 
 		typeMapper = new DefaultVaultTypeMapper(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
 				Collections.singletonList(configurableTypeInformationMapper));
@@ -90,7 +92,7 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void readsTypeLoadingClassesForUnmappedTypesIfConfigured() {
+	void readsTypeLoadingClassesForUnmappedTypesIfConfigured() {
 
 		typeMapper = new DefaultVaultTypeMapper(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
 				Arrays.asList(configurableTypeInformationMapper,
@@ -105,34 +107,34 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void addsFullyQualifiedClassNameUnderDefaultKeyByDefault() {
+	void addsFullyQualifiedClassNameUnderDefaultKeyByDefault() {
 		writesTypeToField(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, new LinkedHashMap<>(),
 				String.class);
 	}
 
 	@Test
-	public void writesTypeToCustomFieldIfConfigured() {
+	void writesTypeToCustomFieldIfConfigured() {
 
 		typeMapper = new DefaultVaultTypeMapper("_custom");
 		writesTypeToField("_custom", new LinkedHashMap<>(), String.class);
 	}
 
 	@Test
-	public void doesNotWriteTypeInformationInCaseKeyIsSetToNull() {
+	void doesNotWriteTypeInformationInCaseKeyIsSetToNull() {
 
 		typeMapper = new DefaultVaultTypeMapper(null);
 		writesTypeToField(null, new LinkedHashMap<>(), String.class);
 	}
 
 	@Test
-	public void readsTypeFromDefaultKeyByDefault() {
+	void readsTypeFromDefaultKeyByDefault() {
 		readsTypeFromField(Collections.singletonMap(
 				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, String.class.getName()),
 				String.class);
 	}
 
 	@Test
-	public void readsTypeFromCustomFieldConfigured() {
+	void readsTypeFromCustomFieldConfigured() {
 
 		typeMapper = new DefaultVaultTypeMapper("_custom");
 		readsTypeFromField(Collections.singletonMap("_custom", String.class.getName()),
@@ -140,7 +142,7 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void returnsNullIfNoTypeInfoInDocument() {
+	void returnsNullIfNoTypeInfoInDocument() {
 		readsTypeFromField(new LinkedHashMap<>(), null);
 		readsTypeFromField(
 				Collections.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, ""),
@@ -148,20 +150,20 @@ public class DefaultVaultTypeMapperUnitTests {
 	}
 
 	@Test
-	public void returnsNullIfClassCannotBeLoaded() {
+	void returnsNullIfClassCannotBeLoaded() {
 		readsTypeFromField(Collections.singletonMap(
 				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "fooBar"), null);
 	}
 
 	@Test
-	public void returnsNullIfTypeKeySetToNull() {
+	void returnsNullIfTypeKeySetToNull() {
 		typeMapper = new DefaultVaultTypeMapper(null);
 		readsTypeFromField(Collections.singletonMap(
 				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, String.class), null);
 	}
 
 	@Test
-	public void returnsCorrectTypeKey() {
+	void returnsCorrectTypeKey() {
 
 		assertThat(typeMapper.isTypeKey(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY))
 				.isTrue();

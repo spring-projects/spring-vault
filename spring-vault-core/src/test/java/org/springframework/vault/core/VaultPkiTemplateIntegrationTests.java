@@ -30,13 +30,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.StreamUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultPkiOperations.Encoding;
@@ -46,10 +46,10 @@ import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -57,19 +57,19 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
+class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
-	private static final Version NO_TTL_UNIT_REQUIRED_FROM = Version.parse("0.7.3");
+	static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
-	private VaultPkiOperations pkiOperations;
+	VaultPkiOperations pkiOperations;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		pkiOperations = vaultOperations.opsForPki();
 
@@ -99,7 +99,7 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void issueCertificateShouldCreateCertificate() {
+	void issueCertificateShouldCreateCertificate() {
 
 		VaultCertificateRequest request = VaultCertificateRequest
 				.create("hello.example.com");
@@ -118,10 +118,8 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void issueCertificateWithTtlShouldCreateCertificate() {
-
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				NO_TTL_UNIT_REQUIRED_FROM));
+	@RequiresVaultVersion(NO_TTL_UNIT_REQUIRED_FROM)
+	void issueCertificateWithTtlShouldCreateCertificate() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
 				.ttl(Duration.ofHours(48)).commonName("hello.example.com").build();
@@ -138,7 +136,7 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void signShouldSignCsr() {
+	void signShouldSignCsr() {
 
 		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
 				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
@@ -174,16 +172,17 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.createTrustStore()).isNotNull();
 	}
 
-	@Test(expected = VaultException.class)
-	public void issueCertificateFail() {
+	@Test
+	void issueCertificateFail() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
-		pkiOperations.issueCertificate("testrole", request);
+		assertThatThrownBy(() -> pkiOperations.issueCertificate("testrole", request))
+				.isInstanceOf(VaultException.class);
 	}
 
 	@Test
-	public void shouldRevokeCertificate() throws Exception {
+	void shouldRevokeCertificate() throws Exception {
 
 		VaultCertificateRequest request = VaultCertificateRequest
 				.create("foo.example.com");
@@ -206,7 +205,7 @@ public class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldReturnCrl() throws Exception {
+	void shouldReturnCrl() throws Exception {
 
 		try (InputStream in = pkiOperations.getCrl(Encoding.DER)) {
 

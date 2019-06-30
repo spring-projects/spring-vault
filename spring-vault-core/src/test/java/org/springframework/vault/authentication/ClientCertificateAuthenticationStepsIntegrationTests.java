@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -28,6 +28,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using
@@ -35,11 +36,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthenticationStepsIntegrationTests extends
+class ClientCertificateAuthenticationStepsIntegrationTests extends
 		ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
-	public void authenticationStepsShouldLoginSuccessfully() {
+	void authenticationStepsShouldLoginSuccessfully() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), prepareCertAuthenticationMethod());
@@ -57,16 +58,18 @@ public class ClientCertificateAuthenticationStepsIntegrationTests extends
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
 	// receive a VaultException here.
-	@Test(expected = NestedRuntimeException.class)
-	public void authenticationStepsLoginShouldFail() {
+	@Test
+	void authenticationStepsLoginShouldFail() {
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
 				.create(new ClientOptions(), Settings.createSslConfiguration());
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		new AuthenticationStepsExecutor(
+		assertThatThrownBy(
+				() -> new AuthenticationStepsExecutor(
 				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate)
-				.login();
+.login())
+				.isInstanceOf(NestedRuntimeException.class);
 	}
 }

@@ -17,7 +17,7 @@ package org.springframework.vault.client;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -36,10 +36,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class ReactiveVaultClientsUnitTests {
+class ReactiveVaultClientsUnitTests {
 
 	@Test
-	public void shouldApplyNamespace() {
+	void shouldApplyNamespace() {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
 				"/auth/foo");
@@ -59,7 +59,7 @@ public class ReactiveVaultClientsUnitTests {
 	}
 
 	@Test
-	public void shouldAllowNamespaceOverride() {
+	void shouldAllowNamespaceOverride() {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
 				"/auth/foo");

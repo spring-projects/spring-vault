@@ -20,13 +20,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -67,8 +69,9 @@ import static org.mockito.Mockito.when;
  *
  * @author Mark Paluch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class ReactiveLifecycleAwareSessionManagerUnitTests {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 	@Mock
 	VaultTokenSupplier tokenSupplier;
@@ -95,18 +98,18 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	ResponseSpec responseSpec;
 
 	@Mock
-	private AuthenticationListener listener;
+	AuthenticationListener listener;
 
 	@Mock
-	private AuthenticationErrorListener errorListener;
+	AuthenticationErrorListener errorListener;
 
 	@Captor
-	private ArgumentCaptor<AuthenticationEvent> captor;
+	ArgumentCaptor<AuthenticationEvent> captor;
 
 	private ReactiveLifecycleAwareSessionManager sessionManager;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		// POST
 		when(webClient.post()).thenReturn(requestBodyUriSpec);
@@ -127,7 +130,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldObtainTokenFromClientAuthentication() {
+	void shouldObtainTokenFromClientAuthentication() {
 
 		mockToken(LoginToken.of("login"));
 
@@ -137,7 +140,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void loginShouldFail() {
+	void loginShouldFail() {
 
 		when(tokenSupplier.getVaultToken()).thenReturn(
 				Mono.error(new VaultLoginException("foo")));
@@ -149,7 +152,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldSelfLookupToken() {
+	void shouldSelfLookupToken() {
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
@@ -177,7 +180,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldContinueIfSelfLookupFails() {
+	void shouldContinueIfSelfLookupFails() {
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
@@ -196,7 +199,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void tokenRenewalShouldMapException() {
+	void tokenRenewalShouldMapException() {
 
 		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
 
@@ -220,7 +223,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldRevokeLoginTokenOnDestroy() {
+	void shouldRevokeLoginTokenOnDestroy() {
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
@@ -240,7 +243,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotRevokeRegularTokenOnDestroy() {
+	void shouldNotRevokeRegularTokenOnDestroy() {
 
 		mockToken(VaultToken.of("login"));
 
@@ -256,7 +259,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotThrowExceptionsOnRevokeErrors() {
+	void shouldNotThrowExceptionsOnRevokeErrors() {
 
 		mockToken(LoginToken.of("login"));
 
@@ -272,7 +275,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldScheduleTokenRenewal() {
+	void shouldScheduleTokenRenewal() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
@@ -283,7 +286,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldRunTokenRenewal() {
+	void shouldRunTokenRenewal() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
@@ -313,7 +316,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
+	void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
@@ -333,7 +336,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
+	void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
@@ -352,7 +355,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReLoginIfRenewalTtlExceedsThreshold() {
+	void shouldReLoginIfRenewalTtlExceedsThreshold() {
 
 		when(tokenSupplier.getVaultToken())
 				.thenReturn(
@@ -383,7 +386,7 @@ public class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReLoginIfRenewFails() {
+	void shouldReLoginIfRenewFails() {
 
 		when(tokenSupplier.getVaultToken())
 				.thenReturn(

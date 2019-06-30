@@ -21,49 +21,47 @@ import java.util.Map;
 import java.util.UUID;
 
 import lombok.Data;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultVersionedKeyValueTemplate}.
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultVersionedKeyValueTemplateIntegrationTests extends
+class VaultVersionedKeyValueTemplateIntegrationTests extends
 		IntegrationTestSupport {
 
 	@Autowired
-	private VaultOperations vaultOperations;
-	private VaultVersionedKeyValueOperations versionedOperations;
+	VaultOperations vaultOperations;
 
-	@Before
-	public void before() {
+	VaultVersionedKeyValueOperations versionedOperations;
 
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(
-				VaultRule.VERSIONING_INTRODUCED_WITH));
-
+	@BeforeEach
+	void before() {
 		versionedOperations = vaultOperations.opsForVersionedKeyValue("versioned");
 	}
 
 	@Test
-	public void shouldCreateVersionedSecret() {
+	void shouldCreateVersionedSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 
@@ -78,7 +76,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldCreateComplexVersionedSecret() {
+	void shouldCreateComplexVersionedSecret() {
 
 		Person person = new Person();
 		person.setFirstname("Walter");
@@ -93,7 +91,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldCreateVersionedWithCAS() {
+	void shouldCreateVersionedWithCAS() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 
@@ -110,7 +108,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldReadAndWriteVersionedSecret() {
+	void shouldReadAndWriteVersionedSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 
@@ -126,7 +124,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldListExistingSecrets() {
+	void shouldListExistingSecrets() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 		String key = UUID.randomUUID().toString();
@@ -137,7 +135,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldReadDifferentVersions() {
+	void shouldReadDifferentVersions() {
 
 		String key = UUID.randomUUID().toString();
 
@@ -151,7 +149,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldDeleteMostRecentVersion() {
+	void shouldDeleteMostRecentVersion() {
 
 		String key = UUID.randomUUID().toString();
 
@@ -170,7 +168,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldUndeleteVersion() {
+	void shouldUndeleteVersion() {
 
 		String key = UUID.randomUUID().toString();
 
@@ -189,7 +187,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldDeleteIntermediateRecentVersion() {
+	void shouldDeleteIntermediateRecentVersion() {
 
 		String key = UUID.randomUUID().toString();
 
@@ -209,7 +207,7 @@ public class VaultVersionedKeyValueTemplateIntegrationTests extends
 	}
 
 	@Test
-	public void shouldDestroyVersion() {
+	void shouldDestroyVersion() {
 
 		String key = UUID.randomUUID().toString();
 

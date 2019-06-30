@@ -18,9 +18,9 @@ package org.springframework.vault.repository;
 import java.util.List;
 
 import lombok.Data;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -28,7 +28,7 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.repository.VaultRepositoryIntegrationTests.VaultRepositoryTestConfiguration;
@@ -36,12 +36,13 @@ import org.springframework.vault.repository.configuration.EnableVaultRepositorie
 import org.springframework.vault.util.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.data.domain.Sort.Order.asc;
 
 /**
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultRepositoryTestConfiguration.class)
 public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
@@ -57,13 +58,13 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 	@Autowired
 	VaultTemplate vaultTemplate;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		vaultRepository.deleteAll();
 	}
 
 	@Test
-	public void loadAndSave() {
+	void loadAndSave() {
 
 		Person person = new Person();
 		person.setId("foo-key");
@@ -78,7 +79,7 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldApplyQueryMethod() {
+	void shouldApplyQueryMethod() {
 
 		Person walter = new Person();
 		walter.setId("walter");
@@ -98,7 +99,7 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldApplyQueryMethodWithSorting() {
+	void shouldApplyQueryMethodWithSorting() {
 
 		Person walter = new Person();
 		walter.setId("walter");
@@ -119,7 +120,7 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldApplyLimiting() {
+	void shouldApplyLimiting() {
 
 		Person walter = new Person();
 		walter.setId("walter");
@@ -136,9 +137,10 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		assertThat(vaultRepository.findTop1By(Sort.by(asc("name")))).containsOnly(skyler);
 	}
 
-	@Test(expected = InvalidDataAccessApiUsageException.class)
-	public void shouldFailForNonIdCriteria() {
-		vaultRepository.findInvalidByName("foo");
+	@Test
+	void shouldFailForNonIdCriteria() {
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
+				() -> vaultRepository.findInvalidByName("foo"));
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {

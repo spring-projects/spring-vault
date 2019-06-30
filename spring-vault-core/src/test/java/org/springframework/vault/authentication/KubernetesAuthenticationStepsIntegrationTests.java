@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
@@ -33,11 +33,11 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public class KubernetesAuthenticationStepsIntegrationTests extends
+class KubernetesAuthenticationStepsIntegrationTests extends
 		KubernetesAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	void shouldLoginSuccessfully() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 

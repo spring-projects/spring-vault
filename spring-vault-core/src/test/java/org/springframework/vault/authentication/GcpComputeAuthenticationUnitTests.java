@@ -17,8 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -37,13 +37,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class GcpComputeAuthenticationUnitTests {
+class GcpComputeAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -72,7 +73,7 @@ public class GcpComputeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLogin() {
+	void shouldLogin() {
 
 		setupMocks();
 
@@ -93,7 +94,7 @@ public class GcpComputeAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLoginWithAuthenticationSteps() {
+	void shouldLoginWithAuthenticationSteps() {
 
 		setupMocks();
 

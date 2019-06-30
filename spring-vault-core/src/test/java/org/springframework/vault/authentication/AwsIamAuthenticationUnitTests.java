@@ -18,8 +18,8 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 
 import com.amazonaws.auth.BasicAWSCredentials;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -40,13 +40,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class AwsIamAuthenticationUnitTests {
+class AwsIamAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -56,7 +57,7 @@ public class AwsIamAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldAuthenticate() {
+	void shouldAuthenticate() {
 
 		mockRest.expect(requestTo("/auth/aws/login"))
 				.andExpect(method(HttpMethod.POST))
@@ -87,7 +88,7 @@ public class AwsIamAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldUsingAuthenticationSteps() {
+	void shouldUsingAuthenticationSteps() {
 
 		mockRest.expect(requestTo("/auth/aws/login"))
 				.andExpect(method(HttpMethod.POST))

@@ -20,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
@@ -36,12 +36,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  *
  * @author Mark Paluch
  */
-public class PolicySerializationUnitTests {
+class PolicySerializationUnitTests {
 
 	ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void shouldSerialize() throws Exception {
+	void shouldSerialize() throws Exception {
 
 		Rule rule = Rule.builder().path("secret/*")
 				.capabilities("create", "read", "update")
@@ -64,7 +64,7 @@ public class PolicySerializationUnitTests {
 	}
 
 	@Test
-	public void shouldDeserialize() throws Exception {
+	void shouldDeserialize() throws Exception {
 
 		Rule rule = Rule.builder().path("secret/*")
 				.capabilities("create", "read", "update", "update")
@@ -109,13 +109,13 @@ public class PolicySerializationUnitTests {
 	}
 
 	@Test
-	public void shouldDeserializeEmptyPolicy() throws Exception {
+	void shouldDeserializeEmptyPolicy() throws Exception {
 
 		assertThat(objectMapper.readValue("{}", Policy.class)).isEqualTo(Policy.empty());
 	}
 
 	@Test
-	public void shouldRejectUnknownFieldNames() throws Exception {
+	void shouldRejectUnknownFieldNames() throws Exception {
 
 		assertThatThrownBy(
 				() -> objectMapper.readValue("{\"foo\":1, \"path\": {} }", Policy.class))
@@ -126,7 +126,7 @@ public class PolicySerializationUnitTests {
 	}
 
 	@Test
-	public void shouldDeserializePolicyWithEmptyRules() throws Exception {
+	void shouldDeserializePolicyWithEmptyRules() throws Exception {
 
 		Policy actual = objectMapper.readValue("{ \"path\": {} }", Policy.class);
 
@@ -134,7 +134,7 @@ public class PolicySerializationUnitTests {
 	}
 
 	@Test
-	public void shouldDeserializeRuleWithHour() throws Exception {
+	void shouldDeserializeRuleWithHour() throws Exception {
 
 		Policy actual = objectMapper.readValue(
 				"{ \"path\": { \"secret\" : {\"min_wrapping_ttl\":\"1h\"} } }",

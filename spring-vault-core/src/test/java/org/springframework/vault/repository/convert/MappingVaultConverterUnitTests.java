@@ -24,8 +24,8 @@ import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
@@ -43,8 +43,8 @@ public class MappingVaultConverterUnitTests {
 
 	MappingVaultConverter converter = new MappingVaultConverter(context);
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		VaultCustomConversions conversions = new VaultCustomConversions(Arrays.asList(
 				DocumentToPersonConverter.INSTANCE, PersonToDocumentConverter.INSTANCE));
@@ -53,7 +53,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadSimpleEntity() {
+	void shouldReadSimpleEntity() {
 
 		SecretDocument document = new SecretDocument("heisenberg");
 		document.put("username", "walter");
@@ -67,7 +67,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadConvertedEntity() {
+	void shouldReadConvertedEntity() {
 
 		SecretDocument document = new SecretDocument("heisenberg");
 		document.put("the_name", "walter");
@@ -78,7 +78,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadSubtype() {
+	void shouldReadSubtype() {
 
 		SecretDocument document = new SecretDocument("heisenberg");
 		document.put("_class", ExtendedEntity.class.getName());
@@ -96,7 +96,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadEntityWithEnum() {
+	void shouldReadEntityWithEnum() {
 
 		SecretDocument document = new SecretDocument();
 		document.put("condition", "BAD");
@@ -107,7 +107,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadSimpleEntityWithConstructorCreation() {
+	void shouldReadSimpleEntityWithConstructorCreation() {
 
 		SecretDocument document = new SecretDocument("heisenberg");
 		document.put("username", "walter");
@@ -121,7 +121,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadEntityWithList() {
+	void shouldReadEntityWithList() {
 
 		SecretDocument document = new SecretDocument(Collections.singletonMap(
 				"usernames", Arrays.asList("walter", "heisenberg")));
@@ -133,7 +133,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadEntityWithMap() {
+	void shouldReadEntityWithMap() {
 
 		Map<String, Integer> keyVersions = new LinkedHashMap<>();
 		keyVersions.put("foo", 1);
@@ -148,7 +148,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadEntityWithNesting() {
+	void shouldReadEntityWithNesting() {
 
 		Map<String, String> walter = new LinkedHashMap<>();
 		walter.put("username", "heisenberg");
@@ -164,7 +164,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldReadEntityWithListOfEntities() {
+	void shouldReadEntityWithListOfEntities() {
 
 		Map<String, String> walter = new LinkedHashMap<>();
 		walter.put("username", "heisenberg");
@@ -185,7 +185,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldWriteSimpleEntity() {
+	void shouldWriteSimpleEntity() {
 
 		SimpleEntity entity = new SimpleEntity();
 		entity.setId("heisenberg");
@@ -205,7 +205,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldWriteConvertedEntity() {
+	void shouldWriteConvertedEntity() {
 
 		SecretDocument expected = new SecretDocument();
 		expected.put("the_name", "walter");
@@ -218,7 +218,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldWriteEntityWithEnum() {
+	void shouldWriteEntityWithEnum() {
 
 		EntityWithEnum entity = new EntityWithEnum();
 		entity.setCondition(Condition.BAD);
@@ -231,7 +231,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldWriteEntityWithList() {
+	void shouldWriteEntityWithList() {
 
 		EntityWithListOfStrings entity = new EntityWithListOfStrings();
 		entity.setUsernames(Arrays.asList("walter", "heisenberg"));
@@ -245,7 +245,7 @@ public class MappingVaultConverterUnitTests {
 	}
 
 	@Test
-	public void shouldWriteEntityWithMap() {
+	void shouldWriteEntityWithMap() {
 
 		Map<String, Integer> keyVersions = new LinkedHashMap<>();
 		keyVersions.put("foo", 1);
@@ -263,7 +263,7 @@ public class MappingVaultConverterUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldWriteEntityWithListOfEntities() {
+	void shouldWriteEntityWithListOfEntities() {
 
 		EntityWithListOfEntities entity = new EntityWithListOfEntities();
 		entity.setNested(Arrays.asList(new NestedType("heisenberg", "hb"),

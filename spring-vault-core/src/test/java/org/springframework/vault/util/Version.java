@@ -33,13 +33,13 @@ public class Version implements Comparable<Version> {
 
 	private static final String VERSION_PARSE_ERROR = "Invalid version string! Could not parse segment %s within %s.";
 
-	private final int major;
+	final int major;
 
-	private final int minor;
+	final int minor;
 
-	private final int bugfix;
+	final int bugfix;
 
-	private final int build;
+	final int build;
 
 	/**
 	 * Creates a new {@link Version} from the given integer values. At least one value has

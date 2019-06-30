@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -39,14 +39,14 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  */
-public class AuthenticationStepsOperatorUnitTests {
+class AuthenticationStepsOperatorUnitTests {
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 	}
 
 	@Test
-	public void justTokenShouldLogin() {
+	void justTokenShouldLogin() {
 
 		AuthenticationSteps steps = AuthenticationSteps.just(VaultToken.of("my-token"));
 
@@ -55,7 +55,7 @@ public class AuthenticationStepsOperatorUnitTests {
 	}
 
 	@Test
-	public void supplierOfStringShouldLoginWithMap() {
+	void supplierOfStringShouldLoginWithMap() {
 
 		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token")
 				.login(VaultToken::of);
@@ -65,7 +65,7 @@ public class AuthenticationStepsOperatorUnitTests {
 	}
 
 	@Test
-	public void justLoginRequestShouldLogin() {
+	void justLoginRequestShouldLogin() {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
 				"/auth/cert/login");
@@ -87,7 +87,7 @@ public class AuthenticationStepsOperatorUnitTests {
 	}
 
 	@Test
-	public void justLoginShouldFail() {
+	void justLoginShouldFail() {
 
 		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
 				"/auth/cert/login");
@@ -105,7 +105,7 @@ public class AuthenticationStepsOperatorUnitTests {
 	}
 
 	@Test
-	public void zipWithShouldRequestTwoItems() {
+	void zipWithShouldRequestTwoItems() {
 
 		ClientHttpRequest leftRequest = new MockClientHttpRequest(HttpMethod.GET,
 				"/auth/login/left");

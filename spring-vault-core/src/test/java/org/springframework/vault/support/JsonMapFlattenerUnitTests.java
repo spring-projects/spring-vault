@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,12 +29,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @SuppressWarnings("unchecked")
-public class JsonMapFlattenerUnitTests {
+class JsonMapFlattenerUnitTests {
 
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
-	public void shouldPreserveFlatMap() {
+	void shouldPreserveFlatMap() {
 
 		Map<String, Object> result = JsonMapFlattener.flatten(Collections.singletonMap(
 				"key", "value"));
@@ -42,7 +42,7 @@ public class JsonMapFlattenerUnitTests {
 	}
 
 	@Test
-	public void shouldFlattenNestedObject() throws Exception {
+	void shouldFlattenNestedObject() throws Exception {
 
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": { \"nested\":true} }", Map.class);
@@ -52,7 +52,7 @@ public class JsonMapFlattenerUnitTests {
 	}
 
 	@Test
-	public void shouldFlattenDeeplyNestedObject() throws Exception {
+	void shouldFlattenDeeplyNestedObject() throws Exception {
 
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": { \"nested\": {\"anotherLevel\": \"value\"} } }", Map.class);
@@ -62,7 +62,7 @@ public class JsonMapFlattenerUnitTests {
 	}
 
 	@Test
-	public void shouldFlattenNestedListOfSimpleObjects() throws Exception {
+	void shouldFlattenNestedListOfSimpleObjects() throws Exception {
 
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": [\"one\", \"two\"], \"dotted.key\": [\"one\", \"two\"] }",
@@ -75,7 +75,7 @@ public class JsonMapFlattenerUnitTests {
 	}
 
 	@Test
-	public void shouldFlattenNestedListOfComplexObject() throws Exception {
+	void shouldFlattenNestedListOfComplexObject() throws Exception {
 
 		Map<String, Object> map = objectMapper.readValue(
 				"{\"key\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}] }",
@@ -87,7 +87,7 @@ public class JsonMapFlattenerUnitTests {
 	}
 
 	@Test
-	public void shouldFlattenDeeplyNestedListOfComplexObject() throws Exception {
+	void shouldFlattenDeeplyNestedListOfComplexObject() throws Exception {
 
 		Map<String, Object> map = objectMapper
 				.readValue(

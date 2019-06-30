@@ -18,7 +18,7 @@ package org.springframework.vault.support;
 import java.time.Duration;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +27,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultTokenRequestUnitTests {
+class VaultTokenRequestUnitTests {
 
 	@Test
-	public void shouldBuildEmptyRequest() {
+	void shouldBuildEmptyRequest() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().build();
 
@@ -39,7 +39,7 @@ public class VaultTokenRequestUnitTests {
 	}
 
 	@Test
-	public void shouldBuildRequestWithMeta() {
+	void shouldBuildRequestWithMeta() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.meta(Collections.singletonMap("key", "value")).build();
@@ -48,7 +48,7 @@ public class VaultTokenRequestUnitTests {
 	}
 
 	@Test
-	public void shouldBuildRequestWithPolicies() {
+	void shouldBuildRequestWithPolicies() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().withPolicy("foo")
 				.build();
@@ -57,7 +57,7 @@ public class VaultTokenRequestUnitTests {
 	}
 
 	@Test
-	public void shouldRequestWithDuration() {
+	void shouldRequestWithDuration() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.ttl(Duration.ofSeconds(10)).explicitMaxTtl(Duration.ofSeconds(20))

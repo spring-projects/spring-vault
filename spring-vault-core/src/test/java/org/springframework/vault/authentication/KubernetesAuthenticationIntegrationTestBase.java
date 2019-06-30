@@ -21,14 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.util.StringUtils;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
 
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -36,15 +36,15 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Michal Budzyn
  */
+@RequiresVaultVersion("0.8.3")
 public abstract class KubernetesAuthenticationIntegrationTestBase extends
 		IntegrationTestSupport {
 
-	@Before
+	@BeforeEach
 	public void before() {
 
 		String minikubeIp = System.getProperty("MINIKUBE_IP");
-		assumeTrue(StringUtils.hasText(minikubeIp)
-				&& prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.8.3")));
+		assumeTrue(StringUtils.hasText(minikubeIp));
 
 		if (!prepare().hasAuth("kubernetes")) {
 			prepare().mountAuth("kubernetes");

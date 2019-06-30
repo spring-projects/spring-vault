@@ -19,14 +19,14 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -41,17 +41,17 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  * @author Sven Schürmann
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
+class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
-	private Version vaultVersion;
+	Version vaultVersion;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		VaultSysOperations adminOperations = vaultOperations.opsForSys();
 
@@ -66,8 +66,8 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 		vaultOperations.write("transit/keys/mykey", null);
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		removeKeys();
 	}
 
@@ -99,7 +99,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldEncrypt() {
+	void shouldEncrypt() {
 
 		VaultResponse response = vaultOperations.write(
 				"transit/encrypt/mykey",
@@ -110,7 +110,7 @@ public class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	public void shouldEncryptAndDecrypt() {
+	void shouldEncryptAndDecrypt() {
 
 		VaultResponse response = vaultOperations.write(
 				"transit/encrypt/mykey",

@@ -18,17 +18,18 @@ package org.springframework.vault.config;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthentication;
+import org.springframework.vault.util.VaultExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,28 +39,28 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michal Budzyn
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@ExtendWith(VaultExtension.class)
 @TestPropertySource(properties = { "vault.uri=https://localhost:8123",
 		"vault.authentication=kubernetes", "vault.kubernetes.role=my-role",
 		"vault.kubernetes.service-account-token-file=target/token" })
-public class EnvironmentVaultConfigurationKubernetesAuthenticationUnitTests {
+class EnvironmentVaultConfigurationKubernetesAuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
 	}
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-
+	@BeforeAll
+	static void beforeClass() throws Exception {
 		Files.write(Paths.get("target", "token"), "token".getBytes());
 	}
 
 	@Autowired
-	private EnvironmentVaultConfiguration configuration;
+	EnvironmentVaultConfiguration configuration;
 
 	@Test
-	public void shouldConfigureAuthentication() {
+	void shouldConfigureAuthentication() {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 

@@ -16,6 +16,7 @@
 package org.springframework.vault.core.lease;
 
 import java.util.Map;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -41,9 +42,9 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 	public static class PropertySourceHolder implements InitializingBean {
 
 		@Autowired
-		private ApplicationContext appContext;
+		ApplicationContext appContext;
 
-		private LeaseAwareVaultPropertySource propertySource;
+		LeaseAwareVaultPropertySource propertySource;
 
 		/**
 		 * Searches the {@link ApplicationContext} for the

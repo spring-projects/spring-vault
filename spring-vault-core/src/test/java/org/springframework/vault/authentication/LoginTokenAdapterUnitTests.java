@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -37,13 +37,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class LoginTokenAdapterUnitTests {
+class LoginTokenAdapterUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() throws Exception {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -53,7 +54,7 @@ public class LoginTokenAdapterUnitTests {
 	}
 
 	@Test
-	public void shouldSelfLookupToken() throws Exception {
+	void shouldSelfLookupToken() throws Exception {
 
 		mockRest.expect(requestTo("/auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))

@@ -20,14 +20,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -70,31 +70,31 @@ import static org.mockito.Mockito.when;
  *
  * @author Mark Paluch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class LifecycleAwareSessionManagerUnitTests {
+@ExtendWith(MockitoExtension.class)
+class LifecycleAwareSessionManagerUnitTests {
 
 	@Mock
-	private ClientAuthentication clientAuthentication;
+	ClientAuthentication clientAuthentication;
 
 	@Mock
-	private TaskScheduler taskScheduler;
+	TaskScheduler taskScheduler;
 
 	@Mock
-	private RestOperations restOperations;
+	RestOperations restOperations;
 
 	@Mock
-	private AuthenticationListener listener;
+	AuthenticationListener listener;
 
 	@Mock
-	private AuthenticationErrorListener errorListener;
+	AuthenticationErrorListener errorListener;
 
 	@Captor
-	private ArgumentCaptor<AuthenticationEvent> captor;
+	ArgumentCaptor<AuthenticationEvent> captor;
 
 	private LifecycleAwareSessionManager sessionManager;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
 				taskScheduler, restOperations);
 		sessionManager.addAuthenticationListener(listener);
@@ -102,7 +102,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldObtainTokenFromClientAuthentication() {
+	void shouldObtainTokenFromClientAuthentication() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
@@ -111,7 +111,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void loginShouldFail() {
+	void loginShouldFail() {
 
 		when(clientAuthentication.login()).thenThrow(new VaultLoginException("foo"));
 
@@ -123,7 +123,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldSelfLookupToken() {
+	void shouldSelfLookupToken() {
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
@@ -149,7 +149,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void shouldContinueIfSelfLookupFails() {
+	void shouldContinueIfSelfLookupFails() {
 
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
@@ -168,7 +168,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldTranslateExceptionOnTokenRenewal() {
+	void shouldTranslateExceptionOnTokenRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofMinutes(5)));
@@ -185,7 +185,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldRevokeLoginTokenOnDestroy() {
+	void shouldRevokeLoginTokenOnDestroy() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
@@ -202,7 +202,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotRevokeRegularTokenOnDestroy() {
+	void shouldNotRevokeRegularTokenOnDestroy() {
 
 		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
@@ -216,7 +216,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotThrowExceptionsOnRevokeErrors() {
+	void shouldNotThrowExceptionsOnRevokeErrors() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
@@ -240,7 +240,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldScheduleTokenRenewal() {
+	void shouldScheduleTokenRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -251,7 +251,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldRunTokenRenewal() {
+	void shouldRunTokenRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -277,7 +277,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
+	void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -297,7 +297,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
+	void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -317,7 +317,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReLoginIfRenewalTtlExceedsThreshold() {
+	void shouldReLoginIfRenewalTtlExceedsThreshold() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
@@ -341,7 +341,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldReLoginIfRenewalFails() {
+	void shouldReLoginIfRenewalFails() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
@@ -361,7 +361,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldUseTaskScheduler() {
+	void shouldUseTaskScheduler() {
 
 		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
 				taskScheduler, restOperations);
@@ -379,7 +379,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
+	void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -399,7 +399,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void shouldObtainTokenIfNoTokenAvailable() {
+	void shouldObtainTokenIfNoTokenAvailable() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
@@ -412,7 +412,7 @@ public class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
-	public void renewShouldReportFalseIfTokenRenewalFails() {
+	void renewShouldReportFalseIfTokenRenewalFails() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));

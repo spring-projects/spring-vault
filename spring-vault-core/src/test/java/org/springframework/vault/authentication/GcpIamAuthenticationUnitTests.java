@@ -22,8 +22,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential.Builder;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -44,14 +44,16 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class GcpIamAuthenticationUnitTests {
+class GcpIamAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
-	private MockHttpTransport mockHttpTransport;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	MockHttpTransport mockHttpTransport;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -61,7 +63,7 @@ public class GcpIamAuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLogin() {
+	void shouldLogin() {
 
 		MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
 		response.setStatusCode(200);

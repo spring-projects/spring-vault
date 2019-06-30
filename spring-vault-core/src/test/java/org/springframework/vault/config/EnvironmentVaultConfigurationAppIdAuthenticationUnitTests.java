@@ -15,14 +15,14 @@
  */
 package org.springframework.vault.config;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.ClientAuthentication;
 
@@ -33,11 +33,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = { "vault.uri=https://localhost:8123",
 		"vault.authentication=appid", "vault.app-id.user-id=IP_ADDRESS",
 		"vault.app-id.app-id=foo" })
-public class EnvironmentVaultConfigurationAppIdAuthenticationUnitTests {
+class EnvironmentVaultConfigurationAppIdAuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
@@ -45,10 +45,10 @@ public class EnvironmentVaultConfigurationAppIdAuthenticationUnitTests {
 	}
 
 	@Autowired
-	private EnvironmentVaultConfiguration configuration;
+	EnvironmentVaultConfiguration configuration;
 
 	@Test
-	public void shouldConfigureAuthentication() {
+	void shouldConfigureAuthentication() {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 

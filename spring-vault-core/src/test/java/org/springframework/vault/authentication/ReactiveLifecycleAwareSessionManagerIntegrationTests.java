@@ -25,10 +25,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.assertj.core.util.Files;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -44,14 +43,11 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.TestWebClientFactory;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.Assume.assumeTrue;
 import static org.springframework.vault.util.Settings.createSslConfiguration;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
@@ -60,15 +56,14 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
+@RequiresVaultVersion("0.6.2")
+class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 		IntegrationTestSupport {
 
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
-	@Before
-	public void before() {
-
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
+	@BeforeEach
+	void before() {
 
 		taskScheduler.afterPropertiesSet();
 
@@ -93,13 +88,13 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 				});
 	}
 
-	@After
-	public void tearDown() {
+	@AfterEach
+	void tearDown() {
 		taskScheduler.destroy();
 	}
 
 	@Test
-	public void shouldLogin() {
+	void shouldLogin() {
 
 		LoginToken loginToken = createLoginToken();
 
@@ -112,7 +107,7 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 
 	// Expect no exception to be thrown.
 	@Test
-	public void shouldRenewToken() {
+	void shouldRenewToken() {
 
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
 				.opsForToken();
@@ -149,40 +144,7 @@ public class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 	}
 
 	@Test
-	@Ignore("Run me manually, I take some seconds to complete")
-	public void shouldRenewTokenAfterExpiry() throws InterruptedException {
-
-		SslConfiguration sslConfiguration = prepareCertAuthenticationMethod();
-
-		WebClient webClient = TestWebClientFactory.create(sslConfiguration);
-		final AtomicInteger getTokenCounter = new AtomicInteger();
-		AuthenticationStepsOperator stepsOperator = new AuthenticationStepsOperator(
-				ClientCertificateAuthentication.createAuthenticationSteps(), webClient) {
-			@Override
-			public Mono<VaultToken> getVaultToken() throws VaultException {
-				return super.getVaultToken().doAfterTerminate(
-						getTokenCounter::incrementAndGet);
-			}
-		};
-
-		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
-				stepsOperator, taskScheduler, prepare().getWebClient());
-
-		VaultToken firstToken = sessionManager.getSessionToken().block();
-		VaultToken cached = sessionManager.getSessionToken().block();
-
-		TimeUnit.SECONDS.sleep(5);
-		VaultToken nextToken = sessionManager.getSessionToken().block();
-
-		assertThat(firstToken).isNotNull().isEqualTo(cached);
-		assertThat(nextToken).isNotNull();
-		assertThat(nextToken.getToken()).isNotEqualTo(firstToken.toString());
-		assertThat(nextToken.getToken()).isNotEqualTo(firstToken.toString());
-		assertThat(getTokenCounter.get()).isEqualTo(2);
-	}
-
-	@Test
-	public void shouldRevokeOnDisposal() {
+	void shouldRevokeOnDisposal() {
 
 		final LoginToken loginToken = createLoginToken();
 

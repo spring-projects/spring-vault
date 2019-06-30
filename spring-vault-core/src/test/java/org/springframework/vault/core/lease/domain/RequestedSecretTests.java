@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.core.lease.domain;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Pierre-Jean Vardanega
  */
-public class RequestedSecretTests {
+class RequestedSecretTests {
 
 	@Test
-	public void shouldBuildRotatingRequestedSecret() {
+	void shouldBuildRotatingRequestedSecret() {
 
 		RequestedSecret requestedSecret = RequestedSecret.from(Mode.ROTATE, "my/path");
 
@@ -37,7 +37,7 @@ public class RequestedSecretTests {
 	}
 
 	@Test
-	public void shouldBuildRenewingRequestedSecret() {
+	void shouldBuildRenewingRequestedSecret() {
 
 		RequestedSecret requestedSecret = RequestedSecret.from(Mode.RENEW, "my/path");
 

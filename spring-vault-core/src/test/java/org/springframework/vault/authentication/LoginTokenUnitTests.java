@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,10 +24,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class LoginTokenUnitTests {
+class LoginTokenUnitTests {
 
 	@Test
-	public void shouldConstructLoginToken() {
+	void shouldConstructLoginToken() {
 
 		assertThat(LoginToken.of("token")).isInstanceOf(LoginToken.class);
 		assertThat(LoginToken.of("token", 1)).isInstanceOf(LoginToken.class);
@@ -35,7 +35,7 @@ public class LoginTokenUnitTests {
 	}
 
 	@Test
-	public void toStringShouldPrintFields() {
+	void toStringShouldPrintFields() {
 
 		assertThat(LoginToken.of("token").toString()).isEqualTo(
 				"LoginToken(renewable=false, leaseDuration=PT0S)");

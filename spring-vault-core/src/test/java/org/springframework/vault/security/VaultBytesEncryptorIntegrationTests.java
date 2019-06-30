@@ -17,8 +17,8 @@ package org.springframework.vault.security;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.core.VaultTransitOperations;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -32,16 +32,16 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
+class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 
-	static final String KEY_NAME = "security-encryptor";
+	private static final String KEY_NAME = "security-encryptor";
 
-	private VaultTransitOperations transit;
+	VaultTransitOperations transit;
 
-	private Version vaultVersion;
+	Version vaultVersion;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		transit = prepare().getVaultOperations().opsForTransit();
 		vaultVersion = prepare().getVersion();
@@ -82,7 +82,7 @@ public class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport 
 	}
 
 	@Test
-	public void shouldEncryptAndDecrypt() {
+	void shouldEncryptAndDecrypt() {
 
 		VaultBytesEncryptor encryptor = new VaultBytesEncryptor(transit, KEY_NAME);
 

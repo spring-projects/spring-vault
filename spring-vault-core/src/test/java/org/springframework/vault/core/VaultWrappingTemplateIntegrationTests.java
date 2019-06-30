@@ -23,23 +23,23 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.EqualsAndHashCode;
 import lombok.Value;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link VaultWrappingTemplate} through
@@ -47,33 +47,26 @@ import static org.junit.Assume.assumeTrue;
  *
  * @author Mark Paluch
  */
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
+@RequiresVaultVersion(VaultWrappingTemplateIntegrationTests.WRAPPING_ENDPOINT_INTRODUCED_IN_VERSION)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
+class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
-	private static final Version WRAPPING_ENDPOINT_INTRODUCED_IN_VERSION = Version
-			.parse("0.6.2");
+	static final String WRAPPING_ENDPOINT_INTRODUCED_IN_VERSION = "0.6.2";
 
 	@Autowired
-	private VaultOperations vaultOperations;
+	VaultOperations vaultOperations;
 
-	private VaultWrappingOperations wrappingOperations;
+	VaultWrappingOperations wrappingOperations;
 
-	private Version vaultVersion;
-
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		wrappingOperations = vaultOperations.opsForWrapping();
-
-		vaultVersion = prepare().getVersion();
-
-		assumeTrue(vaultVersion
-				.isGreaterThanOrEqualTo(WRAPPING_ENDPOINT_INTRODUCED_IN_VERSION));
 	}
 
 	@Test
-	public void shouldCreateWrappedSecret() {
+	void shouldCreateWrappedSecret() {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
@@ -86,7 +79,7 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
-	public void shouldLookupWrappedSecret() {
+	void shouldLookupWrappedSecret() {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
@@ -101,7 +94,7 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
-	public void shouldReadWrappedSecret() {
+	void shouldReadWrappedSecret() {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
@@ -113,7 +106,7 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
-	public void shouldReadWrappedTypedSecret() {
+	void shouldReadWrappedTypedSecret() {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
@@ -125,14 +118,14 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
-	public void shouldReturnNullForNonExistentSecret() {
+	void shouldReturnNullForNonExistentSecret() {
 
 		assertThat(wrappingOperations.read(VaultToken.of("foo"))).isNull();
 		assertThat(wrappingOperations.read(VaultToken.of("foo"), Map.class)).isNull();
 	}
 
 	@Test
-	public void shouldLookupAbsentSecret() {
+	void shouldLookupAbsentSecret() {
 
 		WrappedMetadata lookup = wrappingOperations.lookup(VaultToken.of("foo"));
 
@@ -140,7 +133,7 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
-	public void shouldRewrapSecret() {
+	void shouldRewrapSecret() {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
@@ -154,9 +147,10 @@ public class VaultWrappingTemplateIntegrationTests extends IntegrationTestSuppor
 				.isAfter(Instant.now().minusSeconds(60));
 	}
 
-	@Test(expected = VaultException.class)
-	public void shouldRewrapAbsentSecret() {
-		wrappingOperations.rewrap(VaultToken.of("foo"));
+	@Test
+	void shouldRewrapAbsentSecret() {
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
 	@Value

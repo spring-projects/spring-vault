@@ -19,16 +19,17 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.VaultResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.mockito.Mockito.when;
 
 /**
@@ -36,26 +37,29 @@ import static org.mockito.Mockito.when;
  *
  * @author Mark Paluch
  */
-@RunWith(MockitoJUnitRunner.class)
-public class VaultPropertySourceUnitTests {
+@ExtendWith(MockitoExtension.class)
+class VaultPropertySourceUnitTests {
 
 	@Mock
 	VaultTemplate vaultTemplate;
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldRejectEmptyPath() {
-		new VaultPropertySource("hello", vaultTemplate, "", PropertyTransformers.noop());
+	@Test
+	void shouldRejectEmptyPath() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> new VaultPropertySource("hello", vaultTemplate, "",
+						PropertyTransformers.noop()));
 
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldRejectPathStartingWithSlash() {
-		new VaultPropertySource("hello", vaultTemplate, "/secret",
-				PropertyTransformers.noop());
 	}
 
 	@Test
-	public void shouldLoadProperties() {
+	void shouldRejectPathStartingWithSlash() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> new VaultPropertySource("hello", vaultTemplate, "/secret",
+						PropertyTransformers.noop()));
+	}
+
+	@Test
+	void shouldLoadProperties() {
 
 		prepareResponse();
 
@@ -70,7 +74,7 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void shouldLoadAndTransformProperties() {
+	void shouldLoadAndTransformProperties() {
 
 		prepareResponse();
 
@@ -88,7 +92,7 @@ public class VaultPropertySourceUnitTests {
 	}
 
 	@Test
-	public void getPropertyNamesShouldReturnNames() {
+	void getPropertyNamesShouldReturnNames() {
 
 		prepareResponse();
 

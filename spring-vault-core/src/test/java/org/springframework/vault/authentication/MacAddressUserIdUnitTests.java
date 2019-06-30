@@ -21,37 +21,37 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * Unit tests for {@link MacAddressUserId}.
  *
  * @author Mark Paluch
  */
-public class MacAddressUserIdUnitTests {
+class MacAddressUserIdUnitTests {
 
 	@Test
-	public void shouldGenerateUppercaseSha256HexString() {
+	void shouldGenerateUppercaseSha256HexString() {
 
 		String userId = new MacAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
-				.doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
+				Pattern.compile("[a-f]"));
 	}
 
 	@Test
-	public void shouldGenerateUserIdFromNetworkInterfaceIndex() throws Exception {
+	void shouldGenerateUserIdFromNetworkInterfaceIndex() throws Exception {
 
 		int index = getValidNetworkInterfaceIndex();
 		assumeTrue(index != -1);
 
 		String userId = new MacAddressUserId(index).createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
-				.doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(
+				Pattern.compile("[a-f]"));
 	}
 
 	/**
@@ -62,8 +62,8 @@ public class MacAddressUserIdUnitTests {
 	 */
 	private int getValidNetworkInterfaceIndex() throws SocketException {
 
-		List<NetworkInterface> interfaces = Collections
-				.list(NetworkInterface.getNetworkInterfaces());
+		List<NetworkInterface> interfaces = Collections.list(NetworkInterface
+				.getNetworkInterfaces());
 
 		int index = -1;
 

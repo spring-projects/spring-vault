@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -27,9 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Michal Budzyn
  * @author Mark Paluch
  */
-public class KubeServiceAccountTokenFileUnitTests {
+class KubeServiceAccountTokenFileUnitTests {
 
-	private final static String TEST_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9."
+	final static String TEST_TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9."
 			+ "eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy"
 			+ "5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJu"
 			+ "ZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImRlZmF1bHQtdG"
@@ -46,7 +46,7 @@ public class KubeServiceAccountTokenFileUnitTests {
 			+ "k-v0It8hky0CKtCLs2UHiABA";
 
 	@Test
-	public void shouldGetJwtTokenFromResource() {
+	void shouldGetJwtTokenFromResource() {
 
 		String jwt = new KubernetesServiceAccountTokenFile(new ClassPathResource(
 				"kube-jwt-token")).get();
@@ -55,7 +55,7 @@ public class KubeServiceAccountTokenFileUnitTests {
 	}
 
 	@Test
-	public void shouldGetJwtTokenFromFile() throws Exception {
+	void shouldGetJwtTokenFromFile() throws Exception {
 
 		String fileName = new ClassPathResource("kube-jwt-token").getFile()
 				.getAbsolutePath();

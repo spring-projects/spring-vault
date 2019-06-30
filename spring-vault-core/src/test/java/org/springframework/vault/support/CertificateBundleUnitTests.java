@@ -21,8 +21,8 @@ import java.security.PrivateKey;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,13 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class CertificateBundleUnitTests {
+class CertificateBundleUnitTests {
 
 	CertificateBundle certificateBundle;
 
 	@SuppressWarnings("unchecked")
-	@Before
-	public void before() throws Exception {
+	@BeforeEach
+	void before() throws Exception {
 		Map<String, String> data = new ObjectMapper().readValue(
 				getClass().getResource("/certificate.json"), Map.class);
 
@@ -46,7 +46,7 @@ public class CertificateBundleUnitTests {
 	}
 
 	@Test
-	public void getPrivateKeySpecShouldCreatePrivateKey() throws Exception {
+	void getPrivateKeySpecShouldCreatePrivateKey() throws Exception {
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
 		PrivateKey privateKey = kf.generatePrivate(certificateBundle.getPrivateKeySpec());
@@ -56,7 +56,7 @@ public class CertificateBundleUnitTests {
 	}
 
 	@Test
-	public void getAsKeystore() throws Exception {
+	void getAsKeystore() throws Exception {
 
 		KeyStore keyStore = certificateBundle.createKeyStore("mykey");
 

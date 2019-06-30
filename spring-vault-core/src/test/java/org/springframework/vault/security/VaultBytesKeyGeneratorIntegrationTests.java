@@ -15,26 +15,24 @@
  */
 package org.springframework.vault.security;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Version;
+import org.springframework.vault.util.RequiresVaultVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assume.assumeTrue;
 
 /**
  * Integration tests for {@link VaultBytesKeyGenerator}.
  *
  * @author Mark Paluch
  */
-public class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSupport {
+@RequiresVaultVersion("0.6.2")
+class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSupport {
 
-	@Before
-	public void before() {
-
-		assumeTrue(prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("0.6.2")));
+	@BeforeEach
+	void before() {
 
 		if (!prepare().hasSecret("transit")) {
 			prepare().mountSecret("transit");
@@ -42,7 +40,7 @@ public class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSuppo
 	}
 
 	@Test
-	public void shouldGenerateRandomBytes() {
+	void shouldGenerateRandomBytes() {
 
 		VaultBytesKeyGenerator generator = new VaultBytesKeyGenerator(prepare()
 				.getVaultOperations(), "transit", 16);

@@ -17,7 +17,7 @@ package org.springframework.vault.client;
 
 import java.net.URI;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,10 +26,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class VaultEndpointUnitTests {
+class VaultEndpointUnitTests {
 
 	@Test
-	public void shouldCreateEndpointFromHostAndPort() {
+	void shouldCreateEndpointFromHostAndPort() {
 
 		VaultEndpoint endpoint = VaultEndpoint.create("host", 1234);
 
@@ -39,7 +39,7 @@ public class VaultEndpointUnitTests {
 	}
 
 	@Test
-	public void shouldCreateEndpointFromURI() {
+	void shouldCreateEndpointFromURI() {
 
 		VaultEndpoint endpoint = VaultEndpoint.from(URI.create("http://127.0.0.1:443/"));
 
@@ -50,7 +50,7 @@ public class VaultEndpointUnitTests {
 	}
 
 	@Test
-	public void shouldCreateEndpointFromURIWithoutPort() {
+	void shouldCreateEndpointFromURIWithoutPort() {
 
 		VaultEndpoint endpoint = VaultEndpoint.from(URI.create("http://127.0.0.1"));
 
@@ -61,7 +61,7 @@ public class VaultEndpointUnitTests {
 	}
 
 	@Test
-	public void shouldCreateEndpointWithPath() {
+	void shouldCreateEndpointWithPath() {
 
 		VaultEndpoint endpoint = VaultEndpoint.from(URI
 				.create("http://127.0.0.1/context"));

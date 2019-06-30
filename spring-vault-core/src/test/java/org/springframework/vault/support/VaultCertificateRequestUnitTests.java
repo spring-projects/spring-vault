@@ -15,24 +15,26 @@
  */
 package org.springframework.vault.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Unit tests for {@link VaultCertificateRequest}.
  *
  * @author Mark Paluch
  */
-public class VaultCertificateRequestUnitTests {
+class VaultCertificateRequestUnitTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldRejectUnconfiguredBuilder() throws Exception {
-		VaultCertificateRequest.builder().build();
+	@Test
+	void shouldRejectUnconfiguredBuilder() {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
+				() -> VaultCertificateRequest.builder().build());
 	}
 
 	@Test
-	public void shouldBuildRequestWithCommonName() throws Exception {
+	void shouldBuildRequestWithCommonName() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
 				.commonName("hello.com").build();
@@ -41,7 +43,7 @@ public class VaultCertificateRequestUnitTests {
 	}
 
 	@Test
-	public void shouldBuildFullyConfiguredRequest() throws Exception {
+	void shouldBuildFullyConfiguredRequest() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder() //
 				.commonName("hello.com") //

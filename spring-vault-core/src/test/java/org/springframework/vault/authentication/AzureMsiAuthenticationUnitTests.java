@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -38,13 +38,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class AzureMsiAuthenticationUnitTests {
+class AzureMsiAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -54,7 +55,7 @@ public class AzureMsiAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainTokenAndFetchMetadata() {
+	void loginShouldObtainTokenAndFetchMetadata() {
 
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
 				.role("dev-role") //
@@ -73,7 +74,7 @@ public class AzureMsiAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainToken() {
+	void loginShouldObtainToken() {
 
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions
 				.builder()
@@ -94,7 +95,7 @@ public class AzureMsiAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginWithStepsShouldObtainTokenAndFetchMetadata() {
+	void loginWithStepsShouldObtainTokenAndFetchMetadata() {
 
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
 				.role("dev-role") //
@@ -113,7 +114,7 @@ public class AzureMsiAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginWithStepsShouldObtainToken() {
+	void loginWithStepsShouldObtainToken() {
 
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions
 				.builder()

@@ -19,8 +19,8 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -33,6 +33,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -44,13 +45,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Mark Paluch
  */
-public class AwsEc2AuthenticationUnitTests {
+class AwsEc2AuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-	private MockRestServiceServer mockRest;
+	RestTemplate restTemplate;
 
-	@Before
-	public void before() {
+	MockRestServiceServer mockRest;
+
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -60,7 +62,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldObtainIdentityDocument() {
+	void shouldObtainIdentityDocument() {
 
 		mockRest.expect(
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
@@ -74,7 +76,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldContainRole() {
+	void shouldContainRole() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
 				.role("ami").build();
@@ -94,7 +96,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void shouldLogin() {
+	void shouldLogin() {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
@@ -130,7 +132,7 @@ public class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	public void authenticationChainShouldLogin() {
+	void authenticationChainShouldLogin() {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
@@ -164,27 +166,29 @@ public class AwsEc2AuthenticationUnitTests {
 		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFailWhileObtainingIdentityDocument() {
+	@Test
+	void loginShouldFailWhileObtainingIdentityDocument() {
 
 		mockRest.expect(
 				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
-		new AwsEc2Authentication(restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new AwsEc2Authentication(restTemplate).login());
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		mockRest.expect(requestTo("/auth/aws-ec2/login")) //
 				.andRespond(withServerError());
 
-		new AwsEc2Authentication(restTemplate) {
-			@Override
-			protected Map<String, String> getEc2Login() {
-				return Collections.singletonMap("pkcs7", "value");
-			}
-		}.login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new AwsEc2Authentication(restTemplate) {
+					@Override
+					protected Map<String, String> getEc2Login() {
+						return Collections.singletonMap("pkcs7", "value");
+					}
+				}.login());
 	}
 }

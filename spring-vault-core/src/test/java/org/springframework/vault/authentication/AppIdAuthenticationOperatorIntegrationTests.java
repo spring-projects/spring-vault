@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.vault.util.Settings;
@@ -28,13 +28,13 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationOperatorIntegrationTests extends
+class AppIdAuthenticationOperatorIntegrationTests extends
 		AppIdAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
-	public void authenticationStepsShouldLoginSuccessfully() {
+	void authenticationStepsShouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
@@ -48,7 +48,7 @@ public class AppIdAuthenticationOperatorIntegrationTests extends
 	}
 
 	@Test
-	public void authenticationStepsLoginShouldFail() {
+	void authenticationStepsLoginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //

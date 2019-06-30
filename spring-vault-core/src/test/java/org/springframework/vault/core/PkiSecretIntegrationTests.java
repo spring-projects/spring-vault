@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.util.IntegrationTestSupport;
 
@@ -34,13 +34,13 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public class PkiSecretIntegrationTests extends IntegrationTestSupport {
+class PkiSecretIntegrationTests extends IntegrationTestSupport {
 
 	/**
 	 * Initialize the pki secret backend.
 	 */
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 
 		if (!prepare().hasSecret("pki")) {
 			prepare().mountSecret("pki");
@@ -73,7 +73,7 @@ public class PkiSecretIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	public void shouldCreateCertificateCorrectly() {
+	void shouldCreateCertificateCorrectly() {
 
 	}
 }

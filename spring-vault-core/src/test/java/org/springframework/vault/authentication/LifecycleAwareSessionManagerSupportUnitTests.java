@@ -19,7 +19,7 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.authentication.LifecycleAwareSessionManagerSupport.FixedTimeoutRefreshTrigger;
 
@@ -30,10 +30,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class LifecycleAwareSessionManagerSupportUnitTests {
+class LifecycleAwareSessionManagerSupportUnitTests {
 
 	@Test
-	public void shouldScheduleNextExecutionTimeCorrectly() {
+	void shouldScheduleNextExecutionTimeCorrectly() {
 
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);
@@ -46,7 +46,7 @@ public class LifecycleAwareSessionManagerSupportUnitTests {
 	}
 
 	@Test
-	public void shouldScheduleNextExecutionIfValidityLessThanTimeout() {
+	void shouldScheduleNextExecutionIfValidityLessThanTimeout() {
 
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);

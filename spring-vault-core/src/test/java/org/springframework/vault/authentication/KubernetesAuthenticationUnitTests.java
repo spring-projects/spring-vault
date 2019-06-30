@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -28,6 +28,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
@@ -39,13 +40,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  *
  * @author Michal Budzyn
  */
-public class KubernetesAuthenticationUnitTests {
+class KubernetesAuthenticationUnitTests {
 
 	private RestTemplate restTemplate;
+
 	private MockRestServiceServer mockRest;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
@@ -55,7 +57,7 @@ public class KubernetesAuthenticationUnitTests {
 	}
 
 	@Test
-	public void loginShouldObtainTokenWithStaticJwtSupplier() {
+	void loginShouldObtainTokenWithStaticJwtSupplier() {
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
 				.builder().role("hello") //
@@ -77,8 +79,8 @@ public class KubernetesAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFail() {
+	@Test
+	void loginShouldFail() {
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
 				.builder().role("hello").jwtSupplier(() -> "my-jwt-token").build();
@@ -86,6 +88,7 @@ public class KubernetesAuthenticationUnitTests {
 		mockRest.expect(requestTo("/auth/kubernetes/login")) //
 				.andRespond(withServerError());
 
-		new KubernetesAuthentication(options, restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new KubernetesAuthentication(options, restTemplate).login());
 	}
 }

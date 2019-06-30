@@ -15,19 +15,19 @@
  */
 package org.springframework.vault.util;
 
-import org.junit.Rule;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Base class for integration tests using Vault.
  *
  * @author Mark Paluch
  */
+@ExtendWith(VaultExtension.class)
 public abstract class IntegrationTestSupport {
 
-	@Rule
-	public final VaultRule vaultRule = new VaultRule();
+	private final VaultInitializer initializer = new VaultInitializer();
 
-	public final PrepareVault prepare() {
-		return vaultRule.prepare();
+	protected final PrepareVault prepare() {
+		return initializer.prepare();
 	}
 }

@@ -18,7 +18,7 @@ package org.springframework.vault.authentication;
 import java.security.PrivateKey;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -28,10 +28,10 @@ import static org.mockito.Mockito.mock;
  *
  * @author Magnus Jungsbluth
  */
-public class GcpIamAuthenticationOptionsBuilderUnitTests {
+class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 	@Test
-	public void shouldDefaultToCredentialServiceAccountId() {
+	void shouldDefaultToCredentialServiceAccountId() {
 
 		GoogleCredential credential = createGoogleCredential();
 
@@ -43,7 +43,7 @@ public class GcpIamAuthenticationOptionsBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldAllowServiceAccountIdOverride() {
+	void shouldAllowServiceAccountIdOverride() {
 
 		GoogleCredential credential = createGoogleCredential();
 
@@ -56,7 +56,7 @@ public class GcpIamAuthenticationOptionsBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldAllowServiceAccountIdProviderOverride() {
+	void shouldAllowServiceAccountIdProviderOverride() {
 
 		GoogleCredential credential = createGoogleCredential();
 
@@ -72,7 +72,7 @@ public class GcpIamAuthenticationOptionsBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldDefaultToCredentialProjectId() {
+	void shouldDefaultToCredentialProjectId() {
 
 		GoogleCredential credential = createGoogleCredential();
 
@@ -84,7 +84,7 @@ public class GcpIamAuthenticationOptionsBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldAllowProjectIdOverride() {
+	void shouldAllowProjectIdOverride() {
 
 		GoogleCredential credential = createGoogleCredential();
 
@@ -96,7 +96,7 @@ public class GcpIamAuthenticationOptionsBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldAllowProjectIdProviderOverride() {
+	void shouldAllowProjectIdProviderOverride() {
 
 		GoogleCredential credential = createGoogleCredential();
 

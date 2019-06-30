@@ -15,24 +15,26 @@
  */
 package org.springframework.vault.support;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link VaultTransitContext}.
  *
  * @author Mark Paluch
  */
-public class VaultTransitContextUnitTests {
+class VaultTransitContextUnitTests {
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullContext() {
-		VaultTransitContext.fromContext(null);
+	@Test
+	void rejectsNullContext() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> VaultTransitContext.fromContext(null));
 	}
 
 	@Test
-	public void createsFromContext() {
+	void createsFromContext() {
 
 		byte[] bytes = new byte[] { 1 };
 
@@ -42,13 +44,14 @@ public class VaultTransitContextUnitTests {
 		assertThat(context.getNonce()).isEmpty();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void rejectsNullNonce() {
-		VaultTransitContext.fromNonce(null);
+	@Test
+	void rejectsNullNonce() {
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> VaultTransitContext.fromNonce(null));
 	}
 
 	@Test
-	public void createsFromNonce() {
+	void createsFromNonce() {
 
 		byte[] bytes = new byte[] { 1 };
 

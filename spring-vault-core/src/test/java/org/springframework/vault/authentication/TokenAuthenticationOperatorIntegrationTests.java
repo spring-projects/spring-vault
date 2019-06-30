@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
 import org.springframework.vault.VaultException;
@@ -35,13 +35,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class TokenAuthenticationOperatorIntegrationTests extends
+class TokenAuthenticationOperatorIntegrationTests extends
 		TokenAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
-	public void shouldSelfLookup() {
+	void shouldSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();
@@ -69,7 +69,7 @@ public class TokenAuthenticationOperatorIntegrationTests extends
 	}
 
 	@Test
-	public void shouldFailDuringSelfLookup() {
+	void shouldFailDuringSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();

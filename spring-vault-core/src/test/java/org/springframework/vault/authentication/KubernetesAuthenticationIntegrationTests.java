@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.io.File;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.VaultException;
@@ -27,6 +27,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -34,21 +35,20 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Michal Budzyn
  */
-public class KubernetesAuthenticationIntegrationTests extends
+class KubernetesAuthenticationIntegrationTests extends
 		KubernetesAuthenticationIntegrationTestBase {
 
 	@Test
-	public void shouldLoginSuccessfully() {
+	void shouldLoginSuccessfully() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
 				.builder().role("my-role")
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
-				.build();
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
 				restTemplate);
@@ -57,37 +57,36 @@ public class KubernetesAuthenticationIntegrationTests extends
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFailBadRole() {
+	@Test
+	void loginShouldFailBadRole() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
 				.builder().role("wrong")
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
-				.build();
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		new KubernetesAuthentication(options, restTemplate).login();
-
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new KubernetesAuthentication(options, restTemplate).login());
 	}
 
-	@Test(expected = VaultException.class)
-	public void loginShouldFailBadToken() {
+	@Test
+	void loginShouldFailBadToken() {
 
 		ClassPathResource tokenResource = new ClassPathResource("kube-jwt-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder()
-				.role("my-role")
+				.builder().role("my-role")
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenResource))
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
+				.createSslConfiguration());
 
-		new KubernetesAuthentication(options, restTemplate).login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> new KubernetesAuthentication(options, restTemplate).login());
 	}
 }

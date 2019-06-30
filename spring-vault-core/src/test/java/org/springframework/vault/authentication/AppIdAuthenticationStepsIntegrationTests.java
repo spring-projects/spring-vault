@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
@@ -24,6 +24,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link AppIdAuthentication} using
@@ -31,11 +32,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class AppIdAuthenticationStepsIntegrationTests extends
+class AppIdAuthenticationStepsIntegrationTests extends
 		AppIdAuthenticationIntegrationTestBase {
 
 	@Test
-	public void authenticationStepsShouldLoginSuccessfully() {
+	void authenticationStepsShouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("myapp") //
@@ -53,8 +54,8 @@ public class AppIdAuthenticationStepsIntegrationTests extends
 		assertThat(login.getToken()).isNotEmpty();
 	}
 
-	@Test(expected = VaultException.class)
-	public void authenticationStepsLoginShouldFail() {
+	@Test
+	void authenticationStepsLoginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
 				.appId("wrong") //
@@ -67,6 +68,6 @@ public class AppIdAuthenticationStepsIntegrationTests extends
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppIdAuthentication.createAuthenticationSteps(options), restTemplate);
 
-		executor.login();
+		assertThatExceptionOfType(VaultException.class).isThrownBy(executor::login);
 	}
 }

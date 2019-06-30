@@ -31,7 +31,7 @@ import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.util.PrepareVault;
-import org.springframework.vault.util.VaultRule;
+import org.springframework.vault.util.VaultInitializer;
 
 /**
  * This application uses {@link PropertySources} to define static config files and
@@ -49,10 +49,10 @@ public class SecurePropertyUsage {
 
 	public static void main(String[] args) {
 
-		VaultRule vaultRule = new VaultRule();
-		vaultRule.before();
+		VaultInitializer initializer = new VaultInitializer();
+		initializer.initialize();
 
-		PrepareVault prepareVault = vaultRule.prepare();
+		PrepareVault prepareVault = initializer.prepare();
 		VaultOperations vaultOperations = prepareVault.getVaultOperations();
 
 		Map<String, String> data = new HashMap<String, String>();

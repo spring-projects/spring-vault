@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class RestTemplateBuilderUnitTests {
+class RestTemplateBuilderUnitTests {
 
 	@Test
-	public void shouldApplyErrorHandler() {
+	void shouldApplyErrorHandler() {
 
 		ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
@@ -49,7 +49,7 @@ public class RestTemplateBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldApplyErrorHandlerViaCustomizer() {
+	void shouldApplyErrorHandlerViaCustomizer() {
 
 		ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
@@ -61,7 +61,7 @@ public class RestTemplateBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldApplyDefaultHeaders() throws IOException {
+	void shouldApplyDefaultHeaders() throws IOException {
 
 		RestTemplate restTemplate = RestTemplateBuilder.builder()
 				.endpoint(VaultEndpoint.create("localhost", 8200))
@@ -77,7 +77,7 @@ public class RestTemplateBuilderUnitTests {
 	}
 
 	@Test
-	public void shouldApplyRequestCustomizers() throws IOException {
+	void shouldApplyRequestCustomizers() throws IOException {
 
 		RestTemplate restTemplate = RestTemplateBuilder
 				.builder()

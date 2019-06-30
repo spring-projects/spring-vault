@@ -74,7 +74,7 @@ public class TestRestTemplateFactory {
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
 	 */
-	public static RestTemplate create(ClientHttpRequestFactory requestFactory) {
+	private static RestTemplate create(ClientHttpRequestFactory requestFactory) {
 
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
 

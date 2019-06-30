@@ -19,8 +19,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-import org.junit.rules.ExternalResource;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.VaultEndpoint;
@@ -31,16 +29,19 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Vault rule to ensure a running and prepared Vault. Prepared means unsealed, having a
- * non-versioning key-value backend mounted at {@code secret/} and a {@link VaultToken}
- * with {@code root} privileges.
+ * Vault initializer to ensure a running and prepared Vault. Prepared means unsealed,
+ * having a non-versioning key-value backend mounted at {@code secret/} and a
+ * {@link VaultToken} with {@code root} privileges.
  *
  * @author Mark Paluch
  * @see Settings#token()
  */
-public class VaultRule extends ExternalResource {
+public class VaultInitializer {
 
-	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse("0.10.0");
+	public static final String VERSIONING_INTRODUCED_WITH_VALUE = "0.10.0";
+
+	private static final Version VERSIONING_INTRODUCED_WITH = Version
+			.parse(VERSIONING_INTRODUCED_WITH_VALUE);
 
 	private final VaultEndpoint vaultEndpoint;
 
@@ -49,23 +50,23 @@ public class VaultRule extends ExternalResource {
 	private VaultToken token;
 
 	/**
-	 * Create a new {@link VaultRule} with default SSL configuration and endpoint.
+	 * Create a new {@link VaultInitializer} with default SSL configuration and endpoint.
 	 *
 	 * @see Settings#createSslConfiguration()
 	 * @see VaultEndpoint
 	 */
-	public VaultRule() {
+	public VaultInitializer() {
 		this(Settings.createSslConfiguration(), new VaultEndpoint());
 	}
 
 	/**
-	 * Create a new {@link VaultRule} with the given {@link SslConfiguration} and
+	 * Create a new {@link VaultInitializer} with the given {@link SslConfiguration} and
 	 * {@link VaultEndpoint}.
 	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 */
-	public VaultRule(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
+	public VaultInitializer(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
 
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
@@ -84,8 +85,7 @@ public class VaultRule extends ExternalResource {
 		this.vaultEndpoint = vaultEndpoint;
 	}
 
-	@Override
-	public void before() {
+	public void initialize() {
 
 		assertRunningVault();
 
@@ -98,8 +98,6 @@ public class VaultRule extends ExternalResource {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}
-
-			this.token = Settings.token();
 		}
 	}
 
