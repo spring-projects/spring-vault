@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.core;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,8 +71,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.displayName("display") //
-				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
-				.ttl(30 * 60) //
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
 				.policies(Collections.singleton("root")) //
 				.numUses(2) //
 				.renewable() //
@@ -98,8 +98,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
 				.displayName("display") //
-				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
-				.ttl(30 * 60) //
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
 				.policies(Collections.singleton("root")) //
 				.numUses(2) //
 				.renewable() //
@@ -117,8 +117,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void renewShouldRenewToken() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.explicitMaxTtl(TimeUnit.HOURS.toSeconds(10)) //
-				.ttl(30 * 60) //
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
 				.renewable() //
 				.build();
 
@@ -161,6 +161,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 	}
 
+	@SuppressWarnings("ConstantConditions")
 	private ResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
 		return vaultOperations
@@ -169,9 +170,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 					headers.add(VaultHttpHeaders.VAULT_TOKEN, tokenResponse.getToken()
 							.getToken());
 
-					return restOperations
-							.exchange("auth/token/lookup-self", HttpMethod.GET,
-									new HttpEntity<Object>(headers), String.class);
+					return restOperations.exchange("auth/token/lookup-self",
+							HttpMethod.GET, new HttpEntity<>(headers), String.class);
 				});
 
 	}

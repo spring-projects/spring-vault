@@ -341,7 +341,7 @@ public class ClientHttpRequestFactoryFactory {
 				SslConfiguration sslConfiguration) throws GeneralSecurityException,
 				IOException {
 
-			final Netty4ClientHttpRequestFactory requestFactory = new Netty4ClientHttpRequestFactory();
+			Netty4ClientHttpRequestFactory requestFactory = new Netty4ClientHttpRequestFactory();
 
 			if (hasSslConfiguration(sslConfiguration)) {
 

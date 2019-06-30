@@ -50,8 +50,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -209,6 +209,7 @@ class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldRenewLease() {
 
 		prepareRenewal();
@@ -563,13 +564,13 @@ class SecretLeaseContainerUnitTests {
 		secrets.setLeaseId("lease");
 		secrets.setRenewable(renewable);
 		secrets.setLeaseDuration(100);
-		secrets.setData(Collections.singletonMap(key, (Object) value));
+		secrets.setData(Collections.singletonMap(key, value));
 
 		return secrets;
 	}
 
 	private VaultResponse createGenericSecrets() {
-		return createGenericSecrets(Collections.singletonMap("key", (Object) "value"));
+		return createGenericSecrets(Collections.singletonMap("key", "value"));
 	}
 
 	private VaultResponse createGenericSecrets(Map<String, Object> data) {

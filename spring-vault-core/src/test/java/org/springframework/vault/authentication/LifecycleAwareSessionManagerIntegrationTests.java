@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -80,7 +81,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(
-				LoginToken.renewable(token.getToken(), 0));
+				LoginToken.renewable(token.getToken().toCharArray(), Duration.ZERO));
 
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(

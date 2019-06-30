@@ -49,8 +49,9 @@ public class Version implements Comparable<Version> {
 	 */
 	private Version(int... parts) {
 
-		Assert.notNull(parts);
-		Assert.isTrue(parts.length > 0 && parts.length < 5);
+		Assert.notNull(parts, "Parts must not be null");
+		Assert.isTrue(parts.length > 0 && parts.length < 5,
+				"Parts must contain one to four segments");
 
 		this.major = parts[0];
 		this.minor = parts.length > 1 ? parts[1] : 0;

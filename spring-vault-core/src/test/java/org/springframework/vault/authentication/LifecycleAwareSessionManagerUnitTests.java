@@ -186,6 +186,7 @@ class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldRevokeLoginTokenOnDestroy() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
@@ -217,6 +218,7 @@ class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldNotThrowExceptionsOnRevokeErrors() {
 
 		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
@@ -252,6 +254,7 @@ class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldRunTokenRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
@@ -270,8 +273,9 @@ class LifecycleAwareSessionManagerUnitTests {
 
 		verify(restOperations).postForObject(
 				eq("auth/token/renew-self"),
-				eq(new HttpEntity<Object>(VaultHttpHeaders.from(LoginToken.renewable(
-						"login", 5)))), any(Class.class));
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.renewable(
+						"login".toCharArray(), Duration.ofSeconds(5))))),
+				any(Class.class));
 		verify(clientAuthentication, times(1)).login();
 		verify(listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
 		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
@@ -380,6 +384,7 @@ class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
 
 		when(clientAuthentication.login()).thenReturn(
@@ -408,19 +413,20 @@ class LifecycleAwareSessionManagerUnitTests {
 		sessionManager.renewToken();
 
 		assertThat(sessionManager.getSessionToken()).isEqualTo(
-				LoginToken.renewable("login", 5));
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		verify(clientAuthentication, times(1)).login();
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	void renewShouldReportFalseIfTokenRenewalFails() {
 
 		when(clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		when(
-				restOperations.postForObject(anyString(),
-						ArgumentMatchers.<Object> any(), ArgumentMatchers.<Class> any()))
-				.thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
+				restOperations.postForObject(anyString(), ArgumentMatchers.any(),
+						ArgumentMatchers.<Class> any())).thenThrow(
+				new HttpServerErrorException(HttpStatus.BAD_REQUEST));
 
 		sessionManager.getSessionToken();
 

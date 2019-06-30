@@ -46,6 +46,8 @@ import org.springframework.vault.authentication.KubernetesServiceAccountTokenFil
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
@@ -286,10 +288,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 				"Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
 
 		AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().roleId(roleId);
+				.builder().roleId(RoleId.provided(roleId));
 
 		if (StringUtils.hasText(secretId)) {
-			builder = builder.secretId(secretId);
+			builder = builder.secretId(SecretId.provided(secretId));
 		}
 
 		return new AppRoleAuthentication(builder.build(), restOperations());

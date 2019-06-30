@@ -25,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
@@ -71,8 +72,8 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldObtainToken() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("hello") //
-				.secretId("world") //
+				.roleId(RoleId.provided("hello")) //
+				.secretId(SecretId.provided("world")) //
 				.build();
 
 		mockRest.expect(requestTo("/auth/approle/login"))
@@ -150,7 +151,7 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldObtainTokenWithoutSecretId() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("hello") //
+				.roleId(RoleId.provided("hello")) //
 				.build();
 
 		mockRest.expect(requestTo("/auth/approle/login"))
@@ -179,7 +180,7 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldFail() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("hello") //
+				.roleId(RoleId.provided("hello")) //
 				.build();
 
 		mockRest.expect(requestTo("/auth/approle/login")) //
@@ -193,7 +194,7 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldUnwrapSecretIdResponse() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId("my_role_id")
+				.roleId(RoleId.provided("my_role_id"))
 				.secretId(SecretId.wrapped(VaultToken.of("unwrapping_token"))).build();
 
 		String wrappedResponse = "{"

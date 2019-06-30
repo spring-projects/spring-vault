@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -117,8 +118,9 @@ public enum LeaseEndpoints {
 		Number leaseDuration = (Number) body.get("lease_duration");
 		boolean renewable = (Boolean) body.get("renewable");
 
-		return Lease.of(leaseId, leaseDuration != null ? leaseDuration.longValue() : 0,
-				renewable);
+		return Lease
+				.of(leaseId, Duration.ofSeconds(leaseDuration != null ? leaseDuration
+						.longValue() : 0), renewable);
 	}
 
 	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {

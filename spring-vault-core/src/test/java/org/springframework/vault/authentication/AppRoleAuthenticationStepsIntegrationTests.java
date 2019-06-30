@@ -46,7 +46,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 		VaultToken unwrappingToken = generateWrappedSecretIdResponse();
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.secretId(SecretId.wrapped(unwrappingToken)).roleId(roleId).build();
+				.secretId(SecretId.wrapped(unwrappingToken))
+				.roleId(RoleId.provided(roleId)).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
@@ -79,7 +80,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 	void shouldAuthenticateWithFullPullMode() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.appRole("with-secret-id").initialToken(Settings.token()).build();
+				.appRole("with-secret-id").roleId(RoleId.pull(Settings.token()))
+				.secretId(SecretId.pull(Settings.token())).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
@@ -95,7 +97,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("with-secret-id").secretId(SecretId.pull(Settings.token()))
-				.roleId(roleId).build();
+				.roleId(RoleId.provided(roleId)).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
@@ -128,7 +130,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 		String roleId = getRoleId("with-secret-id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(roleId).secretId("this-is-a-wrong-secret-id").build();
+				.roleId(RoleId.provided(roleId))
+				.secretId(SecretId.provided("this-is-a-wrong-secret-id")).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
@@ -148,7 +151,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				Collections.singletonMap("secret_id", secretId));
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(roleId).secretId(secretId).build();
+				.roleId(RoleId.provided(roleId)).secretId(SecretId.provided(secretId))
+				.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
@@ -167,8 +171,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 		String roleId = getRoleId("with-secret-id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(roleId).appRole("with-secret-id").initialToken(Settings.token())
-				.build();
+				.roleId(RoleId.provided(roleId)).appRole("with-secret-id")
+				.secretId(SecretId.pull(Settings.token())).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
