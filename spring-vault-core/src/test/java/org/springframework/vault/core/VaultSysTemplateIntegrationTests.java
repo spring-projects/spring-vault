@@ -123,7 +123,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getData()).containsEntry("hello", "world");
+		assertThat(read.getRequiredData()).containsEntry("hello", "world");
 	}
 
 	@Test
@@ -155,7 +155,8 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 				.opsForVersionedKeyValue("kVv2");
 
 		versionedOperations.put("secret/mykey", Collections.singletonMap("key", "value"));
-		assertThat(versionedOperations.get("secret/mykey").getData()).containsEntry(
+		assertThat(versionedOperations.get("secret/mykey").getRequiredData())
+				.containsEntry(
 				"key", "value");
 	}
 

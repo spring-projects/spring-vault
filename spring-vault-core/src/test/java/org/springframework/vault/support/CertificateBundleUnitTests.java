@@ -33,12 +33,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class CertificateBundleUnitTests {
 
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
+
 	CertificateBundle certificateBundle;
 
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = new ObjectMapper().readValue(
+		Map<String, String> data = OBJECT_MAPPER.readValue(
 				getClass().getResource("/certificate.json"), Map.class);
 
 		certificateBundle = CertificateBundle.of(data.get("serial_number"),

@@ -38,7 +38,7 @@ public class VaultApp {
 
 		VaultResponseSupport<Secrets> response = vaultTemplate.read("secret/myapp",
 				Secrets.class);
-		System.out.println(response.getData().getUsername());
+		System.out.println(response.getRequiredData().getUsername());
 
 		vaultTemplate.delete("secret/myapp");
 	}

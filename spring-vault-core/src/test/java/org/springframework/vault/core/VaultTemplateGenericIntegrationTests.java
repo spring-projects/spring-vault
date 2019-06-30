@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -43,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
-	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
 	@Autowired
 	VaultOperations vaultOperations;
@@ -63,7 +64,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getData()).containsEntry("hello", "world");
+		assertThat(read.getRequiredData()).containsEntry("hello", "world");
 	}
 
 	@Test
@@ -77,21 +78,23 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getData()).containsEntry("hello.array[0]", "array-value0");
-		assertThat(read.getData()).containsEntry("hello.array[1]", "array-value1");
+		assertThat(read.getRequiredData())
+				.containsEntry("hello.array[0]", "array-value0");
+		assertThat(read.getRequiredData())
+				.containsEntry("hello.array[1]", "array-value1");
 	}
 
 	@Test
 	void readShouldReturnNestedObjects() throws Exception {
 
-		Map map = new ObjectMapper().readValue(
+		Map map = OBJECT_MAPPER.readValue(
 				"{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
 				Map.class);
 		vaultOperations.write("secret/mykey", map);
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getData()).containsEntry(
+		assertThat(read.getRequiredData()).containsEntry(
 				"array",
 				Arrays.asList(Collections.singletonMap("hello", "world"),
 						Collections.singletonMap("hello1", "world1")));
@@ -110,7 +113,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 				Person.class);
 		assertThat(read).isNotNull();
 
-		Person person = read.getData();
+		Person person = read.getRequiredData();
 		assertThat(person.getFirstname()).isEqualTo("Walter");
 		assertThat(person.getPassword()).isEqualTo("Secret");
 	}

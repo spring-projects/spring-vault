@@ -28,6 +28,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,7 +51,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class AppRoleAuthenticationUnitTests {
 
-	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
 	RestTemplate restTemplate;
 

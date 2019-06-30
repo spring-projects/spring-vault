@@ -52,9 +52,15 @@ class CubbyholeAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				CubbyholeAuthentication.createAuthenticationSteps(options), webClient);
 
-		StepVerifier.create(operator.getVaultToken()).consumeNextWith(actual -> {
+		operator.getVaultToken() //
+				.as(StepVerifier::create)
+				//
+				.consumeNextWith(
+						actual -> {
 
-			assertThat(actual).isNotEqualTo(Settings.token().getToken()).isNotNull();
-		}).verifyComplete();
+							assertThat(actual).isNotEqualTo(Settings.token().getToken())
+									.isNotNull();
+						}) //
+				.verifyComplete();
 	}
 }

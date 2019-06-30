@@ -55,6 +55,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -115,8 +116,8 @@ class LifecycleAwareSessionManagerUnitTests {
 
 		when(clientAuthentication.login()).thenThrow(new VaultLoginException("foo"));
 
-		assertThatThrownBy(() -> sessionManager.getSessionToken()).isInstanceOf(
-				VaultLoginException.class);
+		assertThatExceptionOfType(VaultLoginException.class).isThrownBy(
+				() -> sessionManager.getSessionToken());
 		verifyZeroInteractions(listener);
 		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}

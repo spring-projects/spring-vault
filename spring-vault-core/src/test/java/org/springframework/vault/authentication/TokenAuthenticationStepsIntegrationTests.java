@@ -27,7 +27,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link TokenAuthentication} using
@@ -76,6 +76,6 @@ class TokenAuthenticationStepsIntegrationTests extends
 				TokenAuthentication.createAuthenticationSteps(token, true), restTemplate);
 
 		operator.login();
-		assertThatThrownBy(operator::login).isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(operator::login);
 	}
 }

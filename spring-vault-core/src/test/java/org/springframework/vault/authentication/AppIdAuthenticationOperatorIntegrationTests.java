@@ -44,7 +44,10 @@ class AppIdAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
 				AppIdAuthentication.createAuthenticationSteps(options), webClient);
 
-		StepVerifier.create(supplier.getVaultToken()).expectNextCount(1).verifyComplete();
+		supplier.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -58,6 +61,9 @@ class AppIdAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
 				AppIdAuthentication.createAuthenticationSteps(options), webClient);
 
-		StepVerifier.create(supplier.getVaultToken()).expectError().verify();
+		supplier.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectError() //
+				.verify();
 	}
 }

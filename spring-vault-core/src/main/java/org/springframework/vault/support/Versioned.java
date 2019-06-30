@@ -136,6 +136,24 @@ public class Versioned<T> {
 	}
 
 	/**
+	 * Returns the required {@link Metadata} for this versioned object. Throws
+	 * {@link IllegalStateException} if no metadata is associated.
+	 *
+	 * @return the non-null {@link Metadata} held by this for this versioned object.
+	 * @throws IllegalStateException if no metadata is present.
+	 */
+	public Metadata getRequiredMetadata() {
+
+		Metadata metadata = this.metadata;
+
+		if (metadata == null) {
+			throw new IllegalStateException("Required Metadata is not present");
+		}
+
+		return metadata;
+	}
+
+	/**
 	 * @return {@literal true} if this versioned object has data associated, or
 	 * {@code false}, of the version is deleted or destroyed.
 	 */

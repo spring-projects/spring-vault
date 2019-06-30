@@ -47,8 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @ExtendWith(SpringExtension.class)
 @RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-class VaultVersionedKeyValueTemplateIntegrationTests extends
-		IntegrationTestSupport {
+class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Autowired
 	VaultOperations vaultOperations;
@@ -87,7 +86,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		Versioned<Person> versioned = versionedOperations.get(key, Person.class);
 
-		assertThat(versioned.getData()).isEqualTo(person);
+		assertThat(versioned.getRequiredData()).isEqualTo(person);
 	}
 
 	@Test
@@ -118,8 +117,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		Versioned<Map<String, Object>> loaded = versionedOperations.get(key);
 
-		assertThat(loaded.getData()).isEqualTo(secret);
-		assertThat(loaded.getMetadata()).isNotNull();
+		assertThat(loaded.getRequiredData()).isEqualTo(secret);
+		assertThat(loaded.getRequiredMetadata()).isNotNull();
 		assertThat(loaded.getVersion()).isEqualTo(Version.from(1));
 	}
 
@@ -142,10 +141,10 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
 		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		assertThat(versionedOperations.get(key, Version.from(1)).getData()).isEqualTo(
-				Collections.singletonMap("key", "v1"));
-		assertThat(versionedOperations.get(key, Version.from(2)).getData()).isEqualTo(
-				Collections.singletonMap("key", "v2"));
+		assertThat(versionedOperations.get(key, Version.from(1)).getRequiredData())
+				.isEqualTo(Collections.singletonMap("key", "v1"));
+		assertThat(versionedOperations.get(key, Version.from(2)).getRequiredData())
+				.isEqualTo(Collections.singletonMap("key", "v2"));
 	}
 
 	@Test
@@ -162,8 +161,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
-		assertThat(versioned.getMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getMetadata().getDeletedAt()).isBetween(
+		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(
 				Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
 	}
 
@@ -180,10 +179,11 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
 
-		assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v2"));
+		assertThat(versioned.getRequiredData()).isEqualTo(
+				Collections.singletonMap("key", "v2"));
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
-		assertThat(versioned.getMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getMetadata().getDeletedAt()).isNull();
+		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
 	}
 
 	@Test
@@ -201,8 +201,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(1));
-		assertThat(versioned.getMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getMetadata().getDeletedAt()).isBetween(
+		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(
 				Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
 	}
 
@@ -220,8 +220,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
-		assertThat(versioned.getMetadata().isDestroyed()).isTrue();
-		assertThat(versioned.getMetadata().getDeletedAt()).isNull();
+		assertThat(versioned.getRequiredMetadata().isDestroyed()).isTrue();
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
 	}
 
 	@Data

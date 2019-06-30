@@ -134,8 +134,10 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.of("login"));
 
-		sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(LoginToken.of("login")).verifyComplete();
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNext(LoginToken.of("login")) //
+				.verifyComplete();
 		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 	}
 
@@ -145,7 +147,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		when(tokenSupplier.getVaultToken()).thenReturn(
 				Mono.error(new VaultLoginException("foo")));
 
-		sessionManager.getSessionToken().as(StepVerifier::create).verifyError();
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.verifyError();
 		verifyZeroInteractions(listener);
 		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
@@ -191,9 +195,11 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden",
 						null, null, null)));
 
-		sessionManager.getSessionToken().as(StepVerifier::create).assertNext(it -> {
-			assertThat(it).isExactlyInstanceOf(VaultToken.class);
-		}).verifyComplete();
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.assertNext(it -> {
+					assertThat(it).isExactlyInstanceOf(VaultToken.class);
+				}).verifyComplete();
 		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 		verify(errorListener).onAuthenticationError(any());
 	}
@@ -231,7 +237,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(LoginToken.of("login"));
 		when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("OK"));
 
-		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 
 		sessionManager.destroy();
@@ -248,7 +256,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(VaultToken.of("login"));
 
 		sessionManager.setTokenSelfLookupEnabled(false);
-		sessionManager.renewToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.renewToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 		sessionManager.destroy();
 
@@ -267,7 +277,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden",
 						null, null, null)));
 
-		sessionManager.renewToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.renewToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 		sessionManager.destroy();
 
@@ -279,7 +291,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 
 		verify(taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
@@ -300,7 +314,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
 				Mono.just(vaultResponse));
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
@@ -326,7 +342,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
@@ -368,7 +386,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 						Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
@@ -398,7 +418,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				Mono.error(new RuntimeException("foo")));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
 				.verifyComplete();
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();

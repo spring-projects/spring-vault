@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SuppressWarnings("unchecked")
 class JsonMapFlattenerUnitTests {
 
-	private static final ObjectMapper objectMapper = new ObjectMapper();
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
 	@Test
 	void shouldPreserveFlatMap() {
@@ -44,7 +44,7 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldFlattenNestedObject() throws Exception {
 
-		Map<String, Object> map = objectMapper.readValue(
+		Map<String, Object> map = OBJECT_MAPPER.readValue(
 				"{\"key\": { \"nested\":true} }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
@@ -54,7 +54,7 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldFlattenDeeplyNestedObject() throws Exception {
 
-		Map<String, Object> map = objectMapper.readValue(
+		Map<String, Object> map = OBJECT_MAPPER.readValue(
 				"{\"key\": { \"nested\": {\"anotherLevel\": \"value\"} } }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
@@ -64,7 +64,7 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldFlattenNestedListOfSimpleObjects() throws Exception {
 
-		Map<String, Object> map = objectMapper.readValue(
+		Map<String, Object> map = OBJECT_MAPPER.readValue(
 				"{\"key\": [\"one\", \"two\"], \"dotted.key\": [\"one\", \"two\"] }",
 				Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
@@ -77,7 +77,7 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldFlattenNestedListOfComplexObject() throws Exception {
 
-		Map<String, Object> map = objectMapper.readValue(
+		Map<String, Object> map = OBJECT_MAPPER.readValue(
 				"{\"key\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}] }",
 				Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
@@ -89,7 +89,7 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldFlattenDeeplyNestedListOfComplexObject() throws Exception {
 
-		Map<String, Object> map = objectMapper
+		Map<String, Object> map = OBJECT_MAPPER
 				.readValue(
 						"{\"key\": { \"level1\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}]} }",
 						Map.class);

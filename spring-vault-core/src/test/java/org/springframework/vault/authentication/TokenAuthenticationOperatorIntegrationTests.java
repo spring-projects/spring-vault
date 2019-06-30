@@ -52,8 +52,8 @@ class TokenAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				TokenAuthentication.createAuthenticationSteps(token, true), webClient);
 
-		StepVerifier
-				.create(operator.getVaultToken())
+		operator.getVaultToken()
+				.as(StepVerifier::create)
 				.consumeNextWith(
 						actual -> {
 
@@ -81,9 +81,14 @@ class TokenAuthenticationOperatorIntegrationTests extends
 				TokenAuthentication.createAuthenticationSteps(token, true), webClient);
 
 		// first usage
-		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 
-		StepVerifier.create(operator.getVaultToken()).expectError(VaultException.class)
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectError(VaultException.class) //
 				.verify();
 	}
 }

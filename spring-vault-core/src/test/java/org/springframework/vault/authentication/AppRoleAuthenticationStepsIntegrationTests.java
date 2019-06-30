@@ -60,7 +60,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
-						null).getData().get("secret_id");
+						null).getRequiredData().get("secret_id");
 
 		VaultToken roleIdToken = generateWrappedRoleIdResponse();
 
@@ -109,7 +109,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
-						null).getData().get("secret_id");
+						null).getRequiredData().get("secret_id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.provided(secretId)).appRole("with-secret-id")
@@ -158,7 +158,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		getVaultOperations().write(
 				"auth/approle/role/with-secret-id/secret-id-accessor/destroy",
-				customSecretIdResponse.getData());
+				customSecretIdResponse.getRequiredData());
 	}
 
 	@Test

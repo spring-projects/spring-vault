@@ -50,7 +50,7 @@ import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
@@ -620,8 +620,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultHmacRequest request = VaultHmacRequest.builder()
 				.plaintext(Plaintext.of("hello-world")).algorithm("blah-512").build();
 
-		assertThatThrownBy(() -> transitOperations.getHmac(keyName, request))
-				.isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> transitOperations.getHmac(keyName, request));
 	}
 
 	@Test
@@ -653,9 +653,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		transitOperations.createKey("mykey");
 
-		assertThatThrownBy(
-				() -> transitOperations.sign("mykey", Plaintext.of("hello-world")))
-				.isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> transitOperations.sign("mykey", Plaintext.of("hello-world")));
 	}
 
 	@Test
@@ -772,9 +771,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		vaultOperations.write("transit/keys/export",
 				Collections.singletonMap("exportable", true));
 
-		assertThatThrownBy(
-				() -> transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY))
-				.isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY));
 	}
 
 	@Test

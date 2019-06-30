@@ -42,7 +42,10 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
-		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -55,7 +58,10 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
-		StepVerifier.create(operator.getVaultToken()).expectNextCount(1).verifyComplete();
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -68,8 +74,9 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
-		StepVerifier.create(operator.getVaultToken()).verifyError(
-				VaultLoginException.class);
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.verifyError(VaultLoginException.class);
 	}
 
 	@Test

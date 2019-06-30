@@ -27,6 +27,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -44,7 +45,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class CubbyholeAuthenticationUnitTests {
 
-	static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
 	RestTemplate restTemplate;
 

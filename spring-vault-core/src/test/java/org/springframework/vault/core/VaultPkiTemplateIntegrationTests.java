@@ -49,7 +49,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -107,7 +107,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
 				"testrole", request);
 
-		CertificateBundle data = certificateResponse.getData();
+		CertificateBundle data = certificateResponse.getRequiredData();
 
 		assertThat(data.getPrivateKey()).isNotEmpty();
 		assertThat(data.getCertificate()).isNotEmpty();
@@ -127,7 +127,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
 				"testrole", request);
 
-		X509Certificate certificate = certificateResponse.getData().getX509Certificate();
+		X509Certificate certificate = certificateResponse.getRequiredData()
+				.getX509Certificate();
 
 		Instant now = Instant.now();
 		assertThat(certificate.getNotAfter()).isAfter(
@@ -162,7 +163,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultSignCertificateRequestResponse certificateResponse = pkiOperations
 				.signCertificateRequest("testrole", csr, request);
 
-		Certificate data = certificateResponse.getData();
+		Certificate data = certificateResponse.getRequiredData();
 
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
@@ -177,8 +178,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
-		assertThatThrownBy(() -> pkiOperations.issueCertificate("testrole", request))
-				.isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(
+				() -> pkiOperations.issueCertificate("testrole", request));
 	}
 
 	@Test
@@ -190,9 +191,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
 				"testrole", request);
 
-		BigInteger serial = new BigInteger(certificateResponse.getData()
+		BigInteger serial = new BigInteger(certificateResponse.getRequiredData()
 				.getSerialNumber().replaceAll("\\:", ""), 16);
-		pkiOperations.revoke(certificateResponse.getData().getSerialNumber());
+		pkiOperations.revoke(certificateResponse.getRequiredData().getSerialNumber());
 
 		try (InputStream in = pkiOperations.getCrl(Encoding.DER)) {
 

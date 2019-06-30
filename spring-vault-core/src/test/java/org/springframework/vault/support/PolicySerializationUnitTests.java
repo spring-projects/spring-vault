@@ -29,7 +29,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.vault.support.Policy.Rule;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Unit tests for {@link Policy} JSON serialization/deserialization.
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 class PolicySerializationUnitTests {
 
-	ObjectMapper objectMapper = new ObjectMapper();
+	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
 	@Test
 	void shouldSerialize() throws Exception {
@@ -58,7 +58,7 @@ class PolicySerializationUnitTests {
 		try (InputStream is = new ClassPathResource("policy.json").getInputStream()) {
 
 			String expected = StreamUtils.copyToString(is, StandardCharsets.UTF_8);
-			JSONAssert.assertEquals(expected, objectMapper.writeValueAsString(policy),
+			JSONAssert.assertEquals(expected, OBJECT_MAPPER.writeValueAsString(policy),
 					JSONCompareMode.STRICT);
 		}
 	}
@@ -80,7 +80,7 @@ class PolicySerializationUnitTests {
 
 		try (InputStream is = new ClassPathResource("policy.json").getInputStream()) {
 
-			Policy actual = objectMapper.readValue(is, Policy.class);
+			Policy actual = OBJECT_MAPPER.readValue(is, Policy.class);
 
 			assertThat(actual.getRules()).hasSameClassAs(expected.getRules());
 
@@ -111,24 +111,24 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldDeserializeEmptyPolicy() throws Exception {
 
-		assertThat(objectMapper.readValue("{}", Policy.class)).isEqualTo(Policy.empty());
+		assertThat(OBJECT_MAPPER.readValue("{}", Policy.class)).isEqualTo(Policy.empty());
 	}
 
 	@Test
 	void shouldRejectUnknownFieldNames() throws Exception {
 
-		assertThatThrownBy(
-				() -> objectMapper.readValue("{\"foo\":1, \"path\": {} }", Policy.class))
-				.isInstanceOf(IllegalArgumentException.class);
-		assertThatThrownBy(
-				() -> objectMapper.readValue("{\"foo\":\"bar\"}", Policy.class))
-				.isInstanceOf(IllegalArgumentException.class);
+		assertThatIllegalArgumentException()
+				.isThrownBy(
+						() -> OBJECT_MAPPER.readValue("{\"foo\":1, \"path\": {} }",
+								Policy.class));
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
 	}
 
 	@Test
 	void shouldDeserializePolicyWithEmptyRules() throws Exception {
 
-		Policy actual = objectMapper.readValue("{ \"path\": {} }", Policy.class);
+		Policy actual = OBJECT_MAPPER.readValue("{ \"path\": {} }", Policy.class);
 
 		assertThat(actual).isEqualTo(Policy.empty());
 	}
@@ -136,7 +136,7 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldDeserializeRuleWithHour() throws Exception {
 
-		Policy actual = objectMapper.readValue(
+		Policy actual = OBJECT_MAPPER.readValue(
 				"{ \"path\": { \"secret\" : {\"min_wrapping_ttl\":\"1h\"} } }",
 				Policy.class);
 

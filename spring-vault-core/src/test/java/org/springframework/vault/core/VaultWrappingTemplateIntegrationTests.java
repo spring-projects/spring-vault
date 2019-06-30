@@ -101,7 +101,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
 		VaultResponse response = wrappingOperations.read(metadata.getToken());
 
-		assertThat(response.getData())
+		assertThat(response.getRequiredData())
 				.isEqualTo(Collections.singletonMap("key", "value"));
 	}
 
@@ -114,7 +114,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultResponseSupport<Secret> response = wrappingOperations.read(
 				metadata.getToken(), Secret.class);
 
-		assertThat(response.getData()).isEqualTo(new Secret("value"));
+		assertThat(response.getRequiredData()).isEqualTo(new Secret("value"));
 	}
 
 	@Test

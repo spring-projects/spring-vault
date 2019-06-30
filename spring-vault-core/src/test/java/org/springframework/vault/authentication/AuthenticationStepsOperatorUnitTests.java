@@ -50,7 +50,8 @@ class AuthenticationStepsOperatorUnitTests {
 
 		AuthenticationSteps steps = AuthenticationSteps.just(VaultToken.of("my-token"));
 
-		StepVerifier.create(login(steps)).expectNext(VaultToken.of("my-token"))
+		login(steps).as(StepVerifier::create) //
+				.expectNext(VaultToken.of("my-token")) //
 				.verifyComplete();
 	}
 
@@ -60,7 +61,8 @@ class AuthenticationStepsOperatorUnitTests {
 		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token")
 				.login(VaultToken::of);
 
-		StepVerifier.create(login(steps)).expectNext(VaultToken.of("my-token"))
+		login(steps).as(StepVerifier::create) //
+				.expectNext(VaultToken.of("my-token")) //
 				.verifyComplete();
 	}
 
@@ -82,8 +84,9 @@ class AuthenticationStepsOperatorUnitTests {
 		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
 				"cert").as(VaultResponse.class));
 
-		StepVerifier.create(login(steps, webClient))
-				.expectNext(VaultToken.of("my-token")).verifyComplete();
+		login(steps, webClient).as(StepVerifier::create) //
+				.expectNext(VaultToken.of("my-token")) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -101,7 +104,9 @@ class AuthenticationStepsOperatorUnitTests {
 		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
 				"cert").as(VaultResponse.class));
 
-		StepVerifier.create(login(steps, webClient)).expectError().verify();
+		login(steps, webClient).as(StepVerifier::create) //
+				.expectError() //
+				.verify();
 	}
 
 	@Test
@@ -140,8 +145,9 @@ class AuthenticationStepsOperatorUnitTests {
 				it -> VaultToken.of(it.getLeft().getRequestId() + "-"
 						+ it.getRight().getRequestId()));
 
-		StepVerifier.create(login(steps, webClient))
-				.expectNext(VaultToken.of("left-right")).verifyComplete();
+		login(steps, webClient).as(StepVerifier::create) //
+				.expectNext(VaultToken.of("left-right")) //
+				.verifyComplete();
 	}
 
 	private Mono<VaultToken> login(AuthenticationSteps steps) {

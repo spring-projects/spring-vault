@@ -32,23 +32,19 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultTokenOperations;
-import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
-import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.springframework.vault.util.Settings.createSslConfiguration;
 import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
@@ -57,8 +53,7 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  * @author Mark Paluch
  */
 @RequiresVaultVersion("0.6.2")
-class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
-		IntegrationTestSupport {
+class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
 
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
@@ -101,7 +96,9 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
 				() -> Mono.just(loginToken), taskScheduler, prepare().getWebClient());
 
-		sessionManager.getVaultToken().as(StepVerifier::create).expectNext(loginToken)
+		sessionManager.getVaultToken() //
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
 				.verifyComplete();
 	}
 
@@ -137,9 +134,13 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 			}
 		};
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNext(loginToken)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
 				.verifyComplete();
-		sessionManager.renewToken().as(StepVerifier::create).expectNext(loginToken)
+		sessionManager.renewToken() //
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
 				.verifyComplete();
 	}
 
@@ -152,7 +153,9 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(),
 				taskScheduler, prepare().getWebClient());
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNext(loginToken)
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
 				.verifyComplete();
 		sessionManager.destroy();
 
@@ -181,14 +184,5 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends
 		VaultToken token = tokenOperations.createOrphan().getToken();
 
 		return LoginToken.of(token.getToken());
-	}
-
-	static SslConfiguration prepareCertAuthenticationMethod() {
-
-		SslConfiguration original = createSslConfiguration();
-
-		return new SslConfiguration(KeyStoreConfiguration.of(new FileSystemResource(
-				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
-				original.getTrustStoreConfiguration());
 	}
 }

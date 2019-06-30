@@ -28,7 +28,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using
@@ -66,10 +66,8 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		assertThatThrownBy(
-				() -> new AuthenticationStepsExecutor(
-				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate)
-.login())
-				.isInstanceOf(NestedRuntimeException.class);
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
+				() -> new AuthenticationStepsExecutor(ClientCertificateAuthentication
+						.createAuthenticationSteps(), restTemplate).login());
 	}
 }
