@@ -15,8 +15,6 @@
  */
 package org.springframework.vault.repository.query;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.keyvalue.core.KeyValueOperations;
 import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.mapping.context.MappingContext;
@@ -58,11 +56,15 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 						(MappingContext) keyValueOperations.getMappingContext()));
 	}
 
-	@RequiredArgsConstructor
 	static class VaultQueryCreatorFactory implements
 			QueryCreatorFactory<VaultQueryCreator> {
 
 		private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
+
+		public VaultQueryCreatorFactory(
+				MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
+			this.mappingContext = mappingContext;
+		}
 
 		@Override
 		public VaultQueryCreator queryCreatorFor(PartTree partTree,

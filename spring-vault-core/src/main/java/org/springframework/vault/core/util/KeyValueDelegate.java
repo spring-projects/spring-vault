@@ -20,8 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import lombok.Getter;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -145,7 +143,6 @@ public class KeyValueDelegate {
 		return mountInfo;
 	}
 
-	@Getter
 	static class MountInfo {
 
 		static final MountInfo UNAVAILABLE = new MountInfo("", Collections.emptyMap(),
@@ -202,6 +199,19 @@ public class KeyValueDelegate {
 			}
 
 			return false;
+		}
+
+		public String getPath() {
+			return this.path;
+		}
+
+		@Nullable
+		public Map<String, Object> getOptions() {
+			return this.options;
+		}
+
+		public boolean isAvailable() {
+			return this.available;
 		}
 	}
 }

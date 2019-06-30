@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.vault.domain.Person;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -136,28 +137,5 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNull();
-	}
-
-	static class Person {
-
-		String firstname;
-
-		String password;
-
-		void setFirstname(String firstname) {
-			this.firstname = firstname;
-		}
-
-		void setPassword(String password) {
-			this.password = password;
-		}
-
-		String getFirstname() {
-			return firstname;
-		}
-
-		String getPassword() {
-			return password;
-		}
 	}
 }

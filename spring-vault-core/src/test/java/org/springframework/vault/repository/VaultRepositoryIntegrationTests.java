@@ -17,7 +17,6 @@ package org.springframework.vault.repository;
 
 import java.util.List;
 
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.domain.Person;
 import org.springframework.vault.repository.VaultRepositoryIntegrationTests.VaultRepositoryTestConfiguration;
 import org.springframework.vault.repository.configuration.EnableVaultRepositories;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -40,11 +40,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.data.domain.Sort.Order.asc;
 
 /**
+ * Integration tests for Vault repositories.
+ *
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultRepositoryTestConfiguration.class)
-public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
+class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableVaultRepositories(considerNestedRepositories = true)
@@ -68,7 +70,7 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		Person person = new Person();
 		person.setId("foo-key");
-		person.setName("bar");
+		person.setFirstname("bar");
 
 		vaultRepository.save(person);
 
@@ -83,13 +85,13 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		Person walter = new Person();
 		walter.setId("walter");
-		walter.setName("Walter");
+		walter.setFirstname("Walter");
 
 		vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
-		skyler.setName("Skyler");
+		skyler.setFirstname("Skyler");
 
 		vaultRepository.save(skyler);
 
@@ -103,20 +105,20 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		Person walter = new Person();
 		walter.setId("walter");
-		walter.setName("Walter");
+		walter.setFirstname("Walter");
 
 		vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
-		skyler.setName("Skyler");
+		skyler.setFirstname("Skyler");
 
 		vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findAllByOrderByNameAsc()).containsSequence(skyler,
-				walter);
-		assertThat(vaultRepository.findAllByOrderByNameDesc()).containsSequence(walter,
-				skyler);
+		assertThat(vaultRepository.findAllByOrderByFirstnameAsc()).containsSequence(
+				skyler, walter);
+		assertThat(vaultRepository.findAllByOrderByFirstnameDesc()).containsSequence(
+				walter, skyler);
 	}
 
 	@Test
@@ -124,41 +126,36 @@ public class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		Person walter = new Person();
 		walter.setId("walter");
-		walter.setName("Walter");
+		walter.setFirstname("Walter");
 
 		vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
-		skyler.setName("Skyler");
+		skyler.setFirstname("Skyler");
 
 		vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findTop1By(Sort.by(asc("name")))).containsOnly(skyler);
+		assertThat(vaultRepository.findTop1By(Sort.by(asc("firstname")))).containsOnly(
+				skyler);
 	}
 
 	@Test
 	void shouldFailForNonIdCriteria() {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
-				() -> vaultRepository.findInvalidByName("foo"));
+				() -> vaultRepository.findInvalidByFirstname("foo"));
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {
 
 		List<Person> findByIdStartsWith(String prefix);
 
-		List<Person> findAllByOrderByNameAsc();
+		List<Person> findAllByOrderByFirstnameAsc();
 
-		List<Person> findAllByOrderByNameDesc();
+		List<Person> findAllByOrderByFirstnameDesc();
 
 		List<Person> findTop1By(Sort sort);
 
-		List<Person> findInvalidByName(String name);
-	}
-
-	@Data
-	static class Person {
-
-		String id, name;
+		List<Person> findInvalidByFirstname(String name);
 	}
 }

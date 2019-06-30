@@ -15,8 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -27,8 +26,6 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 2.0
  */
-@EqualsAndHashCode
-@ToString
 public class Hmac {
 
 	private final String hmac;
@@ -52,5 +49,29 @@ public class Hmac {
 
 	public String getHmac() {
 		return hmac;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Hmac))
+			return false;
+		Hmac other = (Hmac) o;
+		return hmac.equals(other.hmac);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(hmac);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [hmac='").append(hmac).append('\'');
+		sb.append(']');
+		return sb.toString();
 	}
 }

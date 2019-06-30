@@ -17,8 +17,6 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 
-import lombok.ToString;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
 
@@ -27,7 +25,6 @@ import org.springframework.vault.support.VaultToken;
  *
  * @author Mark Paluch
  */
-@ToString
 public class LoginToken extends VaultToken {
 
 	private final boolean renewable;
@@ -210,4 +207,13 @@ public class LoginToken extends VaultToken {
 		return renewable;
 	}
 
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [renewable=").append(renewable);
+		sb.append(", leaseDuration=").append(leaseDuration);
+		sb.append(']');
+		return sb.toString();
+	}
 }

@@ -19,12 +19,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.domain.Person;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.VaultInitializer;
@@ -121,12 +121,5 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 		kvOperations.delete(key);
 
 		assertThat(kvOperations.get(key)).isNull();
-	}
-
-	@Data
-	static class Person {
-
-		String firstname;
-		String lastname;
 	}
 }

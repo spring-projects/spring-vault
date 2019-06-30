@@ -18,9 +18,6 @@ package org.springframework.vault.support;
 
 import java.util.Arrays;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
 import org.springframework.util.Assert;
 
 /**
@@ -28,8 +25,6 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
-@EqualsAndHashCode
-@ToString(exclude = "token")
 public class VaultToken {
 
 	private final char[] token;
@@ -81,4 +76,22 @@ public class VaultToken {
 		return token;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof VaultToken))
+			return false;
+		VaultToken that = (VaultToken) o;
+		return Arrays.equals(token, that.token);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(token);
+	}
+
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

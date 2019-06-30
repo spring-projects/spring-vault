@@ -31,7 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -116,7 +117,6 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @see Lease
  * @see LeaseEndpoints
  */
-@CommonsLog
 public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 		InitializingBean, DisposableBean {
 
@@ -128,6 +128,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	private static final int STATUS_INITIAL = 0;
 	private static final int STATUS_STARTED = 1;
 	private static final int STATUS_DESTROYED = 2;
+	private static final Log log = LogFactory.getLog(SecretLeaseContainer.class);
 
 	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
 
@@ -699,9 +700,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements
 	 * a newer {@link Lease} for renewal, the previously registered renewal task will skip
 	 * renewal.
 	 */
-	@CommonsLog
 	static class LeaseRenewalScheduler {
 
+		private static final Log log = org.apache.commons.logging.LogFactory
+				.getLog(LeaseRenewalScheduler.class);
 		private final TaskScheduler taskScheduler;
 
 		final AtomicReference<Lease> currentLeaseRef = new AtomicReference<>();

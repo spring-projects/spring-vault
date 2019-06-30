@@ -17,7 +17,6 @@ package org.springframework.vault.config;
 
 import java.time.Duration;
 
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.context.annotation.Bean;
@@ -178,10 +177,13 @@ public abstract class AbstractReactiveVaultConfiguration extends
 	 * Simple {@link SessionManager} adapter using a {@link ReactiveSessionManager} to
 	 * obtain tokens.
 	 */
-	@RequiredArgsConstructor
 	static class ReactiveSessionManagerAdapter implements SessionManager {
 
 		private final ReactiveSessionManager sessionManager;
+
+		public ReactiveSessionManagerAdapter(ReactiveSessionManager sessionManager) {
+			this.sessionManager = sessionManager;
+		}
 
 		@Override
 		public VaultToken getSessionToken() {

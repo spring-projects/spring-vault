@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.support;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 /**
  * Enumeration to specify the type of the transit key. Intended for use with
  * {@link org.springframework.vault.core.VaultTransitOperations}
@@ -25,11 +22,17 @@ import lombok.RequiredArgsConstructor;
  * @author Sven Schürmann
  * @author Mark Paluch
  */
-@Getter
-@RequiredArgsConstructor
 public enum TransitKeyType {
 
 	ENCRYPTION_KEY("encryption-key"), SIGNING_KEY("signing-key"), HMAC_KEY("hmac-key");
 
 	final String value;
+
+	TransitKeyType(String value) {
+		this.value = value;
+	}
+
+	public String getValue() {
+		return this.value;
+	}
 }

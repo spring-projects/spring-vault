@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
 @ContextConfiguration
-public class VaultPropertySourceMultipleIntegrationTests {
+class VaultPropertySourceMultipleIntegrationTests {
 
 	@VaultPropertySource(value = "secret/myapp/profile", propertyNamePrefix = "database.")
 	@VaultPropertySource("secret/myapp")

@@ -17,9 +17,7 @@ package org.springframework.vault.repository.convert;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -37,8 +35,6 @@ import org.springframework.vault.support.VaultResponse;
  * @author Mark Paluch
  * @since 2.0
  */
-@EqualsAndHashCode
-@ToString
 public class SecretDocument {
 
 	private @Nullable String id;
@@ -133,5 +129,30 @@ public class SecretDocument {
 	 */
 	public void put(String key, Object value) {
 		this.body.put(key, value);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof SecretDocument))
+			return false;
+		SecretDocument that = (SecretDocument) o;
+		return Objects.equals(id, that.id) && Objects.equals(body, that.body);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id, body);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [id='").append(id).append('\'');
+		sb.append(", body=").append(body);
+		sb.append(']');
+		return sb.toString();
 	}
 }

@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,7 +29,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import lombok.Data;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -188,8 +188,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	public void authMount(String path, VaultMount vaultMount)
-			throws VaultException {
+	public void authMount(String path, VaultMount vaultMount) throws VaultException {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
@@ -411,7 +410,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 	}
 
-	@Data
 	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
 
 		private List<String> keys = new ArrayList<>();
@@ -419,12 +417,41 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@JsonProperty("root_token")
 		private String rootToken = "";
 
+		public VaultInitializationResponseImpl() {
+		}
+
 		public VaultToken getRootToken() {
 			return VaultToken.of(rootToken);
 		}
+
+		public List<String> getKeys() {
+			return this.keys;
+		}
+
+		public void setKeys(List<String> keys) {
+			this.keys = keys;
+		}
+
+		public void setRootToken(String rootToken) {
+			this.rootToken = rootToken;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof VaultInitializationResponseImpl))
+				return false;
+			VaultInitializationResponseImpl that = (VaultInitializationResponseImpl) o;
+			return keys.equals(that.keys) && rootToken.equals(that.rootToken);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(keys, rootToken);
+		}
 	}
 
-	@Data
 	static class VaultUnsealStatusImpl implements VaultUnsealStatus {
 
 		private boolean sealed;
@@ -436,9 +463,59 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private int secretShares;
 
 		private int progress;
+
+		public VaultUnsealStatusImpl() {
+		}
+
+		public boolean isSealed() {
+			return this.sealed;
+		}
+
+		public int getSecretThreshold() {
+			return this.secretThreshold;
+		}
+
+		public int getSecretShares() {
+			return this.secretShares;
+		}
+
+		public int getProgress() {
+			return this.progress;
+		}
+
+		public void setSealed(boolean sealed) {
+			this.sealed = sealed;
+		}
+
+		public void setSecretThreshold(int secretThreshold) {
+			this.secretThreshold = secretThreshold;
+		}
+
+		public void setSecretShares(int secretShares) {
+			this.secretShares = secretShares;
+		}
+
+		public void setProgress(int progress) {
+			this.progress = progress;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof VaultUnsealStatusImpl))
+				return false;
+			VaultUnsealStatusImpl that = (VaultUnsealStatusImpl) o;
+			return sealed == that.sealed && secretThreshold == that.secretThreshold
+					&& secretShares == that.secretShares && progress == that.progress;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(sealed, secretThreshold, secretShares, progress);
+		}
 	}
 
-	@Data
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class VaultHealthImpl implements VaultHealth {
 
@@ -461,6 +538,44 @@ public class VaultSysTemplate implements VaultSysOperations {
 			this.standby = standby;
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
+		}
+
+		public boolean isInitialized() {
+			return this.initialized;
+		}
+
+		public boolean isSealed() {
+			return this.sealed;
+		}
+
+		public boolean isStandby() {
+			return this.standby;
+		}
+
+		public int getServerTimeUtc() {
+			return this.serverTimeUtc;
+		}
+
+		@Nullable
+		public String getVersion() {
+			return this.version;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof VaultHealthImpl))
+				return false;
+			VaultHealthImpl that = (VaultHealthImpl) o;
+			return initialized == that.initialized && sealed == that.sealed
+					&& standby == that.standby && serverTimeUtc == that.serverTimeUtc
+					&& Objects.equals(version, that.version);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(initialized, sealed, standby, serverTimeUtc, version);
 		}
 	}
 }

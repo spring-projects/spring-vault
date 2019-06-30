@@ -20,10 +20,8 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-public class MappingVaultConverterUnitTests {
+class MappingVaultConverterUnitTests {
 
 	VaultMappingContext context = new VaultMappingContext();
 
@@ -285,74 +283,203 @@ public class MappingVaultConverterUnitTests {
 				skyler);
 	}
 
-	@Data
 	static class SimpleEntity {
 
 		String id;
 		String username;
 		String password;
+
+		public String getId() {
+			return this.id;
+		}
+
+		public String getUsername() {
+			return this.username;
+		}
+
+		public String getPassword() {
+			return this.password;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 	}
 
-	@Data
 	static class ExtendedEntity extends SimpleEntity {
 
 		String location;
+
+		public String getLocation() {
+			return this.location;
+		}
+
+		public void setLocation(String location) {
+			this.location = location;
+		}
 	}
 
-	@Data
 	static class EntityWithNestedType {
 
 		NestedType nested;
+
+		public NestedType getNested() {
+			return this.nested;
+		}
+
+		public void setNested(NestedType nested) {
+			this.nested = nested;
+		}
 	}
 
-	@Data
 	static class EntityWithEnum {
 
 		Condition condition;
+
+		public Condition getCondition() {
+			return this.condition;
+		}
+
+		public void setCondition(Condition condition) {
+			this.condition = condition;
+		}
 	}
 
-	@Data
-	@RequiredArgsConstructor
 	static class ConstructorCreation {
 
 		final String id;
 		final String username;
 		String password;
+
+		public ConstructorCreation(String id, String username) {
+			this.id = id;
+			this.username = username;
+		}
+
+		public String getId() {
+			return this.id;
+		}
+
+		public String getUsername() {
+			return this.username;
+		}
+
+		public String getPassword() {
+			return this.password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 	}
 
-	@Data
 	static class EntityWithListOfStrings {
 
 		List<String> usernames;
+
+		public List<String> getUsernames() {
+			return this.usernames;
+		}
+
+		public void setUsernames(List<String> usernames) {
+			this.usernames = usernames;
+		}
 	}
 
-	@Data
 	static class EntityWithListOfEntities {
 
 		List<NestedType> nested;
+
+		public List<NestedType> getNested() {
+			return this.nested;
+		}
+
+		public void setNested(List<NestedType> nested) {
+			this.nested = nested;
+		}
 	}
 
-	@Data
 	static class EntityWithMap {
 
 		Map<String, Integer> keyVersions;
+
+		public EntityWithMap() {
+		}
+
+		public Map<String, Integer> getKeyVersions() {
+			return this.keyVersions;
+		}
+
+		public void setKeyVersions(Map<String, Integer> keyVersions) {
+			this.keyVersions = keyVersions;
+		}
 	}
 
-	@Data
-	@AllArgsConstructor
 	static class NestedType {
 
 		String username;
 		String password;
+
+		public NestedType(String username, String password) {
+			this.username = username;
+			this.password = password;
+		}
+
+		public String getUsername() {
+			return this.username;
+		}
+
+		public String getPassword() {
+			return this.password;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof NestedType))
+				return false;
+			NestedType that = (NestedType) o;
+			return Objects.equals(username, that.username)
+					&& Objects.equals(password, that.password);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(username, password);
+		}
 	}
 
 	enum Condition {
 		GOOD, BAD
 	}
 
-	@Data
 	static class Person {
 		final String name;
+
+		public Person(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
 	}
 
 	enum DocumentToPersonConverter implements Converter<SecretDocument, Person> {

@@ -18,8 +18,6 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 import java.util.Map;
 
-import lombok.experimental.UtilityClass;
-
 import org.springframework.util.Assert;
 
 /**
@@ -27,8 +25,12 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
-@UtilityClass
-class LoginTokenUtil {
+final class LoginTokenUtil {
+
+	private LoginTokenUtil() {
+		throw new UnsupportedOperationException(
+				"This is a utility class and cannot be instantiated");
+	}
 
 	/**
 	 * Construct a {@link LoginToken} from an auth response.

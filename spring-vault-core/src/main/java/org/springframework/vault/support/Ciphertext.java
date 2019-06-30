@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -26,7 +26,6 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 1.1
  */
-@EqualsAndHashCode
 public class Ciphertext {
 
 	private final String ciphertext;
@@ -72,5 +71,20 @@ public class Ciphertext {
 		Assert.notNull(context, "VaultTransitContext must not be null");
 
 		return new Ciphertext(getCiphertext(), context);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Ciphertext))
+			return false;
+		Ciphertext that = (Ciphertext) o;
+		return ciphertext.equals(that.ciphertext) && context.equals(that.context);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(ciphertext, context);
 	}
 }

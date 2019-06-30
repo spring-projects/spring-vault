@@ -20,9 +20,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -570,7 +570,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				"batch_results");
 	}
 
-	@Data
 	static class VaultTransitKeyImpl implements VaultTransitKey {
 
 		@Nullable
@@ -613,6 +612,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("supports_signing")
 		private boolean supportsSigning;
 
+		public VaultTransitKeyImpl() {
+		}
+
 		@Override
 		public String getType() {
 
@@ -642,14 +644,197 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		public boolean supportsSigning() {
 			return isSupportsSigning();
 		}
+
+		@Nullable
+		public String getName() {
+			return this.name;
+		}
+
+		public String getCipherMode() {
+			return this.cipherMode;
+		}
+
+		public boolean isDeletionAllowed() {
+			return this.deletionAllowed;
+		}
+
+		public boolean isDerived() {
+			return this.derived;
+		}
+
+		public boolean isExportable() {
+			return this.exportable;
+		}
+
+		public Map<String, Object> getKeys() {
+			return this.keys;
+		}
+
+		public int getLatestVersion() {
+			return this.latestVersion;
+		}
+
+		public int getMinDecryptionVersion() {
+			return this.minDecryptionVersion;
+		}
+
+		public int getMinEncryptionVersion() {
+			return this.minEncryptionVersion;
+		}
+
+		public boolean isSupportsDecryption() {
+			return this.supportsDecryption;
+		}
+
+		public boolean isSupportsEncryption() {
+			return this.supportsEncryption;
+		}
+
+		public boolean isSupportsDerivation() {
+			return this.supportsDerivation;
+		}
+
+		public boolean isSupportsSigning() {
+			return this.supportsSigning;
+		}
+
+		public void setName(@Nullable String name) {
+			this.name = name;
+		}
+
+		public void setCipherMode(String cipherMode) {
+			this.cipherMode = cipherMode;
+		}
+
+		public void setType(@Nullable String type) {
+			this.type = type;
+		}
+
+		public void setDeletionAllowed(boolean deletionAllowed) {
+			this.deletionAllowed = deletionAllowed;
+		}
+
+		public void setDerived(boolean derived) {
+			this.derived = derived;
+		}
+
+		public void setExportable(boolean exportable) {
+			this.exportable = exportable;
+		}
+
+		public void setKeys(Map<String, Object> keys) {
+			this.keys = keys;
+		}
+
+		public void setLatestVersion(int latestVersion) {
+			this.latestVersion = latestVersion;
+		}
+
+		public void setMinDecryptionVersion(int minDecryptionVersion) {
+			this.minDecryptionVersion = minDecryptionVersion;
+		}
+
+		public void setMinEncryptionVersion(int minEncryptionVersion) {
+			this.minEncryptionVersion = minEncryptionVersion;
+		}
+
+		public void setSupportsDecryption(boolean supportsDecryption) {
+			this.supportsDecryption = supportsDecryption;
+		}
+
+		public void setSupportsEncryption(boolean supportsEncryption) {
+			this.supportsEncryption = supportsEncryption;
+		}
+
+		public void setSupportsDerivation(boolean supportsDerivation) {
+			this.supportsDerivation = supportsDerivation;
+		}
+
+		public void setSupportsSigning(boolean supportsSigning) {
+			this.supportsSigning = supportsSigning;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof VaultTransitKeyImpl))
+				return false;
+			VaultTransitKeyImpl that = (VaultTransitKeyImpl) o;
+			return deletionAllowed == that.deletionAllowed && derived == that.derived
+					&& exportable == that.exportable
+					&& latestVersion == that.latestVersion
+					&& minDecryptionVersion == that.minDecryptionVersion
+					&& minEncryptionVersion == that.minEncryptionVersion
+					&& supportsDecryption == that.supportsDecryption
+					&& supportsEncryption == that.supportsEncryption
+					&& supportsDerivation == that.supportsDerivation
+					&& supportsSigning == that.supportsSigning
+					&& Objects.equals(name, that.name)
+					&& cipherMode.equals(that.cipherMode)
+					&& Objects.equals(type, that.type) && keys.equals(that.keys);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, cipherMode, type, deletionAllowed, derived,
+					exportable, keys, latestVersion, minDecryptionVersion,
+					minEncryptionVersion, supportsDecryption, supportsEncryption,
+					supportsDerivation, supportsSigning);
+		}
 	}
 
-	@Data
 	static class RawTransitKeyImpl implements RawTransitKey {
 
 		private Map<String, String> keys = Collections.emptyMap();
 
 		@Nullable
 		private String name;
+
+		public RawTransitKeyImpl() {
+		}
+
+		public Map<String, String> getKeys() {
+			return this.keys;
+		}
+
+		@Nullable
+		public String getName() {
+			return this.name;
+		}
+
+		public void setKeys(Map<String, String> keys) {
+			this.keys = keys;
+		}
+
+		public void setName(@Nullable String name) {
+			this.name = name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof RawTransitKeyImpl))
+				return false;
+			RawTransitKeyImpl that = (RawTransitKeyImpl) o;
+			return keys.equals(that.keys) && Objects.equals(name, that.name);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(keys, name);
+		}
+
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [vaultOperations=").append(vaultOperations);
+		sb.append(", path='").append(path).append('\'');
+		sb.append(']');
+		return sb.toString();
 	}
 }

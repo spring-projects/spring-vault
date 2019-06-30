@@ -17,8 +17,7 @@ package org.springframework.vault.util;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import lombok.EqualsAndHashCode;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -28,7 +27,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Paluch
  */
-@EqualsAndHashCode
 public class Version implements Comparable<Version> {
 
 	private static final String VERSION_PARSE_ERROR = "Invalid version string! Could not parse segment %s within %s.";
@@ -199,5 +197,21 @@ public class Version implements Comparable<Version> {
 		}
 
 		return StringUtils.collectionToDelimitedString(digits, ".");
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Version))
+			return false;
+		Version version = (Version) o;
+		return major == version.major && minor == version.minor
+				&& bugfix == version.bugfix && build == version.build;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(major, minor, bugfix, build);
 	}
 }

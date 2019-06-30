@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
 @ContextConfiguration
-public class VaultPropertySourceIntegrationTests {
+class VaultPropertySourceIntegrationTests {
 
 	@Import({ Partial1.class, Partial2.class })
 	static class Config extends VaultIntegrationTestConfiguration {

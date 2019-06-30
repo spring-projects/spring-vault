@@ -21,8 +21,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.EqualsAndHashCode;
-import lombok.Value;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -153,13 +151,41 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 				() -> wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
-	@Value
-	@EqualsAndHashCode
-	static class Secret {
-		final String key;
+	static final class Secret {
+		private final String key;
 
 		Secret(@JsonProperty("key") String key) {
 			this.key = key;
+		}
+
+		public String getKey() {
+			return this.key;
+		}
+
+		public String toString() {
+			return "VaultWrappingTemplateIntegrationTests.Secret(key=" + this.getKey()
+					+ ")";
+		}
+
+		public boolean equals(final Object o) {
+			if (o == this)
+				return true;
+			if (!(o instanceof Secret))
+				return false;
+			final Secret other = (Secret) o;
+			final Object this$key = this.getKey();
+			final Object other$key = other.getKey();
+			if (this$key == null ? other$key != null : !this$key.equals(other$key))
+				return false;
+			return true;
+		}
+
+		public int hashCode() {
+			final int PRIME = 59;
+			int result = 1;
+			final Object $key = this.getKey();
+			result = result * PRIME + ($key == null ? 43 : $key.hashCode());
+			return result;
 		}
 	}
 }

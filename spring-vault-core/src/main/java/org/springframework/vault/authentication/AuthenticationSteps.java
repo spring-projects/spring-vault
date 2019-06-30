@@ -24,15 +24,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
-import lombok.Value;
-import lombok.experimental.FieldDefaults;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -422,25 +413,23 @@ public class AuthenticationSteps {
 	 *
 	 * @param <T> authentication state object type produced by this request.
 	 */
-	@FieldDefaults(makeFinal = true, level = AccessLevel.PACKAGE)
-	@Getter(AccessLevel.PACKAGE)
 	public static class HttpRequest<T> {
 
-		HttpMethod method;
+		final HttpMethod method;
 
 		@Nullable
-		URI uri;
+		final URI uri;
 
 		@Nullable
-		String uriTemplate;
+		final String uriTemplate;
 
 		@Nullable
-		String[] urlVariables;
+		final String[] urlVariables;
 
 		@Nullable
-		HttpEntity<?> entity;
+		final HttpEntity<?> entity;
 
-		Class<T> responseType;
+		final Class<T> responseType;
 
 		HttpRequest(HttpRequestBuilder builder, Class<T> responseType) {
 			this.method = builder.method;
@@ -456,35 +445,86 @@ public class AuthenticationSteps {
 			return String.format("%s %s AS %s", getMethod(), getUri() != null ? getUri()
 					: getUriTemplate(), getResponseType());
 		}
+
+		HttpMethod getMethod() {
+			return this.method;
+		}
+
+		@Nullable
+		URI getUri() {
+			return this.uri;
+		}
+
+		@Nullable
+		String getUriTemplate() {
+			return this.uriTemplate;
+		}
+
+		@Nullable
+		String[] getUrlVariables() {
+			return this.urlVariables;
+		}
+
+		@Nullable
+		HttpEntity<?> getEntity() {
+			return this.entity;
+		}
+
+		Class<T> getResponseType() {
+			return this.responseType;
+		}
 	}
 
-	@Value
-	@EqualsAndHashCode(callSuper = false)
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	static class HttpRequestNode<T> extends Node<T> implements PathAware {
+	static final class HttpRequestNode<T> extends Node<T> implements PathAware {
 
-		@NonNull
-		HttpRequest<T> definition;
+		private final HttpRequest<T> definition;
 
-		@NonNull
-		Node<?> previous;
+		private final Node<?> previous;
+
+		HttpRequestNode(HttpRequest<T> definition, Node<?> previous) {
+			this.definition = definition;
+			this.previous = previous;
+		}
 
 		@Override
 		public String toString() {
 			return definition.toString();
 		}
+
+		public HttpRequest<T> getDefinition() {
+			return this.definition;
+		}
+
+		public Node<?> getPrevious() {
+			return this.previous;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof HttpRequestNode))
+				return false;
+			HttpRequestNode<?> that = (HttpRequestNode<?>) o;
+			return definition.equals(that.definition) && previous.equals(that.previous);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(definition, previous);
+		}
 	}
 
-	@Value
-	@EqualsAndHashCode(callSuper = false)
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	static class MapStep<I, O> extends Node<O> implements PathAware {
+	static final class MapStep<I, O> extends Node<O> implements PathAware {
 
-		@NonNull
-		Function<? super I, ? extends O> mapper;
+		private final Function<? super I, ? extends O> mapper;
 
-		@NonNull
-		Node<?> previous;
+		private final Node<?> previous;
+
+		MapStep(Function<? super I, ? extends O> mapper, Node<?> previous) {
+			this.mapper = mapper;
+			this.previous = previous;
+		}
 
 		O apply(I in) {
 			return mapper.apply(in);
@@ -494,17 +534,36 @@ public class AuthenticationSteps {
 		public String toString() {
 			return "Map: " + mapper.toString();
 		}
+
+		public Function<? super I, ? extends O> getMapper() {
+			return this.mapper;
+		}
+
+		public Node<?> getPrevious() {
+			return this.previous;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof MapStep))
+				return false;
+			MapStep<?, ?> mapStep = (MapStep<?, ?>) o;
+			return mapper.equals(mapStep.mapper) && previous.equals(mapStep.previous);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(mapper, previous);
+		}
 	}
 
-	@Value
-	@EqualsAndHashCode(callSuper = false)
-	static class ZipStep<L, R> extends Node<Pair<L, R>> implements PathAware {
+	static final class ZipStep<L, R> extends Node<Pair<L, R>> implements PathAware {
 
-		@NonNull
-		Node<?> left;
+		private final Node<?> left;
 
-		@NonNull
-		List<Node<?>> right;
+		private final List<Node<?>> right;
 
 		ZipStep(Node<?> left, PathAware right) {
 			this.left = left;
@@ -520,18 +579,41 @@ public class AuthenticationSteps {
 		public String toString() {
 			return "Zip";
 		}
+
+		public AuthenticationSteps.Node<?> getLeft() {
+			return this.left;
+		}
+
+		public List<Node<?>> getRight() {
+			return this.right;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof ZipStep))
+				return false;
+			ZipStep<?, ?> zipStep = (ZipStep<?, ?>) o;
+			return left.equals(zipStep.left) && right.equals(zipStep.right);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(left, right);
+		}
 	}
 
-	@Value
-	@EqualsAndHashCode(callSuper = false)
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	static class OnNextStep<T> extends Node<T> implements PathAware {
+	static final class OnNextStep<T> extends Node<T> implements PathAware {
 
-		@NonNull
-		Consumer<? super T> consumer;
+		private final Consumer<? super T> consumer;
 
-		@NonNull
-		Node<?> previous;
+		private final Node<?> previous;
+
+		OnNextStep(Consumer<? super T> consumer, Node<?> previous) {
+			this.consumer = consumer;
+			this.previous = previous;
+		}
 
 		T apply(T in) {
 			consumer.accept(in);
@@ -542,18 +624,41 @@ public class AuthenticationSteps {
 		public String toString() {
 			return "Consumer: " + consumer.toString();
 		}
+
+		public Consumer<? super T> getConsumer() {
+			return this.consumer;
+		}
+
+		public AuthenticationSteps.Node<?> getPrevious() {
+			return this.previous;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof OnNextStep))
+				return false;
+			OnNextStep<?> that = (OnNextStep<?>) o;
+			return consumer.equals(that.consumer) && previous.equals(that.previous);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(consumer, previous);
+		}
 	}
 
-	@Value
-	@EqualsAndHashCode(callSuper = false)
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	static class SupplierStep<T> extends Node<T> implements PathAware {
+	static final class SupplierStep<T> extends Node<T> implements PathAware {
 
-		@NonNull
-		Supplier<T> supplier;
+		private final Supplier<T> supplier;
 
-		@NonNull
-		Node<?> previous;
+		private final Node<?> previous;
+
+		SupplierStep(Supplier<T> supplier, Node<?> previous) {
+			this.supplier = supplier;
+			this.previous = previous;
+		}
 
 		public T get() {
 			return supplier.get();
@@ -562,6 +667,29 @@ public class AuthenticationSteps {
 		@Override
 		public String toString() {
 			return "Supplier: " + supplier.toString();
+		}
+
+		public Supplier<T> getSupplier() {
+			return this.supplier;
+		}
+
+		public Node<?> getPrevious() {
+			return this.previous;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof SupplierStep))
+				return false;
+			SupplierStep<?> that = (SupplierStep<?>) o;
+			return supplier.equals(that.supplier) && previous.equals(that.previous);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(supplier, previous);
 		}
 	}
 
@@ -576,8 +704,6 @@ public class AuthenticationSteps {
 	 * @param <R>
 	 * @since 2.1
 	 */
-	@EqualsAndHashCode
-	@ToString
 	public static class Pair<L, R> {
 
 		private final L left;
@@ -616,6 +742,31 @@ public class AuthenticationSteps {
 		 */
 		public R getRight() {
 			return right;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof Pair))
+				return false;
+			Pair<?, ?> pair = (Pair<?, ?>) o;
+			return left.equals(pair.left) && right.equals(pair.right);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(left, right);
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append(getClass().getSimpleName());
+			sb.append(" [left=").append(left);
+			sb.append(", right=").append(right);
+			sb.append(']');
+			return sb.toString();
 		}
 	}
 }

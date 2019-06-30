@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -165,12 +164,15 @@ public abstract class LifecycleAwareSessionManagerSupport extends
 	 * This one-shot trigger creates only one execution time to trigger an execution only
 	 * once.
 	 */
-	@RequiredArgsConstructor
 	protected static class OneShotTrigger implements Trigger {
 
 		private final AtomicBoolean fired = new AtomicBoolean();
 
 		private final Date nextExecutionTime;
+
+		public OneShotTrigger(Date nextExecutionTime) {
+			this.nextExecutionTime = nextExecutionTime;
+		}
 
 		@Nullable
 		public Date nextExecutionTime(TriggerContext triggerContext) {

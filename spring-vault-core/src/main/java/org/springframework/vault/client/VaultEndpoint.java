@@ -18,8 +18,7 @@ package org.springframework.vault.client;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
-
-import lombok.EqualsAndHashCode;
+import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -33,7 +32,6 @@ import org.springframework.util.StringUtils;
  *
  * @author Mark Paluch
  */
-@EqualsAndHashCode
 public class VaultEndpoint implements Serializable {
 
 	public static final String API_VERSION = "v1";
@@ -216,6 +214,22 @@ public class VaultEndpoint implements Serializable {
 
 		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(),
 				getPath(), path);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof VaultEndpoint))
+			return false;
+		VaultEndpoint that = (VaultEndpoint) o;
+		return port == that.port && host.equals(that.host) && scheme.equals(that.scheme)
+				&& path.equals(that.path);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(host, port, scheme, path);
 	}
 
 	@Override

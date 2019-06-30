@@ -19,7 +19,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import lombok.extern.apachecommons.CommonsLog;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
@@ -209,10 +210,11 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	/**
 	 * Simple {@link LeaseErrorListener} implementation to log errors.
 	 */
-	@CommonsLog
 	public enum LoggingErrorListener implements LeaseErrorListener {
 
 		INSTANCE;
+
+		private static final Log log = LogFactory.getLog(LoggingErrorListener.class);
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {

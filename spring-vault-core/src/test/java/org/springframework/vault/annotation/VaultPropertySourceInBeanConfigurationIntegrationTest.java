@@ -17,8 +17,6 @@ package org.springframework.vault.annotation;
 
 import java.util.Collections;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
 @ContextConfiguration
-public class VaultPropertySourceInBeanConfigurationIntegrationTest {
+class VaultPropertySourceInBeanConfigurationIntegrationTest {
 
 	@VaultPropertySource({ "secret/myapp" })
 	static class Config extends VaultIntegrationTestConfiguration {
@@ -71,9 +69,19 @@ public class VaultPropertySourceInBeanConfigurationIntegrationTest {
 		assertThat(clientClass.getMyapp()).isEqualTo("myvalue");
 	}
 
-	@Data
-	@AllArgsConstructor
 	static class ClientClass {
 		String myapp;
+
+		public ClientClass(String myapp) {
+			this.myapp = myapp;
+		}
+
+		public String getMyapp() {
+			return this.myapp;
+		}
+
+		public void setMyapp(String myapp) {
+			this.myapp = myapp;
+		}
 	}
 }

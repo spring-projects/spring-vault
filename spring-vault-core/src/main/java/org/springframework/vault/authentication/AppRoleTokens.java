@@ -15,10 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.support.VaultToken;
@@ -41,30 +37,48 @@ class AppRoleTokens {
 	/**
 	 * Wrapped roleId/secretId via Cubbyhole.
 	 */
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	@Getter
 	static class Wrapped implements RoleId, SecretId {
 
 		final VaultToken initialToken;
+
+		Wrapped(VaultToken initialToken) {
+			this.initialToken = initialToken;
+		}
+
+		public VaultToken getInitialToken() {
+			return this.initialToken;
+		}
 	}
 
 	/**
 	 * Pull-mode.
 	 */
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	@Getter
 	static class Pull implements RoleId, SecretId {
 
 		final VaultToken initialToken;
+
+		Pull(VaultToken initialToken) {
+			this.initialToken = initialToken;
+		}
+
+		public VaultToken getInitialToken() {
+			return this.initialToken;
+		}
 	}
 
 	/**
 	 * Static, provided roleId/secretId.
 	 */
-	@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
-	@Getter
 	static class Provided implements RoleId, SecretId {
 
 		final String value;
+
+		Provided(String value) {
+			this.value = value;
+		}
+
+		public String getValue() {
+			return this.value;
+		}
 	}
 }

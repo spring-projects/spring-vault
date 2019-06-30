@@ -17,7 +17,6 @@ package org.springframework.vault.repository;
 
 import java.util.List;
 
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,13 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.domain.Person;
 import org.springframework.vault.repository.MultipleSpringDataModulesIntegrationTests.MultipleModulesActiveTestConfiguration;
 import org.springframework.vault.repository.configuration.EnableVaultRepositories;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -40,11 +39,13 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * Integration tests for Vault repositories with multiple Spring Data modules.
+ *
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MultipleModulesActiveTestConfiguration.class)
-public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
+class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableMapRepositories(considerNestedRepositories = true, //
@@ -74,7 +75,7 @@ public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSu
 
 		Person person = new Person();
 		person.setId("foo-key");
-		person.setName("bar");
+		person.setFirstname("bar");
 
 		vaultRepository.save(person);
 
@@ -91,14 +92,14 @@ public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSu
 
 		Person person = new Person();
 		person.setId("foo-key");
-		person.setName("bar");
+		person.setFirstname("bar");
 
 		mapRepository.save(person);
 
 		Iterable<Person> all = mapRepository.findAll();
 
 		assertThat(all).contains(person);
-		assertThat(mapRepository.findByNameStartsWith("bar")).contains(person);
+		assertThat(mapRepository.findByFirstnameStartsWith("bar")).contains(person);
 		assertThat(vaultRepository.findById("foo-key")).isEmpty();
 	}
 
@@ -109,14 +110,6 @@ public class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSu
 
 	interface MapRepository extends CrudRepository<Person, String> {
 
-		List<Person> findByNameStartsWith(String prefix);
-	}
-
-	@Data
-	static class Person {
-
-		@Id
-		String id;
-		String name;
+		List<Person> findByFirstnameStartsWith(String prefix);
 	}
 }

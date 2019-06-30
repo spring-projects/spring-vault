@@ -19,9 +19,6 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
@@ -397,11 +394,22 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 *
 	 * @since 2.0
 	 */
-	@RequiredArgsConstructor
-	@Getter
 	protected static class TokenWrapper {
 
 		private final VaultToken token;
 		private final boolean revocable;
+
+		TokenWrapper(VaultToken token, boolean revocable) {
+			this.token = token;
+			this.revocable = revocable;
+		}
+
+		public VaultToken getToken() {
+			return this.token;
+		}
+
+		public boolean isRevocable() {
+			return this.revocable;
+		}
 	}
 }

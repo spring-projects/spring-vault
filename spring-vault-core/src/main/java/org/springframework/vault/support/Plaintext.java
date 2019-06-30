@@ -15,7 +15,8 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
+import java.util.Arrays;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -27,7 +28,6 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 1.1
  */
-@EqualsAndHashCode
 public class Plaintext {
 
 	private static final Plaintext EMPTY = new Plaintext(new byte[0],
@@ -114,5 +114,23 @@ public class Plaintext {
 	 */
 	public String asString() {
 		return new String(getPlaintext());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Plaintext))
+			return false;
+		Plaintext plaintext1 = (Plaintext) o;
+		return Arrays.equals(plaintext, plaintext1.plaintext)
+				&& context.equals(plaintext1.context);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(context);
+		result = 31 * result + Arrays.hashCode(plaintext);
+		return result;
 	}
 }

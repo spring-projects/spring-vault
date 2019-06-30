@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
+import java.util.Arrays;
 
 import org.springframework.util.Assert;
 
@@ -24,7 +24,6 @@ import org.springframework.util.Assert;
  *
  * @author Mark Paluch
  */
-@EqualsAndHashCode
 public class VaultTransitContext {
 
 	/**
@@ -91,6 +90,23 @@ public class VaultTransitContext {
 	 */
 	public byte[] getNonce() {
 		return nonce;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof VaultTransitContext))
+			return false;
+		VaultTransitContext that = (VaultTransitContext) o;
+		return Arrays.equals(context, that.context) && Arrays.equals(nonce, that.nonce);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Arrays.hashCode(context);
+		result = 31 * result + Arrays.hashCode(nonce);
+		return result;
 	}
 
 	/**

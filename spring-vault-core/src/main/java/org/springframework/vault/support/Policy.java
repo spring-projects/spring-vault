@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,7 +47,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
-import lombok.EqualsAndHashCode;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -65,7 +65,6 @@ import org.springframework.vault.support.Policy.PolicySerializer;
  */
 @JsonSerialize(using = PolicySerializer.class)
 @JsonDeserialize(using = PolicyDeserializer.class)
-@EqualsAndHashCode
 public class Policy {
 
 	private static final Policy EMPTY = new Policy(Collections.emptySet());
@@ -157,13 +156,27 @@ public class Policy {
 		return null;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Policy))
+			return false;
+		Policy policy = (Policy) o;
+		return rules.equals(policy.rules);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(rules);
+	}
+
 	/**
 	 * Value object representing a rule for a certain path. Rule equality is considered by
 	 * comparing only the path segment to guarante uniqueness within a {@link Set}.
 	 *
 	 * @author Mark Paluch
 	 */
-	@EqualsAndHashCode(of = "path")
 	@JsonInclude(Include.NON_EMPTY)
 	public static class Rule {
 
@@ -245,6 +258,15 @@ public class Policy {
 			this.deniedParameters = deniedParameters;
 		}
 
+		/**
+		 * Create a new builder for {@link Rule}.
+		 *
+		 * @return a new {@link RuleBuilder}.
+		 */
+		public static RuleBuilder builder() {
+			return new RuleBuilder();
+		}
+
 		private Rule withPath(String path) {
 			return new Rule(path, capabilities, minWrappingTtl, maxWrappingTtl,
 					allowedParameters, deniedParameters);
@@ -276,13 +298,19 @@ public class Policy {
 			return deniedParameters;
 		}
 
-		/**
-		 * Create a new builder for {@link Rule}.
-		 *
-		 * @return a new {@link RuleBuilder}.
-		 */
-		public static RuleBuilder builder() {
-			return new RuleBuilder();
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof Rule))
+				return false;
+			Rule rule = (Rule) o;
+			return path.equals(rule.path);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(path);
 		}
 
 		/**

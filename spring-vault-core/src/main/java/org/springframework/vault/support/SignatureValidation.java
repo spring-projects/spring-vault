@@ -15,8 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.Objects;
 
 /**
  * Value object representing the result of a {@link Signature} validation.
@@ -24,8 +23,6 @@ import lombok.ToString;
  * @author Mark Paluch
  * @since 2.0
  */
-@EqualsAndHashCode
-@ToString
 public class SignatureValidation {
 
 	private static final SignatureValidation VALID = new SignatureValidation(true);
@@ -62,5 +59,29 @@ public class SignatureValidation {
 
 	public boolean isValid() {
 		return state;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof SignatureValidation))
+			return false;
+		SignatureValidation that = (SignatureValidation) o;
+		return state == that.state;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(state);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [state=").append(state);
+		sb.append(']');
+		return sb.toString();
 	}
 }

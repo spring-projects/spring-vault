@@ -15,8 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import java.util.Objects;
 
 import org.springframework.util.Assert;
 
@@ -27,8 +26,6 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 2.0
  */
-@EqualsAndHashCode
-@ToString
 public class Signature {
 
 	private final String signature;
@@ -52,5 +49,29 @@ public class Signature {
 
 	public String getSignature() {
 		return signature;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Signature))
+			return false;
+		Signature that = (Signature) o;
+		return signature.equals(that.signature);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(signature);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [signature='").append(signature).append('\'');
+		sb.append(']');
+		return sb.toString();
 	}
 }

@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -480,12 +478,23 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 *
 	 * @since 2.0
 	 */
-	@RequiredArgsConstructor
-	@Getter
 	protected static class TokenWrapper {
 
 		private final VaultToken token;
 		private final boolean revocable;
+
+		public TokenWrapper(VaultToken token, boolean revocable) {
+			this.token = token;
+			this.revocable = revocable;
+		}
+
+		public VaultToken getToken() {
+			return this.token;
+		}
+
+		public boolean isRevocable() {
+			return this.revocable;
+		}
 	}
 
 	/**

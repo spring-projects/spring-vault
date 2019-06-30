@@ -22,8 +22,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import lombok.Value;
-
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.keyvalue.core.query.KeyValueQuery;
@@ -191,15 +189,66 @@ public class VaultQueryCreator extends
 		return part.shouldIgnoreCase() != IgnoreCaseType.NEVER;
 	}
 
-	@Value
-	static class Criteria<T> implements Predicate<String> {
+	static final class Criteria<T> implements Predicate<String> {
 
-		private T value;
-		private BiPredicate<T, String> predicate;
+		private final T value;
+		private final BiPredicate<T, String> predicate;
+
+		public Criteria(T value, BiPredicate<T, String> predicate) {
+			this.value = value;
+			this.predicate = predicate;
+		}
 
 		@Override
 		public boolean test(String s) {
 			return predicate.test(value, s);
+		}
+
+		public T getValue() {
+			return this.value;
+		}
+
+		public BiPredicate<T, String> getPredicate() {
+			return this.predicate;
+		}
+
+		public boolean equals(final Object o) {
+			if (o == this)
+				return true;
+			if (!(o instanceof Criteria))
+				return false;
+			final Criteria<?> other = (Criteria<?>) o;
+			final Object this$value = this.getValue();
+			final Object other$value = other.getValue();
+			if (this$value == null ? other$value != null : !this$value
+					.equals(other$value))
+				return false;
+			final Object this$predicate = this.getPredicate();
+			final Object other$predicate = other.getPredicate();
+			if (this$predicate == null ? other$predicate != null : !this$predicate
+					.equals(other$predicate))
+				return false;
+			return true;
+		}
+
+		public int hashCode() {
+			final int PRIME = 59;
+			int result = 1;
+			final Object $value = this.getValue();
+			result = result * PRIME + ($value == null ? 43 : $value.hashCode());
+			final Object $predicate = this.getPredicate();
+			result = result * PRIME + ($predicate == null ? 43 : $predicate.hashCode());
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append(getClass().getSimpleName());
+			sb.append(" [value=").append(value);
+			sb.append(", predicate=").append(predicate);
+			sb.append(']');
+			return sb.toString();
 		}
 	}
 

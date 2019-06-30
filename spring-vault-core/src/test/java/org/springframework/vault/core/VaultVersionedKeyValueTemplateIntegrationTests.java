@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
-import lombok.Data;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.domain.Person;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
@@ -222,12 +222,5 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isTrue();
 		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
-	}
-
-	@Data
-	static class Person {
-
-		String firstname;
-		String lastname;
 	}
 }
