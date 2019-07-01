@@ -1,6 +1,21 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.3.RELEASE
+-----------------------------------------
+* URL Cleanup #392
+* URL Cleanup #394
+* Upgrade to Vault 1.1.0 #400
+* URL Cleanup #408
+* VaultClients does not consider path prefix #413
+* SpEL expression in @VaultPropertySource annotation not expanded with enabled renewal #420
+* @VaultPropertySource annotations in more than one @Configuration class #421
+* Upgrade to Jackson 2.9.9 #424
+* Upgrade to netty 4.1.36.Final #425
+* Upgrade to Spring Framework 5.1.8 #445
+* Upgrade to Spring Data Lovelace SR9 #446
+* Upgrade to Spring Security 5.1.5 #447
+
 Changes in version 2.1.2.RELEASE
 -----------------------------------------
 * Upgrade to Vault 1.0.0-beta2 #335
