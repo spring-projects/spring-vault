@@ -36,4 +36,21 @@ public interface KubernetesJwtSupplier extends Supplier<String> {
 	 */
 	@Override
 	String get();
+
+	/**
+	 * Retrieve a cached {@link KubernetesJwtSupplier} that obtains the JWT early and
+	 * reuses the token for each {@link #get()} call. This is useful to prevent I/O
+	 * operations in e.g. reactive usage.
+	 * <p>
+	 * Reusing a cached token can lead to authentication failures if the token expires.
+	 *
+	 * @return a caching {@link KubernetesJwtSupplier}.
+	 * @since 2.2
+	 */
+	default KubernetesJwtSupplier cached() {
+
+		String jwt = get();
+
+		return () -> jwt;
+	}
 }

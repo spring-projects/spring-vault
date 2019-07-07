@@ -44,7 +44,7 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 	 */
 	public static final String DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
-	private byte[] token;
+	private final Resource resource;
 
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
@@ -92,18 +92,19 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 		Assert.isTrue(resource.exists(),
 				() -> String.format("Resource %s does not exist", resource));
 
-		try {
-			this.token = readToken(resource);
-		}
-		catch (IOException e) {
-			throw new VaultException(String.format(
-					"Kube JWT token retrieval from %s failed", resource), e);
-		}
+		this.resource = resource;
 	}
 
 	@Override
 	public String get() {
-		return new String(token, StandardCharsets.US_ASCII);
+
+		try {
+			return new String(readToken(this.resource), StandardCharsets.US_ASCII);
+		}
+		catch (IOException e) {
+			throw new VaultException(String.format(
+					"Kube JWT token retrieval from %s failed", this.resource), e);
+		}
 	}
 
 	/**
@@ -113,7 +114,7 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 	 * @return the new byte array that has been copied to (possibly empty).
 	 * @throws IOException in case of I/O errors.
 	 */
-	protected static byte[] readToken(Resource resource) throws IOException {
+	private static byte[] readToken(Resource resource) throws IOException {
 
 		Assert.notNull(resource, "Resource must not be null");
 

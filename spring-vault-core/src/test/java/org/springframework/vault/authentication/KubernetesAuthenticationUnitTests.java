@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -90,5 +92,29 @@ class KubernetesAuthenticationUnitTests {
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(
 				() -> new KubernetesAuthentication(options, restTemplate).login());
+	}
+
+	@Test
+	void shouldReuseCachedToken() {
+
+		AtomicReference<String> token = new AtomicReference<>("foo");
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
+				.builder().role("hello") //
+				.jwtSupplier(((KubernetesJwtSupplier) token::get).cached()).build();
+
+		token.set("bar");
+
+		mockRest.expect(requestTo("/auth/kubernetes/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("hello"))
+				.andExpect(jsonPath("$.jwt").value("foo"))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
+				restTemplate);
+
+		authentication.login();
 	}
 }

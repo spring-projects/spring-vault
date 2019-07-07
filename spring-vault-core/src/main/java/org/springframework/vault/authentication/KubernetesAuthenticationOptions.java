@@ -26,11 +26,16 @@ import org.springframework.util.Assert;
  * Authentication options provide the path, role and jwt supplier.
  * {@link KubernetesAuthentication} can be constructed using {@link #builder()}. Instances
  * of this class are immutable once constructed.
+ * <p>
+ * Default to obtain a cached token from
+ * {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
  *
  * @author Michal Budzyn
  * @author Mark Paluch
  * @since 2.0
  * @see KubernetesAuthentication
+ * @see KubernetesJwtSupplier
+ * @see KubernetesServiceAccountTokenFile
  * @see #builder()
  */
 public class KubernetesAuthenticationOptions {
@@ -135,6 +140,7 @@ public class KubernetesAuthenticationOptions {
 		 *
 		 * @param jwtSupplier the supplier, must not be {@literal null}.
 		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 * @see KubernetesJwtSupplier
 		 */
 		public KubernetesAuthenticationOptionsBuilder jwtSupplier(
 				Supplier<String> jwtSupplier) {
@@ -156,7 +162,7 @@ public class KubernetesAuthenticationOptions {
 
 			return new KubernetesAuthenticationOptions(path, role,
 					jwtSupplier == null ? new KubernetesServiceAccountTokenFile()
-							: jwtSupplier);
+							.cached() : jwtSupplier);
 		}
 	}
 }

@@ -19,6 +19,7 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
@@ -40,7 +41,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 		AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
-	void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
+	void authenticationStepsShouldAuthenticateWithWrappedSecretId()
+			throws InterruptedException {
 
 		String roleId = getRoleId("with-secret-id");
 		VaultToken unwrappingToken = generateWrappedSecretIdResponse();
@@ -53,7 +55,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
 						.getRestTemplate());
 
-		assertThat(executor.login()).isNotNull();
+
 	}
 
 	@Test
@@ -77,7 +79,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 	}
 
 	@Test
-	void shouldAuthenticateWithFullPullMode() {
+	void shouldAuthenticateWithFullPullMode() throws InterruptedException {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("with-secret-id").roleId(RoleId.pull(Settings.token()))
@@ -87,7 +89,18 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
 						.getRestTemplate());
 
-		assertThat(executor.login()).isNotNull();
+		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+		taskScheduler.afterPropertiesSet();
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
+				executor, taskScheduler, prepare().getRestTemplate());
+
+		VaultToken sessionToken = sessionManager.getSessionToken();
+		System.out.println(sessionToken);
+
+		Thread.sleep(90000);
+		VaultToken sessionToken2 = sessionManager.getSessionToken();
+		System.out.println(sessionToken2);
+
 	}
 
 	@Test

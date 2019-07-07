@@ -48,26 +48,30 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			prepare().mountAuth("approle");
 		}
 
-		getVaultOperations().doWithSession(restOperations -> {
+		getVaultOperations().doWithSession(
+				restOperations -> {
 
-			Map<String, String> withSecretId = new HashMap<String, String>();
-			withSecretId.put("policies", "dummy"); // policy
-				withSecretId.put("bound_cidr_list", "0.0.0.0/0");
-				withSecretId.put("bind_secret_id", "true");
+					Map<String, String> withSecretId = new HashMap<>();
+					withSecretId.put("policies", "dummy");
+					withSecretId.put("bound_cidr_list", "0.0.0.0/0");
+					withSecretId.put("bind_secret_id", "true");
+					withSecretId.put("token_ttl", "60s");
+					withSecretId.put("token_max_ttl", "60s");
 
-				restOperations.postForEntity("auth/approle/role/with-secret-id",
-						withSecretId, Map.class);
+					restOperations.postForEntity("auth/approle/role/with-secret-id",
+							withSecretId, Map.class);
 
-				Map<String, String> noSecretIdRole = new HashMap<String, String>();
-				noSecretIdRole.put("policies", "dummy"); // policy
-				noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
-				noSecretIdRole.put("bind_secret_id", "false");
+					Map<String, String> noSecretIdRole = new HashMap<>();
+					noSecretIdRole.put("policies", "dummy"); // policy
+					noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
+					noSecretIdRole.put("bind_secret_id", "false");
+					noSecretIdRole.put("max_ttl", "60s");
 
-				restOperations.postForEntity("auth/approle/role/no-secret-id",
-						noSecretIdRole, Map.class);
+					restOperations.postForEntity("auth/approle/role/no-secret-id",
+							noSecretIdRole, Map.class);
 
-				return null;
-			});
+					return null;
+				});
 	}
 
 	VaultOperations getVaultOperations() {
@@ -77,8 +81,7 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 	String getRoleId(String roleName) {
 		return (String) getVaultOperations()
 				.read(String.format("auth/approle/role/%s/role-id", roleName))
-				.getRequiredData()
-				.get("role_id");
+				.getRequiredData().get("role_id");
 	}
 
 	VaultToken generateWrappedSecretIdResponse() {
