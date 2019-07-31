@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,24 @@
  */
 package org.springframework.vault.authentication;
 
-/**
- * Interface to obtain a Kubernetes Service Account Token for Kubernetes authentication.
- * Implementations are used by {@link KubernetesAuthentication}.
- *
- * @author Michal Budzyn
- * @author Mark Paluch
- * @since 2.0
- * @see KubernetesAuthentication
- */
-@FunctionalInterface
-public interface KubernetesJwtSupplier extends CredentialSupplier {
+import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * Unit tests for {@link PcfAuthenticationOptions}.
+ *
+ * @author Mark Paluch
+ */
+class PcfAuthenticationOptionsUnitTests {
+
+	@Test
+	void emptyEnvVariableShouldFailWithMeaningfulMessage() {
+
+		assertThatThrownBy(
+				() -> PcfAuthenticationOptions.builder().role("my-role").build())
+						.isInstanceOf(IllegalStateException.class) //
+						.hasMessageContaining(
+								"Environment variable CF_INSTANCE_CERT not set");
+	}
 }

@@ -106,7 +106,7 @@ public class Certificate {
 			byte[] bytes = Base64Utils.decodeFromString(getCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
-		catch (IOException | CertificateException e) {
+		catch (CertificateException e) {
 			throw new VaultException("Cannot create Certificate from certificate", e);
 		}
 	}
@@ -123,7 +123,7 @@ public class Certificate {
 			byte[] bytes = Base64Utils.decodeFromString(getIssuingCaCertificate());
 			return KeystoreUtil.getCertificate(bytes);
 		}
-		catch (IOException | CertificateException e) {
+		catch (CertificateException e) {
 			throw new VaultException(
 					"Cannot create Certificate from issuing CA certificate", e);
 		}

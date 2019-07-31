@@ -29,7 +29,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class TestWebClientFactory {
 
-	private static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
+	private static final VaultEndpoint TEST_VAULT_ENDPOINT = TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
 
 	/**
 	 * Create a new {@link WebClient} using the {@link SslConfiguration}. See

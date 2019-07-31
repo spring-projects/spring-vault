@@ -22,6 +22,7 @@ import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -40,6 +41,27 @@ import java.util.List;
  */
 class KeystoreUtil {
 
+	private static final CertificateFactory CERTIFICATE_FACTORY;
+
+	private static final KeyFactory KEY_FACTORY;
+
+	static {
+
+		try {
+			CERTIFICATE_FACTORY = CertificateFactory.getInstance("X.509");
+		}
+		catch (CertificateException e) {
+			throw new IllegalStateException("No X.509 Certificate available", e);
+		}
+
+		try {
+			KEY_FACTORY = KeyFactory.getInstance("RSA");
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException("No RSA KeyFactory available", e);
+		}
+	}
+
 	/**
 	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
 	 * certificates} using the given {@code keyAlias}.
@@ -54,8 +76,7 @@ class KeystoreUtil {
 			X509Certificate... certificates)
 			throws GeneralSecurityException, IOException {
 
-		KeyFactory kf = KeyFactory.getInstance("RSA");
-		PrivateKey privateKey = kf.generatePrivate(privateKeySpec);
+		PrivateKey privateKey = KEY_FACTORY.generatePrivate(privateKeySpec);
 
 		KeyStore keyStore = createKeyStore();
 
@@ -93,11 +114,9 @@ class KeystoreUtil {
 	}
 
 	static X509Certificate getCertificate(byte[] source)
-			throws CertificateException, IOException {
+			throws CertificateException {
 
-		CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-
-		List<X509Certificate> certificates = getCertificates(certificateFactory, source);
+		List<X509Certificate> certificates = getCertificates(CERTIFICATE_FACTORY, source);
 
 		return certificates.stream().findFirst().orElseThrow(
 				() -> new IllegalArgumentException("No X509Certificate found"));
@@ -120,7 +139,7 @@ class KeystoreUtil {
 	}
 
 	private static List<X509Certificate> getCertificates(CertificateFactory cf,
-			byte[] source) throws CertificateException, IOException {
+			byte[] source) throws CertificateException {
 
 		List<X509Certificate> x509Certificates = new ArrayList<>();
 

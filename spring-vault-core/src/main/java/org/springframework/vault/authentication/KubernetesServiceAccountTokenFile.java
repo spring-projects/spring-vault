@@ -16,15 +16,9 @@
 package org.springframework.vault.authentication;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
-import org.springframework.vault.VaultException;
 
 /**
  * Mechanism to retrieve a Kubernetes service account token.
@@ -37,14 +31,13 @@ import org.springframework.vault.VaultException;
  * @since 2.0
  * @see KubernetesJwtSupplier
  */
-public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier {
+public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplier
+		implements KubernetesJwtSupplier {
 
 	/**
 	 * Default path to the service account token file.
 	 */
 	public static final String DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-
-	private final Resource resource;
 
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
@@ -88,38 +81,6 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
 	public KubernetesServiceAccountTokenFile(Resource resource) {
-
-		Assert.isTrue(resource.exists(),
-				() -> String.format("Resource %s does not exist", resource));
-
-		this.resource = resource;
-	}
-
-	@Override
-	public String get() {
-
-		try {
-			return new String(readToken(this.resource), StandardCharsets.US_ASCII);
-		}
-		catch (IOException e) {
-			throw new VaultException(String
-					.format("Kube JWT token retrieval from %s failed", this.resource), e);
-		}
-	}
-
-	/**
-	 * Read the token from {@link Resource}.
-	 *
-	 * @param resource the resource to read from, must not be {@literal null}.
-	 * @return the new byte array that has been copied to (possibly empty).
-	 * @throws IOException in case of I/O errors.
-	 */
-	private static byte[] readToken(Resource resource) throws IOException {
-
-		Assert.notNull(resource, "Resource must not be null");
-
-		try (InputStream is = resource.getInputStream()) {
-			return StreamUtils.copyToByteArray(is);
-		}
+		super(resource);
 	}
 }

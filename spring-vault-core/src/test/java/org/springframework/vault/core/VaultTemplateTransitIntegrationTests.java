@@ -18,7 +18,6 @@ package org.springframework.vault.core;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.codec.binary.Base64;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.util.Base64Utils;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -103,7 +103,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
-						Base64.encodeBase64String("that message is secret".getBytes())));
+						Base64Utils.encodeToString("that message is secret".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("ciphertext")).isNotEmpty();
 	}
@@ -113,13 +113,13 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
-						Base64.encodeBase64String("that message is secret".getBytes())));
+						Base64Utils.encodeToString("that message is secret".getBytes())));
 
 		VaultResponse decrypted = vaultOperations.write("transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext",
 						response.getRequiredData().get("ciphertext")));
 
 		assertThat((String) decrypted.getRequiredData().get("plaintext")).isEqualTo(
-				Base64.encodeBase64String("that message is secret".getBytes()));
+				Base64Utils.encodeToString("that message is secret".getBytes()));
 	}
 }

@@ -22,6 +22,7 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.config.AbstractReactiveVaultConfiguration;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
+import org.springframework.vault.util.TestRestTemplateFactory;
 
 /**
  * Test configuration for Vault integration tests.
@@ -34,7 +35,7 @@ public class VaultIntegrationTestConfiguration
 
 	@Override
 	public VaultEndpoint vaultEndpoint() {
-		return new VaultEndpoint();
+		return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
 	}
 
 	@Override

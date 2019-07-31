@@ -531,6 +531,52 @@ See also:
 * https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
 * https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt[GCP Documentation: projects.serviceAccounts.signJwt][[vault.authentication.gcpiam]]
 
+[[vault.authentication.pcf]]
+== PCF authentication
+
+The https://www.vaultproject.io/docs/auth/pcf.html[pcf]
+auth backend allows Vault login for PCF instances.
+It leverages https://content.pivotal.io/blog/new-in-pcf-2-1-app-container-identity-assurance-via-automatic-cert-rotation[PCF's App and Container Identity Assurance].
+
+PCF authentication uses the instance key and certificate to create a signature that is validated by Vault.
+If the signature matches, and potentially bound organization/space/application Id's match, Vault issues an appropriately-scoped token.
+
+Instance credentials are available from files at `CF_INSTANCE_CERT` and
+`CF_INSTANCE_KEY` variables.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        PcfAuthenticationOptions options = PcfAuthenticationOptions.builder()
+                .role(…).build();
+
+        PcfAuthentication authentication = new PcfAuthentication(options,
+                restOperations());
+    }
+
+    // …
+}
+----
+====
+
+`PcfAuthenticationOptions` requires the https://www.bouncycastle.org/latest_releases.html[BouncyCastle]
+library for creating RSA-PSS signatures.
+
+You can configure the authentication via `PcfAuthenticationOptions`.
+
+See also:
+
+* https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation:
+Using the PCF auth backend]
+
 [[vault.authentication.clientcert]]
 == TLS certificate authentication
 

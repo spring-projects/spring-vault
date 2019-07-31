@@ -264,7 +264,13 @@ public class RestTemplateBuilder {
 			ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
 			HttpHeaders headers = request.getHeaders();
 
-			this.defaultHeaders.forEach(headers::addIfAbsent);
+			this.defaultHeaders.forEach((key, value) -> {
+
+				if (!headers.containsKey(key)) {
+					headers.add(key, value);
+				}
+
+			});
 			this.requestCustomizers.forEach(it -> it.customize(request));
 
 			return request;

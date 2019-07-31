@@ -8,6 +8,7 @@
 * SpEL support in `@Secret`.
 * Add support for Jetty as reactive HttpClient.
 * `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
+* <<vault.authentication.pcf>>.
 * Deprecation of `AppIdAuthentication`. Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 
 [[new-features.2-1-0]]

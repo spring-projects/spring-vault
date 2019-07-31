@@ -61,7 +61,7 @@ public class KubernetesAuthentication
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options,
 			RestOperations restOperations) {
 
-		Assert.notNull(options, "KubeAuthenticationOptions must not be null");
+		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
