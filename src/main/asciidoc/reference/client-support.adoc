@@ -43,6 +43,8 @@ dependencies to your project. You can omit the version number if using
 ----
 ====
 
+NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-4.5.x/logging.html[wire logging] can be enabled through logging configuration. Make sure to not accidentally enable logging as logs may expose traffic between your application and Vault in plain text.
+
 .Netty Dependency
 ====
 [source, xml]
