@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -36,7 +38,7 @@
 		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
-		<java-module-name />
+		<java-module-name/>
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -259,7 +261,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.8.1</version>
 				</plugin>
 
 				<plugin>
@@ -289,13 +291,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.1</version>
 					<configuration>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
@@ -347,14 +349,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7.1</version>
-					<dependencies>
-						<dependency><!-- add support for ssh/scp -->
-							<groupId>org.apache.maven.wagon</groupId>
-							<artifactId>wagon-ssh</artifactId>
-							<version>3.1.0</version>
-						</dependency>
-					</dependencies>
+					<version>3.8.2</version>
 				</plugin>
 
 				<plugin>
@@ -366,7 +361,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.17</version>
+					<version>1.18</version>
 				</plugin>
 
 				<plugin>
@@ -584,16 +579,9 @@
 
 			<dependencies>
 				<dependency>
-					<groupId>org.springframework.doc-resources</groupId>
+					<groupId>io.spring.docresources</groupId>
 					<artifactId>spring-doc-resources</artifactId>
-					<version>0.1.1-SNAPSHOT</version>
-					<scope>provided</scope>
-					<type>zip</type>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.data.build</groupId>
-					<artifactId>spring-data-build-resources</artifactId>
-					<version>2.0.0.RELEASE</version>
+					<version>0.1.2.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
 				</dependency>
@@ -637,7 +625,7 @@
 								</goals>
 								<phase>generate-resources</phase>
 								<configuration>
-									<includeGroupIds>org.springframework.doc-resources
+									<includeGroupIds>io.spring.docresources
 									</includeGroupIds>
 									<includeArtifactIds>spring-doc-resources
 									</includeArtifactIds>
@@ -690,12 +678,14 @@
 									<configuration>
 										<target>
 											<copy todir="${project.root}/target/site/reference/html/images">
-												<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
-													<include name="**/*.png" />
-													<include name="**/*.gif" />
-													<include name="**/*.jpg" />
+												<fileset
+														dir="${basedir}/src/main/asciidoc"
+														erroronmissingdir="false">
+													<include name="**/*.png"/>
+													<include name="**/*.gif"/>
+													<include name="**/*.jpg"/>
 												</fileset>
-												<flattenmapper />
+												<flattenmapper/>
 											</copy>
 										</target>
 									</configuration>
@@ -710,10 +700,12 @@
 									<configuration>
 										<target>
 											<copy todir="${project.build.directory}/schemas">
-												<fileset dir="${basedir}" erroronmissingdir="false">
-													<include name="**/src/main/resources/**/config/spring-*.xsd" />
+												<fileset dir="${basedir}"
+														 erroronmissingdir="false">
+													<include
+															name="**/src/main/resources/**/config/spring-*.xsd"/>
 												</fileset>
-												<flattenmapper />
+												<flattenmapper/>
 											</copy>
 										</target>
 									</configuration>
@@ -727,17 +719,23 @@
 									<phase>generate-resources</phase>
 									<configuration>
 										<target>
-											<copy failonerror="false" file="${project.build.directory}/doc-resources/stylesheets/spring.css" tofile="${project.build.directory}/working/stylesheets/spring.css" />
-											<copy failonerror="false" file="${project.build.directory}/doc-resources/html/docinfo.html" tofile="${project.build.directory}/working/docinfo.html" />
-											<copy failonerror="false" file="${project.build.directory}/doc-resources/html/docinfo-footer.html" tofile="${project.build.directory}/working/docinfo-footer.html" />
-											<copy failonerror="false" todir="${project.build.directory}/working/tocbot-3.0.2">
-												<fileset dir="${project.build.directory}/doc-resources/javascript/tocbot-3.0.2" includes="**" />
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working">
+												<fileset
+														dir="${project.build.directory}/doc-resources"
+														includes="**"/>
 											</copy>
-											<copy failonerror="false" todir="${project.build.directory}/working">
-												<fileset dir="${project.root}/src/main/asciidoc" includes="**" />
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working">
+												<fileset
+														dir="${project.root}/src/main/asciidoc"
+														includes="**"/>
 											</copy>
-											<copy failonerror="false" todir="${project.build.directory}/working/images">
-												<fileset dir="${project.root}/src/main/asciidoc/images" includes="**" />
+											<copy failonerror="false"
+												  todir="${project.build.directory}/working/images">
+												<fileset
+														dir="${project.root}/src/main/asciidoc/images"
+														includes="**"/>
 											</copy>
 										</target>
 									</configuration>
@@ -752,22 +750,25 @@
 									<configuration>
 										<target>
 											<!-- Copy files for the single-file HTML version -->
-											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.html" tofile="${project.root}/target/site/reference/html/index.html" />
-											<copy failonerror="false" todir="${project.root}/target/site/reference/html/images">
-												<fileset dir="${project.build.directory}/generated-docs/images">
-													<include name="*.*" />
+											<copy failonerror="false"
+												  todir="${project.root}/target/site/reference/html">
+												<fileset
+														dir="${project.build.directory}/doc-resources">
+													<include name="**"/>
+													<exclude name="**/docinfo*.html"/>
 												</fileset>
 											</copy>
-											<copy failonerror="false" todir="${project.root}/target/site/reference/html/tocbot-3.0.2">
-												<fileset dir="${project.build.directory}/generated-docs/tocbot-3.0.2">
-													<include name="*.*" />
-												</fileset>
-											</copy>
-											<copy failonerror="false" file="${project.build.directory}/generated-docs/stylesheets/spring.css" tofile="${project.root}/target/site/reference/html/stylesheets/spring.css" />
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.html"
+												  tofile="${project.root}/target/site/reference/html/index.html"/>
 											<!-- Copy and rename the Epub file -->
-											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.pdf"
+												  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
 											<!-- Copy and rename the PDF file -->
-											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
+											<copy failonerror="false"
+												  file="${project.build.directory}/generated-docs/index.epub"
+												  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
 
 										</target>
 									</configuration>
@@ -820,13 +821,17 @@
 										<sectids>false</sectids>
 										<sourceHighlighter>prettify</sourceHighlighter>
 										<attributes>
+											<sectanchors>true</sectanchors>
+											<docinfo>shared</docinfo>
+											<stylesdir>css/</stylesdir>
+											<stylesheet>spring.css</stylesheet>
 											<linkcss>true</linkcss>
 											<icons>font</icons>
-											<sectanchors>true</sectanchors>
-											<stylesdir>./stylesheets</stylesdir>
-											<stylesheet>spring.css</stylesheet>
-											<docinfo>shared</docinfo>
 											<toc>left</toc>
+											<source-highlighter>highlightjs</source-highlighter>
+											<highlightjsdir>js/highlight</highlightjsdir>
+											<highlightjs-theme>atom-one-dark-reasonable
+											</highlightjs-theme>
 										</attributes>
 									</configuration>
 								</execution>
@@ -900,22 +905,6 @@
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-assembly-plugin</artifactId>
 							<executions>
-								<execution>
-									<id>static</id>
-									<goals>
-										<goal>single</goal>
-									</goals>
-									<phase>prepare-package</phase>
-									<configuration>
-										<descriptors>
-											<descriptor>
-												${shared.resources}/assemblies/static-resources.xml
-											</descriptor>
-										</descriptors>
-										<finalName>static-resources</finalName>
-										<appendAssemblyId>false</appendAssemblyId>
-									</configuration>
-								</execution>
 								<execution>
 									<id>docs</id>
 									<goals>
