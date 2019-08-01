@@ -199,8 +199,8 @@ public class SecretLeaseContainerUnitTests {
 	@SuppressWarnings("unchecked")
 	public void shouldAcceptSecretsWithRenewableLease() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(createSecrets());
 
@@ -232,15 +232,15 @@ public class SecretLeaseContainerUnitTests {
 	public void shouldRotateNonRenewableLease() {
 
 		final List<SecretLeaseEvent> events = new ArrayList<SecretLeaseEvent>();
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(
 				createSecrets("key", "value", false),
 				createSecrets("key", "value2", false));
 
-		secretLeaseContainer.addRequestedSecret(RequestedSecret.rotating(requestedSecret
-				.getPath()));
+		secretLeaseContainer
+				.addRequestedSecret(RequestedSecret.rotating(requestedSecret.getPath()));
 		secretLeaseContainer.addLeaseListener(new LeaseListenerAdapter() {
 			@Override
 			public void onLeaseEvent(SecretLeaseEvent leaseEvent) {
@@ -268,8 +268,8 @@ public class SecretLeaseContainerUnitTests {
 	@Test
 	public void shouldRotateGenericSecret() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
 		when(vaultOperations.read(rotatingGenericSecret.getPath())).thenReturn(
 				createGenericSecrets(Collections.singletonMap("key", (Object) "value")),
@@ -286,20 +286,22 @@ public class SecretLeaseContainerUnitTests {
 		verifyZeroInteractions(scheduledFuture);
 		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
-		ArgumentCaptor<SecretLeaseCreatedEvent> createdEvents = ArgumentCaptor
-				.forClass(SecretLeaseCreatedEvent.class);
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor
+				.forClass(SecretLeaseEvent.class);
 		verify(leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
 
-		List<SecretLeaseCreatedEvent> events = createdEvents.getAllValues();
+		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
 		assertThat(events).hasSize(3);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(0).getSecrets()).containsOnlyKeys("key");
+		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets())
+				.containsOnlyKeys("key");
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
 
 		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(2).getSecrets()).containsOnlyKeys("foo");
+		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets())
+				.containsOnlyKeys("foo");
 	}
 
 	@Test
@@ -324,8 +326,8 @@ public class SecretLeaseContainerUnitTests {
 	@Test
 	public void shouldNotRotateExpiringLease() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
 		VaultResponse first = createSecrets();
 		VaultResponse second = createSecrets();
@@ -345,20 +347,22 @@ public class SecretLeaseContainerUnitTests {
 		captor.getValue().run();
 		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
-		ArgumentCaptor<SecretLeaseCreatedEvent> createdEvents = ArgumentCaptor
-				.forClass(SecretLeaseCreatedEvent.class);
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor
+				.forClass(SecretLeaseEvent.class);
 		verify(leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
 
-		List<SecretLeaseCreatedEvent> events = createdEvents.getAllValues();
+		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
 		assertThat(events).hasSize(3);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(0).getSecrets()).containsOnlyKeys("key");
+		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets())
+				.containsOnlyKeys("key");
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
 
 		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(2).getSecrets()).containsOnlyKeys("foo");
+		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets())
+				.containsOnlyKeys("foo");
 	}
 
 	@Test
@@ -381,8 +385,8 @@ public class SecretLeaseContainerUnitTests {
 	public void shouldPublishRenewalErrors() {
 
 		prepareRenewal();
-		when(vaultOperations.doWithSession(any(RestOperationsCallback.class))).thenThrow(
-				new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
 
 		secretLeaseContainer.start();
 
@@ -493,10 +497,10 @@ public class SecretLeaseContainerUnitTests {
 		verify(vaultOperations).doWithSession(any(RestOperationsCallback.class));
 		verify(scheduledFuture).cancel(false);
 		verify(leaseListenerAdapter).onLeaseEvent(any(SecretLeaseCreatedEvent.class));
-		verify(leaseListenerAdapter).onLeaseEvent(
-				any(BeforeSecretLeaseRevocationEvent.class));
-		verify(leaseListenerAdapter).onLeaseEvent(
-				any(AfterSecretLeaseRevocationEvent.class));
+		verify(leaseListenerAdapter)
+				.onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
+		verify(leaseListenerAdapter)
+				.onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
 	}
 
 	@Test
@@ -514,20 +518,20 @@ public class SecretLeaseContainerUnitTests {
 
 		verifyZeroInteractions(taskScheduler);
 
-		verify(leaseListenerAdapter, never()).onLeaseEvent(
-				any(BeforeSecretLeaseRevocationEvent.class));
-		verify(leaseListenerAdapter, never()).onLeaseEvent(
-				any(AfterSecretLeaseRevocationEvent.class));
+		verify(leaseListenerAdapter, never())
+				.onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
+		verify(leaseListenerAdapter, never())
+				.onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
 	}
 
 	@Test
 	public void shouldRequestRotatingGenericSecrets() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
-		when(vaultOperations.read(rotatingGenericSecret.getPath())).thenReturn(
-				createGenericSecrets());
+		when(vaultOperations.read(rotatingGenericSecret.getPath()))
+				.thenReturn(createGenericSecrets());
 
 		secretLeaseContainer.addRequestedSecret(rotatingGenericSecret);
 		secretLeaseContainer.start();
@@ -545,8 +549,8 @@ public class SecretLeaseContainerUnitTests {
 	@SuppressWarnings("unchecked")
 	private void prepareRenewal() {
 
-		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(
-				scheduledFuture);
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
 
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(createSecrets());
 
