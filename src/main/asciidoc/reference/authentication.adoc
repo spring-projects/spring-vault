@@ -83,6 +83,8 @@ See also:
 [[vault.authentication.appid]]
 == AppId authentication
 
+NOTE: AppId authentication is deprecated by Vault. Use <<vault.authentication.approle>> instead.
+
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
 authentication that consists of two hard to guess tokens. The AppId
 defaults to `spring.application.name` that is statically configured.

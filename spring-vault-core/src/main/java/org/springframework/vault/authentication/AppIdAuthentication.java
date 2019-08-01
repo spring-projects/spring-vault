@@ -37,9 +37,11 @@ import org.springframework.web.client.RestOperations;
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
  * ID</a>
+ * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
-public class AppIdAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+@Deprecated
+public class AppIdAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
 
@@ -77,9 +79,9 @@ public class AppIdAuthentication implements ClientAuthentication,
 
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 
-		return AuthenticationSteps.fromSupplier(
-				() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism()
-						.createUserId())) //
+		return AuthenticationSteps
+				.fromSupplier(() -> getAppIdLogin(options.getAppId(),
+						options.getUserIdMechanism().createUserId())) //
 				.login("auth/{mount}/login", options.getPath());
 	}
 
@@ -95,8 +97,8 @@ public class AppIdAuthentication implements ClientAuthentication,
 
 	private VaultToken createTokenUsingAppId() {
 
-		Map<String, String> login = getAppIdLogin(options.getAppId(), options
-				.getUserIdMechanism().createUserId());
+		Map<String, String> login = getAppIdLogin(options.getAppId(),
+				options.getUserIdMechanism().createUserId());
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",

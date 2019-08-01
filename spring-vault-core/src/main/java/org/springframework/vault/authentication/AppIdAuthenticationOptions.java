@@ -28,7 +28,9 @@ import org.springframework.util.Assert;
  * @see AppIdAuthentication
  * @see AppIdUserIdMechanism
  * @see #builder()
+ * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
+@Deprecated
 public class AppIdAuthenticationOptions {
 
 	public static final String DEFAULT_APPID_AUTHENTICATION_PATH = "app-id";

@@ -3,10 +3,12 @@
 
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2
+
 * Support for Key-Value v2 (versioned backend) secrets through `@VaultPropertySource`.
 * SpEL support in `@Secret`.
 * Add support for Jetty as reactive HttpClient.
 * `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
+* Deprecation of `AppIdAuthentication`. Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 
 [[new-features.2-1-0]]
 === What's new in Spring Vault 2.1

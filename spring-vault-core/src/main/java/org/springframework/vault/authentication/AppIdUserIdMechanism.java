@@ -22,7 +22,9 @@ package org.springframework.vault.authentication;
  *
  * @author Mark Paluch
  * @see AppIdAuthentication
+ * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
+@Deprecated
 @FunctionalInterface
 public interface AppIdUserIdMechanism {
 
