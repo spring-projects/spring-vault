@@ -358,7 +358,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.8.0</version>
+					<version>3.8.1</version>
 				</plugin>
 
 				<plugin>
@@ -388,13 +388,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-source-plugin</artifactId>
-					<version>3.0.1</version>
+					<version>3.1.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.1.0</version>
+					<version>3.1.1</version>
 					<configuration>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
@@ -449,14 +449,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>3.7.1</version>
-					<dependencies>
-						<dependency><!-- add support for ssh/scp -->
-							<groupId>org.apache.maven.wagon</groupId>
-							<artifactId>wagon-ssh</artifactId>
-							<version>3.1.0</version>
-						</dependency>
-					</dependencies>
+					<version>3.8.2</version>
 				</plugin>
 
 				<plugin>
@@ -468,7 +461,7 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>animal-sniffer-maven-plugin</artifactId>
-					<version>1.17</version>
+					<version>1.18</version>
 				</plugin>
 
 				<plugin>
@@ -706,14 +699,8 @@
 				<dependency>
 					<groupId>io.spring.docresources</groupId>
 					<artifactId>spring-doc-resources</artifactId>
-					<version>0.1.1.BUILD-SNAPSHOT</version>
-					<type>zip</type>
-					<optional>true</optional>
-				</dependency>
-				<dependency>
-					<groupId>org.springframework.data.build</groupId>
-					<artifactId>spring-data-build-resources</artifactId>
-					<version>2.2.0.BUILD-SNAPSHOT</version>
+					<version>0.1.2.RELEASE</version>
+					<scope>provided</scope>
 					<type>zip</type>
 					<optional>true</optional>
 				</dependency>
@@ -851,10 +838,10 @@
 									<configuration>
 										<target>
 											<copy failonerror="false"
-												  todir="${generated-asciidoc-sources.directory}/">
+												  todir="${project.build.directory}/working">
 												<fileset
-														dir="${project.root}/src/main/asciidoc"
-														includes="**/*.adoc"/>
+														dir="${project.build.directory}/doc-resources"
+														includes="**"/>
 											</copy>
 											<copy failonerror="false"
 												  todir="${generated-asciidoc-sources.directory}/images/">
@@ -884,31 +871,20 @@
 
 											<!-- Copy files for the single-file HTML version -->
 											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/images">
+												  todir="${project.root}/target/site/reference/html">
 												<fileset
-														dir="${generated-docs.directory}/images"/>
-											</copy>
-
-											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/">
-												<fileset
-														dir="${generated-asciidoc-sources.directory}">
-													<include name="css/**"/>
-													<include name="js/**"/>
+														dir="${project.build.directory}/doc-resources">
+													<include name="**"/>
+													<exclude name="**/docinfo*.html"/>
 												</fileset>
 											</copy>
-
 											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/">
-												<fileset dir="${generated-docs.directory}"
-														 includes="*.html"/>
-											</copy>
-
+												  file="${project.build.directory}/generated-docs/index.html"
+												  tofile="${project.root}/target/site/reference/html/index.html"/>
 											<!-- Copy and rename the Epub file -->
 											<copy failonerror="false"
 												  file="${generated-docs.directory}/index.pdf"
 												  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
-
 											<!-- Copy and rename the PDF file -->
 											<copy failonerror="false"
 												  file="${generated-docs.directory}/index.epub"
@@ -964,14 +940,17 @@
 										<sourceHighlighter>highlight.js
 										</sourceHighlighter>
 										<attributes>
+											<sectanchors>true</sectanchors>
+											<docinfo>shared</docinfo>
+											<stylesdir>css/</stylesdir>
+											<stylesheet>spring.css</stylesheet>
+											<linkcss>true</linkcss>
+											<icons>font</icons>
+											<toc>left</toc>
+											<source-highlighter>highlightjs</source-highlighter>
 											<highlightjsdir>js/highlight</highlightjsdir>
 											<highlightjs-theme>atom-one-dark-reasonable
 											</highlightjs-theme>
-											<linkcss>true</linkcss>
-											<sectanchors>true</sectanchors>
-											<stylesdir>./css</stylesdir>
-											<stylesheet>spring.css</stylesheet>
-											<toc>left</toc>
 										</attributes>
 									</configuration>
 								</execution>
@@ -1048,22 +1027,6 @@
 							<groupId>org.apache.maven.plugins</groupId>
 							<artifactId>maven-assembly-plugin</artifactId>
 							<executions>
-								<execution>
-									<id>static</id>
-									<goals>
-										<goal>single</goal>
-									</goals>
-									<phase>prepare-package</phase>
-									<configuration>
-										<descriptors>
-											<descriptor>
-												${shared.resources}/assemblies/static-resources.xml
-											</descriptor>
-										</descriptors>
-										<finalName>static-resources</finalName>
-										<appendAssemblyId>false</appendAssemblyId>
-									</configuration>
-								</execution>
 								<execution>
 									<id>docs</id>
 									<goals>
