@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Mark Paluch
  * @author Christophe Tafani-Dereeper
  */
-class AppRoleAuthenticationStepsIntegrationTests extends
-		AppRoleAuthenticationIntegrationTestBase {
+class AppRoleAuthenticationStepsIntegrationTests
+		extends AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
 	void authenticationStepsShouldAuthenticateWithWrappedSecretId()
@@ -52,9 +52,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				.roleId(RoleId.provided(roleId)).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
-
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 	}
 
@@ -63,44 +62,34 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
-						null).getRequiredData().get("secret_id");
+						null)
+				.getRequiredData().get("secret_id");
 
 		VaultToken roleIdToken = generateWrappedRoleIdResponse();
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.secretId(SecretId.provided(secretId))
-				.roleId(RoleId.wrapped(roleIdToken)).build();
+				.secretId(SecretId.provided(secretId)).roleId(RoleId.wrapped(roleIdToken))
+				.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 	}
 
 	@Test
-	void shouldAuthenticateWithFullPullMode() throws InterruptedException {
+	void shouldAuthenticateWithFullPullMode() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.appRole("with-secret-id").roleId(RoleId.pull(Settings.token()))
 				.secretId(SecretId.pull(Settings.token())).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
-		ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-		taskScheduler.afterPropertiesSet();
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				executor, taskScheduler, prepare().getRestTemplate());
-
-		VaultToken sessionToken = sessionManager.getSessionToken();
-		System.out.println(sessionToken);
-
-		Thread.sleep(90000);
-		VaultToken sessionToken2 = sessionManager.getSessionToken();
-		System.out.println(sessionToken2);
-
+		assertThat(executor.login()).isNotNull();
 	}
 
 	@Test
@@ -113,8 +102,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				.roleId(RoleId.provided(roleId)).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -124,15 +113,16 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
-						null).getRequiredData().get("secret_id");
+						null)
+				.getRequiredData().get("secret_id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.provided(secretId)).appRole("with-secret-id")
 				.roleId(RoleId.pull(Settings.token())).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -147,8 +137,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				.secretId(SecretId.provided("this-is-a-wrong-secret-id")).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(executor::login);
 	}
@@ -168,8 +158,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 
@@ -188,8 +178,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends
 				.secretId(SecretId.pull(Settings.token())).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare()
-						.getRestTemplate());
+				AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getRestTemplate());
 
 		assertThat(executor.login()).isNotNull();
 	}
