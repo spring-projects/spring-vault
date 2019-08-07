@@ -22,16 +22,16 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<assertj-core.version>3.12.0</assertj-core.version>
+		<assertj-core.version>3.13.2</assertj-core.version>
 		<json-path.version>2.4.0</json-path.version>
 		<junit.version>5.5.0</junit.version>
 		<kotlin.version>1.3.40</kotlin.version>
 		<mockk.version>1.9.3</mockk.version>
 		<mockito-core.version>3.0.0</mockito-core.version>
-		<spring.version>5.2.0.M3</spring.version>
-		<spring-data-releasetrain.version>Moore-M4</spring-data-releasetrain.version>
+		<spring.version>5.2.0.RC1</spring.version>
+		<spring-data-releasetrain.version>Moore-RC2</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.1.5.RELEASE</spring-security-bom.version>
-		<reactor.version>Dysprosium-M1</reactor.version>
+		<reactor.version>Dysprosium-M3</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>

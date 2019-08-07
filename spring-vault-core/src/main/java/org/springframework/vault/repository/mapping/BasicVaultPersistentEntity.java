@@ -31,17 +31,14 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @since 2.0
  */
-public class BasicVaultPersistentEntity<T> extends
-		BasicKeyValuePersistentEntity<T, VaultPersistentProperty> implements
-		VaultPersistentEntity<T> {
+public class BasicVaultPersistentEntity<T>
+		extends BasicKeyValuePersistentEntity<T, VaultPersistentProperty>
+		implements VaultPersistentEntity<T> {
 
 	private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
-	private final @Nullable String backend;
+	private final String backend;
 	private final @Nullable Expression backendExpression;
-
-	private final @Nullable String keyspace;
-	private final @Nullable Expression keyspaceExpression;
 
 	/**
 	 * Creates new {@link BasicVaultPersistentEntity}.
@@ -60,15 +57,10 @@ public class BasicVaultPersistentEntity<T> extends
 			this.backend = annotation.backend();
 			this.backendExpression = detectExpression(this.backend);
 
-			this.keyspace = super.getKeySpace();
-			this.keyspaceExpression = detectExpression(this.keyspace);
 		}
 		else {
 			this.backend = "secret";
 			this.backendExpression = null;
-
-			this.keyspace = super.getKeySpace();
-			this.keyspaceExpression = null;
 		}
 	}
 
@@ -90,20 +82,14 @@ public class BasicVaultPersistentEntity<T> extends
 
 	@Override
 	public String getKeySpace() {
-		return String.format("%s/%s", getSecretBackend(), doGetKeySpace());
-	}
-
-	private String doGetKeySpace() {
-		return keyspaceExpression == null //
-		? keyspace //
-				: keyspaceExpression.getValue(getEvaluationContext(null), String.class);
+		return String.format("%s/%s", getSecretBackend(), super.getKeySpace());
 	}
 
 	@Override
 	public String getSecretBackend() {
 
 		return backendExpression == null //
-		? backend //
+				? backend //
 				: backendExpression.getValue(getEvaluationContext(null), String.class);
 	}
 }
