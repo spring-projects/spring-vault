@@ -137,8 +137,8 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * "https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
  * Wrapping</a>
  */
-public class CubbyholeAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class CubbyholeAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(CubbyholeAuthentication.class);
 
@@ -194,8 +194,8 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
-			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(
-					tokenToUse), restOperations);
+			LoginTokenAdapter adapter = new LoginTokenAdapter(
+					new TokenAuthentication(tokenToUse), restOperations);
 			tokenToUse = adapter.login();
 		}
 
@@ -261,10 +261,9 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 		}
 
 		if (data == null || data.isEmpty()) {
-			throw new VaultLoginException(
-					String.format(
-							"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
-							options.getPath()));
+			throw new VaultLoginException(String.format(
+					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
+					options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -272,9 +271,8 @@ public class CubbyholeAuthentication implements ClientAuthentication,
 			return VaultToken.of(token);
 		}
 
-		throw new VaultLoginException(
-				String.format(
-						"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
-						options.getPath()));
+		throw new VaultLoginException(String.format(
+				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
+				options.getPath()));
 	}
 }

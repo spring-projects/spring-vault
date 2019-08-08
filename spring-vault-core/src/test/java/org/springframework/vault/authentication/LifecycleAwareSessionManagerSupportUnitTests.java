@@ -38,8 +38,8 @@ class LifecycleAwareSessionManagerSupportUnitTests {
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
-				"foo".toCharArray(), Duration.ofMinutes(1)));
+		Date nextExecutionTime = trigger.nextExecutionTime(
+				LoginToken.of("foo".toCharArray(), Duration.ofMinutes(1)));
 		assertThat(nextExecutionTime).isBetween(
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(52)),
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(56)));
@@ -51,8 +51,8 @@ class LifecycleAwareSessionManagerSupportUnitTests {
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5,
 				TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of(
-				"foo".toCharArray(), Duration.ofSeconds(2)));
+		Date nextExecutionTime = trigger.nextExecutionTime(
+				LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)));
 		assertThat(nextExecutionTime).isBetween(
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
 				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2)));

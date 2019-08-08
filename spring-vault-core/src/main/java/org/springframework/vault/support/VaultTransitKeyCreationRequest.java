@@ -128,8 +128,8 @@ public class VaultTransitKeyCreationRequest {
 		 * Configure key derivation.
 		 *
 		 * @param derived {@literal true} if key derivation MUST be used. If enabled, all
-		 * encrypt/decrypt requests to this named key must provide a context which is used
-		 * for key derivation. Defaults to {@literal false}.
+		 *     encrypt/decrypt requests to this named key must provide a context which is
+		 *     used for key derivation. Defaults to {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder derived(boolean derived) {
@@ -143,7 +143,7 @@ public class VaultTransitKeyCreationRequest {
 		 * ciphertext. Requires {@link #derived(boolean)} to be {@literal true}.
 		 *
 		 * @param convergentEncryption {@literal true} the same plaintext creates the same
-		 * ciphertext. Defaults to {@literal false}.
+		 *     ciphertext. Defaults to {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder convergentEncryption(
@@ -157,7 +157,7 @@ public class VaultTransitKeyCreationRequest {
 		 * Configure if the raw key is exportable.
 		 *
 		 * @param exportable {@literal true} the raw key is exportable. Defaults to
-		 * {@literal false}.
+		 *     {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder exportable(boolean exportable) {
@@ -176,8 +176,8 @@ public class VaultTransitKeyCreationRequest {
 
 			Assert.hasText(type, "Type must not be empty");
 
-			return new VaultTransitKeyCreationRequest(derived, type,
-					convergentEncryption, exportable);
+			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption,
+					exportable);
 		}
 	}
 }

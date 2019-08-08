@@ -62,36 +62,29 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 				.as(StepVerifier::create) //
 				.verifyComplete();
 
-		vaultOperations
-				.read("secret/mykey")
-				.as(StepVerifier::create)
-				.consumeNextWith(
-						actual -> assertThat(actual.getRequiredData()).containsEntry(
-								"hello", "world")) //
+		vaultOperations.read("secret/mykey").as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual.getRequiredData())
+						.containsEntry("hello", "world")) //
 				.verifyComplete();
 	}
 
 	@Test
 	void readShouldReturnNestedPropertiesKey() throws IOException {
 
-		Map map = OBJECT_MAPPER
-				.readValue(
-						"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
-						Map.class);
+		Map map = OBJECT_MAPPER.readValue(
+				"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
+				Map.class);
 
 		vaultOperations.write("secret/mykey", map).as(StepVerifier::create)
 				.verifyComplete();
 
-		vaultOperations
-				.read("secret/mykey")
-				.as(StepVerifier::create)
-				.consumeNextWith(
-						actual -> {
-							assertThat(actual.getRequiredData()).containsEntry(
-									"hello.array[0]", "array-value0");
-							assertThat(actual.getRequiredData()).containsEntry(
-									"hello.array[1]", "array-value1");
-						}).verifyComplete();
+		vaultOperations.read("secret/mykey").as(StepVerifier::create)
+				.consumeNextWith(actual -> {
+					assertThat(actual.getRequiredData()).containsEntry("hello.array[0]",
+							"array-value0");
+					assertThat(actual.getRequiredData()).containsEntry("hello.array[1]",
+							"array-value1");
+				}).verifyComplete();
 
 	}
 
@@ -108,14 +101,10 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 				Collections.singletonMap("hello", "world"),
 				Collections.singletonMap("hello1", "world1"));
 
-		vaultOperations
-				.read("secret/mykey")
-				.as(StepVerifier::create)
-				.consumeNextWith(
-						actual -> {
-							assertThat(actual.getRequiredData()).containsEntry("array",
-									expected);
-						}).verifyComplete();
+		vaultOperations.read("secret/mykey").as(StepVerifier::create)
+				.consumeNextWith(actual -> {
+					assertThat(actual.getRequiredData()).containsEntry("array", expected);
+				}).verifyComplete();
 	}
 
 	@Test

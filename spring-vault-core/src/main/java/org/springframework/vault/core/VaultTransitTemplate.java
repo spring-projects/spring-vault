@@ -89,7 +89,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	public void createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest) {
+	public void createKey(String keyName,
+			VaultTransitKeyCreationRequest createKeyRequest) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(createKeyRequest,
@@ -102,15 +103,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public List<String> getKeys() {
 
-		VaultResponse response = vaultOperations.read(String.format("%s/keys?list=true",
-				path));
+		VaultResponse response = vaultOperations
+				.read(String.format("%s/keys?list=true", path));
 
-		return response == null ? Collections.emptyList() : (List) response
-				.getRequiredData().get("keys");
+		return response == null ? Collections.emptyList()
+				: (List) response.getRequiredData().get("keys");
 	}
 
 	@Override
-	public void configureKey(String keyName, VaultTransitKeyConfiguration keyConfiguration) {
+	public void configureKey(String keyName,
+			VaultTransitKeyConfiguration keyConfiguration) {
 
 		Assert.hasText(keyName, "KeyName must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
@@ -444,8 +446,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				"Signature verification request must not be null");
 
 		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(verificationRequest
-				.getPlaintext().getPlaintext()));
+		request.put("input", Base64Utils
+				.encodeToString(verificationRequest.getPlaintext().getPlaintext()));
 
 		if (verificationRequest.getHmac() != null) {
 			request.put("hmac", verificationRequest.getHmac().getHmac());
@@ -459,10 +461,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			request.put("algorithm", verificationRequest.getAlgorithm());
 		}
 
-		Map<String, Object> response = vaultOperations.write(
-				String.format("%s/verify/%s", path, keyName), request).getRequiredData();
+		Map<String, Object> response = vaultOperations
+				.write(String.format("%s/verify/%s", path, keyName), request)
+				.getRequiredData();
 
-		if (response.containsKey("valid") && Boolean.valueOf("" + response.get("valid"))) {
+		if (response.containsKey("valid")
+				&& Boolean.valueOf("" + response.get("valid"))) {
 			return SignatureValidation.valid();
 		}
 
@@ -496,17 +500,17 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 				Map<String, String> data = batchData.get(i);
 				if (StringUtils.hasText(data.get("error"))) {
-					encrypted = new VaultEncryptionResult(new VaultException(
-							data.get("error")));
+					encrypted = new VaultEncryptionResult(
+							new VaultException(data.get("error")));
 				}
 				else {
-					encrypted = new VaultEncryptionResult(toCiphertext(
-							data.get("ciphertext"), plaintext.getContext()));
+					encrypted = new VaultEncryptionResult(
+							toCiphertext(data.get("ciphertext"), plaintext.getContext()));
 				}
 			}
 			else {
-				encrypted = new VaultEncryptionResult(new VaultException(
-						"No result for plaintext #" + i));
+				encrypted = new VaultEncryptionResult(
+						new VaultException("No result for plaintext #" + i));
 			}
 
 			result.add(encrypted);
@@ -531,8 +535,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				encrypted = getDecryptionResult(batchData.get(i), ciphertext);
 			}
 			else {
-				encrypted = new VaultDecryptionResult(new VaultException(
-						"No result for ciphertext #" + i));
+				encrypted = new VaultDecryptionResult(
+						new VaultException("No result for ciphertext #" + i));
 			}
 
 			result.add(encrypted);
@@ -551,8 +555,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		if (StringUtils.hasText(data.get("plaintext"))) {
 
 			byte[] plaintext = Base64Utils.decodeFromString(data.get("plaintext"));
-			return new VaultDecryptionResult(Plaintext.of(plaintext).with(
-					ciphertext.getContext()));
+			return new VaultDecryptionResult(
+					Plaintext.of(plaintext).with(ciphertext.getContext()));
 		}
 
 		return new VaultDecryptionResult(Plaintext.empty().with(ciphertext.getContext()));
@@ -560,14 +564,14 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	private static Ciphertext toCiphertext(String ciphertext,
 			@Nullable VaultTransitContext context) {
-		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext
-				.of(ciphertext);
+		return context != null ? Ciphertext.of(ciphertext).with(context)
+				: Ciphertext.of(ciphertext);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
-		return (List<Map<String, String>>) vaultResponse.getRequiredData().get(
-				"batch_results");
+		return (List<Map<String, String>>) vaultResponse.getRequiredData()
+				.get("batch_results");
 	}
 
 	static class VaultTransitKeyImpl implements VaultTransitKey {

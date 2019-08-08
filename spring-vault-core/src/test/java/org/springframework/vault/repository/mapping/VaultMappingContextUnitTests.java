@@ -48,7 +48,7 @@ class VaultMappingContextUnitTests {
 
 		assertThat(
 				context.getRequiredPersistentEntity(Credentials.class).getSecretBackend())
-				.isEqualTo("shared");
+						.isEqualTo("shared");
 		assertThat(context.getRequiredPersistentEntity(Credentials.class).getKeySpace())
 				.isEqualTo("shared/Email");
 	}

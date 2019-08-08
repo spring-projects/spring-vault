@@ -45,8 +45,8 @@ class ReactiveVaultClientsUnitTests {
 				"/auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(
-				Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
+				.then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector)
 				.filter(ReactiveVaultClients.namespace("foo/bar")).build();
@@ -66,8 +66,8 @@ class ReactiveVaultClientsUnitTests {
 				"/auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(
-				Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
+				.then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector)
 				.filter(ReactiveVaultClients.namespace("foo/bar")).build();

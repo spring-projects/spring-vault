@@ -312,7 +312,7 @@ public class Versioned<T> {
 			 * Configure a created at {@link Instant}.
 			 *
 			 * @param createdAt timestamp at which the version was created, must not be
-			 * {@literal null}.
+			 *     {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder createdAt(Instant createdAt) {
@@ -327,7 +327,7 @@ public class Versioned<T> {
 			 * Configure a deleted at {@link Instant}.
 			 *
 			 * @param deletedAt timestamp at which the version was deleted, must not be
-			 * {@literal null}.
+			 *     {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder deletedAt(Instant deletedAt) {

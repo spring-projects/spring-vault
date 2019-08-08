@@ -36,16 +36,16 @@ class JsonMapFlattenerUnitTests {
 	@Test
 	void shouldPreserveFlatMap() {
 
-		Map<String, Object> result = JsonMapFlattener.flatten(Collections.singletonMap(
-				"key", "value"));
+		Map<String, Object> result = JsonMapFlattener
+				.flatten(Collections.singletonMap("key", "value"));
 		assertThat(result).containsEntry("key", "value");
 	}
 
 	@Test
 	void shouldFlattenNestedObject() throws Exception {
 
-		Map<String, Object> map = OBJECT_MAPPER.readValue(
-				"{\"key\": { \"nested\":true} }", Map.class);
+		Map<String, Object> map = OBJECT_MAPPER
+				.readValue("{\"key\": { \"nested\":true} }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key.nested", true);
@@ -70,8 +70,8 @@ class JsonMapFlattenerUnitTests {
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key[0]", "one").containsEntry("key[1]", "two");
-		assertThat(result).containsEntry("dotted.key[0]", "one").containsEntry(
-				"dotted.key[1]", "two");
+		assertThat(result).containsEntry("dotted.key[0]", "one")
+				.containsEntry("dotted.key[1]", "two");
 	}
 
 	@Test
@@ -82,20 +82,19 @@ class JsonMapFlattenerUnitTests {
 				Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
-		assertThat(result).containsEntry("key[0].nested", "value").containsEntry(
-				"key[1].nested", "other-value");
+		assertThat(result).containsEntry("key[0].nested", "value")
+				.containsEntry("key[1].nested", "other-value");
 	}
 
 	@Test
 	void shouldFlattenDeeplyNestedListOfComplexObject() throws Exception {
 
-		Map<String, Object> map = OBJECT_MAPPER
-				.readValue(
-						"{\"key\": { \"level1\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}]} }",
-						Map.class);
+		Map<String, Object> map = OBJECT_MAPPER.readValue(
+				"{\"key\": { \"level1\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}]} }",
+				Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
-		assertThat(result).containsEntry("key.level1[0].nested", "value").containsEntry(
-				"key.level1[1].nested", "other-value");
+		assertThat(result).containsEntry("key.level1[0].nested", "value")
+				.containsEntry("key.level1[1].nested", "other-value");
 	}
 }

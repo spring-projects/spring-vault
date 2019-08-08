@@ -40,8 +40,8 @@ import org.springframework.vault.repository.mapping.VaultSimpleTypes;
  * @see org.springframework.data.mapping.model.SimpleTypeHolder
  * @see VaultSimpleTypes
  */
-public class VaultCustomConversions extends
-		org.springframework.data.convert.CustomConversions {
+public class VaultCustomConversions
+		extends org.springframework.data.convert.CustomConversions {
 
 	private static final StoreConversions STORE_CONVERSIONS;
 
@@ -55,8 +55,8 @@ public class VaultCustomConversions extends
 		converters.addAll(JodaTimeConverters.getConvertersToRegister());
 
 		STORE_CONVERTERS = Collections.unmodifiableList(converters);
-		STORE_CONVERSIONS = StoreConversions
-				.of(VaultSimpleTypes.HOLDER, STORE_CONVERTERS);
+		STORE_CONVERSIONS = StoreConversions.of(VaultSimpleTypes.HOLDER,
+				STORE_CONVERTERS);
 	}
 
 	/**

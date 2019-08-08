@@ -94,8 +94,8 @@ class VaultClientsUnitTests {
 	void shouldApplyNamespace() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.getInterceptors().add(
-				VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.getInterceptors()
+				.add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
@@ -111,8 +111,8 @@ class VaultClientsUnitTests {
 	void shouldAllowNamespaceOverride() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.getInterceptors().add(
-				VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.getInterceptors()
+				.add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);

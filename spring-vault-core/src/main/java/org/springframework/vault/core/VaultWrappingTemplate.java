@@ -91,12 +91,10 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@Override
 	public VaultResponse read(VaultToken token) {
 
-		return doUnwrap(
-				token,
-				(restOperations, entity) -> {
-					return restOperations.exchange("sys/wrapping/unwrap",
-							HttpMethod.POST, entity, VaultResponse.class).getBody();
-				});
+		return doUnwrap(token, (restOperations, entity) -> {
+			return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST, entity,
+					VaultResponse.class).getBody();
+		});
 	}
 
 	@Nullable
@@ -106,12 +104,11 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
-		return doUnwrap(
-				token,
-				(restOperations, entity) -> {
-					return restOperations.exchange("sys/wrapping/unwrap",
-							HttpMethod.POST, entity, ref).getBody();
-				});
+		return doUnwrap(token, (restOperations, entity) -> {
+			return restOperations
+					.exchange("sys/wrapping/unwrap", HttpMethod.POST, entity, ref)
+					.getBody();
+		});
 	}
 
 	@Nullable
@@ -121,8 +118,8 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		return vaultOperations.doWithVault(restOperations -> {
 
 			try {
-				return requestFunction.apply(restOperations, new HttpEntity<>(
-						VaultHttpHeaders.from(token)));
+				return requestFunction.apply(restOperations,
+						new HttpEntity<>(VaultHttpHeaders.from(token)));
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -164,8 +161,10 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("X-Vault-Wrap-TTL", Long.toString(duration.getSeconds()));
 
-			return restOperations.exchange("sys/wrapping/wrap", HttpMethod.POST,
-					new HttpEntity<>(body, headers), VaultResponse.class).getBody();
+			return restOperations
+					.exchange("sys/wrapping/wrap", HttpMethod.POST,
+							new HttpEntity<>(body, headers), VaultResponse.class)
+					.getBody();
 		});
 
 		Map<String, String> wrapInfo = response.getWrapInfo();
@@ -188,8 +187,9 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 		String date = (String) ((Map) responseMetadata).getOrDefault(key, "");
 
-		return StringUtils.hasText(date) ? DateTimeFormatter.ISO_OFFSET_DATE_TIME
-				.parse(date) : null;
+		return StringUtils.hasText(date)
+				? DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)
+				: null;
 	}
 
 	@Nullable

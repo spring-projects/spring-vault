@@ -99,11 +99,10 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		versionedOperations.put(key, Versioned.create(secret, Version.unversioned()));
 
 		// this should fail
-		assertThatThrownBy(
-				() -> versionedOperations.put(key,
-						Versioned.create(secret, Version.unversioned())))
-				.isExactlyInstanceOf(VaultException.class).hasMessageContaining(
-						"check-and-set parameter did not match the current version");
+		assertThatThrownBy(() -> versionedOperations.put(key,
+				Versioned.create(secret, Version.unversioned())))
+						.isExactlyInstanceOf(VaultException.class).hasMessageContaining(
+								"check-and-set parameter did not match the current version");
 	}
 
 	@Test
@@ -162,8 +161,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(
-				Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+		assertThat(versioned.getRequiredMetadata().getDeletedAt())
+				.isBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
 	}
 
 	@Test
@@ -179,8 +178,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
 
-		assertThat(versioned.getRequiredData()).isEqualTo(
-				Collections.singletonMap("key", "v2"));
+		assertThat(versioned.getRequiredData())
+				.isEqualTo(Collections.singletonMap("key", "v2"));
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
 		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
@@ -202,8 +201,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(1));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(
-				Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+		assertThat(versioned.getRequiredMetadata().getDeletedAt())
+				.isBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
 	}
 
 	@Test

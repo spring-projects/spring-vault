@@ -48,8 +48,8 @@ class KubeServiceAccountTokenFileUnitTests {
 	@Test
 	void shouldGetJwtTokenFromResource() {
 
-		String jwt = new KubernetesServiceAccountTokenFile(new ClassPathResource(
-				"kube-jwt-token")).get();
+		String jwt = new KubernetesServiceAccountTokenFile(
+				new ClassPathResource("kube-jwt-token")).get();
 
 		assertThat(jwt).isEqualTo(TEST_TOKEN);
 	}

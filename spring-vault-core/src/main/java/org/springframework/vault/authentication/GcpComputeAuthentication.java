@@ -45,12 +45,12 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * @see GcpComputeAuthenticationOptions
  * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend: gcp
  * (IAM)</a>
- * @see <a
- * href="https://cloud.google.com/compute/docs/instances/verifying-instance-identity">Google
+ * @see <a href=
+ * "https://cloud.google.com/compute/docs/instances/verifying-instance-identity">Google
  * Compute Engine: Verifying the Identity of Instances</a>
  */
-public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport implements
-		ClientAuthentication, AuthenticationStepsFactory {
+public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	public static final String COMPUTE_METADATA_URL_TEMPLATE = "http://metadata/computeMetadata/v1/instance/service-accounts/{serviceAccount}/identity"
 			+ "?audience={audience}&format={format}";
@@ -112,8 +112,8 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport implem
 
 		HttpRequest<String> jwtRequest = get(COMPUTE_METADATA_URL_TEMPLATE,
 				serviceAccount, audience, "full") //
-				.with(getMetadataHttpHeaders()) //
-				.as(String.class);
+						.with(getMetadataHttpHeaders()) //
+						.as(String.class);
 
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 				//

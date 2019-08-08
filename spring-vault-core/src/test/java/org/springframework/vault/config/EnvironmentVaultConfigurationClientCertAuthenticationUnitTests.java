@@ -51,7 +51,7 @@ class EnvironmentVaultConfigurationClientCertAuthenticationUnitTests {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 
-		assertThat(clientAuthentication).isInstanceOf(
-				ClientCertificateAuthentication.class);
+		assertThat(clientAuthentication)
+				.isInstanceOf(ClientCertificateAuthentication.class);
 	}
 }

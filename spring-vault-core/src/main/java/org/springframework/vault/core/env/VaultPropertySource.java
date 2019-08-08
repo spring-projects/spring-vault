@@ -66,7 +66,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 * be empty or {@literal null}.
+	 *     be empty or {@literal null}.
 	 */
 	public VaultPropertySource(VaultOperations vaultOperations, String path) {
 		this(path, vaultOperations, path);
@@ -80,9 +80,10 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 * be empty or {@literal null}.
+	 *     be empty or {@literal null}.
 	 */
-	public VaultPropertySource(String name, VaultOperations vaultOperations, String path) {
+	public VaultPropertySource(String name, VaultOperations vaultOperations,
+			String path) {
 		this(name, vaultOperations, path, PropertyTransformers.noop());
 	}
 
@@ -95,7 +96,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 * be empty or {@literal null}.
+	 *     be empty or {@literal null}.
 	 * @param propertyTransformer object to transform properties.
 	 * @see PropertyTransformers
 	 */
@@ -110,8 +111,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 		this.path = path;
 		this.keyValueDelegate = new KeyValueDelegate(vaultOperations, LinkedHashMap::new);
-		this.propertyTransformer = propertyTransformer.andThen(PropertyTransformers
-				.removeNullProperties());
+		this.propertyTransformer = propertyTransformer
+				.andThen(PropertyTransformers.removeNullProperties());
 
 		loadProperties();
 	}

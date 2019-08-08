@@ -49,8 +49,8 @@ public interface VaultPkiOperations {
 	 * @param certificateRequest must not be {@literal null}.
 	 * @return the {@link VaultCertificateResponse} containing a {@link CertificateBundle}
 	 * .
-	 * @see <a
-	 * href="https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
+	 * @see <a href=
+	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
 	 * /pki/issue/[role name]</a>
 	 */
 	VaultCertificateResponse issueCertificate(String roleName,
@@ -68,8 +68,8 @@ public interface VaultPkiOperations {
 	 * @return the {@link VaultCertificateResponse} containing a
 	 * {@link org.springframework.vault.support.Certificate} .
 	 * @since 2.0
-	 * @see <a
-	 * href="https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
+	 * @see <a href=
+	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
 	 * /pki/sign/[role name]</a>
 	 */
 	VaultSignCertificateRequestResponse signCertificateRequest(String roleName,
@@ -82,8 +82,8 @@ public interface VaultPkiOperations {
 	 *
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @since 2.0
-	 * @see <a
-	 * href="https://www.vaultproject.io/docs/secrets/pki/index.html#revoke-certificate">POST
+	 * @see <a href=
+	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#revoke-certificate">POST
 	 * /pki/revoke</a>
 	 */
 	void revoke(String serialNumber) throws VaultException;

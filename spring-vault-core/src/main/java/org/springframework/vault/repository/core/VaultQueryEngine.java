@@ -40,8 +40,8 @@ import org.springframework.vault.repository.query.VaultQuery;
  * @see VaultQuery
  * @see org.springframework.vault.repository.query.VaultQueryCreator
  */
-class VaultQueryEngine extends
-		QueryEngine<VaultKeyValueAdapter, VaultQuery, Comparator<?>> {
+class VaultQueryEngine
+		extends QueryEngine<VaultKeyValueAdapter, VaultQuery, Comparator<?>> {
 
 	private static final SpelExpressionParser parser = new SpelExpressionParser();
 

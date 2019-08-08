@@ -60,14 +60,10 @@ class ClientCertificateAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		mockRest.expect(requestTo("/auth/cert/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(
 				restTemplate);
@@ -76,8 +72,8 @@ class ClientCertificateAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
-				Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration())
+				.isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 

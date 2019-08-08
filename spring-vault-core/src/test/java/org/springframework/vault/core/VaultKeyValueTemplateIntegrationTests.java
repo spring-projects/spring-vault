@@ -36,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-class VaultKeyValueTemplateIntegrationTests extends
-		AbstractVaultKeyValueTemplateIntegrationTests {
+class VaultKeyValueTemplateIntegrationTests
+		extends AbstractVaultKeyValueTemplateIntegrationTests {
 
 	VaultKeyValueTemplateIntegrationTests() {
 		super("secret", KeyValueBackend.unversioned());

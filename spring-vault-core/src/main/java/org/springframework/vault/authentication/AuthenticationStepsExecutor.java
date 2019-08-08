@@ -74,7 +74,6 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	public VaultToken login() throws VaultException {
 
-
 		Iterable<Node<?>> steps = chain.steps;
 
 		Object state = evaluate(steps);
@@ -102,8 +101,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String
-						.format("Executing %s with current state %s", o, state));
+				logger.debug(
+						String.format("Executing %s with current state %s", o, state));
 			}
 
 			try {
@@ -128,8 +127,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				}
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Executed %s with current state %s", o,
-							state));
+					logger.debug(
+							String.format("Executed %s with current state %s", o, state));
 				}
 			}
 			catch (HttpStatusCodeException e) {
@@ -139,8 +138,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 						VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 			catch (RuntimeException e) {
-				throw new VaultLoginException(String.format(
-						"Authentication execution failed in %s", o), e);
+				throw new VaultLoginException(
+						String.format("Authentication execution failed in %s", o), e);
 			}
 		}
 		return state;
@@ -172,11 +171,11 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		if (definition.getUri() == null) {
 
-			ResponseEntity<?> exchange = restOperations
-					.exchange(definition.getUriTemplate(), definition.getMethod(),
-							getEntity(definition.getEntity(), state),
-							definition.getResponseType(),
-							(Object[]) definition.getUrlVariables());
+			ResponseEntity<?> exchange = restOperations.exchange(
+					definition.getUriTemplate(), definition.getMethod(),
+					getEntity(definition.getEntity(), state),
+					definition.getResponseType(),
+					(Object[]) definition.getUrlVariables());
 
 			return exchange.getBody();
 		}

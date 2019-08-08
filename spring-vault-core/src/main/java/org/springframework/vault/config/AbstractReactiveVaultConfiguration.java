@@ -61,8 +61,8 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @since 2.0
  */
 @Configuration
-public abstract class AbstractReactiveVaultConfiguration extends
-		AbstractVaultConfiguration {
+public abstract class AbstractReactiveVaultConfiguration
+		extends AbstractVaultConfiguration {
 
 	/**
 	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
@@ -89,8 +89,9 @@ public abstract class AbstractReactiveVaultConfiguration extends
 	 */
 	@Bean
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
-		return new ReactiveVaultTemplate(webClientBuilder(vaultEndpointProvider(),
-				clientHttpConnector()), reactiveSessionManager());
+		return new ReactiveVaultTemplate(
+				webClientBuilder(vaultEndpointProvider(), clientHttpConnector()),
+				reactiveSessionManager());
 	}
 
 	/**
@@ -154,11 +155,10 @@ public abstract class AbstractReactiveVaultConfiguration extends
 			return CachingVaultTokenSupplier.of(stepsOperator);
 		}
 
-		throw new IllegalStateException(
-				String.format(
-						"Cannot construct VaultTokenSupplier from %s. "
-								+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",
-						clientAuthentication));
+		throw new IllegalStateException(String.format(
+				"Cannot construct VaultTokenSupplier from %s. "
+						+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",
+				clientAuthentication));
 	}
 
 	/**

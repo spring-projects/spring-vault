@@ -37,8 +37,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
-import org.springframework.vault.support.Versioned.Version;
 import org.springframework.vault.support.Versioned.Metadata.MetadataBuilder;
+import org.springframework.vault.support.Versioned.Version;
 import org.springframework.web.client.HttpStatusCodeException;
 
 /**
@@ -48,8 +48,8 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Maciej Drozdzowski
  * @since 2.1
  */
-public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements
-		VaultVersionedKeyValueOperations {
+public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
+		implements VaultVersionedKeyValueOperations {
 
 	private final VaultOperations vaultOperations;
 
@@ -92,8 +92,10 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	@Nullable
 	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
-		String secretPath = version.isVersioned() ? String.format("%s?version=%d",
-				createDataPath(path), version.getVersion()) : createDataPath(path);
+		String secretPath = version.isVersioned()
+				? String.format("%s?version=%d", createDataPath(path),
+						version.getVersion())
+				: createDataPath(path);
 
 		VersionedResponse response = vaultOperations.doWithSession(restOperations -> {
 
@@ -239,7 +241,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 				Collections.singletonMap("versions", versions));
 	}
 
-	private static class VersionedResponse extends
-			VaultResponseSupport<VaultResponseSupport<JsonNode>> {
+	private static class VersionedResponse
+			extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
 	}
 }

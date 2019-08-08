@@ -30,9 +30,9 @@ import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.Part;
-import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.repository.query.parser.Part.IgnoreCaseType;
 import org.springframework.data.repository.query.parser.Part.Type;
+import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
@@ -44,8 +44,8 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultQueryCreator extends
-		AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
+public class VaultQueryCreator
+		extends AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
 
 	private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
@@ -57,9 +57,7 @@ public class VaultQueryCreator extends
 	 * @param parameters must not be {@literal null}.
 	 * @param mappingContext must not be {@literal null}.
 	 */
-	public VaultQueryCreator(
-			PartTree tree,
-			ParameterAccessor parameters,
+	public VaultQueryCreator(PartTree tree, ParameterAccessor parameters,
 			MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
 
 		super(tree, parameters);
@@ -83,9 +81,9 @@ public class VaultQueryCreator extends
 
 		if (propertyPath.getLeafProperty() != null
 				&& !propertyPath.getLeafProperty().isIdProperty()) {
-			throw new InvalidDataAccessApiUsageException(String.format(
-					"Cannot create criteria for non-@Id property %s",
-					propertyPath.getLeafProperty()));
+			throw new InvalidDataAccessApiUsageException(
+					String.format("Cannot create criteria for non-@Id property %s",
+							propertyPath.getLeafProperty()));
 		}
 
 		VariableAccessor accessor = getVariableAccessor(part);
@@ -147,8 +145,10 @@ public class VaultQueryCreator extends
 			return new Criteria<>(accessor.nextString(parameters),
 					(value, it) -> !it.contains(value));
 		case REGEX:
-			return Pattern.compile((String) parameters.next(),
-					isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0).asPredicate();
+			return Pattern
+					.compile((String) parameters.next(),
+							isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
+					.asPredicate();
 		case TRUE:
 			return it -> it.equalsIgnoreCase("true");
 		case FALSE:
@@ -220,13 +220,13 @@ public class VaultQueryCreator extends
 			final Criteria<?> other = (Criteria<?>) o;
 			final Object this$value = this.getValue();
 			final Object other$value = other.getValue();
-			if (this$value == null ? other$value != null : !this$value
-					.equals(other$value))
+			if (this$value == null ? other$value != null
+					: !this$value.equals(other$value))
 				return false;
 			final Object this$predicate = this.getPredicate();
 			final Object other$predicate = other.getPredicate();
-			if (this$predicate == null ? other$predicate != null : !this$predicate
-					.equals(other$predicate))
+			if (this$predicate == null ? other$predicate != null
+					: !this$predicate.equals(other$predicate))
 				return false;
 			return true;
 		}

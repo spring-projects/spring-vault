@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Mark Paluch
  */
-class ClientCertificateAuthenticationIntegrationTests extends
-		ClientCertificateAuthenticationIntegrationTestBase {
+class ClientCertificateAuthenticationIntegrationTests
+		extends ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldLoginSuccessfully() {
@@ -85,8 +85,8 @@ class ClientCertificateAuthenticationIntegrationTests extends
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
 				restTemplate);
 
-		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
-				authentication::login);
+		assertThatExceptionOfType(NestedRuntimeException.class)
+				.isThrownBy(authentication::login);
 	}
 
 	@Test

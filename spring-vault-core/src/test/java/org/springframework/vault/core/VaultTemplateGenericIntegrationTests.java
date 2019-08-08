@@ -71,18 +71,17 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void readShouldReturnNestedPropertiesKey() throws Exception {
 
-		Map map = OBJECT_MAPPER
-				.readValue(
-						"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
-						Map.class);
+		Map map = OBJECT_MAPPER.readValue(
+				"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
+				Map.class);
 		vaultOperations.write("secret/mykey", map);
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getRequiredData())
-				.containsEntry("hello.array[0]", "array-value0");
-		assertThat(read.getRequiredData())
-				.containsEntry("hello.array[1]", "array-value1");
+		assertThat(read.getRequiredData()).containsEntry("hello.array[0]",
+				"array-value0");
+		assertThat(read.getRequiredData()).containsEntry("hello.array[1]",
+				"array-value1");
 	}
 
 	@Test
@@ -95,8 +94,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse read = vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getRequiredData()).containsEntry(
-				"array",
+		assertThat(read.getRequiredData()).containsEntry("array",
 				Arrays.asList(Collections.singletonMap("hello", "world"),
 						Collections.singletonMap("hello1", "world1")));
 	}

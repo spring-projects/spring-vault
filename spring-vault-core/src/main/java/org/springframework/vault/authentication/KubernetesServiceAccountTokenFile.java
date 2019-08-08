@@ -52,7 +52,7 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 	 * exception if the file does not exist.
 	 *
 	 * @throws IllegalArgumentException if the
-	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
+	 *     {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
 	 */
 	public KubernetesServiceAccountTokenFile() {
 		this(DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
@@ -102,8 +102,8 @@ public class KubernetesServiceAccountTokenFile implements KubernetesJwtSupplier 
 			return new String(readToken(this.resource), StandardCharsets.US_ASCII);
 		}
 		catch (IOException e) {
-			throw new VaultException(String.format(
-					"Kube JWT token retrieval from %s failed", this.resource), e);
+			throw new VaultException(String
+					.format("Kube JWT token retrieval from %s failed", this.resource), e);
 		}
 	}
 

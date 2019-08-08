@@ -41,8 +41,8 @@ import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
  * Publisher for {@link SecretLeaseEvent}s.
  * <p>
  * This publisher dispatches events to {@link LeaseListener} and
- * {@link LeaseErrorListener}. Instances are thread-safe once
- * {@link #afterPropertiesSet() initialized}.
+ * {@link LeaseErrorListener}. Instances are thread-safe once {@link #afterPropertiesSet()
+ * initialized}.
  *
  * @author Mark Paluch
  * @see SecretLeaseEvent
@@ -218,9 +218,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
-			log.warn(
-					String.format("[%s] %s %s", leaseEvent.getSource(),
-							leaseEvent.getLease(), exception.getMessage()), exception);
+			log.warn(String.format("[%s] %s %s", leaseEvent.getSource(),
+					leaseEvent.getLease(), exception.getMessage()), exception);
 		}
 	}
 }

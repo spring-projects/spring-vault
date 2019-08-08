@@ -40,8 +40,8 @@ public class AzureMsiAuthenticationOptions {
 	public static final URI DEFAULT_INSTANCE_METADATA_SERVICE_URI = URI
 			.create("http://169.254.169.254/metadata/instance?api-version=2017-08-01");
 
-	public static final URI DEFAULT_IDENTITY_TOKEN_SERVICE_URI = URI
-			.create("http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.hashicorp.com&api-version=2018-02-01");
+	public static final URI DEFAULT_IDENTITY_TOKEN_SERVICE_URI = URI.create(
+			"http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.hashicorp.com&api-version=2018-02-01");
 
 	/**
 	 * Path of the azure authentication backend mount.

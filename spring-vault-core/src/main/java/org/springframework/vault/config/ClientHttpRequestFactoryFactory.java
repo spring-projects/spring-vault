@@ -43,7 +43,7 @@ public class ClientHttpRequestFactoryFactory {
 	 */
 	public static ClientHttpRequestFactory create(ClientOptions options,
 			SslConfiguration sslConfiguration) {
-		return org.springframework.vault.client.ClientHttpRequestFactoryFactory.create(
-				options, sslConfiguration);
+		return org.springframework.vault.client.ClientHttpRequestFactoryFactory
+				.create(options, sslConfiguration);
 	}
 }

@@ -39,8 +39,8 @@ class CertificateUnitTests {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = OBJECT_MAPPER.readValue(
-				getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = OBJECT_MAPPER
+				.readValue(getClass().getResource("/certificate.json"), Map.class);
 
 		certificate = Certificate.of(data.get("serial_number"), data.get("certificate"),
 				data.get("issuing_ca"));
@@ -51,8 +51,8 @@ class CertificateUnitTests {
 
 		X509Certificate x509Certificate = certificate.getX509Certificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo(
-				"CN=hello.example.com");
+		assertThat(x509Certificate.getSubjectDN().getName())
+				.isEqualTo("CN=hello.example.com");
 	}
 
 	@Test
@@ -60,8 +60,8 @@ class CertificateUnitTests {
 
 		X509Certificate x509Certificate = certificate.getX509IssuerCertificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).startsWith(
-				"CN=Intermediate CA Certificate");
+		assertThat(x509Certificate.getSubjectDN().getName())
+				.startsWith("CN=Intermediate CA Certificate");
 	}
 
 	@Test

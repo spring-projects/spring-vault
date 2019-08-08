@@ -122,7 +122,8 @@ public class GcpComputeAuthenticationOptions {
 		 * @param serviceAccount must not be empty or {@literal null}.
 		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
 		 */
-		public GcpComputeAuthenticationOptionsBuilder serviceAccount(String serviceAccount) {
+		public GcpComputeAuthenticationOptionsBuilder serviceAccount(
+				String serviceAccount) {
 
 			Assert.hasText(serviceAccount, "Service account must not be null");
 

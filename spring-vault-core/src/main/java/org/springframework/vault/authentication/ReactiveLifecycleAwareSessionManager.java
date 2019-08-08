@@ -80,9 +80,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
  * @see TaskScheduler
  * @see AuthenticationEventPublisher
  */
-public class ReactiveLifecycleAwareSessionManager extends
-		LifecycleAwareSessionManagerSupport implements ReactiveSessionManager,
-		DisposableBean {
+public class ReactiveLifecycleAwareSessionManager
+		extends LifecycleAwareSessionManagerSupport
+		implements ReactiveSessionManager, DisposableBean {
 
 	private static final Mono<TokenWrapper> EMPTY = Mono.empty();
 
@@ -182,14 +182,9 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 */
 	protected Mono<Void> revoke(VaultToken token) {
 
-		return webClient
-				.post()
-				.uri("auth/token/revoke-self")
-				.headers(httpHeaders -> {
-					httpHeaders.addAll(VaultHttpHeaders.from(token));
-				})
-				.retrieve()
-				.bodyToMono(String.class)
+		return webClient.post().uri("auth/token/revoke-self").headers(httpHeaders -> {
+			httpHeaders.addAll(VaultHttpHeaders.from(token));
+		}).retrieve().bodyToMono(String.class)
 				.doOnSubscribe(
 						ignore -> dispatch(new BeforeLoginTokenRevocationEvent(token)))
 				.doOnNext(ignore -> dispatch(new AfterLoginTokenRevocationEvent(token)))
@@ -237,55 +232,44 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 	private Mono<TokenWrapper> doRenewToken(TokenWrapper wrapper) {
 
-		return doRenew(wrapper)
-				.onErrorResume(
-						WebClientResponseException.class,
-						e -> {
+		return doRenew(wrapper).onErrorResume(WebClientResponseException.class, e -> {
 
-							dropCurrentToken();
+			dropCurrentToken();
 
-							String message = "Cannot renew token, resetting token and performing re-login on next token access";
+			String message = "Cannot renew token, resetting token and performing re-login on next token access";
 
-							if (e.getStatusCode().is4xxClientError()) {
+			if (e.getStatusCode().is4xxClientError()) {
 
-								logger.warn(format(message, e));
-								dispatch(new LoginTokenRenewalFailedEvent(wrapper
-										.getToken(), e));
-								return EMPTY;
-							}
+				logger.warn(format(message, e));
+				dispatch(new LoginTokenRenewalFailedEvent(wrapper.getToken(), e));
+				return EMPTY;
+			}
 
-							logger.debug(format(message, e));
+			logger.debug(format(message, e));
 
-							return Mono.error(new VaultTokenRenewalException(format(
-									"Cannot renew token", e), e));
-						})
-				.onErrorMap(
-						it -> !(it instanceof VaultTokenRenewalException),
-						e -> {
+			return Mono.error(
+					new VaultTokenRenewalException(format("Cannot renew token", e), e));
+		}).onErrorMap(it -> !(it instanceof VaultTokenRenewalException), e -> {
 
-							dropCurrentToken();
-							logger.debug(String
-									.format("Cannot renew token, resetting token and performing re-login on next token access: %s",
-											e.toString()));
+			dropCurrentToken();
+			logger.debug(String.format(
+					"Cannot renew token, resetting token and performing re-login on next token access: %s",
+					e.toString()));
 
-							return new VaultTokenRenewalException("Cannot renew token", e);
-						});
+			return new VaultTokenRenewalException("Cannot renew token", e);
+		});
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
 
-		Mono<VaultResponse> exchange = webClient
-				.post()
-				.uri("auth/token/renew-self")
-				.headers(
-						httpHeaders -> httpHeaders.putAll(VaultHttpHeaders
-								.from(tokenWrapper.token))).retrieve()
-				.bodyToMono(VaultResponse.class);
+		Mono<VaultResponse> exchange = webClient.post().uri("auth/token/renew-self")
+				.headers(httpHeaders -> httpHeaders
+						.putAll(VaultHttpHeaders.from(tokenWrapper.token)))
+				.retrieve().bodyToMono(VaultResponse.class);
 
 		return exchange
-				.doOnSubscribe(
-						ignore -> dispatch(new BeforeLoginTokenRenewedEvent(tokenWrapper
-								.getToken())))
+				.doOnSubscribe(ignore -> dispatch(
+						new BeforeLoginTokenRenewedEvent(tokenWrapper.getToken())))
 				.handle((response, sink) -> {
 
 					LoginToken renewed = LoginTokenUtil.from(response.getRequiredAuth());
@@ -300,12 +284,13 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 						Duration validTtlThreshold = getRefreshTrigger()
 								.getValidTtlThreshold(renewed);
-						logger.info(String
-								.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
-										renewed.getLeaseDuration(), validTtlThreshold));
+						logger.info(String.format(
+								"Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
+								renewed.getLeaseDuration(), validTtlThreshold));
 					}
 					else {
-						logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
+						logger.info(
+								"Token TTL exceeded validity TTL threshold. Dropping token.");
 					}
 
 					dropCurrentToken();
@@ -356,17 +341,16 @@ public class ReactiveLifecycleAwareSessionManager extends
 		if (isTokenSelfLookupEnabled()
 				&& !ClassUtils.isAssignableValue(LoginToken.class, token)) {
 
-			Mono<VaultToken> loginTokenMono = augmentWithSelfLookup(this.webClient, token);
+			Mono<VaultToken> loginTokenMono = augmentWithSelfLookup(this.webClient,
+					token);
 
-			return loginTokenMono.onErrorResume(
-					e -> {
+			return loginTokenMono.onErrorResume(e -> {
 
-						logger.warn(String.format(
-								"Cannot enhance VaultToken to a LoginToken: %s",
-								e.getMessage()));
-						dispatch(new AuthenticationErrorEvent(token, e));
-						return Mono.just(token);
-					}).map(it -> new TokenWrapper(it, false));
+				logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s",
+						e.getMessage()));
+				dispatch(new AuthenticationErrorEvent(token, e));
+				return Mono.just(token);
+			}).map(it -> new TokenWrapper(it, false));
 		}
 
 		return Mono.just(wrapper);
@@ -377,8 +361,7 @@ public class ReactiveLifecycleAwareSessionManager extends
 	 */
 	protected boolean isTokenRenewable(VaultToken token) {
 
-		return Optional.of(token)
-				.filter(LoginToken.class::isInstance)
+		return Optional.of(token).filter(LoginToken.class::isInstance)
 				//
 				.filter(it -> {
 
@@ -421,8 +404,8 @@ public class ReactiveLifecycleAwareSessionManager extends
 
 	private OneShotTrigger createTrigger(VaultToken token) {
 
-		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime(
-				(LoginToken) token));
+		return new OneShotTrigger(
+				getRefreshTrigger().nextExecutionTime((LoginToken) token));
 	}
 
 	private static Mono<VaultToken> augmentWithSelfLookup(WebClient webClient,
@@ -448,23 +431,16 @@ public class ReactiveLifecycleAwareSessionManager extends
 	private static Mono<Map<String, Object>> lookupSelf(WebClient webClient,
 			VaultToken token) {
 
-		return webClient
-				.get()
-				.uri("auth/token/lookup-self")
+		return webClient.get().uri("auth/token/lookup-self")
 				.headers(httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)))
-				.retrieve()
-				.bodyToMono(VaultResponse.class)
-				.map(it -> {
+				.retrieve().bodyToMono(VaultResponse.class).map(it -> {
 
 					Assert.state(it.getData() != null, "Token response is null");
 					return it.getRequiredData();
-				})
-				.onErrorMap(
-						WebClientResponseException.class,
-						e -> {
-							return new VaultTokenLookupException(format(
-									"Token self-lookup", e), e);
-						});
+				}).onErrorMap(WebClientResponseException.class, e -> {
+					return new VaultTokenLookupException(format("Token self-lookup", e),
+							e);
+				});
 	}
 
 	private static String format(String message, WebClientResponseException e) {

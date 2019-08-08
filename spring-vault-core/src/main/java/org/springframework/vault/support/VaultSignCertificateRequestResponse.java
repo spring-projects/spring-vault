@@ -20,6 +20,6 @@ package org.springframework.vault.support;
  *
  * @author Mark Paluch
  */
-public class VaultSignCertificateRequestResponse extends
-		VaultResponseSupport<Certificate> {
+public class VaultSignCertificateRequestResponse
+		extends VaultResponseSupport<Certificate> {
 }

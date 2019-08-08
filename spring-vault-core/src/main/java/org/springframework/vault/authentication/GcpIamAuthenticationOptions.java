@@ -194,7 +194,8 @@ public class GcpIamAuthenticationOptions {
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
 		 * @see #credentialSupplier(GcpCredentialSupplier)
 		 */
-		public GcpIamAuthenticationOptionsBuilder credential(GoogleCredential credential) {
+		public GcpIamAuthenticationOptionsBuilder credential(
+				GoogleCredential credential) {
 
 			Assert.notNull(credential, "Credential must not be null");
 
@@ -227,11 +228,13 @@ public class GcpIamAuthenticationOptions {
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
 		 * @since 2.1
 		 */
-		public GcpIamAuthenticationOptionsBuilder serviceAccountId(String serviceAccountId) {
+		public GcpIamAuthenticationOptionsBuilder serviceAccountId(
+				String serviceAccountId) {
 
 			Assert.notNull(serviceAccountId, "Service account id may not be null");
 
-			return serviceAccountIdAccessor((GoogleCredential credential) -> serviceAccountId);
+			return serviceAccountIdAccessor(
+					(GoogleCredential credential) -> serviceAccountId);
 		}
 
 		/**
@@ -276,7 +279,7 @@ public class GcpIamAuthenticationOptions {
 		 * {@link GoogleCredential#getServiceAccountProjectId()}.
 		 *
 		 * @param projectIdAccessor the GCP project id supplier to use in GCP IAM API
-		 * calls
+		 *     calls
 		 * @return {@code this} {@link GcpIamAuthenticationOptionsBuilder}.
 		 * @since 2.1
 		 */

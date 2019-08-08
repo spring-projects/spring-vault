@@ -110,13 +110,13 @@ public interface ReactiveVaultOperations {
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws WebClientException exceptions from
-	 * {@link org.springframework.web.reactive.function.client.WebClient}.
+	 *     {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
 	<V, T extends Publisher<V>> T doWithVault(
-			Function<WebClient, ? extends T> clientCallback) throws VaultException,
-			WebClientException;
+			Function<WebClient, ? extends T> clientCallback)
+			throws VaultException, WebClientException;
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
@@ -125,11 +125,11 @@ public interface ReactiveVaultOperations {
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws WebClientException exceptions from
-	 * {@link org.springframework.web.reactive.function.client.WebClient}.
+	 *     {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
 	<V, T extends Publisher<V>> T doWithSession(
-			Function<WebClient, ? extends T> sessionCallback) throws VaultException,
-			WebClientException;
+			Function<WebClient, ? extends T> sessionCallback)
+			throws VaultException, WebClientException;
 }

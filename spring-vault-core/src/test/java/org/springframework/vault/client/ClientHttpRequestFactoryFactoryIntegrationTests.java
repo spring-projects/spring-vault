@@ -94,8 +94,8 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			ResponseEntity<String> responseEntity = template.exchange(url,
-					HttpMethod.GET, null, String.class);
+			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET,
+					null, String.class);
 			return responseEntity.getBody();
 		}
 		catch (HttpStatusCodeException e) {

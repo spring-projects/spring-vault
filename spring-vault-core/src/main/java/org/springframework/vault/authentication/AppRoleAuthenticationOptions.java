@@ -298,8 +298,7 @@ public class AppRoleAuthenticationOptions {
 				}
 				else {
 
-					Assert.notNull(
-							initialToken,
+					Assert.notNull(initialToken,
 							"AppRole authentication configured for pull mode. InitialToken must not be null (pull mode)");
 					roleId(RoleId.pull(initialToken));
 				}

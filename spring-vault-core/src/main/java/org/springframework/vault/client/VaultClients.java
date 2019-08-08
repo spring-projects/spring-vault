@@ -124,8 +124,8 @@ public class VaultClients {
 
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
 
-		restTemplate.getInterceptors().add(
-				(request, body, execution) -> execution.execute(request, body));
+		restTemplate.getInterceptors()
+				.add((request, body, execution) -> execution.execute(request, body));
 
 		return restTemplate;
 	}
@@ -140,7 +140,8 @@ public class VaultClients {
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
 	 * @since 2.2
 	 */
-	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
+	public static ClientHttpRequestInterceptor createNamespaceInterceptor(
+			String namespace) {
 
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");
 
@@ -220,11 +221,11 @@ public class VaultClients {
 			VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
 
 			String baseUri = toBaseUri(endpoint);
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(
-					prepareUriTemplate(baseUri, uriTemplate)).build();
+			UriComponents uriComponents = UriComponentsBuilder
+					.fromUriString(prepareUriTemplate(baseUri, uriTemplate)).build();
 
-			return UriComponentsBuilder.fromUriString(baseUri).uriComponents(
-					uriComponents);
+			return UriComponentsBuilder.fromUriString(baseUri)
+					.uriComponents(uriComponents);
 		}
 	}
 

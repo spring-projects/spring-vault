@@ -44,8 +44,8 @@ public class TestWebClientFactory {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
 
 		try {
-			ClientHttpConnector connector = ClientHttpConnectorFactory.create(
-					new ClientOptions(), sslConfiguration);
+			ClientHttpConnector connector = ClientHttpConnectorFactory
+					.create(new ClientOptions(), sslConfiguration);
 			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT, connector);
 		}
 		catch (Exception e) {

@@ -27,10 +27,10 @@ import org.springframework.context.annotation.Import;
  * Container annotation that aggregates several {@link VaultPropertySource} annotations.
  * <p>
  * Can be used natively, declaring several nested {@link VaultPropertySource} annotations.
- * Can also be used in conjunction with Java 8's support for
- * <em>repeatable annotations</em>, where {@link VaultPropertySource} can simply be
- * declared several times on the same {@linkplain ElementType#TYPE type}, implicitly
- * generating this container annotation.
+ * Can also be used in conjunction with Java 8's support for <em>repeatable
+ * annotations</em>, where {@link VaultPropertySource} can simply be declared several
+ * times on the same {@linkplain ElementType#TYPE type}, implicitly generating this
+ * container annotation.
  *
  * @author Mark Paluch
  * @see VaultPropertySource

@@ -45,17 +45,17 @@ class VaultPropertySourceUnitTests {
 
 	@Test
 	void shouldRejectEmptyPath() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> new VaultPropertySource("hello", vaultTemplate, "",
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new VaultPropertySource("hello", vaultTemplate, "",
 						PropertyTransformers.noop()));
 
 	}
 
 	@Test
 	void shouldRejectPathStartingWithSlash() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> new VaultPropertySource("hello", vaultTemplate, "/secret",
-						PropertyTransformers.noop()));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
+						"/secret", PropertyTransformers.noop()));
 	}
 
 	@Test
@@ -87,8 +87,8 @@ class VaultPropertySourceUnitTests {
 		assertThat(vaultPropertySource.getProperty("database.key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("key")).isNull();
 		assertThat(vaultPropertySource.getProperty("database.integer")).isEqualTo(1);
-		assertThat(vaultPropertySource.getProperty("database.complex.key")).isEqualTo(
-				"value");
+		assertThat(vaultPropertySource.getProperty("database.complex.key"))
+				.isEqualTo("value");
 	}
 
 	@Test

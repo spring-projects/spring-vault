@@ -29,8 +29,8 @@ class VaultTransitContextUnitTests {
 
 	@Test
 	void rejectsNullContext() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> VaultTransitContext.fromContext(null));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> VaultTransitContext.fromContext(null));
 	}
 
 	@Test
@@ -46,8 +46,8 @@ class VaultTransitContextUnitTests {
 
 	@Test
 	void rejectsNullNonce() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> VaultTransitContext.fromNonce(null));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> VaultTransitContext.fromNonce(null));
 	}
 
 	@Test

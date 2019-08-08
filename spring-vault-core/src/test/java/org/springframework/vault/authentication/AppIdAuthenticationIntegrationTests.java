@@ -31,8 +31,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Mark Paluch
  */
-class AppIdAuthenticationIntegrationTests extends
-		AppIdAuthenticationIntegrationTestBase {
+class AppIdAuthenticationIntegrationTests extends AppIdAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldLoginSuccessfully() {
@@ -42,8 +41,8 @@ class AppIdAuthenticationIntegrationTests extends
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options,
 				restTemplate);
@@ -60,11 +59,11 @@ class AppIdAuthenticationIntegrationTests extends
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new AppIdAuthentication(options, restTemplate).login());
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new AppIdAuthentication(options, restTemplate).login());
 
 	}
 }

@@ -30,8 +30,11 @@ import org.springframework.vault.authentication.AppIdAuthenticationOptions;
 import org.springframework.vault.authentication.AppIdUserIdMechanism;
 import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AzureMsiAuthentication;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -46,13 +49,10 @@ import org.springframework.vault.authentication.KubernetesServiceAccountTokenFil
 import org.springframework.vault.authentication.MacAddressUserId;
 import org.springframework.vault.authentication.StaticUserId;
 import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
-import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
-import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -149,8 +149,8 @@ import org.springframework.web.client.RestOperations;
  * @see KubernetesAuthentication
  */
 @Configuration
-public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration implements
-		ApplicationContextAware {
+public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
+		implements ApplicationContextAware {
 
 	private @Nullable RestOperations cachedRestOperations;
 	private @Nullable ApplicationContext applicationContext;
@@ -317,8 +317,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.hasText(roleId,
 				"Vault AWS EC2 authentication: RoleId (vault.aws-ec2.role-id) must not be empty");
 
-		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions
-				.builder().role(roleId);
+		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
+				.role(roleId);
 
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));

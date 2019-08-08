@@ -66,7 +66,8 @@ public class VaultInitializer {
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 */
-	public VaultInitializer(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
+	public VaultInitializer(SslConfiguration sslConfiguration,
+			VaultEndpoint vaultEndpoint) {
 
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
@@ -93,8 +94,8 @@ public class VaultInitializer {
 			this.token = prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
-			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(
-					VERSIONING_INTRODUCED_WITH)) {
+			if (this.prepareVault.getVersion()
+					.isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}
@@ -109,10 +110,9 @@ public class VaultInitializer {
 					vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(
-					String.format(
-							"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-							vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(String.format(
+					"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+					vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 	}
 

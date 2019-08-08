@@ -43,8 +43,8 @@ class PropertyTransformersUnitTests {
 	void propertyNamePrefixChaining() {
 
 		PropertyTransformer propertyTransformer = PropertyTransformers
-				.propertyNamePrefix("my-prefix.").andThen(
-						PropertyTransformers.propertyNamePrefix("foo-bar."));
+				.propertyNamePrefix("my-prefix.")
+				.andThen(PropertyTransformers.propertyNamePrefix("foo-bar."));
 
 		assertThat(propertyTransformer.transformProperties(properties)).hasSize(1)
 				.containsEntry("foo-bar.my-prefix.key", "value");

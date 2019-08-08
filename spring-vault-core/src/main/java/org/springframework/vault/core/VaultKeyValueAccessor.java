@@ -80,8 +80,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		Assert.hasText(path, "Path must not be empty");
 
 		vaultOperations.doWithSession((restOperations -> {
-			restOperations.exchange(createDataPath(path), HttpMethod.DELETE,
- null,
+			restOperations.exchange(createDataPath(path), HttpMethod.DELETE, null,
 					Void.class);
 
 			return null;
@@ -95,7 +94,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @param path must not be {@literal null}.
 	 * @param deserializeAs must not be {@literal null}.
 	 * @param mappingFunction Mapping function to convert from the intermediate to the
-	 * target data type. Must not be {@literal null}.
+	 *     target data type. Must not be {@literal null}.
 	 * @param <I> intermediate data type for {@literal data} deserialization.
 	 * @param <T> return type. Value is created by the {@code mappingFunction}.
 	 * @return mapped value.
@@ -166,8 +165,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		return vaultOperations.doWithSession((restOperations) -> {
 
 			try {
-				return callback.apply(restOperations)
-						.getBody();
+				return callback.apply(restOperations).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -196,8 +194,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 			return vaultOperations.doWithSession((restOperations) -> {
 				return restOperations.exchange(path, HttpMethod.POST,
-						new HttpEntity<>(body), VaultResponse.class)
-						.getBody();
+						new HttpEntity<>(body), VaultResponse.class).getBody();
 			});
 		}
 		catch (HttpStatusCodeException e) {
@@ -221,26 +218,24 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	private static ObjectMapper extractObjectMapper(VaultOperations vaultOperations) {
 
-		Optional<ObjectMapper> mapper = vaultOperations
-				.doWithSession(operations -> {
+		Optional<ObjectMapper> mapper = vaultOperations.doWithSession(operations -> {
 
-					if (operations instanceof RestTemplate) {
+			if (operations instanceof RestTemplate) {
 
-						RestTemplate template = (RestTemplate) operations;
+				RestTemplate template = (RestTemplate) operations;
 
-						Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template
-								.getMessageConverters()
-								.stream()
-								.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
-								.map(AbstractJackson2HttpMessageConverter.class::cast) //
-								.findFirst();
+				Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template
+						.getMessageConverters().stream()
+						.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
+						.map(AbstractJackson2HttpMessageConverter.class::cast) //
+						.findFirst();
 
-						return jackson2Converter
-								.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
-					}
+				return jackson2Converter
+						.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
+			}
 
-					return Optional.empty();
-				});
+			return Optional.empty();
+		});
 
 		return mapper.orElseGet(ObjectMapper::new);
 	}

@@ -56,8 +56,8 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 						(MappingContext) keyValueOperations.getMappingContext()));
 	}
 
-	static class VaultQueryCreatorFactory implements
-			QueryCreatorFactory<VaultQueryCreator> {
+	static class VaultQueryCreatorFactory
+			implements QueryCreatorFactory<VaultQueryCreator> {
 
 		private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 

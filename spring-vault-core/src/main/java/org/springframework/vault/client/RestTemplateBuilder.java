@@ -234,14 +234,14 @@ public class RestTemplateBuilder {
 
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
 		RestTemplateBuilderClientHttpRequestFactoryWrapper wrapper = new RestTemplateBuilderClientHttpRequestFactoryWrapper(
-				requestFactory, new LinkedHashMap<>(defaultHeaders), new LinkedHashSet<>(
-						requestCustomizers));
+				requestFactory, new LinkedHashMap<>(defaultHeaders),
+				new LinkedHashSet<>(requestCustomizers));
 
 		return VaultClients.createRestTemplate(endpointProvider, wrapper);
 	}
 
-	static class RestTemplateBuilderClientHttpRequestFactoryWrapper extends
-			AbstractClientHttpRequestFactoryWrapper {
+	static class RestTemplateBuilderClientHttpRequestFactoryWrapper
+			extends AbstractClientHttpRequestFactoryWrapper {
 
 		private final Map<String, String> defaultHeaders;
 

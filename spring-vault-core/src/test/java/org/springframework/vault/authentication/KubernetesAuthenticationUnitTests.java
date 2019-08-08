@@ -69,9 +69,8 @@ class KubernetesAuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("hello"))
 				.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
-				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
 				restTemplate);
@@ -108,9 +107,8 @@ class KubernetesAuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("hello"))
 				.andExpect(jsonPath("$.jwt").value("foo"))
-				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-								"{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
 				restTemplate);

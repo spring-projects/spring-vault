@@ -31,22 +31,19 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-abstract class CubbyholeAuthenticationIntegrationTestBase extends
-		IntegrationTestSupport {
+abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	Map<String, String> prepareWrappedToken() {
 
 		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
-				.doWithSession(
-						restOperations -> {
+				.doWithSession(restOperations -> {
 
-							HttpHeaders headers = new HttpHeaders();
-							headers.add("X-Vault-Wrap-TTL", "10m");
+					HttpHeaders headers = new HttpHeaders();
+					headers.add("X-Vault-Wrap-TTL", "10m");
 
-							return restOperations.exchange("auth/token/create",
-									HttpMethod.POST, new HttpEntity<Object>(headers),
-									VaultResponse.class);
-						});
+					return restOperations.exchange("auth/token/create", HttpMethod.POST,
+							new HttpEntity<Object>(headers), VaultResponse.class);
+				});
 
 		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
 

@@ -51,9 +51,11 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.h
  */
 public class ClientHttpConnectorFactory {
 
-	private static final boolean REACTOR_NETTY_PRESENT = isPresent("reactor.netty.http.client.HttpClient");
+	private static final boolean REACTOR_NETTY_PRESENT = isPresent(
+			"reactor.netty.http.client.HttpClient");
 
-	private static final boolean JETTY_PRESENT = isPresent("org.eclipse.jetty.client.HttpClient");
+	private static final boolean JETTY_PRESENT = isPresent(
+			"org.eclipse.jetty.client.HttpClient");
 
 	/**
 	 * Checks for presence of all {@code classNames} using this class' classloader.
@@ -106,8 +108,8 @@ public class ClientHttpConnectorFactory {
 		try {
 
 			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-				sslContextBuilder.trustManager(createTrustManagerFactory(sslConfiguration
-						.getTrustStoreConfiguration()));
+				sslContextBuilder.trustManager(createTrustManagerFactory(
+						sslConfiguration.getTrustStoreConfiguration()));
 			}
 
 			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
@@ -142,9 +144,9 @@ public class ClientHttpConnectorFactory {
 				});
 			}
 
-			client = client.tcpConfiguration(it -> it.option(
-					ChannelOption.CONNECT_TIMEOUT_MILLIS,
-					Math.toIntExact(options.getConnectionTimeout().toMillis())));
+			client = client.tcpConfiguration(
+					it -> it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+							Math.toIntExact(options.getConnectionTimeout().toMillis())));
 
 			return new ReactorClientHttpConnector(client);
 		}
@@ -155,8 +157,8 @@ public class ClientHttpConnectorFactory {
 				SslConfiguration sslConfiguration) {
 
 			try {
-				return new JettyClientHttpConnector(configureClient(
-						getHttpClient(sslConfiguration), options));
+				return new JettyClientHttpConnector(
+						configureClient(getHttpClient(sslConfiguration), options));
 			}
 			catch (GeneralSecurityException | IOException e) {
 				throw new IllegalStateException(e);
@@ -167,8 +169,8 @@ public class ClientHttpConnectorFactory {
 				org.eclipse.jetty.client.HttpClient httpClient, ClientOptions options) {
 
 			httpClient.setConnectTimeout(options.getConnectionTimeout().toMillis());
-			httpClient.setAddressResolutionTimeout(options.getConnectionTimeout()
-					.toMillis());
+			httpClient.setAddressResolutionTimeout(
+					options.getConnectionTimeout().toMillis());
 
 			return httpClient;
 		}
@@ -201,8 +203,8 @@ public class ClientHttpConnectorFactory {
 				}
 
 				if (keyConfiguration.getKeyPassword() != null) {
-					sslContextFactory.setKeyManagerPassword(new String(keyConfiguration
-							.getKeyPassword()));
+					sslContextFactory.setKeyManagerPassword(
+							new String(keyConfiguration.getKeyPassword()));
 				}
 
 				return new org.eclipse.jetty.client.HttpClient(sslContextFactory);

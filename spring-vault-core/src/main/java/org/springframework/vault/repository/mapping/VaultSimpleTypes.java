@@ -40,8 +40,8 @@ public abstract class VaultSimpleTypes {
 	}
 
 	private static final Set<Class<?>> VAULT_SIMPLE_TYPES;
-	public static final SimpleTypeHolder HOLDER = new SimpleTypeHolder(
-			VAULT_SIMPLE_TYPES, true);
+	public static final SimpleTypeHolder HOLDER = new SimpleTypeHolder(VAULT_SIMPLE_TYPES,
+			true);
 
 	private VaultSimpleTypes() {
 	}

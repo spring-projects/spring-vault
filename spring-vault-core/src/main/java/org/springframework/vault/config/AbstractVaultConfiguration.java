@@ -103,8 +103,9 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-		return new VaultTemplate(restTemplateBuilder(vaultEndpointProvider(),
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory()),
+		return new VaultTemplate(
+				restTemplateBuilder(vaultEndpointProvider(),
+						clientHttpRequestFactoryWrapper().getClientHttpRequestFactory()),
 				sessionManager());
 	}
 
@@ -201,8 +202,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public ClientFactoryWrapper clientHttpRequestFactoryWrapper() {
-		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory.create(
-				clientOptions(), sslConfiguration()));
+		return new ClientFactoryWrapper(ClientHttpRequestFactoryFactory
+				.create(clientOptions(), sslConfiguration()));
 	}
 
 	/**

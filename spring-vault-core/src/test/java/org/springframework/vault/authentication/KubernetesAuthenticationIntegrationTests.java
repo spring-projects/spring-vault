@@ -35,8 +35,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Michal Budzyn
  */
-class KubernetesAuthenticationIntegrationTests extends
-		KubernetesAuthenticationIntegrationTestBase {
+class KubernetesAuthenticationIntegrationTests
+		extends KubernetesAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldLoginSuccessfully() {
@@ -47,8 +47,8 @@ class KubernetesAuthenticationIntegrationTests extends
 				.builder().role("my-role")
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
 				restTemplate);
@@ -66,8 +66,8 @@ class KubernetesAuthenticationIntegrationTests extends
 				.builder().role("wrong")
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(
 				() -> new KubernetesAuthentication(options, restTemplate).login());
@@ -83,8 +83,8 @@ class KubernetesAuthenticationIntegrationTests extends
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenResource))
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(
 				() -> new KubernetesAuthentication(options, restTemplate).login());

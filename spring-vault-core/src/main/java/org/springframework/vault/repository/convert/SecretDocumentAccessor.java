@@ -44,7 +44,7 @@ class SecretDocumentAccessor {
 	 * Creates a new {@link SecretDocumentAccessor} for the given {@link SecretDocument}.
 	 *
 	 * @param document must be a {@link SecretDocument} effectively, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 */
 	SecretDocumentAccessor(SecretDocument document) {
 
@@ -59,7 +59,7 @@ class SecretDocumentAccessor {
 	 * and {@link Map body}.
 	 *
 	 * @param document must be a {@link SecretDocument} effectively, must not be
-	 * {@literal null}
+	 *     {@literal null}
 	 * @param body must not be {@literal null}.
 	 */
 	private SecretDocumentAccessor(SecretDocument document, Map<String, Object> body) {

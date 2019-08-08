@@ -64,8 +64,9 @@ public abstract class VaultResponses {
 					e.getRawStatusCode(), e.getStatusText(), message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s", e.getRawStatusCode(),
-				e.getStatusText()), e);
+		return new VaultException(
+				String.format("Status %s %s", e.getRawStatusCode(), e.getStatusText()),
+				e);
 	}
 
 	/**
@@ -86,17 +87,16 @@ public abstract class VaultResponses {
 					e.getRawStatusCode(), e.getStatusText(), path, message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s [%s]",
-				e.getRawStatusCode(), e.getStatusText(), path), e);
+		return new VaultException(String.format("Status %s %s [%s]", e.getRawStatusCode(),
+				e.getStatusText(), path), e);
 	}
 
 	public static VaultException buildException(HttpStatus statusCode, String path,
 			String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s [%s]: %s", statusCode,
-					path,
-					message));
+			return new VaultException(
+					String.format("Status %s [%s]: %s", statusCode, path, message));
 		}
 
 		return new VaultException(String.format("Status %s [%s]", statusCode, path));

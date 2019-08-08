@@ -30,8 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
  *
  * @author Mark Paluch
  */
-class ClientCertificateAuthenticationOperatorIntegrationTests extends
-		ClientCertificateAuthenticationIntegrationTestBase {
+class ClientCertificateAuthenticationOperatorIntegrationTests
+		extends ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
 	void authenticationStepsShouldLoginSuccessfully() {
@@ -51,9 +51,8 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 	@Test
 	void shouldSelectKey() {
 
-		WebClient webClient = TestWebClientFactory
-				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
-						.of("changeit".toCharArray(), "1")));
+		WebClient webClient = TestWebClientFactory.create(prepareCertAuthenticationMethod(
+				SslConfiguration.KeyConfiguration.of("changeit".toCharArray(), "1")));
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
@@ -67,9 +66,8 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 	@Test
 	void shouldSelectInvalidKey() {
 
-		WebClient webClient = TestWebClientFactory
-				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
-						.of("changeit".toCharArray(), "2")));
+		WebClient webClient = TestWebClientFactory.create(prepareCertAuthenticationMethod(
+				SslConfiguration.KeyConfiguration.of("changeit".toCharArray(), "2")));
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
@@ -81,10 +79,8 @@ class ClientCertificateAuthenticationOperatorIntegrationTests extends
 
 	@Test
 	void shouldProvideInvalidKeyPassword() {
-		assertThatIllegalStateException()
-				.isThrownBy(
-						() -> TestWebClientFactory
-								.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
-										.of("wrong".toCharArray(), "1"))));
+		assertThatIllegalStateException().isThrownBy(() -> TestWebClientFactory
+				.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
+						.of("wrong".toCharArray(), "1"))));
 	}
 }

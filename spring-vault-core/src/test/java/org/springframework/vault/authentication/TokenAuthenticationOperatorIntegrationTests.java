@@ -35,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-class TokenAuthenticationOperatorIntegrationTests extends
-		TokenAuthenticationIntegrationTestBase {
+class TokenAuthenticationOperatorIntegrationTests
+		extends TokenAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
@@ -52,20 +52,17 @@ class TokenAuthenticationOperatorIntegrationTests extends
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				TokenAuthentication.createAuthenticationSteps(token, true), webClient);
 
-		operator.getVaultToken()
-				.as(StepVerifier::create)
-				.consumeNextWith(
-						actual -> {
+		operator.getVaultToken().as(StepVerifier::create).consumeNextWith(actual -> {
 
-							assertThat(actual).isInstanceOf(LoginToken.class);
+			assertThat(actual).isInstanceOf(LoginToken.class);
 
-							LoginToken loginToken = (LoginToken) actual;
+			LoginToken loginToken = (LoginToken) actual;
 
-							assertThat(loginToken.getLeaseDuration()).isBetween(
-									Duration.ofSeconds(40), Duration.ofSeconds(60));
-							assertThat(loginToken.isRenewable()).isTrue();
+			assertThat(loginToken.getLeaseDuration()).isBetween(Duration.ofSeconds(40),
+					Duration.ofSeconds(60));
+			assertThat(loginToken.isRenewable()).isTrue();
 
-						}).verifyComplete();
+		}).verifyComplete();
 	}
 
 	@Test

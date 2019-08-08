@@ -39,10 +39,11 @@ class VaultVersionExtension implements ExecutionCondition {
 			.enabled("@VaultVersion is not present");
 
 	@Override
-	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+	public ConditionEvaluationResult evaluateExecutionCondition(
+			ExtensionContext context) {
 
-		Optional<RequiresVaultVersion> optional = AnnotationUtils.findAnnotation(
-				context.getElement(), RequiresVaultVersion.class);
+		Optional<RequiresVaultVersion> optional = AnnotationUtils
+				.findAnnotation(context.getElement(), RequiresVaultVersion.class);
 
 		if (!optional.isPresent()) {
 			return ENABLED_BY_DEFAULT;

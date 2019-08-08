@@ -91,8 +91,8 @@ class EnvironmentVaultConfigurationUnitTests {
 
 		assertThat(sslConfiguration.getTrustStore())
 				.isInstanceOf(ClassPathResource.class);
-		assertThat(sslConfiguration.getTrustStorePassword()).isEqualTo(
-				"trust store password");
+		assertThat(sslConfiguration.getTrustStorePassword())
+				.isEqualTo("trust store password");
 
 		configurableEnvironment.getPropertySources().remove(propertySource.getName());
 	}

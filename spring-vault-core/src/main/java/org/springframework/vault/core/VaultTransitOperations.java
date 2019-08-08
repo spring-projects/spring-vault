@@ -143,7 +143,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @param transitRequest must not be {@literal null}. Use
-	 * {@link VaultTransitContext#empty()} if no request options provided.
+	 *     {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 */
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
@@ -154,7 +154,7 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
-	 * optional context.
+	 *     optional context.
 	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
 	 * @since 1.1
 	 */
@@ -185,7 +185,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitContext must not be {@literal null}. Use
-	 * {@link VaultTransitContext#empty()} if no request options provided.
+	 *     {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 * @return plain text.
 	 */
@@ -198,7 +198,7 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
-	 * optional context.
+	 *     optional context.
 	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
 	 * @since 1.1
 	 */
@@ -224,7 +224,7 @@ public interface VaultTransitOperations {
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitContext must not be {@literal null}. Use
-	 * {@link VaultTransitContext#empty()} if no request options provided.
+	 *     {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 * @see #rotate(String)
 	 */
@@ -299,7 +299,7 @@ public interface VaultTransitOperations {
 	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param request {@link VaultSignatureVerificationRequest} must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 * @return the resulting {@link SignatureValidation}.
 	 * @since 2.0
 	 */

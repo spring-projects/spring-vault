@@ -51,31 +51,28 @@ class KeyValueDelegateUnitTests {
 	@Test
 	void shouldConsiderKeyValueVersion() {
 
-		assertThat(
-				MountInfo.from("foo", Collections.singletonMap("version", "1"))
-						.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
-				.isTrue();
+		assertThat(MountInfo.from("foo", Collections.singletonMap("version", "1"))
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
+						.isTrue();
 
-		assertThat(
-				MountInfo.from("foo", Collections.singletonMap("version", 1)).isKeyValue(
-						VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)).isTrue();
+		assertThat(MountInfo.from("foo", Collections.singletonMap("version", 1))
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
+						.isTrue();
 
-		assertThat(
-				MountInfo.from("foo", Collections.singletonMap("version", "2"))
-						.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_2))
-				.isTrue();
+		assertThat(MountInfo.from("foo", Collections.singletonMap("version", "2"))
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_2))
+						.isTrue();
 
-		assertThat(
-				MountInfo.from("foo", Collections.singletonMap("version", 2)).isKeyValue(
-						VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)).isFalse();
+		assertThat(MountInfo.from("foo", Collections.singletonMap("version", 2))
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
+						.isFalse();
 
-		assertThat(
-				MountInfo.from("foo", Collections.singletonMap("version", "2"))
-						.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
-				.isFalse();
+		assertThat(MountInfo.from("foo", Collections.singletonMap("version", "2"))
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
+						.isFalse();
 
-		assertThat(
-				MountInfo.from("foo", Collections.emptyMap()).isKeyValue(
-						VaultKeyValueOperationsSupport.KeyValueBackend.KV_1)).isFalse();
+		assertThat(MountInfo.from("foo", Collections.emptyMap())
+				.isKeyValue(VaultKeyValueOperationsSupport.KeyValueBackend.KV_1))
+						.isFalse();
 	}
 }

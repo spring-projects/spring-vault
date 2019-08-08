@@ -78,13 +78,14 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
-		String cert = Files.contentOf(
-				new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
-		String key = Files.contentOf(new File(workDir,
-				"ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
+		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"),
+				"US-ASCII");
+		String key = Files.contentOf(
+				new File(workDir, "ca/private/intermediate.decrypted.key.pem"),
+				"US-ASCII");
 
-		Map<String, String> pembundle = Collections
-				.singletonMap("pem_bundle", cert + key);
+		Map<String, String> pembundle = Collections.singletonMap("pem_bundle",
+				cert + key);
 
 		vaultOperations.write("pki/config/ca", pembundle);
 
@@ -104,8 +105,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest
 				.create("hello.example.com");
 
-		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
-				"testrole", request);
+		VaultCertificateResponse certificateResponse = pkiOperations
+				.issueCertificate("testrole", request);
 
 		CertificateBundle data = certificateResponse.getRequiredData();
 
@@ -124,16 +125,16 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
 				.ttl(Duration.ofHours(48)).commonName("hello.example.com").build();
 
-		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
-				"testrole", request);
+		VaultCertificateResponse certificateResponse = pkiOperations
+				.issueCertificate("testrole", request);
 
 		X509Certificate certificate = certificateResponse.getRequiredData()
 				.getX509Certificate();
 
 		Instant now = Instant.now();
-		assertThat(certificate.getNotAfter()).isAfter(
-				Date.from(now.plus(40, ChronoUnit.HOURS))).isBefore(
-				Date.from(now.plus(50, ChronoUnit.HOURS)));
+		assertThat(certificate.getNotAfter())
+				.isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
+				.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
 	}
 
 	@Test
@@ -178,8 +179,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> pkiOperations.issueCertificate("testrole", request));
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> pkiOperations.issueCertificate("testrole", request));
 	}
 
 	@Test
@@ -188,8 +189,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest
 				.create("foo.example.com");
 
-		VaultCertificateResponse certificateResponse = pkiOperations.issueCertificate(
-				"testrole", request);
+		VaultCertificateResponse certificateResponse = pkiOperations
+				.issueCertificate("testrole", request);
 
 		BigInteger serial = new BigInteger(certificateResponse.getRequiredData()
 				.getSerialNumber().replaceAll("\\:", ""), 16);

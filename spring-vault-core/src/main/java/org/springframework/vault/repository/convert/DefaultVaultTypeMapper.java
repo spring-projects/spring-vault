@@ -116,8 +116,8 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	 *
 	 * @author Mark Paluch
 	 */
-	static class SecretDocumentTypeAliasAccessor implements
-			TypeAliasAccessor<Map<String, Object>> {
+	static class SecretDocumentTypeAliasAccessor
+			implements TypeAliasAccessor<Map<String, Object>> {
 
 		private final @Nullable String typeKey;
 

@@ -179,17 +179,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @return the {@link RestTemplate} used for Vault communication.
 	 * @since 2.1
 	 */
-	protected RestTemplate doCreateSessionTemplate(
-			VaultEndpointProvider endpointProvider,
+	protected RestTemplate doCreateSessionTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		return RestTemplateBuilder
-				.builder()
-				.endpointProvider(endpointProvider)
-				.requestFactory(requestFactory)
-				.customizer(
-						restTemplate -> restTemplate.getInterceptors().add(
-								getSessionInterceptor())).build();
+		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
+				.requestFactory(requestFactory).customizer(restTemplate -> restTemplate
+						.getInterceptors().add(getSessionInterceptor()))
+				.build();
 	}
 
 	private ClientHttpRequestInterceptor getSessionInterceptor() {
@@ -231,7 +227,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
+	public VaultKeyValueOperations opsForKeyValue(String path,
+			KeyValueBackend apiVersion) {
 
 		switch (apiVersion) {
 		case KV_1:
@@ -240,8 +237,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			return new VaultKeyValue2Template(this, path);
 		}
 
-		throw new UnsupportedOperationException(String.format(
-				"Key/Value backend version %s not supported", apiVersion));
+		throw new UnsupportedOperationException(
+				String.format("Key/Value backend version %s not supported", apiVersion));
 
 	}
 
@@ -301,8 +298,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 				.getTypeReference(responseType);
 
 		try {
-			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate.exchange(
-					path, HttpMethod.GET, null, ref);
+			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate
+					.exchange(path, HttpMethod.GET, null, ref);
 
 			return exchange.getBody();
 		}

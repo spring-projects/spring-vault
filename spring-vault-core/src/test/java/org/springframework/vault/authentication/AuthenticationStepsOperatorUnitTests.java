@@ -76,13 +76,13 @@ class AuthenticationStepsOperatorUnitTests {
 		response.setBody("{"
 				+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 				+ "}");
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(
-				Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
+				.then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector).build();
 
-		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
-				"cert").as(VaultResponse.class));
+		AuthenticationSteps steps = AuthenticationSteps
+				.just(post("/auth/{path}/login", "cert").as(VaultResponse.class));
 
 		login(steps, webClient).as(StepVerifier::create) //
 				.expectNext(VaultToken.of("my-token")) //
@@ -96,13 +96,13 @@ class AuthenticationStepsOperatorUnitTests {
 				"/auth/cert/login");
 		MockClientHttpResponse response = new MockClientHttpResponse(
 				HttpStatus.BAD_REQUEST);
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(
-				Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
+				.then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector).build();
 
-		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
-				"cert").as(VaultResponse.class));
+		AuthenticationSteps steps = AuthenticationSteps
+				.just(post("/auth/{path}/login", "cert").as(VaultResponse.class));
 
 		login(steps, webClient).as(StepVerifier::create) //
 				.expectError() //
@@ -135,15 +135,14 @@ class AuthenticationStepsOperatorUnitTests {
 
 		WebClient webClient = WebClient.builder().clientConnector(connector).build();
 
-		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post(
-				"/auth/login/left").as(VaultResponse.class));
+		Node<VaultResponse> left = AuthenticationSteps
+				.fromHttpRequest(post("/auth/login/left").as(VaultResponse.class));
 
-		Node<VaultResponse> right = AuthenticationSteps.fromHttpRequest(post(
-				"/auth/login/right").as(VaultResponse.class));
+		Node<VaultResponse> right = AuthenticationSteps
+				.fromHttpRequest(post("/auth/login/right").as(VaultResponse.class));
 
-		AuthenticationSteps steps = left.zipWith(right).login(
-				it -> VaultToken.of(it.getLeft().getRequestId() + "-"
-						+ it.getRight().getRequestId()));
+		AuthenticationSteps steps = left.zipWith(right).login(it -> VaultToken
+				.of(it.getLeft().getRequestId() + "-" + it.getRight().getRequestId()));
 
 		login(steps, webClient).as(StepVerifier::create) //
 				.expectNext(VaultToken.of("left-right")) //

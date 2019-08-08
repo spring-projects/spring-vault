@@ -36,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Mark Paluch
  */
-class ClientCertificateAuthenticationStepsIntegrationTests extends
-		ClientCertificateAuthenticationIntegrationTestBase {
+class ClientCertificateAuthenticationStepsIntegrationTests
+		extends ClientCertificateAuthenticationIntegrationTestBase {
 
 	@Test
 	void authenticationStepsShouldLoginSuccessfully() {
@@ -49,7 +49,8 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate);
+				ClientCertificateAuthentication.createAuthenticationSteps(),
+				restTemplate);
 
 		VaultToken login = executor.login();
 
@@ -66,8 +67,9 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends
 		RestTemplate restTemplate = VaultClients.createRestTemplate(
 				TestRestTemplateFactory.TEST_VAULT_ENDPOINT, clientHttpRequestFactory);
 
-		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
-				() -> new AuthenticationStepsExecutor(ClientCertificateAuthentication
-						.createAuthenticationSteps(), restTemplate).login());
+		assertThatExceptionOfType(NestedRuntimeException.class)
+				.isThrownBy(() -> new AuthenticationStepsExecutor(
+						ClientCertificateAuthentication.createAuthenticationSteps(),
+						restTemplate).login());
 	}
 }

@@ -33,8 +33,8 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Mark Paluch
  */
-class CubbyholeAuthenticationIntegrationTests extends
-		CubbyholeAuthenticationIntegrationTestBase {
+class CubbyholeAuthenticationIntegrationTests
+		extends CubbyholeAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldCreateWrappedToken() {
@@ -45,8 +45,8 @@ class CubbyholeAuthenticationIntegrationTests extends
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
 				restTemplate);
@@ -60,8 +60,8 @@ class CubbyholeAuthenticationIntegrationTests extends
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
 				restTemplate);
 

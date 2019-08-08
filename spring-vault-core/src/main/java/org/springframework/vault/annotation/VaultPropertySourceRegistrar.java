@@ -73,16 +73,14 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		ConfigurableEnvironment env = beanFactory.getBean(ConfigurableEnvironment.class);
 		MutablePropertySources propertySources = env.getPropertySources();
 
-		registerPropertySources(
-				beanFactory.getBeansOfType(
+		registerPropertySources(beanFactory
+				.getBeansOfType(
 						org.springframework.vault.core.env.VaultPropertySource.class)
-						.values(), propertySources);
+				.values(), propertySources);
 
-		registerPropertySources(
-				beanFactory
-						.getBeansOfType(
-								org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class)
-						.values(), propertySources);
+		registerPropertySources(beanFactory.getBeansOfType(
+				org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class)
+				.values(), propertySources);
 	}
 
 	private void registerPropertySources(
@@ -134,8 +132,9 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 					"'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
 
 			PropertyTransformer propertyTransformer = StringUtils
-					.hasText(propertyNamePrefix) ? PropertyTransformers
-					.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
+					.hasText(propertyNamePrefix)
+							? PropertyTransformers.propertyNamePrefix(propertyNamePrefix)
+							: PropertyTransformers.noop();
 
 			for (String propertyPath : paths) {
 
@@ -143,8 +142,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 					continue;
 				}
 
-				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref,
-						renewal, propertyTransformer,
+				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref, renewal,
+						propertyTransformer,
 						potentiallyResolveRequiredPlaceholders(propertyPath));
 
 				do {
@@ -163,8 +162,9 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 	}
 
 	private String potentiallyResolveRequiredPlaceholders(String expression) {
-		return this.environment != null ? this.environment
-				.resolveRequiredPlaceholders(expression) : expression;
+		return this.environment != null
+				? this.environment.resolveRequiredPlaceholders(expression)
+				: expression;
 	}
 
 	private AbstractBeanDefinition createBeanDefinition(String ref, Renewal renewal,
@@ -173,19 +173,20 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		BeanDefinitionBuilder builder;
 
 		if (isRenewable(renewal)) {
-			builder = BeanDefinitionBuilder
-					.rootBeanDefinition(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
+			builder = BeanDefinitionBuilder.rootBeanDefinition(
+					org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
 
-			RequestedSecret requestedSecret = renewal == Renewal.ROTATE ? RequestedSecret
-					.rotating(propertyPath) : RequestedSecret.renewable(propertyPath);
+			RequestedSecret requestedSecret = renewal == Renewal.ROTATE
+					? RequestedSecret.rotating(propertyPath)
+					: RequestedSecret.renewable(propertyPath);
 
 			builder.addConstructorArgValue(propertyPath);
 			builder.addConstructorArgReference("secretLeaseContainer");
 			builder.addConstructorArgValue(requestedSecret);
 		}
 		else {
-			builder = BeanDefinitionBuilder
-					.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
+			builder = BeanDefinitionBuilder.rootBeanDefinition(
+					org.springframework.vault.core.env.VaultPropertySource.class);
 
 			builder.addConstructorArgValue(propertyPath);
 			builder.addConstructorArgReference(ref);
@@ -210,8 +211,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		addAttributesIfNotNull(result,
 				metadata.getAnnotationAttributes(annotationClassName, false));
 
-		Map<String, Object> container = metadata.getAnnotationAttributes(
-				containerClassName, false);
+		Map<String, Object> container = metadata
+				.getAnnotationAttributes(containerClassName, false);
 		if (container != null && container.containsKey("value")) {
 			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container
 					.get("value")) {

@@ -29,8 +29,8 @@ import org.springframework.util.StringUtils;
  * @since 2.1
  * @see GcpIamAuthentication
  */
-enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor,
-		GcpServiceAccountIdAccessor {
+enum DefaultGcpCredentialAccessors
+		implements GcpProjectIdAccessor, GcpServiceAccountIdAccessor {
 
 	INSTANCE;
 
@@ -44,8 +44,7 @@ enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor,
 	public String getServiceAccountId(GoogleCredential credential) {
 
 		Assert.notNull(credential, "GoogleCredential must not be null");
-		Assert.notNull(
-				credential.getServiceAccountId(),
+		Assert.notNull(credential.getServiceAccountId(),
 				"The configured GoogleCredential does not represent a service account. Configure the service account id with GcpIamAuthenticationOptionsBuilder#serviceAccountId(String).");
 
 		return credential.getServiceAccountId();

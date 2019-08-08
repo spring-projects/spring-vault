@@ -49,9 +49,8 @@ class PolicySerializationUnitTests {
 
 		Rule another = Rule.builder().path("secret/foo")
 				.capabilities("create", "read", "update", "delete", "list")
-				.minWrappingTtl(Duration.ofMinutes(1))
-				.maxWrappingTtl(Duration.ofHours(1)).allowedParameter("ttl", "1h", "2h")
-				.deniedParameter("password").build();
+				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
+				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
 
 		Policy policy = Policy.of(rule, another);
 
@@ -72,9 +71,9 @@ class PolicySerializationUnitTests {
 
 		Rule another = Rule.builder().path("secret/foo")
 				.capabilities("create", "read", "update", "delete", "list")
-				.minWrappingTtl(Duration.ofMinutes(1))
-				.maxWrappingTtl(Duration.ofHours(1)).allowedParameter("ttl", "1h", "2h")
-				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
+				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
+				.allowedParameter("ttl", "1h", "2h").allowedParameter("ttl", "1h", "2h")
+				.deniedParameter("password").build();
 
 		Policy expected = Policy.of(rule, another);
 
@@ -88,23 +87,23 @@ class PolicySerializationUnitTests {
 
 			assertThat(secretAll.getPath()).isEqualTo(rule.getPath());
 			assertThat(secretAll.getCapabilities()).isEqualTo(rule.getCapabilities());
-			assertThat(secretAll.getAllowedParameters()).isEqualTo(
-					rule.getAllowedParameters());
-			assertThat(secretAll.getDeniedParameters()).isEqualTo(
-					rule.getDeniedParameters());
+			assertThat(secretAll.getAllowedParameters())
+					.isEqualTo(rule.getAllowedParameters());
+			assertThat(secretAll.getDeniedParameters())
+					.isEqualTo(rule.getDeniedParameters());
 
 			Rule secretFoo = actual.getRule("secret/foo");
 
 			assertThat(secretFoo.getPath()).isEqualTo(another.getPath());
 			assertThat(secretFoo.getCapabilities()).isEqualTo(another.getCapabilities());
-			assertThat(secretFoo.getMinWrappingTtl()).isEqualTo(
-					another.getMinWrappingTtl());
-			assertThat(secretFoo.getMaxWrappingTtl()).isEqualTo(
-					another.getMaxWrappingTtl());
-			assertThat(secretFoo.getAllowedParameters()).isEqualTo(
-					another.getAllowedParameters());
-			assertThat(secretFoo.getDeniedParameters()).isEqualTo(
-					another.getDeniedParameters());
+			assertThat(secretFoo.getMinWrappingTtl())
+					.isEqualTo(another.getMinWrappingTtl());
+			assertThat(secretFoo.getMaxWrappingTtl())
+					.isEqualTo(another.getMaxWrappingTtl());
+			assertThat(secretFoo.getAllowedParameters())
+					.isEqualTo(another.getAllowedParameters());
+			assertThat(secretFoo.getDeniedParameters())
+					.isEqualTo(another.getDeniedParameters());
 		}
 	}
 
@@ -117,10 +116,8 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldRejectUnknownFieldNames() throws Exception {
 
-		assertThatIllegalArgumentException()
-				.isThrownBy(
-						() -> OBJECT_MAPPER.readValue("{\"foo\":1, \"path\": {} }",
-								Policy.class));
+		assertThatIllegalArgumentException().isThrownBy(() -> OBJECT_MAPPER
+				.readValue("{\"foo\":1, \"path\": {} }", Policy.class));
 		assertThatIllegalArgumentException().isThrownBy(
 				() -> OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
 	}

@@ -40,8 +40,8 @@ class CertificateBundleUnitTests {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = OBJECT_MAPPER.readValue(
-				getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = OBJECT_MAPPER
+				.readValue(getClass().getResource("/certificate.json"), Map.class);
 
 		certificateBundle = CertificateBundle.of(data.get("serial_number"),
 				data.get("certificate"), data.get("issuing_ca"), data.get("private_key"));

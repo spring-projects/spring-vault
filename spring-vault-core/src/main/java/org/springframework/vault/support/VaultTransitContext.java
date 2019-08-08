@@ -124,7 +124,7 @@ public class VaultTransitContext {
 		 * Configure a key derivation context for the {@code transit} operation.
 		 *
 		 * @param context key derivation context, provided as a binary data. Must be
-		 * provided if derivation is enabled.
+		 *     provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitRequestBuilder context(byte[] context) {
@@ -141,8 +141,8 @@ public class VaultTransitContext {
 		 * Vault 0.6.1. Not required for keys created in 0.6.2+.
 		 *
 		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must
-		 * ensure that for any given context (and thus, any given encryption key) this
-		 * nonce value is never reused
+		 *     ensure that for any given context (and thus, any given encryption key) this
+		 *     nonce value is never reused
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitRequestBuilder nonce(byte[] nonce) {

@@ -72,7 +72,8 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+		public Map<String, Object> transformProperties(
+				Map<String, ? extends Object> input) {
 			return (Map) input;
 		}
 	}
@@ -95,10 +96,10 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+		public Map<String, Object> transformProperties(
+				Map<String, ? extends Object> input) {
 
-			Map<String, Object> target = new LinkedHashMap<>(input.size(),
-					1);
+			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
 
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 
@@ -131,7 +132,7 @@ public abstract class PropertyTransformers {
 		 * Create a new {@link KeyPrefixPropertyTransformer} that adds a prefix to each
 		 * key name.
 		 * @param propertyNamePrefix the property name prefix to be added in front of each
-		 * property name, must not be {@literal null}.
+		 *     property name, must not be {@literal null}.
 		 * @return a new {@link KeyPrefixPropertyTransformer} that adds a prefix to each
 		 * key name.
 		 */
@@ -140,10 +141,10 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
-		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+		public Map<String, Object> transformProperties(
+				Map<String, ? extends Object> input) {
 
-			Map<String, Object> target = new LinkedHashMap<>(input.size(),
-					1);
+			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
 
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 				target.put(propertyNamePrefix + entry.getKey(), entry.getValue());

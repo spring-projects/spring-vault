@@ -56,7 +56,8 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	 * @param delegate must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public LoginTokenAdapter(ClientAuthentication delegate, RestOperations restOperations) {
+	public LoginTokenAdapter(ClientAuthentication delegate,
+			RestOperations restOperations) {
 
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -94,8 +95,8 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 		try {
 			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					"auth/token/lookup-self", HttpMethod.GET, new HttpEntity<>(
-							VaultHttpHeaders.from(token)), VaultResponse.class);
+					"auth/token/lookup-self", HttpMethod.GET,
+					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
 
 			Assert.state(entity.getBody() != null && entity.getBody().getData() != null,
 					"Token response is null");
@@ -103,9 +104,9 @@ public class LoginTokenAdapter implements ClientAuthentication {
 			return entity.getBody().getData();
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultTokenLookupException(String.format(
-					"Token self-lookup failed: %s %s", e.getRawStatusCode(),
-					VaultResponses.getError(e.getResponseBodyAsString())));
+			throw new VaultTokenLookupException(
+					String.format("Token self-lookup failed: %s %s", e.getRawStatusCode(),
+							VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 		catch (RestClientException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed", e);

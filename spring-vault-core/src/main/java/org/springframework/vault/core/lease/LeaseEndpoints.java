@@ -118,9 +118,9 @@ public enum LeaseEndpoints {
 		Number leaseDuration = (Number) body.get("lease_duration");
 		boolean renewable = (Boolean) body.get("renewable");
 
-		return Lease
-				.of(leaseId, Duration.ofSeconds(leaseDuration != null ? leaseDuration
-						.longValue() : 0), renewable);
+		return Lease.of(leaseId,
+				Duration.ofSeconds(leaseDuration != null ? leaseDuration.longValue() : 0),
+				renewable);
 	}
 
 	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {

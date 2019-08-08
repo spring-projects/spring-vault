@@ -37,8 +37,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
-abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
-		IntegrationTestSupport {
+abstract class AbstractVaultKeyValueTemplateIntegrationTests
+		extends IntegrationTestSupport {
 
 	private final String path;
 
@@ -49,7 +49,8 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 
 	VaultKeyValueOperations kvOperations;
 
-	AbstractVaultKeyValueTemplateIntegrationTests(String path, KeyValueBackend apiVersion) {
+	AbstractVaultKeyValueTemplateIntegrationTests(String path,
+			KeyValueBackend apiVersion) {
 		this.path = path;
 		this.apiVersion = apiVersion;
 	}
@@ -104,8 +105,8 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests extends
 
 		kvOperations.put("my-secret", person);
 
-		assertThat(kvOperations.get("my-secret").getRequiredData()).containsEntry(
-				"firstname", "Walter");
+		assertThat(kvOperations.get("my-secret").getRequiredData())
+				.containsEntry("firstname", "Walter");
 		assertThat(kvOperations.get("my-secret", Person.class).getRequiredData())
 				.isEqualTo(person);
 	}

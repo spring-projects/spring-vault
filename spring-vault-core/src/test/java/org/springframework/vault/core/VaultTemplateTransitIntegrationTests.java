@@ -101,8 +101,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncrypt() {
 
-		VaultResponse response = vaultOperations.write(
-				"transit/encrypt/mykey",
+		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
 						Base64.encodeBase64String("that message is secret".getBytes())));
 
@@ -112,13 +111,11 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncryptAndDecrypt() {
 
-		VaultResponse response = vaultOperations.write(
-				"transit/encrypt/mykey",
+		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
 				Collections.singletonMap("plaintext",
 						Base64.encodeBase64String("that message is secret".getBytes())));
 
-		VaultResponse decrypted = vaultOperations.write(
-				"transit/decrypt/mykey",
+		VaultResponse decrypted = vaultOperations.write("transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext",
 						response.getRequiredData().get("ciphertext")));
 

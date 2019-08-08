@@ -23,8 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.keyvalue.core.KeyValueOperations;
 import org.springframework.data.keyvalue.repository.config.QueryCreatorType;
 import org.springframework.data.repository.config.DefaultRepositoryBaseClass;

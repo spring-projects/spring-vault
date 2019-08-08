@@ -68,8 +68,8 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			transit.configureKey(keyName, VaultTransitKeyConfiguration.builder()
-					.deletionAllowed(true).build());
+			transit.configureKey(keyName,
+					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}

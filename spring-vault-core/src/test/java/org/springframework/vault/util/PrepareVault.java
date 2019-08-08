@@ -28,9 +28,9 @@ import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
+import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -76,13 +76,13 @@ public class PrepareVault {
 		int createKeys = 2;
 		int requiredKeys = 2;
 
-		VaultInitializationResponse initialized = vaultOperations.opsForSys().initialize(
-				VaultInitializationRequest.create(createKeys, requiredKeys));
+		VaultInitializationResponse initialized = vaultOperations.opsForSys()
+				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 
-			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys().unseal(
-					initialized.getKeys().get(i));
+			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys()
+					.unseal(initialized.getKeys().get(i));
 
 			if (!unsealStatus.isSealed()) {
 				break;
@@ -107,8 +107,8 @@ public class PrepareVault {
 			builder.withPolicy(policy);
 		}
 
-		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken().create(
-				builder.build());
+		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken()
+				.create(builder.build());
 		return vaultTokenResponse.getToken();
 	}
 
@@ -162,7 +162,8 @@ public class PrepareVault {
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	private void mountSecret(String secretBackend, String path, Map<String, Object> config) {
+	private void mountSecret(String secretBackend, String path,
+			Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
@@ -223,10 +224,8 @@ public class PrepareVault {
 	public void mountVersionedKvBackend() {
 
 		mountSecret("kv", "versioned", Collections.emptyMap());
-		vaultOperations.write(
-				"sys/mounts/versioned/tune",
-				Collections.singletonMap("options",
-						Collections.singletonMap("version", "2")));
+		vaultOperations.write("sys/mounts/versioned/tune", Collections
+				.singletonMap("options", Collections.singletonMap("version", "2")));
 	}
 
 	public VaultOperations getVaultOperations() {

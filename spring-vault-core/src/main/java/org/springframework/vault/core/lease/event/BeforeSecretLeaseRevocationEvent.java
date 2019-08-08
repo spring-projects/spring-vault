@@ -36,7 +36,8 @@ public class BeforeSecretLeaseRevocationEvent extends SecretLeaseEvent {
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
-	public BeforeSecretLeaseRevocationEvent(RequestedSecret requestedSecret, Lease lease) {
+	public BeforeSecretLeaseRevocationEvent(RequestedSecret requestedSecret,
+			Lease lease) {
 		super(requestedSecret, lease);
 	}
 }

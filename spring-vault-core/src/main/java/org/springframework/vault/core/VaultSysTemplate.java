@@ -45,11 +45,11 @@ import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
 import org.springframework.vault.support.VaultInitializationResponse;
 import org.springframework.vault.support.VaultMount;
+import org.springframework.vault.support.VaultMount.VaultMountBuilder;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.vault.support.VaultMount.VaultMountBuilder;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 
@@ -118,14 +118,15 @@ public class VaultSysTemplate implements VaultSysOperations {
 	public VaultInitializationResponse initialize(
 			VaultInitializationRequest vaultInitializationRequest) {
 
-		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
+		Assert.notNull(vaultInitializationRequest,
+				"VaultInitialization must not be null");
 
 		return requireResponse(vaultOperations.doWithVault(restOperations -> {
 
 			try {
 				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
-						.exchange("sys/init", HttpMethod.PUT, new HttpEntity<Object>(
-								vaultInitializationRequest),
+						.exchange("sys/init", HttpMethod.PUT,
+								new HttpEntity<Object>(vaultInitializationRequest),
 								VaultInitializationResponseImpl.class);
 
 				Assert.state(exchange.getBody() != null,
@@ -298,8 +299,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return response;
 	}
 
-	private static class GetUnsealStatus implements
-			RestOperationsCallback<VaultUnsealStatus> {
+	private static class GetUnsealStatus
+			implements RestOperationsCallback<VaultUnsealStatus> {
 
 		@Override
 		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
@@ -318,8 +319,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class GetMounts implements
-			RestOperationsCallback<Map<String, VaultMount>> {
+	private static class GetMounts
+			implements RestOperationsCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
@@ -331,7 +332,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 		@Override
-		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
+		public Map<String, VaultMount> doWithRestOperations(
+				RestOperations restOperations) {
 
 			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(path,
 					HttpMethod.GET, null, MOUNT_TYPE_REF, Collections.emptyMap());
@@ -347,8 +349,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return body.getTopLevelMounts();
 		}
 
-		private static class VaultMountsResponse extends
-				VaultResponseSupport<Map<String, VaultMount>> {
+		private static class VaultMountsResponse
+				extends VaultResponseSupport<Map<String, VaultMount>> {
 
 			private Map<String, VaultMount> topLevelMounts = new HashMap<>();
 

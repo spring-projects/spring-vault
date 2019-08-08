@@ -40,8 +40,8 @@ import org.springframework.vault.support.VaultToken;
  * @author Mark Paluch
  * @since 2.0
  */
-public abstract class LifecycleAwareSessionManagerSupport extends
-		AuthenticationEventPublisher {
+public abstract class LifecycleAwareSessionManagerSupport
+		extends AuthenticationEventPublisher {
 
 	/**
 	 * Refresh 5 seconds before the token expires.
@@ -125,7 +125,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends
 	 * token is renewable and its TTL.
 	 *
 	 * @param tokenSelfLookupEnabled {@literal true} to enable self-lookup,
-	 * {@literal false} to disable self-lookup. Enabled by default.
+	 *     {@literal false} to disable self-lookup. Enabled by default.
 	 */
 	public void setTokenSelfLookupEnabled(boolean tokenSelfLookupEnabled) {
 		this.tokenSelfLookupEnabled = tokenSelfLookupEnabled;
@@ -260,8 +260,8 @@ public abstract class LifecycleAwareSessionManagerSupport extends
 		 *
 		 * @param timeout timeout value.
 		 * @param validTtlThreshold minimum TTL duration to consider a Token as valid.
-		 * Tokens with a shorter TTL are not used anymore. Should be greater than
-		 * {@code timeout} to prevent token expiry.
+		 *     Tokens with a shorter TTL are not used anymore. Should be greater than
+		 *     {@code timeout} to prevent token expiry.
 		 * @since 2.0
 		 */
 		public FixedTimeoutRefreshTrigger(Duration timeout, Duration validTtlThreshold) {
@@ -278,8 +278,8 @@ public abstract class LifecycleAwareSessionManagerSupport extends
 		@Override
 		public Date nextExecutionTime(LoginToken loginToken) {
 
-			long milliseconds = Math.max(ONE_SECOND.toMillis(), loginToken
-					.getLeaseDuration().toMillis() - duration.toMillis());
+			long milliseconds = Math.max(ONE_SECOND.toMillis(),
+					loginToken.getLeaseDuration().toMillis() - duration.toMillis());
 
 			return new Date(System.currentTimeMillis() + milliseconds);
 		}

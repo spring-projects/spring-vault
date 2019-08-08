@@ -42,8 +42,8 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
-public class KubernetesAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class KubernetesAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(KubernetesAuthentication.class);
 
@@ -81,16 +81,16 @@ public class KubernetesAuthentication implements ClientAuthentication,
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 
 		String token = options.getJwtSupplier().get();
-		return AuthenticationSteps.fromSupplier(
-				() -> getKubernetesLogin(options.getRole(), token)) //
+		return AuthenticationSteps
+				.fromSupplier(() -> getKubernetesLogin(options.getRole(), token)) //
 				.login("auth/{mount}/login", options.getPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		Map<String, String> login = getKubernetesLogin(options.getRole(), options
-				.getJwtSupplier().get());
+		Map<String, String> login = getKubernetesLogin(options.getRole(),
+				options.getJwtSupplier().get());
 
 		try {
 			VaultResponse response = restOperations.postForObject("auth/{mount}/login",

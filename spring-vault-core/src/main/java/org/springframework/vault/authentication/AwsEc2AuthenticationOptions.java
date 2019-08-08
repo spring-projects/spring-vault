@@ -203,7 +203,8 @@ public class AwsEc2AuthenticationOptions {
 
 			Assert.notNull(identityDocumentUri, "IdentityDocumentUri must not be null");
 
-			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role, nonce);
+			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role,
+					nonce);
 		}
 	}
 

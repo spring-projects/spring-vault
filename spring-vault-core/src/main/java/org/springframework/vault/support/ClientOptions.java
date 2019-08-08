@@ -50,9 +50,9 @@ public class ClientOptions {
 	 * Create new {@link ClientOptions}.
 	 *
 	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must
-	 * not be negative.
+	 *     not be negative.
 	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must not be
-	 * negative.
+	 *     negative.
 	 * @deprecated since 2.0, use {@link #ClientOptions(Duration, Duration)} for time unit
 	 * safety.
 	 */

@@ -59,19 +59,15 @@ class AwsIamAuthenticationUnitTests {
 	@Test
 	void shouldAuthenticate() {
 
-		mockRest.expect(requestTo("/auth/aws/login"))
-				.andExpect(method(HttpMethod.POST))
+		mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
 				.andExpect(jsonPath("$.iam_request_url").exists())
 				.andExpect(jsonPath("$.iam_request_body").exists())
 				.andExpect(jsonPath("$.iam_request_headers").exists())
 				.andExpect(jsonPath("$.role").value("foo-role"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
 				.role("foo-role").credentials(new BasicAWSCredentials("foo", "bar"))
@@ -82,27 +78,23 @@ class AwsIamAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
-				Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration())
+				.isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
 	@Test
 	void shouldUsingAuthenticationSteps() {
 
-		mockRest.expect(requestTo("/auth/aws/login"))
-				.andExpect(method(HttpMethod.POST))
+		mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
 				.andExpect(jsonPath("$.iam_request_url").exists())
 				.andExpect(jsonPath("$.iam_request_body").exists())
 				.andExpect(jsonPath("$.iam_request_headers").exists())
 				.andExpect(jsonPath("$.role").value("foo-role"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
 				.role("foo-role").credentials(new BasicAWSCredentials("foo", "bar"))
@@ -117,8 +109,8 @@ class AwsIamAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
-				Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration())
+				.isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 }

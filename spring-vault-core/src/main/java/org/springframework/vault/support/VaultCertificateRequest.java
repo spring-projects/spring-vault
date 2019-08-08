@@ -188,7 +188,8 @@ public class VaultCertificateRequest {
 		 * @param ipSubjectAltName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
-		public VaultCertificateRequestBuilder withIpSubjectAltName(String ipSubjectAltName) {
+		public VaultCertificateRequestBuilder withIpSubjectAltName(
+				String ipSubjectAltName) {
 
 			Assert.hasText(ipSubjectAltName, "IP subject alt name must not be empty");
 
@@ -277,8 +278,8 @@ public class VaultCertificateRequest {
 				altNames = java.util.Collections.singletonList(this.altNames.get(0));
 				break;
 			default:
-				altNames = java.util.Collections.unmodifiableList(new ArrayList<>(
-						this.altNames));
+				altNames = java.util.Collections
+						.unmodifiableList(new ArrayList<>(this.altNames));
 			}
 
 			List<String> ipSubjectAltNames;

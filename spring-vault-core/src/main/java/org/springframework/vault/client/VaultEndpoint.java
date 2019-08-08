@@ -80,7 +80,7 @@ public class VaultEndpoint implements Serializable {
 	 * Create a {@link VaultEndpoint} given a {@link URI}.
 	 *
 	 * @param uri must contain hostname, port and scheme, must not be empty or
-	 * {@literal null}.
+	 *     {@literal null}.
 	 * @return a new {@link VaultEndpoint}.
 	 */
 	public static VaultEndpoint from(URI uri) {
@@ -93,12 +93,12 @@ public class VaultEndpoint implements Serializable {
 
 		vaultEndpoint.setHost(uri.getHost());
 		try {
-			vaultEndpoint.setPort(uri.getPort() == -1 ? uri.toURL().getDefaultPort()
-					: uri.getPort());
+			vaultEndpoint.setPort(
+					uri.getPort() == -1 ? uri.toURL().getDefaultPort() : uri.getPort());
 		}
 		catch (MalformedURLException e) {
-			throw new IllegalArgumentException(String.format(
-					"Can't retrieve default port from %s", uri), e);
+			throw new IllegalArgumentException(
+					String.format("Can't retrieve default port from %s", uri), e);
 		}
 		vaultEndpoint.setScheme(uri.getScheme());
 
@@ -180,7 +180,7 @@ public class VaultEndpoint implements Serializable {
 
 	/**
 	 * @param path context path prefix. Must not be {@literal null} or empty and must not
-	 * start with a leading slash.
+	 *     start with a leading slash.
 	 * @since 2.1
 	 */
 	public void setPath(String path) {

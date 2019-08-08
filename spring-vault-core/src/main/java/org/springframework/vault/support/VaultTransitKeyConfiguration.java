@@ -39,7 +39,8 @@ public class VaultTransitKeyConfiguration {
 	private final Integer minEncryptionVersion;
 
 	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed,
-			@Nullable Integer minDecryptionVersion, @Nullable Integer minEncryptionVersion) {
+			@Nullable Integer minDecryptionVersion,
+			@Nullable Integer minEncryptionVersion) {
 
 		this.deletionAllowed = deletionAllowed;
 		this.minDecryptionVersion = minDecryptionVersion;
@@ -103,7 +104,8 @@ public class VaultTransitKeyConfiguration {
 		 * @param deletionAllowed {@literal true} if key deletion should be allowed.
 		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
 		 */
-		public VaultTransitKeyConfigurationBuilder deletionAllowed(boolean deletionAllowed) {
+		public VaultTransitKeyConfigurationBuilder deletionAllowed(
+				boolean deletionAllowed) {
 			this.deletionAllowed = deletionAllowed;
 			return this;
 		}
@@ -147,8 +149,8 @@ public class VaultTransitKeyConfiguration {
 		 * @return a new {@link VaultTransitKeyConfiguration}.
 		 */
 		public VaultTransitKeyConfiguration build() {
-			return new VaultTransitKeyConfiguration(deletionAllowed,
-					minDecryptionVersion, minEncryptionVersion);
+			return new VaultTransitKeyConfiguration(deletionAllowed, minDecryptionVersion,
+					minEncryptionVersion);
 		}
 	}
 }

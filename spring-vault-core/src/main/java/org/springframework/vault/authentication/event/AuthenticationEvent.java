@@ -33,7 +33,7 @@ public abstract class AuthenticationEvent extends ApplicationEvent {
 	 * Create a new {@link AuthenticationEvent} given {@link VaultToken}.
 	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 */
 	protected AuthenticationEvent(VaultToken source) {
 		super(source);

@@ -33,8 +33,8 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class ClientCertificateAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);

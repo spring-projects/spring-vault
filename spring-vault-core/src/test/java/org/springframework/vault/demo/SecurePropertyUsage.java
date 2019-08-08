@@ -63,8 +63,8 @@ public class SecurePropertyUsage {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				Config.class);
 
-		System.out.println(context.getEnvironment().getProperty(
-				"my-property-that-references-vault"));
+		System.out.println(context.getEnvironment()
+				.getProperty("my-property-that-references-vault"));
 		System.out.println(context.getEnvironment().getProperty("encrypted"));
 
 		System.out.println(context.getBean(Client.class).myValue);

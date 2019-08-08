@@ -59,12 +59,12 @@ import org.springframework.web.client.RestOperations;
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend: gcp
  * (IAM)</a>
- * @see <a
- * href="https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
+ * @see <a href=
+ * "https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
  * projects.serviceAccounts.signJwt</a>
  */
-public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
-		ClientAuthentication {
+public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
+		implements ClientAuthentication {
 
 	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
@@ -82,9 +82,9 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	 * @param options must not be {@literal null}.
 	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
 	 * @throws GeneralSecurityException thrown by
-	 * {@link GoogleApacheHttpTransport#newTrustedTransport()}.
+	 *     {@link GoogleApacheHttpTransport#newTrustedTransport()}.
 	 * @throws IOException thrown by
-	 * {@link GoogleApacheHttpTransport#newTrustedTransport()}.
+	 *     {@link GoogleApacheHttpTransport#newTrustedTransport()}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options,
 			RestOperations restOperations) throws GeneralSecurityException, IOException {
@@ -139,12 +139,9 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 			SignJwtRequest request = new SignJwtRequest();
 			request.setPayload(payload);
 
-			SignJwt signJwt = iam
-					.projects()
-					.serviceAccounts()
-					.signJwt(
-							String.format("projects/%s/serviceAccounts/%s", projectId,
-									serviceAccount), request);
+			SignJwt signJwt = iam.projects().serviceAccounts().signJwt(String
+					.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount),
+					request);
 
 			SignJwtResponse response = signJwt.execute();
 

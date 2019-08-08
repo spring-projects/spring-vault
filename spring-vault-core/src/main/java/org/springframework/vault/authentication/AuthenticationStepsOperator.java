@@ -80,31 +80,26 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 		Mono<Object> state = createMono(chain.steps);
 
-		return state
-				.map(stateObject -> {
+		return state.map(stateObject -> {
 
-					if (stateObject instanceof VaultToken) {
-						return (VaultToken) stateObject;
-					}
+			if (stateObject instanceof VaultToken) {
+				return (VaultToken) stateObject;
+			}
 
-					if (stateObject instanceof VaultResponse) {
+			if (stateObject instanceof VaultResponse) {
 
-						VaultResponse response = (VaultResponse) stateObject;
+				VaultResponse response = (VaultResponse) stateObject;
 
-						Assert.state(response.getAuth() != null,
-								"Auth field must not be null");
+				Assert.state(response.getAuth() != null, "Auth field must not be null");
 
-						return LoginTokenUtil.from(response.getAuth());
-					}
+				return LoginTokenUtil.from(response.getAuth());
+			}
 
-					throw new IllegalStateException(
-							String.format(
-									"Cannot retrieve VaultToken from authentication chain. Got instead %s",
-									stateObject));
-				})
-				.onErrorMap(
-						t -> new VaultLoginException(
-								"Cannot retrieve VaultToken from authentication chain", t));
+			throw new IllegalStateException(String.format(
+					"Cannot retrieve VaultToken from authentication chain. Got instead %s",
+					stateObject));
+		}).onErrorMap(t -> new VaultLoginException(
+				"Cannot retrieve VaultToken from authentication chain", t));
 	}
 
 	private Mono<Object> createMono(Iterable<Node<?>> steps) {
@@ -114,13 +109,14 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String
-						.format("Executing %s with current state %s", o, state));
+				logger.debug(
+						String.format("Executing %s with current state %s", o, state));
 			}
 
 			if (o instanceof HttpRequestNode) {
-				state = state.flatMap(stateObject -> doHttpRequest(
-						(HttpRequestNode<Object>) o, stateObject));
+				state = state
+						.flatMap(stateObject -> doHttpRequest((HttpRequestNode<Object>) o,
+								stateObject));
 			}
 
 			if (o instanceof MapStep) {
@@ -129,13 +125,13 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			}
 
 			if (o instanceof ZipStep) {
-				state = state.zipWith(doZipStep((ZipStep<Object, Object>) o)).map(
-						it -> Pair.of(it.getT1(), it.getT2()));
+				state = state.zipWith(doZipStep((ZipStep<Object, Object>) o))
+						.map(it -> Pair.of(it.getT1(), it.getT2()));
 			}
 
 			if (o instanceof OnNextStep) {
-				state = state.doOnNext(stateObject -> doOnNext((OnNextStep<Object>) o,
-						stateObject));
+				state = state.doOnNext(
+						stateObject -> doOnNext((OnNextStep<Object>) o, stateObject));
 			}
 
 			if (o instanceof SupplierStep<?>) {
@@ -144,7 +140,8 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Executed %s with current state %s", o, state));
+				logger.debug(
+						String.format("Executed %s with current state %s", o, state));
 			}
 		}
 		return state;

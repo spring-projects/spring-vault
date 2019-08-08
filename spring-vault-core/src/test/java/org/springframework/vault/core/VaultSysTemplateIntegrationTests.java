@@ -29,10 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.Policy;
+import org.springframework.vault.support.Policy.Rule;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.vault.support.Policy.Rule;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.VaultInitializer;
@@ -156,8 +156,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 		versionedOperations.put("secret/mykey", Collections.singletonMap("key", "value"));
 		assertThat(versionedOperations.get("secret/mykey").getRequiredData())
-				.containsEntry(
-				"key", "value");
+				.containsEntry("key", "value");
 	}
 
 	@Test
@@ -224,8 +223,8 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion("0.6.1")
 	void shouldReadDefaultPolicy() {
 
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(
-				() -> adminOperations.getPolicy("default"));
+		assertThatExceptionOfType(UnsupportedOperationException.class)
+				.isThrownBy(() -> adminOperations.getPolicy("default"));
 	}
 
 	@Test

@@ -19,7 +19,6 @@ import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;

@@ -24,7 +24,6 @@ import org.springframework.vault.util.RequiresVaultVersion;
  * @author Mark Paluch
  */
 @RequiresVaultVersion("0.6.4")
-abstract class TokenAuthenticationIntegrationTestBase extends
-		IntegrationTestSupport {
+abstract class TokenAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 }

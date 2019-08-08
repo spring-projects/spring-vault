@@ -30,8 +30,8 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  * @since 2.1
  */
-class VaultKeyValue2Template extends VaultKeyValue2Accessor implements
-		VaultKeyValueOperations {
+class VaultKeyValue2Template extends VaultKeyValue2Accessor
+		implements VaultKeyValueOperations {
 
 	/**
 	 * Create a new {@link VaultKeyValue2Template} given {@link VaultOperations} and the

@@ -29,8 +29,8 @@ class VaultCertificateRequestUnitTests {
 
 	@Test
 	void shouldRejectUnconfiguredBuilder() {
-		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(
-				() -> VaultCertificateRequest.builder().build());
+		assertThatExceptionOfType(IllegalArgumentException.class)
+				.isThrownBy(() -> VaultCertificateRequest.builder().build());
 	}
 
 	@Test

@@ -37,8 +37,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
-		IntegrationTestSupport {
+public abstract class ClientCertificateAuthenticationIntegrationTestBase
+		extends IntegrationTestSupport {
 
 	@BeforeEach
 	public void before() {
@@ -47,12 +47,13 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations().doWithSession(
-				(RestOperationsCallback<Object>) restOperations -> {
+		prepare().getVaultOperations()
+				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
 					File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(new File(workDir,
-							"ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
+					String certificate = Files.contentOf(
+							new File(workDir, "ca/certs/client.cert.pem"),
+							StandardCharsets.US_ASCII);
 
 					return restOperations.postForEntity("auth/cert/certs/my-role",
 							Collections.singletonMap("certificate", certificate),
@@ -61,8 +62,8 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 	}
 
 	static SslConfiguration prepareCertAuthenticationMethod() {
-		return prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration
-				.unconfigured());
+		return prepareCertAuthenticationMethod(
+				SslConfiguration.KeyConfiguration.unconfigured());
 	}
 
 	static SslConfiguration prepareCertAuthenticationMethod(
@@ -70,8 +71,11 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 
 		SslConfiguration original = createSslConfiguration();
 
-		return new SslConfiguration(KeyStoreConfiguration.of(new FileSystemResource(
-				new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
+		return new SslConfiguration(
+				KeyStoreConfiguration.of(
+						new FileSystemResource(
+								new File(findWorkDir(), "client-cert.jks")),
+						"changeit".toCharArray()),
 				keyConfiguration, original.getTrustStoreConfiguration());
 	}
 }

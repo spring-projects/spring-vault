@@ -126,7 +126,8 @@ public class CubbyholeAuthenticationOptions {
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
-		public CubbyholeAuthenticationOptionsBuilder initialToken(VaultToken initialToken) {
+		public CubbyholeAuthenticationOptionsBuilder initialToken(
+				VaultToken initialToken) {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 
@@ -166,7 +167,7 @@ public class CubbyholeAuthenticationOptions {
 		 * {@literal true}.
 		 *
 		 * @param selfLookup {@literal true} to perform a self-lookup or {@literal false}
-		 * to disable it.
+		 *     to disable it.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 * @since 1.0.1
 		 */

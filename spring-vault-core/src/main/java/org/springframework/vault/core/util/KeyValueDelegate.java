@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 /**
@@ -80,8 +80,8 @@ public class KeyValueDelegate {
 			return this.operations.read(path);
 		}
 
-		VaultResponse response = this.operations.read(getKeyValue2Path(
-				mountInfo.getPath(), path));
+		VaultResponse response = this.operations
+				.read(getKeyValue2Path(mountInfo.getPath(), path));
 		unwrapDataResponse(response);
 
 		return response;
@@ -106,16 +106,16 @@ public class KeyValueDelegate {
 			return;
 		}
 
-		Map<String, Object> nested = new LinkedHashMap<>((Map) response.getRequiredData()
-				.get("data"));
+		Map<String, Object> nested = new LinkedHashMap<>(
+				(Map) response.getRequiredData().get("data"));
 		response.setData(nested);
 	}
 
 	@SuppressWarnings("unchecked")
 	private MountInfo doGetMountInfo(String path) {
 
-		VaultResponse response = this.operations.read(String.format(
-				"sys/internal/ui/mounts/%s", path));
+		VaultResponse response = this.operations
+				.read(String.format("sys/internal/ui/mounts/%s", path));
 
 		if (response == null || response.getData() == null) {
 			return MountInfo.unavailable();

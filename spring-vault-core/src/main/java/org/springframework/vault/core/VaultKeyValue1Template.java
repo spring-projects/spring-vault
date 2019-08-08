@@ -33,8 +33,8 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @since 2.1
  * @see KeyValueBackend#KV_1
  */
-class VaultKeyValue1Template extends VaultKeyValueAccessor implements
-		VaultKeyValueOperations {
+class VaultKeyValue1Template extends VaultKeyValueAccessor
+		implements VaultKeyValueOperations {
 
 	private final VaultOperations vaultOperations;
 	private final String path;

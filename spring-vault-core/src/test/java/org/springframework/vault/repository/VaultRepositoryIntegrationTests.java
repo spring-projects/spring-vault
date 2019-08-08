@@ -50,8 +50,8 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableVaultRepositories(considerNestedRepositories = true)
-	static class VaultRepositoryTestConfiguration extends
-			VaultIntegrationTestConfiguration {
+	static class VaultRepositoryTestConfiguration
+			extends VaultIntegrationTestConfiguration {
 	}
 
 	@Autowired
@@ -115,10 +115,10 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findAllByOrderByFirstnameAsc()).containsSequence(
-				skyler, walter);
-		assertThat(vaultRepository.findAllByOrderByFirstnameDesc()).containsSequence(
-				walter, skyler);
+		assertThat(vaultRepository.findAllByOrderByFirstnameAsc())
+				.containsSequence(skyler, walter);
+		assertThat(vaultRepository.findAllByOrderByFirstnameDesc())
+				.containsSequence(walter, skyler);
 	}
 
 	@Test
@@ -136,14 +136,14 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findTop1By(Sort.by(asc("firstname")))).containsOnly(
-				skyler);
+		assertThat(vaultRepository.findTop1By(Sort.by(asc("firstname"))))
+				.containsOnly(skyler);
 	}
 
 	@Test
 	void shouldFailForNonIdCriteria() {
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
-				() -> vaultRepository.findInvalidByFirstname("foo"));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(() -> vaultRepository.findInvalidByFirstname("foo"));
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {

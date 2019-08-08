@@ -84,17 +84,13 @@ class AuthenticationStepsExecutorUnitTests {
 	@Test
 	void justLoginRequestShouldLogin() {
 
-		mockRest.expect(requestTo("/auth/cert/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
-		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
-				"cert").as(VaultResponse.class));
+		AuthenticationSteps steps = AuthenticationSteps
+				.just(post("/auth/{path}/login", "cert").as(VaultResponse.class));
 
 		assertThat(login(steps)).isEqualTo(VaultToken.of("my-token"));
 	}
@@ -105,11 +101,10 @@ class AuthenticationStepsExecutorUnitTests {
 		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
 				.andRespond(withBadRequest().body("foo"));
 
-		AuthenticationSteps steps = AuthenticationSteps.just(post("/auth/{path}/login",
-				"cert").as(VaultResponse.class));
+		AuthenticationSteps steps = AuthenticationSteps
+				.just(post("/auth/{path}/login", "cert").as(VaultResponse.class));
 
-		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> login(steps))
+		assertThatExceptionOfType(VaultException.class).isThrownBy(() -> login(steps))
 				.withMessageContaining(
 						"HTTP request POST /auth/{path}/login AS class org.springframework.vault.support.VaultResponse "
 								+ "in state null failed with Status 400 and body foo");
@@ -121,15 +116,11 @@ class AuthenticationStepsExecutorUnitTests {
 		mockRest.expect(requestTo("somewhere/else")).andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("foo"));
 
-		mockRest.expect(requestTo("/auth/cert/login"))
-				.andExpect(method(HttpMethod.POST))
+		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(content().string("foo-token"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"foo-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"foo-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		AuthenticationSteps steps = AuthenticationSteps
 				.fromHttpRequest(get(URI.create("somewhere/else")).as(String.class))
@@ -148,20 +139,17 @@ class AuthenticationStepsExecutorUnitTests {
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("foo"));
 
-		mockRest.expect(requestTo("/auth/cert/login"))
-				.andExpect(content().string("foo"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"foo-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+		mockRest.expect(requestTo("/auth/cert/login")).andExpect(content().string("foo"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"foo-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("foo", "bar");
 
-		AuthenticationSteps steps = AuthenticationSteps.fromHttpRequest(
-				get(URI.create("somewhere/else")).with(headers).as(String.class)) //
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromHttpRequest(
+						get(URI.create("somewhere/else")).with(headers).as(String.class)) //
 				.login("/auth/cert/login");
 
 		assertThat(login(steps)).isEqualTo(VaultToken.of("foo-token"));
@@ -170,27 +158,22 @@ class AuthenticationStepsExecutorUnitTests {
 	@Test
 	void zipWithShouldRequestTwoItems() {
 
-		mockRest.expect(requestTo("/auth/login/left"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-								"{" + "\"request_id\": \"left\"}"));
+		mockRest.expect(requestTo("/auth/login/left")).andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"request_id\": \"left\"}"));
 
-		mockRest.expect(requestTo("/auth/login/right"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-								"{" + "\"request_id\": \"right\"}"));
+		mockRest.expect(requestTo("/auth/login/right")).andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"request_id\": \"right\"}"));
 
-		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post(
-				"/auth/login/left").as(VaultResponse.class));
+		Node<VaultResponse> left = AuthenticationSteps
+				.fromHttpRequest(post("/auth/login/left").as(VaultResponse.class));
 
-		Node<VaultResponse> right = AuthenticationSteps.fromHttpRequest(post(
-				"/auth/login/right").as(VaultResponse.class));
+		Node<VaultResponse> right = AuthenticationSteps
+				.fromHttpRequest(post("/auth/login/right").as(VaultResponse.class));
 
-		AuthenticationSteps steps = left.zipWith(right).login(
-				it -> VaultToken.of(it.getLeft().getRequestId() + "-"
-						+ it.getRight().getRequestId()));
+		AuthenticationSteps steps = left.zipWith(right).login(it -> VaultToken
+				.of(it.getLeft().getRequestId() + "-" + it.getRight().getRequestId()));
 
 		assertThat(login(steps)).isEqualTo(VaultToken.of("left-right"));
 	}

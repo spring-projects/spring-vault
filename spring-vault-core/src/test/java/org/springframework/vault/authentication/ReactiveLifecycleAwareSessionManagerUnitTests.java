@@ -47,12 +47,12 @@ import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -144,8 +144,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	@Test
 	void loginShouldFail() {
 
-		when(tokenSupplier.getVaultToken()).thenReturn(
-				Mono.error(new VaultLoginException("foo")));
+		when(tokenSupplier.getVaultToken())
+				.thenReturn(Mono.error(new VaultLoginException("foo")));
 
 		sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
@@ -165,16 +165,12 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		when(responseSpec.bodyToMono((Class) any())).thenReturn(Mono.just(vaultResponse));
 
-		sessionManager
-				.getSessionToken()
-				.as(StepVerifier::create)
-				.assertNext(
-						it -> {
+		sessionManager.getSessionToken().as(StepVerifier::create).assertNext(it -> {
 
-							LoginToken sessionToken = (LoginToken) it;
-							assertThat(sessionToken.getLeaseDuration()).isEqualTo(
-									Duration.ofSeconds(100));
-						}).verifyComplete();
+			LoginToken sessionToken = (LoginToken) it;
+			assertThat(sessionToken.getLeaseDuration())
+					.isEqualTo(Duration.ofSeconds(100));
+		}).verifyComplete();
 
 		verify(webClient.get()).uri("auth/token/lookup-self");
 		verify(listener).onAuthenticationEvent(captor.capture());
@@ -191,9 +187,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(VaultToken.of("login"));
 
-		when(responseSpec.bodyToMono((Class) any())).thenReturn(
-				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden",
-						null, null, null)));
+		when(responseSpec.bodyToMono((Class) any()))
+				.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403,
+						"Forbidden", null, null, null)));
 
 		sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
@@ -209,23 +205,19 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
 
-		when(responseSpec.bodyToMono((Class) any())).thenReturn(
-				Mono.error(new WebClientResponseException("Some server error", 500,
-						"Some server error", null, null, null)));
+		when(responseSpec.bodyToMono((Class) any()))
+				.thenReturn(Mono.error(new WebClientResponseException("Some server error",
+						500, "Some server error", null, null, null)));
 
 		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
 				.verifyComplete();
-		sessionManager
-				.renewToken()
-				.as(StepVerifier::create)
-				.consumeErrorWith(
-						exception -> {
-							assertThat(exception)
-									.isInstanceOf(VaultTokenRenewalException.class)
-									.hasCauseInstanceOf(WebClientResponseException.class)
-									.hasMessageContaining(
-											"Cannot renew token: Status 500 Some server error");
-						}).verify();
+		sessionManager.renewToken().as(StepVerifier::create)
+				.consumeErrorWith(exception -> {
+					assertThat(exception).isInstanceOf(VaultTokenRenewalException.class)
+							.hasCauseInstanceOf(WebClientResponseException.class)
+							.hasMessageContaining(
+									"Cannot renew token: Status 500 Some server error");
+				}).verify();
 	}
 
 	@Test
@@ -273,9 +265,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.of("login"));
 
-		when(responseSpec.bodyToMono((Class) any())).thenReturn(
-				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden",
-						null, null, null)));
+		when(responseSpec.bodyToMono((Class) any()))
+				.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403,
+						"Forbidden", null, null, null)));
 
 		sessionManager.renewToken() //
 				.as(StepVerifier::create) //
@@ -311,8 +303,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		auth.put("ttl", 100);
 		vaultResponse.setAuth(auth);
 
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
-				Mono.just(vaultResponse));
+		when(responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.just(vaultResponse));
 
 		sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
@@ -336,9 +328,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
-				Mono.just(fromToken(LoginToken.of("foo".toCharArray(),
-						Duration.ofSeconds(10)))));
+		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
+				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -357,9 +348,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
-				Mono.just(fromToken(LoginToken.of("foo".toCharArray(),
-						Duration.ofSeconds(2)))));
+		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
+				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
@@ -375,15 +365,13 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	@Test
 	void shouldReLoginIfRenewalTtlExceedsThreshold() {
 
-		when(tokenSupplier.getVaultToken())
-				.thenReturn(
-						Mono.just(LoginToken.renewable("login".toCharArray(),
-								Duration.ofSeconds(5))),
-						Mono.just(LoginToken.renewable("bar".toCharArray(),
-								Duration.ofSeconds(5))));
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
-				Mono.just(fromToken(LoginToken.of("foo".toCharArray(),
-						Duration.ofSeconds(2)))));
+		when(tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(),
+						Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(),
+						Duration.ofSeconds(5))));
+		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
+				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		sessionManager.getSessionToken() //
@@ -393,9 +381,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		sessionManager
-				.getSessionToken()
-				.as(StepVerifier::create)
+		sessionManager.getSessionToken().as(StepVerifier::create)
 				.expectNext(
 						LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
 				.verifyComplete();
@@ -408,14 +394,13 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	@Test
 	void shouldReLoginIfRenewFails() {
 
-		when(tokenSupplier.getVaultToken())
-				.thenReturn(
-						Mono.just(LoginToken.renewable("login".toCharArray(),
-								Duration.ofSeconds(5))),
-						Mono.just(LoginToken.renewable("bar".toCharArray(),
-								Duration.ofSeconds(5))));
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(
-				Mono.error(new RuntimeException("foo")));
+		when(tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(),
+						Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(),
+						Duration.ofSeconds(5))));
+		when(responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.error(new RuntimeException("foo")));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		sessionManager.getSessionToken() //
@@ -425,9 +410,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		sessionManager
-				.getSessionToken()
-				.as(StepVerifier::create)
+		sessionManager.getSessionToken().as(StepVerifier::create)
 				.expectNext(
 						LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
 				.verifyComplete();

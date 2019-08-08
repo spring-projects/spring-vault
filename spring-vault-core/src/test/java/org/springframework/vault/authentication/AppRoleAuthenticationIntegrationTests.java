@@ -35,8 +35,8 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  * @author Mark Paluch
  * @author Christophe Tafani-Dereeper
  */
-class AppRoleAuthenticationIntegrationTests extends
-		AppRoleAuthenticationIntegrationTestBase {
+class AppRoleAuthenticationIntegrationTests
+		extends AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldAuthenticateWithRoleIdOnly() {
@@ -81,7 +81,8 @@ class AppRoleAuthenticationIntegrationTests extends
 		String roleId = getRoleId("with-secret-id");
 		String secretId = (String) getVaultOperations()
 				.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"),
-						null).getRequiredData().get("secret_id");
+						null)
+				.getRequiredData().get("secret_id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(RoleId.provided(roleId)).secretId(SecretId.provided(secretId))

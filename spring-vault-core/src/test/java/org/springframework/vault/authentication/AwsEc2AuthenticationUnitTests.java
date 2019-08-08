@@ -64,8 +64,8 @@ class AwsEc2AuthenticationUnitTests {
 	@Test
 	void shouldObtainIdentityDocument() {
 
-		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(requestTo(
+				"http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
@@ -81,8 +81,8 @@ class AwsEc2AuthenticationUnitTests {
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
 				.role("ami").build();
 
-		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(requestTo(
+				"http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
@@ -103,8 +103,8 @@ class AwsEc2AuthenticationUnitTests {
 		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions
 				.builder().nonce(nonce).build();
 
-		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(requestTo(
+				"http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("value"));
 
@@ -112,12 +112,9 @@ class AwsEc2AuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("value"))
 				.andExpect(jsonPath("$.nonce").value("foo"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
+						+ "}"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(
 				authenticationOptions, restTemplate, restTemplate);
@@ -126,8 +123,8 @@ class AwsEc2AuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
-				Duration.ofSeconds(20));
+		assertThat(((LoginToken) login).getLeaseDuration())
+				.isEqualTo(Duration.ofSeconds(20));
 		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 
@@ -139,8 +136,8 @@ class AwsEc2AuthenticationUnitTests {
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
 				.nonce(nonce).build();
 
-		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(requestTo(
+				"http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("value"));
 
@@ -148,12 +145,9 @@ class AwsEc2AuthenticationUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("value"))
 				.andExpect(jsonPath("$.nonce").value("foo"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}"
+						+ "}"));
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AwsEc2Authentication.createAuthenticationSteps(options), restTemplate);
@@ -161,20 +155,20 @@ class AwsEc2AuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(
-				Duration.ofSeconds(20));
+		assertThat(((LoginToken) login).getLeaseDuration())
+				.isEqualTo(Duration.ofSeconds(20));
 		assertThat(((LoginToken) login).isRenewable()).isFalse();
 	}
 
 	@Test
 	void loginShouldFailWhileObtainingIdentityDocument() {
 
-		mockRest.expect(
-				requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		mockRest.expect(requestTo(
+				"http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new AwsEc2Authentication(restTemplate).login());
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new AwsEc2Authentication(restTemplate).login());
 	}
 
 	@Test
@@ -183,8 +177,8 @@ class AwsEc2AuthenticationUnitTests {
 		mockRest.expect(requestTo("/auth/aws-ec2/login")) //
 				.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new AwsEc2Authentication(restTemplate) {
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new AwsEc2Authentication(restTemplate) {
 					@Override
 					protected Map<String, String> getEc2Login() {
 						return Collections.singletonMap("pkcs7", "value");

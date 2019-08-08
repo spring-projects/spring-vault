@@ -29,8 +29,8 @@ import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBac
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-class VaultKeyValueTemplateVersionedIntegrationTests extends
-		AbstractVaultKeyValueTemplateIntegrationTests {
+class VaultKeyValueTemplateVersionedIntegrationTests
+		extends AbstractVaultKeyValueTemplateIntegrationTests {
 
 	VaultKeyValueTemplateVersionedIntegrationTests() {
 		super("versioned", KeyValueBackend.versioned());

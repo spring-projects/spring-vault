@@ -72,7 +72,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 	@Override
 	public VaultSignCertificateRequestResponse signCertificateRequest(String roleName,
-			String csr, VaultCertificateRequest certificateRequest) throws VaultException {
+			String csr, VaultCertificateRequest certificateRequest)
+			throws VaultException {
 
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.hasText(csr, "CSR name must not be empty");
@@ -136,8 +137,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			String requestPath = encoding == Encoding.DER ? "{path}/crl"
 					: "{path}/crl/pem";
 			try {
-				ResponseEntity<byte[]> response = restOperations.getForEntity(
-						requestPath, byte[].class, path);
+				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath,
+						byte[].class, path);
 
 				return new ByteArrayInputStream(response.getBody());
 			}
@@ -163,17 +164,13 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		request.put("common_name", certificateRequest.getCommonName());
 
 		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put(
-					"alt_names",
-					StringUtils.collectionToDelimitedString(
-							certificateRequest.getAltNames(), ","));
+			request.put("alt_names", StringUtils
+					.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
 		}
 
 		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put(
-					"ip_sans",
-					StringUtils.collectionToDelimitedString(
-							certificateRequest.getIpSubjectAltNames(), ","));
+			request.put("ip_sans", StringUtils.collectionToDelimitedString(
+					certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
 		if (certificateRequest.getTtl() != null) {

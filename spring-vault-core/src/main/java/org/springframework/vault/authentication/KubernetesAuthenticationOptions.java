@@ -124,7 +124,7 @@ public class KubernetesAuthenticationOptions {
 		 * Configure the role.
 		 *
 		 * @param role name of the role against which the login is being attempted, must
-		 * not be {@literal null} or empty.
+		 *     not be {@literal null} or empty.
 		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
 		 */
 		public KubernetesAuthenticationOptionsBuilder role(String role) {
@@ -161,8 +161,8 @@ public class KubernetesAuthenticationOptions {
 			Assert.notNull(role, "Role must not be null");
 
 			return new KubernetesAuthenticationOptions(path, role,
-					jwtSupplier == null ? new KubernetesServiceAccountTokenFile()
-							.cached() : jwtSupplier);
+					jwtSupplier == null ? new KubernetesServiceAccountTokenFile().cached()
+							: jwtSupplier);
 		}
 	}
 }

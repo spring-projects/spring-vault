@@ -177,8 +177,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		try {
 			dispatch(new BeforeLoginTokenRevocationEvent(token));
-			restOperations.postForObject("auth/token/revoke-self", new HttpEntity<>(
-					VaultHttpHeaders.from(token)), Map.class);
+			restOperations.postForObject("auth/token/revoke-self",
+					new HttpEntity<>(VaultHttpHeaders.from(token)), Map.class);
 			dispatch(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
@@ -251,11 +251,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		if (isExpired(renewed)) {
 
 			if (logger.isDebugEnabled()) {
-				Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(
-						renewed);
-				logger.info(String
-						.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
-								renewed.getLeaseDuration(), validTtlThreshold));
+				Duration validTtlThreshold = getRefreshTrigger()
+						.getValidTtlThreshold(renewed);
+				logger.info(String.format(
+						"Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
+						renewed.getLeaseDuration(), validTtlThreshold));
 			}
 			else {
 				logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
@@ -285,8 +285,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 		}
 
-		return getToken().map(TokenWrapper::getToken).orElseThrow(
-				() -> new IllegalStateException("Cannot obtain VaultToken"));
+		return getToken().map(TokenWrapper::getToken)
+				.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
 
 	private void doGetSessionToken() {
@@ -311,8 +311,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				wrapper = new TokenWrapper(token, false);
 			}
 			catch (VaultTokenLookupException e) {
-				logger.warn(String.format(
-						"Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
+				logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s",
+						e.getMessage()));
 				dispatch(new AuthenticationErrorEvent(token, e));
 			}
 		}
@@ -334,8 +334,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	protected boolean isTokenRenewable() {
 
-		return getToken().map(TokenWrapper::getToken)
-				.filter(LoginToken.class::isInstance)
+		return getToken().map(TokenWrapper::getToken).filter(LoginToken.class::isInstance)
 				//
 				.filter(it -> {
 
@@ -379,8 +378,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 	private OneShotTrigger createTrigger(TokenWrapper tokenWrapper) {
 
-		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime(
-				(LoginToken) tokenWrapper.getToken()));
+		return new OneShotTrigger(getRefreshTrigger()
+				.nextExecutionTime((LoginToken) tokenWrapper.getToken()));
 	}
 
 	private static String format(String message, HttpStatusCodeException e) {

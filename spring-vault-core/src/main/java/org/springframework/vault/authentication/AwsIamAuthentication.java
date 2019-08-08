@@ -62,12 +62,12 @@ import org.springframework.web.client.RestOperations;
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Backend: aws
  * (IAM)</a>
- * @see <a
- * href="https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:
+ * @see <a href=
+ * "https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:
  * GetCallerIdentity</a>
  */
-public class AwsIamAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class AwsIamAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsIamAuthentication.class);
 
@@ -123,8 +123,8 @@ public class AwsIamAuthentication implements ClientAuthentication,
 	protected static AuthenticationSteps createAuthenticationSteps(
 			AwsIamAuthenticationOptions options, AWSCredentials credentials) {
 
-		return AuthenticationSteps.fromSupplier(
-				() -> createRequestBody(options, credentials)) //
+		return AuthenticationSteps
+				.fromSupplier(() -> createRequestBody(options, credentials)) //
 				.login("auth/{mount}/login", options.getPath());
 	}
 
@@ -135,8 +135,8 @@ public class AwsIamAuthentication implements ClientAuthentication,
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(this.options, this.options
-				.getCredentialsProvider().getCredentials());
+		return createAuthenticationSteps(this.options,
+				this.options.getCredentialsProvider().getCredentials());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -157,10 +157,10 @@ public class AwsIamAuthentication implements ClientAuthentication,
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response
 							.getAuth().get("metadata");
-					logger.debug(String
-							.format("Login successful using AWS-IAM authentication for user id %s, ARN %s",
-									metadata.get("client_user_id"),
-									metadata.get("canonical_arn")));
+					logger.debug(String.format(
+							"Login successful using AWS-IAM authentication for user id %s, ARN %s",
+							metadata.get("client_user_id"),
+							metadata.get("canonical_arn")));
 				}
 				else {
 					logger.debug("Login successful using AWS-IAM authentication");
@@ -183,8 +183,8 @@ public class AwsIamAuthentication implements ClientAuthentication,
 	 */
 	protected static Map<String, String> createRequestBody(
 			AwsIamAuthenticationOptions options) {
-		return createRequestBody(options, options.getCredentialsProvider()
-				.getCredentials());
+		return createRequestBody(options,
+				options.getCredentialsProvider().getCredentials());
 	}
 
 	/**
@@ -200,8 +200,8 @@ public class AwsIamAuthentication implements ClientAuthentication,
 		Map<String, String> login = new HashMap<>();
 
 		login.put("iam_http_request_method", "POST");
-		login.put("iam_request_url", Base64Utils.encodeToString(options.getEndpointUri()
-				.toString().getBytes()));
+		login.put("iam_request_url", Base64Utils
+				.encodeToString(options.getEndpointUri().toString().getBytes()));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 
 		String headerJson = getSignedHeaders(options, credentials);
@@ -252,7 +252,8 @@ public class AwsIamAuthentication implements ClientAuthentication,
 		Map<String, String> headers = new LinkedHashMap<>();
 
 		headers.put(HttpHeaders.CONTENT_LENGTH, "" + REQUEST_BODY.length());
-		headers.put(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+		headers.put(HttpHeaders.CONTENT_TYPE,
+				MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 
 		if (StringUtils.hasText(options.getServerId())) {
 			headers.put("X-Vault-AWS-IAM-Server-ID", options.getServerId());

@@ -30,8 +30,8 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * @see VaultToken
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  */
-public class TokenAuthentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class TokenAuthentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private final VaultToken token;
 
@@ -65,8 +65,8 @@ public class TokenAuthentication implements ClientAuthentication,
 	 *
 	 * @param token must not be {@literal null}.
 	 * @param selfLookup {@literal true} to perform a self-lookup using the given
-	 * {@link VaultToken}. Self-lookup will create a {@link LoginToken} and provide
-	 * renewability and TTL.
+	 *     {@link VaultToken}. Self-lookup will create a {@link LoginToken} and provide
+	 *     renewability and TTL.
 	 * @return {@link AuthenticationSteps} for token authentication.
 	 * @since 2.0
 	 */
@@ -77,11 +77,11 @@ public class TokenAuthentication implements ClientAuthentication,
 
 		if (selfLookup) {
 
-			HttpRequest<VaultResponse> httpRequest = get("auth/token/lookup-self").with(
-					VaultHttpHeaders.from(token)).as(VaultResponse.class);
+			HttpRequest<VaultResponse> httpRequest = get("auth/token/lookup-self")
+					.with(VaultHttpHeaders.from(token)).as(VaultResponse.class);
 
-			return AuthenticationSteps.fromHttpRequest(httpRequest).login(
-					response -> LoginTokenUtil.from(token.toCharArray(),
+			return AuthenticationSteps.fromHttpRequest(httpRequest)
+					.login(response -> LoginTokenUtil.from(token.toCharArray(),
 							response.getRequiredData()));
 		}
 

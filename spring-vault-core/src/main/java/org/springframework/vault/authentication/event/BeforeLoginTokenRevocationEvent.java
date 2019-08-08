@@ -33,7 +33,7 @@ public class BeforeLoginTokenRevocationEvent extends AuthenticationEvent {
 	 * Create a new {@link BeforeLoginTokenRevocationEvent} given {@link VaultToken}.
 	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 */
 	public BeforeLoginTokenRevocationEvent(VaultToken source) {
 		super(source);

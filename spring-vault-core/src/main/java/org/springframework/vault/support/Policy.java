@@ -33,8 +33,8 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -230,8 +230,7 @@ public class Policy {
 		private final Map<String, List<String>> deniedParameters;
 
 		@JsonCreator
-		private Rule(
-				@JsonProperty("capabilities") List<Capability> capabilities,
+		private Rule(@JsonProperty("capabilities") List<Capability> capabilities,
 				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration minWrappingTtl,
 				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration maxWrappingTtl,
 				@JsonProperty("allowed_parameters") Map<String, List<String>> allowedParameters,
@@ -386,7 +385,7 @@ public class Policy {
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 * @throws IllegalArgumentException if the capability cannot be resolved to a
-			 * built-in {@link Capability}.
+			 *     built-in {@link Capability}.
 			 */
 			public RuleBuilder capabilities(String... capabilities) {
 
@@ -394,18 +393,16 @@ public class Policy {
 				Assert.noNullElements(capabilities,
 						"Capabilities must not contain null elements");
 
-				List<Capability> mapped = Arrays
-						.stream(capabilities)
-						.map(value -> {
+				List<Capability> mapped = Arrays.stream(capabilities).map(value -> {
 
-							Capability capability = BuiltinCapabilities.find(value);
+					Capability capability = BuiltinCapabilities.find(value);
 
-							if (capability == null) {
-								throw new IllegalArgumentException("Cannot resolve "
-										+ value + " to a capability");
-							}
-							return capability;
-						}).collect(Collectors.toList());
+					if (capability == null) {
+						throw new IllegalArgumentException(
+								"Cannot resolve " + value + " to a capability");
+					}
+					return capability;
+				}).collect(Collectors.toList());
 
 				return capabilities(mapped);
 			}
@@ -504,12 +501,12 @@ public class Policy {
 					capabilities = Collections.emptyList();
 					break;
 				case 1:
-					capabilities = Collections.singletonList(this.capabilities.iterator()
-							.next());
+					capabilities = Collections
+							.singletonList(this.capabilities.iterator().next());
 					break;
 				default:
-					capabilities = Collections.unmodifiableList(new ArrayList<>(
-							this.capabilities));
+					capabilities = Collections
+							.unmodifiableList(new ArrayList<>(this.capabilities));
 				}
 
 				return new Rule(path, capabilities, minWrappingTtl, maxWrappingTtl,
@@ -517,7 +514,8 @@ public class Policy {
 						createMap(this.deniedParameters));
 			}
 
-			private Map<String, List<String>> createMap(Map<String, List<String>> source) {
+			private Map<String, List<String>> createMap(
+					Map<String, List<String>> source) {
 
 				if (source.isEmpty()) {
 					return Collections.emptyMap();
@@ -769,7 +767,8 @@ public class Policy {
 					return Duration.ofHours(Long.parseLong(matcher.group(1)));
 				}
 
-				throw new IllegalArgumentException("Unsupported duration value: " + value);
+				throw new IllegalArgumentException(
+						"Unsupported duration value: " + value);
 			}
 		}
 

@@ -57,7 +57,7 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param transitPath path of the transit backend, must not be {@literal null} or
-	 * empty.
+	 *     empty.
 	 * @param length number of random bytes to generate. Must be greater than zero.
 	 */
 	public VaultBytesKeyGenerator(VaultOperations vaultOperations, String transitPath,

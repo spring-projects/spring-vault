@@ -47,7 +47,8 @@ public class VaultMappingContext extends
 	@Override
 	protected <T> VaultPersistentEntity<?> createPersistentEntity(
 			TypeInformation<T> typeInformation) {
-		return new BasicVaultPersistentEntity<>(typeInformation, fallbackKeySpaceResolver);
+		return new BasicVaultPersistentEntity<>(typeInformation,
+				fallbackKeySpaceResolver);
 	}
 
 	@Override

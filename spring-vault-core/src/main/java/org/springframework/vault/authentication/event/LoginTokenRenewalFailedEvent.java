@@ -34,7 +34,7 @@ public class LoginTokenRenewalFailedEvent extends AuthenticationErrorEvent {
 	 * {@link Exception}.
 	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
 	public LoginTokenRenewalFailedEvent(VaultToken source, Throwable exception) {

@@ -284,7 +284,7 @@ public class VaultTokenRequest {
 		 * Configure whether the default policy should be part of the token's policy set.
 		 *
 		 * @param noDefaultPolicy {@literal true} to omit the default policy in the
-		 * token's policy set.
+		 *     token's policy set.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder noDefaultPolicy(boolean noDefaultPolicy) {
@@ -305,8 +305,8 @@ public class VaultTokenRequest {
 		 * Configure TTL extension/renewal for the token.
 		 *
 		 * @param renewable {@literal false} to disable the ability of the token to be
-		 * renewed past its initial TTL. {@literal true}, or omitting this option, will
-		 * allow the token to be renewable up to the system/mount maximum TTL.
+		 *     renewed past its initial TTL. {@literal true}, or omitting this option,
+		 *     will allow the token to be renewable up to the system/mount maximum TTL.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder renewable(boolean renewable) {
@@ -392,8 +392,8 @@ public class VaultTokenRequest {
 			Assert.isTrue(explicitMaxTtl >= 0, "TTL must not be negative");
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
 
-			this.explicitMaxTtl = String
-					.format("%ss", timeUnit.toSeconds(explicitMaxTtl));
+			this.explicitMaxTtl = String.format("%ss",
+					timeUnit.toSeconds(explicitMaxTtl));
 			return this;
 		}
 
@@ -404,7 +404,7 @@ public class VaultTokenRequest {
 		 * able to be renewed or used past the value set at issue time.
 		 *
 		 * @param explicitMaxTtl the time to live, must not be {@literal null} or
-		 * negative.
+		 *     negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 * @since 2.0
 		 */

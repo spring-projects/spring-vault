@@ -184,7 +184,8 @@ public class AwsIamAuthenticationOptions {
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 * @see #credentialsProvider(AWSCredentialsProvider)
 		 */
-		public AwsIamAuthenticationOptionsBuilder credentials(AWSCredentials credentials) {
+		public AwsIamAuthenticationOptionsBuilder credentials(
+				AWSCredentials credentials) {
 
 			Assert.notNull(credentials, "Credentials must not be null");
 
@@ -203,7 +204,8 @@ public class AwsIamAuthenticationOptions {
 		public AwsIamAuthenticationOptionsBuilder credentialsProvider(
 				AWSCredentialsProvider credentialsProvider) {
 
-			Assert.notNull(credentialsProvider, "AWSCredentialsProvider must not be null");
+			Assert.notNull(credentialsProvider,
+					"AWSCredentialsProvider must not be null");
 
 			this.credentialsProvider = credentialsProvider;
 			return this;

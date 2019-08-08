@@ -28,8 +28,8 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
-class AppIdAuthenticationOperatorIntegrationTests extends
-		AppIdAuthenticationIntegrationTestBase {
+class AppIdAuthenticationOperatorIntegrationTests
+		extends AppIdAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 

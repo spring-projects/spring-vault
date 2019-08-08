@@ -48,30 +48,29 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			prepare().mountAuth("approle");
 		}
 
-		getVaultOperations().doWithSession(
-				restOperations -> {
+		getVaultOperations().doWithSession(restOperations -> {
 
-					Map<String, String> withSecretId = new HashMap<>();
-					withSecretId.put("policies", "dummy");
-					withSecretId.put("bound_cidr_list", "0.0.0.0/0");
-					withSecretId.put("bind_secret_id", "true");
-					withSecretId.put("token_ttl", "60s");
-					withSecretId.put("token_max_ttl", "60s");
+			Map<String, String> withSecretId = new HashMap<>();
+			withSecretId.put("policies", "dummy");
+			withSecretId.put("bound_cidr_list", "0.0.0.0/0");
+			withSecretId.put("bind_secret_id", "true");
+			withSecretId.put("token_ttl", "60s");
+			withSecretId.put("token_max_ttl", "60s");
 
-					restOperations.postForEntity("auth/approle/role/with-secret-id",
-							withSecretId, Map.class);
+			restOperations.postForEntity("auth/approle/role/with-secret-id", withSecretId,
+					Map.class);
 
-					Map<String, String> noSecretIdRole = new HashMap<>();
-					noSecretIdRole.put("policies", "dummy"); // policy
-					noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
-					noSecretIdRole.put("bind_secret_id", "false");
-					noSecretIdRole.put("max_ttl", "60s");
+			Map<String, String> noSecretIdRole = new HashMap<>();
+			noSecretIdRole.put("policies", "dummy"); // policy
+			noSecretIdRole.put("bound_cidr_list", "0.0.0.0/0");
+			noSecretIdRole.put("bind_secret_id", "false");
+			noSecretIdRole.put("max_ttl", "60s");
 
-					restOperations.postForEntity("auth/approle/role/no-secret-id",
-							noSecretIdRole, Map.class);
+			restOperations.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole,
+					Map.class);
 
-					return null;
-				});
+			return null;
+		});
 	}
 
 	VaultOperations getVaultOperations() {
@@ -86,32 +85,32 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	VaultToken generateWrappedSecretIdResponse() {
 
-		return getVaultOperations().doWithVault(
-				restOperations -> {
+		return getVaultOperations().doWithVault(restOperations -> {
 
-					HttpEntity<String> httpEntity = getWrappingHeaders();
+			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-					VaultResponse response = restOperations.exchange(
-							"auth/approle/role/with-secret-id/secret-id", HttpMethod.PUT,
-							httpEntity, VaultResponse.class).getBody();
+			VaultResponse response = restOperations
+					.exchange("auth/approle/role/with-secret-id/secret-id",
+							HttpMethod.PUT, httpEntity, VaultResponse.class)
+					.getBody();
 
-					return VaultToken.of(response.getWrapInfo().get("token"));
-				});
+			return VaultToken.of(response.getWrapInfo().get("token"));
+		});
 	}
 
 	VaultToken generateWrappedRoleIdResponse() {
 
-		return getVaultOperations().doWithVault(
-				restOperations -> {
+		return getVaultOperations().doWithVault(restOperations -> {
 
-					HttpEntity<String> httpEntity = getWrappingHeaders();
+			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-					VaultResponse response = restOperations.exchange(
-							"auth/approle/role/with-secret-id/role-id", HttpMethod.GET,
-							httpEntity, VaultResponse.class).getBody();
+			VaultResponse response = restOperations
+					.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET,
+							httpEntity, VaultResponse.class)
+					.getBody();
 
-					return VaultToken.of(response.getWrapInfo().get("token"));
-				});
+			return VaultToken.of(response.getWrapInfo().get("token"));
+		});
 	}
 
 	private HttpEntity<String> getWrappingHeaders() {

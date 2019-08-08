@@ -46,8 +46,8 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
  * aws-ec2</a>
  */
-public class AwsEc2Authentication implements ClientAuthentication,
-		AuthenticationStepsFactory {
+public class AwsEc2Authentication
+		implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
@@ -81,7 +81,8 @@ public class AwsEc2Authentication implements ClientAuthentication,
 	 * @param awsMetadataRestOperations must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
-			RestOperations vaultRestOperations, RestOperations awsMetadataRestOperations) {
+			RestOperations vaultRestOperations,
+			RestOperations awsMetadataRestOperations) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
@@ -116,10 +117,9 @@ public class AwsEc2Authentication implements ClientAuthentication,
 			Supplier<char[]> nonceSupplier) {
 
 		return AuthenticationSteps
-				.fromHttpRequest(
-						HttpRequestBuilder.get(
-								options.getIdentityDocumentUri().toString()).as(
-								String.class)) //
+				.fromHttpRequest(HttpRequestBuilder
+						.get(options.getIdentityDocumentUri().toString())
+						.as(String.class)) //
 				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
 				.map(pkcs7 -> pkcs7.replace("\\n", "")) //
 				.map(pkcs7 -> {
@@ -169,10 +169,9 @@ public class AwsEc2Authentication implements ClientAuthentication,
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response
 							.getAuth().get("metadata");
-					logger.debug(String
-							.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-									metadata.get("instance_id"),
-									metadata.get("instance_id")));
+					logger.debug(String.format(
+							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+							metadata.get("instance_id"), metadata.get("instance_id")));
 				}
 				else {
 					logger.debug("Login successful using AWS-EC2 authentication");
@@ -201,8 +200,8 @@ public class AwsEc2Authentication implements ClientAuthentication,
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = this.awsMetadataRestOperations.getForObject(
-					this.options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = this.awsMetadataRestOperations
+					.getForObject(this.options.getIdentityDocumentUri(), String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
@@ -210,9 +209,10 @@ public class AwsEc2Authentication implements ClientAuthentication,
 			return login;
 		}
 		catch (RestClientException e) {
-			throw new VaultLoginException(String.format(
-					"Cannot obtain Identity Document from %s",
-					options.getIdentityDocumentUri()), e);
+			throw new VaultLoginException(
+					String.format("Cannot obtain Identity Document from %s",
+							options.getIdentityDocumentUri()),
+					e);
 		}
 	}
 

@@ -121,8 +121,8 @@ class MappingVaultConverterUnitTests {
 	@Test
 	void shouldReadEntityWithList() {
 
-		SecretDocument document = new SecretDocument(Collections.singletonMap(
-				"usernames", Arrays.asList("walter", "heisenberg")));
+		SecretDocument document = new SecretDocument(Collections.singletonMap("usernames",
+				Arrays.asList("walter", "heisenberg")));
 
 		EntityWithListOfStrings entity = converter.read(EntityWithListOfStrings.class,
 				document);
@@ -137,8 +137,8 @@ class MappingVaultConverterUnitTests {
 		keyVersions.put("foo", 1);
 		keyVersions.put("bar", 2);
 
-		SecretDocument document = new SecretDocument(Collections.singletonMap(
-				"keyVersions", keyVersions));
+		SecretDocument document = new SecretDocument(
+				Collections.singletonMap("keyVersions", keyVersions));
 
 		EntityWithMap entity = converter.read(EntityWithMap.class, document);
 
@@ -155,8 +155,8 @@ class MappingVaultConverterUnitTests {
 		SecretDocument document = new SecretDocument();
 		document.put("nested", walter);
 
-		EntityWithNestedType entity = converter
-				.read(EntityWithNestedType.class, document);
+		EntityWithNestedType entity = converter.read(EntityWithNestedType.class,
+				document);
 
 		assertThat(entity.getNested()).isEqualTo(new NestedType("heisenberg", "hb"));
 	}

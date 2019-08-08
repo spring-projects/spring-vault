@@ -133,8 +133,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultTokenResponse tokenResponse = tokenOperations.create();
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> tokenOperations.renew(tokenResponse.getToken()));
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> tokenOperations.renew(tokenResponse.getToken()));
 	}
 
 	@Test
@@ -164,15 +164,14 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@SuppressWarnings("ConstantConditions")
 	private ResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
-		return vaultOperations
-				.doWithVault(restOperations -> {
-					HttpHeaders headers = new HttpHeaders();
-					headers.add(VaultHttpHeaders.VAULT_TOKEN, tokenResponse.getToken()
-							.getToken());
+		return vaultOperations.doWithVault(restOperations -> {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add(VaultHttpHeaders.VAULT_TOKEN,
+					tokenResponse.getToken().getToken());
 
-					return restOperations.exchange("auth/token/lookup-self",
-							HttpMethod.GET, new HttpEntity<>(headers), String.class);
-				});
+			return restOperations.exchange("auth/token/lookup-self", HttpMethod.GET,
+					new HttpEntity<>(headers), String.class);
+		});
 
 	}
 }

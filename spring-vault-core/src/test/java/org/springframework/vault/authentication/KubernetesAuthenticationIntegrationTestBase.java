@@ -37,8 +37,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  * @author Michal Budzyn
  */
 @RequiresVaultVersion("0.8.3")
-public abstract class KubernetesAuthenticationIntegrationTestBase extends
-		IntegrationTestSupport {
+public abstract class KubernetesAuthenticationIntegrationTestBase
+		extends IntegrationTestSupport {
 
 	@BeforeEach
 	public void before() {
@@ -50,12 +50,13 @@ public abstract class KubernetesAuthenticationIntegrationTestBase extends
 			prepare().mountAuth("kubernetes");
 		}
 
-		prepare().getVaultOperations().doWithSession(
-				(RestOperationsCallback<Object>) restOperations -> {
+		prepare().getVaultOperations()
+				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
 					File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(new File(workDir,
-							"minikube/ca.crt"), StandardCharsets.US_ASCII);
+					String certificate = Files.contentOf(
+							new File(workDir, "minikube/ca.crt"),
+							StandardCharsets.US_ASCII);
 
 					String host = String.format("https://%s:8443", minikubeIp);
 

@@ -72,7 +72,8 @@ public abstract class JsonMapFlattener {
 
 		Map<String, Object> resultMap = new LinkedHashMap<>();
 
-		doFlatten("", inputMap.entrySet().iterator(), resultMap, UnaryOperator.identity());
+		doFlatten("", inputMap.entrySet().iterator(), resultMap,
+				UnaryOperator.identity());
 
 		return resultMap;
 	}
@@ -92,8 +93,8 @@ public abstract class JsonMapFlattener {
 
 		Map<String, String> resultMap = new LinkedHashMap<>();
 
-		doFlatten("", inputMap.entrySet().iterator(), resultMap, it -> it == null ? null
-				: it.toString());
+		doFlatten("", inputMap.entrySet().iterator(), resultMap,
+				it -> it == null ? null : it.toString());
 
 		return resultMap;
 	}

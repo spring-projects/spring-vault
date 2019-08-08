@@ -185,20 +185,19 @@ class VaultQueryCreatorUnitTests {
 
 	@Test
 	void failsForNonIdProperties() {
-		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class).isThrownBy(
-				() -> createQuery("findByName", ""));
+		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
+				.isThrownBy(() -> createQuery("findByName", ""));
 	}
 
 	VaultQuery createQuery(String methodName, String value) {
 
-		DefaultParameters defaultParameters = new DefaultParameters(
-				ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod",
-						String.class));
+		DefaultParameters defaultParameters = new DefaultParameters(ReflectionUtils
+				.findMethod(dummy.class, "someUnrelatedMethod", String.class));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
-		VaultQueryCreator queryCreator = new VaultQueryCreator(
-				partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }),
+		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
+				new ParametersParameterAccessor(defaultParameters,
+						new Object[] { value }),
 				mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
@@ -206,14 +205,13 @@ class VaultQueryCreatorUnitTests {
 
 	VaultQuery createQuery(String methodName, List<String> value) {
 
-		DefaultParameters defaultParameters = new DefaultParameters(
-				ReflectionUtils
-						.findMethod(dummy.class, "someUnrelatedMethod", List.class));
+		DefaultParameters defaultParameters = new DefaultParameters(ReflectionUtils
+				.findMethod(dummy.class, "someUnrelatedMethod", List.class));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
-		VaultQueryCreator queryCreator = new VaultQueryCreator(
-				partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }),
+		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
+				new ParametersParameterAccessor(defaultParameters,
+						new Object[] { value }),
 				mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
@@ -227,8 +225,9 @@ class VaultQueryCreatorUnitTests {
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value,
-						anotherValue }), mappingContext);
+				new ParametersParameterAccessor(defaultParameters,
+						new Object[] { value, anotherValue }),
+				mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}

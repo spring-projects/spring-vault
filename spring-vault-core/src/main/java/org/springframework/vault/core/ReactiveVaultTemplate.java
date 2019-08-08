@@ -45,8 +45,8 @@ import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
 
@@ -76,7 +76,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 */
 	public ReactiveVaultTemplate(VaultEndpoint vaultEndpoint,
 			ClientHttpConnector connector, VaultTokenSupplier vaultTokenSupplier) {
-		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector, vaultTokenSupplier);
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector,
+				vaultTokenSupplier);
 	}
 
 	/**
@@ -168,8 +169,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private ExchangeFilterFunction getSessionFilter() {
 
-		return ofRequestProcessor(request -> vaultTokenSupplier.getVaultToken().map(
-				token -> {
+		return ofRequestProcessor(
+				request -> vaultTokenSupplier.getVaultToken().map(token -> {
 
 					return ClientRequest.from(request).headers(headers -> {
 						headers.set(VaultHttpHeaders.VAULT_TOKEN, token.getToken());
@@ -208,8 +209,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 				.filter(response -> response.getData() != null
 						&& response.getData().containsKey("keys"))
 				//
-				.flatMapIterable(
-						response -> (List<String>) response.getRequiredData().get("keys"));
+				.flatMapIterable(response -> (List<String>) response.getRequiredData()
+						.get("keys"));
 	}
 
 	@Override
@@ -239,8 +240,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	@Override
 	public <V, T extends Publisher<V>> T doWithVault(
-			Function<WebClient, ? extends T> clientCallback) throws VaultException,
-			WebClientException {
+			Function<WebClient, ? extends T> clientCallback)
+			throws VaultException, WebClientException {
 
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
@@ -254,8 +255,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	@Override
 	public <V, T extends Publisher<V>> T doWithSession(
-			Function<WebClient, ? extends T> sessionCallback) throws VaultException,
-			WebClientException {
+			Function<WebClient, ? extends T> sessionCallback)
+			throws VaultException, WebClientException {
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
@@ -282,31 +283,32 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	private static <T> Function<ClientResponse, Mono<? extends T>> mapResponse(
 			ParameterizedTypeReference<T> typeReference, String path) {
 
-		return response -> isSuccess(response) ? response.body(BodyExtractors
-				.toMono(typeReference)) : mapOtherwise(response, path);
+		return response -> isSuccess(response)
+				? response.body(BodyExtractors.toMono(typeReference))
+				: mapOtherwise(response, path);
 	}
 
 	private static boolean isSuccess(ClientResponse response) {
 		return response.statusCode().is2xxSuccessful();
 	}
 
-	private static <T> Mono<? extends T> mapOtherwise(ClientResponse response, String path) {
+	private static <T> Mono<? extends T> mapOtherwise(ClientResponse response,
+			String path) {
 
 		if (response.statusCode() == HttpStatus.NOT_FOUND) {
 			return Mono.empty();
 		}
 
-		return response.bodyToMono(String.class).flatMap(
-				body -> {
+		return response.bodyToMono(String.class).flatMap(body -> {
 
-					String error = VaultResponses.getError(body);
+			String error = VaultResponses.getError(body);
 
-					return Mono.error(VaultResponses.buildException(
-							response.statusCode(), path, error));
-				});
+			return Mono.error(
+					VaultResponses.buildException(response.statusCode(), path, error));
+		});
 	}
 
-	private static class VaultListResponse extends
-			VaultResponseSupport<Map<String, Object>> {
+	private static class VaultListResponse
+			extends VaultResponseSupport<Map<String, Object>> {
 	}
 }

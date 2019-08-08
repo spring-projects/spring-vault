@@ -87,8 +87,8 @@ class DefaultVaultTypeMapperUnitTests {
 		readsTypeFromField(
 				Collections.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "1"),
 				String.class);
-		readsTypeFromField(Collections.singletonMap(
-				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "unmapped"), null);
+		readsTypeFromField(Collections
+				.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "unmapped"), null);
 	}
 
 	@Test
@@ -101,8 +101,9 @@ class DefaultVaultTypeMapperUnitTests {
 		readsTypeFromField(
 				Collections.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "1"),
 				String.class);
-		readsTypeFromField(Collections.singletonMap(
-				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, Object.class.getName()),
+		readsTypeFromField(
+				Collections.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
+						Object.class.getName()),
 				Object.class);
 	}
 
@@ -128,8 +129,9 @@ class DefaultVaultTypeMapperUnitTests {
 
 	@Test
 	void readsTypeFromDefaultKeyByDefault() {
-		readsTypeFromField(Collections.singletonMap(
-				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, String.class.getName()),
+		readsTypeFromField(
+				Collections.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY,
+						String.class.getName()),
 				String.class);
 	}
 
@@ -151,8 +153,8 @@ class DefaultVaultTypeMapperUnitTests {
 
 	@Test
 	void returnsNullIfClassCannotBeLoaded() {
-		readsTypeFromField(Collections.singletonMap(
-				DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "fooBar"), null);
+		readsTypeFromField(Collections
+				.singletonMap(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, "fooBar"), null);
 	}
 
 	@Test
@@ -179,7 +181,8 @@ class DefaultVaultTypeMapperUnitTests {
 				.isFalse();
 	}
 
-	private void readsTypeFromField(Map<String, Object> document, @Nullable Class<?> type) {
+	private void readsTypeFromField(Map<String, Object> document,
+			@Nullable Class<?> type) {
 
 		TypeInformation<?> typeInfo = typeMapper.readType(document);
 

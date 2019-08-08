@@ -39,8 +39,8 @@ import org.springframework.vault.repository.mapping.VaultMappingContext;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultRepositoryConfigurationExtension extends
-		KeyValueRepositoryConfigurationExtension {
+public class VaultRepositoryConfigurationExtension
+		extends KeyValueRepositoryConfigurationExtension {
 
 	private static final String VAULT_ADAPTER_BEAN_NAME = "vaultKeyValueAdapter";
 
@@ -68,7 +68,8 @@ public class VaultRepositoryConfigurationExtension extends
 		Optional<String> vaultTemplateRef = configurationSource
 				.getAttribute("vaultTemplateRef");
 
-		RootBeanDefinition mappingContextDefinition = createVaultMappingContext(configurationSource);
+		RootBeanDefinition mappingContextDefinition = createVaultMappingContext(
+				configurationSource);
 		mappingContextDefinition.setSource(configurationSource.getSource());
 
 		registerIfNotAlreadyRegistered(() -> mappingContextDefinition, registry,
@@ -83,8 +84,8 @@ public class VaultRepositoryConfigurationExtension extends
 		constructorArgumentValuesForVaultKeyValueAdapter.addIndexedArgumentValue(0,
 				new RuntimeBeanReference(vaultTemplateRef.orElse("vaultTemplate")));
 
-		vaultKeyValueAdapterDefinition
-				.setConstructorArgumentValues(constructorArgumentValuesForVaultKeyValueAdapter);
+		vaultKeyValueAdapterDefinition.setConstructorArgumentValues(
+				constructorArgumentValuesForVaultKeyValueAdapter);
 
 		registerIfNotAlreadyRegistered(() -> vaultKeyValueAdapterDefinition, registry,
 				VAULT_ADAPTER_BEAN_NAME, configurationSource);
@@ -99,7 +100,8 @@ public class VaultRepositoryConfigurationExtension extends
 
 			registerIfNotAlreadyRegistered(
 					() -> getDefaultKeyValueTemplateBeanDefinition(configurationSource),
-					registry, keyValueTemplateName.get(), configurationSource.getSource());
+					registry, keyValueTemplateName.get(),
+					configurationSource.getSource());
 		}
 
 		super.registerBeansForRoot(registry, configurationSource);
@@ -132,8 +134,8 @@ public class VaultRepositoryConfigurationExtension extends
 		constructorArgumentValuesForKeyValueTemplate.addIndexedArgumentValue(1,
 				new RuntimeBeanReference(VAULT_MAPPING_CONTEXT_BEAN_NAME));
 
-		keyValueTemplateDefinition
-				.setConstructorArgumentValues(constructorArgumentValuesForKeyValueTemplate);
+		keyValueTemplateDefinition.setConstructorArgumentValues(
+				constructorArgumentValuesForKeyValueTemplate);
 
 		return keyValueTemplateDefinition;
 	}

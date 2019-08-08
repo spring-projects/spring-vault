@@ -32,8 +32,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-class CubbyholeAuthenticationStepsIntegrationTests extends
-		CubbyholeAuthenticationIntegrationTestBase {
+class CubbyholeAuthenticationStepsIntegrationTests
+		extends CubbyholeAuthenticationIntegrationTestBase {
 
 	@Test
 	void authenticationStepsShouldCreateWrappedToken() {
@@ -44,8 +44,8 @@ class CubbyholeAuthenticationStepsIntegrationTests extends
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-				.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory
+				.create(Settings.createSslConfiguration());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				CubbyholeAuthentication.createAuthenticationSteps(options), restTemplate);

@@ -44,7 +44,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ContextConfiguration
 class LeaseAwareVaultPropertySourceIntegrationTests {
 
-	@VaultPropertySource(value = { "secret/myapp", "secret/myapp/profile" }, renewal = Renewal.RENEW)
+	@VaultPropertySource(value = { "secret/myapp",
+			"secret/myapp/profile" }, renewal = Renewal.RENEW)
 	static class Config extends VaultIntegrationTestConfiguration {
 	}
 

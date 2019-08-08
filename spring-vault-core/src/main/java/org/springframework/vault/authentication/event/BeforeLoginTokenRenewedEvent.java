@@ -33,7 +33,7 @@ public class BeforeLoginTokenRenewedEvent extends AuthenticationEvent {
 	 * Create a new {@link BeforeLoginTokenRenewedEvent} given {@link VaultToken}.
 	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 */
 	public BeforeLoginTokenRenewedEvent(VaultToken source) {
 		super(source);

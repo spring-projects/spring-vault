@@ -53,7 +53,8 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  * @author Mark Paluch
  */
 @RequiresVaultVersion("0.6.2")
-class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
+class ReactiveLifecycleAwareSessionManagerIntegrationTests
+		extends IntegrationTestSupport {
 
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
@@ -66,12 +67,13 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations().doWithSession(
-				(RestOperationsCallback<Object>) restOperations -> {
+		prepare().getVaultOperations()
+				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
 					File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(new File(workDir,
-							"ca/certs/client.cert.pem"), StandardCharsets.US_ASCII);
+					String certificate = Files.contentOf(
+							new File(workDir, "ca/certs/client.cert.pem"),
+							StandardCharsets.US_ASCII);
 
 					Map<String, Object> body = new HashMap<>();
 					body.put("certificate", certificate);
@@ -159,22 +161,21 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 				.verifyComplete();
 		sessionManager.destroy();
 
-		prepare().getVaultOperations().doWithSession(
-				restOperations -> {
+		prepare().getVaultOperations().doWithSession(restOperations -> {
 
-					try {
-						restOperations.getForEntity("auth/token/lookup/{token}",
-								Map.class, loginToken.toCharArray());
-						fail("Missing HttpStatusCodeException");
-					}
-					catch (HttpStatusCodeException e) {
-						// Compatibility across Vault versions.
-						assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-								HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
-					}
+			try {
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class,
+						loginToken.toCharArray());
+				fail("Missing HttpStatusCodeException");
+			}
+			catch (HttpStatusCodeException e) {
+				// Compatibility across Vault versions.
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+			}
 
-					return null;
-				});
+			return null;
+		});
 	}
 
 	private LoginToken createLoginToken() {

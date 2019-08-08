@@ -35,11 +35,11 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Mark Paluch
  */
-class TokenAuthenticationStepsIntegrationTests extends
-		TokenAuthenticationIntegrationTestBase {
+class TokenAuthenticationStepsIntegrationTests
+		extends TokenAuthenticationIntegrationTestBase {
 
-	RestTemplate restTemplate = TestRestTemplateFactory.create(Settings
-			.createSslConfiguration());
+	RestTemplate restTemplate = TestRestTemplateFactory
+			.create(Settings.createSslConfiguration());
 
 	@Test
 	void shouldSelfLookup() {

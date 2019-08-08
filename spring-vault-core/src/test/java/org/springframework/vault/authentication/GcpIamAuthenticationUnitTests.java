@@ -69,19 +69,15 @@ class GcpIamAuthenticationUnitTests {
 		response.setStatusCode(200);
 		response.setContent("{\"keyId\":\"keyid\", \"signedJwt\":\"my-jwt\"}");
 
-		mockHttpTransport = new MockHttpTransport.Builder().setLowLevelHttpResponse(
-				response).build();
+		mockHttpTransport = new MockHttpTransport.Builder()
+				.setLowLevelHttpResponse(response).build();
 
-		mockRest.expect(requestTo("/auth/gcp/login"))
-				.andExpect(method(HttpMethod.POST))
+		mockRest.expect(requestTo("/auth/gcp/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role"))
 				.andExpect(jsonPath("$.jwt").value("my-jwt"))
-				.andRespond(
-						withSuccess()
-								.contentType(MediaType.APPLICATION_JSON)
-								.body("{"
-										+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-										+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
+						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		PrivateKey privateKeyMock = mock(PrivateKey.class);
 		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")

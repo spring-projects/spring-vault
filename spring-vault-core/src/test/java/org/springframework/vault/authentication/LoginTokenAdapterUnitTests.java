@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
@@ -58,17 +58,15 @@ class LoginTokenAdapterUnitTests {
 
 		mockRest.expect(requestTo("/auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))
-				.andExpect(
-						header(VaultHttpHeaders.VAULT_TOKEN,
-								"5e6332cf-f003-6369-8cba-5bce2330f6cc"))
-				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-								"{\"data\": {\n" + "    \"creation_ttl\": 600,\n"
-										+ "    \"renewable\": false,\n"
-										+ "    \"ttl\": 456} }"));
+				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN,
+						"5e6332cf-f003-6369-8cba-5bce2330f6cc"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{\"data\": {\n" + "    \"creation_ttl\": 600,\n"
+								+ "    \"renewable\": false,\n" + "    \"ttl\": 456} }"));
 
-		LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(
-				"5e6332cf-f003-6369-8cba-5bce2330f6cc"), restTemplate);
+		LoginTokenAdapter adapter = new LoginTokenAdapter(
+				new TokenAuthentication("5e6332cf-f003-6369-8cba-5bce2330f6cc"),
+				restTemplate);
 
 		VaultToken login = adapter.login();
 

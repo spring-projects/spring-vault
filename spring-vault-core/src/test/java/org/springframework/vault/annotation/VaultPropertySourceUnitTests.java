@@ -150,8 +150,8 @@ class VaultPropertySourceUnitTests {
 		SecretLeaseContainer leaseContainerMock = ctx.getBean(SecretLeaseContainer.class);
 		verify(leaseContainerMock).afterPropertiesSet();
 		verify(leaseContainerMock).addLeaseListener(any());
-		verify(leaseContainerMock).addRequestedSecret(
-				RequestedSecret.renewable("foo/renewable"));
+		verify(leaseContainerMock)
+				.addRequestedSecret(RequestedSecret.renewable("foo/renewable"));
 		verifyNoMoreInteractions(leaseContainerMock);
 	}
 }

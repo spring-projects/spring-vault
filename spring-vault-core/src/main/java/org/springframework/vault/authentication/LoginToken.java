@@ -108,7 +108,7 @@ public class LoginToken extends VaultToken {
 	 * @param token must not be {@literal null}.
 	 *
 	 * @param leaseDuration the lease duration, must not be negative and not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 * @return the created {@link VaultToken}
 	 * @since 2.0
 	 */

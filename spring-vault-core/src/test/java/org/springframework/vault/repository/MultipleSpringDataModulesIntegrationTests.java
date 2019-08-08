@@ -22,9 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.data.map.repository.config.EnableMapRepositories;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.test.context.ContextConfiguration;
@@ -49,11 +49,11 @@ class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableMapRepositories(considerNestedRepositories = true, //
-	excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaultRepository.class))
+			excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaultRepository.class))
 	@EnableVaultRepositories(considerNestedRepositories = true, //
-	excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = MapRepository.class))
-	static class MultipleModulesActiveTestConfiguration extends
-			VaultIntegrationTestConfiguration {
+			excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = MapRepository.class))
+	static class MultipleModulesActiveTestConfiguration
+			extends VaultIntegrationTestConfiguration {
 	}
 
 	@Autowired

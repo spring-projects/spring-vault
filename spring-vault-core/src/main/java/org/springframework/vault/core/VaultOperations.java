@@ -176,13 +176,13 @@ public interface VaultOperations {
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws RestClientException exceptions from
-	 * {@link org.springframework.web.client.RestOperations}.
+	 *     {@link org.springframework.web.client.RestOperations}.
 	 */
 	@Nullable
-	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException,
-			RestClientException;
+	<T> T doWithVault(RestOperationsCallback<T> clientCallback)
+			throws VaultException, RestClientException;
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
@@ -191,12 +191,12 @@ public interface VaultOperations {
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws RestClientException exceptions from
-	 * {@link org.springframework.web.client.RestOperations}.
+	 *     {@link org.springframework.web.client.RestOperations}.
 	 */
 	@Nullable
-	<T> T doWithSession(RestOperationsCallback<T> sessionCallback) throws VaultException,
-			RestClientException;
+	<T> T doWithSession(RestOperationsCallback<T> sessionCallback)
+			throws VaultException, RestClientException;
 
 }

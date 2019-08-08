@@ -43,7 +43,7 @@ public class ClientHttpConnectorFactory {
 	 */
 	public static ClientHttpConnector create(ClientOptions options,
 			SslConfiguration sslConfiguration) {
-		return org.springframework.vault.client.ClientHttpConnectorFactory.create(
-				options, sslConfiguration);
+		return org.springframework.vault.client.ClientHttpConnectorFactory.create(options,
+				sslConfiguration);
 	}
 }

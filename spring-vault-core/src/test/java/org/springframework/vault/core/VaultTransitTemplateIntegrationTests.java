@@ -103,8 +103,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			transitOperations.configureKey(keyName, VaultTransitKeyConfiguration
-					.builder().deletionAllowed(true).build());
+			transitOperations.configureKey(keyName,
+					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
@@ -261,8 +261,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	void deleteKeyShouldDeleteKey() {
 
 		transitOperations.createKey("mykey");
-		transitOperations.configureKey("mykey", VaultTransitKeyConfiguration.builder()
-				.deletionAllowed(true).build());
+		transitOperations.configureKey("mykey",
+				VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		transitOperations.deleteKey("mykey");
 
 		assertThat(transitOperations.getKey("mykey")).isNull();
@@ -620,8 +620,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultHmacRequest request = VaultHmacRequest.builder()
 				.plaintext(Plaintext.of("hello-world")).algorithm("blah-512").build();
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> transitOperations.getHmac(keyName, request));
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> transitOperations.getHmac(keyName, request));
 	}
 
 	@Test
@@ -630,8 +630,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		Signature signature = transitOperations
-				.sign(keyName, Plaintext.of("hello-world"));
+		Signature signature = transitOperations.sign(keyName,
+				Plaintext.of("hello-world"));
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
@@ -711,11 +711,11 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		Signature signature = transitOperations.sign(keyName, request);
 
 		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest
-				.builder().algorithm("sha2-512").plaintext(plaintext)
-				.signature(signature).build();
+				.builder().algorithm("sha2-512").plaintext(plaintext).signature(signature)
+				.build();
 
-		SignatureValidation valid = transitOperations
-				.verify(keyName, verificationRequest);
+		SignatureValidation valid = transitOperations.verify(keyName,
+				verificationRequest);
 		assertThat(valid).isEqualTo(SignatureValidation.valid());
 	}
 

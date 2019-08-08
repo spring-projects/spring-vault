@@ -85,15 +85,15 @@ public class AuthenticationSteps {
 	 * Create a flow definition using a provided {@link VaultToken}.
 	 *
 	 * @param token the token to be used from this {@link AuthenticationSteps}, must not
-	 * be {@literal null}.
+	 *     be {@literal null}.
 	 * @return the {@link AuthenticationSteps}.
 	 */
 	public static AuthenticationSteps just(VaultToken token) {
 
 		Assert.notNull(token, "Vault token must not be null");
 
-		return new AuthenticationSteps(new SupplierStep<>(() -> token,
-				AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(
+				new SupplierStep<>(() -> token, AuthenticationSteps.HEAD));
 	}
 
 	/**
@@ -106,15 +106,15 @@ public class AuthenticationSteps {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 
-		return new AuthenticationSteps(new HttpRequestNode<>(request,
-				AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(
+				new HttpRequestNode<>(request, AuthenticationSteps.HEAD));
 	}
 
 	/**
 	 * Start flow composition from a {@link Supplier}.
 	 *
 	 * @param supplier supplier function that will produce the flow value, must not be
-	 * {@literal null}.
+	 *     {@literal null}.
 	 * @return the first {@link Node}.
 	 */
 	public static <T> Node<T> fromSupplier(Supplier<T> supplier) {
@@ -184,7 +184,7 @@ public class AuthenticationSteps {
 		 * Transform the state object into a different object.
 		 *
 		 * @param mappingFunction mapping function to be applied to the state object, must
-		 * not be {@literal null}.
+		 *     not be {@literal null}.
 		 * @param <R> resulting object type
 		 * @return the next {@link Node}.
 		 */
@@ -213,7 +213,7 @@ public class AuthenticationSteps {
 		 * Callback with the current state object.
 		 *
 		 * @param consumerFunction consumer function to be called with the state object,
-		 * must not be {@literal null}.
+		 *     must not be {@literal null}.
 		 * @return the next {@link Node}.
 		 */
 		public Node<T> onNext(Consumer<? super T> consumerFunction) {
@@ -241,7 +241,7 @@ public class AuthenticationSteps {
 		 * the current state to Vaults {@code uriTemplate}.
 		 *
 		 * @param uriTemplate Vault authentication endpoint, must not be {@literal null}
-		 * or empty.
+		 *     or empty.
 		 * @param uriVariables URI variables for URI template expansion.
 		 * @return the {@link AuthenticationSteps}.
 		 */
@@ -249,8 +249,8 @@ public class AuthenticationSteps {
 
 			Assert.hasText(uriTemplate, "URI template must not be null or empty");
 
-			return login(HttpRequestBuilder.post(uriTemplate, uriVariables).as(
-					VaultResponse.class));
+			return login(HttpRequestBuilder.post(uriTemplate, uriVariables)
+					.as(VaultResponse.class));
 		}
 
 		/**
@@ -272,7 +272,7 @@ public class AuthenticationSteps {
 		 * mapping {@link Function} to the current state object.
 		 *
 		 * @param mappingFunction mapping function to be applied to the state object, must
-		 * not be {@literal null}.
+		 *     not be {@literal null}.
 		 * @return the {@link AuthenticationSteps}.
 		 */
 		public AuthenticationSteps login(
@@ -331,7 +331,8 @@ public class AuthenticationSteps {
 		 * @param uriVariables the variables to expand the template.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
-		public static HttpRequestBuilder post(String uriTemplate, String... uriVariables) {
+		public static HttpRequestBuilder post(String uriTemplate,
+				String... uriVariables) {
 			return new HttpRequestBuilder(HttpMethod.POST, uriTemplate, uriVariables);
 		}
 
@@ -442,8 +443,8 @@ public class AuthenticationSteps {
 
 		@Override
 		public String toString() {
-			return String.format("%s %s AS %s", getMethod(), getUri() != null ? getUri()
-					: getUriTemplate(), getResponseType());
+			return String.format("%s %s AS %s", getMethod(),
+					getUri() != null ? getUri() : getUriTemplate(), getResponseType());
 		}
 
 		HttpMethod getMethod() {

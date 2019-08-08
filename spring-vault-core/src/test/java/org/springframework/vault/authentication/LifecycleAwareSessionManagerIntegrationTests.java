@@ -112,22 +112,21 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
 
-		prepare().getVaultOperations().doWithSession(
-				restOperations -> {
+		prepare().getVaultOperations().doWithSession(restOperations -> {
 
-					try {
-						restOperations.getForEntity("auth/token/lookup/{token}",
-								Map.class, loginToken.toCharArray());
-						fail("Missing HttpStatusCodeException");
-					}
-					catch (HttpStatusCodeException e) {
-						// Compatibility across Vault versions.
-						assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-								HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
-					}
+			try {
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class,
+						loginToken.toCharArray());
+				fail("Missing HttpStatusCodeException");
+			}
+			catch (HttpStatusCodeException e) {
+				// Compatibility across Vault versions.
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+			}
 
-					return null;
-				});
+			return null;
+		});
 	}
 
 	private LoginToken createLoginToken() {

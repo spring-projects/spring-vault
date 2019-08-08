@@ -38,7 +38,7 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 	 * Utility class which will give our tests a reference to the
 	 * {@link LeaseAwareVaultPropertySource} which holds our secrets.
 	 */
-	@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "secret/rotating", renewal = VaultPropertySource.Renewal.ROTATE	)
+	@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "secret/rotating", renewal = VaultPropertySource.Renewal.ROTATE)
 	public static class PropertySourceHolder implements InitializingBean {
 
 		@Autowired
@@ -52,7 +52,7 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 		 * testing.
 		 *
 		 * @throws Exception if bad things happen (for example, if the property source
-		 * does not exist).
+		 *     does not exist).
 		 */
 		@Override
 		public void afterPropertiesSet() throws Exception {
