@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.vault.authentication.event.AfterLoginEvent;
 import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
 import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
 import org.springframework.vault.authentication.event.AuthenticationListener;
@@ -44,6 +46,7 @@ import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEve
 import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
 import org.springframework.vault.authentication.event.LoginFailedEvent;
 import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -209,15 +212,19 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				.thenReturn(Mono.error(new WebClientResponseException("Some server error",
 						500, "Some server error", null, null, null)));
 
+		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
+		sessionManager.addErrorListener(listener::set);
+
 		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
 				.verifyComplete();
 		sessionManager.renewToken().as(StepVerifier::create)
-				.consumeErrorWith(exception -> {
-					assertThat(exception).isInstanceOf(VaultTokenRenewalException.class)
+				.verifyComplete();
+		assertThat(listener.get().getException())
+				.isInstanceOf(VaultTokenRenewalException.class)
 							.hasCauseInstanceOf(WebClientResponseException.class)
 							.hasMessageContaining(
 									"Cannot renew token: Status 500 Some server error");
-				}).verify();
+
 	}
 
 	@Test
@@ -416,6 +423,34 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				.verifyComplete();
 
 		verify(tokenSupplier, times(2)).getVaultToken();
+	}
+
+	@Test
+	void shouldRetainTokenAfterRenewalFailure() {
+
+		when(tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(),
+						Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(),
+						Duration.ofSeconds(5))));
+		when(responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.error(new RuntimeException("foo")));
+		sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		runnableCaptor.getValue().run();
+
+		sessionManager
+				.getSessionToken().as(StepVerifier::create).expectNext(LoginToken
+						.renewable("login".toCharArray(), Duration.ofSeconds(5)))
+				.verifyComplete();
+
+		verify(tokenSupplier).getVaultToken();
 	}
 
 	private static VaultResponse fromToken(LoginToken loginToken) {

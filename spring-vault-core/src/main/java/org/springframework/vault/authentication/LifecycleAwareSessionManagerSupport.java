@@ -28,6 +28,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.Assert;
+import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultToken;
 
 /**
@@ -74,6 +75,8 @@ public abstract class LifecycleAwareSessionManagerSupport
 	 * decrement token usage count by one.
 	 */
 	private boolean tokenSelfLookupEnabled = true;
+
+	private LeaseStrategy leaseStrategy = LeaseStrategy.dropOnError();
 
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link TaskScheduler}. Using
@@ -129,6 +132,22 @@ public abstract class LifecycleAwareSessionManagerSupport
 	 */
 	public void setTokenSelfLookupEnabled(boolean tokenSelfLookupEnabled) {
 		this.tokenSelfLookupEnabled = tokenSelfLookupEnabled;
+	}
+
+	/**
+	 * Set the {@link LeaseStrategy} for lease renewal error handling.
+	 *
+	 * @param leaseStrategy the {@link LeaseStrategy}, must not be {@literal null}.
+	 * @since 2.2
+	 */
+	public void setLeaseStrategy(LeaseStrategy leaseStrategy) {
+
+		Assert.notNull(leaseStrategy, "LeaseStrategy must not be null");
+		this.leaseStrategy = leaseStrategy;
+	}
+
+	LeaseStrategy getLeaseStrategy() {
+		return leaseStrategy;
 	}
 
 	/**

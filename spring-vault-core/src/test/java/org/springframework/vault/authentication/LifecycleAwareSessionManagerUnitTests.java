@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import org.springframework.scheduling.Trigger;
 import org.springframework.vault.authentication.event.AfterLoginEvent;
 import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
 import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
 import org.springframework.vault.authentication.event.AuthenticationListener;
@@ -47,6 +49,7 @@ import org.springframework.vault.authentication.event.LoginFailedEvent;
 import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
 import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
 import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
@@ -56,7 +59,6 @@ import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -175,8 +177,13 @@ class LifecycleAwareSessionManagerUnitTests {
 				.thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
 						"Some server error"));
 
+		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
+		sessionManager.addErrorListener(listener::set);
+
 		sessionManager.getSessionToken();
-		assertThatThrownBy(() -> sessionManager.renewToken())
+		sessionManager.renewToken();
+
+		assertThat(listener.get().getException())
 				.isInstanceOf(VaultTokenRenewalException.class)
 				.hasCauseInstanceOf(HttpServerErrorException.class)
 				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
@@ -354,6 +361,27 @@ class LifecycleAwareSessionManagerUnitTests {
 				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
 
 		verify(clientAuthentication, times(2)).login();
+	}
+
+	@Test
+	void shouldRetainTokenAfterRenewalFailure() {
+
+		when(clientAuthentication.login()).thenReturn(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
+				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
+		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenThrow(new ResourceAccessException("Connection refused"));
+		sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		sessionManager.getSessionToken();
+		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		runnableCaptor.getValue().run();
+
+		assertThat(sessionManager.getSessionToken()).isEqualTo(
+				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+
+		verify(clientAuthentication).login();
 	}
 
 	@Test

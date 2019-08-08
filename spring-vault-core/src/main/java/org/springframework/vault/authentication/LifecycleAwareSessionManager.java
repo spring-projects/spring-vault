@@ -196,7 +196,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @return {@literal true} if the refresh was successful. {@literal false} if a new
 	 * token was obtained or refresh failed.
 	 */
-	protected boolean renewToken() {
+	public boolean renewToken() {
 
 		logger.info("Renewing token");
 
@@ -210,31 +210,25 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		try {
 			return doRenew(tokenWrapper);
 		}
-		catch (HttpStatusCodeException e) {
-
-			setToken(Optional.empty());
-
-			String message = "Cannot renew token, resetting token and performing re-login";
-
-			if (e.getStatusCode().is4xxClientError()) {
-
-				logger.warn(format(message, e));
-				dispatch(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), e));
-				return false;
-			}
-
-			logger.debug(format(message, e));
-
-			throw new VaultTokenRenewalException(format("Cannot renew token", e), e);
-		}
 		catch (RuntimeException e) {
 
-			logger.debug(String.format(
-					"Cannot renew token, resetting token and performing re-login: %s",
-					e.toString()));
-			setToken(Optional.empty());
+			VaultTokenRenewalException exception = new VaultTokenRenewalException(
+					format("Cannot renew token", e), e);
 
-			throw new VaultTokenRenewalException("Cannot renew token", e);
+			if (getLeaseStrategy().shouldDrop(exception)) {
+				setToken(Optional.empty());
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(exception.getMessage(), exception);
+			}
+			else {
+				logger.warn(exception.getMessage());
+			}
+
+			dispatch(
+					new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
+			return false;
 		}
 	}
 
@@ -382,9 +376,17 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				.nextExecutionTime((LoginToken) tokenWrapper.getToken()));
 	}
 
-	private static String format(String message, HttpStatusCodeException e) {
-		return String.format("%s: Status %s %s %s", message, e.getRawStatusCode(),
-				e.getStatusText(), VaultResponses.getError(e.getResponseBodyAsString()));
+	private static String format(String message, RuntimeException e) {
+
+		if (e instanceof HttpStatusCodeException) {
+
+			HttpStatusCodeException hsce = (HttpStatusCodeException) e;
+			return String.format("%s: Status %s %s %s", message, hsce.getRawStatusCode(),
+					hsce.getStatusText(),
+					VaultResponses.getError(hsce.getResponseBodyAsString()));
+		}
+
+		return message;
 	}
 
 	/**

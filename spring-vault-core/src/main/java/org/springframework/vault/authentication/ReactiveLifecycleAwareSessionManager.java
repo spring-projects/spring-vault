@@ -213,7 +213,7 @@ public class ReactiveLifecycleAwareSessionManager
 	 * obtained. {@link Mono#empty()} if a new the token expired or
 	 * {@link Mono#error(Throwable)} if refresh failed.
 	 */
-	protected Mono<VaultToken> renewToken() {
+	public Mono<VaultToken> renewToken() {
 
 		logger.info("Renewing token");
 
@@ -232,32 +232,28 @@ public class ReactiveLifecycleAwareSessionManager
 
 	private Mono<TokenWrapper> doRenewToken(TokenWrapper wrapper) {
 
-		return doRenew(wrapper).onErrorResume(WebClientResponseException.class, e -> {
+		return doRenew(wrapper).onErrorResume(RuntimeException.class, e -> {
 
-			dropCurrentToken();
+			VaultTokenRenewalException exception = new VaultTokenRenewalException(
+					format("Cannot renew token", e), e);
 
-			String message = "Cannot renew token, resetting token and performing re-login on next token access";
+			if (getLeaseStrategy().shouldDrop(exception)) {
+				dropCurrentToken();
+			}
 
-			if (e.getStatusCode().is4xxClientError()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug(exception.getMessage(), exception);
+			}
+			else {
+				logger.warn(exception.getMessage());
+			}
 
-				logger.warn(format(message, e));
-				dispatch(new LoginTokenRenewalFailedEvent(wrapper.getToken(), e));
+
+			dispatch(new LoginTokenRenewalFailedEvent(wrapper.getToken(), exception));
 				return EMPTY;
 			}
 
-			logger.debug(format(message, e));
-
-			return Mono.error(
-					new VaultTokenRenewalException(format("Cannot renew token", e), e));
-		}).onErrorMap(it -> !(it instanceof VaultTokenRenewalException), e -> {
-
-			dropCurrentToken();
-			logger.debug(String.format(
-					"Cannot renew token, resetting token and performing re-login on next token access: %s",
-					e.toString()));
-
-			return new VaultTokenRenewalException("Cannot renew token", e);
-		});
+		);
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
@@ -443,9 +439,17 @@ public class ReactiveLifecycleAwareSessionManager
 				});
 	}
 
-	private static String format(String message, WebClientResponseException e) {
-		return String.format("%s: Status %s %s %s", message, e.getRawStatusCode(),
-				e.getStatusText(), VaultResponses.getError(e.getResponseBodyAsString()));
+	private static String format(String message, RuntimeException e) {
+
+		if (e instanceof WebClientResponseException) {
+
+			WebClientResponseException wce = (WebClientResponseException) e;
+			return String.format("%s: Status %s %s %s", message, wce.getRawStatusCode(),
+					wce.getStatusText(),
+					VaultResponses.getError(wce.getResponseBodyAsString()));
+		}
+
+		return message;
 	}
 
 	/**

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ import org.springframework.vault.core.lease.event.LeaseListenerAdapter;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -228,6 +230,82 @@ class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void shouldRenewLeaseNow() {
+
+		prepareRenewal();
+
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+
+		secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(taskScheduler).schedule(captor.capture(), any(Trigger.class));
+
+		secretLeaseContainer.renew(requestedSecret);
+
+		verify(vaultOperations).doWithSession(any(RestOperationsCallback.class));
+		verify(scheduledFuture).cancel(false);
+		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void shouldRenewLeaseAfterFailure() {
+
+		prepareRenewal();
+		AtomicInteger attempts = new AtomicInteger();
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.then(invocation -> {
+
+					int attempt = attempts.incrementAndGet();
+					if (attempt == 1) {
+						throw new VaultException("Renewal failure");
+					}
+
+					return Lease.of("new_lease", Duration.ofSeconds(70), true);
+				});
+
+		secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
+		secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(taskScheduler).schedule(captor.capture(), any(Trigger.class));
+		captor.getValue().run();
+
+		boolean renewed = secretLeaseContainer.renew(requestedSecret);
+		assertThat(renewed).isTrue();
+
+		verify(vaultOperations, times(2))
+				.doWithSession(any(RestOperationsCallback.class));
+		verify(scheduledFuture).cancel(false);
+		verify(taskScheduler, times(3)).schedule(captor.capture(), any(Trigger.class));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void shouldRetainLeaseAfterRenewalFailure() {
+
+		prepareRenewal();
+		when(vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenThrow(new VaultException("Renewal failure"));
+
+		secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
+		secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(taskScheduler).schedule(captor.capture(), any(Trigger.class));
+		captor.getValue().run();
+
+		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+		captor.getValue().run();
+
+		verify(vaultOperations, times(2))
+				.doWithSession(any(RestOperationsCallback.class));
+	}
+
+	@Test
 	void shouldRotateNonRenewableLease() {
 
 		final List<SecretLeaseEvent> events = new ArrayList<SecretLeaseEvent>();
@@ -301,6 +379,31 @@ class SecretLeaseContainerUnitTests {
 		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
 		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets())
 				.containsOnlyKeys("foo");
+	}
+
+	@Test
+	void shouldRotateGenericSecretNow() {
+
+		when(taskScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(scheduledFuture);
+
+		when(vaultOperations.read(rotatingGenericSecret.getPath())).thenReturn(
+				createGenericSecrets(Collections.singletonMap("key", "value")),
+				createGenericSecrets(Collections.singletonMap("foo", "bar")));
+
+		secretLeaseContainer.addRequestedSecret(rotatingGenericSecret);
+		secretLeaseContainer.start();
+
+		secretLeaseContainer.rotate(rotatingGenericSecret);
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+		verify(scheduledFuture).cancel(false);
+		verify(taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor
+				.forClass(SecretLeaseEvent.class);
+		verify(leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
 	}
 
 	@Test
