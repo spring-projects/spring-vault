@@ -78,7 +78,7 @@ public class KubernetesAuthentication
 	public static AuthenticationSteps createAuthenticationSteps(
 			KubernetesAuthenticationOptions options) {
 
-		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
+		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 
 		String token = options.getJwtSupplier().get();
 		return AuthenticationSteps
