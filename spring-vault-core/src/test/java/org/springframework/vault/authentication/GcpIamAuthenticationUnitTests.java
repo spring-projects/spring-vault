@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.time.Duration;
 
@@ -99,5 +101,22 @@ class GcpIamAuthenticationUnitTests {
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isTrue();
 		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
+	}
+
+	@Test
+	void shouldCreateNewGcpIamObjectInstance()
+			throws GeneralSecurityException, IOException {
+
+		PrivateKey privateKeyMock = mock(PrivateKey.class);
+		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")
+				.setServiceAccountProjectId("foobar")
+				.setServiceAccountPrivateKey(privateKeyMock)
+				.setServiceAccountPrivateKeyId("key-id").build();
+		credential.setAccessToken("foobar");
+
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
+				.role("dev-role").credential(credential).build();
+
+		new GcpIamAuthentication(options, restTemplate);
 	}
 }
