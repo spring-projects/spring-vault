@@ -16,7 +16,6 @@
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -82,13 +81,9 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
-	 * @throws GeneralSecurityException thrown by
-	 *     {@link GoogleApacheHttpTransport#newTrustedTransport()}.
-	 * @throws IOException thrown by
-	 *     {@link GoogleApacheHttpTransport#newTrustedTransport()}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options,
-			RestOperations restOperations) throws GeneralSecurityException, IOException {
+			RestOperations restOperations) {
 		this(options, restOperations, new NetHttpTransport());
 	}
 
