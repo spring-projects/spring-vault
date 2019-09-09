@@ -1,46 +1,160 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ###########################################################################
 # Download and Install Vault                                              #
 # This script is prepared for caching of the download directory           #
 ###########################################################################
 
+set -o errexit
 
-VAULT_VER="${VAULT_VER:-1.2.2}"
-UNAME=$(uname -s |  tr '[:upper:]' '[:lower:]')
-VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_amd64.zip"
-IGNORE_CERTS="${IGNORE_CERTS:-no}"
+EDITION="${EDITION:-oss}"
+VAULT_OSS="${VAULT_OSS:-1.2.2}"
+VAULT_ENT="${VAULT_ENT:-0.11.0}"
+UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
+VERBOSE=false
+VAULT_DIRECTORY=vault
+DOWNLOAD_DIRECTORY=download
+readonly script_name="$(basename "${BASH_SOURCE[0]}")"
 
-# cleanup
-mkdir -p vault
-mkdir -p download
+function say() {
+  echo "$@"
+}
 
-if [[ ! -f "download/${VAULT_ZIP}" ]] ; then
-    cd download
+function verbose() {
+  if [[ ${VERBOSE} == true ]]; then
+    echo "$@"
+  fi
+}
+
+function initialize() {
+  # cleanup
+  mkdir -p ${VAULT_DIRECTORY}
+  mkdir -p ${DOWNLOAD_DIRECTORY}
+}
+
+function usage() {
+  cat <<EOF
+Usage: ${script_name} [OPTION]...
+Download and extract HashiCorp Vault
+Options:
+  -h|--help                    Displays this help
+  -v|--version                 Vault version number
+  -e|--edition oss|enterprise  Vault Edition
+EOF
+}
+
+function parse_options() {
+  local option
+  while [[ $# -gt 0 ]]; do
+    option="$1"
+    shift
+    case ${option} in
+    -h | -H | --help)
+      usage
+      exit 0
+      ;;
+    --verbose)
+      VERBOSE=true
+      ;;
+    -v | --version)
+      VAULT_VER="$1"
+      verbose "VAULT_VER=${VAULT_VER}"
+      shift
+      ;;
+    -e | --edition)
+      EDITION="$1"
+      verbose "EDITION=${EDITION}"
+      shift
+      ;;
+
+    *)
+      script_exit "Invalid argument was provided: ${option}" 2
+      ;;
+    esac
+  done
+}
+
+function unpack() {
+
+  cd ${VAULT_DIRECTORY}
+
+  if [[ -f vault ]]; then
+    rm vault
+  fi
+
+  say "Unzipping ${VAULT_FILE}..."
+  verbose " unzip ../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+  if [[ ${VERBOSE} == true ]]; then
+    unzip "../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+  else
+    unzip -q "../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+  fi
+
+  chmod a+x vault
+
+  # check
+  ./vault --version
+  cd ..
+}
+
+function download() {
+
+  if [[ ! -f "${DOWNLOAD_DIRECTORY}/${VAULT_FILE}" ]]; then
+    cd ${DOWNLOAD_DIRECTORY}
     # install Vault
-    if [[ "${IGNORE_CERTS}" == "no" ]] ; then
-      echo "Downloading Vault with certs verification"
-      wget "https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
+    say "Downloading Vault from ${VAULT_URL}"
+
+    verbose "wget ${VAULT_URL} -O ${VAULT_FILE}"
+
+    if [[ ${VERBOSE} == true ]]; then
+      wget "${VAULT_URL}" -O "${VAULT_FILE}"
     else
-      echo "WARNING... Downloading Vault WITHOUT certs verification"
-      wget "https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}" --no-check-certificate
+      wget "${VAULT_URL}" -q -O "${VAULT_FILE}"
     fi
 
-    if [[ $? != 0 ]] ; then
+    if [[ $? != 0 ]]; then
       echo "Cannot download Vault"
       exit 1
     fi
     cd ..
-fi
+  fi
+}
 
-cd vault
+function download_oss() {
 
-if [[ -f vault ]] ; then
-  rm vault
-fi
+  VAULT_VER="${VAULT_VER:-${VAULT_OSS}}"
+  VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_amd64.zip"
+  VAULT_FILE=${VAULT_ZIP}
+  VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
 
-unzip ../download/${VAULT_ZIP}
-chmod a+x vault
+  download
+  unpack
+}
 
-# check
-./vault --version
+function download_enterprise() {
+
+  VAULT_VER="${VAULT_VER:-${VAULT_ENT}}"
+  VAULT_ZIP="vault-enterprise_${VAULT_VER}%2Bent_${UNAME}_amd64.zip"
+  VAULT_FILE="vault-enterprise_${VAULT_VER}+ent_${UNAME}_amd64.zip"
+  VAULT_URL="http://hc-enterprise-binaries.s3.amazonaws.com/vault/ent/${VAULT_VER}/${VAULT_ZIP}"
+
+  download
+  unpack
+}
+
+function main() {
+
+  initialize
+  parse_options "$@"
+
+  if [[ ${EDITION} == 'oss' ]]; then
+    download_oss
+  elif [[ ${EDITION} == 'enterprise' ]]; then
+    download_enterprise
+  else
+    say "Ignoring edition option: ${EDITION} - oss and enterprise supported only"
+    exit 1
+  fi
+}
+
+main "$@"

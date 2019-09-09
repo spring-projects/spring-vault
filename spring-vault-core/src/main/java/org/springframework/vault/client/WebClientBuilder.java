@@ -194,8 +194,11 @@ public class WebClientBuilder {
 			builder.filter((request, next) -> {
 
 				return next.exchange(ClientRequest.from(request)
-						.headers(headers -> defaultHeaders.forEach(headers::addIfAbsent))
-						.build());
+						.headers(headers -> defaultHeaders.forEach((key, value) -> {
+							if (!headers.containsKey(key)) {
+								headers.add(key, value);
+							}
+						})).build());
 
 			});
 		}

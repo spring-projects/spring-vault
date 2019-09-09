@@ -1,6 +1,9 @@
 *.iml
 *.ipr
 *.iws
+*.crt
+*.hcl
+*.key
 .classpath
 .idea
 .project

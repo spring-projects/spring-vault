@@ -39,13 +39,15 @@ public class Version implements Comparable<Version> {
 
 	final int build;
 
+	final boolean enterprise;
+
 	/**
 	 * Creates a new {@link Version} from the given integer values. At least one value has
 	 * to be given but a maximum of 4.
 	 *
 	 * @param parts must not be {@literal null} or empty.
 	 */
-	private Version(int... parts) {
+	private Version(boolean enterprise, int... parts) {
 
 		Assert.notNull(parts, "Parts must not be null");
 		Assert.isTrue(parts.length > 0 && parts.length < 5,
@@ -55,6 +57,7 @@ public class Version implements Comparable<Version> {
 		this.minor = parts.length > 1 ? parts[1] : 0;
 		this.bugfix = parts.length > 2 ? parts[2] : 0;
 		this.build = parts.length > 3 ? parts[3] : 0;
+		this.enterprise = enterprise;
 
 		Assert.isTrue(major >= 0, "Major version must be greater or equal zero!");
 		Assert.isTrue(minor >= 0, "Minor version must be greater or equal zero!");
@@ -70,10 +73,11 @@ public class Version implements Comparable<Version> {
 	 */
 	public static Version parse(String version) {
 
-		Assert.hasText(version);
+		Assert.hasText(version, "Version must not be empty!");
 
 		String[] parts = version.trim().split("\\.");
 		int[] intParts = new int[parts.length];
+		boolean enterprise = version.endsWith("+ent");
 
 		for (int i = 0; i < parts.length; i++) {
 
@@ -91,7 +95,7 @@ public class Version implements Comparable<Version> {
 			}
 		}
 
-		return new Version(intParts);
+		return new Version(enterprise, intParts);
 	}
 
 	/**
@@ -176,6 +180,10 @@ public class Version implements Comparable<Version> {
 		return 0;
 	}
 
+	public boolean isEnterprise() {
+		return enterprise;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *
@@ -196,7 +204,8 @@ public class Version implements Comparable<Version> {
 			digits.add(build);
 		}
 
-		return StringUtils.collectionToDelimitedString(digits, ".");
+		return StringUtils.collectionToDelimitedString(digits, ".")
+				+ (isEnterprise() ? "+ent" : "");
 	}
 
 	@Override
@@ -207,11 +216,12 @@ public class Version implements Comparable<Version> {
 			return false;
 		Version version = (Version) o;
 		return major == version.major && minor == version.minor
-				&& bugfix == version.bugfix && build == version.build;
+				&& bugfix == version.bugfix && build == version.build
+				&& enterprise == version.enterprise;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(major, minor, bugfix, build);
+		return Objects.hash(major, minor, bugfix, build, enterprise);
 	}
 }
