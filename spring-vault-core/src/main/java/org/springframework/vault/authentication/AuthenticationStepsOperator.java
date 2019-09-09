@@ -52,7 +52,8 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodySpe
  */
 public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
-	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
+	private static final Log logger = LogFactory
+			.getLog(AuthenticationStepsOperator.class);
 
 	private final AuthenticationSteps chain;
 
@@ -75,7 +76,6 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
 		Mono<Object> state = createMono(chain.steps);
