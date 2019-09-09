@@ -29,7 +29,7 @@
 		<mockk.version>1.9.3</mockk.version>
 		<mockito-core.version>3.0.0</mockito-core.version>
 		<spring.version>5.2.0.RC2</spring.version>
-		<spring-data-releasetrain.version>Moore-RC2</spring-data-releasetrain.version>
+		<spring-data-releasetrain.version>Moore-RC3</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.1.5.RELEASE</spring-security-bom.version>
 		<reactor.version>Dysprosium-M3</reactor.version>
 		<java.version>1.8</java.version>
