@@ -10,6 +10,7 @@
 * `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
 * <<vault.authentication.pcf>>.
 * Deprecation of `AppIdAuthentication`. Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
+* `CubbyholeAuthentication` and wrapped `AppRoleAuthentication` now use `sys/wrapping/unwrap` endpoints by default.
 
 [[new-features.2-1-0]]
 === What's new in Spring Vault 2.1

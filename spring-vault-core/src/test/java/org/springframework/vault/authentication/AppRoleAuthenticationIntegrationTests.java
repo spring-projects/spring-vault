@@ -101,7 +101,8 @@ class AppRoleAuthenticationIntegrationTests
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.wrapped(unwrappingToken))
-				.roleId(RoleId.provided(roleId)).build();
+				.roleId(RoleId.provided(roleId))
+				.unwrappingEndpoints(getUnwrappingEndpoints()).build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
 				prepare().getRestTemplate());
@@ -117,7 +118,8 @@ class AppRoleAuthenticationIntegrationTests
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.wrapped(secretIdToken))
-				.roleId(RoleId.wrapped(roleIdToken)).build();
+				.roleId(RoleId.wrapped(roleIdToken))
+				.unwrappingEndpoints(getUnwrappingEndpoints()).build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
 				prepare().getRestTemplate());
@@ -133,7 +135,8 @@ class AppRoleAuthenticationIntegrationTests
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.wrapped(VaultToken.of(unwrappingToken)))
-				.roleId(RoleId.provided(roleId)).build();
+				.roleId(RoleId.provided(roleId))
+				.unwrappingEndpoints(getUnwrappingEndpoints()).build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options,
 				prepare().getRestTemplate());

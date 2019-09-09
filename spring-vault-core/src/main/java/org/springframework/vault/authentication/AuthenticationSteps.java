@@ -346,6 +346,19 @@ public class AuthenticationSteps {
 			return new HttpRequestBuilder(HttpMethod.POST, uri);
 		}
 
+		/**
+		 * Builder entry point to use {@link HttpMethod} for {@code uriTemplate}.
+		 *
+		 * @param uriTemplate must not be {@literal null} or empty.
+		 * @param uriVariables the variables to expand the template.
+		 * @return a new {@link HttpRequestBuilder}.
+		 * @since 2.2
+		 */
+		public static HttpRequestBuilder method(HttpMethod method, String uriTemplate,
+				String... uriVariables) {
+			return new HttpRequestBuilder(method, uriTemplate, uriVariables);
+		}
+
 		private HttpRequestBuilder(HttpMethod method, URI uri) {
 			this.method = method;
 			this.uri = uri;

@@ -40,20 +40,21 @@ class AppRoleAuthenticationStepsIntegrationTests
 		extends AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
-	void authenticationStepsShouldAuthenticateWithWrappedSecretId()
-			throws InterruptedException {
+	void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
 		VaultToken unwrappingToken = generateWrappedSecretIdResponse();
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.wrapped(unwrappingToken))
-				.roleId(RoleId.provided(roleId)).build();
+				.roleId(RoleId.provided(roleId))
+				.unwrappingEndpoints(getUnwrappingEndpoints()).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options),
 				prepare().getRestTemplate());
 
+		assertThat(executor.login()).isNotNull();
 	}
 
 	@Test
@@ -68,7 +69,7 @@ class AppRoleAuthenticationStepsIntegrationTests
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.secretId(SecretId.provided(secretId)).roleId(RoleId.wrapped(roleIdToken))
-				.build();
+				.unwrappingEndpoints(getUnwrappingEndpoints()).build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppRoleAuthentication.createAuthenticationSteps(options),

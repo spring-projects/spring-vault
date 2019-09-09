@@ -42,6 +42,11 @@ public class CubbyholeAuthenticationOptions {
 	private final String path;
 
 	/**
+	 * Unwrapping endpoint to cater for functionality across various Vault versions.
+	 */
+	private final UnwrappingEndpoints unwrappingEndpoints;
+
+	/**
 	 * Indicates whether the Cubbyhole contains a wrapped token.
 	 */
 	private final boolean wrappedToken;
@@ -53,12 +58,14 @@ public class CubbyholeAuthenticationOptions {
 	private final boolean selfLookup;
 
 	private CubbyholeAuthenticationOptions(VaultToken initialToken, String path,
-			boolean wrappedToken, boolean selfLookup) {
+			UnwrappingEndpoints unwrappingEndpoints, boolean wrappedToken,
+			boolean selfLookup) {
 
 		this.initialToken = initialToken;
 		this.path = path;
 		this.wrappedToken = wrappedToken;
 		this.selfLookup = selfLookup;
+		this.unwrappingEndpoints = unwrappingEndpoints;
 	}
 
 	/**
@@ -80,6 +87,14 @@ public class CubbyholeAuthenticationOptions {
 	 */
 	public String getPath() {
 		return path;
+	}
+
+	/**
+	 * @return the endpoint configuration.
+	 * @since 2.2
+	 */
+	public UnwrappingEndpoints getUnwrappingEndpoints() {
+		return unwrappingEndpoints;
 	}
 
 	/**
@@ -112,6 +127,8 @@ public class CubbyholeAuthenticationOptions {
 
 		@Nullable
 		private String path;
+
+		private UnwrappingEndpoints endpoints = UnwrappingEndpoints.SysWrapping;
 
 		private boolean wrappedToken;
 
@@ -151,13 +168,29 @@ public class CubbyholeAuthenticationOptions {
 		}
 
 		/**
+		 * Configure the {@link UnwrappingEndpoints} to use.
+		 *
+		 * @param endpoints must not be {@literal null}.
+		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}
+		 * @since 2.2
+		 */
+		public CubbyholeAuthenticationOptionsBuilder unwrappingEndpoints(
+				UnwrappingEndpoints endpoints) {
+
+			Assert.notNull(endpoints, "UnwrappingEndpoints must not be empty");
+
+			this.endpoints = endpoints;
+			return this;
+		}
+
+		/**
 		 * Configure whether to use wrapped token responses.
 		 *
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
 		public CubbyholeAuthenticationOptionsBuilder wrapped() {
 
-			this.path = "cubbyhole/response";
+			this.path = "";
 			this.wrappedToken = true;
 			return this;
 		}
@@ -188,8 +221,8 @@ public class CubbyholeAuthenticationOptions {
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 			Assert.notNull(path, "Path must not be null");
 
-			return new CubbyholeAuthenticationOptions(initialToken, path, wrappedToken,
-					selfLookup);
+			return new CubbyholeAuthenticationOptions(initialToken, path, endpoints,
+					wrappedToken, selfLookup);
 		}
 	}
 }

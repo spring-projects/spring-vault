@@ -43,6 +43,7 @@ class CubbyholeAuthenticationStepsIntegrationTests
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 		RestTemplate restTemplate = TestRestTemplateFactory
 				.create(Settings.createSslConfiguration());

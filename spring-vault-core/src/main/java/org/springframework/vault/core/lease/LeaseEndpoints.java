@@ -66,7 +66,7 @@ public enum LeaseEndpoints {
 	},
 
 	/**
-	 * Sys/lease endpoints for Vault 0.8 ans higher ({@literal /sys/leases/…}).
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}).
 	 */
 	SysLeases {
 

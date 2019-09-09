@@ -44,6 +44,7 @@ class CubbyholeAuthenticationIntegrationTests
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 		RestTemplate restTemplate = TestRestTemplateFactory
 				.create(Settings.createSslConfiguration());
@@ -58,6 +59,7 @@ class CubbyholeAuthenticationIntegrationTests
 	void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.initialToken(VaultToken.of("Hello")).wrapped().build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory
@@ -70,9 +72,7 @@ class CubbyholeAuthenticationIntegrationTests
 			fail("Missing VaultException");
 		}
 		catch (VaultException e) {
-			assertThat(e).hasMessageContaining("Cannot login using Cubbyhole")
-					.hasMessageContaining("permission denied");
+			assertThat(e).hasMessageContaining("Cannot login using Cubbyhole");
 		}
 	}
-
 }

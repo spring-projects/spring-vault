@@ -62,7 +62,7 @@ class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldLoginUsingWrappedLogin() throws Exception {
+	void shouldLoginUsingCubbyholeLogin() throws Exception {
 
 		String wrappedResponse = "{\"request_id\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\","
 				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\","
@@ -78,7 +78,8 @@ class CubbyholeAuthenticationUnitTests {
 								+ "} }"));
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.initialToken(VaultToken.of("hello")).wrapped().build();
+				.initialToken(VaultToken.of("hello"))
+				.unwrappingEndpoints(UnwrappingEndpoints.Cubbyhole).wrapped().build();
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
 				restTemplate);
@@ -94,20 +95,49 @@ class CubbyholeAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldLoginUsingWrappedLoginWithSelfLookup() throws Exception {
+	void shouldLoginUsingWrappedLogin() {
+
+		String wrappedResponse = "{\"request_id\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\","
+				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\","
+				+ "\"lease_duration\":0,"
+				+ "\"accessor\":\"46b6aebb-187f-932a-26d7-4f3d86a68319\"} }";
+
+		mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body(wrappedResponse));
+
+		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.initialToken(VaultToken.of("hello"))
+				.unwrappingEndpoints(UnwrappingEndpoints.SysWrapping).wrapped().build();
+
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
+				restTemplate);
+
+		VaultToken login = authentication.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("5e6332cf-f003-6369-8cba-5bce2330f6cc");
+
+		LoginToken loginToken = (LoginToken) login;
+		assertThat(loginToken.isRenewable()).isFalse();
+		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ZERO);
+	}
+
+	@Test
+	void shouldLoginUsingWrappedLoginWithSelfLookup() {
 
 		String wrappedResponse = "{\"request_id\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\","
 				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\","
 				+ "\"lease_duration\":10,"
 				+ "\"accessor\":\"46b6aebb-187f-932a-26d7-4f3d86a68319\"} }";
 
-		mockRest.expect(requestTo("/cubbyhole/response"))
-				.andExpect(method(HttpMethod.GET))
+		mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+				.andExpect(method(HttpMethod.POST))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\":{\"response\":"
-								+ OBJECT_MAPPER.writeValueAsString(wrappedResponse)
-								+ "} }"));
+						.body(wrappedResponse));
 
 		mockRest.expect(requestTo("/auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))

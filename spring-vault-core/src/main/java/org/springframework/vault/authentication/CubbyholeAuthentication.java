@@ -28,14 +28,12 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
 import org.springframework.vault.client.VaultHttpHeaders;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.method;
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
@@ -176,21 +174,26 @@ public class CubbyholeAuthentication
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 
-		HttpRequest<VaultResponse> initialRequest = get(options.getPath()) //
-				.with(VaultHttpHeaders.from(options.getInitialToken())) //
+		String url = getRequestPath(options);
+
+		HttpMethod unwrapMethod = getRequestMethod(options);
+		HttpEntity<Object> requestEntity = getRequestEntity(options);
+
+		HttpRequest<VaultResponse> initialRequest = method(unwrapMethod, url) //
+				.with(requestEntity) //
 				.as(VaultResponse.class);
 
 		return AuthenticationSteps.fromHttpRequest(initialRequest) //
-				.map(VaultResponseSupport::getData) //
-				.login(map -> getToken(options, map));
+				.login(it -> getToken(options, it, url));
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		Map<String, Object> data = lookupToken();
+		String url = getRequestPath(options);
+		VaultResponse data = lookupToken(url);
 
-		VaultToken tokenToUse = getToken(this.options, data);
+		VaultToken tokenToUse = getToken(this.options, data, url);
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
@@ -209,18 +212,17 @@ public class CubbyholeAuthentication
 	}
 
 	@Nullable
-	private Map<String, Object> lookupToken() {
+	private VaultResponse lookupToken(String url) {
 
 		try {
-
-			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					options.getPath(), HttpMethod.GET,
-					new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken())),
-					VaultResponse.class);
+			HttpMethod unwrapMethod = getRequestMethod(options);
+			HttpEntity<Object> requestEntity = getRequestEntity(options);
+			ResponseEntity<VaultResponse> entity = restOperations.exchange(url,
+					unwrapMethod, requestEntity, VaultResponse.class);
 
 			Assert.state(entity.getBody() != null, "Auth response must not be null");
 
-			return entity.getBody().getData();
+			return entity.getBody();
 		}
 		catch (RestClientException e) {
 			throw VaultLoginException.create("Cubbyhole", e);
@@ -245,21 +247,43 @@ public class CubbyholeAuthentication
 		return true;
 	}
 
+	private static HttpEntity<Object> getRequestEntity(
+			CubbyholeAuthenticationOptions options) {
+		return new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken()));
+	}
+
+	private static HttpMethod getRequestMethod(CubbyholeAuthenticationOptions options) {
+
+		if (options.isWrappedToken()) {
+			return options.getUnwrappingEndpoints().getUnwrapRequestMethod();
+		}
+
+		return HttpMethod.GET;
+	}
+
+	private static String getRequestPath(CubbyholeAuthenticationOptions options) {
+
+		if (options.isWrappedToken()) {
+			return options.getUnwrappingEndpoints().getPath();
+		}
+
+		return options.getPath();
+	}
+
 	private static VaultToken getToken(CubbyholeAuthenticationOptions options,
-			@Nullable Map<String, Object> data) {
+			VaultResponse response, String url) {
 
 		if (options.isWrappedToken()) {
 
-			Assert.state(data != null, "Auth data must not be null");
+			VaultResponse responseToUse = options.getUnwrappingEndpoints()
+					.unwrap(response);
 
-			VaultResponse response = VaultResponses.unwrap((String) data.get("response"),
-					VaultResponse.class);
+			Assert.state(responseToUse.getAuth() != null, "Auth field must not be null");
 
-			Assert.state(response.getAuth() != null, "Auth field must not be null");
-
-			return LoginTokenUtil.from(response.getAuth());
+			return LoginTokenUtil.from(responseToUse.getAuth());
 		}
 
+		Map<String, Object> data = response.getData();
 		if (data == null || data.isEmpty()) {
 			throw new VaultLoginException(String.format(
 					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
@@ -273,6 +297,6 @@ public class CubbyholeAuthentication
 
 		throw new VaultLoginException(String.format(
 				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token",
-				options.getPath()));
+				url));
 	}
 }

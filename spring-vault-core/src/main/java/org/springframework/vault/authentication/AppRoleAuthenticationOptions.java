@@ -61,6 +61,11 @@ public class AppRoleAuthenticationOptions {
 	private final String appRole;
 
 	/**
+	 * Unwrapping endpoint to cater for functionality across various Vault versions.
+	 */
+	private final UnwrappingEndpoints unwrappingEndpoints;
+
+	/**
 	 * Token associated for pull mode (retrieval of secretId/roleId).
 	 * @deprecated since 2.0, use {@link RoleId#pull(VaultToken)}/
 	 * {@link SecretId#pull(VaultToken)} to configure pull mode for roleId/secretId.
@@ -70,12 +75,14 @@ public class AppRoleAuthenticationOptions {
 	private final VaultToken initialToken;
 
 	private AppRoleAuthenticationOptions(String path, RoleId roleId, SecretId secretId,
-			@Nullable String appRole, @Nullable VaultToken initialToken) {
+			@Nullable String appRole, UnwrappingEndpoints unwrappingEndpoints,
+			@Nullable VaultToken initialToken) {
 
 		this.path = path;
 		this.roleId = roleId;
 		this.secretId = secretId;
 		this.appRole = appRole;
+		this.unwrappingEndpoints = unwrappingEndpoints;
 		this.initialToken = initialToken;
 	}
 
@@ -117,6 +124,14 @@ public class AppRoleAuthenticationOptions {
 	}
 
 	/**
+	 * @return the endpoint configuration.
+	 * @since 2.2
+	 */
+	public UnwrappingEndpoints getUnwrappingEndpoints() {
+		return unwrappingEndpoints;
+	}
+
+	/**
 	 * @return the initial token for roleId/secretId retrieval in pull mode.
 	 * @since 1.1
 	 * @deprecated since 2.0, use {@link #getRoleId()}/{@link #getSecretId()} to obtain
@@ -149,6 +164,8 @@ public class AppRoleAuthenticationOptions {
 
 		@Nullable
 		private String appRole;
+
+		private UnwrappingEndpoints unwrappingEndpoints = UnwrappingEndpoints.SysWrapping;
 
 		@Nullable
 		@Deprecated
@@ -250,6 +267,22 @@ public class AppRoleAuthenticationOptions {
 		}
 
 		/**
+		 * Configure the {@link UnwrappingEndpoints} to use.
+		 *
+		 * @param endpoints must not be {@literal null}.
+		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}
+		 * @since 2.2
+		 */
+		public AppRoleAuthenticationOptionsBuilder unwrappingEndpoints(
+				UnwrappingEndpoints endpoints) {
+
+			Assert.notNull(endpoints, "UnwrappingEndpoints must not be empty");
+
+			this.unwrappingEndpoints = endpoints;
+			return this;
+		}
+
+		/**
 		 * Configure a {@code initialToken}.
 		 *
 		 * @param initialToken must not be empty or {@literal null}.
@@ -310,7 +343,7 @@ public class AppRoleAuthenticationOptions {
 			}
 
 			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole,
-					initialToken);
+					unwrappingEndpoints, initialToken);
 		}
 	}
 

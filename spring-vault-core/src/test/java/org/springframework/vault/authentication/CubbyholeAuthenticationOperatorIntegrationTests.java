@@ -47,6 +47,7 @@ class CubbyholeAuthenticationOperatorIntegrationTests
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
+				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.initialToken(VaultToken.of(initialToken)).wrapped().build();
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(

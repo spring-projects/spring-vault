@@ -29,6 +29,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Settings;
+import org.springframework.vault.util.Version;
 
 /**
  * Integration tests for {@link AppRoleAuthentication}.
@@ -40,6 +41,7 @@ import org.springframework.vault.util.Settings;
 class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	static final String SUITABLE_FOR_APP_ROLE_TESTS = "0.6.2";
+	static final Version sysUnwrapSince = Version.parse("0.6.2");
 
 	@BeforeEach
 	public void before() {
@@ -111,6 +113,15 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
+	}
+
+	UnwrappingEndpoints getUnwrappingEndpoints() {
+		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping
+				: UnwrappingEndpoints.Cubbyhole;
+	}
+
+	private boolean useSysWrapping() {
+		return prepare().getVersion().isGreaterThanOrEqualTo(sysUnwrapSince);
 	}
 
 	private HttpEntity<String> getWrappingHeaders() {

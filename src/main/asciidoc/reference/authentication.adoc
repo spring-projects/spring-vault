@@ -25,7 +25,7 @@ OS access levels.
 ====
 [source, java]
 ----
-@PropertySource("configuration.properties"),
+@PropertySource("configuration.properties")
 @Configuration
 public class Config extends AbstractVaultConfiguration {
 
@@ -669,7 +669,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ====
 [source,shell]
 ----
-$ vault token-create
+$ vault token create
 Key                    Value
 ---                    -----
 token                  f9e30681-d46a-cdaf-aaa0-2ae0a9ad0819
@@ -678,7 +678,7 @@ token_duration         0s
 token_renewable        false
 token_policies         [root]
 
-$ token-create -use-limit=2 -orphan -no-default-policy -policy=none
+$ vault token create -use-limit=2 -orphan -no-default-policy -policy=none
 Key                    Value
 ---                    -----
 token                  895cb88b-aef4-0e33-ba65-d50007290780

@@ -23,6 +23,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,6 +34,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
+	private static final Version sysUnwrapSince = Version.parse("0.6.2");
+
 	Map<String, String> prepareWrappedToken() {
 
 		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
@@ -42,7 +45,7 @@ abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTes
 					headers.add("X-Vault-Wrap-TTL", "10m");
 
 					return restOperations.exchange("auth/token/create", HttpMethod.POST,
-							new HttpEntity<Object>(headers), VaultResponse.class);
+							new HttpEntity<>(headers), VaultResponse.class);
 				});
 
 		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
@@ -50,5 +53,14 @@ abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTes
 		// Response Wrapping requires Vault 0.6.0+
 		assertThat(wrapInfo).isNotNull();
 		return wrapInfo;
+	}
+
+	UnwrappingEndpoints getUnwrappingEndpoints() {
+		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping
+				: UnwrappingEndpoints.Cubbyhole;
+	}
+
+	private boolean useSysWrapping() {
+		return prepare().getVersion().isGreaterThanOrEqualTo(sysUnwrapSince);
 	}
 }

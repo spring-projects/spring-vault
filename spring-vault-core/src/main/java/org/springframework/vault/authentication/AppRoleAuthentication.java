@@ -43,6 +43,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.method;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
@@ -136,9 +137,10 @@ public class AppRoleAuthentication
 		}
 
 		if (roleId instanceof Wrapped) {
-			return unwrapResponse(((Wrapped) roleId).getInitialToken())
-					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
-							.get("role_id"));
+			return unwrapResponse(options.getUnwrappingEndpoints(),
+					((Wrapped) roleId).getInitialToken())
+							.map(vaultResponse -> (String) vaultResponse.getRequiredData()
+									.get("role_id"));
 		}
 
 		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
@@ -164,25 +166,24 @@ public class AppRoleAuthentication
 
 		if (secretId instanceof Wrapped) {
 
-			return unwrapResponse(((Wrapped) secretId).getInitialToken())
-					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
-							.get("secret_id"));
+			return unwrapResponse(options.getUnwrappingEndpoints(),
+					((Wrapped) secretId).getInitialToken())
+							.map(vaultResponse -> (String) vaultResponse.getRequiredData()
+									.get("secret_id"));
 		}
 
 		throw new IllegalArgumentException("Unknown SecretId configuration: " + secretId);
 
 	}
 
-	private static Node<VaultResponse> unwrapResponse(VaultToken token) {
+	private static Node<VaultResponse> unwrapResponse(
+			UnwrappingEndpoints unwrappingEndpoints, VaultToken token) {
 
-		return AuthenticationSteps.fromHttpRequest(get("cubbyhole/response")
-				.with(createHttpHeaders(token)).as(VaultResponse.class))
-				.map(vaultResponse -> {
-
-					Map<String, Object> data = vaultResponse.getRequiredData();
-					return VaultResponses.unwrap((String) data.get("response"),
-							VaultResponse.class);
-				});
+		return AuthenticationSteps
+				.fromHttpRequest(method(unwrappingEndpoints.getUnwrapRequestMethod(),
+						unwrappingEndpoints.getPath()).with(createHttpHeaders(token))
+								.as(VaultResponse.class))
+				.map(unwrappingEndpoints::unwrap);
 	}
 
 	@Override
@@ -247,14 +248,14 @@ public class AppRoleAuthentication
 			VaultToken token = ((Wrapped) roleId).getInitialToken();
 
 			try {
-
+				UnwrappingEndpoints unwrappingEndpoints = options
+						.getUnwrappingEndpoints();
 				ResponseEntity<VaultResponse> entity = restOperations.exchange(
-						"cubbyhole/response", HttpMethod.GET, createHttpEntity(token),
-						VaultResponse.class);
+						unwrappingEndpoints.getPath(),
+						unwrappingEndpoints.getUnwrapRequestMethod(),
+						createHttpEntity(token), VaultResponse.class);
 
-				Map<String, Object> data = entity.getBody().getRequiredData();
-				VaultResponse response = VaultResponses
-						.unwrap((String) data.get("response"), VaultResponse.class);
+				VaultResponse response = unwrappingEndpoints.unwrap(entity.getBody());
 
 				return (String) response.getRequiredData().get("role_id");
 			}
@@ -299,13 +300,14 @@ public class AppRoleAuthentication
 
 			try {
 
+				UnwrappingEndpoints unwrappingEndpoints = options
+						.getUnwrappingEndpoints();
 				ResponseEntity<VaultResponse> entity = restOperations.exchange(
-						"cubbyhole/response", HttpMethod.GET, createHttpEntity(token),
-						VaultResponse.class);
+						unwrappingEndpoints.getPath(),
+						unwrappingEndpoints.getUnwrapRequestMethod(),
+						createHttpEntity(token), VaultResponse.class);
 
-				Map<String, Object> data = entity.getBody().getRequiredData();
-				VaultResponse response = VaultResponses
-						.unwrap((String) data.get("response"), VaultResponse.class);
+				VaultResponse response = unwrappingEndpoints.unwrap(entity.getBody());
 
 				return (String) response.getRequiredData().get("secret_id");
 			}
