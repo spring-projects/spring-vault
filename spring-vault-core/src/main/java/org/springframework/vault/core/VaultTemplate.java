@@ -183,7 +183,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			ClientHttpRequestFactory requestFactory) {
 
 		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
-				.requestFactory(requestFactory).customizer(restTemplate -> restTemplate
+				.requestFactory(requestFactory).customizers(restTemplate -> restTemplate
 						.getInterceptors().add(getSessionInterceptor()))
 				.build();
 	}

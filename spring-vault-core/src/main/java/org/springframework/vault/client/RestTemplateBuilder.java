@@ -176,7 +176,7 @@ public class RestTemplateBuilder {
 	 * @param customizer the template customizers to add.
 	 * @return {@code this} {@link RestTemplateBuilder}.
 	 */
-	public RestTemplateBuilder customizer(RestTemplateCustomizer... customizer) {
+	public RestTemplateBuilder customizers(RestTemplateCustomizer... customizer) {
 
 		this.customizers.addAll(Arrays.asList(customizer));
 

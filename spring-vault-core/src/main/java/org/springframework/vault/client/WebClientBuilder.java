@@ -150,7 +150,7 @@ public class WebClientBuilder {
 	 * @param customizer the client customizers to add.
 	 * @return {@code this} {@link WebClientBuilder}.
 	 */
-	public WebClientBuilder customizer(WebClientCustomizer... customizer) {
+	public WebClientBuilder customizers(WebClientCustomizer... customizer) {
 
 		this.customizers.addAll(Arrays.asList(customizer));
 

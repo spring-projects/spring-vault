@@ -55,7 +55,7 @@ class RestTemplateBuilderUnitTests {
 
 		RestTemplate restTemplate = RestTemplateBuilder.builder()
 				.endpoint(VaultEndpoint.create("localhost", 8200))
-				.customizer(it -> it.setErrorHandler(errorHandler)).build();
+				.customizers(it -> it.setErrorHandler(errorHandler)).build();
 
 		assertThat(restTemplate.getErrorHandler()).isSameAs(errorHandler);
 	}

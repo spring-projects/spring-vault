@@ -91,7 +91,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 				.requestFactory(ClientHttpRequestFactoryFactory
 						.create(new ClientOptions(), Settings.createSslConfiguration()))
 				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.customizer(restTemplate -> restTemplate.getInterceptors()
+				.customizers(restTemplate -> restTemplate.getInterceptors()
 						.add(VaultClients.createNamespaceInterceptor("dev")));
 
 		maketingRestTemplate = RestTemplateBuilder.builder()
