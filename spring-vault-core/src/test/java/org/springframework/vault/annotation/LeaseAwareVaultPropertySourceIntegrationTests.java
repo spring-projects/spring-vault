@@ -21,27 +21,26 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.stereotype.Component;
 import org.springframework.vault.annotation.VaultPropertySource.Renewal;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.env.VaultPropertySourceNotFoundException;
 import org.springframework.vault.util.VaultExtension;
 import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration test for {@link VaultPropertySource}.
  *
  * @author Mark Paluch
  */
-@ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
-@ContextConfiguration
 class LeaseAwareVaultPropertySourceIntegrationTests {
 
 	@VaultPropertySource(value = { "secret/myapp",
@@ -49,11 +48,15 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 	static class Config extends VaultIntegrationTestConfiguration {
 	}
 
-	@Autowired
-	Environment env;
+	@VaultPropertySource(value = { "unknown" }, ignoreSecretNotFound = false)
+	static class FailingConfig extends VaultIntegrationTestConfiguration {
+	}
 
-	@Value("${myapp}")
-	String myapp;
+	@VaultPropertySource(value = {
+			"unknown" }, ignoreSecretNotFound = false, renewal = Renewal.RENEW)
+	static class FailingRenewableConfig extends VaultIntegrationTestConfiguration {
+
+	}
 
 	@BeforeAll
 	static void beforeClass(VaultInitializer vaultInitializer) {
@@ -67,14 +70,51 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 	}
 
 	@Test
-	void environmentShouldResolveProperties() {
+	void shouldLoadProperties() {
 
-		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
-		assertThat(env.getProperty("myprofile")).isEqualTo("myprofilevalue");
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				Config.class, PropertyConsumer.class)) {
+			ConfigurableEnvironment env = context.getEnvironment();
+			PropertyConsumer consumer = context.getBean(PropertyConsumer.class);
+
+			assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
+			assertThat(env.getProperty("myprofile")).isEqualTo("myprofilevalue");
+			assertThat(consumer.myapp).isEqualTo("myvalue");
+		}
 	}
 
 	@Test
-	void valueShouldInjectProperty() {
-		assertThat(myapp).isEqualTo("myvalue");
+	void shouldFailIfPropertiesNotFound() {
+
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				FailingConfig.class)) {
+			fail("AnnotationConfigApplicationContext startup did not fail");
+		}
+		catch (Exception e) {
+			assertThat(e)
+					.hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
+					.hasMessageContaining("Vault location [unknown] not resolvable");
+		}
+	}
+
+	@Test
+	void shouldFailIfRenewablePropertiesNotFound() {
+
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
+				FailingRenewableConfig.class)) {
+
+			fail("AnnotationConfigApplicationContext startup did not fail");
+		}
+		catch (Exception e) {
+			assertThat(e)
+					.hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
+					.hasMessageContaining("Vault location [unknown] not resolvable");
+		}
+	}
+
+	@Component
+	static class PropertyConsumer {
+		@Value("${myapp}")
+		String myapp;
 	}
 }

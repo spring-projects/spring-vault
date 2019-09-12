@@ -24,16 +24,17 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.event.BeforeSecretLeaseRevocationEvent;
-import org.springframework.vault.core.lease.event.LeaseListener;
 import org.springframework.vault.core.lease.event.LeaseListenerAdapter;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.JsonMapFlattener;
@@ -64,7 +65,14 @@ public class LeaseAwareVaultPropertySource
 
 	private final PropertyTransformer propertyTransformer;
 
-	private final LeaseListener leaseListener;
+	private final boolean ignoreSecretNotFound;
+
+	private final LeaseListenerAdapter leaseListener;
+
+	private volatile boolean notFound = false;
+
+	@Nullable
+	private volatile Exception loadError;
 
 	/**
 	 * Create a new {@link LeaseAwareVaultPropertySource} given a
@@ -111,6 +119,28 @@ public class LeaseAwareVaultPropertySource
 			SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret,
 			PropertyTransformer propertyTransformer) {
 
+		this(name, secretLeaseContainer, requestedSecret, propertyTransformer, true);
+	}
+
+	/**
+	 * Create a new {@link LeaseAwareVaultPropertySource} given a {@code name},
+	 * {@link SecretLeaseContainer} and {@link RequestedSecret}. This property source
+	 * requests the secret upon initialization and receives secrets once they are emitted
+	 * through events published by {@link SecretLeaseContainer}.
+	 *
+	 * @param name name of the property source, must not be {@literal null}.
+	 * @param secretLeaseContainer must not be {@literal null}.
+	 * @param requestedSecret must not be {@literal null}.
+	 * @param propertyTransformer object to transform properties.
+	 * @param ignoreSecretNotFound indicate if failure to find a secret at {@code path}
+	 *     should be ignored.
+	 * @since 2.2
+	 * @see PropertyTransformers
+	 */
+	public LeaseAwareVaultPropertySource(String name,
+			SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret,
+			PropertyTransformer propertyTransformer, boolean ignoreSecretNotFound) {
+
 		super(name);
 
 		Assert.notNull(secretLeaseContainer,
@@ -122,11 +152,17 @@ public class LeaseAwareVaultPropertySource
 		this.requestedSecret = requestedSecret;
 		this.propertyTransformer = propertyTransformer
 				.andThen(PropertyTransformers.removeNullProperties());
+		this.ignoreSecretNotFound = ignoreSecretNotFound;
 		this.leaseListener = new LeaseListenerAdapter() {
 			@Override
 			public void onLeaseEvent(SecretLeaseEvent leaseEvent) {
 				handleLeaseEvent(leaseEvent,
 						LeaseAwareVaultPropertySource.this.properties);
+			}
+
+			@Override
+			public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
+				handleLeaseErrorEvent(leaseEvent, exception);
 			}
 		};
 
@@ -144,7 +180,28 @@ public class LeaseAwareVaultPropertySource
 		}
 
 		secretLeaseContainer.addLeaseListener(leaseListener);
+		secretLeaseContainer.addErrorListener(leaseListener);
 		secretLeaseContainer.addRequestedSecret(requestedSecret);
+
+		Exception loadError = this.loadError;
+		if (notFound || loadError != null) {
+
+			String msg = String.format("Vault location [%s] not resolvable",
+					requestedSecret.getPath());
+
+			if (ignoreSecretNotFound) {
+				if (logger.isInfoEnabled()) {
+					logger.info(String.format("%s: %s", msg,
+							loadError != null ? loadError.getMessage() : "Not found"));
+				}
+			}
+			else {
+				if (loadError != null) {
+					throw new VaultPropertySourceNotFoundException(msg, loadError);
+				}
+				throw new VaultPropertySourceNotFoundException(msg);
+			}
+		}
 	}
 
 	public RequestedSecret getRequestedSecret() {
@@ -180,6 +237,10 @@ public class LeaseAwareVaultPropertySource
 			return;
 		}
 
+		if (leaseEvent instanceof SecretNotFoundEvent) {
+			this.notFound = true;
+		}
+
 		if (leaseEvent instanceof SecretLeaseExpiredEvent
 				|| leaseEvent instanceof BeforeSecretLeaseRevocationEvent
 				|| leaseEvent instanceof SecretLeaseCreatedEvent) {
@@ -191,6 +252,22 @@ public class LeaseAwareVaultPropertySource
 			SecretLeaseCreatedEvent created = (SecretLeaseCreatedEvent) leaseEvent;
 			properties.putAll(doTransformProperties(flattenMap(created.getSecrets())));
 		}
+	}
+
+	/**
+	 * Hook method to handle a {@link SecretLeaseEvent} errors.
+	 *
+	 * @param leaseEvent must not be {@literal null}.
+	 * @param exception offending exception.
+	 */
+	protected void handleLeaseErrorEvent(SecretLeaseEvent leaseEvent,
+			Exception exception) {
+
+		if (leaseEvent.getSource() != getRequestedSecret()) {
+			return;
+		}
+
+		this.loadError = exception;
 	}
 
 	/**

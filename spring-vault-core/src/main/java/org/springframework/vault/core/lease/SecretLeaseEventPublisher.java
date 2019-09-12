@@ -36,6 +36,7 @@ import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseErrorEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 
 /**
  * Publisher for {@link SecretLeaseEvent}s.
@@ -119,6 +120,17 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	protected void onSecretsObtained(RequestedSecret requestedSecret, Lease lease,
 			Map<String, Object> body) {
 		dispatch(new SecretLeaseCreatedEvent(requestedSecret, lease, body));
+	}
+
+	/**
+	 * Hook method called when secrets were not found. The default implementation is to
+	 * notify {@link LeaseListener}. Implementations can override this method in
+	 * subclasses.
+	 *
+	 * @param requestedSecret must not be {@literal null}.
+	 */
+	protected void onSecretsNotFound(RequestedSecret requestedSecret) {
+		dispatch(new SecretNotFoundEvent(requestedSecret, Lease.none()));
 	}
 
 	/**

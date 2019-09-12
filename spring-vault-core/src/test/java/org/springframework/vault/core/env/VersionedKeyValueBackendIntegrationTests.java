@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.vault.annotation.VaultPropertySource;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultKeyValueOperations;
@@ -52,6 +53,7 @@ class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@VaultPropertySource(value = "versioned/my/path", renewal = VaultPropertySource.Renewal.ROTATE)
+	@PropertySource(value = "http://foo", ignoreResourceNotFound = true)
 	@Configuration
 	static class RotatingSecret {
 	}

@@ -69,6 +69,8 @@ import org.springframework.context.annotation.Import;
  * MutablePropertySources} javadocs for details.
  *
  * @author Mark Paluch
+ * @see org.springframework.vault.core.env.VaultPropertySource
+ * @see org.springframework.vault.core.env.LeaseAwareVaultPropertySource
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -78,7 +80,7 @@ import org.springframework.context.annotation.Import;
 public @interface VaultPropertySource {
 
 	/**
-	 * Indicate the Vault path(s) of the properties to be retrieved. For example,
+	 * Indicate the Vault path(s) of the secret to be retrieved. For example,
 	 * {@code "secret/myapp"} or {@code "secret/my-application/profile"}.
 	 * <p>
 	 * Each location will be added to the enclosing {@code Environment} as its own
@@ -91,6 +93,15 @@ public @interface VaultPropertySource {
 	 * prefixed with {@code propertyNamePrefix}.
 	 */
 	String propertyNamePrefix() default "";
+
+	/**
+	 * Indicate if failure to find the {@link #value() secrets} should be ignored.
+	 * <p>
+	 * {@literal true} is appropriate if the secrets are completely optional. Default is
+	 * {@literal true}.
+	 * @since 2.2.
+	 */
+	boolean ignoreSecretNotFound() default true;
 
 	/**
 	 * Configure the name of the {@link org.springframework.vault.core.VaultTemplate} bean

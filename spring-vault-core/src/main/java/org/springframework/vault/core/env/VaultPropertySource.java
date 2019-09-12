@@ -57,6 +57,8 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	private final PropertyTransformer propertyTransformer;
 
+	private final boolean ignoreSecretNotFound;
+
 	private final Object lock = new Object();
 
 	/**
@@ -102,6 +104,27 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 */
 	public VaultPropertySource(String name, VaultOperations vaultOperations, String path,
 			PropertyTransformer propertyTransformer) {
+		this(name, vaultOperations, path, propertyTransformer, true);
+	}
+
+	/**
+	 * Create a new {@link VaultPropertySource} given a {@code name},
+	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
+	 * properties upon construction and transforms these by applying
+	 * {@link PropertyTransformer}.
+	 *
+	 * @param name name of the property source, must not be {@literal null}.
+	 * @param vaultOperations must not be {@literal null}.
+	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
+	 *     be empty or {@literal null}.
+	 * @param propertyTransformer object to transform properties.
+	 * @param ignoreSecretNotFound indicate if failure to find a secret at {@code path}
+	 *     should be ignored.
+	 * @since 2.2
+	 * @see PropertyTransformers
+	 */
+	public VaultPropertySource(String name, VaultOperations vaultOperations, String path,
+			PropertyTransformer propertyTransformer, boolean ignoreSecretNotFound) {
 
 		super(name, vaultOperations);
 
@@ -113,6 +136,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 		this.keyValueDelegate = new KeyValueDelegate(vaultOperations, LinkedHashMap::new);
 		this.propertyTransformer = propertyTransformer
 				.andThen(PropertyTransformers.removeNullProperties());
+		this.ignoreSecretNotFound = ignoreSecretNotFound;
 
 		loadProperties();
 	}
@@ -127,9 +151,34 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 				logger.debug(String.format("Fetching properties from Vault at %s", path));
 			}
 
-			Map<String, Object> properties = doGetProperties(path);
+			Map<String, Object> properties = null;
+			RuntimeException error = null;
 
-			if (properties != null) {
+			try {
+				properties = doGetProperties(path);
+			}
+			catch (RuntimeException e) {
+				error = e;
+			}
+
+			if (properties == null) {
+
+				String msg = String.format("Vault location [%s] not resolvable", path);
+
+				if (ignoreSecretNotFound) {
+					if (logger.isInfoEnabled()) {
+						logger.info(String.format("%s: %s", msg,
+								error != null ? error.getMessage() : "Not found"));
+					}
+				}
+				else {
+					if (error != null) {
+						throw new VaultPropertySourceNotFoundException(msg, error);
+					}
+					throw new VaultPropertySourceNotFoundException(msg);
+				}
+			}
+			else {
 				this.properties.putAll(doTransformProperties(properties));
 			}
 		}

@@ -47,6 +47,7 @@ import org.springframework.vault.core.lease.event.LeaseListenerAdapter;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
@@ -127,7 +128,8 @@ class SecretLeaseContainerUnitTests {
 
 		secretLeaseContainer.requestRenewableSecret(requestedSecret.getPath());
 
-		verifyZeroInteractions(leaseListenerAdapter);
+		verify(leaseListenerAdapter).onLeaseEvent(any(SecretNotFoundEvent.class));
+		verifyNoMoreInteractions(leaseListenerAdapter);
 	}
 
 	@Test
@@ -158,7 +160,7 @@ class SecretLeaseContainerUnitTests {
 		VaultResponse secrets = new VaultResponse();
 		secrets.setLeaseId("lease");
 		secrets.setRenewable(false);
-		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+		secrets.setData(Collections.singletonMap("key", "value"));
 
 		when(vaultOperations.read(requestedSecret.getPath())).thenReturn(secrets);
 

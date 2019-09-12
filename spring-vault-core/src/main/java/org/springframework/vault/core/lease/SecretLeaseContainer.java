@@ -653,12 +653,20 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			RequestedSecret requestedSecret) {
 
 		try {
+			VaultResponseSupport<Map<String, Object>> secrets;
 
 			if (keyValueDelegate.isVersioned(requestedSecret.getPath())) {
-				return keyValueDelegate.getSecret(requestedSecret.getPath());
+				secrets = keyValueDelegate.getSecret(requestedSecret.getPath());
+			}
+			else {
+				secrets = this.operations.read(requestedSecret.getPath());
 			}
 
-			return this.operations.read(requestedSecret.getPath());
+			if (secrets == null) {
+				onSecretsNotFound(requestedSecret);
+			}
+
+			return secrets;
 		}
 		catch (RuntimeException e) {
 

@@ -124,6 +124,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 			String ref = propertySource.getString("vaultTemplateRef");
 			String propertyNamePrefix = propertySource.getString("propertyNamePrefix");
 			Renewal renewal = propertySource.getEnum("renewal");
+			boolean ignoreSecretNotFound = propertySource
+					.getBoolean("ignoreSecretNotFound");
 
 			Assert.isTrue(paths.length > 0,
 					"At least one @VaultPropertySource(value) location is required");
@@ -143,7 +145,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 				}
 
 				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref, renewal,
-						propertyTransformer,
+						propertyTransformer, ignoreSecretNotFound,
 						potentiallyResolveRequiredPlaceholders(propertyPath));
 
 				do {
@@ -168,7 +170,8 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 	}
 
 	private AbstractBeanDefinition createBeanDefinition(String ref, Renewal renewal,
-			PropertyTransformer propertyTransformer, String propertyPath) {
+			PropertyTransformer propertyTransformer, boolean ignoreResourceNotFound,
+			String propertyPath) {
 
 		BeanDefinitionBuilder builder;
 
@@ -194,6 +197,7 @@ class VaultPropertySourceRegistrar implements ImportBeanDefinitionRegistrar,
 		}
 
 		builder.addConstructorArgValue(propertyTransformer);
+		builder.addConstructorArgValue(ignoreResourceNotFound);
 		builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 
 		return builder.getBeanDefinition();

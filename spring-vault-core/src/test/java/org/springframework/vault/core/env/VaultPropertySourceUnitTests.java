@@ -24,12 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.util.PropertyTransformers;
 import org.springframework.vault.support.VaultResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 /**
@@ -56,6 +58,47 @@ class VaultPropertySourceUnitTests {
 		assertThatIllegalArgumentException()
 				.isThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
 						"/secret", PropertyTransformers.noop()));
+	}
+
+	@Test
+	void propertiesNotFoundShouldFailOnIgnoreSecretNotFoundDisabled() {
+
+		assertThatThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
+				"secret/myapp", PropertyTransformers.noop(), false))
+						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+						.hasNoCause();
+	}
+
+	@Test
+	void shouldPropagateFetchErrorIgnoreSecretNotFoundDisabled() {
+
+		when(vaultTemplate.read("secret/myapp"))
+				.thenThrow(new VaultException("HTTP error"));
+		assertThatThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
+				"secret/myapp", PropertyTransformers.noop(), false))
+						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+						.hasRootCauseExactlyInstanceOf(VaultException.class);
+	}
+
+	@Test
+	void propertiesNotFoundShouldBeIgnoredByDefault() {
+
+		VaultPropertySource source = new VaultPropertySource("hello", vaultTemplate,
+				"secret/myapp", PropertyTransformers.noop());
+
+		assertThat(source.getPropertyNames()).isEmpty();
+	}
+
+	@Test
+	void shouldIgnoreFetchErrorByDefault() {
+
+		when(vaultTemplate.read("secret/myapp"))
+				.thenThrow(new VaultException("HTTP error"));
+
+		VaultPropertySource source = new VaultPropertySource("hello", vaultTemplate,
+				"secret/myapp", PropertyTransformers.noop());
+
+		assertThat(source.getPropertyNames()).isEmpty();
 	}
 
 	@Test
