@@ -1,6 +1,104 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.0.M1
+-----------------------------------------
+* Deprecated path cubbyhole/response #163
+* Add @VaultPropertySource support for versioned Key-Value backend #245
+* Fix aws -> kubernetes typo #317
+* Rename threadPoolTaskScheduler bean to vaultThreadPoolTaskScheduler #318
+* Expired leases do are not rotated on secret renewal #319
+* Upgrade to Spring Framework 5.1.2.RELEASE #323
+* Upgrade to Reactor Californium SR2 #324
+* Upgrade to Vault 1.0.0-beta1 #325
+* Upgrade to Spring Data Lovelace SR2 #326
+* Upgrade to netty 4.1.31.Final #331
+* Upgrade to Vault 1.0.0-beta2 #335
+* Upgrade to Vault 1.0.0-rc1 #336
+* Let AwsIamAuthentication implement AuthenticationStepsFactory #338
+* Use Spring documentation resources for a uniform documentation style #343
+* Replace own Base64 class with Spring's Base64Utils #344
+* Remove code duplicates from VaultWrappingTemplate #345
+* Add interceptors for Vault's namespace support #346
+* Update copyright years to 2019 #348
+* Upgrade to Vault 1.0.1 #349
+* Update dependencies #351
+* Upgrade to Spring Framework 5.1.4.RELEASE #352
+* Upgrade to Spring Data Lovelace SR4 #353
+* Upgrade to Project Reactor Californium SR4 #354
+* Upgrade to Spring Security 5.1.3.RELEASE #355
+* Upgrade to assetj-core 3.11.1 #356
+* Upgrade to mockito-core 2.23.4 #357
+* Upgrade to maven-jar-plugin 3.1.1 #358
+* Upgrade to maven-surefire-plugin 3.0.0-M3 #359
+* Upgrade to maven-deploy-plugin 3.0.0-M1 #360
+* Upgrade to asciidoctor-maven-plugin 1.5.7.1 #361
+* Upgrade to maven-assembly-plugin 3.1.1 #362
+* Upgrade springNext version to 5.1.5.BUILD-SNAPSHOT #363
+* Upgrade spring-doc-resources version to 0.1.1.BUILD-SNAPSHOT #364
+* Upgrade to Vault 1.0.2 #366
+* Upgrade to Jackson 2.9.8 #368
+* Improve documentation on Token authentication, renewal and SessionManager use #369
+* Upgrade to Vault 1.0.3 #371
+* Upgrade to AssertJ 3.12.0 #373
+* Upgrade to Spring Framework 5.1.5 #374
+* Upgrade to Spring Data Lovelace SR5 #375
+* Upgrade to Reactor Californium SR5 #376
+* PrefixAwareUriBuilderFactory injects Vault port into absolute URL's #377
+* Consistently use https for linkable resources #381
+* Upgrade to Spring Security 5.1.4 #382
+* Upgrade to Apache HttpClient 4.5.7  #383
+* Upgrade to Apache HttpCore 4.4.11 #384
+* Upgrade to AWS SDK 1.11.507 #385
+* Upgrade to Lombok  1.18.6 #386
+* Release Spring Vault 2.1.2.RELEASE #387
+* URL Cleanup #394
+* Upgrade to Vault 1.1.0 #400
+* VaultClients does not consider path prefix #413
+* Make LifecycleAwareSessionManager more extensible #415
+* Support  key password and key alias #416
+* Upgrade to Vault 1.1.1. #418
+* Upgrade to Vault 1.1.2. #419
+* SpEL expression in @VaultPropertySource annotation not expanded with enabled renewal #420
+* @VaultPropertySource annotations in more than one @Configuration class #421
+* Add RestTemplateBuilder, RestTemplateCustomizer and WebClientBuilder #423
+* Upgrade to Jackson 2.9.9 #424
+* Upgrade to netty 4.1.36.Final #425
+* Add configuration to retain a Lease in LifecycleAwareSessionManager after Vault server failures #426
+* Upgrade to OkHttp 3.14.2 #427
+* Upgrade to Reactor Dysprosium M1 #428
+* Upgrade to Spring Framework 5.2 M2 #429
+* Upgrade to Spring Data Moore M4 #430
+* Add listener/events support to LifecycleAwareSessionManager #431
+* Upgrade to Vault 1.1.3 #434
+* Add options to VaultMount #435
+* Add SpEL support for @Secret annotation #436
+* Upgrade dependencies #437
+* Add support for JettyClientHttpConnector #438
+* Upgrade to Spring Framework 5.2 M3 #439
+* Support PCF Login Method #440
+* Create security policy readme #441
+* Add Kotlin extensions #442
+* Migrate tests to use JUnit 5 #443
+* Remove Lombok usage #444
+* Upgrade to Spring Security 5.1.5 #447
+* Allow re-reading Kubernetes service token for each authentication #449
+* Update docs reflecting Apache HttpClient's wire logging #451
+* Deprecate App ID authentication mechanism #453
+* Upgrade TravisCI to use Java 12 #454
+* Upgrade to Mockito 3.0 #455
+* Fix incorrect assert fail message in KubernetesAuthentication #459
+* Update Vault version to 1.2.1 #460
+* GoogleApacheHttpTransport fails with newer Apache HttpClient versions #463
+* Add integration tests for Vault's namespace support #465
+* Upgrade to Spring Framework 5.2 RC2 #466
+* Upgrade to Spring Data Moore RC3 #467
+* Upgrade to Reactor Dysprosium RC1 #468
+* Upgrade to Kotlin 1.3.50 #469
+* Remove repository declarations from pom file #470
+* Fail with @VaultPropertySource if secret not found #471
+* Add Kotlin Coroutines extensions for ReactiveVaultOperations #472
+
 Changes in version 2.1.0.RELEASE
 -----------------------------------------
 * Upgrade to Reactor Californium GA #309
