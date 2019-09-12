@@ -15,9 +15,18 @@
  */
 package org.springframework.vault.core
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.springframework.vault.support.VaultResponse
+import org.springframework.vault.support.VaultResponseSupport
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  * Unit tests for [ReactiveVaultOperationsExtensions].
@@ -40,6 +49,95 @@ class ReactiveVaultOperationsExtensionsTests {
 
         operation.read("the-path")
         verify { operation.read("the-path") }
+    }
+
+    @Test
+    fun awaitReadWithValue() {
+
+        val expected = VaultResponseSupport<Person>()
+        every { operation.read("path", Person::class.java) } returns Mono.just(expected)
+
+        runBlocking {
+            assertThat(operation.awaitRead<Person>("path")).isEqualTo(expected)
+        }
+
+        verify {
+            operation.read("path", Person::class.java)
+        }
+    }
+
+    @Test
+    fun awaitReadWithoutValue() {
+
+        every { operation.read("path", Person::class.java) } returns Mono.empty()
+
+        runBlocking {
+            assertThat(operation.awaitReadOrNull<Person>("path")).isNull()
+        }
+
+        verify {
+            operation.read("path", Person::class.java)
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Test
+    fun listAsFlow() {
+
+        every { operation.list("path") } returns Flux.just("one", "two", "three")
+
+        runBlocking {
+            assertThat(operation.listAsFlow("path").toList()).contains("one", "two", "three")
+        }
+
+        verify {
+            operation.list("path")
+        }
+    }
+
+    @Test
+    fun awaitWrite() {
+
+        val expected = VaultResponse()
+        every { operation.write("path") } returns Mono.just(expected)
+
+        runBlocking {
+            assertThat(operation.awaitWrite("path")).isEqualTo(expected)
+        }
+
+        verify {
+            operation.write("path")
+        }
+    }
+
+    @Test
+    fun awaitWriteBody() {
+
+        val expected = VaultResponse()
+        val body = Person()
+        every { operation.write("path", body) } returns Mono.just(expected)
+
+        runBlocking {
+            assertThat(operation.awaitWrite("path", body)).isEqualTo(expected)
+        }
+
+        verify {
+            operation.write("path", body)
+        }
+    }
+
+    @Test
+    fun awaitDelete() {
+
+        every { operation.delete("path") } returns Mono.empty()
+
+        runBlocking {
+            assertThat(operation.awaitDelete("path")).isNull()
+        }
+
+        verify {
+            operation.delete("path")
+        }
     }
 
     class Person
