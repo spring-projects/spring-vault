@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.vault</groupId>
 		<artifactId>spring-vault-parent</artifactId>
-		<version>2.2.0.BUILD-SNAPSHOT</version>
+		<version>2.2.0.M1</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -149,20 +147,17 @@
 									<configuration>
 										<target>
 											<copy todir="${generated-asciidoc-sources.directory}">
-												<fileset
-														dir="${basedir}/../src/main/asciidoc">
-													<include name="**/*.adoc"/>
+												<fileset dir="${basedir}/../src/main/asciidoc">
+													<include name="**/*.adoc" />
 												</fileset>
 											</copy>
 											<copy todir="${project.root}/target/site/reference/html/images">
-												<fileset
-														dir="${basedir}/src/main/asciidoc"
-														erroronmissingdir="false">
-													<include name="**/*.png"/>
-													<include name="**/*.gif"/>
-													<include name="**/*.jpg"/>
+												<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
+													<include name="**/*.png" />
+													<include name="**/*.gif" />
+													<include name="**/*.jpg" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -177,12 +172,10 @@
 									<configuration>
 										<target>
 											<copy todir="${project.build.directory}/schemas">
-												<fileset dir="${basedir}"
-														 erroronmissingdir="false">
-													<include
-															name="**/src/main/resources/**/config/spring-*.xsd"/>
+												<fileset dir="${basedir}" erroronmissingdir="false">
+													<include name="**/src/main/resources/**/config/spring-*.xsd" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -196,23 +189,17 @@
 									<phase>process-resources</phase>
 									<configuration>
 										<target>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working">
-												<fileset
-														dir="${project.build.directory}/doc-resources"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working">
+												<fileset dir="${project.build.directory}/doc-resources" includes="**" />
 											</copy>
-											<copy failonerror="false"
-												  todir="${generated-asciidoc-sources.directory}/images/">
-												<fileset
-														dir="${project.root}/src/main/asciidoc/images"/>
+											<copy failonerror="false" todir="${generated-asciidoc-sources.directory}/images/">
+												<fileset dir="${project.root}/src/main/asciidoc/images" />
 											</copy>
 
 											<copy todir="${generated-docs.directory}">
-												<fileset
-														dir="${generated-asciidoc-sources.directory}">
-													<include name="css/**"/>
-													<include name="js/**"/>
+												<fileset dir="${generated-asciidoc-sources.directory}">
+													<include name="css/**" />
+													<include name="js/**" />
 												</fileset>
 											</copy>
 										</target>
@@ -229,33 +216,23 @@
 										<target>
 
 											<!-- Copy files for the single-file HTML version -->
-											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html/images">
-												<fileset
-														dir="${generated-docs.directory}/images"/>
+											<copy failonerror="false" todir="${project.root}/target/site/reference/html/images">
+												<fileset dir="${generated-docs.directory}/images" />
 											</copy>
 
-											<copy
-													todir="${project.root}/target/site/reference/html/">
-												<fileset
-														dir="${generated-asciidoc-sources.directory}">
-													<include name="css/**"/>
-													<include name="js/**"/>
-													<include name="*.ico"/>
+											<copy todir="${project.root}/target/site/reference/html/">
+												<fileset dir="${generated-asciidoc-sources.directory}">
+													<include name="css/**" />
+													<include name="js/**" />
+													<include name="*.ico" />
 												</fileset>
 											</copy>
 
-											<copy
-													file="${project.build.directory}/generated-docs/index.html"
-													todir="${project.root}/target/site/reference/html/"/>
+											<copy file="${project.build.directory}/generated-docs/index.html" todir="${project.root}/target/site/reference/html/" />
 											<!-- Copy and rename the Epub file -->
-											<copy
-													file="${generated-docs.directory}/index.pdf"
-													tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
+											<copy file="${generated-docs.directory}/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
 											<!-- Copy and rename the PDF file -->
-											<copy
-													file="${generated-docs.directory}/index.epub"
-													tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
+											<copy file="${generated-docs.directory}/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
 										</target>
 									</configuration>
 									<goals>
