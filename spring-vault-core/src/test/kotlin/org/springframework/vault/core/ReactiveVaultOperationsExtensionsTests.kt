@@ -132,7 +132,7 @@ class ReactiveVaultOperationsExtensionsTests {
         every { operation.delete("path") } returns Mono.empty()
 
         runBlocking {
-            assertThat(operation.awaitDelete("path")).isNull()
+            assertThat(operation.awaitDelete("path")).isEqualTo(Unit)
         }
 
         verify {

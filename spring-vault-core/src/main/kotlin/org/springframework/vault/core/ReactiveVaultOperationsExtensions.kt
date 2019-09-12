@@ -86,5 +86,6 @@ suspend fun ReactiveVaultOperations.awaitWrite(path: String, body: Any): VaultRe
  * @author Mark Paluch
  * @since 2.2
  */
-suspend fun ReactiveVaultOperations.awaitDelete(path: String) = delete(path).awaitFirstOrNull()
-
+suspend fun ReactiveVaultOperations.awaitDelete(path: String) {
+    delete(path).awaitFirstOrNull()
+}
