@@ -173,6 +173,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 					certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
+		if (!certificateRequest.getUriSubjectAltNames().isEmpty()) {
+			request.put("uri_sans", StringUtils.collectionToDelimitedString(
+					certificateRequest.getUriSubjectAltNames(), ","));
+		}
+
 		if (certificateRequest.getTtl() != null) {
 			request.put("ttl", certificateRequest.getTtl().get(ChronoUnit.SECONDS));
 		}

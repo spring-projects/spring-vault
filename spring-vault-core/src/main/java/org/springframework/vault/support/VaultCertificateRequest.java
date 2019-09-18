@@ -46,6 +46,11 @@ public class VaultCertificateRequest {
 	private final List<String> ipSubjectAltNames;
 
 	/**
+	 * Requested URI Subject Alternative Names.
+	 */
+	private final List<String> uriSubjectAltNames;
+
+	/**
 	 * Requested Time to Live
 	 */
 	@Nullable
@@ -59,12 +64,13 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	VaultCertificateRequest(String commonName, List<String> altNames,
-			List<String> ipSubjectAltNames, @Nullable Duration ttl,
+			List<String> ipSubjectAltNames, List<String> uriSubjectAltNames, @Nullable Duration ttl,
 			boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
+		this.uriSubjectAltNames = uriSubjectAltNames;
 		this.ttl = ttl;
 		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 	}
@@ -98,6 +104,10 @@ public class VaultCertificateRequest {
 		return ipSubjectAltNames;
 	}
 
+	public List<String> getUriSubjectAltNames() {
+		return uriSubjectAltNames;
+	}
+
 	@Nullable
 	public Duration getTtl() {
 		return ttl;
@@ -115,6 +125,8 @@ public class VaultCertificateRequest {
 		private List<String> altNames = new ArrayList<>();
 
 		private List<String> ipSubjectAltNames = new ArrayList<>();
+
+		private List<String> uriSubjectAltNames = new ArrayList<>();
 
 		@Nullable
 		private Duration ttl;
@@ -194,6 +206,37 @@ public class VaultCertificateRequest {
 			Assert.hasText(ipSubjectAltName, "IP subject alt name must not be empty");
 
 			this.ipSubjectAltNames.add(ipSubjectAltName);
+			return this;
+		}
+
+		/**
+		 * Configure URI subject alternative names. Replaces previously configured URI
+		 * subject alt names.
+		 *
+		 * @param uriSubjectAltNames must not be {@literal null}.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 */
+		public VaultCertificateRequestBuilder uriSubjectAltNames(
+				Iterable<String> uriSubjectAltNames) {
+
+			Assert.notNull(uriSubjectAltNames, "URI subject alt names must not be null");
+
+			this.uriSubjectAltNames = toList(uriSubjectAltNames);
+			return this;
+		}
+
+		/**
+		 * Add an URI subject alternative name.
+		 *
+		 * @param uriSubjectAltName must not be empty or {@literal null}.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 */
+		public VaultCertificateRequestBuilder withUriSubjectAltName(
+				String uriSubjectAltName) {
+
+			Assert.hasText(uriSubjectAltName, "URI subject alt name must not be empty");
+
+			this.uriSubjectAltNames.add(uriSubjectAltName);
 			return this;
 		}
 
@@ -296,8 +339,22 @@ public class VaultCertificateRequest {
 						.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
 			}
 
+			List<String> uriSubjectAltNames;
+			switch (this.uriSubjectAltNames.size()) {
+				case 0:
+					uriSubjectAltNames = java.util.Collections.emptyList();
+					break;
+				case 1:
+					uriSubjectAltNames = java.util.Collections
+							.singletonList(this.uriSubjectAltNames.get(0));
+					break;
+				default:
+					uriSubjectAltNames = java.util.Collections
+							.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
+			}
+
 			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames,
-					ttl, excludeCommonNameFromSubjectAltNames);
+					uriSubjectAltNames, ttl, excludeCommonNameFromSubjectAltNames);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {
