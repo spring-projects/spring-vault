@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core
 
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.reactive.asFlow
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -58,7 +57,6 @@ suspend inline fun <reified T : Any> ReactiveVaultOperations.awaitReadOrNull(pat
  * @author Mark Paluch
  * @since 2.2
  */
-@ExperimentalCoroutinesApi
 fun ReactiveVaultOperations.listAsFlow(path: String): Flow<String> =
         list(path).asFlow()
 
