@@ -72,6 +72,7 @@ public abstract class PropertyTransformers {
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Map<String, Object> transformProperties(
 				Map<String, ? extends Object> input) {
 			return (Map) input;

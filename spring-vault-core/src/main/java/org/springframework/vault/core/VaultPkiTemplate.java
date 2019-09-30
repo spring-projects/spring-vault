@@ -36,6 +36,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * Default implementation of {@link VaultPkiOperations}.
  *
  * @author Mark Paluch
+ * @author Alex Antonov
  */
 public class VaultPkiTemplate implements VaultPkiOperations {
 

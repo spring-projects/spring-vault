@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  * Request for a Certificate.
  *
  * @author Mark Paluch
+ * @author Alex Antonov
  */
 public class VaultCertificateRequest {
 
@@ -63,9 +64,9 @@ public class VaultCertificateRequest {
 	 */
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
-	VaultCertificateRequest(String commonName, List<String> altNames,
-			List<String> ipSubjectAltNames, List<String> uriSubjectAltNames, @Nullable Duration ttl,
-			boolean excludeCommonNameFromSubjectAltNames) {
+	private VaultCertificateRequest(String commonName, List<String> altNames,
+			List<String> ipSubjectAltNames, List<String> uriSubjectAltNames,
+			@Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
@@ -215,6 +216,7 @@ public class VaultCertificateRequest {
 		 *
 		 * @param uriSubjectAltNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.2
 		 */
 		public VaultCertificateRequestBuilder uriSubjectAltNames(
 				Iterable<String> uriSubjectAltNames) {
@@ -230,6 +232,7 @@ public class VaultCertificateRequest {
 		 *
 		 * @param uriSubjectAltName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.2
 		 */
 		public VaultCertificateRequestBuilder withUriSubjectAltName(
 				String uriSubjectAltName) {
@@ -341,16 +344,16 @@ public class VaultCertificateRequest {
 
 			List<String> uriSubjectAltNames;
 			switch (this.uriSubjectAltNames.size()) {
-				case 0:
-					uriSubjectAltNames = java.util.Collections.emptyList();
-					break;
-				case 1:
-					uriSubjectAltNames = java.util.Collections
-							.singletonList(this.uriSubjectAltNames.get(0));
-					break;
-				default:
-					uriSubjectAltNames = java.util.Collections
-							.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
+			case 0:
+				uriSubjectAltNames = java.util.Collections.emptyList();
+				break;
+			case 1:
+				uriSubjectAltNames = java.util.Collections
+						.singletonList(this.uriSubjectAltNames.get(0));
+				break;
+			default:
+				uriSubjectAltNames = java.util.Collections
+						.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
 			}
 
 			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames,

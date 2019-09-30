@@ -49,12 +49,14 @@ class VaultCertificateRequestUnitTests {
 				.commonName("hello.com") //
 				.withAltName("alt") //
 				.withIpSubjectAltName("127.0.0.1") //
+				.withUriSubjectAltName("hello.world") //
 				.excludeCommonNameFromSubjectAltNames() //
 				.build();
 
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 		assertThat(request.getAltNames()).hasSize(1).contains("alt");
-		assertThat(request.getIpSubjectAltNames()).hasSize(1).contains("127.0.0.1");
+		assertThat(request.getIpSubjectAltNames()).containsOnly("127.0.0.1");
+		assertThat(request.getUriSubjectAltNames()).containsOnly("hello.world");
 		assertThat(request.isExcludeCommonNameFromSubjectAltNames()).isTrue();
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 	}
