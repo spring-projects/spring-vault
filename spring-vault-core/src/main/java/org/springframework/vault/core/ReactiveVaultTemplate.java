@@ -162,10 +162,13 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType) {
 
-		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
-				.getTypeReference(responseType);
+		return doWithSession(webClient -> {
 
-		return sessionClient.get().uri(path).exchange().flatMap(mapResponse(ref, path));
+			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
+					.getTypeReference(responseType);
+
+			return webClient.get().uri(path).exchange().flatMap(mapResponse(ref, path));
+		});
 	}
 
 	@Override
@@ -181,7 +184,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		return read
 				.filter(response -> response.getData() != null
 						&& response.getData().containsKey("keys"))
-				//
 				.flatMapIterable(
 						response -> (List<String>) response.getRequiredData().get("keys"));
 	}
@@ -191,15 +193,18 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		RequestBodySpec uri = sessionClient.post().uri(path);
-		Mono<ClientResponse> exchange;
-		if (body != null) {
-			exchange = uri.syncBody(body).exchange();
-		}
-		else {
-			exchange = uri.exchange();
-		}
-		return exchange.flatMap(mapResponse(VaultResponse.class, path));
+		return doWithSession(webClient -> {
+
+			RequestBodySpec uri = webClient.post().uri(path);
+			Mono<ClientResponse> exchange;
+			if (body != null) {
+				exchange = uri.syncBody(body).exchange();
+			}
+			else {
+				exchange = uri.exchange();
+			}
+			return exchange.flatMap(mapResponse(VaultResponse.class, path));
+		});
 	}
 
 	@Override
@@ -207,8 +212,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return sessionClient.delete().uri(path).exchange()
-				.flatMap(mapResponse(String.class, path)).then();
+		return doWithSession(webClient -> webClient.delete().uri(path).exchange()
+				.flatMap(mapResponse(String.class, path)).then());
 	}
 
 	@Override

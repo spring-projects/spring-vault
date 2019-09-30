@@ -276,20 +276,23 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 				.getTypeReference(responseType);
 
-		try {
-			ResponseEntity<VaultResponseSupport<T>> exchange = sessionTemplate.exchange(
+		return doWithSession(restOperations -> {
+
+			try {
+				ResponseEntity<VaultResponseSupport<T>> exchange = restOperations.exchange(
 					path, HttpMethod.GET, null, ref);
 
-			return exchange.getBody();
-		}
-		catch (HttpStatusCodeException e) {
-
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				return null;
+				return exchange.getBody();
 			}
+			catch (HttpStatusCodeException e) {
 
-			throw VaultResponses.buildException(e, path);
-		}
+				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return null;
+				}
+
+				throw VaultResponses.buildException(e, path);
+			}
+		});
 	}
 
 	@Override
@@ -315,12 +318,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		try {
-			return sessionTemplate.postForObject(path, body, VaultResponse.class);
-		}
-		catch (HttpStatusCodeException e) {
-			throw VaultResponses.buildException(e, path);
-		}
+		return doWithSession(restOperations -> restOperations.postForObject(path, body,
+				VaultResponse.class));
 	}
 
 	@Override
@@ -328,17 +327,22 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		try {
-			sessionTemplate.delete(path);
-		}
-		catch (HttpStatusCodeException e) {
+		doWithSession(restOperations -> {
 
-			if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
-				return;
+			try {
+				restOperations.delete(path);
+			}
+			catch (HttpStatusCodeException e) {
+
+				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+					return null;
+				}
+
+				throw VaultResponses.buildException(e, path);
 			}
 
-			throw VaultResponses.buildException(e, path);
-		}
+			return null;
+		});
 	}
 
 	@Override
