@@ -142,7 +142,7 @@ public abstract class VaultResponses {
 	 * Obtain the error message from a JSON response.
 	 *
 	 * @param json must not be {@literal null}.
-	 * @return
+	 * @return extracted error string.
 	 */
 	@SuppressWarnings("unchecked")
 	public static String getError(String json) {

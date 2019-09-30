@@ -42,7 +42,7 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	private String transitPath;
 
 	/**
-	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@link 32}
+	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@code 32}
 	 * random bytes using {@code transit} for transit mount path.
 	 *
 	 * @param vaultOperations must not be {@literal null}.

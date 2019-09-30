@@ -38,7 +38,7 @@ public interface LeaseStrategy {
 	/**
 	 * Predefined strategy to drop leases on error.
 	 *
-	 * @return
+	 * @return the drop on error strategy.
 	 */
 	static LeaseStrategy dropOnError() {
 		return error -> true;
@@ -47,7 +47,7 @@ public interface LeaseStrategy {
 	/**
 	 * Predefined strategy to retain leases on error.
 	 *
-	 * @return
+	 * @return the retain on error strategy.
 	 */
 	static LeaseStrategy retainOnError() {
 		return error -> false;

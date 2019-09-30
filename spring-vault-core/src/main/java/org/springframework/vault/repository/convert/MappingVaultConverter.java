@@ -308,9 +308,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @param type the {@link Map} {@link TypeInformation} to be used to unmarshal this
 	 *     {@link Map}.
 	 * @param sourceMap must not be {@literal null}
-	 * @return
+	 * @return the converted {@link Map}.
 	 */
-	@SuppressWarnings("unchecked")
 	protected Map<Object, Object> readMap(TypeInformation<?> type,
 			Map<String, Object> sourceMap) {
 
@@ -539,7 +538,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 *
 	 * @param collection must not be {@literal null}.
 	 * @param property must not be {@literal null}.
-	 * @return
+	 * @return the converted {@link List}.
 	 */
 	protected List<Object> createCollection(Collection<?> collection,
 			VaultPersistentProperty property) {
@@ -555,7 +554,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 *     {@literal null}.
 	 * @param type the {@link TypeInformation} to consider or {@literal null} if unknown.
 	 * @param sink the {@link List} to write to.
-	 * @return
+	 * @return the converted {@link List}.
 	 */
 	private List<Object> writeCollectionInternal(Collection<?> source,
 			@Nullable TypeInformation<?> type, List<Object> sink) {
@@ -594,7 +593,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 *
 	 * @param map must not {@literal null}.
 	 * @param property must not be {@literal null}.
-	 * @return
+	 * @return the converted {@link Map}.
 	 */
 	protected Map<String, Object> createMap(Map<Object, Object> map,
 			VaultPersistentProperty property) {
@@ -613,7 +612,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @param obj must not be {@literal null}.
 	 * @param bson must not be {@literal null}.
 	 * @param propertyType must not be {@literal null}.
-	 * @return
+	 * @return the converted {@link Map}.
 	 */
 	protected Map<String, Object> writeMapInternal(Map<Object, Object> obj,
 			Map<String, Object> bson, TypeInformation<?> propertyType) {
@@ -657,7 +656,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * is if the value is not the same as the one given. This is usually the case if you
 	 * store a subtype of the actual declared type of the property.
 	 *
-	 * @param type
+	 * @param type type hint.
 	 * @param value must not be {@literal null}.
 	 * @param accessor must not be {@literal null}.
 	 */
@@ -678,8 +677,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * arbitrary simple Vault type. Returns the converted value if so. If not, we perform
 	 * special enum handling or simply return the value as is.
 	 *
-	 * @param value
-	 * @return
+	 * @param value the value to write.
+	 * @return the converted value. Can be {@literal null}.
 	 */
 	@Nullable
 	private Object getPotentiallyConvertedSimpleWrite(@Nullable Object value) {
@@ -713,8 +712,9 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * {@link Collection} or simply create a single element collection for everything
 	 * else.
 	 *
-	 * @param source
-	 * @return
+	 * @param source the collection object. Can be a {@link Collection}, array or
+	 *     singleton object.
+	 * @return the {@code source} as {@link Collection}.
 	 */
 	private static Collection<?> asCollection(Object source) {
 

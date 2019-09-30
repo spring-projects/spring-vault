@@ -31,7 +31,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  * @since 2.1
  * @see VaultVersionedKeyValueOperations
- * @see KeyValueBackend
+ * @see VaultKeyValueOperationsSupport.KeyValueBackend
  */
 public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport {
 
@@ -59,7 +59,6 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 *
 	 * @param path must not be {@literal null}.
 	 * @param body must not be {@literal null}.
-	 * @return the resulting {@link VaultResponse}.
 	 */
 	void put(String path, Object body);
 }

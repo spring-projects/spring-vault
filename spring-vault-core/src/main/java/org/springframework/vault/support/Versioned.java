@@ -373,10 +373,10 @@ public class Versioned<T> {
 			}
 
 			/**
-			 * Build the {@link Metadata} object. Requires {@link #createdAt(Instant)} and
-			 * {@link #version(Version)} to be set.
+			 * Build the {@link Versioned.Metadata} object. Requires {@link #createdAt(Instant)} and
+			 * {@link #version(Versioned.Version)} to be set.
 			 *
-			 * @return the {@link Metadata} object.
+			 * @return the {@link Versioned.Metadata} object.
 			 */
 			public Metadata build() {
 

@@ -209,7 +209,7 @@ public class AppRoleAuthenticationOptions {
 		 *
 		 * @param roleId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 * @deprecated since 2.0, use {@link #roleId(RoleId)}.
+		 * @deprecated since 2.0, use {@link #roleId(AppRoleAuthenticationOptions.RoleId)}.
 		 */
 		@Deprecated
 		public AppRoleAuthenticationOptionsBuilder roleId(String roleId) {
@@ -240,7 +240,7 @@ public class AppRoleAuthenticationOptions {
 		 *
 		 * @param secretId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 * @deprecated since 2.0, use {@link #secretId(SecretId)}.
+		 * @deprecated since 2.0, use {@link #secretId(AppRoleAuthenticationOptions.SecretId)}.
 		 */
 		@Deprecated
 		public AppRoleAuthenticationOptionsBuilder secretId(String secretId) {
@@ -288,7 +288,8 @@ public class AppRoleAuthenticationOptions {
 		 * @param initialToken must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @since 1.1
-		 * @deprecated since 2.0, use {@link #roleId(RoleId)}/{@link #secretId(SecretId)}
+		 * @deprecated since 2.0, use
+		 * {@link #roleId(AppRoleAuthenticationOptions.RoleId)}/{@link #secretId(AppRoleAuthenticationOptions.SecretId)}
 		 * to configure pull mode.
 		 */
 		@Deprecated

@@ -485,7 +485,7 @@ public class Policy {
 
 			/**
 			 * Build the {@link Rule} object. Requires a configured {@link #path(String)}
-			 * and at least one {@link #capability(Capability)}.
+			 * and at least one {@link #capability(Policy.Capability)}.
 			 *
 			 * @return the new {@link Rule} object.
 			 */

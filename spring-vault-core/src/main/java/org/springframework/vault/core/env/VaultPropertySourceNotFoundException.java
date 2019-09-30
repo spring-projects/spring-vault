@@ -23,7 +23,7 @@ import org.springframework.vault.annotation.VaultPropertySource;
  *
  * @author Mark Paluch
  * @since 2.2
- * @see VaultPropertySource#ignoreSecretNotFound()
+ * @see VaultPropertySource#ignoreSecretNotFound
  */
 public class VaultPropertySourceNotFoundException extends VaultException {
 

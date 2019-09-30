@@ -144,7 +144,7 @@ public class VaultSignatureVerificationRequest {
 		/**
 		 * Configure the {@link Signature} to be verified. Signature verification requires
 		 * either a {@link Signature} or a {@link #hmac(Hmac)} to be configured. Clears
-		 * any previously configured {@link HMAC}.
+		 * any previously configured {@link #hmac(Hmac)}.
 		 *
 		 * @param signature to be verified, must not be {@literal null}.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
