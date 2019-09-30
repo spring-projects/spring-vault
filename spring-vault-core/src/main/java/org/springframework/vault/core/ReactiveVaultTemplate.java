@@ -225,7 +225,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			RequestBodySpec uri = webClient.post().uri(path);
 			Mono<ClientResponse> exchange;
 			if (body != null) {
-				exchange = uri.syncBody(body).exchange();
+				exchange = uri.bodyValue(body).exchange();
 			}
 			else {
 				exchange = uri.exchange();

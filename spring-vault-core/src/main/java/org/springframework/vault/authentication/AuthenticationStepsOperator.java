@@ -172,7 +172,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		if (definition.getUri() == null) {
 
 			spec = webClient.method(definition.getMethod()).uri(
-					definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
+					definition.getUriTemplate(), definition.getUrlVariables());
 		}
 		else {
 			spec = webClient.method(definition.getMethod()).uri(definition.getUri());
@@ -183,7 +183,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		}
 
 		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.INSTANCE)) {
-			return spec.syncBody(entity.getBody()).retrieve()
+			return spec.bodyValue(entity.getBody()).retrieve()
 					.bodyToMono(definition.getResponseType());
 		}
 
