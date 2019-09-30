@@ -76,7 +76,7 @@ openssl req -config <(cat ${DIR}/openssl.cnf \
 
 echo "[INFO] Signing certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -extensions server_cert -days 375 -notext -md sha256 \
+      -extensions server_cert -days 7300 -notext -md sha256 \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/localhost.csr.pem \
@@ -103,7 +103,7 @@ openssl req -config ${DIR}/openssl.cnf \
 
 echo "[INFO] Signing certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -extensions usr_cert -days 375 -notext -md sha256 \
+      -extensions usr_cert -days 7300 -notext -md sha256 \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/client.csr.pem \
@@ -143,7 +143,7 @@ openssl req -config ${DIR}/intermediate.cnf \
 
 echo "[INFO] Signing intermediate certificate request"
 openssl ca -config ${DIR}/openssl.cnf \
-      -days 3650 -notext -md sha256 -extensions v3_intermediate_ca \
+      -days 7300 -notext -md sha256 -extensions v3_intermediate_ca \
       -passin pass:changeit \
       -batch \
       -in ${CA_DIR}/csr/intermediate.csr.pem \
