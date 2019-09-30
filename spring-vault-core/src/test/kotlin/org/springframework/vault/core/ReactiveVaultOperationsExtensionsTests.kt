@@ -18,7 +18,6 @@ package org.springframework.vault.core
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
@@ -80,7 +79,6 @@ class ReactiveVaultOperationsExtensionsTests {
         }
     }
 
-    @ExperimentalCoroutinesApi
     @Test
     fun listAsFlow() {
 
