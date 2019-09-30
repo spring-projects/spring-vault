@@ -8,7 +8,7 @@
 set -o errexit
 
 EDITION="${EDITION:-oss}"
-VAULT_OSS="${VAULT_OSS:-1.2.2}"
+VAULT_OSS="${VAULT_OSS:-1.2.3}"
 VAULT_ENT="${VAULT_ENT:-0.11.0}"
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
