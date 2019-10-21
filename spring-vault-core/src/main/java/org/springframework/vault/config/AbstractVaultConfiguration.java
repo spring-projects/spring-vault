@@ -136,7 +136,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Construct a {@link SecretLeaseContainer} using {@link #vaultTemplate()} and
 	 * {@link #threadPoolTaskScheduler()}.
 	 *
-	 * @return the {@link SessionManager} for Vault session management.
+	 * @return the {@link SecretLeaseContainer} to allocate, renew and rotate secrets and
+	 * their leases.
 	 * @see #vaultTemplate()
 	 * @see #threadPoolTaskScheduler()
 	 */
