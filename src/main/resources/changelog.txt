@@ -1,6 +1,25 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.0.RC1
+-----------------------------------------
+* Remove repository declarations from pom file. #470
+* Fix Javadoc warnings #475
+* Added ability to configure uri_sans when building issue certificate request #476
+* Upgrade to Jackson 2.10 #478
+* Upgrade to Kotlin Coroutines 1.3.2 #479
+* Consistently use doWithSession(…) from within VaultTemplate #481
+* Upgrade to Spring Framework 5.2 GA #482
+* Upgrade to Reactor Dysprosium GA #483
+* Upgrade dependencies #484
+* Upgrade Vault to 1.2.3. #485
+* AbstractVaultConfiguration#secretLeaseContainer() is misleading #486
+* Upgrade to AWS SDK 1.11.658 #490
+* Upgrade to google-api-services-iam v1-rev20191010-1.30.3 #491
+* Upgrade to Google OAuth 0.18.0 #492
+* Upgrade to bcpkix-jdk15on 1.64 #493
+* Upgrade to Spring Data Moore GA #494
+
 Changes in version 2.2.0.M1
 -----------------------------------------
 * Deprecated path cubbyhole/response #163
