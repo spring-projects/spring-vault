@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>2.2.0.BUILD-SNAPSHOT</version>
+	<version>2.2.0.RC1</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -41,7 +39,7 @@
 		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
-		<java-module-name/>
+		<java-module-name />
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -57,7 +55,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-		<tag>HEAD</tag>
+		<tag>2.2.0.RC1</tag>
 	</scm>
 
 	<issueManagement>
@@ -110,7 +108,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>2.2.0.BUILD-SNAPSHOT</version>
+				<version>2.2.0.RC1</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
