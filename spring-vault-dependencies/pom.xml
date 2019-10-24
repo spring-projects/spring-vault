@@ -57,8 +57,8 @@
 	</licenses>
 
 	<properties>
-		<httpclient.version>4.5.9</httpclient.version>
-		<httpcore.version>4.4.11</httpcore.version>
+		<httpclient.version>4.5.10</httpclient.version>
+		<httpcore.version>4.4.12</httpcore.version>
 		<netty.version>4.1.42.Final</netty.version>
 		<okhttp3.version>3.11.0</okhttp3.version>
 		<jackson.version>2.9.9</jackson.version>
