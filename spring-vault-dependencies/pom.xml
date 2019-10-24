@@ -65,7 +65,7 @@
 		<jackson-databind.version>2.10.0</jackson-databind.version>
 		<aws-java-sdk.version>1.11.658</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev20191010-1.30.3</google-api-services-iam.version>
-		<google-auth-library-oauth2-http.version>0.17.2</google-auth-library-oauth2-http.version>
+		<google-auth-library-oauth2-http.version>0.18.0</google-auth-library-oauth2-http.version>
 		<bcpkix-jdk15on.version>1.63</bcpkix-jdk15on.version>
 	</properties>
 
