@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>2.1.4.BUILD-SNAPSHOT</version>
+	<version>2.1.4.RELEASE</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -38,7 +36,7 @@
 		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
-		<java-module-name/>
+		<java-module-name />
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -54,7 +52,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-		<tag>HEAD</tag>
+		<tag>2.1.4.RELEASE</tag>
 	</scm>
 
 	<issueManagement>
@@ -107,7 +105,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>2.1.4.BUILD-SNAPSHOT</version>
+				<version>2.1.4.RELEASE</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -678,14 +676,12 @@
 									<configuration>
 										<target>
 											<copy todir="${project.root}/target/site/reference/html/images">
-												<fileset
-														dir="${basedir}/src/main/asciidoc"
-														erroronmissingdir="false">
-													<include name="**/*.png"/>
-													<include name="**/*.gif"/>
-													<include name="**/*.jpg"/>
+												<fileset dir="${basedir}/src/main/asciidoc" erroronmissingdir="false">
+													<include name="**/*.png" />
+													<include name="**/*.gif" />
+													<include name="**/*.jpg" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -700,12 +696,10 @@
 									<configuration>
 										<target>
 											<copy todir="${project.build.directory}/schemas">
-												<fileset dir="${basedir}"
-														 erroronmissingdir="false">
-													<include
-															name="**/src/main/resources/**/config/spring-*.xsd"/>
+												<fileset dir="${basedir}" erroronmissingdir="false">
+													<include name="**/src/main/resources/**/config/spring-*.xsd" />
 												</fileset>
-												<flattenmapper/>
+												<flattenmapper />
 											</copy>
 										</target>
 									</configuration>
@@ -719,23 +713,14 @@
 									<phase>generate-resources</phase>
 									<configuration>
 										<target>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working">
-												<fileset
-														dir="${project.build.directory}/doc-resources"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working">
+												<fileset dir="${project.build.directory}/doc-resources" includes="**" />
 											</copy>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working">
-												<fileset
-														dir="${project.root}/src/main/asciidoc"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working">
+												<fileset dir="${project.root}/src/main/asciidoc" includes="**" />
 											</copy>
-											<copy failonerror="false"
-												  todir="${project.build.directory}/working/images">
-												<fileset
-														dir="${project.root}/src/main/asciidoc/images"
-														includes="**"/>
+											<copy failonerror="false" todir="${project.build.directory}/working/images">
+												<fileset dir="${project.root}/src/main/asciidoc/images" includes="**" />
 											</copy>
 										</target>
 									</configuration>
@@ -750,25 +735,17 @@
 									<configuration>
 										<target>
 											<!-- Copy files for the single-file HTML version -->
-											<copy failonerror="false"
-												  todir="${project.root}/target/site/reference/html">
-												<fileset
-														dir="${project.build.directory}/doc-resources">
-													<include name="**"/>
-													<exclude name="**/docinfo*.html"/>
+											<copy failonerror="false" todir="${project.root}/target/site/reference/html">
+												<fileset dir="${project.build.directory}/doc-resources">
+													<include name="**" />
+													<exclude name="**/docinfo*.html" />
 												</fileset>
 											</copy>
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.html"
-												  tofile="${project.root}/target/site/reference/html/index.html"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.html" tofile="${project.root}/target/site/reference/html/index.html" />
 											<!-- Copy and rename the Epub file -->
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.pdf"
-												  tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.pdf" tofile="${project.root}/target/site/reference/pdf/${dist.id}-reference.pdf" />
 											<!-- Copy and rename the PDF file -->
-											<copy failonerror="false"
-												  file="${project.build.directory}/generated-docs/index.epub"
-												  tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub"/>
+											<copy failonerror="false" file="${project.build.directory}/generated-docs/index.epub" tofile="${project.root}/target/site/reference/epub/${dist.id}-reference.epub" />
 
 										</target>
 									</configuration>
