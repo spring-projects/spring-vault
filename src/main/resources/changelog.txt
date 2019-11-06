@@ -1,6 +1,10 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.0.RELEASE
+-----------------------------------------
+* Consider performance standby mode in health check #501
+
 Changes in version 2.2.0.RC1
 -----------------------------------------
 * Remove repository declarations from pom file. #470
