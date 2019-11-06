@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.Policy.Rule;
+import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
@@ -254,6 +255,19 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		adminOperations.deletePolicy("foo");
 
 		assertThat(adminOperations.getPolicyNames()).doesNotContain("foo");
+	}
+
+	@Test
+	@RequiresVaultVersion("0.6.1")
+	void shouldReportHealth() {
+
+		VaultHealth health = adminOperations.health();
+
+		assertThat(health.isInitialized()).isTrue();
+		assertThat(health.isSealed()).isFalse();
+		assertThat(health.isPerformanceStandby()).isFalse();
+		assertThat(health.isRecoveryReplicationSecondary()).isFalse();
+		assertThat(health.isStandby()).isFalse();
 	}
 
 	@Test

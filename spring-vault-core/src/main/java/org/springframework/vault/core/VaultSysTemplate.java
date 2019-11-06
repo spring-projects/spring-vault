@@ -51,6 +51,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -385,7 +386,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 				}
 			}
 		}
-
 	}
 
 	private static class Health implements RestOperationsCallback<VaultHealth> {
@@ -398,7 +398,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 						"sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
 				return healthResponse.getBody();
 			}
-			catch (HttpStatusCodeException responseError) {
+			catch (RestClientResponseException responseError) {
 
 				try {
 					ObjectMapper mapper = new ObjectMapper();
@@ -524,20 +524,27 @@ public class VaultSysTemplate implements VaultSysOperations {
 		private final boolean initialized;
 		private final boolean sealed;
 		private final boolean standby;
+		private final boolean performanceStandby;
+		private final boolean replicationRecoverySecondary;
 		private final int serverTimeUtc;
 
 		@Nullable
 		private final String version;
 
-		private VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
+		VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
 				@JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
+				@JsonProperty("performance_standby") boolean performanceStandby,
+				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
 				@JsonProperty("server_time_utc") int serverTimeUtc,
 				@Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
 			this.standby = standby;
+			this.performanceStandby = performanceStandby;
+			this.replicationRecoverySecondary = replicationRecoverySecondary != null
+					&& !"disabled".equalsIgnoreCase(replicationRecoverySecondary);
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
 		}
@@ -552,6 +559,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		public boolean isStandby() {
 			return this.standby;
+		}
+
+		public boolean isPerformanceStandby() {
+			return performanceStandby;
+		}
+
+		public boolean isRecoveryReplicationSecondary() {
+			return replicationRecoverySecondary;
 		}
 
 		public int getServerTimeUtc() {
@@ -571,13 +586,17 @@ public class VaultSysTemplate implements VaultSysOperations {
 				return false;
 			VaultHealthImpl that = (VaultHealthImpl) o;
 			return initialized == that.initialized && sealed == that.sealed
-					&& standby == that.standby && serverTimeUtc == that.serverTimeUtc
+					&& standby == that.standby
+					&& performanceStandby == that.performanceStandby
+					&& replicationRecoverySecondary == that.replicationRecoverySecondary
+					&& serverTimeUtc == that.serverTimeUtc
 					&& Objects.equals(version, that.version);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(initialized, sealed, standby, serverTimeUtc, version);
+			return Objects.hash(initialized, sealed, standby, performanceStandby,
+					replicationRecoverySecondary, serverTimeUtc, version);
 		}
 	}
 }

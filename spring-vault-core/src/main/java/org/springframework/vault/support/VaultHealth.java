@@ -45,6 +45,20 @@ public interface VaultHealth {
 	boolean isStandby();
 
 	/**
+	 * @return {@literal true} if the Vault instance is in performance standby mode,
+	 * otherwise {@literal false}.
+	 * @since 2.2
+	 */
+	boolean isPerformanceStandby();
+
+	/**
+	 * @return {@literal true} if the Vault instance is a secondary node in data recovery
+	 * replication mode, otherwise {@literal false}.
+	 * @since 2.2
+	 */
+	boolean isRecoveryReplicationSecondary();
+
+	/**
 	 * @return the server time in seconds, UTC.
 	 */
 	int getServerTimeUtc();
