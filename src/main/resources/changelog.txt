@@ -4,6 +4,7 @@ Spring Vault Changelog
 Changes in version 2.2.0.RELEASE
 -----------------------------------------
 * Consider performance standby mode in health check #501
+* Upgrade dependencies #502
 
 Changes in version 2.2.0.RC1
 -----------------------------------------
