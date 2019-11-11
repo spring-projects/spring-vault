@@ -78,7 +78,7 @@ If you'd rather like the latest snapshots of the upcoming major version, use our
 To get started with Vault and this guide you need a
 *NIX-like operating systems that provides:
 
-* `wget`, `openssl` and `unzip`
+* `curl`, `openssl` and `unzip`
 * at least Java 8 and a properly configured `JAVA_HOME` environment variable
 
 *Install Vault*

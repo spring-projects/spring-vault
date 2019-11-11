@@ -104,12 +104,12 @@ function download() {
     # install Vault
     say "Downloading Vault from ${VAULT_URL}"
 
-    verbose "wget ${VAULT_URL} -O ${VAULT_FILE}"
+    verbose "curl ${VAULT_URL} --output ${VAULT_FILE}"
 
     if [[ ${VERBOSE} == true ]]; then
-      wget "${VAULT_URL}" -O "${VAULT_FILE}"
+      curl "${VAULT_URL}" -vs --output "${VAULT_FILE}"
     else
-      wget "${VAULT_URL}" -q -O "${VAULT_FILE}"
+      curl "${VAULT_URL}" -s --output "${VAULT_FILE}"
     fi
 
     if [[ $? != 0 ]]; then
