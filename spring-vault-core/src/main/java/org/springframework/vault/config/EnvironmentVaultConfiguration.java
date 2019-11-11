@@ -27,9 +27,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.AppIdAuthentication;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.AppIdAuthenticationOptions.AppIdAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppIdUserIdMechanism;
 import org.springframework.vault.authentication.AppRoleAuthentication;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
+import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2Authentication;
@@ -37,13 +39,16 @@ import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AzureMsiAuthentication;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
+import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthentication;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
+import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.IpAddressUserId;
 import org.springframework.vault.authentication.KubernetesAuthentication;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
+import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.KubernetesJwtSupplier;
 import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
 import org.springframework.vault.authentication.MacAddressUserId;
@@ -217,8 +222,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	@Override
 	public ClientAuthentication clientAuthentication() {
 
-		String authentication = getEnvironment()
-				.getProperty("vault.authentication", AuthenticationMethod.TOKEN.name())
+		String authentication = getProperty("vault.authentication", AuthenticationMethod.TOKEN.name())
 				.toUpperCase().replace('-', '_');
 
 		AuthenticationMethod authenticationMethod = AuthenticationMethod
@@ -264,31 +268,39 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 	protected ClientAuthentication appIdAuthentication() {
 
-		String appId = getEnvironment().getProperty("vault.app-id.app-id",
-				getProperty("spring.application.name"));
+		String appId = getProperty("vault.app-id.app-id", getProperty("spring.application.name"));
 		String userId = getProperty("vault.app-id.user-id");
+		String path = getProperty("vault.app-id.app-id-path",
+				AppIdAuthenticationOptions.DEFAULT_APPID_AUTHENTICATION_PATH);
 
 		Assert.hasText(appId,
 				"Vault AppId authentication: AppId (vault.app-id.app-id) must not be empty");
 		Assert.hasText(userId,
 				"Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptions authenticationOptions = AppIdAuthenticationOptions
-				.builder().appId(appId) //
-				.userIdMechanism(getAppIdUserIdMechanism(userId)).build();
+		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions
+				.builder()
+				.appId(appId)
+				.userIdMechanism(getAppIdUserIdMechanism(userId))
+				.path(path);
 
-		return new AppIdAuthentication(authenticationOptions, restOperations());
+		return new AppIdAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication appRoleAuthentication() {
 
 		String roleId = getProperty("vault.app-role.role-id");
 		String secretId = getProperty("vault.app-role.secret-id");
+		String path = getProperty("vault.app-role.app-role-path",
+				AppRoleAuthenticationOptions.DEFAULT_APPROLE_AUTHENTICATION_PATH);
+		
 		Assert.hasText(roleId,
 				"Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
 
-		AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().roleId(RoleId.provided(roleId));
+		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
+				.builder()
+				.roleId(RoleId.provided(roleId))
+				.path(path);
 
 		if (StringUtils.hasText(secretId)) {
 			builder = builder.secretId(SecretId.provided(secretId));
@@ -314,11 +326,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 		String roleId = getProperty("vault.aws-ec2.role-id");
 		String identityDocument = getProperty("vault.aws-ec2.identity-document");
+		String path = getProperty("vault.aws-ec2.aws-ec2-path",
+				AwsEc2AuthenticationOptions.DEFAULT_AWS_AUTHENTICATION_PATH);
+		
 		Assert.hasText(roleId,
 				"Vault AWS EC2 authentication: RoleId (vault.aws-ec2.role-id) must not be empty");
 
-		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
-				.role(roleId);
+		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions
+				.builder()
+				.role(roleId)
+				.path(path);
 
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));
@@ -331,53 +348,64 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	protected ClientAuthentication azureMsiAuthentication() {
 
 		String roleId = getProperty("vault.azure-msi.role");
+		String path = getProperty("vault.azure-msi.azure-path",
+				AzureMsiAuthenticationOptions.DEFAULT_AZURE_AUTHENTICATION_PATH);
+		
 		Assert.hasText(roleId,
 				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
-		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
-				.role(roleId).build();
+		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions
+				.builder()
+				.role(roleId)
+				.path(path);
 
-		return new AzureMsiAuthentication(options, restOperations());
+		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication cubbyholeAuthentication() {
 
-		String token = getEnvironment().getProperty("vault.token");
+		String token = getProperty("vault.token");
 		Assert.hasText(token,
 				"Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
 
-		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder() //
-				.wrapped() //
-				.initialToken(VaultToken.of(token)) //
-				.build();
+		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions
+				.builder()
+				.wrapped()
+				.initialToken(VaultToken.of(token));
 
-		return new CubbyholeAuthentication(options, restOperations());
+		return new CubbyholeAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication kubeAuthentication() {
 
 		String role = getProperty("vault.kubernetes.role");
+		String tokenFile = getProperty("vault.kubernetes.service-account-token-file",
+				KubernetesServiceAccountTokenFile.DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
+		String path = getProperty("vault.kubernetes.kubernetes-path",
+				KubernetesAuthenticationOptions.DEFAULT_KUBERNETES_AUTHENTICATION_PATH);
+
 		Assert.hasText(role, "Vault Kubernetes authentication: role must not be empty");
 
-		String tokenFile = getProperty("vault.kubernetes.service-account-token-file");
-		if (!StringUtils.hasText(tokenFile)) {
-			tokenFile = KubernetesServiceAccountTokenFile.DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE;
-		}
 		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(
 				tokenFile);
 
-		KubernetesAuthenticationOptions authenticationOptions = KubernetesAuthenticationOptions
-				.builder() //
-				.role(role) //
-				.jwtSupplier(jwtSupplier) //
-				.build();
+		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions
+				.builder()
+				.role(role)
+				.jwtSupplier(jwtSupplier)
+				.path(path);
 
-		return new KubernetesAuthentication(authenticationOptions, restOperations());
+		return new KubernetesAuthentication(builder.build(), restOperations());
 	}
 
 	@Nullable
 	private String getProperty(String key) {
-		return getEnvironment().getProperty(key);
+		return getProperty(key, null);
+	}
+
+	@Nullable
+	private String getProperty(String key, String defaultValue) {
+		return getEnvironment().getProperty(key, defaultValue);
 	}
 
 	@Nullable
