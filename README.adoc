@@ -107,9 +107,10 @@ Vault is sealed and not initialized when starting up
 so you need to initialize it first.
 
 ----
+$ cd vault
 $ export VAULT_ADDR="https://localhost:8200"
 $ export VAULT_SKIP_VERIFY=true # Don't do this for production
-$ vault init
+$ ./vault operator init
 ----
 
 You should see something like:
@@ -135,9 +136,9 @@ Vault will initialize and return a set of unsealing keys and the root token.
 Pick 3 keys and unseal Vault.
 
 ----
-$ vault unseal (Key 1)
-$ vault unseal (Key 2)
-$ vault unseal (Key 3)
+$ ./vault operator unseal (Key 1)
+$ ./vault operator unseal (Key 2)
+$ ./vault operator unseal (Key 3)
 ----
 
 Vault is now initialized and unsealed.
