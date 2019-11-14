@@ -112,6 +112,8 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>AppId authentication
  * <ul>
+ * <li>AppId path: {@code vault.app-id.app-id-path} (since 2.2.1, defaults to
+ * {@link AppIdAuthenticationOptions#DEFAULT_APPID_AUTHENTICATION_PATH})</li>
  * <li>AppId: {@code vault.app-id.app-id}</li>
  * <li>UserId: {@code vault.app-id.user-id}. {@literal MAC_ADDRESS} and
  * {@literal IP_ADDRESS} use {@link MacAddressUserId}, respective {@link IpAddressUserId}.
@@ -119,16 +121,22 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>AppRole authentication
  * <ul>
+ * <li>AppRole path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
+ * {@link AppRoleAuthenticationOptions#DEFAULT_APPROLE_AUTHENTICATION_PATH})</li>
  * <li>RoleId: {@code vault.app-role.role-id}</li>
  * <li>SecretId: {@code vault.app-role.secret-id} (optional)</li>
  * </ul>
  * <li>AWS EC2 authentication
  * <ul>
+ * <li>AWS EC2 path: {@code vault.app-id-path} (since 2.2.1, defaults to
+ * {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
  * <li>RoleId: {@code vault.aws-ec2.role-id}</li>
  * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (optional)</li>
  * </ul>
  * <li>Azure MSI authentication
  * <ul>
+ * <li>Azure MSI path: {@code vault.azure-msi.azure-path} (since 2.2.1, defaults to
+ * {@link AzureMsiAuthenticationOptions#DEFAULT_AZURE_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.azure-msi.role}</li>
  * </ul>
  * <li>Client Certificate authentication
@@ -139,10 +147,20 @@ import org.springframework.web.client.RestOperations;
  * <ul>
  * <li>Initial Vault Token: {@code vault.token}</li>
  * </ul>
+ * <li>Kubernetes authentication
+ * <ul>
+ * <li>Kubernetes path: {@code vault.kubernetes.kubernetes-path} (since 2.2.1, defaults to
+ * {@link KubernetesAuthenticationOptions#DEFAULT_KUBERNETES_AUTHENTICATION_PATH})</li>
+ * <li>Role: {@code vault.kubernetes.role}</li>
+ * <li>Path to service account token file:
+ * {@code vault.kubernetes.service-account-token-file} (defaults to
+ * {@link KubernetesServiceAccountTokenFile#DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE})</li>
+ * </ul>
  * </ul>
  *
  * @author Mark Paluch
  * @author Michal Budzyn
+ * @author Raoof Mohammed
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see VaultEndpoint
@@ -222,8 +240,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	@Override
 	public ClientAuthentication clientAuthentication() {
 
-		String authentication = getProperty("vault.authentication", AuthenticationMethod.TOKEN.name())
-				.toUpperCase().replace('-', '_');
+		String authentication = getProperty("vault.authentication",
+				AuthenticationMethod.TOKEN.name()).toUpperCase().replace('-', '_');
 
 		AuthenticationMethod authenticationMethod = AuthenticationMethod
 				.valueOf(authentication);
@@ -268,7 +286,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 	protected ClientAuthentication appIdAuthentication() {
 
-		String appId = getProperty("vault.app-id.app-id", getProperty("spring.application.name"));
+		String appId = getProperty("vault.app-id.app-id",
+				getProperty("spring.application.name"));
 		String userId = getProperty("vault.app-id.user-id");
 		String path = getProperty("vault.app-id.app-id-path",
 				AppIdAuthenticationOptions.DEFAULT_APPID_AUTHENTICATION_PATH);
@@ -278,11 +297,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		Assert.hasText(userId,
 				"Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions
-				.builder()
-				.appId(appId)
-				.userIdMechanism(getAppIdUserIdMechanism(userId))
-				.path(path);
+		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder()
+				.appId(appId).userIdMechanism(getAppIdUserIdMechanism(userId)).path(path);
 
 		return new AppIdAuthentication(builder.build(), restOperations());
 	}
@@ -293,14 +309,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		String secretId = getProperty("vault.app-role.secret-id");
 		String path = getProperty("vault.app-role.app-role-path",
 				AppRoleAuthenticationOptions.DEFAULT_APPROLE_AUTHENTICATION_PATH);
-		
+
 		Assert.hasText(roleId,
 				"Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
 
 		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder()
-				.roleId(RoleId.provided(roleId))
-				.path(path);
+				.builder().roleId(RoleId.provided(roleId)).path(path);
 
 		if (StringUtils.hasText(secretId)) {
 			builder = builder.secretId(SecretId.provided(secretId));
@@ -328,14 +342,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		String identityDocument = getProperty("vault.aws-ec2.identity-document");
 		String path = getProperty("vault.aws-ec2.aws-ec2-path",
 				AwsEc2AuthenticationOptions.DEFAULT_AWS_AUTHENTICATION_PATH);
-		
+
 		Assert.hasText(roleId,
 				"Vault AWS EC2 authentication: RoleId (vault.aws-ec2.role-id) must not be empty");
 
-		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions
-				.builder()
-				.role(roleId)
-				.path(path);
+		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
+				.role(roleId).path(path);
 
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));
@@ -350,14 +362,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		String roleId = getProperty("vault.azure-msi.role");
 		String path = getProperty("vault.azure-msi.azure-path",
 				AzureMsiAuthenticationOptions.DEFAULT_AZURE_AUTHENTICATION_PATH);
-		
+
 		Assert.hasText(roleId,
 				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
 		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions
-				.builder()
-				.role(roleId)
-				.path(path);
+				.builder().role(roleId).path(path);
 
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
@@ -369,9 +379,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 				"Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
 
 		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions
-				.builder()
-				.wrapped()
-				.initialToken(VaultToken.of(token));
+				.builder().wrapped().initialToken(VaultToken.of(token));
 
 		return new CubbyholeAuthentication(builder.build(), restOperations());
 	}
@@ -390,10 +398,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 				tokenFile);
 
 		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions
-				.builder()
-				.role(role)
-				.jwtSupplier(jwtSupplier)
-				.path(path);
+				.builder().role(role).jwtSupplier(jwtSupplier).path(path);
 
 		return new KubernetesAuthentication(builder.build(), restOperations());
 	}
