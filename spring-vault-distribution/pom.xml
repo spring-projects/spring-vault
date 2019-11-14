@@ -75,6 +75,13 @@
 				</dependency>
 			</dependencies>
 
+			<repositories>
+				<repository>
+					<id>spring-libs-milestone</id>
+					<url>https://repo.spring.io/libs-milestone</url>
+				</repository>
+			</repositories>
+
 			<build>
 
 				<plugins>
