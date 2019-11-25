@@ -131,7 +131,8 @@ import org.springframework.web.client.RestOperations;
  * <ul>
  * <li>AWS EC2 path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
- * <li>RoleId: {@code vault.aws-ec2.role-id}</li>
+ * <li>Role: {@code vault.aws-ec2.role} (since 2.2.1)</li>
+ * <li>RoleId: {@code vault.aws-ec2.role-id} (@Deprecated - use {@code vault.aws-ec2.role} instead)</li>
  * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI})</li>
  * </ul>
@@ -340,23 +341,27 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 	protected ClientAuthentication awsEc2Authentication() {
 
+		String role = getProperty("vault.aws-ec2.role");
 		String roleId = getProperty("vault.aws-ec2.role-id");
 		String identityDocument = getProperty("vault.aws-ec2.identity-document");
 		String path = getProperty("vault.aws-ec2.aws-ec2-path",
 				AwsEc2AuthenticationOptions.DEFAULT_AWS_AUTHENTICATION_PATH);
 
-		Assert.hasText(roleId,
-				"Vault AWS EC2 authentication: RoleId (vault.aws-ec2.role-id) must not be empty");
+		Assert.isTrue(StringUtils.hasText(roleId) || StringUtils.hasText(role),
+				"Vault AWS-EC2 authentication: Role (vault.aws-ec2.role) must not be empty");
+
+		Assert.isTrue(!(StringUtils.hasText(roleId) && StringUtils.hasText(role)),
+				"Vault AWS-EC2 authentication: Only one of Role (vault.aws-ec2.role) or"
+						+ " RoleId(@Deprecated) (vault.aws-ec2.roleId) must be provided");
 
 		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
-				.role(roleId).path(path);
+				.role(StringUtils.hasText(role) ? role : roleId).path(path);
 
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));
 		}
 
-		return new AwsEc2Authentication(builder.build(), restOperations(),
-				restOperations());
+		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
