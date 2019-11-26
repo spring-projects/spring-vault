@@ -24,6 +24,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.lang.Nullable;
@@ -55,6 +56,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
  * into Vault on initialization and use the token throughout the whole lifetime.
  *
  * @author Mark Paluch
+ * @author Raoof Mohammed
  * @see SessionManager
  * @since 2.0
  */
@@ -167,7 +169,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
 					.getTypeReference(responseType);
 
-			return webClient.get().uri(path).exchange().flatMap(mapResponse(ref, path));
+			return webClient.get().uri(path).exchange()
+					.flatMap(mapResponse(ref, path, HttpMethod.GET));
 		});
 	}
 
@@ -203,7 +206,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			else {
 				exchange = uri.exchange();
 			}
-			return exchange.flatMap(mapResponse(VaultResponse.class, path));
+			return exchange
+					.flatMap(mapResponse(VaultResponse.class, path, HttpMethod.POST));
 		});
 	}
 
@@ -213,7 +217,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.hasText(path, "Path must not be empty");
 
 		return doWithSession(webClient -> webClient.delete().uri(path).exchange()
-				.flatMap(mapResponse(String.class, path)).then());
+				.flatMap(mapResponse(String.class, path, HttpMethod.DELETE)).then());
 	}
 
 	@Override
@@ -249,29 +253,30 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	private <T> Mono<T> doRead(String path, Class<T> responseType) {
 
 		return doWithSession(client -> client.get() //
-				.uri(path).exchange().flatMap(mapResponse(responseType, path)));
+				.uri(path).exchange()
+				.flatMap(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
 	private static <T> Function<ClientResponse, Mono<? extends T>> mapResponse(
-			Class<T> bodyType, String path) {
+			Class<T> bodyType, String path, HttpMethod method) {
 		return response -> isSuccess(response) ? response.bodyToMono(bodyType)
-				: mapOtherwise(response, path);
+				: mapOtherwise(response, path, method);
 	}
 
 	private static <T> Function<ClientResponse, Mono<? extends T>> mapResponse(
-			ParameterizedTypeReference<T> typeReference, String path) {
+			ParameterizedTypeReference<T> typeReference, String path, HttpMethod method) {
 
 		return response -> isSuccess(response) ? response.body(BodyExtractors
-				.toMono(typeReference)) : mapOtherwise(response, path);
+				.toMono(typeReference)) : mapOtherwise(response, path, method);
 	}
 
 	private static boolean isSuccess(ClientResponse response) {
 		return response.statusCode().is2xxSuccessful();
 	}
 
-	private static <T> Mono<? extends T> mapOtherwise(ClientResponse response, String path) {
+	private static <T> Mono<? extends T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
 
-		if (response.statusCode() == HttpStatus.NOT_FOUND) {
+		if (response.statusCode() == HttpStatus.NOT_FOUND && method == HttpMethod.GET) {
 			return Mono.empty();
 		}
 
