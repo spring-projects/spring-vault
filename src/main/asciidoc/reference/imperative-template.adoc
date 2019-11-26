@@ -170,12 +170,11 @@ vault.token=00000000-0000-0000-0000-000000000000
 
 * Vault URI: `vault.uri`
 * SSL Configuration
- ** Keystore resource: `vault.ssl.key-store` (optional)
- ** Keystore password: `vault.ssl.key-store-password` (optional)
- ** Truststore resource: `vault.ssl.trust-store` (optional)
- ** Truststore password: `vault.ssl.trust-store-password` (optional)
-* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `CERT`, `CUBBYHOLE`)
-
+** Keystore resource: `vault.ssl.key-store` (optional)
+** Keystore password: `vault.ssl.key-store-password` (optional)
+** Truststore resource: `vault.ssl.trust-store` (optional)
+** Truststore password: `vault.ssl.trust-store-password` (optional)
+* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
 
 **Authentication-specific property keys**
 
@@ -185,18 +184,27 @@ vault.token=00000000-0000-0000-0000-000000000000
 
 **<<vault.authentication.appid>>**
 
+* AppId path: `vault.app-id.app-id-path` (defaults to `app-id`)
 * AppId: `vault.app-id.app-id`
-* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use `MacAddressUserId`, respective `IpAddressUserId` user id mechanisms. Any other value is used with `StaticUserId`.
+* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use `MacAddressUserId`, respective `IpAddressUserId` user id mechanisms.
+Any other value is used with `StaticUserId`.
 
 **<<vault.authentication.approle>>**
 
+* AppRole path: `vault.app-role.app-role-path` (defaults to `approle`)
 * RoleId: `vault.app-role.role-id`
 * SecretId: `vault.app-role.secret-id` (optional)
 
 **<<vault.authentication.awsec2>>**
 
+* AWS EC2 path: `vault.aws-ec2.aws-ec2-path` (defaults to `aws-ec2`)
 * RoleId: `vault.aws-ec2.role-id`
-* Identity Document URL: `vault.aws-ec2.identity-document` (optional)
+* Identity Document URL: `vault.aws-ec2.identity-document` (defaults to `http://169.254.169.254/latest/dynamic/instance-identity/pkcs7`)
+
+**<<vault.authentication.azuremsi>>**
+
+* Azure MSI path: `vault.azure-msi.azure-path` (defaults to `azure`)
+* Role: `vault.azure-msi.role`
 
 **<<vault.authentication.clientcert>>**
 
@@ -206,14 +214,18 @@ No configuration options.
 
 * Initial Vault Token: `vault.token`
 
+**<<vault.authentication.kubernetes>>**
+
+* Kubernetes path: `vault.kubernetes.kubernetes-path` (defaults to `kubernetes`)
+* Role: `vault.kubernetes.role`
+* Path to service account token file: `vault.kubernetes.service-account-token-file` (defaults to `/var/run/secrets/kubernetes.io/serviceaccount/token`)
+
 [[vault.core.executioncallback]]
 == Execution callbacks
 
-One common design feature of all Spring template classes is that all functionality
-is routed into one of the templates execute callback methods. This helps ensure
-that exceptions and any resource management that maybe required are performed
-consistency. While this was of much greater need in the case of JDBC and JMS
-than with Vault, it still offers a single spot for access and logging to occur.
+One common design feature of all Spring template classes is that all functionality is routed into one of the templates execute callback methods.
+This helps ensure that exceptions and any resource management that maybe required are performed consistency.
+While this was of much greater need in the case of JDBC and JMS than with Vault, it still offers a single spot for access and logging to occur.
 As such, using the execute callback is the preferred way to access the Vault API
 to perform uncommon operations that we've not exposed as methods on `VaultTemplate`.
 

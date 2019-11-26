@@ -105,7 +105,8 @@ import org.springframework.web.client.RestOperations;
  * </li>
  * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
  * supported authentication methods are:
- * {@literal TOKEN, APPID, APPROLE, AZURE, AWS_EC2, CERT, CUBBYHOLE})</li>
+ * {@literal TOKEN, APPID, APPROLE, AWS_EC2, AZURE, CERT, CUBBYHOLE, KUBERNETES}, see
+ * {@link AuthenticationMethod})</li>
  * <li>Token authentication
  * <ul>
  * <li>Vault Token: {@code vault.token}</li>
@@ -121,17 +122,18 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>AppRole authentication
  * <ul>
- * <li>AppRole path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
+ * <li>AppRole path: {@code vault.app-role.app-role-path} (since 2.2.1, defaults to
  * {@link AppRoleAuthenticationOptions#DEFAULT_APPROLE_AUTHENTICATION_PATH})</li>
  * <li>RoleId: {@code vault.app-role.role-id}</li>
  * <li>SecretId: {@code vault.app-role.secret-id} (optional)</li>
  * </ul>
  * <li>AWS EC2 authentication
  * <ul>
- * <li>AWS EC2 path: {@code vault.app-id-path} (since 2.2.1, defaults to
+ * <li>AWS EC2 path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
  * <li>RoleId: {@code vault.aws-ec2.role-id}</li>
- * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (optional)</li>
+ * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults to
+ * {@link AwsEc2AuthenticationOptions#DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI})</li>
  * </ul>
  * <li>Azure MSI authentication
  * <ul>
@@ -425,6 +427,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	}
 
 	enum AuthenticationMethod {
-		TOKEN, APPID, APPROLE, AZURE, AWS_EC2, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPID, APPROLE, AWS_EC2, AZURE, CERT, CUBBYHOLE, KUBERNETES;
 	}
 }
