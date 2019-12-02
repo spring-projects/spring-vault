@@ -30,6 +30,7 @@ import reactor.test.StepVerifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.domain.Person;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -130,6 +131,13 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
+	void listShouldNotReturnAbsentKey() {
+
+		vaultOperations.list("foo").collectList().as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual).isEmpty()).verifyComplete();
+	}
+
+	@Test
 	void listShouldReturnExistingKey() {
 
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
@@ -166,5 +174,19 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 					assertThat(response.getAuth()).isNotNull();
 
 				}).verifyComplete();
+	}
+
+	@Test
+	void deleteUnknownPathShouldFail() {
+
+		vaultOperations.delete("foobar").as(StepVerifier::create)
+				.verifyError(VaultException.class);
+	}
+
+	@Test
+	void writeUnknownPathShouldFail() {
+
+		vaultOperations.write("foobar").as(StepVerifier::create)
+				.verifyError(VaultException.class);
 	}
 }
