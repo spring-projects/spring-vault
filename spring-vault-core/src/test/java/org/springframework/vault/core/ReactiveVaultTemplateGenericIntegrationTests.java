@@ -30,6 +30,7 @@ import reactor.test.StepVerifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.util.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,37 +55,31 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	@Test
 	public void readShouldReturnExistingKey() {
 
-		StepVerifier.create(
-				vaultOperations.write("secret/mykey",
-						Collections.singletonMap("hello", "world"))).verifyComplete();
+		StepVerifier.create(vaultOperations.write("secret/mykey",
+				Collections.singletonMap("hello", "world"))).verifyComplete();
 
-		StepVerifier
-				.create(vaultOperations.read("secret/mykey"))
-				.consumeNextWith(
-						actual -> assertThat(actual.getData()).containsEntry("hello",
-								"world")).verifyComplete();
+		StepVerifier.create(vaultOperations.read("secret/mykey")).consumeNextWith(
+				actual -> assertThat(actual.getData()).containsEntry("hello", "world"))
+				.verifyComplete();
 
 	}
 
 	@Test
 	public void readShouldReturnNestedPropertiesKey() throws IOException {
 
-		Map map = new ObjectMapper()
-				.readValue(
-						"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
-						Map.class);
+		Map map = new ObjectMapper().readValue(
+				"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
+				Map.class);
 
 		StepVerifier.create(vaultOperations.write("secret/mykey", map)).verifyComplete();
 
-		StepVerifier
-				.create(vaultOperations.read("secret/mykey"))
-				.consumeNextWith(
-						actual -> {
-							assertThat(actual.getData()).containsEntry("hello.array[0]",
-									"array-value0");
-							assertThat(actual.getData()).containsEntry("hello.array[1]",
-									"array-value1");
-						}).verifyComplete();
+		StepVerifier.create(vaultOperations.read("secret/mykey"))
+				.consumeNextWith(actual -> {
+					assertThat(actual.getData()).containsEntry("hello.array[0]",
+							"array-value0");
+					assertThat(actual.getData()).containsEntry("hello.array[1]",
+							"array-value1");
+				}).verifyComplete();
 
 	}
 
@@ -127,11 +122,17 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	}
 
 	@Test
+	public void listShouldNotReturnAbsentKey() {
+
+		vaultOperations.list("foo").collectList().as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual).isEmpty()).verifyComplete();
+	}
+
+	@Test
 	public void listShouldReturnExistingKey() {
 
-		StepVerifier.create(
-				vaultOperations.write("secret/mykey",
-						Collections.singletonMap("hello", "world"))).verifyComplete();
+		StepVerifier.create(vaultOperations.write("secret/mykey",
+				Collections.singletonMap("hello", "world"))).verifyComplete();
 
 		StepVerifier.create(vaultOperations.list("secret").collectList())
 				.consumeNextWith(actual -> assertThat(actual).contains("mykey"))
@@ -141,9 +142,8 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 	@Test
 	public void deleteShouldRemoveKey() {
 
-		StepVerifier.create(
-				vaultOperations.write("secret/mykey",
-						Collections.singletonMap("hello", "world"))).verifyComplete();
+		StepVerifier.create(vaultOperations.write("secret/mykey",
+				Collections.singletonMap("hello", "world"))).verifyComplete();
 
 		StepVerifier.create(vaultOperations.delete("secret/mykey")).verifyComplete();
 
@@ -159,6 +159,20 @@ public class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTes
 					assertThat(response.getAuth()).isNotNull();
 
 				}).verifyComplete();
+	}
+
+	@Test
+	public void deleteUnknownPathShouldFail() {
+
+		vaultOperations.delete("foobar").as(StepVerifier::create)
+				.verifyError(VaultException.class);
+	}
+
+	@Test
+	public void writeUnknownPathShouldFail() {
+
+		vaultOperations.write("foobar").as(StepVerifier::create)
+				.verifyError(VaultException.class);
 	}
 
 	static class Person {

@@ -123,6 +123,13 @@ public class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
+	public void listShouldNotReturnAbsentKey() {
+
+		List<String> keys = vaultOperations.list("foo");
+		assertThat(keys).isEmpty();
+	}
+
+	@Test
 	public void deleteShouldRemoveKey() throws Exception {
 
 		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
