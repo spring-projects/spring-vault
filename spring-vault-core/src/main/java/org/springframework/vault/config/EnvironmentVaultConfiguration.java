@@ -17,6 +17,9 @@ package org.springframework.vault.config;
 
 import java.net.URI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -132,7 +135,8 @@ import org.springframework.web.client.RestOperations;
  * <li>AWS EC2 path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.aws-ec2.role} (since 2.2.1)</li>
- * <li>RoleId: {@code vault.aws-ec2.role-id} (@Deprecated - use {@code vault.aws-ec2.role} instead)</li>
+ * <li>RoleId: {@code vault.aws-ec2.role-id} (<strong>deprecated since 2.2.1:</strong> use
+ * {@code vault.aws-ec2.role} instead)</li>
  * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI})</li>
  * </ul>
@@ -177,6 +181,9 @@ import org.springframework.web.client.RestOperations;
 @Configuration
 public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		implements ApplicationContextAware {
+
+	private static final Log logger = LogFactory
+			.getLog(EnvironmentVaultConfiguration.class);
 
 	private @Nullable RestOperations cachedRestOperations;
 	private @Nullable ApplicationContext applicationContext;
@@ -350,9 +357,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		Assert.isTrue(StringUtils.hasText(roleId) || StringUtils.hasText(role),
 				"Vault AWS-EC2 authentication: Role (vault.aws-ec2.role) must not be empty");
 
-		Assert.isTrue(!(StringUtils.hasText(roleId) && StringUtils.hasText(role)),
-				"Vault AWS-EC2 authentication: Only one of Role (vault.aws-ec2.role) or"
-						+ " RoleId(@Deprecated) (vault.aws-ec2.roleId) must be provided");
+		if (StringUtils.hasText(roleId) && StringUtils.hasText(role)) {
+			throw new IllegalStateException(
+					"AWS-EC2 Authentication: Only one of Role (vault.aws-ec2.role) or"
+							+ " RoleId (deprecated, vault.aws-ec2.roleId) must be provided");
+		}
+
+		if (StringUtils.hasText(roleId)) {
+			logger.warn(
+					"AWS-EC2 Authentication: vault.aws-ec2.roleId is deprecated. Please use vault.aws-ec2.role instead.");
+		}
 
 		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
 				.role(StringUtils.hasText(role) ? role : roleId).path(path);
@@ -361,20 +375,21 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 			builder.identityDocumentUri(URI.create(identityDocument));
 		}
 
-		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
+		return new AwsEc2Authentication(builder.build(), restOperations(),
+				restOperations());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
 
-		String roleId = getProperty("vault.azure-msi.role");
+		String role = getProperty("vault.azure-msi.role");
 		String path = getProperty("vault.azure-msi.azure-path",
 				AzureMsiAuthenticationOptions.DEFAULT_AZURE_AUTHENTICATION_PATH);
 
-		Assert.hasText(roleId,
+		Assert.hasText(role,
 				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
 		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions
-				.builder().role(roleId).path(path);
+				.builder().role(role).path(path);
 
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}

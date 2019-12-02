@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=aws-ec2", "vault.aws-ec2.role-id=role" })
+		"vault.authentication=aws-ec2", "vault.aws-ec2.role=role" })
 class EnvironmentVaultConfigurationAwsEc2AuthenticationUnitTests {
 
 	@Configuration

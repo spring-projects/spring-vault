@@ -199,7 +199,7 @@ Any other value is used with `StaticUserId`.
 
 * AWS EC2 path: `vault.aws-ec2.aws-ec2-path` (defaults to `aws-ec2`)
 * Role: `vault.aws-ec2.role`
-* RoleId: `vault.aws-ec2.role-id` (deprecated - use `vault.aws-ec2.role` instead)
+* RoleId: `vault.aws-ec2.role-id` (*deprecated:* use `vault.aws-ec2.role` instead)
 * Identity Document URL: `vault.aws-ec2.identity-document` (defaults to `http://169.254.169.254/latest/dynamic/instance-identity/pkcs7`)
 
 **<<vault.authentication.azuremsi>>**
