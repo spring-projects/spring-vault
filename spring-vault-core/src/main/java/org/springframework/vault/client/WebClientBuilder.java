@@ -117,13 +117,29 @@ public class WebClientBuilder {
 	 *
 	 * @param httpConnector the supplier for the HTTP connector.
 	 * @return {@code this} {@link WebClientBuilder}.
+	 * @since 2.2.1
 	 */
-	public WebClientBuilder requestFactory(Supplier<ClientHttpConnector> httpConnector) {
+	public WebClientBuilder httpConnectorFactory(
+			Supplier<ClientHttpConnector> httpConnector) {
 
 		Assert.notNull(httpConnector, "Supplier of ClientHttpConnector must not be null");
 
 		this.httpConnector = httpConnector;
 		return this;
+	}
+
+	/**
+	 * Set the {@link Supplier} of {@link ClientHttpConnector} that should be called each
+	 * time we {@link #build()} a new {@link WebClient} instance.
+	 *
+	 * @param httpConnector the supplier for the HTTP connector.
+	 * @return {@code this} {@link WebClientBuilder}.
+	 * @deprecated since 2.2.1 as the name is wrong, use
+	 * {@link #httpConnectorFactory(Supplier)}
+	 */
+	@Deprecated
+	public WebClientBuilder requestFactory(Supplier<ClientHttpConnector> httpConnector) {
+		return httpConnectorFactory(httpConnector);
 	}
 
 	/**
