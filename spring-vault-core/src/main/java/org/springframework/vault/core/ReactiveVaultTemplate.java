@@ -40,6 +40,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -70,6 +71,22 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpoint},
+	 * {@link ClientHttpConnector}. This constructor does not use a
+	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
+	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
+	 * authentication token header}.
+	 *
+	 * @param vaultEndpoint must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public ReactiveVaultTemplate(VaultEndpoint vaultEndpoint,
+			ClientHttpConnector connector) {
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector);
+	}
+
+	/**
+	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpConnector} and {@link VaultTokenSupplier}.
 	 *
 	 * @param vaultEndpoint must not be {@literal null}.
@@ -80,6 +97,30 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			ClientHttpConnector connector, VaultTokenSupplier vaultTokenSupplier) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector,
 				vaultTokenSupplier);
+	}
+
+	/**
+	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpointProvider} and
+	 * {@link ClientHttpConnector}. This constructor does not use a
+	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
+	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
+	 * authentication token header}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param connector must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(connector, "ClientHttpConnector must not be null");
+
+		WebClient webClient = doCreateWebClient(endpointProvider, connector);
+
+		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
+		this.statelessClient = webClient;
+		this.sessionClient = webClient;
 	}
 
 	/**
@@ -100,6 +141,26 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = doCreateWebClient(endpointProvider, connector);
 		this.sessionClient = doCreateSessionWebClient(endpointProvider, connector);
+	}
+
+	/**
+	 * Create a new {@link ReactiveVaultTemplate} through a {@link WebClientBuilder}. This
+	 * constructor does not use a {@link VaultTokenSupplier}. It is intended for usage
+	 * with Vault Agent to inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
+	 * @param webClientBuilder must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public ReactiveVaultTemplate(WebClientBuilder webClientBuilder) {
+
+		Assert.notNull(webClientBuilder, "WebClientBuilder must not be null");
+
+		WebClient webClient = webClientBuilder.build();
+
+		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
+		this.statelessClient = webClient;
+		this.sessionClient = webClient;
 	}
 
 	/**
@@ -320,5 +381,15 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private static class VaultListResponse
 			extends VaultResponseSupport<Map<String, Object>> {
+	}
+
+	private enum NoTokenSupplier implements VaultTokenSupplier {
+		INSTANCE;
+
+		@Override
+		public Mono<VaultToken> getVaultToken() {
+			return Mono
+					.error(new UnsupportedOperationException("Token retrieval disabled"));
+		}
 	}
 }

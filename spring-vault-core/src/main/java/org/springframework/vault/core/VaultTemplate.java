@@ -41,6 +41,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
@@ -61,6 +62,20 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private SessionManager sessionManager;
 
 	private final boolean dedicatedSessionManager;
+
+	/**
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint}. This constructor
+	 * does not use a {@link ClientAuthentication} mechanism. It is intended for usage
+	 * with Vault Agent to inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
+	 * @param vaultEndpoint must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public VaultTemplate(VaultEndpoint vaultEndpoint) {
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint),
+				new SimpleClientHttpRequestFactory());
+	}
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint} and
@@ -88,6 +103,22 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	/**
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint}, and
+	 * {@link ClientHttpRequestFactory}. This constructor does not use a
+	 * {@link ClientAuthentication} mechanism. It is intended for usage with Vault Agent
+	 * to inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
+	 * @param vaultEndpoint must not be {@literal null}.
+	 * @param clientHttpRequestFactory must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public VaultTemplate(VaultEndpoint vaultEndpoint,
+			ClientHttpRequestFactory clientHttpRequestFactory) {
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory);
+	}
+
+	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
 	 *
@@ -100,6 +131,32 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			SessionManager sessionManager) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory,
 				sessionManager);
+	}
+
+	/**
+	 * Create a new {@link VaultTemplate} with a {@link VaultEndpointProvider},
+	 * {@link ClientHttpRequestFactory} and {@link SessionManager}. This constructor does
+	 * not use a {@link ClientAuthentication} mechanism. It is intended for usage with
+	 * Vault Agent to inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public VaultTemplate(VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory) {
+
+		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
+		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
+
+		RestTemplate restTemplate = doCreateRestTemplate(endpointProvider,
+				requestFactory);
+
+		this.sessionManager = NoSessionManager.INSTANCE;
+		this.dedicatedSessionManager = false;
+		this.statelessTemplate = restTemplate;
+		this.sessionTemplate = restTemplate;
 	}
 
 	/**
@@ -120,9 +177,30 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
-
 		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
+	}
+
+	/**
+	 * Create a new {@link VaultTemplate} through a {@link RestTemplateBuilder} and
+	 * {@link SessionManager}. This constructor does not use a
+	 * {@link ClientAuthentication} mechanism. It is intended for usage with Vault Agent
+	 * to inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
+	 * @param restTemplateBuilder must not be {@literal null}.
+	 * @since 2.2.1
+	 */
+	public VaultTemplate(RestTemplateBuilder restTemplateBuilder) {
+
+		Assert.notNull(restTemplateBuilder, "RestTemplateBuilder must not be null");
+
+		RestTemplate restTemplate = restTemplateBuilder.build();
+
+		this.sessionManager = NoSessionManager.INSTANCE;
+		this.dedicatedSessionManager = false;
+		this.statelessTemplate = restTemplate;
+		this.sessionTemplate = restTemplate;
 	}
 
 	/**
@@ -409,5 +487,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 				throw VaultResponses.buildException(e, path);
 			}
 		});
+	}
+
+	private enum NoSessionManager implements SessionManager {
+		INSTANCE;
+
+		@Override
+		public VaultToken getSessionToken() {
+			throw new UnsupportedOperationException();
+		}
 	}
 }

@@ -17,7 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.vault.core.RestOperationsCallback;
+import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -40,12 +41,20 @@ import static org.springframework.vault.util.Settings.findWorkDir;
 public abstract class ClientCertificateAuthenticationIntegrationTestBase
 		extends IntegrationTestSupport {
 
+	static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*")
+			.capabilities(Policy.BuiltinCapabilities.READ,
+					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE)
+			.build());
+
 	@BeforeEach
 	public void before() {
 
 		if (!prepare().hasAuth("cert")) {
 			prepare().mountAuth("cert");
 		}
+
+		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy("cert-auth",
+				POLICY);
 
 		prepare().getVaultOperations()
 				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
@@ -55,8 +64,12 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase
 							new File(workDir, "ca/certs/client.cert.pem"),
 							StandardCharsets.US_ASCII);
 
+					Map<String, Object> role = new LinkedHashMap<>();
+					role.put("token_policies", "cert-auth");
+					role.put("certificate", certificate);
+
 					return restOperations.postForEntity("auth/cert/certs/my-role",
-							Collections.singletonMap("certificate", certificate),
+							role,
 							Map.class);
 				});
 	}
