@@ -58,11 +58,11 @@
 
 	<properties>
 		<httpclient.version>4.5.10</httpclient.version>
-		<httpcore.version>4.4.12</httpcore.version>
-		<netty.version>4.1.42.Final</netty.version>
+		<httpcore.version>4.4.13</httpcore.version>
+		<netty.version>4.1.44.Final</netty.version>
 		<okhttp3.version>3.11.0</okhttp3.version>
-		<jackson.version>2.9.10.1</jackson.version>
-		<aws-java-sdk.version>1.11.658</aws-java-sdk.version>
+		<jackson.version>2.9.10.2</jackson.version>
+		<aws-java-sdk.version>1.11.706</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev289-1.25.0</google-api-services-iam.version>
 		<google-auth-library-oauth2-http.version>0.10.0</google-auth-library-oauth2-http.version>
 	</properties>
