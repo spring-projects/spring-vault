@@ -24,7 +24,7 @@
 		<json-path.version>2.4.0</json-path.version>
 		<junit.version>4.12</junit.version>
 		<mockito-core.version>3.0.0</mockito-core.version>
-		<spring.version>5.1.10.RELEASE</spring.version>
+		<spring.version>5.1.13.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Lovelace-SR11</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.1.5.RELEASE</spring-security-bom.version>
 		<reactor.version>Californium-SR15</reactor.version>
