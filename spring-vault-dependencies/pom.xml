@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-dependencies</artifactId>
-	<version>2.2.1.BUILD-SNAPSHOT</version>
+	<version>2.2.1.RELEASE</version>
 	<packaging>pom</packaging>
 
 	<name>spring-vault-dependencies</name>
@@ -25,7 +25,8 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-	</scm>
+	  <tag>2.2.1.RELEASE</tag>
+  </scm>
 
 	<issueManagement>
 		<system>GitHub</system>
@@ -76,7 +77,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-core</artifactId>
-				<version>2.2.1.BUILD-SNAPSHOT</version>
+				<version>2.2.1.RELEASE</version>
 			</dependency>
 
 			<dependency>
