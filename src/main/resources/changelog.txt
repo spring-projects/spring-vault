@@ -1,6 +1,15 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.1.5.RELEASE
+-----------------------------------------
+* Write call is returning Mono.empty() when request failed with 404 Not Found #503
+* Update copyright years to 2020 #518
+* Upgrade to Reactor Californium SR15 #519
+* Upgrade to Spring Framework 5.1.13 #521
+* Upgrade to Spring Data Lovelace SR15 #523
+* Upgrade dependencies #526
+
 Changes in version 2.1.4.RELEASE
 -----------------------------------------
 * Update docs reflecting Apache HttpClient's wire logging #451
@@ -17,7 +26,6 @@ Changes in version 2.1.4.RELEASE
 * Upgrade to Spring Data Lovelace SR11 #498
 * Upgrade to Spring Framework 5.1.10 #499
 * Upgrade to Reactor Californium-SR12 #500
-
 
 Changes in version 2.1.3.RELEASE
 -----------------------------------------
