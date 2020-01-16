@@ -1,6 +1,21 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.1.RELEASE
+-----------------------------------------
+* Write call is returning Mono.empty() when request failed with 404 Not Found #503
+* Provide configurable custom mount path for vault auth backends #507
+* Incorrect environment property for aws ec2 role #508
+* Fix EnvironmentVaultConfiguration documentation #510
+* Support for Vault Agent #515
+* Rename WebClientBuilder.requestFactory(…) to httpConnectorFactory(…) #517
+* Update copyright years to 2020 #518
+* Upgrade to Reactor Dysprosium SR3 #520
+* Upgrade to Spring Framework 5.2.3 #522
+* Upgrade to Spring Data Moore SR4 #524
+* Upgrade to Kotlin 1.3.61 #525
+* Upgrade dependencies #527
+
 Changes in version 2.2.0.RELEASE
 -----------------------------------------
 * Consider performance standby mode in health check #501
