@@ -82,7 +82,7 @@ public class AppIdAuthentication
 		return AuthenticationSteps
 				.fromSupplier(() -> getAppIdLogin(options.getAppId(),
 						options.getUserIdMechanism().createUserId())) //
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -101,8 +101,8 @@ public class AppIdAuthentication
 				options.getUserIdMechanism().createUserId());
 
 		try {
-			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
-					login, VaultResponse.class, options.getPath());
+			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
+					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");

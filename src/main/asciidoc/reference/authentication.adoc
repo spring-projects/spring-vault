@@ -813,7 +813,7 @@ AuthenticationSteps.fromSupplier(                                       <1>
 
     () -> getAppRoleLogin(options.getRoleId(), options.getSecretId()))  <2>
 
-    .login("auth/{mount}/login", options.getPath());                    <3>
+    .login(AuthenticationUtil.getLoginPath(options.getPath()));         <3>
 ----
 <1> Start declaring `AuthenticationSteps` accepting a `Supplier<T>`. The state
 object type depends on the `Supplier` response type which can be mapped in a later step.

@@ -138,7 +138,7 @@ public class AwsEc2Authentication
 					login.put("pkcs7", pkcs7);
 
 					return login;
-				}).login("auth/{mount}/login", options.getPath());
+				}).login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public class AwsEc2Authentication
 		try {
 
 			VaultResponse response = this.vaultRestOperations.postForObject(
-					"auth/{mount}/login", login, VaultResponse.class, options.getPath());
+					AuthenticationUtil.getLoginPath(options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");

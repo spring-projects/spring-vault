@@ -101,7 +101,7 @@ public class PcfAuthentication
 		return AuthenticationSteps
 				.fromSupplier(() -> getPcfLogin(options.getRole(), options.getClock(),
 						instanceCert, instanceKey)) //
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -112,8 +112,8 @@ public class PcfAuthentication
 				options.getInstanceKeySupplier().get());
 
 		try {
-			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
-					login, VaultResponse.class, options.getPath());
+			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
+					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");

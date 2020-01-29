@@ -64,7 +64,7 @@ public abstract class GcpJwtAuthenticationSupport {
 		try {
 
 			VaultResponse response = this.restOperations.postForObject(
-					"auth/{mount}/login", login, VaultResponse.class, path);
+					AuthenticationUtil.getLoginPath(path), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
