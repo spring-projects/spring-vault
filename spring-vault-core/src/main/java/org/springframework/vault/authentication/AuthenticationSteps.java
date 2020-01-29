@@ -53,7 +53,7 @@ import org.springframework.vault.support.VaultToken;
  * 			login.put(&quot;pkcs7&quot;, pkcs7);
  *
  * 			return login;
- * 		}).login(&quot;auth/{mount}/login&quot;, &quot;aws&quot;);
+ * 		}).login(AuthenticationUtil.getLoginPath(options.getPath()));
  * </pre>
  *
  * <p>
