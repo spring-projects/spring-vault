@@ -36,6 +36,8 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 public class ClientCertificateAuthentication
 		implements ClientAuthentication, AuthenticationStepsFactory {
 
+	private static final String CERT = "cert";
+
 	private static final Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);
 
@@ -60,12 +62,12 @@ public class ClientCertificateAuthentication
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps() {
-		return AuthenticationSteps.just(post("auth/cert/login").as(VaultResponse.class));
+		return AuthenticationSteps.just(post(AuthenticationUtil.getLoginPath(CERT)).as(VaultResponse.class));
 	}
 
 	@Override
 	public VaultToken login() {
-		return createTokenUsingTlsCertAuthentication("cert");
+		return createTokenUsingTlsCertAuthentication();
 	}
 
 	@Override
@@ -73,11 +75,11 @@ public class ClientCertificateAuthentication
 		return createAuthenticationSteps();
 	}
 
-	private VaultToken createTokenUsingTlsCertAuthentication(String path) {
+	private VaultToken createTokenUsingTlsCertAuthentication() {
 
 		try {
-			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
-					Collections.emptyMap(), VaultResponse.class, path);
+			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(CERT),
+					Collections.emptyMap(), VaultResponse.class);
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 

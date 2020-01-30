@@ -118,7 +118,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 				//
 				.map(jwt -> createRequestBody(options.getRole(), jwt))
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override

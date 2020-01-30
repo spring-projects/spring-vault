@@ -83,7 +83,7 @@ public class KubernetesAuthentication
 		String token = options.getJwtSupplier().get();
 		return AuthenticationSteps
 				.fromSupplier(() -> getKubernetesLogin(options.getRole(), token))
-				.login(getLoginPath(options));
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -93,7 +93,7 @@ public class KubernetesAuthentication
 				options.getJwtSupplier().get());
 
 		try {
-			VaultResponse response = restOperations.postForObject(getLoginPath(options),
+			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
 					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
@@ -124,9 +124,5 @@ public class KubernetesAuthentication
 		login.put("role", role);
 
 		return login;
-	}
-	
-	private static String getLoginPath(KubernetesAuthenticationOptions options) {
-		return String.format("auth/%s/login", options.getPath());
 	}
 }

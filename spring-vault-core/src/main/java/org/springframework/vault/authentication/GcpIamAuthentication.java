@@ -110,7 +110,6 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 		this.credential = options.getCredentialSupplier().get();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public VaultToken login() throws VaultException {
 

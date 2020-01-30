@@ -147,7 +147,7 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 		return environmentSteps.zipWith(msiToken)
 				.map(tuple -> getAzureLogin(options.getRole(), tuple.getLeft(),
 						tuple.getRight())) //
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -155,7 +155,6 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 		return createTokenUsingAzureMsiCompute();
 	}
 
-	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAzureMsiCompute() {
 
 		Map<String, String> login = getAzureLogin(options.getRole(), getVmEnvironment(),
@@ -164,7 +163,7 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 		try {
 
 			VaultResponse response = this.vaultRestOperations.postForObject(
-					"auth/{mount}/login", login, VaultResponse.class, options.getPath());
+					AuthenticationUtil.getLoginPath(options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
@@ -193,7 +192,6 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 		return loginBody;
 	}
 
-	@SuppressWarnings("unchecked")
 	private String getAccessToken() {
 
 		ResponseEntity<Map> response = this.azureMetadataRestOperations.exchange(

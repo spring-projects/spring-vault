@@ -35,6 +35,7 @@ import org.springframework.vault.authentication.AppRoleTokens.Provided;
 import org.springframework.vault.authentication.AppRoleTokens.Pull;
 import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -104,7 +105,7 @@ public class AppRoleAuthentication
 		SecretId secretId = options.getSecretId();
 
 		return getAuthenticationSteps(options, roleId, secretId)
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	private static Node<Map<String, String>> getAuthenticationSteps(
@@ -129,8 +130,8 @@ public class AppRoleAuthentication
 			HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
 
 			return AuthenticationSteps
-					.fromHttpRequest(get("auth/{mount}/role/{role}/role-id",
-							options.getPath(), options.getAppRole()).with(headers)
+					.fromHttpRequest(get(AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/role-id",
+							options.getAppRole()).with(headers)
 									.as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
 							.get("role_id"));
@@ -157,8 +158,8 @@ public class AppRoleAuthentication
 			HttpHeaders headers = createHttpHeaders(((Pull) secretId).getInitialToken());
 
 			return AuthenticationSteps
-					.fromHttpRequest(post("auth/{mount}/role/{role}/secret-id",
-							options.getPath(), options.getAppRole()).with(headers)
+					.fromHttpRequest(post(AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/secret-id",
+							options.getAppRole()).with(headers)
 									.as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
 							.get("secret_id"));
@@ -202,8 +203,8 @@ public class AppRoleAuthentication
 				options.getSecretId());
 
 		try {
-			VaultResponse response = restOperations.postForObject("auth/{mount}/login",
-					login, VaultResponse.class, options.getPath());
+			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
+					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
@@ -230,8 +231,8 @@ public class AppRoleAuthentication
 			try {
 
 				ResponseEntity<VaultResponse> entity = restOperations.exchange(
-						"auth/{mount}/role/{role}/role-id", HttpMethod.GET,
-						createHttpEntity(token), VaultResponse.class, options.getPath(),
+						AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/role-id", HttpMethod.GET,
+						createHttpEntity(token), VaultResponse.class,
 						options.getAppRole());
 				return (String) entity.getBody().getRequiredData().get("role_id");
 			}
@@ -282,8 +283,8 @@ public class AppRoleAuthentication
 
 			try {
 				VaultResponse response = restOperations.postForObject(
-						"auth/{mount}/role/{role}/secret-id", createHttpEntity(token),
-						VaultResponse.class, options.getPath(), options.getAppRole());
+						AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/secret-id", createHttpEntity(token),
+						VaultResponse.class, options.getAppRole());
 				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
@@ -325,12 +326,12 @@ public class AppRoleAuthentication
 	private static HttpHeaders createHttpHeaders(VaultToken token) {
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Vault-Token", token.getToken());
+		headers.set(VaultHttpHeaders.VAULT_TOKEN, token.getToken());
 
 		return headers;
 	}
 
-	private static HttpEntity createHttpEntity(VaultToken token) {
+	private static HttpEntity<String> createHttpEntity(VaultToken token) {
 		return new HttpEntity<String>(null, createHttpHeaders(token));
 	}
 

@@ -125,7 +125,7 @@ public class AwsIamAuthentication
 
 		return AuthenticationSteps
 				.fromSupplier(() -> createRequestBody(options, credentials)) //
-				.login("auth/{mount}/login", options.getPath());
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class AwsIamAuthentication
 		try {
 
 			VaultResponse response = this.vaultRestOperations.postForObject(
-					"auth/{mount}/login", login, VaultResponse.class, options.getPath());
+					AuthenticationUtil.getLoginPath(options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
