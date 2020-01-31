@@ -813,13 +813,14 @@ AuthenticationSteps.fromSupplier(                                       <1>
 
     () -> getAppRoleLogin(options.getRoleId(), options.getSecretId()))  <2>
 
-    .login(AuthenticationUtil.getLoginPath(options.getPath()));         <3>
+    .login("auth/{mount}/login", options.getPath());                    <3>
 ----
-<1> Start declaring `AuthenticationSteps` accepting a `Supplier<T>`. The state
-object type depends on the `Supplier` response type which can be mapped in a later step.
-<2> The actual `Supplier` implementation. Creating a `Map` in this case.
-<3> Perform a Vault login by posting the state object (`Map`) to a Vault endpoint
-for Vault token creation.
+<1> Start declaring `AuthenticationSteps` accepting a `Supplier<T>`.
+The state object type depends on the `Supplier` response type which can be mapped in a later step.
+<2> The actual `Supplier` implementation.
+Creating a `Map` in this case.
+<3> Perform a Vault login by posting the state object (`Map`) to a Vault endpoint for Vault token creation.
+Note that template variables are subject to URL escaping.
 ====
 
 Authentication flows require an executor to perform the actual login. We provide two executors

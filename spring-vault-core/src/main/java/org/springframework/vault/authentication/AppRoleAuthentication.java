@@ -46,6 +46,7 @@ import org.springframework.web.client.RestOperations;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.method;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
+import static org.springframework.vault.authentication.AuthenticationUtil.getLoginPath;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
@@ -105,7 +106,7 @@ public class AppRoleAuthentication
 		SecretId secretId = options.getSecretId();
 
 		return getAuthenticationSteps(options, roleId, secretId)
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.login(getLoginPath(options.getPath()));
 	}
 
 	private static Node<Map<String, String>> getAuthenticationSteps(
@@ -130,9 +131,8 @@ public class AppRoleAuthentication
 			HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
 
 			return AuthenticationSteps
-					.fromHttpRequest(get(AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/role-id",
-							options.getAppRole()).with(headers)
-									.as(VaultResponse.class))
+					.fromHttpRequest(get(getRoleIdIdPath(options)).with(headers)
+							.as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
 							.get("role_id"));
 		}
@@ -158,9 +158,8 @@ public class AppRoleAuthentication
 			HttpHeaders headers = createHttpHeaders(((Pull) secretId).getInitialToken());
 
 			return AuthenticationSteps
-					.fromHttpRequest(post(AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/secret-id",
-							options.getAppRole()).with(headers)
-									.as(VaultResponse.class))
+					.fromHttpRequest(post(getSecretIdPath(options)).with(headers)
+							.as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData()
 							.get("secret_id"));
 		}
@@ -203,8 +202,8 @@ public class AppRoleAuthentication
 				options.getSecretId());
 
 		try {
-			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
-					login, VaultResponse.class);
+			VaultResponse response = restOperations.postForObject(
+					getLoginPath(options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
@@ -231,9 +230,8 @@ public class AppRoleAuthentication
 			try {
 
 				ResponseEntity<VaultResponse> entity = restOperations.exchange(
-						AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/role-id", HttpMethod.GET,
-						createHttpEntity(token), VaultResponse.class,
-						options.getAppRole());
+						getRoleIdIdPath(options), HttpMethod.GET, createHttpEntity(token),
+						VaultResponse.class);
 				return (String) entity.getBody().getRequiredData().get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
@@ -283,8 +281,8 @@ public class AppRoleAuthentication
 
 			try {
 				VaultResponse response = restOperations.postForObject(
-						AuthenticationUtil.getAuthRolePath(options.getPath()) + "{role}/secret-id", createHttpEntity(token),
-						VaultResponse.class, options.getAppRole());
+						getSecretIdPath(options), createHttpEntity(token),
+						VaultResponse.class);
 				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
@@ -360,5 +358,15 @@ public class AppRoleAuthentication
 		}
 
 		return login;
+	}
+
+	private static String getSecretIdPath(AppRoleAuthenticationOptions options) {
+		return String.format("auth/%s/role/%s/secret-id", options.getPath(),
+				options.getAppRole());
+	}
+
+	private static String getRoleIdIdPath(AppRoleAuthenticationOptions options) {
+		return String.format("auth/%s/role/%s/role-id", options.getPath(),
+				options.getAppRole());
 	}
 }
