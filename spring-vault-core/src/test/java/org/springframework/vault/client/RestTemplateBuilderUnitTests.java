@@ -61,22 +61,6 @@ class RestTemplateBuilderUnitTests {
 	}
 
 	@Test
-	void shouldApplyDefaultHeaders() throws IOException {
-
-		RestTemplate restTemplate = RestTemplateBuilder.builder()
-				.endpoint(VaultEndpoint.create("localhost", 8200))
-				.defaultHeader("header", "value").build();
-
-		restTemplate.getInterceptors().clear();
-
-		ClientHttpRequest request = restTemplate.getRequestFactory()
-				.createRequest(URI.create("/"), HttpMethod.GET);
-
-		assertThat(request.getHeaders()).containsEntry("header",
-				Collections.singletonList("value"));
-	}
-
-	@Test
 	void shouldApplyRequestCustomizers() throws IOException {
 
 		RestTemplate restTemplate = RestTemplateBuilder.builder()

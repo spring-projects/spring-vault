@@ -69,6 +69,12 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	RestTemplateBuilder devRestTemplate;
 	RestTemplateBuilder maketingRestTemplate;
 
+	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
+			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(),
+					Settings.createSslConfiguration()))
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+
 	String devToken;
 	String marketingToken;
 
@@ -166,14 +172,9 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		VaultTemplate marketing = new VaultTemplate(maketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(marketingToken)));
 
-		WebClientBuilder webClientBuilder = WebClientBuilder.builder()
-				.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(),
-						Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
-
 		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(
-				webClientBuilder, () -> Mono.just(VaultToken.of(marketingToken)));
+				marketingWebClientBuilder,
+				() -> Mono.just(VaultToken.of(marketingToken)));
 
 		marketing.write("marketing-secrets/my-secret",
 				Collections.singletonMap("key", "marketing"));
@@ -185,6 +186,41 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 					assertThat(actual.getRequiredData()).containsEntry("key",
 							"marketing");
 				}).verifyComplete();
+	}
+
+	@Test
+	void shouldReportInitialized() {
+
+		VaultTemplate marketing = new VaultTemplate(maketingRestTemplate,
+				new SimpleSessionManager(new TokenAuthentication(marketingToken)));
+
+		assertThat(marketing.opsForSys().isInitialized()).isTrue();
+	}
+
+	@Test
+	void shouldReportHealth() {
+
+		VaultTemplate marketing = new VaultTemplate(maketingRestTemplate,
+				new SimpleSessionManager(new TokenAuthentication(marketingToken)));
+
+		assertThat(marketing.opsForSys().health().isInitialized()).isTrue();
+	}
+
+	@Test
+	void shouldReportReactiveInitialized() {
+
+		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(
+				marketingWebClientBuilder,
+				() -> Mono.just(VaultToken.of(marketingToken)));
+
+		reactiveMarketing.doWithSession(webClient -> {
+			return webClient.get().uri("sys/init")
+					.header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange()
+					.flatMap(it -> it.bodyToMono(Map.class));
+		}).as(StepVerifier::create)
+				.assertNext(
+						actual -> assertThat(actual).containsEntry("initialized", true))
+				.verifyComplete();
 	}
 
 	@Configuration
