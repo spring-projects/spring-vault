@@ -233,27 +233,42 @@ public class RestTemplateBuilder {
 	protected RestTemplate createTemplate() {
 
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
-		RestTemplateBuilderClientHttpRequestFactoryWrapper wrapper = new RestTemplateBuilderClientHttpRequestFactoryWrapper(
-				requestFactory, new LinkedHashMap<>(defaultHeaders),
-				new LinkedHashSet<>(requestCustomizers));
 
-		return VaultClients.createRestTemplate(endpointProvider, wrapper);
+		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(
+				this.defaultHeaders);
+		LinkedHashSet<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers = new LinkedHashSet<>(
+				this.requestCustomizers);
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(this.endpointProvider,
+				new RestTemplateBuilderClientHttpRequestFactoryWrapper(requestFactory,
+						requestCustomizers));
+
+		restTemplate.getInterceptors()
+				.add((httpRequest, bytes, clientHttpRequestExecution) -> {
+
+					HttpHeaders headers = httpRequest.getHeaders();
+					defaultHeaders.forEach((key, value) -> {
+						if (!headers.containsKey(key)) {
+							headers.add(key, value);
+						}
+					});
+
+					return clientHttpRequestExecution.execute(httpRequest, bytes);
+				});
+
+		return restTemplate;
 	}
 
 	static class RestTemplateBuilderClientHttpRequestFactoryWrapper
 			extends AbstractClientHttpRequestFactoryWrapper {
 
-		private final Map<String, String> defaultHeaders;
-
 		private final Set<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers;
 
 		RestTemplateBuilderClientHttpRequestFactoryWrapper(
 				ClientHttpRequestFactory requestFactory,
-				Map<String, String> defaultHeaders,
 				Set<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers) {
 
 			super(requestFactory);
-			this.defaultHeaders = defaultHeaders;
 			this.requestCustomizers = requestCustomizers;
 		}
 
@@ -262,15 +277,7 @@ public class RestTemplateBuilder {
 				ClientHttpRequestFactory requestFactory) throws IOException {
 
 			ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
-			HttpHeaders headers = request.getHeaders();
 
-			this.defaultHeaders.forEach((key, value) -> {
-
-				if (!headers.containsKey(key)) {
-					headers.add(key, value);
-				}
-
-			});
 			this.requestCustomizers.forEach(it -> it.customize(request));
 
 			return request;

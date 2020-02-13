@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +40,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultHealth;
@@ -99,15 +101,17 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@SuppressWarnings("unchecked")
 	public boolean isInitialized() {
 
-		return requireResponse(vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				Map<String, Boolean> body = restOperations.getForObject("sys/init",
-						Map.class);
+				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) restOperations
+						.exchange("sys/init", HttpMethod.GET, emptyNamespace(null),
+								Map.class);
 
-				Assert.state(body != null, "Initialization response must not be null");
+				Assert.state(body.getBody() != null,
+						"Initialization response must not be null");
 
-				return body.get("initialized");
+				return body.getBody().get("initialized");
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -127,7 +131,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			try {
 				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
 						.exchange("sys/init", HttpMethod.PUT,
-								new HttpEntity<Object>(vaultInitializationRequest),
+								emptyNamespace(vaultInitializationRequest),
 								VaultInitializationResponseImpl.class);
 
 				Assert.state(exchange.getBody() != null,
@@ -388,6 +392,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 	}
 
+	private static <T> HttpEntity<T> emptyNamespace(@Nullable T body) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
+		return new HttpEntity<>(body, headers);
+	}
+
 	private static class Health implements RestOperationsCallback<VaultHealth> {
 
 		@Override
@@ -395,7 +405,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			try {
 				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange(
-						"sys/health", HttpMethod.GET, null, VaultHealthImpl.class);
+						"sys/health", HttpMethod.GET, emptyNamespace(null),
+						VaultHealthImpl.class);
 				return healthResponse.getBody();
 			}
 			catch (RestClientResponseException responseError) {
