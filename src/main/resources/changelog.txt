@@ -1,6 +1,14 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.2.RELEASE
+-----------------------------------------
+* Mount path shouldn't be escaped #533
+* Bypass Namespace for health and initialized calls #534
+* Upgrade to Spring Framework 5.2.4 #535
+* Upgrade dependencies #538
+* Upgrade to Spring Data Moore SR5 #539
+
 Changes in version 2.2.1.RELEASE
 -----------------------------------------
 * Write call is returning Mono.empty() when request failed with 404 Not Found #503
