@@ -27,7 +27,7 @@
 		<kotlin-coroutines.version>1.3.3</kotlin-coroutines.version>
 		<mockk.version>1.9.3</mockk.version>
 		<mockito-core.version>3.3.0</mockito-core.version>
-		<spring.version>5.2.3.RELEASE</spring.version>
+		<spring.version>5.2.4.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Moore-SR4</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.2.2.RELEASE</spring-security-bom.version>
 		<reactor.version>Dysprosium-SR3</reactor.version>
