@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,42 +15,56 @@
  */
 package org.springframework.vault.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.net.URI;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.vault.authentication.AwsEc2Authentication;
 import org.springframework.vault.authentication.AzureMsiAuthentication;
+import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.ClientAuthentication;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link EnvironmentVaultConfiguration} with AzureMSI authentication.
  *
  * @author Justin Bertrand
+ * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=azure", "vault.azure-msi.role=role" })
+@TestPropertySource(properties = { "vault.uri=http://null", "vault.authentication=azure",
+		"vault.azure-msi.role=role", "vault.azure-msi.metadata-service=http://foo" })
 class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 
 	@Configuration
-	@Import(EnvironmentVaultConfiguration.class)
-	static class ApplicationConfiguration {
+	static class MyConfig {
+
 	}
 
-	@Autowired
-	EnvironmentVaultConfiguration configuration;
-
 	@Test
-	void shouldConfigureAuthentication() {
+	void shouldConfigureAuthentication(@Autowired ApplicationContext context) {
+
+		EnvironmentVaultConfiguration configuration = new EnvironmentVaultConfiguration();
+		configuration.setApplicationContext(context);
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(AzureMsiAuthentication.class);
+
+		DirectFieldAccessor accessor = new DirectFieldAccessor(clientAuthentication);
+		AzureMsiAuthenticationOptions options = (AzureMsiAuthenticationOptions) accessor
+				.getPropertyValue("options");
+
+		assertThat(options.getIdentityTokenServiceUri()).isEqualTo(
+				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
+		assertThat(options.getInstanceMetadataServiceUri())
+				.isEqualTo(URI.create("http://foo"));
 	}
 }

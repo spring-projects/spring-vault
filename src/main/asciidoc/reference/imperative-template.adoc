@@ -206,6 +206,8 @@ Any other value is used with `StaticUserId`.
 
 * Azure MSI path: `vault.azure-msi.azure-path` (defaults to `azure`)
 * Role: `vault.azure-msi.role`
+* Metadata Service URL: `vault.azure-msi.metadata-service` (defaults to `http://169.254.169.254/metadata/instance?api-version=2017-08-01`)
+* Identity TokenService URL: `vault.azure-msi.identity-token-service` (defaults to `http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.hashicorp.com&api-version=2018-02-01`)
 
 **<<vault.authentication.clientcert>>**
 
