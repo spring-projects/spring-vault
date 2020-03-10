@@ -145,10 +145,10 @@ import org.springframework.web.client.RestOperations;
  * <li>Azure MSI path: {@code vault.azure-msi.azure-path} (since 2.2.1, defaults to
  * {@link AzureMsiAuthenticationOptions#DEFAULT_AZURE_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.azure-msi.role}</li>
- * <li>MetadataServiceUri: {@code vault.azure-msi.metadata-service-uri} (defaults to
+ * <li>MetadataServiceUri: {@code vault.azure-msi.metadata-service} (defaults to
  * {@link AzureMsiAuthenticationOptions#DEFAULT_INSTANCE_METADATA_SERVICE_URI})</li>
- * <li>IdentityTokenServiceUri: {@code vault.azure-msi.identity-token-service-uri} (defaults to
- * {@link AzureMsiAuthenticationOptions#DEFAULT_IDENTITY_TOKEN_SERVICE_URI})</li>
+ * <li>IdentityTokenServiceUri: {@code vault.azure-msi.identity-token-service} (defaults
+ * to {@link AzureMsiAuthenticationOptions#DEFAULT_IDENTITY_TOKEN_SERVICE_URI})</li>
  * </ul>
  * <li>Client Certificate authentication
  * <ul>
@@ -172,13 +172,14 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @author Michal Budzyn
  * @author Raoof Mohammed
+ * @author Justin Bertrand
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see VaultEndpoint
  * @see AppIdAuthentication
  * @see AppRoleAuthentication
  * @see AwsEc2Authentication
- * @See AzureMsiAuthentication
+ * @see AzureMsiAuthentication
  * @see ClientCertificateAuthentication
  * @see CubbyholeAuthentication
  * @see KubernetesAuthentication
@@ -389,16 +390,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		String role = getProperty("vault.azure-msi.role");
 		String path = getProperty("vault.azure-msi.azure-path",
 				AzureMsiAuthenticationOptions.DEFAULT_AZURE_AUTHENTICATION_PATH);
-		URI metadataServiceUri = getUri("vault.azure-msi.metadata-service-uri",
+		URI metadataServiceUri = getUri("vault.azure-msi.metadata-service",
 				AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI);
-		URI identityTokenServiceUri = getUri("vault.azure-msi.identity-token-service-uri",
+		URI identityTokenServiceUri = getUri("vault.azure-msi.identity-token-service",
 				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
 		Assert.hasText(role,
 				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
 		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions
-				.builder().role(role).path(path)
-				.instanceMetadataUri(metadataServiceUri).identityTokenServiceUri(identityTokenServiceUri);
+				.builder().role(role).path(path).instanceMetadataUri(metadataServiceUri)
+				.identityTokenServiceUri(identityTokenServiceUri);
 
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
@@ -436,19 +437,15 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 	@Nullable
 	private String getProperty(String key) {
-		return getProperty(key, null);
+		return getEnvironment().getProperty(key);
 	}
 
-	@Nullable
 	private String getProperty(String key, String defaultValue) {
 		return getEnvironment().getProperty(key, defaultValue);
 	}
 
-	@Nullable
 	private URI getUri(String key, URI defaultValue) {
-
-		String value = getProperty(key);
-		return value != null ? URI.create(value) : defaultValue;
+		return getEnvironment().getProperty(key, URI.class, defaultValue);
 	}
 
 	@Nullable
