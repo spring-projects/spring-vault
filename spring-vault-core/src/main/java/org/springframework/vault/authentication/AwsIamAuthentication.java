@@ -133,26 +133,7 @@ public class AwsIamAuthentication
 		try {
 			return createTokenUsingAwsIam();
 		} catch(VaultException e ) {
-
-			logger.warn("Vault login error (STS endpoint: " + this.options.getEndpointUri() +  ")", e);
-
-			// check if we are using a regional endpoint.
-			// if so, fallback to the default and retry. Otherwise
-			// simply return the exception
-			if (!this.options.hasDefaultEndpoint()) {
-				logger.warn("Error using regional STS endpoint (" + this.options.getEndpointUri()
-						+ "). Retrying with default (" + AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT + ")");
-				return new AwsIamAuthentication(
-						new AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder()
-								.options(this.options)
-								.endpointUri(AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT)
-								.build(), this.vaultRestOperations).login();
-
-			} else {
-
-				logger.warn("Already using default STS endpoint (" + this.options.getEndpointUri() +  ").Won't retry.");
-				throw e;
-			}
+			return retryLoginWithDefaultStsOrThrow(e);
 		}
 	}
 
@@ -284,5 +265,36 @@ public class AwsIamAuthentication
 		}
 
 		return headers;
+	}
+
+	/**
+	 * Catch an error during login. If the original request was against a regional
+	 * STS endpoint, then retry with the global one. Otherwise, throw the error as is.
+	 *
+	 *
+	 * @param e a {@link VaultException}
+	 * @throws VaultException
+	 * @return a {@link  VaultToken} on successful login
+	 */
+	private VaultToken retryLoginWithDefaultStsOrThrow(VaultException e) throws VaultException {
+		logger.warn("Vault login error (STS endpoint: " + this.options.getEndpointUri() + ")", e);
+
+		// check if we are using a regional endpoint.
+		// if so, fallback to the default and retry. Otherwise
+		// simply return the exception
+		if (!this.options.hasDefaultEndpoint()) {
+			logger.warn("Error using regional STS endpoint (" + this.options.getEndpointUri()
+					+ "). Retrying with default (" + AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT + ")");
+			return new AwsIamAuthentication(
+					new AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder()
+							.options(this.options)
+							.endpointUri(AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT)
+							.build(), this.vaultRestOperations).login();
+
+		} else {
+
+			logger.warn("Already using default STS endpoint (" + this.options.getEndpointUri() + ").Won't retry.");
+			throw e;
+		}
 	}
 }
