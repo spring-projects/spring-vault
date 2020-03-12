@@ -39,6 +39,8 @@ import org.springframework.util.Assert;
  */
 public class AwsIamAuthenticationOptions {
 
+	public static final URI DEFAULT_STS_ENDPOINT = URI.create("https://sts.amazonaws.com/");
+
 	public static final String DEFAULT_AWS_AUTHENTICATION_PATH = "aws";
 
 	/**
@@ -141,6 +143,16 @@ public class AwsIamAuthenticationOptions {
 	}
 
 	/**
+	 * @return Whether or not these options are configured against the default
+	 * global STS endpoint
+	 *
+	 * @return a boolean value
+	 */
+	public boolean hasDefaultEndpoint() {
+		return DEFAULT_STS_ENDPOINT.getHost().equals(this.endpointUri.getHost());
+	}
+
+	/**
 	 * Builder for {@link AwsIamAuthenticationOptions}.
 	 */
 	public static class AwsIamAuthenticationOptionsBuilder {
@@ -156,7 +168,7 @@ public class AwsIamAuthenticationOptions {
 		@Nullable
 		private String serverId;
 
-		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
+		private URI endpointUri = DEFAULT_STS_ENDPOINT;
 
 		AwsIamAuthenticationOptionsBuilder() {
 		}
@@ -267,6 +279,25 @@ public class AwsIamAuthenticationOptions {
 			Assert.notNull(endpointUri, "Endpoint URI must not be null");
 
 			this.endpointUri = endpointUri;
+			return this;
+		}
+
+		/**
+		 * Copy all the settings from the given original options.
+		 * {@literal https://sts.amazonaws.com/}.
+		 *
+		 * @param other must not be {@literal null}.
+		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 */
+		public AwsIamAuthenticationOptionsBuilder options(AwsIamAuthenticationOptions other) {
+
+			Assert.notNull(other, "Options must not be null");
+
+			this.endpointUri = other.endpointUri;
+			this.credentialsProvider = other.credentialsProvider;
+			this.path  = other.path;
+			this.role = other.role;
+			this.serverId = other.serverId;
 			return this;
 		}
 

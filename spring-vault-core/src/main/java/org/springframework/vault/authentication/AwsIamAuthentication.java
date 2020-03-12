@@ -130,7 +130,30 @@ public class AwsIamAuthentication
 
 	@Override
 	public VaultToken login() throws VaultException {
-		return createTokenUsingAwsIam();
+		try {
+			return createTokenUsingAwsIam();
+		} catch(VaultException e ) {
+
+			logger.warn("Vault login error (STS endpoint: " + this.options.getEndpointUri() +  ")", e);
+
+			// check if we are using a regional endpoint.
+			// if so, fallback to the default and retry. Otherwise
+			// simply return the exception
+			if (!this.options.hasDefaultEndpoint()) {
+				logger.warn("Error using regional STS endpoint (" + this.options.getEndpointUri()
+						+ "). Retrying with default (" + AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT + ")");
+				return new AwsIamAuthentication(
+						new AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder()
+								.options(this.options)
+								.endpointUri(AwsIamAuthenticationOptions.DEFAULT_STS_ENDPOINT)
+								.build(), this.vaultRestOperations).login();
+
+			} else {
+
+				logger.warn("Already using default STS endpoint (" + this.options.getEndpointUri() +  ").Won't retry.");
+				throw e;
+			}
+		}
 	}
 
 	@Override
@@ -148,6 +171,7 @@ public class AwsIamAuthentication
 
 			VaultResponse response = this.vaultRestOperations.postForObject(
 					AuthenticationUtil.getLoginPath(options.getPath()), login, VaultResponse.class);
+
 
 			Assert.state(response != null && response.getAuth() != null,
 					"Auth field must not be null");
