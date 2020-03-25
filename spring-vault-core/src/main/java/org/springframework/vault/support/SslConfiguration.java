@@ -40,7 +40,19 @@ import org.springframework.util.Assert;
  */
 public class SslConfiguration {
 
-	private static final String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
+	/**
+	 * Constant for PEM-based keystore type.
+	 *
+	 * @since 2.3
+	 */
+	public static final String PEM_KEYSTORE_TYPE = "PEM";
+
+	/**
+	 * Constant for system-default keystore type.
+	 *
+	 * @since 2.3
+	 */
+	public static final String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
 
 	private final KeyStoreConfiguration keyStoreConfiguration;
 
@@ -515,8 +527,23 @@ public class SslConfiguration {
 		 */
 		public static KeyStoreConfiguration of(Resource resource,
 				@Nullable char[] storePassword) {
-			return new KeyStoreConfiguration(resource, storePassword,
-					DEFAULT_KEYSTORE_TYPE);
+			return of(resource, storePassword, DEFAULT_KEYSTORE_TYPE);
+		}
+
+		/**
+		 * Create a new {@link KeyStoreConfiguration} given {@link Resource},
+		 * {@code storePassword}, and {@code keyStoreType}.
+		 *
+		 * @param resource resource referencing the key store, must not be {@literal null}
+		 *     .
+		 * @param storePassword key store password, may be {@literal null}.
+		 * @param keyStoreType key store type, must not be {@literal null}.
+		 * @return the {@link KeyStoreConfiguration} for {@code resource}.
+		 * @since 2.3
+		 */
+		public static KeyStoreConfiguration of(Resource resource,
+				@Nullable char[] storePassword, String keyStoreType) {
+			return new KeyStoreConfiguration(resource, storePassword, keyStoreType);
 		}
 
 		/**
@@ -559,6 +586,21 @@ public class SslConfiguration {
 		 */
 		public String getStoreType() {
 			return storeType;
+		}
+
+		/**
+		 * Create a new {@link KeyStoreConfiguration} by applying all values from this
+		 * object and the given {@code storeType}.
+		 *
+		 * @param storeType must not be {@literal null}.
+		 * @return a new {@link KeyStoreConfiguration}.
+		 * @since 2.3
+		 */
+		public KeyStoreConfiguration withStoreType(String storeType) {
+
+			Assert.notNull(storeType, "Key store type must not be null");
+			return new KeyStoreConfiguration(this.resource, this.storePassword,
+					storeType);
 		}
 	}
 

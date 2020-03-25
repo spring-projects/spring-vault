@@ -29,6 +29,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateCrtKeySpec;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,8 +114,7 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
-	static X509Certificate getCertificate(byte[] source)
-			throws CertificateException {
+	static X509Certificate getCertificate(byte[] source) throws CertificateException {
 
 		List<X509Certificate> certificates = getCertificates(CERTIFICATE_FACTORY, source);
 
@@ -156,6 +156,75 @@ class KeystoreUtil {
 	}
 
 	/**
+	 * Convert PKCS#1 encoded public key into RSAPublicKeySpec.
+	 * <p/>
+	 * <p/>
+	 * The ASN.1 syntax for the public key with CRT is
+	 * <p/>
+	 *
+	 * <pre>
+	 * --
+	 * -- Representation of RSA public key with information for the CRT algorithm.
+	 * --
+	 * RSAPublicKey ::= SEQUENCE {
+	 *   modulus           INTEGER,  -- n
+	 *   publicExponent    INTEGER,  -- e
+	 * }
+	 * </pre>
+	 *
+	 * Supports PEM objects with a {@code SEQUENCE} and {@code OBJECT IDENTIFIER} header
+	 * where the actual key sequence is represented as {@code BIT_STRING} (as of
+	 * {@code openssl -pubout} format).
+	 *
+	 * @param keyBytes PKCS#1 encoded key
+	 * @return KeySpec
+	 * @since 2.3
+	 */
+	static RSAPublicKeySpec getRSAPublicKeySpec(byte[] keyBytes)
+			throws IOException, IllegalStateException {
+		DerParser parser = new DerParser(keyBytes);
+
+		Asn1Object sequence = parser.read();
+		if (sequence.getType() != DerParser.SEQUENCE) {
+			throw new IllegalStateException("Invalid DER: not a sequence");
+		}
+
+		// Parse inside the sequence
+		parser = sequence.getParser();
+		Asn1Object object = parser.read();
+
+		if (object.type == DerParser.SEQUENCE) {
+
+			Asn1Object read = object.getParser().read();
+			if (!ObjectIdentifiers.RSA.equalsIgnoreCase(read.getString())) {
+				throw new IllegalStateException(
+						"Unsupported Public Key Algorithm. Expected RSA ("
+								+ ObjectIdentifiers.RSA + "), but was: "
+								+ read.getString());
+			}
+
+			Asn1Object bitString = parser.read();
+			if (bitString.getType() != DerParser.BIT_STRING) {
+				throw new IllegalStateException("Invalid DER: not a bit string");
+			}
+
+			parser = new DerParser(bitString.getValue());
+			sequence = parser.read();
+
+			if (sequence.getType() != DerParser.SEQUENCE) {
+				throw new IllegalStateException("Invalid DER: not a sequence");
+			}
+
+			parser = sequence.getParser();
+		}
+
+		BigInteger modulus = parser.read().getInteger();
+		BigInteger publicExp = parser.read().getInteger();
+
+		return new RSAPublicKeySpec(modulus, publicExp);
+	}
+
+	/**
 	 * Convert PKCS#1 encoded private key into RSAPrivateCrtKeySpec.
 	 * <p/>
 	 * <p/>
@@ -183,7 +252,7 @@ class KeystoreUtil {
 	 * @param keyBytes PKCS#1 encoded key
 	 * @return KeySpec
 	 */
-	static RSAPrivateCrtKeySpec getRSAKeySpec(byte[] keyBytes) throws IOException {
+	static RSAPrivateCrtKeySpec getRSAPrivateKeySpec(byte[] keyBytes) throws IOException {
 		DerParser parser = new DerParser(keyBytes);
 
 		Asn1Object sequence = parser.read();
@@ -206,6 +275,10 @@ class KeystoreUtil {
 
 		return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2,
 				exp1, exp2, crtCoef);
+	}
+
+	private static class ObjectIdentifiers {
+		static final String RSA = "1.2.840.113549.1.1.1";
 	}
 
 	/**
@@ -240,6 +313,7 @@ class KeystoreUtil {
 		static final int BIT_STRING = 0x03;
 		static final int OCTET_STRING = 0x04;
 		static final int NULL = 0x05;
+		static final int OID = 0x06;
 		static final int REAL = 0x09;
 		static final int ENUMERATED = 0x0a;
 
@@ -296,6 +370,12 @@ class KeystoreUtil {
 			}
 
 			int length = getLength();
+
+			if (tag == BIT_STRING) {
+				// Not sure what to do with this one.
+				int padBits = in.read();
+				length--;
+			}
 
 			byte[] value = new byte[length];
 			int n = in.read(value);
@@ -357,6 +437,8 @@ class KeystoreUtil {
 	 * An ASN.1 TLV. The object is not parsed. It can only handle integers and strings.
 	 */
 	static class Asn1Object {
+
+		private static final long LONG_LIMIT = (Long.MAX_VALUE >> 7) - 0x7f;
 
 		private final int type;
 		private final int length;
@@ -435,7 +517,8 @@ class KeystoreUtil {
 		BigInteger getInteger() {
 
 			if (type != DerParser.INTEGER) {
-				throw new IllegalStateException("Invalid DER: object is not integer");
+				throw new IllegalStateException(
+						String.format("Invalid DER: object (%d) is not integer.", type));
 			}
 
 			return new BigInteger(value);
@@ -474,11 +557,76 @@ class KeystoreUtil {
 			case DerParser.UNIVERSAL_STRING:
 				throw new IOException("Invalid DER: can't handle UCS-4 string");
 
+			case DerParser.OID:
+				return getObjectIdentifier(value);
 			default:
-				throw new IOException("Invalid DER: object is not a string");
+				throw new IOException(
+						String.format("Invalid DER: object (%d) is not a string", type));
 			}
 
 			return new String(value, encoding);
+		}
+
+		private static String getObjectIdentifier(byte bytes[]) {
+			StringBuffer objId = new StringBuffer();
+			long value = 0;
+			BigInteger bigValue = null;
+			boolean first = true;
+
+			for (int i = 0; i != bytes.length; i++) {
+				int b = bytes[i] & 0xff;
+
+				if (value <= LONG_LIMIT) {
+					value += (b & 0x7f);
+					if ((b & 0x80) == 0) // end of number reached
+					{
+						if (first) {
+							if (value < 40) {
+								objId.append('0');
+							}
+							else if (value < 80) {
+								objId.append('1');
+								value -= 40;
+							}
+							else {
+								objId.append('2');
+								value -= 80;
+							}
+							first = false;
+						}
+
+						objId.append('.');
+						objId.append(value);
+						value = 0;
+					}
+					else {
+						value <<= 7;
+					}
+				}
+				else {
+					if (bigValue == null) {
+						bigValue = BigInteger.valueOf(value);
+					}
+					bigValue = bigValue.or(BigInteger.valueOf(b & 0x7f));
+					if ((b & 0x80) == 0) {
+						if (first) {
+							objId.append('2');
+							bigValue = bigValue.subtract(BigInteger.valueOf(80));
+							first = false;
+						}
+
+						objId.append('.');
+						objId.append(bigValue);
+						bigValue = null;
+						value = 0;
+					}
+					else {
+						bigValue = bigValue.shiftLeft(7);
+					}
+				}
+			}
+
+			return objId.toString();
 		}
 	}
 }

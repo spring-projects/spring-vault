@@ -18,9 +18,6 @@ package org.springframework.vault.client;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -176,8 +173,8 @@ public class ClientHttpConnectorFactory {
 		}
 
 		private static org.eclipse.jetty.client.HttpClient getHttpClient(
-				SslConfiguration sslConfiguration) throws KeyStoreException, IOException,
-				NoSuchAlgorithmException, CertificateException {
+				SslConfiguration sslConfiguration)
+				throws IOException, GeneralSecurityException {
 
 			if (hasSslConfiguration(sslConfiguration)) {
 

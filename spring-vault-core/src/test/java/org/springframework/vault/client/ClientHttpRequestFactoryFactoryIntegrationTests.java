@@ -15,10 +15,13 @@
  */
 package org.springframework.vault.client;
 
+import java.io.File;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -29,6 +32,7 @@ import org.springframework.vault.client.ClientHttpRequestFactoryFactory.HttpComp
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.Netty;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.OkHttp3;
 import org.springframework.vault.support.ClientOptions;
+import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
@@ -49,6 +53,27 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(
 				new ClientOptions(), Settings.createSslConfiguration());
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(factory).isInstanceOf(HttpComponentsClientHttpRequestFactory.class);
+		assertThat(response).isNotNull().contains("initialized");
+
+		((DisposableBean) factory).destroy();
+	}
+
+	@Test
+	void httpComponentsClientUsingPemShouldWork() throws Exception {
+
+		File caCertificate = new File(Settings.findWorkDir(), "ca/certs/ca.cert.pem");
+		SslConfiguration sslConfiguration = SslConfiguration
+				.forTrustStore(SslConfiguration.KeyStoreConfiguration
+						.of(new FileSystemResource(caCertificate))
+						.withStoreType(SslConfiguration.PEM_KEYSTORE_TYPE));
+
+		ClientHttpRequestFactory factory = HttpComponents
+				.usingHttpComponents(new ClientOptions(), sslConfiguration);
 		RestTemplate template = new RestTemplate(factory);
 
 		String response = request(template);

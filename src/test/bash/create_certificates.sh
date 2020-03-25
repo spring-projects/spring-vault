@@ -62,6 +62,10 @@ openssl rsa -in ${CA_DIR}/private/localhost.key.pem \
       -out ${CA_DIR}/private/localhost.decrypted.key.pem \
       -passin pass:changeit
 
+openssl rsa -in ${CA_DIR}/private/localhost.key.pem \
+      -pubout -out ${CA_DIR}/private/localhost.public.key.pem \
+      -passin pass:changeit
+
 chmod 400 ${CA_DIR}/private/localhost.key.pem
 chmod 400 ${CA_DIR}/private/localhost.decrypted.key.pem
 
@@ -81,7 +85,6 @@ openssl ca -config ${DIR}/openssl.cnf \
       -batch \
       -in ${CA_DIR}/csr/localhost.csr.pem \
       -out ${CA_DIR}/certs/localhost.cert.pem
-
 
 echo "[INFO] Generating client auth private key"
 openssl genrsa -aes256 \

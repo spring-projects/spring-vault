@@ -127,6 +127,18 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
 <4> Configuring only key store settings with providing a key-configuration.
 ====
 
-Please note that providing `SslConfiguration` can be only
-applied when either Apache Http Components or the OkHttp client
-is on your class-path.
+Please note that providing `SslConfiguration` can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
+
+The SSL configuration supports also PEM-encoded certificates as alternative to a Java Key Store.
+
+====
+[source,java]
+----
+KeyStoreConfiguration keystore = KeyStoreConfiguration
+        .of(new ClassPathResource("ca.pem")).withStoreType("PEM");
+SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
+----
+====
+
+PEM files may contain one or more certificates (blocks of `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`).
+Certificates added to the underlying `KeyStore` use the full subject name as alias.

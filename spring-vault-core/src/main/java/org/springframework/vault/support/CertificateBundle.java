@@ -91,7 +91,7 @@ public class CertificateBundle extends Certificate {
 
 		try {
 			byte[] bytes = Base64Utils.decodeFromString(getPrivateKey());
-			return KeystoreUtil.getRSAKeySpec(bytes);
+			return KeystoreUtil.getRSAPrivateKeySpec(bytes);
 		}
 		catch (IOException e) {
 			throw new VaultException("Cannot create KeySpec from private key", e);

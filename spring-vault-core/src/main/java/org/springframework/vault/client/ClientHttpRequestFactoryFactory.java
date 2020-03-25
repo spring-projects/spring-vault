@@ -27,9 +27,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.KeyManager;
@@ -61,10 +61,13 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
+import org.springframework.vault.support.PemObject;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
@@ -140,10 +143,7 @@ public class ClientHttpRequestFactoryFactory {
 				return Netty.usingNetty(options, sslConfiguration);
 			}
 		}
-		catch (GeneralSecurityException e) {
-			throw new IllegalStateException(e);
-		}
-		catch (IOException e) {
+		catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -155,7 +155,7 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	static SSLContext getSSLContext(SslConfiguration sslConfiguration,
+	private static SSLContext getSSLContext(SslConfiguration sslConfiguration,
 			TrustManager[] trustManagers) throws GeneralSecurityException, IOException {
 
 		KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
@@ -170,6 +170,7 @@ public class ClientHttpRequestFactoryFactory {
 		return sslContext;
 	}
 
+	@Nullable
 	private static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
@@ -207,16 +208,23 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	static KeyStore getKeyStore(KeyStoreConfiguration keyStoreConfiguration)
-			throws KeyStoreException, IOException, NoSuchAlgorithmException,
-			CertificateException {
+			throws IOException, GeneralSecurityException {
 
-		KeyStore keyStore = KeyStore
-				.getInstance(StringUtils.hasText(keyStoreConfiguration.getStoreType())
-						? keyStoreConfiguration.getStoreType()
-						: KeyStore.getDefaultType());
+		KeyStore keyStore = KeyStore.getInstance(getKeyStoreType(keyStoreConfiguration));
 
 		loadKeyStore(keyStoreConfiguration, keyStore);
 		return keyStore;
+	}
+
+	private static String getKeyStoreType(KeyStoreConfiguration keyStoreConfiguration) {
+
+		if (StringUtils.hasText(keyStoreConfiguration.getStoreType())
+				&& !SslConfiguration.PEM_KEYSTORE_TYPE
+						.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
+			return keyStoreConfiguration.getStoreType();
+		}
+
+		return KeyStore.getDefaultType();
 	}
 
 	static TrustManagerFactory createTrustManagerFactory(
@@ -233,17 +241,56 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	private static void loadKeyStore(KeyStoreConfiguration keyStoreConfiguration,
-			KeyStore keyStore)
-			throws IOException, NoSuchAlgorithmException, CertificateException {
+			KeyStore keyStore) throws IOException, GeneralSecurityException {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug(String.format("Loading keystore from %s",
+					keyStoreConfiguration.getResource()));
+		}
 
 		InputStream inputStream = null;
 		try {
 			inputStream = keyStoreConfiguration.getResource().getInputStream();
-			keyStore.load(inputStream, keyStoreConfiguration.getStorePassword());
+
+			if (SslConfiguration.PEM_KEYSTORE_TYPE
+					.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
+
+				keyStore.load(null);
+				loadFromPem(keyStore, inputStream);
+			}
+			else {
+				keyStore.load(inputStream, keyStoreConfiguration.getStorePassword());
+			}
+
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Keystore loaded with %d entries",
+						keyStore.size()));
+			}
 		}
 		finally {
 			if (inputStream != null) {
 				inputStream.close();
+			}
+		}
+	}
+
+	private static void loadFromPem(KeyStore keyStore, InputStream inputStream)
+			throws IOException, KeyStoreException {
+
+		List<PemObject> pemObjects = PemObject
+				.parse(new String(FileCopyUtils.copyToByteArray(inputStream)));
+
+		for (PemObject pemObject : pemObjects) {
+			if (pemObject.isCertificate()) {
+				X509Certificate cert = pemObject.getCertificate();
+				String alias = cert.getSubjectX500Principal().getName();
+
+				if (logger.isDebugEnabled()) {
+					logger.debug(
+							String.format("Adding certificate with alias %s", alias));
+				}
+
+				keyStore.setCertificateEntry(alias, cert);
 			}
 		}
 	}

@@ -102,8 +102,10 @@ import org.springframework.web.client.RestOperations;
  * <ul>
  * <li>Keystore resource: {@code vault.ssl.key-store} (optional)</li>
  * <li>Keystore password: {@code vault.ssl.key-store-password} (optional)</li>
+ * <li>Keystore type: {@code vault.ssl.key-store-type} (since 2.3, optional)</li>
  * <li>Truststore resource: {@code vault.ssl.trust-store} (optional)</li>
  * <li>Truststore password: {@code vault.ssl.trust-store-password} (optional)</li>
+ * <li>Truststore type: {@code vault.ssl.trust-store-password} (since 2.3, optional)</li>
  * </ul>
  * </li>
  * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
@@ -228,29 +230,34 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	public SslConfiguration sslConfiguration() {
 
 		KeyStoreConfiguration keyStoreConfiguration = getKeyStoreConfiguration(
-				"vault.ssl.key-store", "vault.ssl.key-store-password");
+				"vault.ssl.key-store", "vault.ssl.key-store-password",
+				"vault.ssl.key-store-type");
 
 		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration(
-				"vault.ssl.trust-store", "vault.ssl.trust-store-password");
+				"vault.ssl.trust-store", "vault.ssl.trust-store-password",
+				"vault.ssl.trust-store-type");
 
 		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration);
 	}
 
 	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty,
-			String passwordProperty) {
+			String passwordProperty, String keystoreTypeProperty) {
 
 		Resource keyStore = getResource(resourceProperty);
 		String keyStorePassword = getProperty(passwordProperty);
+		String keystoreType = getProperty(keystoreTypeProperty,
+				SslConfiguration.PEM_KEYSTORE_TYPE);
 
 		if (keyStore == null) {
 			return KeyStoreConfiguration.unconfigured();
 		}
 
 		if (StringUtils.hasText(keyStorePassword)) {
-			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray());
+			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray(),
+					keystoreType);
 		}
 
-		return KeyStoreConfiguration.of(keyStore);
+		return KeyStoreConfiguration.of(keyStore).withStoreType(keystoreType);
 	}
 
 	@Override

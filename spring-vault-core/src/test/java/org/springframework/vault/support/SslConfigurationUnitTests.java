@@ -65,4 +65,15 @@ class SslConfigurationUnitTests {
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
 	}
+
+	@Test
+	void shouldCreatePemConfiguration() {
+
+		KeyStoreConfiguration keystore = KeyStoreConfiguration
+				.of(new ClassPathResource("certificate.json")).withStoreType("PEM");
+		SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
+
+		assertThat(configuration.getTrustStoreConfiguration().getStoreType())
+				.isEqualTo("PEM");
+	}
 }
