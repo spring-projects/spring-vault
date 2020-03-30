@@ -22,8 +22,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.authentication.AzureMsiAuthentication;
@@ -44,15 +44,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 
 	@Configuration
+	@Import(EnvironmentVaultConfiguration.class)
 	static class MyConfig {
 
 	}
 
 	@Test
-	void shouldConfigureAuthentication(@Autowired ApplicationContext context) {
-
-		EnvironmentVaultConfiguration configuration = new EnvironmentVaultConfiguration();
-		configuration.setApplicationContext(context);
+	void shouldConfigureAuthentication(
+			@Autowired EnvironmentVaultConfiguration configuration) {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 

@@ -60,7 +60,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  * @author Mark Paluch
  * @since 2.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public abstract class AbstractReactiveVaultConfiguration
 		extends AbstractVaultConfiguration {
 
@@ -91,7 +91,7 @@ public abstract class AbstractReactiveVaultConfiguration
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
 		return new ReactiveVaultTemplate(
 				webClientBuilder(vaultEndpointProvider(), clientHttpConnector()),
-				reactiveSessionManager());
+				getReactiveSessionManager());
 	}
 
 	/**
@@ -103,7 +103,7 @@ public abstract class AbstractReactiveVaultConfiguration
 	@Bean
 	@Override
 	public SessionManager sessionManager() {
-		return new ReactiveSessionManagerAdapter(reactiveSessionManager());
+		return new ReactiveSessionManagerAdapter(getReactiveSessionManager());
 	}
 
 	/**
@@ -121,7 +121,7 @@ public abstract class AbstractReactiveVaultConfiguration
 		WebClient webClient = ReactiveVaultClients.createWebClient(vaultEndpoint(),
 				clientHttpConnector());
 		return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier(),
-				threadPoolTaskScheduler(), webClient);
+				getVaultThreadPoolTaskScheduler(), webClient);
 	}
 
 	/**
@@ -171,6 +171,11 @@ public abstract class AbstractReactiveVaultConfiguration
 	 */
 	protected ClientHttpConnector clientHttpConnector() {
 		return ClientHttpConnectorFactory.create(clientOptions(), sslConfiguration());
+	}
+
+	private ReactiveSessionManager getReactiveSessionManager() {
+		return getBeanFactory().getBean("reactiveSessionManager",
+				ReactiveSessionManager.class);
 	}
 
 	/**

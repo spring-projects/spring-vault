@@ -16,6 +16,7 @@
 package org.springframework.vault.config;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -33,7 +34,6 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.core.VaultTemplate;
@@ -48,7 +48,7 @@ import org.springframework.web.client.RestOperations;
  * @author Spencer Gibb
  * @author Mark Paluch
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public abstract class AbstractVaultConfiguration implements ApplicationContextAware {
 
 	private @Nullable ApplicationContext applicationContext;
@@ -105,8 +105,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public VaultTemplate vaultTemplate() {
 		return new VaultTemplate(
 				restTemplateBuilder(vaultEndpointProvider(),
-						clientHttpRequestFactoryWrapper().getClientHttpRequestFactory()),
-				sessionManager());
+						getClientFactoryWrapper().getClientHttpRequestFactory()),
+				getBeanFactory().getBean("sessionManager", SessionManager.class));
 	}
 
 	/**
@@ -129,7 +129,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
 		return new LifecycleAwareSessionManager(clientAuthentication,
-				threadPoolTaskScheduler(), restOperations());
+				getVaultThreadPoolTaskScheduler(), restOperations());
 	}
 
 	/**
@@ -145,7 +145,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public SecretLeaseContainer secretLeaseContainer() throws Exception {
 
 		SecretLeaseContainer secretLeaseContainer = new SecretLeaseContainer(
-				vaultTemplate(), threadPoolTaskScheduler());
+				getBeanFactory().getBean("vaultTemplate", VaultTemplate.class),
+				getVaultThreadPoolTaskScheduler());
 
 		secretLeaseContainer.afterPropertiesSet();
 		secretLeaseContainer.start();
@@ -178,15 +179,16 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 	/**
 	 * Construct a {@link RestOperations} object configured for Vault session management
-	 * and authentication usage.
+	 * and authentication usage. Can be customized by overriding
+	 * {@link #restTemplateBuilder(VaultEndpointProvider, ClientHttpRequestFactory)}.
 	 *
 	 * @return the {@link RestOperations} to be used for Vault access.
 	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
 	 */
 	public RestOperations restOperations() {
-		return VaultClients.createRestTemplate(vaultEndpointProvider(),
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory());
+		return restTemplateBuilder(vaultEndpointProvider(),
+				getClientFactoryWrapper().getClientHttpRequestFactory()).build();
 	}
 
 	/**
@@ -245,6 +247,24 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+
+	BeanFactory getBeanFactory() {
+
+		Assert.state(applicationContext != null,
+				"ApplicationContext must be set before accessing getBeanFactory()");
+
+		return applicationContext;
+	}
+
+	ThreadPoolTaskScheduler getVaultThreadPoolTaskScheduler() {
+		return getBeanFactory().getBean("vaultThreadPoolTaskScheduler",
+				ThreadPoolTaskScheduler.class);
+	}
+
+	private ClientFactoryWrapper getClientFactoryWrapper() {
+		return getBeanFactory().getBean("clientHttpRequestFactoryWrapper",
+				ClientFactoryWrapper.class);
 	}
 
 	/**
