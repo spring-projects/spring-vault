@@ -68,7 +68,7 @@
 				<dependency>
 					<groupId>io.spring.docresources</groupId>
 					<artifactId>spring-doc-resources</artifactId>
-					<version>0.1.2.RELEASE</version>
+					<version>0.2.0.RELEASE</version>
 					<scope>provided</scope>
 					<type>zip</type>
 					<optional>true</optional>
@@ -300,8 +300,7 @@
 											<source-highlighter>highlightjs
 											</source-highlighter>
 											<highlightjsdir>js/highlight</highlightjsdir>
-											<highlightjs-theme>atom-one-dark-reasonable
-											</highlightjs-theme>
+											<highlightjs-theme>github</highlightjs-theme>
 										</attributes>
 									</configuration>
 								</execution>
