@@ -434,6 +434,7 @@
 					<artifactId>maven-javadoc-plugin</artifactId>
 					<version>3.1.1</version>
 					<configuration>
+						<locale>en_US</locale>
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
 						<source>${java.version}</source>
