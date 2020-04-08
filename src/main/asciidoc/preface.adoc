@@ -9,6 +9,7 @@ This part of the reference documentation explains the core functionality offered
 
 <<vault.core, Vault support>> introduces the Vault module feature set.
 
+[[preface.document-structure]]
 == Document Structure
 
 This section provides basic introduction to Spring and Vault.
@@ -56,6 +57,7 @@ Spring Vault 2.x binaries requires JDK level 8.0 and above, and https://spring.i
 
 In terms of Vault, https://www.vaultproject.io/[Vault] at least 0.6.
 
+[[get-started:additional-help]]
 == Additional Help Resources
 
 Learning a new framework is not always straight forward. In this section, we try to provide what we think is an easy to follow guide for starting with Spring Vault module. However, if you encounter issues or you are just looking for advice, feel free to use one of the links below:
