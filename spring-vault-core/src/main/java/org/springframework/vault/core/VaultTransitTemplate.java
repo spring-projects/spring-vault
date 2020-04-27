@@ -264,7 +264,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Plaintext decrypt(String keyName, Ciphertext ciphertext) {
 
-		Assert.hasText(keyName, "Ciphertext must not be null");
+		Assert.hasText(keyName, "keyName must not be null");
 
 		byte[] plaintext = decrypt(keyName, ciphertext.getCiphertext(),
 				ciphertext.getContext());
