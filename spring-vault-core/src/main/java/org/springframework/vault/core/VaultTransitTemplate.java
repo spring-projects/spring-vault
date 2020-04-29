@@ -83,7 +83,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public void createKey(String keyName) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 
 		vaultOperations.write(String.format("%s/keys/%s", path, keyName), null);
 	}
@@ -92,7 +92,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public void createKey(String keyName,
 			VaultTransitKeyCreationRequest createKeyRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(createKeyRequest,
 				"VaultTransitKeyCreationRequest must not be empty");
 
@@ -114,7 +114,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public void configureKey(String keyName,
 			VaultTransitKeyConfiguration keyConfiguration) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
 
 		vaultOperations.write(String.format("%s/keys/%s/config", path, keyName),
@@ -125,7 +125,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Nullable
 	public RawTransitKey exportKey(String keyName, TransitKeyType type) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(type, "Key type must not be null");
 
 		VaultResponseSupport<RawTransitKeyImpl> result = vaultOperations.read(
@@ -139,7 +139,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Nullable
 	public VaultTransitKey getKey(String keyName) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 
 		VaultResponseSupport<VaultTransitKeyImpl> result = vaultOperations.read(
 				String.format("%s/keys/%s", path, keyName), VaultTransitKeyImpl.class);
@@ -154,7 +154,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public void deleteKey(String keyName) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 
 		vaultOperations.delete(String.format("%s/keys/%s", path, keyName));
 	}
@@ -162,7 +162,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public void rotate(String keyName) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 
 		vaultOperations.write(String.format("%s/keys/%s/rotate", path, keyName), null);
 	}
@@ -170,7 +170,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public String encrypt(String keyName, String plaintext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
@@ -185,6 +185,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Ciphertext encrypt(String keyName, Plaintext plaintext) {
 
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		String ciphertext = encrypt(keyName, plaintext.getPlaintext(),
@@ -197,7 +198,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public String encrypt(String keyName, byte[] plaintext,
 			VaultTransitContext transitContext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
@@ -216,16 +217,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public List<VaultEncryptionResult> encrypt(String keyName,
 			List<Plaintext> batchRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notEmpty(batchRequest,
 				"BatchRequest must not be null and must have at least one entry");
 
-		List<Map<String, String>> batch = new ArrayList<Map<String, String>>(
+		List<Map<String, String>> batch = new ArrayList<>(
 				batchRequest.size());
 
 		for (Plaintext request : batchRequest) {
 
-			Map<String, String> vaultRequest = new LinkedHashMap<String, String>(2);
+			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
 			vaultRequest.put("plaintext",
 					Base64Utils.encodeToString(request.getPlaintext()));
@@ -247,8 +248,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public String decrypt(String keyName, String ciphertext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
+		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 
 		Map<String, String> request = new LinkedHashMap<>();
 
@@ -264,7 +265,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Plaintext decrypt(String keyName, Ciphertext ciphertext) {
 
-		Assert.hasText(keyName, "keyName must not be null");
+		Assert.hasText(keyName, "Key name must not be null");
+		Assert.notNull(ciphertext, "Ciphertext must not be null");
 
 		byte[] plaintext = decrypt(keyName, ciphertext.getCiphertext(),
 				ciphertext.getContext());
@@ -276,8 +278,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public byte[] decrypt(String keyName, String ciphertext,
 			VaultTransitContext transitContext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
-		Assert.hasText(ciphertext, "Cipher text must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
+		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
 		Map<String, String> request = new LinkedHashMap<>();
@@ -297,16 +299,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public List<VaultDecryptionResult> decrypt(String keyName,
 			List<Ciphertext> batchRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notEmpty(batchRequest,
 				"BatchRequest must not be null and must have at least one entry");
 
-		List<Map<String, String>> batch = new ArrayList<Map<String, String>>(
+		List<Map<String, String>> batch = new ArrayList<>(
 				batchRequest.size());
 
 		for (Ciphertext request : batchRequest) {
 
-			Map<String, String> vaultRequest = new LinkedHashMap<String, String>(2);
+			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
 			vaultRequest.put("ciphertext", request.getCiphertext());
 
@@ -327,7 +329,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public String rewrap(String keyName, String ciphertext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 
 		Map<String, String> request = new LinkedHashMap<>();
@@ -342,7 +344,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public String rewrap(String keyName, String ciphertext,
 			VaultTransitContext transitContext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
@@ -360,7 +362,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Hmac getHmac(String keyName, Plaintext plaintext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		VaultHmacRequest request = VaultHmacRequest.create(plaintext);
@@ -371,7 +373,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Hmac getHmac(String keyName, VaultHmacRequest hmacRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(hmacRequest, "HMAC request must not be null");
 
 		Map<String, Object> request = new LinkedHashMap<>();
@@ -396,7 +398,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Signature sign(String keyName, Plaintext plaintext) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
 		VaultSignRequest request = VaultSignRequest.create(plaintext);
@@ -407,7 +409,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public Signature sign(String keyName, VaultSignRequest signRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(signRequest, "Sign request must not be null");
 
 		Map<String, Object> request = new LinkedHashMap<>();
@@ -428,7 +430,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@Override
 	public boolean verify(String keyName, Plaintext plainText, Signature signature) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plainText, "Plaintext must not be null");
 		Assert.notNull(signature, "Signature must not be null");
 
@@ -441,7 +443,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	public SignatureValidation verify(String keyName,
 			VaultSignatureVerificationRequest verificationRequest) {
 
-		Assert.hasText(keyName, "KeyName must not be empty");
+		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(verificationRequest,
 				"Signature verification request must not be null");
 
@@ -488,7 +490,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	private static List<VaultEncryptionResult> toEncryptionResults(
 			VaultResponse vaultResponse, List<Plaintext> batchRequest) {
 
-		List<VaultEncryptionResult> result = new ArrayList<VaultEncryptionResult>(
+		List<VaultEncryptionResult> result = new ArrayList<>(
 				batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
 
@@ -522,7 +524,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	private static List<VaultDecryptionResult> toDecryptionResults(
 			VaultResponse vaultResponse, List<Ciphertext> batchRequest) {
 
-		List<VaultDecryptionResult> result = new ArrayList<VaultDecryptionResult>(
+		List<VaultDecryptionResult> result = new ArrayList<>(
 				batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
 
