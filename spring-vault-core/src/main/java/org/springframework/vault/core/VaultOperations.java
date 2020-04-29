@@ -26,20 +26,19 @@ import org.springframework.web.client.RestClientException;
 
 /**
  * Interface that specifies a basic set of Vault operations, implemented by
- * {@link VaultTemplate}. This is the main entry point to interact with Vault in an
- * authenticated and unauthenticated context.
+ * {@link org.springframework.vault.core.VaultTemplate}. This is the main entry point to
+ * interact with Vault in an authenticated and unauthenticated context.
  * <p>
  * {@link VaultOperations} allows execution of callback methods. Callbacks can execute
- * requests within a {@link VaultOperations#doWithSession(RestOperationsCallback) session
- * context} and the {@link VaultOperations#doWithVault(RestOperationsCallback) without a
- * session}.
+ * requests within a {@link #doWithSession(RestOperationsCallback) session context} and
+ * the {@link #doWithVault(RestOperationsCallback) without a session}.
  *
  * @author Mark Paluch
- * @see VaultOperations#doWithSession(RestOperationsCallback)
- * @see VaultOperations#doWithVault(RestOperationsCallback)
+ * @see #doWithSession(RestOperationsCallback)
+ * @see #doWithVault(RestOperationsCallback)
  * @see org.springframework.web.client.RestOperations
- * @see VaultTemplate
- * @see VaultTokenOperations
+ * @see org.springframework.vault.core.VaultTemplate
+ * @see org.springframework.vault.core.VaultTokenOperations
  * @see org.springframework.vault.authentication.SessionManager
  */
 public interface VaultOperations {

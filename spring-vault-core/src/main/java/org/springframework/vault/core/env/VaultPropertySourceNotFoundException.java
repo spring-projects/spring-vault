@@ -16,14 +16,13 @@
 package org.springframework.vault.core.env;
 
 import org.springframework.vault.VaultException;
-import org.springframework.vault.annotation.VaultPropertySource;
 
 /**
  * Exception throws when a {@code VaultPropertySource} could not load its properties.
  *
  * @author Mark Paluch
  * @since 2.2
- * @see VaultPropertySource#ignoreSecretNotFound
+ * @see org.springframework.vault.annotation.VaultPropertySource#ignoreSecretNotFound
  */
 public class VaultPropertySourceNotFoundException extends VaultException {
 

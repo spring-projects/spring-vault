@@ -27,7 +27,8 @@ import org.springframework.vault.support.VaultResponse;
  * Vault database exchange object containing data before/after it's exchanged with Vault.
  * A {@link SecretDocument} is basically an object with an {@code id} and a body
  * represented as {@link Map} of {@link String} and {@link Object}. It can be created
- * {@link #from(String, VaultResponse) from} an Id and {@link VaultResponse}.
+ * {@link #from(String, VaultResponse) from} an Id and
+ * {@link org.springframework.vault.support.VaultResponse}.
  * <p>
  * A secret document can hold simple properties, {@link java.util.Collection list}
  * properties and nested objects as {@link Map}s.

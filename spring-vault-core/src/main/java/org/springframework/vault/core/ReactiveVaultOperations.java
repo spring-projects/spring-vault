@@ -30,21 +30,21 @@ import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
  * Interface that specifies a basic set of Vault operations executed on a reactive
- * infrastructure, implemented by {@link ReactiveVaultTemplate}. This is the main entry
+ * infrastructure, implemented by
+ * {@link org.springframework.vault.core.ReactiveVaultTemplate}. This is the main entry
  * point to interact with Vault in an authenticated and unauthenticated context.
  * <p>
  * {@link ReactiveVaultOperations} allows execution of callback methods. Callbacks can
- * execute requests within a {@link ReactiveVaultOperations#doWithSession(Function)
- * session context} and the {@link ReactiveVaultOperations#doWithVault(Function) without a
- * session}.
+ * execute requests within a {@link #doWithSession(Function) session context} and the
+ * {@link #doWithVault(Function) without a session}.
  *
  * @author Mark Paluch
  * @since 2.0
- * @see ReactiveVaultOperations#doWithSession(Function)
- * @see ReactiveVaultOperations#doWithVault(Function)
- * @see WebClient
- * @see VaultTemplate
- * @see VaultTokenOperations
+ * @see #doWithSession(Function)
+ * @see #doWithVault(Function)
+ * @see org.springframework.web.reactive.function.client.WebClient
+ * @see org.springframework.vault.core.VaultTemplate
+ * @see org.springframework.vault.core.VaultTokenOperations
  * @see org.springframework.vault.authentication.VaultTokenSupplier
  */
 public interface ReactiveVaultOperations {
