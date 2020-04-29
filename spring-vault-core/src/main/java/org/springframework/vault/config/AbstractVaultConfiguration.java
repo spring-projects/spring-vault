@@ -19,6 +19,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +34,8 @@ import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
+import org.springframework.vault.client.RestTemplateCustomizer;
+import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
@@ -41,6 +44,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Base class for Spring Vault configuration using JavaConfig.
@@ -84,13 +88,40 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * @return the {@link RestTemplateBuilder}.
 	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
-	 * @since 2.2
+	 * @since 2.3
 	 */
 	protected RestTemplateBuilder restTemplateBuilder(
 			VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
-		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
-				.requestFactory(requestFactory);
+
+		ObjectProvider<RestTemplateCustomizer> customizers = getBeanFactory()
+				.getBeanProvider(RestTemplateCustomizer.class);
+
+		RestTemplateBuilder builder = RestTemplateBuilder.builder()
+				.endpointProvider(endpointProvider).requestFactory(requestFactory);
+
+		builder.customizers(customizers.stream().toArray(RestTemplateCustomizer[]::new));
+
+		return builder;
+	}
+
+	/**
+	 * Create a {@link RestTemplateFactory} bean that is used to produce
+	 * {@link RestTemplate}.
+	 *
+	 * @return the {@link RestTemplateFactory}.
+	 * @see #vaultEndpointProvider()
+	 * @see #clientHttpRequestFactoryWrapper()
+	 * @since 2.3
+	 */
+	@Bean
+	public RestTemplateFactory restTemplateFactory(
+			ClientFactoryWrapper requestFactoryWrapper) {
+
+		return new DefaultRestTemplateFactory(
+				requestFactoryWrapper.getClientHttpRequestFactory(), it -> {
+					return restTemplateBuilder(vaultEndpointProvider(), it);
+				});
 	}
 
 	/**
@@ -179,16 +210,14 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 	/**
 	 * Construct a {@link RestOperations} object configured for Vault session management
-	 * and authentication usage. Can be customized by overriding
-	 * {@link #restTemplateBuilder(VaultEndpointProvider, ClientHttpRequestFactory)}.
+	 * and authentication usage. Can be customized by providing a
+	 * {@link RestTemplateFactory} bean.
 	 *
 	 * @return the {@link RestOperations} to be used for Vault access.
-	 * @see #vaultEndpointProvider()
-	 * @see #clientHttpRequestFactoryWrapper()
+	 * @see #restTemplateFactory(ClientFactoryWrapper)
 	 */
 	public RestOperations restOperations() {
-		return restTemplateBuilder(vaultEndpointProvider(),
-				getClientFactoryWrapper().getClientHttpRequestFactory()).build();
+		return getRestTemplateFactory().create();
 	}
 
 	/**
@@ -247,6 +276,16 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		this.applicationContext = applicationContext;
+	}
+
+	/**
+	 * Return the {@link RestTemplateFactory}.
+	 * 
+	 * @return the {@link RestTemplateFactory} bean.
+	 * @since 2.3
+	 */
+	protected RestTemplateFactory getRestTemplateFactory() {
+		return getBeanFactory().getBean(RestTemplateFactory.class);
 	}
 
 	BeanFactory getBeanFactory() {

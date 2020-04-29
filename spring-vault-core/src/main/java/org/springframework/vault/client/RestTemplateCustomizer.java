@@ -18,11 +18,13 @@ package org.springframework.vault.client;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Callback interface that can be used to customize a {@link RestTemplate}.
+ * Callback interface that can be used to customize a {@link RestTemplate}. Beans
+ * implementing this interface are applied to
+ * {@link org.springframework.vault.client.RestTemplateBuilder}.
  *
  * @author Mark Paluch
  * @since 2.2
- * @see RestTemplateBuilder
+ * @see org.springframework.vault.client.RestTemplateBuilder#customizers(RestTemplateCustomizer...)
  */
 @FunctionalInterface
 public interface RestTemplateCustomizer {

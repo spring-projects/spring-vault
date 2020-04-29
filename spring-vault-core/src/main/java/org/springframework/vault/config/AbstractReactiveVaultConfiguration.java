@@ -19,6 +19,7 @@ import java.time.Duration;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -33,9 +34,11 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
-import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
+import org.springframework.vault.client.WebClientCustomizer;
+import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
@@ -75,8 +78,33 @@ public abstract class AbstractReactiveVaultConfiguration
 	 */
 	protected WebClientBuilder webClientBuilder(VaultEndpointProvider endpointProvider,
 			ClientHttpConnector httpConnector) {
-		return WebClientBuilder.builder().endpointProvider(endpointProvider)
-				.httpConnector(httpConnector);
+
+		ObjectProvider<WebClientCustomizer> customizers = getBeanFactory()
+				.getBeanProvider(WebClientCustomizer.class);
+
+		WebClientBuilder builder = WebClientBuilder.builder()
+				.endpointProvider(endpointProvider).httpConnector(httpConnector);
+
+		builder.customizers(customizers.stream().toArray(WebClientCustomizer[]::new));
+
+		return builder;
+	}
+
+	/**
+	 * Create a {@link WebClientFactory} bean that is used to produce a {@link WebClient}.
+	 *
+	 * @return the {@link WebClientFactory}.
+	 * @see #clientHttpConnector()
+	 * @since 2.3
+	 */
+	@Bean
+	public WebClientFactory webClientFactory() {
+
+		ClientHttpConnector httpConnector = clientHttpConnector();
+
+		return new DefaultWebClientFactory(httpConnector, clientHttpConnector -> {
+			return webClientBuilder(vaultEndpointProvider(), clientHttpConnector);
+		});
 	}
 
 	/**
@@ -89,8 +117,12 @@ public abstract class AbstractReactiveVaultConfiguration
 	 */
 	@Bean
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
+
+		VaultEndpointProvider provider = vaultEndpointProvider();
+		VaultEndpoint vaultEndpoint = provider.getVaultEndpoint();
+
 		return new ReactiveVaultTemplate(
-				webClientBuilder(vaultEndpointProvider(), clientHttpConnector()),
+				webClientBuilder(() -> vaultEndpoint, clientHttpConnector()),
 				getReactiveSessionManager());
 	}
 
@@ -118,8 +150,8 @@ public abstract class AbstractReactiveVaultConfiguration
 	@Bean
 	public ReactiveSessionManager reactiveSessionManager() {
 
-		WebClient webClient = ReactiveVaultClients.createWebClient(vaultEndpoint(),
-				clientHttpConnector());
+		WebClient webClient = getWebClientFactory().create();
+
 		return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier(),
 				getVaultThreadPoolTaskScheduler(), webClient);
 	}
@@ -147,8 +179,7 @@ public abstract class AbstractReactiveVaultConfiguration
 
 			AuthenticationStepsFactory factory = (AuthenticationStepsFactory) clientAuthentication;
 
-			WebClient webClient = ReactiveVaultClients.createWebClient(vaultEndpoint(),
-					clientHttpConnector());
+			WebClient webClient = getWebClientFactory().create();
 			AuthenticationStepsOperator stepsOperator = new AuthenticationStepsOperator(
 					factory.getAuthenticationSteps(), webClient);
 
@@ -171,6 +202,16 @@ public abstract class AbstractReactiveVaultConfiguration
 	 */
 	protected ClientHttpConnector clientHttpConnector() {
 		return ClientHttpConnectorFactory.create(clientOptions(), sslConfiguration());
+	}
+
+	/**
+	 * Return the {@link WebClientFactory}.
+	 * 
+	 * @return the {@link WebClientFactory} bean.
+	 * @since 2.3
+	 */
+	protected WebClientFactory getWebClientFactory() {
+		return getBeanFactory().getBean(WebClientFactory.class);
 	}
 
 	private ReactiveSessionManager getReactiveSessionManager() {

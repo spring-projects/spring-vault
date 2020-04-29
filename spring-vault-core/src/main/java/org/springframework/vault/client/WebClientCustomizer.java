@@ -18,11 +18,13 @@ package org.springframework.vault.client;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Callback interface that can be used to customize a {@link WebClient.Builder}.
+ * Callback interface that can be used to customize a {@link WebClient.Builder}. Beans
+ * implementing this interface are applied to
+ * {@link org.springframework.vault.client.WebClientBuilder}.
  *
  * @author Mark Paluch
  * @since 2.2
- * @see WebClientBuilder
+ * @see org.springframework.vault.client.WebClientBuilder#customizers(WebClientCustomizer...)
  */
 @FunctionalInterface
 public interface WebClientCustomizer {
