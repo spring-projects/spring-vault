@@ -96,7 +96,7 @@ public class VaultInitializer {
 
 			if (this.prepareVault.getVersion()
 					.isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
-				this.prepareVault.disableGenericVersioning();
+				//this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}
 		}
