@@ -36,10 +36,10 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 public class ClientCertificateAuthentication
 		implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final String CERT = "cert";
-
 	private static final Log logger = LogFactory
 			.getLog(ClientCertificateAuthentication.class);
+
+	private final ClientCertificateAuthenticationOptions options;
 
 	private final RestOperations restOperations;
 
@@ -49,10 +49,25 @@ public class ClientCertificateAuthentication
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public ClientCertificateAuthentication(RestOperations restOperations) {
+		this(ClientCertificateAuthenticationOptions.builder().build(), restOperations);
+	}
 
+	/**
+	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
+	 * @since 2.3
+	 */
+	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options,
+			RestOperations restOperations) {
+
+		Assert.notNull(options,
+				"ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.restOperations = restOperations;
+		this.options = options;
 	}
 
 	/**
@@ -62,7 +77,26 @@ public class ClientCertificateAuthentication
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps() {
-		return AuthenticationSteps.just(post(AuthenticationUtil.getLoginPath(CERT)).as(VaultResponse.class));
+		return createAuthenticationSteps(
+				ClientCertificateAuthenticationOptions.builder().build());
+	}
+
+	/**
+	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for client certificate authentication.
+	 * @since 2.3
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(
+			ClientCertificateAuthenticationOptions options) {
+
+		Assert.notNull(options,
+				"ClientCertificateAuthenticationOptions must not be null");
+
+		return AuthenticationSteps
+				.just(post(AuthenticationUtil.getLoginPath(options.getPath()))
+						.as(VaultResponse.class));
 	}
 
 	@Override
@@ -72,13 +106,14 @@ public class ClientCertificateAuthentication
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps();
+		return createAuthenticationSteps(options);
 	}
 
 	private VaultToken createTokenUsingTlsCertAuthentication() {
 
 		try {
-			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(CERT),
+			VaultResponse response = restOperations.postForObject(
+					AuthenticationUtil.getLoginPath(options.getPath()),
 					Collections.emptyMap(), VaultResponse.class);
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
