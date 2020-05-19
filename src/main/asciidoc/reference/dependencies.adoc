@@ -1,14 +1,13 @@
 [[dependencies]]
 == Dependencies
 
-The easiest way to find compatible versions of Spring Vault dependencies 
-is by relying on the Spring Vault BOM we ship with the compatible versions 
-defined. In a Maven project you would declare this dependency in the 
+The easiest way to find compatible versions of Spring Vault dependencies is by relying on the Spring Vault BOM we ship with the compatible versions defined.
+In a Maven project you would declare this dependency in the
 `<dependencyManagement />` section of your `pom.xml`:
 
 .Using the Spring Vault BOM
 ====
-[source, xml, subs="verbatim,attributes"]
+[source,xml,subs="verbatim,attributes"]
 ----
 <dependencyManagement>
   <dependencies>
@@ -25,18 +24,16 @@ defined. In a Maven project you would declare this dependency in the
 ====
 
 [[dependencies.names]]
-The current version is `{version}`. The version name follows the following 
-pattern: `$\{version\}-$\{release\}` where release can be one of the following:
+The current version is `{version}`.
+The version name follows the following patterns: `$\{version\}` for GA and service releases and `$\{version\}-$\{release\}` for snapshots and milestones. `release` can be one of the following:
 
-* `BUILD-SNAPSHOT` - current snapshots
+* `SNAPSHOT` - current snapshots
 * `M1`, `M2` etc. - milestones
 * `RC1`, `RC2` etc. - release candidates
-* `RELEASE` - GA release
-* `SR1`, `SR2` etc. - service releases
 
 .Declaring a dependency to Spring Vault
 ====
-[source, xml]
+[source,xml]
 ----
 <dependencies>
     <dependency>
@@ -50,7 +47,7 @@ pattern: `$\{version\}-$\{release\}` where release can be one of the following:
 [[dependencies.spring-framework]]
 == Spring Framework
 
-The current version of Spring Vault requires Spring Framework in version 
-{springVersion} or better. The modules might also work with an older bugfix 
-version of that minor version. However, using the most recent version 
-within that generation is highly recommended.
+The current version of Spring Vault requires Spring Framework in version
+{springVersion} or better.
+The modules might also work with an older bugfix version of that minor version.
+However, using the most recent version within that generation is highly recommended.

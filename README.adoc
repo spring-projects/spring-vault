@@ -48,8 +48,9 @@ Add the Maven dependency:
 <dependency>
   <groupId>org.springframework.vault</groupId>
   <artifactId>spring-vault-core</artifactId>
-  <version>${version}.RELEASE</version>
+  <version>${version}</version>
 </dependency>
+----
 ====
 
 If you'd rather like the latest snapshots of the upcoming major version, use our Maven snapshot repository and declare the appropriate dependency version.
@@ -60,7 +61,7 @@ If you'd rather like the latest snapshots of the upcoming major version, use our
 <dependency>
   <groupId>org.springframework.vault</groupId>
   <artifactId>spring-vault</artifactId>
-  <version>${version}.BUILD-SNAPSHOT</version>
+  <version>${version}-SNAPSHOT</version>
 </dependency>
 
 <repository>
@@ -124,11 +125,11 @@ Key 5: b2898fc8130929d569c1677ee69dc5f3be57d7c4b494a6062693ce0b1c4d93d805
 Initial Root Token: 19aefa97-cccc-bbbb-aaaa-225940e63d76
 
 Vault initialized with 5 keys and a key threshold of 3. Please
-securely distribute the above keys. When the Vault is re-sealed,
+securely distribute the above keys.When the Vault is re-sealed,
 restarted, or stopped, you must provide at least 3 of these keys
 to unseal it again.
 
-Vault does not store the master key. Without at least 3 keys,
+Vault does not store the master key.Without at least 3 keys,
 your Vault will remain permanently sealed.
 ----
 
