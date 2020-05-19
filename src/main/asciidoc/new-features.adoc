@@ -5,6 +5,7 @@
 === What's new in Spring Vault 2.3
 
 * Support for PEM-encoded certificates for keystore and truststore usage.
+* `ReactiveVaultEndpointProvider` for non-blocking lookup of `VaultEndpoint`.
 
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2

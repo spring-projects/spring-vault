@@ -34,7 +34,8 @@ import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
-import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientCustomizer;
@@ -68,15 +69,43 @@ public abstract class AbstractReactiveVaultConfiguration
 		extends AbstractVaultConfiguration {
 
 	/**
+	 * @return a {@link ReactiveVaultEndpointProvider} returning the value of
+	 * {@link #vaultEndpointProvider()}.
+	 *
+	 * @see #vaultEndpoint()
+	 * @see #vaultEndpointProvider()
+	 * @since 2.3
+	 */
+	public ReactiveVaultEndpointProvider reactiveVaultEndpointProvider() {
+		return ReactiveVaultClients.wrap(vaultEndpointProvider());
+	}
+
+	/**
 	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
 	 * and {@link ClientHttpConnector}. May be overridden by subclasses.
 	 *
 	 * @return the {@link WebClientBuilder}.
-	 * @see #vaultEndpointProvider()
+	 * @see #reactiveVaultEndpointProvider()
 	 * @see #clientHttpConnector()
 	 * @since 2.2
 	 */
 	protected WebClientBuilder webClientBuilder(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector httpConnector) {
+		return webClientBuilder(ReactiveVaultClients.wrap(endpointProvider),
+				httpConnector);
+	}
+
+	/**
+	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
+	 * and {@link ClientHttpConnector}. May be overridden by subclasses.
+	 *
+	 * @return the {@link WebClientBuilder}.
+	 * @see #reactiveVaultEndpointProvider()
+	 * @see #clientHttpConnector()
+	 * @since 2.3
+	 */
+	protected WebClientBuilder webClientBuilder(
+			ReactiveVaultEndpointProvider endpointProvider,
 			ClientHttpConnector httpConnector) {
 
 		ObjectProvider<WebClientCustomizer> customizers = getBeanFactory()
@@ -103,7 +132,7 @@ public abstract class AbstractReactiveVaultConfiguration
 		ClientHttpConnector httpConnector = clientHttpConnector();
 
 		return new DefaultWebClientFactory(httpConnector, clientHttpConnector -> {
-			return webClientBuilder(vaultEndpointProvider(), clientHttpConnector);
+			return webClientBuilder(reactiveVaultEndpointProvider(), clientHttpConnector);
 		});
 	}
 
@@ -112,17 +141,15 @@ public abstract class AbstractReactiveVaultConfiguration
 	 *
 	 * @return the {@link ReactiveVaultTemplate}.
 	 * @see #vaultEndpoint()
+	 * @see #reactiveVaultEndpointProvider()
 	 * @see #clientHttpConnector()
 	 * @see #reactiveSessionManager()
 	 */
 	@Bean
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
 
-		VaultEndpointProvider provider = vaultEndpointProvider();
-		VaultEndpoint vaultEndpoint = provider.getVaultEndpoint();
-
 		return new ReactiveVaultTemplate(
-				webClientBuilder(() -> vaultEndpoint, clientHttpConnector()),
+				webClientBuilder(reactiveVaultEndpointProvider(), clientHttpConnector()),
 				getReactiveSessionManager());
 	}
 
@@ -206,7 +233,7 @@ public abstract class AbstractReactiveVaultConfiguration
 
 	/**
 	 * Return the {@link WebClientFactory}.
-	 * 
+	 *
 	 * @return the {@link WebClientFactory} bean.
 	 * @since 2.3
 	 */

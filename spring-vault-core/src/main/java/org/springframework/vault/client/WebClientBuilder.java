@@ -49,7 +49,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class WebClientBuilder {
 
-	private @Nullable VaultEndpointProvider endpointProvider;
+	private @Nullable ReactiveVaultEndpointProvider endpointProvider;
 
 	private Supplier<ClientHttpConnector> httpConnector = () -> ClientHttpConnectorFactory
 			.create(new ClientOptions(), SslConfiguration.unconfigured());
@@ -84,14 +84,27 @@ public class WebClientBuilder {
 
 	/**
 	 * Set the {@link VaultEndpointProvider} that should be used with the
-	 * {@link WebClient}.
+	 * {@link WebClient}. {@link VaultEndpointProvider#getVaultEndpoint()} is called on
+	 * {@link reactor.core.scheduler.Schedulers#boundedElastic() a dedicated Thread} to
+	 * ensure that I/O threads are never blocked.
 	 *
 	 * @param provider the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@link WebClientBuilder}.
 	 */
 	public WebClientBuilder endpointProvider(VaultEndpointProvider provider) {
+		return endpointProvider(ReactiveVaultClients.wrap(provider));
+	}
 
-		Assert.notNull(provider, "VaultEndpointProvider must not be null");
+	/**
+	 * Set the {@link ReactiveVaultEndpointProvider} that should be used with the
+	 * {@link WebClient}.
+	 *
+	 * @param provider the {@link VaultEndpoint} provider.
+	 * @return {@code this} {@link WebClientBuilder}.
+	 */
+	public WebClientBuilder endpointProvider(ReactiveVaultEndpointProvider provider) {
+
+		Assert.notNull(provider, "ReactiveVaultEndpointProvider must not be null");
 
 		this.endpointProvider = provider;
 
@@ -199,9 +212,6 @@ public class WebClientBuilder {
 	 */
 	public WebClient build() {
 
-		Assert.state(this.endpointProvider != null,
-				"VaultEndpointProvider must not be null");
-
 		WebClient.Builder builder = createWebClientBuilder();
 
 		if (!defaultHeaders.isEmpty()) {
@@ -215,7 +225,6 @@ public class WebClientBuilder {
 								headers.add(key, value);
 							}
 						})).build());
-
 			});
 		}
 
@@ -233,6 +242,9 @@ public class WebClientBuilder {
 	 * @return the {@link WebClient.Builder} to use.
 	 */
 	protected WebClient.Builder createWebClientBuilder() {
+
+		Assert.state(this.endpointProvider != null,
+				"VaultEndpointProvider must not be null");
 
 		ClientHttpConnector connector = this.httpConnector.get();
 

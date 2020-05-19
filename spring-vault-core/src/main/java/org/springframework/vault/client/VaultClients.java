@@ -249,16 +249,7 @@ public class VaultClients {
 		}
 
 		if (baseUrl != null) {
-
-			if (uriTemplate.startsWith("/") && baseUrl.endsWith("/")) {
-				return uriTemplate.substring(1);
-			}
-
-			if (!uriTemplate.startsWith("/") && !baseUrl.endsWith("/")) {
-				return "/" + uriTemplate;
-			}
-
-			return uriTemplate;
+			return normalizePath(baseUrl, uriTemplate);
 		}
 
 		try {
@@ -276,5 +267,25 @@ public class VaultClients {
 		}
 
 		return uriTemplate;
+	}
+
+	/**
+	 * Normalize the URI {@code path} so that it can be combined with {@code prefix}.
+	 *
+	 * @param prefix
+	 * @param path
+	 * @return
+	 */
+	static String normalizePath(String prefix, String path) {
+
+		if (path.startsWith("/") && prefix.endsWith("/")) {
+			return path.substring(1);
+		}
+
+		if (!path.startsWith("/") && !prefix.endsWith("/")) {
+			return "/" + path;
+		}
+
+		return path;
 	}
 }
