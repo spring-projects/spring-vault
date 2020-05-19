@@ -599,6 +599,10 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
+
+        ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
+                .path(…).build();
+
         return new ClientCertificateAuthentication(options, restOperations());
     }
 

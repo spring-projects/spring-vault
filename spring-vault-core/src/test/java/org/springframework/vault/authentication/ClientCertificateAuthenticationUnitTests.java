@@ -60,13 +60,17 @@ class ClientCertificateAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		mockRest.expect(requestTo("/auth/cert/login")).andExpect(method(HttpMethod.POST))
+		mockRest.expect(requestTo("/auth/my/path/login"))
+				.andExpect(method(HttpMethod.POST))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
 						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 						+ "}"));
 
+		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions
+				.builder().path("my/path").build();
+
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(
-				restTemplate);
+				options, restTemplate);
 
 		VaultToken login = sut.login();
 
