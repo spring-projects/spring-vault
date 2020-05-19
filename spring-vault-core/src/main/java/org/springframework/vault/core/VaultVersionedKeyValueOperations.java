@@ -120,4 +120,11 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @param versionsToDelete must not be {@literal null} or empty.
 	 */
 	void destroy(String path, Version... versionsToDelete);
+
+	/**
+	 * Return {@link VaultKeyValueMetadataOperations}
+	 *
+	 * @return the operations interface to interact with the Vault Key/Value metadata backend
+	 */
+	VaultKeyValueMetadataOperations opsForKeyValueMetadata();
 }

@@ -331,9 +331,6 @@ public class Versioned<T> {
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder deletedAt(Instant deletedAt) {
-
-				Assert.notNull(deletedAt, "Deleted at must not be null");
-
 				this.deletedAt = deletedAt;
 				return this;
 			}
