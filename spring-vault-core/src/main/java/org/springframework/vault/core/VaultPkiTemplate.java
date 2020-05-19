@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -141,7 +142,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath,
 						byte[].class, path);
 
-				return new ByteArrayInputStream(response.getBody());
+				if (response.getStatusCode() == HttpStatus.OK) {
+					return new ByteArrayInputStream(response.getBody());
+				}
+
+				return null;
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
