@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.io.InputStream;
 
+import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
@@ -93,12 +94,17 @@ public interface VaultPkiOperations {
 	 * CRL distribution points extension in a CA certificate. This is a bare endpoint that
 	 * does not return a standard Vault data structure. Returns data {@link Encoding#DER}
 	 * or {@link Encoding#PEM} encoded.
+	 * <p>
+	 * If Vault reports no content under the CRL URL, then the result of this method call
+	 * is {@literal null}.
 	 *
-	 * @return {@link java.io.InputStream} containing the encoded CRL.
+	 * @return {@link java.io.InputStream} containing the encoded CRL or {@literal null}
+	 * if Vault responds with 204 No Content.
 	 * @since 2.0
 	 * @see <a href="https://www.vaultproject.io/api/secret/pki/index.html#read-crl">GET
 	 * /pki/crl</a>
 	 */
+	@Nullable
 	InputStream getCrl(Encoding encoding) throws VaultException;
 
 	enum Encoding {
