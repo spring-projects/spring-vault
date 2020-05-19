@@ -14,6 +14,7 @@ UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
 VAULT_DIRECTORY=vault
 DOWNLOAD_DIRECTORY=download
+PLATFORM=amd64
 readonly script_name="$(basename "${BASH_SOURCE[0]}")"
 
 function say() {
@@ -123,7 +124,7 @@ function download() {
 function download_oss() {
 
   VAULT_VER="${VAULT_VER:-${VAULT_OSS}}"
-  VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_amd64.zip"
+  VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_${PLATFORM}.zip"
   VAULT_FILE=${VAULT_ZIP}
   VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
 
@@ -134,8 +135,8 @@ function download_oss() {
 function download_enterprise() {
 
   VAULT_VER="${VAULT_VER:-${VAULT_ENT}}"
-  VAULT_ZIP="vault-enterprise_${VAULT_VER}%2Bent_${UNAME}_amd64.zip"
-  VAULT_FILE="vault-enterprise_${VAULT_VER}+ent_${UNAME}_amd64.zip"
+  VAULT_ZIP="vault-enterprise_${VAULT_VER}%2Bent_${UNAME}_${PLATFORM}.zip"
+  VAULT_FILE="vault-enterprise_${VAULT_VER}+ent_${UNAME}_${PLATFORM}.zip"
   VAULT_URL="http://hc-enterprise-binaries.s3.amazonaws.com/vault/ent/${VAULT_VER}/${VAULT_ZIP}"
 
   download
@@ -146,7 +147,9 @@ function main() {
 
   initialize
   parse_options "$@"
-
+  if [ "$(uname -m)" == aarch64 ]; then
+    PLATFORM=arm64
+  fi
   if [[ ${EDITION} == 'oss' ]]; then
     download_oss
   elif [[ ${EDITION} == 'enterprise' ]]; then
