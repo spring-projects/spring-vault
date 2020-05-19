@@ -81,7 +81,7 @@ public class RestTemplateBuilder {
 	}
 
 	/**
-	 * Set the {@link VaultEndpoint} that should with the {@link RestTemplate}.
+	 * Set the {@link VaultEndpoint} that should be used with the {@link RestTemplate}.
 	 *
 	 * @param endpoint the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@link RestTemplateBuilder}.
@@ -91,7 +91,8 @@ public class RestTemplateBuilder {
 	}
 
 	/**
-	 * Set the {@link VaultEndpointProvider} that should with the {@link RestTemplate}.
+	 * Set the {@link VaultEndpointProvider} that should be used with the
+	 * {@link RestTemplate}.
 	 *
 	 * @param provider the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@link RestTemplateBuilder}.

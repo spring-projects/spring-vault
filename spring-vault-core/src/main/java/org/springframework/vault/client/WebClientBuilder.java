@@ -73,7 +73,7 @@ public class WebClientBuilder {
 	}
 
 	/**
-	 * Set the {@link VaultEndpoint} that should with the {@link WebClient}.
+	 * Set the {@link VaultEndpoint} that should be used with the {@link WebClient}.
 	 *
 	 * @param endpoint the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@link WebClientBuilder}.
@@ -83,7 +83,8 @@ public class WebClientBuilder {
 	}
 
 	/**
-	 * Set the {@link VaultEndpointProvider} that should with the {@link WebClient}.
+	 * Set the {@link VaultEndpointProvider} that should be used with the
+	 * {@link WebClient}.
 	 *
 	 * @param provider the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@link WebClientBuilder}.
@@ -98,8 +99,7 @@ public class WebClientBuilder {
 	}
 
 	/**
-	 * Set the {@link ClientHttpConnector} that should be used each with the
-	 * {@link WebClient}.
+	 * Set the {@link ClientHttpConnector} that should be used with the {@link WebClient}.
 	 *
 	 * @param httpConnector the HTTP connector.
 	 * @return {@code this} {@link WebClientBuilder}.
