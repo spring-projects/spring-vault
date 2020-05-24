@@ -55,13 +55,6 @@ public interface VaultOperations {
 	VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
 
 	/**
-	 * Return {@link VaultKeyValueMetadataOperations}
-	 *
-	 * @return the operations interface to interact with the Vault Key/Value metadata backend
-	 */
-	VaultKeyValueMetadataOperations opsForKeyValueMetadata();
-
-	/**
 	 * Return {@link VaultVersionedKeyValueOperations}.
 	 *
 	 * @param path the mount path

@@ -53,6 +53,8 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 
 	private final VaultOperations vaultOperations;
 
+	private final String path;
+
 	/**
 	 * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
 	 * and the mount {@code path}.
@@ -65,6 +67,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 		super(vaultOperations, path);
 
 		this.vaultOperations = vaultOperations;
+		this.path = path;
 	}
 
 	@Nullable
@@ -239,6 +242,11 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 
 		doWrite(createBackendPath("destroy", path),
 				Collections.singletonMap("versions", versions));
+	}
+
+	@Override
+	public VaultKeyValueMetadataOperations opsForKeyValueMetadata() {
+		return new VaultKeyValueMetadataTemplate(vaultOperations, path);
 	}
 
 	private static class VersionedResponse

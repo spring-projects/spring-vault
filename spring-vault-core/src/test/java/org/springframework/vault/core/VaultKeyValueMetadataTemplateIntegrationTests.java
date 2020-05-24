@@ -1,13 +1,8 @@
 package org.springframework.vault.core;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
-import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +13,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.Versioned;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -31,7 +25,7 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
   private VaultKeyValueMetadataOperations vaultKeyValueMetadataOperations;
 
   VaultKeyValueMetadataTemplateIntegrationTests() {
-    super("secret", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
+    super("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
   }
 
   @BeforeEach
@@ -40,8 +34,7 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
     secret.put("key", "value");
 
     kvOperations.put(SECRET_NAME, secret);
-
-    vaultKeyValueMetadataOperations = vaultOperations.opsForKeyValueMetadata();
+    vaultKeyValueMetadataOperations = vaultOperations.opsForVersionedKeyValue("versioned").opsForKeyValueMetadata();
   }
 
   @Test
@@ -51,17 +44,17 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
 
     assertThat(metadataResponse.getMaxVersions()).isEqualTo(0);
     assertThat(metadataResponse.getCurrentVersion()).isEqualTo(1);
-    assertThat(StreamSupport.stream(Spliterators.spliteratorUnknownSize(metadataResponse.getVersions().fields(),
-        Spliterator.DISTINCT), false).count()).isEqualTo(1);
+    assertThat(metadataResponse.getVersions()).hasSize(1);
     assertThat(metadataResponse.isCasRequired()).isFalse();
     assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo("0s");
     assertThat(metadataResponse.getCreatedTime().isBefore(Instant.now())).isTrue();
     assertThat(metadataResponse.getUpdatedTime().isBefore(Instant.now())).isTrue();
 
-    JsonNode version1 = metadataResponse.getVersions().get("1");
+    Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
 
-    assertThat(version1.get("deletion_time").asText()).isEmpty();
-    assertThat(LocalDateTime.parse(version1.get("created_time").asText(), DateTimeFormatter.ISO_ZONED_DATE_TIME).isBefore(LocalDateTime.now())).isTrue();
+    assertThat(version1.getDeletedAt()).isNull();
+    assertThat(version1.getCreatedAt()).isBefore(Instant.now());
+    assertThat(version1.getVersion().getVersion()).isEqualTo(1);
   }
 
   @Test
@@ -73,8 +66,7 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
     VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations.get(SECRET_NAME);
 
     assertThat(metadataResponse.getCurrentVersion()).isEqualTo(2);
-    assertThat(StreamSupport.stream(Spliterators.spliteratorUnknownSize(metadataResponse.getVersions().fields(),
-        Spliterator.DISTINCT), false).count()).isEqualTo(2);
+    assertThat(metadataResponse.getVersions()).hasSize(2);
   }
 
   @Test
@@ -94,8 +86,8 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
   public void shouldDeleteMetadata() {
     kvOperations.delete(SECRET_NAME);
     VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations.get(SECRET_NAME);
-    JsonNode version1 = metadataResponse.getVersions().get("1");
-    assertThat(LocalDateTime.parse(version1.get("deletion_time").asText(), DateTimeFormatter.ISO_ZONED_DATE_TIME).isBefore(LocalDateTime.now())).isTrue();
+    Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
+    assertThat(version1.getDeletedAt()).isBefore(Instant.now());
 
     vaultKeyValueMetadataOperations.delete(SECRET_NAME);
 
@@ -106,6 +98,6 @@ public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVault
 
   @AfterEach
   void cleanup() {
-   vaultOperations.opsForKeyValueMetadata().delete(SECRET_NAME);
+    vaultKeyValueMetadataOperations.delete(SECRET_NAME);
   }
 }

@@ -321,11 +321,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public VaultKeyValueMetadataOperations opsForKeyValueMetadata() {
-		return new VaultKeyValueMetadataTemplate(this);
-	}
-
-	@Override
 	public VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path) {
 		return new VaultVersionedKeyValueTemplate(this, path);
 	}

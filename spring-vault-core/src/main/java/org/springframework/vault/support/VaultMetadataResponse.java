@@ -1,43 +1,45 @@
 package org.springframework.vault.support;
 
 import java.time.Instant;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Value object to bind Vault HTTP kv read metadata API responses.
  *
  * @author Zakaria Amine
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultMetadataResponse {
 
-  @JsonProperty("cas_required")
   private boolean casRequired;
 
-
-  @JsonProperty("created_time")
   private Instant createdTime;
 
-  @JsonProperty("current_version")
   private int currentVersion;
 
-  @JsonProperty("delete_version_after")
   private String deleteVersionAfter;
 
-  @JsonProperty("max_versions")
   private int maxVersions;
 
-
-  @JsonProperty("oldest_version")
   private int oldestVersion;
 
-  @JsonProperty("updated_time")
   private Instant updatedTime;
 
-  private JsonNode versions;
+  private List<Versioned.Metadata> versions;
+
+  VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion, String deleteVersionAfter,
+      int maxVersions, int oldestVersion, Instant updatedTime, List<Versioned.Metadata> versions) {
+    this.casRequired = casRequired;
+    this.createdTime = createdTime;
+    this.currentVersion = currentVersion;
+    this.deleteVersionAfter = deleteVersionAfter;
+    this.maxVersions = maxVersions;
+    this.oldestVersion = oldestVersion;
+    this.updatedTime = updatedTime;
+    this.versions = versions;
+  }
+
+  public static VaultMetadataResponseBuilder builder() {return new VaultMetadataResponseBuilder();}
 
   /**
    *
@@ -45,14 +47,6 @@ public class VaultMetadataResponse {
    */
   public boolean isCasRequired() {
     return casRequired;
-  }
-
-  /**
-   *
-   * @param casRequired
-   */
-  public void setCasRequired(boolean casRequired) {
-    this.casRequired = casRequired;
   }
 
   /**
@@ -65,26 +59,10 @@ public class VaultMetadataResponse {
 
   /**
    *
-   * @param createdTime
-   */
-  public void setCreatedTime(Instant createdTime) {
-    this.createdTime = createdTime;
-  }
-
-  /**
-   *
    * @return the active secret version
    */
   public int getCurrentVersion() {
     return currentVersion;
-  }
-
-  /**
-   *
-   * @param currentVersion
-   */
-  public void setCurrentVersion(int currentVersion) {
-    this.currentVersion = currentVersion;
   }
 
   /**
@@ -97,26 +75,10 @@ public class VaultMetadataResponse {
 
   /**
    *
-   * @param deleteVersionAfter
-   */
-  public void setDeleteVersionAfter(String deleteVersionAfter) {
-    this.deleteVersionAfter = deleteVersionAfter;
-  }
-
-  /**
-   *
    * @return max secret versions accepted by this key
    */
   public int getMaxVersions() {
     return maxVersions;
-  }
-
-  /**
-   *
-   * @param maxVersions
-   */
-  public void setMaxVersions(int maxVersions) {
-    this.maxVersions = maxVersions;
   }
 
   /**
@@ -129,26 +91,10 @@ public class VaultMetadataResponse {
 
   /**
    *
-   * @param oldestVersion
-   */
-  public void setOldestVersion(int oldestVersion) {
-    this.oldestVersion = oldestVersion;
-  }
-
-  /**
-   *
    * @return the metadata update time
    */
   public Instant getUpdatedTime() {
     return updatedTime;
-  }
-
-  /**
-   *
-   * @param updatedTime
-   */
-  public void setUpdatedTime(Instant updatedTime) {
-    this.updatedTime = updatedTime;
   }
 
   /**
@@ -170,15 +116,65 @@ public class VaultMetadataResponse {
    *
    * @return the key versions and their details
    */
-  public JsonNode getVersions() {
+  public List<Versioned.Metadata> getVersions() {
     return versions;
   }
 
-  /**
-   *
-   * @param versions
-   */
-  public void setVersions(JsonNode versions) {
-    this.versions = versions;
+
+  public static class VaultMetadataResponseBuilder {
+
+    private boolean casRequired;
+    private Instant createdTime;
+    private int currentVersion;
+    private String deleteVersionAfter;
+    private int maxVersions;
+    private int oldestVersion;
+    private Instant updatedTime;
+    private List<Versioned.Metadata> versions;
+
+    public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
+      this.casRequired = casRequired;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder createdTime(Instant createdTime) {
+      this.createdTime = createdTime;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder currentVersion(int currentVersion) {
+      this.currentVersion = currentVersion;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder deleteVersionAfter(String deleteVersionAfter) {
+      this.deleteVersionAfter = deleteVersionAfter;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder maxVersions(int maxVersions) {
+      this.maxVersions = maxVersions;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder oldestVersion(int oldestVersion) {
+      this.oldestVersion = oldestVersion;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder updatedTime(Instant updatedTime) {
+      this.updatedTime = updatedTime;
+      return this;
+    }
+
+    public VaultMetadataResponseBuilder versions(List<Versioned.Metadata> versions) {
+      this.versions = versions;
+      return this;
+    }
+
+    public VaultMetadataResponse build() {
+      return new VaultMetadataResponse(casRequired, createdTime, currentVersion, deleteVersionAfter, maxVersions,
+          oldestVersion, updatedTime, versions);
+    }
   }
 }
