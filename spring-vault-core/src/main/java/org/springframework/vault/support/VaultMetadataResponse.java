@@ -20,6 +20,8 @@ import java.time.Instant;
 import java.time.Period;
 import java.util.List;
 
+import org.springframework.lang.Nullable;
+
 /**
  * Value object to bind Vault HTTP kv read metadata API responses.
  *
@@ -84,8 +86,9 @@ public class VaultMetadataResponse {
 
 	/**
 	 * @return the duration after which a secret is to be deleted. {@link Period#ZERO} for
-	 * unlimited duration.
+	 * unlimited duration. Versions prior to Vault 1.2 may return {@code null}.
 	 */
+	@Nullable
 	public Duration getDeleteVersionAfter() {
 		return this.deleteVersionAfter;
 	}

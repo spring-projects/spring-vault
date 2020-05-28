@@ -30,8 +30,21 @@ import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.Versioned;
+import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.vault.support.VaultMetadataRequest;
+import org.springframework.vault.support.VaultMetadataResponse;
+import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.Versioned;
+import org.springframework.vault.util.Version;
 
 /**
  * Integration tests for {@link VaultKeyValueMetadataOperations}.
@@ -88,14 +101,19 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 		assertThat(metadataResponse.getCurrentVersion()).isEqualTo(1);
 		assertThat(metadataResponse.getVersions()).hasSize(1);
 		assertThat(metadataResponse.isCasRequired()).isFalse();
-		assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo(Duration.ZERO);
 		assertThat(metadataResponse.getCreatedTime().isBefore(Instant.now())).isTrue();
 		assertThat(metadataResponse.getUpdatedTime().isBefore(Instant.now())).isTrue();
 
 		Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
 
-		assertThat(version1.getDeletedAt()).isNull();
-		assertThat(version1.getCreatedAt()).isBefore(Instant.now());
+		if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
+
+			assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo(Duration.ZERO);
+
+			assertThat(version1.getDeletedAt()).isNull();
+			assertThat(version1.getCreatedAt()).isBefore(Instant.now());
+		}
+
 		assertThat(version1.getVersion().getVersion()).isEqualTo(1);
 	}
 
@@ -130,7 +148,10 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 
 		assertThat(metadataResponseAfterUpdate.isCasRequired()).isEqualTo(request.isCasRequired());
 		assertThat(metadataResponseAfterUpdate.getMaxVersions()).isEqualTo(request.getMaxVersions());
-		assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(duration);
+
+		if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
+			assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(duration);
+		}
 	}
 
 	@Test
