@@ -31,7 +31,9 @@ class AppRoleTokens {
 	 * Absent secretId.
 	 */
 	enum AbsentSecretId implements SecretId {
+
 		INSTANCE;
+
 	}
 
 	/**
@@ -48,6 +50,7 @@ class AppRoleTokens {
 		public VaultToken getInitialToken() {
 			return this.initialToken;
 		}
+
 	}
 
 	/**
@@ -64,6 +67,7 @@ class AppRoleTokens {
 		public VaultToken getInitialToken() {
 			return this.initialToken;
 		}
+
 	}
 
 	/**
@@ -80,5 +84,7 @@ class AppRoleTokens {
 		public String getValue() {
 			return this.value;
 		}
+
 	}
+
 }

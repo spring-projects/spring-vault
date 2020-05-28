@@ -35,7 +35,6 @@ public interface PropertyTransformer {
 	 * <p>
 	 * Implementing classes do not change the {@code input} but create a new {@link Map
 	 * property map}.
-	 *
 	 * @param input must not be {@literal null}.
 	 * @return transformed properties.
 	 */
@@ -51,4 +50,5 @@ public interface PropertyTransformer {
 	default PropertyTransformer andThen(PropertyTransformer after) {
 		return input -> after.transformProperties(transformProperties(input));
 	}
+
 }

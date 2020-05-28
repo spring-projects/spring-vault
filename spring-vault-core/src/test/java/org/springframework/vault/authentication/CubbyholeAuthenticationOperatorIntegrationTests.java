@@ -33,11 +33,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-class CubbyholeAuthenticationOperatorIntegrationTests
-		extends CubbyholeAuthenticationIntegrationTestBase {
+class CubbyholeAuthenticationOperatorIntegrationTests extends CubbyholeAuthenticationIntegrationTestBase {
 
-	private WebClient webClient = TestWebClientFactory
-			.create(Settings.createSslConfiguration());
+	private WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
 	void authenticationStepsShouldCreateWrappedToken() {
@@ -47,20 +45,20 @@ class CubbyholeAuthenticationOperatorIntegrationTests
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints())
-				.initialToken(VaultToken.of(initialToken)).wrapped().build();
+				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of(initialToken)).wrapped()
+				.build();
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
-				CubbyholeAuthentication.createAuthenticationSteps(options), webClient);
+				CubbyholeAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		operator.getVaultToken() //
 				.as(StepVerifier::create)
 				//
 				.consumeNextWith(actual -> {
 
-					assertThat(actual).isNotEqualTo(Settings.token().getToken())
-							.isNotNull();
+					assertThat(actual).isNotEqualTo(Settings.token().getToken()).isNotNull();
 				}) //
 				.verifyComplete();
 	}
+
 }

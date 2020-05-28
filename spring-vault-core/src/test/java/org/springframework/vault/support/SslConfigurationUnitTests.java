@@ -51,18 +51,16 @@ class SslConfigurationUnitTests {
 	@Test
 	void shouldCreateConfiguration() {
 
-		KeyStoreConfiguration keystore = KeyStoreConfiguration
-				.of(new ClassPathResource("certificate.json"));
-		SslConfiguration ksConfig = SslConfiguration.unconfigured()
-				.withKeyStore(keystore);
+		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
+		SslConfiguration ksConfig = SslConfiguration.unconfigured().withKeyStore(keystore);
 
 		assertThat(ksConfig.getKeyStoreConfiguration()).isSameAs(keystore);
 		assertThat(ksConfig.getTrustStoreConfiguration().isPresent()).isFalse();
 
-		SslConfiguration tsConfig = SslConfiguration.unconfigured()
-				.withTrustStore(keystore);
+		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore);
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
 	}
+
 }

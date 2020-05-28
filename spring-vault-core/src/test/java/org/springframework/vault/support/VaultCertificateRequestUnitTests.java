@@ -36,8 +36,7 @@ class VaultCertificateRequestUnitTests {
 	@Test
 	void shouldBuildRequestWithCommonName() {
 
-		VaultCertificateRequest request = VaultCertificateRequest.builder()
-				.commonName("hello.com").build();
+		VaultCertificateRequest request = VaultCertificateRequest.builder().commonName("hello.com").build();
 
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 	}
@@ -60,4 +59,5 @@ class VaultCertificateRequestUnitTests {
 		assertThat(request.isExcludeCommonNameFromSubjectAltNames()).isTrue();
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 	}
+
 }

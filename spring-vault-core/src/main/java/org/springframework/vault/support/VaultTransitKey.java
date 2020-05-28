@@ -95,4 +95,5 @@ public interface VaultTransitKey {
 	 * @since 1.1
 	 */
 	boolean supportsSigning();
+
 }

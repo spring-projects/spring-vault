@@ -53,41 +53,37 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  * @author Mark Paluch
  */
 @RequiresVaultVersion("0.6.2")
-class ReactiveLifecycleAwareSessionManagerIntegrationTests
-		extends IntegrationTestSupport {
+class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSupport {
 
 	private ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
 
 	@BeforeEach
 	void before() {
 
-		taskScheduler.afterPropertiesSet();
+		this.taskScheduler.afterPropertiesSet();
 
 		if (!prepare().hasAuth("cert")) {
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations()
-				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
-					File workDir = findWorkDir();
+		prepare().getVaultOperations().doWithSession((RestOperationsCallback<Object>) restOperations -> {
+			File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(
-							new File(workDir, "ca/certs/client.cert.pem"),
-							StandardCharsets.US_ASCII);
+			String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"),
+					StandardCharsets.US_ASCII);
 
-					Map<String, Object> body = new HashMap<>();
-					body.put("certificate", certificate);
-					body.put("ttl", 2 /* seconds */);
-					body.put("max_ttl", 2 /* seconds */);
+			Map<String, Object> body = new HashMap<>();
+			body.put("certificate", certificate);
+			body.put("ttl", 2 /* seconds */);
+			body.put("max_ttl", 2 /* seconds */);
 
-					return restOperations.postForEntity("auth/cert/certs/my-role", body,
-							Map.class);
-				});
+			return restOperations.postForEntity("auth/cert/certs/my-role", body, Map.class);
+		});
 	}
 
 	@AfterEach
 	void tearDown() {
-		taskScheduler.destroy();
+		this.taskScheduler.destroy();
 	}
 
 	@Test
@@ -96,7 +92,7 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 		LoginToken loginToken = createLoginToken();
 
 		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
-				() -> Mono.just(loginToken), taskScheduler, prepare().getWebClient());
+				() -> Mono.just(loginToken), this.taskScheduler, prepare().getWebClient());
 
 		sessionManager.getVaultToken() //
 				.as(StepVerifier::create) //
@@ -108,8 +104,7 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 	@Test
 	void shouldRenewToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
-				.opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
 				.renewable().ttl(1, TimeUnit.HOURS) //
@@ -122,8 +117,8 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 
 		final AtomicInteger counter = new AtomicInteger();
 		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
-				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(),
-				taskScheduler, prepare().getWebClient()) {
+				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(), this.taskScheduler,
+				prepare().getWebClient()) {
 
 			@Override
 			public Mono<VaultToken> getVaultToken() throws VaultException {
@@ -152,8 +147,8 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 		final LoginToken loginToken = createLoginToken();
 
 		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
-				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(),
-				taskScheduler, prepare().getWebClient());
+				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(), this.taskScheduler,
+				prepare().getWebClient());
 
 		sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
@@ -164,14 +159,12 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 		prepare().getVaultOperations().doWithSession(restOperations -> {
 
 			try {
-				restOperations.getForEntity("auth/token/lookup/{token}", Map.class,
-						loginToken.toCharArray());
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
 			}
 			catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;
@@ -180,10 +173,10 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests
 
 	private LoginToken createLoginToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
-				.opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 		VaultToken token = tokenOperations.createOrphan().getToken();
 
 		return LoginToken.of(token.getToken());
 	}
+
 }

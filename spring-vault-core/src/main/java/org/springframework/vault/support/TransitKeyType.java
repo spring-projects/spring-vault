@@ -35,4 +35,5 @@ public enum TransitKeyType {
 	public String getValue() {
 		return this.value;
 	}
+
 }

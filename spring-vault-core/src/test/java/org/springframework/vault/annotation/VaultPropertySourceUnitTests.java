@@ -52,28 +52,33 @@ class VaultPropertySourceUnitTests {
 		SecretLeaseContainer secretLeaseContainer() {
 			return Mockito.mock(SecretLeaseContainer.class);
 		}
+
 	}
 
 	@Configuration
 	@Profile("demo")
 	@VaultPropertySource("foo")
 	static class DemoProfile {
+
 	}
 
 	@Configuration
 	@Profile("dev")
 	@VaultPropertySource("bar")
 	static class DevProfile {
+
 	}
 
 	@Configuration
 	@VaultPropertySource("foo/${my_property}")
 	static class NonRenewableConfig {
+
 	}
 
 	@Configuration
 	@VaultPropertySource(value = "foo/${my_property}", renewal = RENEW)
 	static class RenewableConfig {
+
 	}
 
 	@AfterEach
@@ -151,8 +156,8 @@ class VaultPropertySourceUnitTests {
 		verify(leaseContainerMock).afterPropertiesSet();
 		verify(leaseContainerMock).addLeaseListener(any());
 		verify(leaseContainerMock).addErrorListener(any());
-		verify(leaseContainerMock)
-				.addRequestedSecret(RequestedSecret.renewable("foo/renewable"));
+		verify(leaseContainerMock).addRequestedSecret(RequestedSecret.renewable("foo/renewable"));
 		verifyNoMoreInteractions(leaseContainerMock);
 	}
+
 }

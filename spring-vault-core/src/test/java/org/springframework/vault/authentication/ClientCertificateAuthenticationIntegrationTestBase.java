@@ -38,13 +38,11 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-public abstract class ClientCertificateAuthenticationIntegrationTestBase
-		extends IntegrationTestSupport {
+public abstract class ClientCertificateAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
-	static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*")
-			.capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE)
-			.build());
+	static final Policy POLICY = Policy
+			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
+					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
 
 	@BeforeEach
 	public void before() {
@@ -53,42 +51,33 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase
 			prepare().mountAuth("cert");
 		}
 
-		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy("cert-auth",
-				POLICY);
+		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy("cert-auth", POLICY);
 
-		prepare().getVaultOperations()
-				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
-					File workDir = findWorkDir();
+		prepare().getVaultOperations().doWithSession((RestOperationsCallback<Object>) restOperations -> {
+			File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(
-							new File(workDir, "ca/certs/client.cert.pem"),
-							StandardCharsets.US_ASCII);
+			String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"),
+					StandardCharsets.US_ASCII);
 
-					Map<String, Object> role = new LinkedHashMap<>();
-					role.put("token_policies", "cert-auth");
-					role.put("certificate", certificate);
+			Map<String, Object> role = new LinkedHashMap<>();
+			role.put("token_policies", "cert-auth");
+			role.put("certificate", certificate);
 
-					return restOperations.postForEntity("auth/cert/certs/my-role",
-							role,
-							Map.class);
-				});
+			return restOperations.postForEntity("auth/cert/certs/my-role", role, Map.class);
+		});
 	}
 
 	static SslConfiguration prepareCertAuthenticationMethod() {
-		return prepareCertAuthenticationMethod(
-				SslConfiguration.KeyConfiguration.unconfigured());
+		return prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.unconfigured());
 	}
 
-	static SslConfiguration prepareCertAuthenticationMethod(
-			SslConfiguration.KeyConfiguration keyConfiguration) {
+	static SslConfiguration prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration keyConfiguration) {
 
 		SslConfiguration original = createSslConfiguration();
 
-		return new SslConfiguration(
-				KeyStoreConfiguration.of(
-						new FileSystemResource(
-								new File(findWorkDir(), "client-cert.jks")),
-						"changeit".toCharArray()),
+		return new SslConfiguration(KeyStoreConfiguration
+				.of(new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
 				keyConfiguration, original.getTrustStoreConfiguration());
 	}
+
 }

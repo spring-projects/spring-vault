@@ -61,19 +61,15 @@ class KubernetesAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainTokenWithStaticJwtSupplier() {
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder().role("hello") //
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder().role("hello") //
 				.jwtSupplier(() -> "my-jwt-token").build();
 
-		mockRest.expect(requestTo("/auth/kubernetes/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("hello"))
-				.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
+		this.mockRest.expect(requestTo("/auth/kubernetes/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("hello")).andExpect(jsonPath("$.jwt").value("my-jwt-token"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
-				restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -83,36 +79,33 @@ class KubernetesAuthenticationUnitTests {
 	@Test
 	void loginShouldFail() {
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder().role("hello").jwtSupplier(() -> "my-jwt-token").build();
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder().role("hello")
+				.jwtSupplier(() -> "my-jwt-token").build();
 
-		mockRest.expect(requestTo("/auth/kubernetes/login")) //
+		this.mockRest.expect(requestTo("/auth/kubernetes/login")) //
 				.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new KubernetesAuthentication(options, restTemplate).login());
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new KubernetesAuthentication(options, this.restTemplate).login());
 	}
 
 	@Test
 	void shouldReuseCachedToken() {
 
 		AtomicReference<String> token = new AtomicReference<>("foo");
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder().role("hello") //
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder().role("hello") //
 				.jwtSupplier(((KubernetesJwtSupplier) token::get).cached()).build();
 
 		token.set("bar");
 
-		mockRest.expect(requestTo("/auth/kubernetes/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("hello"))
-				.andExpect(jsonPath("$.jwt").value("foo"))
+		this.mockRest.expect(requestTo("/auth/kubernetes/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("hello")).andExpect(jsonPath("$.jwt").value("foo"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options,
-				restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
 
 		authentication.login();
 	}
+
 }

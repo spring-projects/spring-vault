@@ -40,7 +40,6 @@ public class Ciphertext {
 
 	/**
 	 * Factory method to create {@link Ciphertext} from the given {@code ciphertext}.
-	 *
 	 * @param ciphertext the ciphertext to decrypt, must not be {@literal null} or empty.
 	 * @return the {@link Ciphertext} for {@code ciphertext}.
 	 */
@@ -52,17 +51,16 @@ public class Ciphertext {
 	}
 
 	public String getCiphertext() {
-		return ciphertext;
+		return this.ciphertext;
 	}
 
 	public VaultTransitContext getContext() {
-		return context;
+		return this.context;
 	}
 
 	/**
 	 * Create a new {@link Ciphertext} object from this ciphertext associated with the
 	 * given {@link VaultTransitContext}.
-	 *
 	 * @param context transit context, must not be {@literal null}.
 	 * @return the new {@link Ciphertext} object.
 	 */
@@ -80,11 +78,12 @@ public class Ciphertext {
 		if (!(o instanceof Ciphertext))
 			return false;
 		Ciphertext that = (Ciphertext) o;
-		return ciphertext.equals(that.ciphertext) && context.equals(that.context);
+		return this.ciphertext.equals(that.ciphertext) && this.context.equals(that.context);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(ciphertext, context);
+		return Objects.hash(this.ciphertext, this.context);
 	}
+
 }

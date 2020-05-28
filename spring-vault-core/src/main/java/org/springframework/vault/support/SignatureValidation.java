@@ -38,7 +38,6 @@ public class SignatureValidation {
 	/**
 	 * Factory method to create a {@link SignatureValidation} object representing a
 	 * successfully validated signature.
-	 *
 	 * @return a {@link SignatureValidation} object representing a successfully validated
 	 * signature.
 	 */
@@ -49,7 +48,6 @@ public class SignatureValidation {
 	/**
 	 * Factory method to create a {@link SignatureValidation} object representing a failed
 	 * signature validation.
-	 *
 	 * @return a {@link SignatureValidation} object representing a failed signature
 	 * validation.
 	 */
@@ -58,7 +56,7 @@ public class SignatureValidation {
 	}
 
 	public boolean isValid() {
-		return state;
+		return this.state;
 	}
 
 	@Override
@@ -68,20 +66,21 @@ public class SignatureValidation {
 		if (!(o instanceof SignatureValidation))
 			return false;
 		SignatureValidation that = (SignatureValidation) o;
-		return state == that.state;
+		return this.state == that.state;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(state);
+		return Objects.hash(this.state);
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [state=").append(state);
+		sb.append(" [state=").append(this.state);
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

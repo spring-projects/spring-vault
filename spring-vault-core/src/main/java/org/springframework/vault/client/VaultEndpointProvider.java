@@ -27,8 +27,8 @@ public interface VaultEndpointProvider {
 
 	/**
 	 * Provides access to {@link VaultEndpoint}.
-	 *
 	 * @return the {@link VaultEndpoint}.
 	 */
 	VaultEndpoint getVaultEndpoint();
+
 }

@@ -59,7 +59,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	/**
 	 * Add a {@link LeaseListener} to the container. The listener starts receiving events
 	 * as soon as possible.
-	 *
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addLeaseListener(LeaseListener listener) {
@@ -71,7 +70,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 	/**
 	 * Remove a {@link LeaseListener}.
-	 *
 	 * @param listener must not be {@literal null}.
 	 */
 	public void removeLeaseListener(LeaseListener listener) {
@@ -81,7 +79,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	/**
 	 * Add a {@link LeaseErrorListener} to the container. The listener starts receiving
 	 * events as soon as possible.
-	 *
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addErrorListener(LeaseErrorListener listener) {
@@ -93,7 +90,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 	/**
 	 * Remove a {@link LeaseErrorListener}.
-	 *
 	 * @param listener must not be {@literal null}.
 	 */
 	public void removeLeaseErrorListener(LeaseErrorListener listener) {
@@ -112,13 +108,11 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called when secrets were obtained. The default implementation is to
 	 * notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @param body must not be {@literal null}.
 	 */
-	protected void onSecretsObtained(RequestedSecret requestedSecret, Lease lease,
-			Map<String, Object> body) {
+	protected void onSecretsObtained(RequestedSecret requestedSecret, Lease lease, Map<String, Object> body) {
 		dispatch(new SecretLeaseCreatedEvent(requestedSecret, lease, body));
 	}
 
@@ -126,7 +120,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called when secrets were not found. The default implementation is to
 	 * notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 */
 	protected void onSecretsNotFound(RequestedSecret requestedSecret) {
@@ -137,7 +130,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called when a {@link Lease} is renewed. The default implementation is
 	 * to notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
@@ -149,7 +141,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called before triggering revocation for a {@link Lease}. The default
 	 * implementation is to notify {@link LeaseListener}. Implementations can override
 	 * this method in subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
@@ -161,7 +152,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called after triggering revocation for a {@link Lease}. The default
 	 * implementation is to notify {@link LeaseListener}. Implementations can override
 	 * this method in subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
@@ -173,7 +163,6 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called when a {@link Lease} expires. The default implementation is to
 	 * notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
@@ -185,36 +174,32 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * Hook method called when an error occurred during secret retrieval, lease renewal,
 	 * and other Vault interactions. The default implementation is to notify
 	 * {@link LeaseErrorListener}. Implementations can override this method in subclasses.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease may be {@literal null}
 	 * @param e the causing exception.
 	 */
-	protected void onError(RequestedSecret requestedSecret, @Nullable Lease lease,
-			Exception e) {
+	protected void onError(RequestedSecret requestedSecret, @Nullable Lease lease, Exception e) {
 		dispatch(new SecretLeaseErrorEvent(requestedSecret, lease, e));
 	}
 
 	/**
 	 * Dispatch the event to all {@link LeaseListener}s.
-	 *
 	 * @param leaseEvent the event to dispatch.
 	 */
 	void dispatch(SecretLeaseEvent leaseEvent) {
 
-		for (LeaseListener listener : leaseListeners) {
+		for (LeaseListener listener : this.leaseListeners) {
 			listener.onLeaseEvent(leaseEvent);
 		}
 	}
 
 	/**
 	 * Dispatch the event to all {@link LeaseErrorListener}s.
-	 *
 	 * @param errorEvent the event to dispatch.
 	 */
 	void dispatch(SecretLeaseErrorEvent errorEvent) {
 
-		for (LeaseErrorListener listener : leaseErrorListeners) {
+		for (LeaseErrorListener listener : this.leaseErrorListeners) {
 			listener.onLeaseError(errorEvent, (Exception) errorEvent.getException());
 		}
 	}
@@ -230,8 +215,10 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
-			log.warn(String.format("[%s] %s %s", leaseEvent.getSource(),
-					leaseEvent.getLease(), exception.getMessage()), exception);
+			log.warn(String.format("[%s] %s %s", leaseEvent.getSource(), leaseEvent.getLease(), exception.getMessage()),
+					exception);
 		}
+
 	}
+
 }

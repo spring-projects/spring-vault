@@ -47,7 +47,6 @@ public class VaultSignRequest {
 	/**
 	 * Create a new {@link VaultSignRequest} given {@link Plaintext}. Uses the default
 	 * algorithm.
-	 *
 	 * @return a new {@link VaultSignRequest} for the given {@link Plaintext input}.
 	 */
 	public static VaultSignRequest create(Plaintext input) {
@@ -58,7 +57,7 @@ public class VaultSignRequest {
 	 * @return plain text input used as basis to generate the signature.
 	 */
 	public Plaintext getPlaintext() {
-		return plaintext;
+		return this.plaintext;
 	}
 
 	/**
@@ -67,7 +66,7 @@ public class VaultSignRequest {
 	 */
 	@Nullable
 	public String getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
 	/**
@@ -81,7 +80,6 @@ public class VaultSignRequest {
 
 		/**
 		 * Configure the input to be used to create the signature.
-		 *
 		 * @param input base input to create the signature, must not be {@literal null}.
 		 * @return {@code this} {@link VaultSignRequestBuilder}.
 		 */
@@ -95,11 +93,9 @@ public class VaultSignRequest {
 
 		/**
 		 * Configure the algorithm to be used for the operation.
-		 *
 		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 *     algorithms are: {@literal sha2-224}, {@literal sha2-256},
-		 *     {@literal sha2-384}, {@literal sha2-512}. Defaults to {@literal sha2-256}
-		 *     if not set.
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultSignRequestBuilder}.
 		 */
 		public VaultSignRequestBuilder algorithm(String algorithm) {
@@ -113,14 +109,15 @@ public class VaultSignRequest {
 		/**
 		 * Build a new {@link VaultSignRequest} instance. Requires
 		 * {@link #plaintext(Plaintext)} to be configured.
-		 *
 		 * @return a new {@link VaultSignRequest}.
 		 */
 		public VaultSignRequest build() {
 
-			Assert.notNull(plaintext, "Plaintext input must not be null");
+			Assert.notNull(this.plaintext, "Plaintext input must not be null");
 
-			return new VaultSignRequest(plaintext, algorithm);
+			return new VaultSignRequest(this.plaintext, this.algorithm);
 		}
+
 	}
+
 }

@@ -51,11 +51,9 @@ import org.springframework.vault.support.JsonMapFlattener;
  * @see PropertyTransformer
  * @see PropertyTransformers
  */
-public class LeaseAwareVaultPropertySource
-		extends EnumerablePropertySource<VaultOperations> {
+public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	private static final Log logger = LogFactory
-			.getLog(LeaseAwareVaultPropertySource.class);
+	private static final Log logger = LogFactory.getLog(LeaseAwareVaultPropertySource.class);
 
 	private final SecretLeaseContainer secretLeaseContainer;
 
@@ -79,12 +77,10 @@ public class LeaseAwareVaultPropertySource
 	 * {@link SecretLeaseContainer} and {@link RequestedSecret}. This property source
 	 * requests the secret upon initialization and receives secrets once they are emitted
 	 * through events published by {@link SecretLeaseContainer}.
-	 *
 	 * @param secretLeaseContainer must not be {@literal null}.
 	 * @param requestedSecret must not be {@literal null}.
 	 */
-	public LeaseAwareVaultPropertySource(SecretLeaseContainer secretLeaseContainer,
-			RequestedSecret requestedSecret) {
+	public LeaseAwareVaultPropertySource(SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret) {
 		this(requestedSecret.getPath(), secretLeaseContainer, requestedSecret);
 	}
 
@@ -93,13 +89,12 @@ public class LeaseAwareVaultPropertySource
 	 * {@link SecretLeaseContainer} and {@link RequestedSecret}. This property source
 	 * requests the secret upon initialization and receives secrets once they are emitted
 	 * through events published by {@link SecretLeaseContainer}.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param secretLeaseContainer must not be {@literal null}.
 	 * @param requestedSecret must not be {@literal null}.
 	 */
-	public LeaseAwareVaultPropertySource(String name,
-			SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret) {
+	public LeaseAwareVaultPropertySource(String name, SecretLeaseContainer secretLeaseContainer,
+			RequestedSecret requestedSecret) {
 		this(name, secretLeaseContainer, requestedSecret, PropertyTransformers.noop());
 	}
 
@@ -108,16 +103,14 @@ public class LeaseAwareVaultPropertySource
 	 * {@link SecretLeaseContainer} and {@link RequestedSecret}. This property source
 	 * requests the secret upon initialization and receives secrets once they are emitted
 	 * through events published by {@link SecretLeaseContainer}.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param secretLeaseContainer must not be {@literal null}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param propertyTransformer object to transform properties.
 	 * @see PropertyTransformers
 	 */
-	public LeaseAwareVaultPropertySource(String name,
-			SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret,
-			PropertyTransformer propertyTransformer) {
+	public LeaseAwareVaultPropertySource(String name, SecretLeaseContainer secretLeaseContainer,
+			RequestedSecret requestedSecret, PropertyTransformer propertyTransformer) {
 
 		this(name, secretLeaseContainer, requestedSecret, propertyTransformer, true);
 	}
@@ -127,37 +120,32 @@ public class LeaseAwareVaultPropertySource
 	 * {@link SecretLeaseContainer} and {@link RequestedSecret}. This property source
 	 * requests the secret upon initialization and receives secrets once they are emitted
 	 * through events published by {@link SecretLeaseContainer}.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param secretLeaseContainer must not be {@literal null}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param propertyTransformer object to transform properties.
 	 * @param ignoreSecretNotFound indicate if failure to find a secret at {@code path}
-	 *     should be ignored.
+	 * should be ignored.
 	 * @since 2.2
 	 * @see PropertyTransformers
 	 */
-	public LeaseAwareVaultPropertySource(String name,
-			SecretLeaseContainer secretLeaseContainer, RequestedSecret requestedSecret,
-			PropertyTransformer propertyTransformer, boolean ignoreSecretNotFound) {
+	public LeaseAwareVaultPropertySource(String name, SecretLeaseContainer secretLeaseContainer,
+			RequestedSecret requestedSecret, PropertyTransformer propertyTransformer, boolean ignoreSecretNotFound) {
 
 		super(name);
 
-		Assert.notNull(secretLeaseContainer,
-				"Path name must contain at least one character");
+		Assert.notNull(secretLeaseContainer, "Path name must contain at least one character");
 		Assert.notNull(requestedSecret, "SecretLeaseContainer must not be null");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
 		this.secretLeaseContainer = secretLeaseContainer;
 		this.requestedSecret = requestedSecret;
-		this.propertyTransformer = propertyTransformer
-				.andThen(PropertyTransformers.removeNullProperties());
+		this.propertyTransformer = propertyTransformer.andThen(PropertyTransformers.removeNullProperties());
 		this.ignoreSecretNotFound = ignoreSecretNotFound;
 		this.leaseListener = new LeaseListenerAdapter() {
 			@Override
 			public void onLeaseEvent(SecretLeaseEvent leaseEvent) {
-				handleLeaseEvent(leaseEvent,
-						LeaseAwareVaultPropertySource.this.properties);
+				handleLeaseEvent(leaseEvent, LeaseAwareVaultPropertySource.this.properties);
 			}
 
 			@Override
@@ -175,24 +163,22 @@ public class LeaseAwareVaultPropertySource
 	private void loadProperties() {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Requesting secrets from Vault at %s using %s",
-					requestedSecret.getPath(), requestedSecret.getMode()));
+			logger.debug(String.format("Requesting secrets from Vault at %s using %s", this.requestedSecret.getPath(),
+					this.requestedSecret.getMode()));
 		}
 
-		secretLeaseContainer.addLeaseListener(leaseListener);
-		secretLeaseContainer.addErrorListener(leaseListener);
-		secretLeaseContainer.addRequestedSecret(requestedSecret);
+		this.secretLeaseContainer.addLeaseListener(this.leaseListener);
+		this.secretLeaseContainer.addErrorListener(this.leaseListener);
+		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
 
 		Exception loadError = this.loadError;
-		if (notFound || loadError != null) {
+		if (this.notFound || loadError != null) {
 
-			String msg = String.format("Vault location [%s] not resolvable",
-					requestedSecret.getPath());
+			String msg = String.format("Vault location [%s] not resolvable", this.requestedSecret.getPath());
 
-			if (ignoreSecretNotFound) {
+			if (this.ignoreSecretNotFound) {
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s: %s", msg,
-							loadError != null ? loadError.getMessage() : "Not found"));
+					logger.info(String.format("%s: %s", msg, loadError != null ? loadError.getMessage() : "Not found"));
 				}
 			}
 			else {
@@ -205,7 +191,7 @@ public class LeaseAwareVaultPropertySource
 	}
 
 	public RequestedSecret getRequestedSecret() {
-		return requestedSecret;
+		return this.requestedSecret;
 	}
 
 	@Override
@@ -226,12 +212,10 @@ public class LeaseAwareVaultPropertySource
 
 	/**
 	 * Hook method to handle a {@link SecretLeaseEvent}.
-	 *
 	 * @param leaseEvent must not be {@literal null}.
 	 * @param properties reference to property storage of this property source.
 	 */
-	protected void handleLeaseEvent(SecretLeaseEvent leaseEvent,
-			Map<String, Object> properties) {
+	protected void handleLeaseEvent(SecretLeaseEvent leaseEvent, Map<String, Object> properties) {
 
 		if (leaseEvent.getSource() != getRequestedSecret()) {
 			return;
@@ -241,8 +225,7 @@ public class LeaseAwareVaultPropertySource
 			this.notFound = true;
 		}
 
-		if (leaseEvent instanceof SecretLeaseExpiredEvent
-				|| leaseEvent instanceof BeforeSecretLeaseRevocationEvent
+		if (leaseEvent instanceof SecretLeaseExpiredEvent || leaseEvent instanceof BeforeSecretLeaseRevocationEvent
 				|| leaseEvent instanceof SecretLeaseCreatedEvent) {
 			properties.clear();
 		}
@@ -256,12 +239,10 @@ public class LeaseAwareVaultPropertySource
 
 	/**
 	 * Hook method to handle a {@link SecretLeaseEvent} errors.
-	 *
 	 * @param leaseEvent must not be {@literal null}.
 	 * @param exception offending exception.
 	 */
-	protected void handleLeaseErrorEvent(SecretLeaseEvent leaseEvent,
-			Exception exception) {
+	protected void handleLeaseErrorEvent(SecretLeaseEvent leaseEvent, Exception exception) {
 
 		if (leaseEvent.getSource() != getRequestedSecret()) {
 			return;
@@ -272,7 +253,6 @@ public class LeaseAwareVaultPropertySource
 
 	/**
 	 * Hook method to transform properties using {@link PropertyTransformer}.
-	 *
 	 * @param properties must not be {@literal null}.
 	 * @return the transformed properties.
 	 */
@@ -283,7 +263,6 @@ public class LeaseAwareVaultPropertySource
 	/**
 	 * Utility method converting a {@code String/Object} map to a flat
 	 * {@code String/String} map. Nested objects are represented with property paths.
-	 *
 	 * @param data the map
 	 * @return the flattened map.
 	 * @deprecated since 2.0, use {@link #flattenMap(Map)} to retain JSON data types.
@@ -296,7 +275,6 @@ public class LeaseAwareVaultPropertySource
 	/**
 	 * Utility method converting a {@code String/Object} map to a flat
 	 * {@code String/Object} map. Nested objects are represented with property path keys.
-	 *
 	 * @param data the map
 	 * @return the flattened map.
 	 * @since 2.0
@@ -304,4 +282,5 @@ public class LeaseAwareVaultPropertySource
 	protected Map<String, Object> flattenMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);
 	}
+
 }

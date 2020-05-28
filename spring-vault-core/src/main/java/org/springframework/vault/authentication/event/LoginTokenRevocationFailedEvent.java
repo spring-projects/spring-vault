@@ -32,9 +32,8 @@ public class LoginTokenRevocationFailedEvent extends AuthenticationErrorEvent {
 	/**
 	 * Create a new {@link LoginTokenRevocationFailedEvent} given {@link VaultToken} and
 	 * {@link Exception}.
-	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
 	public LoginTokenRevocationFailedEvent(VaultToken source, Throwable exception) {
@@ -44,4 +43,5 @@ public class LoginTokenRevocationFailedEvent extends AuthenticationErrorEvent {
 	public VaultToken getSource() {
 		return (VaultToken) super.getSource();
 	}
+
 }

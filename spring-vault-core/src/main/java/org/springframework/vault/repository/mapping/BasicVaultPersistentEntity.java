@@ -31,23 +31,21 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @since 2.0
  */
-public class BasicVaultPersistentEntity<T>
-		extends BasicKeyValuePersistentEntity<T, VaultPersistentProperty>
+public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity<T, VaultPersistentProperty>
 		implements VaultPersistentEntity<T> {
 
 	private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 
 	private final String backend;
+
 	private final @Nullable Expression backendExpression;
 
 	/**
 	 * Creates new {@link BasicVaultPersistentEntity}.
-	 *
 	 * @param information must not be {@literal null}.
 	 * @param fallbackKeySpaceResolver can be {@literal null}.
 	 */
-	public BasicVaultPersistentEntity(TypeInformation<T> information,
-			KeySpaceResolver fallbackKeySpaceResolver) {
+	public BasicVaultPersistentEntity(TypeInformation<T> information, KeySpaceResolver fallbackKeySpaceResolver) {
 		super(information, fallbackKeySpaceResolver);
 
 		Secret annotation = findAnnotation(Secret.class);
@@ -68,15 +66,13 @@ public class BasicVaultPersistentEntity<T>
 	 * Returns a SpEL {@link Expression} if the given {@link String} is actually an
 	 * expression that does not evaluate to a {@link LiteralExpression} (indicating that
 	 * no subsequent evaluation is necessary).
-	 *
 	 * @param potentialExpression can be {@literal null}
 	 * @return
 	 */
 	@Nullable
 	private static Expression detectExpression(String potentialExpression) {
 
-		Expression expression = PARSER.parseExpression(potentialExpression,
-				ParserContext.TEMPLATE_EXPRESSION);
+		Expression expression = PARSER.parseExpression(potentialExpression, ParserContext.TEMPLATE_EXPRESSION);
 		return expression instanceof LiteralExpression ? null : expression;
 	}
 
@@ -88,8 +84,9 @@ public class BasicVaultPersistentEntity<T>
 	@Override
 	public String getSecretBackend() {
 
-		return backendExpression == null //
-				? backend //
-				: backendExpression.getValue(getEvaluationContext(null), String.class);
+		return this.backendExpression == null //
+				? this.backend //
+				: this.backendExpression.getValue(getEvaluationContext(null), String.class);
 	}
+
 }

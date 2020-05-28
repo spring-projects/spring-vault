@@ -48,15 +48,12 @@ class PkiSecretIntegrationTests extends IntegrationTestSupport {
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
 
-		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"),
+		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), StandardCharsets.US_ASCII);
+
+		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"),
 				StandardCharsets.US_ASCII);
 
-		String key = Files.contentOf(
-				new File(workDir, "ca/private/intermediate.decrypted.key.pem"),
-				StandardCharsets.US_ASCII);
-
-		Map<String, String> pembundle = Collections.singletonMap("pem_bundle",
-				cert + key);
+		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key);
 
 		VaultOperations vaultOperations = prepare().getVaultOperations();
 		vaultOperations.write("pki/config/ca", pembundle);
@@ -76,4 +73,5 @@ class PkiSecretIntegrationTests extends IntegrationTestSupport {
 	void shouldCreateCertificateCorrectly() {
 
 	}
+
 }

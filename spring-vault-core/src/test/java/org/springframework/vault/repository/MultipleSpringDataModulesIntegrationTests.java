@@ -52,8 +52,8 @@ class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 			excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = VaultRepository.class))
 	@EnableVaultRepositories(considerNestedRepositories = true, //
 			excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, value = MapRepository.class))
-	static class MultipleModulesActiveTestConfiguration
-			extends VaultIntegrationTestConfiguration {
+	static class MultipleModulesActiveTestConfiguration extends VaultIntegrationTestConfiguration {
+
 	}
 
 	@Autowired
@@ -67,7 +67,7 @@ class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-		vaultRepository.deleteAll();
+		this.vaultRepository.deleteAll();
 	}
 
 	@Test
@@ -77,39 +77,42 @@ class MultipleSpringDataModulesIntegrationTests extends IntegrationTestSupport {
 		person.setId("foo-key");
 		person.setFirstname("bar");
 
-		vaultRepository.save(person);
+		this.vaultRepository.save(person);
 
-		Iterable<Person> all = vaultRepository.findAll();
+		Iterable<Person> all = this.vaultRepository.findAll();
 
 		assertThat(all).contains(person);
-		assertThat(vaultRepository.findByIdStartsWith("foo-key")).contains(person);
+		assertThat(this.vaultRepository.findByIdStartsWith("foo-key")).contains(person);
 	}
 
 	@Test
 	void loadAndSaveMapRepository() {
 
-		vaultRepository.findAll().forEach(vaultRepository::delete);
+		this.vaultRepository.findAll().forEach(this.vaultRepository::delete);
 
 		Person person = new Person();
 		person.setId("foo-key");
 		person.setFirstname("bar");
 
-		mapRepository.save(person);
+		this.mapRepository.save(person);
 
-		Iterable<Person> all = mapRepository.findAll();
+		Iterable<Person> all = this.mapRepository.findAll();
 
 		assertThat(all).contains(person);
-		assertThat(mapRepository.findByFirstnameStartsWith("bar")).contains(person);
-		assertThat(vaultRepository.findById("foo-key")).isEmpty();
+		assertThat(this.mapRepository.findByFirstnameStartsWith("bar")).contains(person);
+		assertThat(this.vaultRepository.findById("foo-key")).isEmpty();
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {
 
 		List<Person> findByIdStartsWith(String prefix);
+
 	}
 
 	interface MapRepository extends CrudRepository<Person, String> {
 
 		List<Person> findByFirstnameStartsWith(String prefix);
+
 	}
+
 }

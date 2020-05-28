@@ -40,7 +40,6 @@ public class VaultBytesEncryptor implements BytesEncryptor {
 	/**
 	 * Create a new {@link VaultBytesEncryptor} given {@link VaultTransitOperations} and
 	 * {@code keyName}.
-	 *
 	 * @param transitOperations must not be {@literal null}.
 	 * @param keyName must not be {@literal null} or empty.
 	 */
@@ -59,8 +58,7 @@ public class VaultBytesEncryptor implements BytesEncryptor {
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.isTrue(!ObjectUtils.isEmpty(plaintext), "Plaintext must not be empty");
 
-		Ciphertext ciphertext = transitOperations.encrypt(keyName,
-				Plaintext.of(plaintext));
+		Ciphertext ciphertext = this.transitOperations.encrypt(this.keyName, Plaintext.of(plaintext));
 
 		return Utf8.encode(ciphertext.getCiphertext());
 	}
@@ -71,9 +69,9 @@ public class VaultBytesEncryptor implements BytesEncryptor {
 		Assert.notNull(ciphertext, "Ciphertext must not be null");
 		Assert.isTrue(!ObjectUtils.isEmpty(ciphertext), "Ciphertext must not be empty");
 
-		Plaintext plaintext = transitOperations.decrypt(keyName,
-				Ciphertext.of(Utf8.decode(ciphertext)));
+		Plaintext plaintext = this.transitOperations.decrypt(this.keyName, Ciphertext.of(Utf8.decode(ciphertext)));
 
 		return plaintext.getPlaintext();
 	}
+
 }

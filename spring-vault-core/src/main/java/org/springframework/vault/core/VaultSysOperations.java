@@ -43,14 +43,12 @@ public interface VaultSysOperations {
 
 	/**
 	 * Initialize Vault with a {@link VaultInitializationRequest}.
-	 *
 	 * @param vaultInitializationRequest must not be {@literal null}.
 	 * @return the {@link VaultInitializationResponse}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-init.html">PUT
 	 * /sys/init</a>
 	 */
-	VaultInitializationResponse initialize(
-			VaultInitializationRequest vaultInitializationRequest) throws VaultException;
+	VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) throws VaultException;
 
 	/**
 	 * Seal vault.
@@ -62,7 +60,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Unseal vault. See {@link VaultUnsealStatus#getProgress()} for progress.
-	 *
 	 * @param keyShare must not be empty and not {@literal null}.
 	 * @return the {@link VaultUnsealStatus}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-unseal.html">PUT
@@ -79,7 +76,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Mounts a secret backend {@link VaultMount} to {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST
@@ -96,7 +92,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Unmounts the secret backend mount at {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE
 	 * /sys/mounts/{mount}</a>
@@ -105,7 +100,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Mounts an auth backend {@link VaultMount} to {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">POST
@@ -122,7 +116,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Unmounts the auth backend mount at {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">DELETE
 	 * /sys/auth/{mount}</a>
@@ -131,7 +124,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Lists policy names stored in Vault.
-	 *
 	 * @return policy names.
 	 * @since 2.0
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
@@ -143,7 +135,6 @@ public interface VaultSysOperations {
 	 * Read a {@link Policy} by its {@literal name}. Policies are either represented as
 	 * HCL (HashiCorp configuration language) or JSON. Retrieving policies is only
 	 * possible if the policy is represented as JSON.
-	 *
 	 * @return the {@link Policy} or {@literal null}, if the policy was not found.
 	 * @since 2.0
 	 * @throws UnsupportedOperationException if the policy is represented as HCL.
@@ -155,7 +146,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Create or update a {@link Policy}.
-	 *
 	 * @param name the policy name, must not be {@literal null} or empty.
 	 * @since 2.0
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">PUT
@@ -165,7 +155,6 @@ public interface VaultSysOperations {
 
 	/**
 	 * Delete a {@link Policy} by its {@literal name}.
-	 *
 	 * @param name the policy name, must not be {@literal null} or empty.
 	 * @since 2.0
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">DELETE
@@ -175,10 +164,10 @@ public interface VaultSysOperations {
 
 	/**
 	 * Return the health status of Vault.
-	 *
 	 * @return the {@link VaultHealth}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-health.html">GET
 	 * /sys/health</a>
 	 */
 	VaultHealth health() throws VaultException;
+
 }

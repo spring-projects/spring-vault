@@ -28,8 +28,8 @@ public interface AuthenticationErrorListener {
 
 	/**
 	 * Callback for a {@link AuthenticationErrorEvent}.
-	 *
 	 * @param authenticationEvent the event object, must not be {@literal null}.
 	 */
 	void onAuthenticationError(AuthenticationErrorEvent authenticationEvent);
+
 }

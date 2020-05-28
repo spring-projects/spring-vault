@@ -37,7 +37,6 @@ public class AuthenticationErrorEvent extends ApplicationEvent {
 	/**
 	 * Create a new {@link AuthenticationErrorEvent} given {@code source} and
 	 * {@link Exception}.
-	 *
 	 * @param source must not be {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
@@ -47,6 +46,7 @@ public class AuthenticationErrorEvent extends ApplicationEvent {
 	}
 
 	public Throwable getException() {
-		return exception;
+		return this.exception;
 	}
+
 }

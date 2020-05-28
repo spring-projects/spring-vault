@@ -36,16 +36,13 @@ class AppIdAuthenticationIntegrationTests extends AppIdAuthenticationIntegration
 	@Test
 	void shouldLoginSuccessfully() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("myapp") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				restTemplate);
+		AppIdAuthentication authentication = new AppIdAuthentication(options, restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -54,16 +51,15 @@ class AppIdAuthenticationIntegrationTests extends AppIdAuthenticationIntegration
 	@Test
 	void loginShouldFail() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("wrong") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("wrong") //
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		assertThatExceptionOfType(VaultException.class)
 				.isThrownBy(() -> new AppIdAuthentication(options, restTemplate).login());
 
 	}
+
 }

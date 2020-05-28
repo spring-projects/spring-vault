@@ -56,7 +56,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 	@BeforeEach
 	void before() {
-		versionedOperations = vaultOperations.opsForVersionedKeyValue("versioned");
+		this.versionedOperations = this.vaultOperations.opsForVersionedKeyValue("versioned");
 	}
 
 	@Test
@@ -66,11 +66,10 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		Metadata metadata = versionedOperations.put(key, Versioned.create(secret));
+		Metadata metadata = this.versionedOperations.put(key, Versioned.create(secret));
 
 		assertThat(metadata.isDestroyed()).isFalse();
-		assertThat(metadata.getCreatedAt()).isBetween(Instant.now().minusSeconds(60),
-				Instant.now().plusSeconds(60));
+		assertThat(metadata.getCreatedAt()).isBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
 		assertThat(metadata.getDeletedAt()).isNull();
 	}
 
@@ -82,9 +81,9 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		person.setLastname("White");
 
 		String key = UUID.randomUUID().toString();
-		versionedOperations.put(key, Versioned.create(person));
+		this.versionedOperations.put(key, Versioned.create(person));
 
-		Versioned<Person> versioned = versionedOperations.get(key, Person.class);
+		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
 
 		assertThat(versioned.getRequiredData()).isEqualTo(person);
 	}
@@ -96,13 +95,12 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Versioned.create(secret, Version.unversioned()));
+		this.versionedOperations.put(key, Versioned.create(secret, Version.unversioned()));
 
 		// this should fail
-		assertThatThrownBy(() -> versionedOperations.put(key,
-				Versioned.create(secret, Version.unversioned())))
-						.isExactlyInstanceOf(VaultException.class).hasMessageContaining(
-								"check-and-set parameter did not match the current version");
+		assertThatThrownBy(() -> this.versionedOperations.put(key, Versioned.create(secret, Version.unversioned())))
+				.isExactlyInstanceOf(VaultException.class)
+				.hasMessageContaining("check-and-set parameter did not match the current version");
 	}
 
 	@Test
@@ -112,9 +110,9 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Versioned.create(secret));
+		this.versionedOperations.put(key, Versioned.create(secret));
 
-		Versioned<Map<String, Object>> loaded = versionedOperations.get(key);
+		Versioned<Map<String, Object>> loaded = this.versionedOperations.get(key);
 
 		assertThat(loaded.getRequiredData()).isEqualTo(secret);
 		assertThat(loaded.getRequiredMetadata()).isNotNull();
@@ -127,9 +125,9 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		Map<String, String> secret = Collections.singletonMap("key", "value");
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, secret);
+		this.versionedOperations.put(key, secret);
 
-		assertThat(versionedOperations.list("")).contains(key);
+		assertThat(this.versionedOperations.list("")).contains(key);
 	}
 
 	@Test
@@ -137,12 +135,12 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		assertThat(versionedOperations.get(key, Version.from(1)).getRequiredData())
+		assertThat(this.versionedOperations.get(key, Version.from(1)).getRequiredData())
 				.isEqualTo(Collections.singletonMap("key", "v1"));
-		assertThat(versionedOperations.get(key, Version.from(2)).getRequiredData())
+		assertThat(this.versionedOperations.get(key, Version.from(2)).getRequiredData())
 				.isEqualTo(Collections.singletonMap("key", "v2"));
 	}
 
@@ -151,18 +149,18 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		versionedOperations.delete(key);
+		this.versionedOperations.delete(key);
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
+		Versioned<Map<String, Object>> versioned = this.versionedOperations.get(key);
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getRequiredMetadata().getDeletedAt())
-				.isBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(Instant.now().minusSeconds(60),
+				Instant.now().plusSeconds(60));
 	}
 
 	@Test
@@ -170,16 +168,15 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		versionedOperations.delete(key, Version.from(2));
-		versionedOperations.undelete(key, Version.from(2));
+		this.versionedOperations.delete(key, Version.from(2));
+		this.versionedOperations.undelete(key, Version.from(2));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
+		Versioned<Map<String, Object>> versioned = this.versionedOperations.get(key);
 
-		assertThat(versioned.getRequiredData())
-				.isEqualTo(Collections.singletonMap("key", "v2"));
+		assertThat(versioned.getRequiredData()).isEqualTo(Collections.singletonMap("key", "v2"));
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
 		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
@@ -190,19 +187,18 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		versionedOperations.delete(key, Version.from(1));
+		this.versionedOperations.delete(key, Version.from(1));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.get(key,
-				Version.from(1));
+		Versioned<Map<String, Object>> versioned = this.versionedOperations.get(key, Version.from(1));
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(1));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isFalse();
-		assertThat(versioned.getRequiredMetadata().getDeletedAt())
-				.isBetween(Instant.now().minusSeconds(60), Instant.now().plusSeconds(60));
+		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isBetween(Instant.now().minusSeconds(60),
+				Instant.now().plusSeconds(60));
 	}
 
 	@Test
@@ -210,16 +206,17 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		String key = UUID.randomUUID().toString();
 
-		versionedOperations.put(key, Collections.singletonMap("key", "v1"));
-		versionedOperations.put(key, Collections.singletonMap("key", "v2"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v1"));
+		this.versionedOperations.put(key, Collections.singletonMap("key", "v2"));
 
-		versionedOperations.destroy(key, Version.from(2));
+		this.versionedOperations.destroy(key, Version.from(2));
 
-		Versioned<Map<String, Object>> versioned = versionedOperations.get(key);
+		Versioned<Map<String, Object>> versioned = this.versionedOperations.get(key);
 
 		assertThat(versioned.getData()).isNull();
 		assertThat(versioned.getVersion()).isEqualTo(Version.from(2));
 		assertThat(versioned.getRequiredMetadata().isDestroyed()).isTrue();
 		assertThat(versioned.getRequiredMetadata().getDeletedAt()).isNull();
 	}
+
 }

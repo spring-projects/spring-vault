@@ -33,16 +33,15 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @since 2.1
  * @see KeyValueBackend#KV_1
  */
-class VaultKeyValue1Template extends VaultKeyValueAccessor
-		implements VaultKeyValueOperations {
+class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyValueOperations {
 
 	private final VaultOperations vaultOperations;
+
 	private final String path;
 
 	/**
 	 * Create a new {@link VaultKeyValue1Template} given {@link VaultOperations} and the
 	 * mount {@code path}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -57,7 +56,7 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor
 	@Nullable
 	@Override
 	public List<String> list(String path) {
-		return vaultOperations.list(createDataPath(path));
+		return this.vaultOperations.list(createDataPath(path));
 	}
 
 	@Nullable
@@ -121,4 +120,5 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor
 	String createDataPath(String path) {
 		return String.format("%s/%s", this.path, path);
 	}
+
 }

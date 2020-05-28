@@ -53,9 +53,9 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		VaultSysOperations adminOperations = vaultOperations.opsForSys();
+		VaultSysOperations adminOperations = this.vaultOperations.opsForSys();
 
-		vaultVersion = prepare().getVersion();
+		this.vaultVersion = prepare().getVersion();
 
 		if (!adminOperations.getMounts().containsKey("transit/")) {
 			adminOperations.mount("transit", VaultMount.create("transit"));
@@ -63,7 +63,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 		removeKeys();
 
-		vaultOperations.write("transit/keys/mykey", null);
+		this.vaultOperations.write("transit/keys/mykey", null);
 	}
 
 	@AfterEach
@@ -74,14 +74,14 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			vaultOperations.opsForTransit().configureKey(keyName,
+			this.vaultOperations.opsForTransit().configureKey(keyName,
 					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
 
 		try {
-			vaultOperations.opsForTransit().deleteKey(keyName);
+			this.vaultOperations.opsForTransit().deleteKey(keyName);
 		}
 		catch (Exception e) {
 		}
@@ -89,8 +89,8 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 	private void removeKeys() {
 
-		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
-			List<String> keys = vaultOperations.opsForTransit().getKeys();
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+			List<String> keys = this.vaultOperations.opsForTransit().getKeys();
 			keys.forEach(this::deleteKey);
 		}
 		else {
@@ -101,9 +101,8 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncrypt() {
 
-		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext",
-						Base64Utils.encodeToString("that message is secret".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey",
+				Collections.singletonMap("plaintext", Base64Utils.encodeToString("that message is secret".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("ciphertext")).isNotEmpty();
 	}
@@ -111,15 +110,14 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncryptAndDecrypt() {
 
-		VaultResponse response = vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext",
-						Base64Utils.encodeToString("that message is secret".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey",
+				Collections.singletonMap("plaintext", Base64Utils.encodeToString("that message is secret".getBytes())));
 
-		VaultResponse decrypted = vaultOperations.write("transit/decrypt/mykey",
-				Collections.singletonMap("ciphertext",
-						response.getRequiredData().get("ciphertext")));
+		VaultResponse decrypted = this.vaultOperations.write("transit/decrypt/mykey",
+				Collections.singletonMap("ciphertext", response.getRequiredData().get("ciphertext")));
 
-		assertThat((String) decrypted.getRequiredData().get("plaintext")).isEqualTo(
-				Base64Utils.encodeToString("that message is secret".getBytes()));
+		assertThat((String) decrypted.getRequiredData().get("plaintext"))
+				.isEqualTo(Base64Utils.encodeToString("that message is secret".getBytes()));
 	}
+
 }

@@ -39,8 +39,7 @@ class BasicVaultPersistentEntityUnitTests {
 	@Test
 	void shouldSetIdPropertyThroughName() {
 
-		VaultPersistentEntity<?> persistentEntity = mappingContext
-				.getPersistentEntity(IdProperty.class);
+		VaultPersistentEntity<?> persistentEntity = this.mappingContext.getPersistentEntity(IdProperty.class);
 
 		assertThat(persistentEntity.getIdProperty()).isNotNull();
 	}
@@ -48,8 +47,7 @@ class BasicVaultPersistentEntityUnitTests {
 	@Test
 	void shouldSetIdPropertyThroughAnnotation() {
 
-		VaultPersistentEntity<?> persistentEntity = mappingContext
-				.getPersistentEntity(ExplicitId.class);
+		VaultPersistentEntity<?> persistentEntity = this.mappingContext.getPersistentEntity(ExplicitId.class);
 
 		assertThat(persistentEntity.getIdProperty()).isNotNull();
 	}
@@ -57,12 +55,10 @@ class BasicVaultPersistentEntityUnitTests {
 	@Test
 	void shouldEvaluateExpression() {
 
-		VaultPersistentEntity<?> persistentEntity = mappingContext
-				.getPersistentEntity(ExpressionEntity.class);
+		VaultPersistentEntity<?> persistentEntity = this.mappingContext.getPersistentEntity(ExpressionEntity.class);
 
-		persistentEntity
-				.setEvaluationContextProvider(new ExtensionAwareEvaluationContextProvider(
-						Collections.singletonList(new SampleExtension())));
+		persistentEntity.setEvaluationContextProvider(
+				new ExtensionAwareEvaluationContextProvider(Collections.singletonList(new SampleExtension())));
 
 		assertThat(persistentEntity.getSecretBackend()).isEqualTo("collectionName");
 
@@ -70,18 +66,24 @@ class BasicVaultPersistentEntityUnitTests {
 	}
 
 	private static class IdProperty {
+
 		String id, username;
+
 	}
 
 	private static class ExplicitId {
+
 		@Id
 		String username;
+
 	}
 
 	@Secret(backend = "#{myProperty}", value = "#{myKeySpace}")
 	private static class ExpressionEntity {
+
 		@Id
 		String username;
+
 	}
 
 	static class SampleExtension implements EvaluationContextExtension {
@@ -99,5 +101,7 @@ class BasicVaultPersistentEntityUnitTests {
 			properties.put("myKeySpace", "foo");
 			return properties;
 		}
+
 	}
+
 }

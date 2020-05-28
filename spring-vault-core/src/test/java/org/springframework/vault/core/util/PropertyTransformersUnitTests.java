@@ -32,21 +32,19 @@ class PropertyTransformersUnitTests {
 	@Test
 	void propertyNamePrefix() {
 
-		PropertyTransformer propertyTransformer = PropertyTransformers
-				.propertyNamePrefix("my-prefix.");
+		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("my-prefix.");
 
-		assertThat(propertyTransformer.transformProperties(properties)).hasSize(1)
-				.containsEntry("my-prefix.key", "value");
+		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1).containsEntry("my-prefix.key",
+				"value");
 	}
 
 	@Test
 	void propertyNamePrefixChaining() {
 
-		PropertyTransformer propertyTransformer = PropertyTransformers
-				.propertyNamePrefix("my-prefix.")
+		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("my-prefix.")
 				.andThen(PropertyTransformers.propertyNamePrefix("foo-bar."));
 
-		assertThat(propertyTransformer.transformProperties(properties)).hasSize(1)
+		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1)
 				.containsEntry("foo-bar.my-prefix.key", "value");
 	}
 
@@ -59,11 +57,11 @@ class PropertyTransformersUnitTests {
 		PropertyTransformer middle = PropertyTransformers.propertyNamePrefix("middle.")
 				.andThen(PropertyTransformers.propertyNamePrefix("after-middle."));
 
-		PropertyTransformer propertyTransformer = PropertyTransformers
-				.propertyNamePrefix("inner.")
+		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("inner.")
 				.andThen(PropertyTransformers.noop().andThen(middle)).andThen(last);
 
-		assertThat(propertyTransformer.transformProperties(properties)).hasSize(1)
+		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1)
 				.containsEntry("last.after-middle.middle.inner.key", "value");
 	}
+
 }

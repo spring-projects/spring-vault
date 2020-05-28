@@ -71,23 +71,19 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		pkiOperations = vaultOperations.opsForPki();
+		this.pkiOperations = this.vaultOperations.opsForPki();
 
 		if (!prepare().hasSecret("pki")) {
 			prepare().mountSecret("pki");
 		}
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
-		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"),
-				"US-ASCII");
-		String key = Files.contentOf(
-				new File(workDir, "ca/private/intermediate.decrypted.key.pem"),
-				"US-ASCII");
+		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
+		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
 
-		Map<String, String> pembundle = Collections.singletonMap("pem_bundle",
-				cert + key);
+		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key);
 
-		vaultOperations.write("pki/config/ca", pembundle);
+		this.vaultOperations.write("pki/config/ca", pembundle);
 
 		Map<String, String> role = new HashMap<String, String>();
 		role.put("allowed_domains", "localhost,example.com");
@@ -96,17 +92,15 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		role.put("allow_ip_sans", "true");
 		role.put("max_ttl", "72h");
 
-		vaultOperations.write("pki/roles/testrole", role);
+		this.vaultOperations.write("pki/roles/testrole", role);
 	}
 
 	@Test
 	void issueCertificateShouldCreateCertificate() {
 
-		VaultCertificateRequest request = VaultCertificateRequest
-				.create("hello.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
 
-		VaultCertificateResponse certificateResponse = pkiOperations
-				.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
 		CertificateBundle data = certificateResponse.getRequiredData();
 
@@ -114,26 +108,22 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
-				.isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
 	}
 
 	@Test
 	@RequiresVaultVersion(NO_TTL_UNIT_REQUIRED_FROM)
 	void issueCertificateWithTtlShouldCreateCertificate() {
 
-		VaultCertificateRequest request = VaultCertificateRequest.builder()
-				.ttl(Duration.ofHours(48)).commonName("hello.example.com").build();
+		VaultCertificateRequest request = VaultCertificateRequest.builder().ttl(Duration.ofHours(48))
+				.commonName("hello.example.com").build();
 
-		VaultCertificateResponse certificateResponse = pkiOperations
-				.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
-		X509Certificate certificate = certificateResponse.getRequiredData()
-				.getX509Certificate();
+		X509Certificate certificate = certificateResponse.getRequiredData().getX509Certificate();
 
 		Instant now = Instant.now();
-		assertThat(certificate.getNotAfter())
-				.isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
+		assertThat(certificate.getNotAfter()).isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
 				.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
 	}
 
@@ -155,22 +145,20 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
 				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
 				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
-				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n"
-				+ "cQ==\n" + "-----END CERTIFICATE REQUEST-----";
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "-----END CERTIFICATE REQUEST-----";
 
-		VaultCertificateRequest request = VaultCertificateRequest
-				.create("hello.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
 
-		VaultSignCertificateRequestResponse certificateResponse = pkiOperations
-				.signCertificateRequest("testrole", csr, request);
+		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
+				csr, request);
 
 		Certificate data = certificateResponse.getRequiredData();
 
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
-				.isEqualTo("CN=csr.example.com");
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=csr.example.com");
 		assertThat(data.createTrustStore()).isNotNull();
 	}
 
@@ -180,23 +168,21 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> pkiOperations.issueCertificate("testrole", request));
+				.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
 	}
 
 	@Test
 	void shouldRevokeCertificate() throws Exception {
 
-		VaultCertificateRequest request = VaultCertificateRequest
-				.create("foo.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("foo.example.com");
 
-		VaultCertificateResponse certificateResponse = pkiOperations
-				.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
-		BigInteger serial = new BigInteger(certificateResponse.getRequiredData()
-				.getSerialNumber().replaceAll("\\:", ""), 16);
-		pkiOperations.revoke(certificateResponse.getRequiredData().getSerialNumber());
+		BigInteger serial = new BigInteger(
+				certificateResponse.getRequiredData().getSerialNumber().replaceAll("\\:", ""), 16);
+		this.pkiOperations.revoke(certificateResponse.getRequiredData().getSerialNumber());
 
-		try (InputStream in = pkiOperations.getCrl(Encoding.DER)) {
+		try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
@@ -209,17 +195,18 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReturnCrl() throws Exception {
 
-		try (InputStream in = pkiOperations.getCrl(Encoding.DER)) {
+		try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
 			assertThat(cf.generateCRL(in)).isInstanceOf(X509CRL.class);
 		}
 
-		try (InputStream crl = pkiOperations.getCrl(Encoding.PEM)) {
+		try (InputStream crl = this.pkiOperations.getCrl(Encoding.PEM)) {
 
 			byte[] bytes = StreamUtils.copyToByteArray(crl);
 			assertThat(bytes).isNotEmpty();
 		}
 	}
+
 }

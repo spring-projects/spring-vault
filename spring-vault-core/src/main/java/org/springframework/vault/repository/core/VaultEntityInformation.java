@@ -25,4 +25,5 @@ import org.springframework.data.repository.core.EntityInformation;
  * @since 2.0
  */
 public interface VaultEntityInformation<T, ID> extends EntityInformation<T, ID> {
+
 }

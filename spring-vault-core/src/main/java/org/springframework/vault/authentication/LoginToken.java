@@ -44,7 +44,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new {@link LoginToken}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @return the created {@link VaultToken}
 	 */
@@ -57,7 +56,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new {@link LoginToken}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @return the created {@link VaultToken}
 	 * @since 1.1
@@ -68,7 +66,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @return the created {@link VaultToken}
@@ -85,7 +82,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @return the created {@link VaultToken}
@@ -104,11 +100,9 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
-	 *
 	 * @param leaseDuration the lease duration, must not be negative and not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 * @return the created {@link VaultToken}
 	 * @since 2.0
 	 */
@@ -124,7 +118,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @return the created {@link VaultToken}
@@ -142,7 +135,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @return the created {@link VaultToken}
@@ -162,7 +154,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
 	 * @return the created {@link VaultToken}
@@ -177,7 +168,6 @@ public class LoginToken extends VaultToken {
 
 	/**
 	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
 	 * @return the created {@link VaultToken}
@@ -197,23 +187,24 @@ public class LoginToken extends VaultToken {
 	 * @return the lease duration in seconds. May be {@literal 0} if none.
 	 */
 	public Duration getLeaseDuration() {
-		return leaseDuration;
+		return this.leaseDuration;
 	}
 
 	/**
 	 * @return {@literal true} if this token is renewable; {@literal false} otherwise.
 	 */
 	public boolean isRenewable() {
-		return renewable;
+		return this.renewable;
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [renewable=").append(renewable);
-		sb.append(", leaseDuration=").append(leaseDuration);
+		sb.append(" [renewable=").append(this.renewable);
+		sb.append(", leaseDuration=").append(this.leaseDuration);
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

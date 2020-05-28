@@ -33,11 +33,10 @@ import org.springframework.util.Base64Utils;
  */
 public class PemObject {
 
-	private static final Pattern KEY_PATTERN = Pattern
-			.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+" + // Header
-					"([a-z0-9+/=\\r\\n]+)" + // Base64 text
-					"-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", // Footer
-					Pattern.CASE_INSENSITIVE);
+	private static final Pattern KEY_PATTERN = Pattern.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+" + // Header
+			"([a-z0-9+/=\\r\\n]+)" + // Base64 text
+			"-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", // Footer
+			Pattern.CASE_INSENSITIVE);
 
 	private final byte[] content;
 
@@ -50,7 +49,6 @@ public class PemObject {
 	/**
 	 * Create a{@link PemObject} from PEM {@code content} that is enclosed with
 	 * {@code -BEGIN PRIVATE KEY-} and {@code -END PRIVATE KEY-}.
-	 *
 	 * @param content the PEM content.
 	 * @return the {@link PemObject} from PEM {@code content}.
 	 */
@@ -66,7 +64,6 @@ public class PemObject {
 
 	/**
 	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
-	 *
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 */
 	public RSAPrivateCrtKeySpec getRSAKeySpec() {
@@ -78,4 +75,5 @@ public class PemObject {
 			throw new IllegalArgumentException("Cannot obtain PrivateKey", e);
 		}
 	}
+
 }

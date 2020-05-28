@@ -49,7 +49,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Create a new named encryption key given a {@code name}.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void createKey(String keyName);
@@ -58,7 +57,6 @@ public interface VaultTransitOperations {
 	 * Create a new named encryption key given a {@code name} and
 	 * {@link VaultTransitKeyCreationRequest}. The key options set here cannot be changed
 	 * after key creation.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param createKeyRequest must not be {@literal null}.
 	 */
@@ -66,14 +64,12 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Get a {@link List} of transit key names.
-	 *
 	 * @return {@link List} of transit key names.
 	 */
 	List<String> getKeys();
 
 	/**
 	 * Create a new named encryption key given a {@code name}.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param keyConfiguration must not be {@literal null}.
 	 */
@@ -83,7 +79,6 @@ public interface VaultTransitOperations {
 	 * Returns the value of the named encryption key. Depending on the type of key,
 	 * different information may be returned. The key must be exportable to support this
 	 * operation.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param type must not be {@literal null}.
 	 * @return the {@link RawTransitKey}.
@@ -93,7 +88,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Return information about a named encryption key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @return the {@link VaultTransitKey}.
 	 */
@@ -103,7 +97,6 @@ public interface VaultTransitOperations {
 	/**
 	 * Deletes a named encryption key. It will no longer be possible to decrypt any data
 	 * encrypted with the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 */
 	void deleteKey(String keyName);
@@ -112,7 +105,6 @@ public interface VaultTransitOperations {
 	 * Rotates the version of the named key. After rotation, new plaintext requests will
 	 * be encrypted with the new version of the key. To upgrade ciphertext to be encrypted
 	 * with the latest version of the key, use {@link #rewrap(String, String)}.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @see #rewrap(String, String)
 	 */
@@ -120,7 +112,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Encrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return cipher text.
@@ -129,7 +120,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Encrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
 	 * @since 1.1
@@ -139,11 +129,10 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Encrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @param transitRequest must not be {@literal null}. Use
-	 *     {@link VaultTransitContext#empty()} if no request options provided.
+	 * {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 */
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
@@ -151,10 +140,9 @@ public interface VaultTransitOperations {
 	/**
 	 * Encrypts the provided batch of plaintext using the named key and context. The
 	 * encryption is done using transit backend's batch operation.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
-	 *     optional context.
+	 * optional context.
 	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
 	 * @since 1.1
 	 */
@@ -162,7 +150,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return plain text.
@@ -171,7 +158,6 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be {@literal null}.
 	 * @return plain text.
@@ -181,11 +167,10 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Decrypts the provided plaintext using the named key.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitContext must not be {@literal null}. Use
-	 *     {@link VaultTransitContext#empty()} if no request options provided.
+	 * {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 * @return plain text.
 	 */
@@ -194,11 +179,9 @@ public interface VaultTransitOperations {
 	/**
 	 * Decrypts the provided barch of ciphertext using the named key and context. The*
 	 * decryption is done using transit backend's batch operation.
-	 *
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
-	 *     optional context.
+	 * optional context.
 	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
 	 * @since 1.1
 	 */
@@ -208,7 +191,6 @@ public interface VaultTransitOperations {
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
 	 * this never returns plaintext, it is possible to delegate this functionality to
 	 * untrusted users or scripts.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return cipher text.
@@ -220,11 +202,10 @@ public interface VaultTransitOperations {
 	 * Rewrap the provided ciphertext using the latest version of the named key. Because
 	 * this never returns plaintext, it is possible to delegate this functionality to
 	 * untrusted users or scripts.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitContext must not be {@literal null}. Use
-	 *     {@link VaultTransitContext#empty()} if no request options provided.
+	 * {@link VaultTransitContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 * @see #rotate(String)
 	 */
@@ -235,7 +216,6 @@ public interface VaultTransitOperations {
 	 * hash algorithm. The key can be of any type supported by transit; the raw key will
 	 * be marshaled into bytes to be used for the HMAC function. If the key is of a type
 	 * that supports rotation, the latest (current) version will be used.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
 	 * @return the digest of given data the default hash algorithm and the named key.
@@ -249,7 +229,6 @@ public interface VaultTransitOperations {
 	 * key will be marshaled into bytes to be used for the HMAC function. If the key is of
 	 * a type that supports rotation, configured {@link VaultHmacRequest#getKeyVersion()}
 	 * will be used.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param request the {@link VaultHmacRequest}, must not be {@literal null}.
 	 * @return the digest of given data the default hash algorithm and the named key.
@@ -261,7 +240,6 @@ public interface VaultTransitOperations {
 	 * Create a cryptographic signature using {@code keyName} of the given
 	 * {@link Plaintext} and the default hash algorithm. The key must be of a type that
 	 * supports signing.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return Signature for {@link Plaintext}.
@@ -273,7 +251,6 @@ public interface VaultTransitOperations {
 	 * Create a cryptographic signature using {@code keyName} of the given
 	 * {@link VaultSignRequest} and the specified hash algorithm. The key must be of a
 	 * type that supports signing.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param request {@link VaultSignRequest} must not be empty or {@literal null}.
 	 * @return Signature for {@link VaultSignRequest}.
@@ -284,7 +261,6 @@ public interface VaultTransitOperations {
 	/**
 	 * Verify the cryptographic signature using {@code keyName} of the given
 	 * {@link Plaintext} and {@link Signature}.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
 	 * @param signature Signature to be verified, must not be {@literal null}.
@@ -296,12 +272,12 @@ public interface VaultTransitOperations {
 	/**
 	 * Verify the cryptographic signature using {@code keyName} of the given
 	 * {@link VaultSignRequest}.
-	 *
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param request {@link VaultSignatureVerificationRequest} must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 * @return the resulting {@link SignatureValidation}.
 	 * @since 2.0
 	 */
 	SignatureValidation verify(String keyName, VaultSignatureVerificationRequest request);
+
 }

@@ -68,4 +68,5 @@ public interface VaultHealth {
 	 */
 	@Nullable
 	String getVersion();
+
 }

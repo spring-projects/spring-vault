@@ -30,11 +30,11 @@ public class SecretNotFoundEvent extends SecretLeaseEvent {
 
 	/**
 	 * Create a new {@link SecretNotFoundEvent} given {@link RequestedSecret}
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
 	public SecretNotFoundEvent(RequestedSecret requestedSecret, Lease lease) {
 		super(requestedSecret, lease);
 	}
+
 }

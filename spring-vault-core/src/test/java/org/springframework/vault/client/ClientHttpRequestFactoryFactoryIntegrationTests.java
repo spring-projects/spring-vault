@@ -47,8 +47,8 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	void httpComponentsClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(
-				new ClientOptions(), Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(new ClientOptions(),
+				Settings.createSslConfiguration());
 		RestTemplate template = new RestTemplate(factory);
 
 		String response = request(template);
@@ -62,8 +62,7 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	void nettyClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
-				Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(), Settings.createSslConfiguration());
 		((InitializingBean) factory).afterPropertiesSet();
 		RestTemplate template = new RestTemplate(factory);
 
@@ -78,8 +77,7 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	@Test
 	void okHttp3ClientShouldWork() throws Exception {
 
-		ClientHttpRequestFactory factory = OkHttp3.usingOkHttp3(new ClientOptions(),
-				Settings.createSslConfiguration());
+		ClientHttpRequestFactory factory = OkHttp3.usingOkHttp3(new ClientOptions(), Settings.createSslConfiguration());
 		RestTemplate template = new RestTemplate(factory);
 
 		String response = request(template);
@@ -94,12 +92,12 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			ResponseEntity<String> responseEntity = template.exchange(url, HttpMethod.GET,
-					null, String.class);
+			ResponseEntity<String> responseEntity = template.exchange(this.url, HttpMethod.GET, null, String.class);
 			return responseEntity.getBody();
 		}
 		catch (HttpStatusCodeException e) {
 			return e.getResponseBodyAsString();
 		}
 	}
+
 }

@@ -32,7 +32,6 @@ public interface VaultKeyValueOperationsSupport {
 
 	/**
 	 * Enumerate keys from a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -41,7 +40,6 @@ public interface VaultKeyValueOperationsSupport {
 
 	/**
 	 * Read the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -50,7 +48,6 @@ public interface VaultKeyValueOperationsSupport {
 
 	/**
 	 * Delete the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 */
 	void delete(String path);
@@ -88,5 +85,7 @@ public interface VaultKeyValueOperationsSupport {
 		public static KeyValueBackend versioned() {
 			return KV_2;
 		}
+
 	}
+
 }

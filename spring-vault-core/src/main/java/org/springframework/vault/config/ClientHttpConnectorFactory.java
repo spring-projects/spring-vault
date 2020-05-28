@@ -36,14 +36,12 @@ public class ClientHttpConnectorFactory {
 	/**
 	 * Create a {@link ClientHttpConnector} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
-	 *
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
 	 * @return a new {@link ClientHttpConnector}.
 	 */
-	public static ClientHttpConnector create(ClientOptions options,
-			SslConfiguration sslConfiguration) {
-		return org.springframework.vault.client.ClientHttpConnectorFactory.create(options,
-				sslConfiguration);
+	public static ClientHttpConnector create(ClientOptions options, SslConfiguration sslConfiguration) {
+		return org.springframework.vault.client.ClientHttpConnectorFactory.create(options, sslConfiguration);
 	}
+
 }

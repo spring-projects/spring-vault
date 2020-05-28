@@ -21,4 +21,5 @@ package org.springframework.vault.support;
  * @author Mark Paluch
  */
 public class VaultCertificateResponse extends VaultResponseSupport<CertificateBundle> {
+
 }

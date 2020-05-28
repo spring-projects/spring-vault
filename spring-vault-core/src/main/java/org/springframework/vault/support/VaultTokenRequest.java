@@ -63,9 +63,8 @@ public class VaultTokenRequest {
 	@JsonProperty("num_uses")
 	private final int numUses;
 
-	VaultTokenRequest(@Nullable String id, List<String> policies,
-			Map<String, String> meta, boolean noParent, boolean noDefaultPolicy,
-			boolean renewable, @Nullable String ttl, @Nullable String explicitMaxTtl,
+	VaultTokenRequest(@Nullable String id, List<String> policies, Map<String, String> meta, boolean noParent,
+			boolean noDefaultPolicy, boolean renewable, @Nullable String ttl, @Nullable String explicitMaxTtl,
 			String displayName, int numUses) {
 
 		this.id = id;
@@ -88,20 +87,18 @@ public class VaultTokenRequest {
 	}
 
 	/**
-	 *
 	 * @return Id of the client token.
 	 */
 	@Nullable
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	/**
-	 *
 	 * @return policies for the token.
 	 */
 	public List<String> getPolicies() {
-		return policies;
+		return this.policies;
 	}
 
 	/**
@@ -109,28 +106,28 @@ public class VaultTokenRequest {
 	 * backends.
 	 */
 	public Map<String, String> getMeta() {
-		return meta;
+		return this.meta;
 	}
 
 	/**
 	 * @return {@literal true} if the token should not have the parent.
 	 */
 	public boolean getNoParent() {
-		return noParent;
+		return this.noParent;
 	}
 
 	/**
 	 * @return {@literal true} if the default policy should not be be applied.
 	 */
 	public boolean getNoDefaultPolicy() {
-		return noDefaultPolicy;
+		return this.noDefaultPolicy;
 	}
 
 	/**
 	 * @return {@literal true} if then the token should be renewable.
 	 */
 	public boolean getRenewable() {
-		return renewable;
+		return this.renewable;
 	}
 
 	/**
@@ -138,7 +135,7 @@ public class VaultTokenRequest {
 	 */
 	@Nullable
 	public String getTtl() {
-		return ttl;
+		return this.ttl;
 	}
 
 	/**
@@ -146,21 +143,21 @@ public class VaultTokenRequest {
 	 */
 	@Nullable
 	public String getExplicitMaxTtl() {
-		return explicitMaxTtl;
+		return this.explicitMaxTtl;
 	}
 
 	/**
 	 * @return the display name.
 	 */
 	public String getDisplayName() {
-		return displayName;
+		return this.displayName;
 	}
 
 	/**
 	 * @return the number of allowed token uses.
 	 */
 	public int getNumUses() {
-		return numUses;
+		return this.numUses;
 	}
 
 	/**
@@ -197,7 +194,6 @@ public class VaultTokenRequest {
 		/**
 		 * Configure a the Id of the client token. Can only be specified by a root token.
 		 * Otherwise, the token Id is a randomly generated UUID.
-		 *
 		 * @param id the token Id.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -208,7 +204,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure policies. Replaces previously configured policies.
-		 *
 		 * @param policies must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -222,7 +217,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Add a policy.
-		 *
 		 * @param policy must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -236,7 +230,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure meta. Replaces previously meta.
-		 *
 		 * @param meta must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -251,7 +244,6 @@ public class VaultTokenRequest {
 		/**
 		 * Configure the token to not have the parent token of the caller. This creates a
 		 * token with no parent. Requires a root caller.
-		 *
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder noParent() {
@@ -261,7 +253,6 @@ public class VaultTokenRequest {
 		/**
 		 * Configure the token to not have the parent token of the caller. This creates a
 		 * token with no parent. Requires a root caller.
-		 *
 		 * @param noParent {@literal true} to not have the parent token of the caller.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -273,7 +264,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Omit the default policy in the token's policy set
-		 *
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder noDefaultPolicy() {
@@ -282,9 +272,8 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure whether the default policy should be part of the token's policy set.
-		 *
 		 * @param noDefaultPolicy {@literal true} to omit the default policy in the
-		 *     token's policy set.
+		 * token's policy set.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder noDefaultPolicy(boolean noDefaultPolicy) {
@@ -294,7 +283,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Enable TTL extension/renewal for the token.
-		 *
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder renewable() {
@@ -303,10 +291,9 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure TTL extension/renewal for the token.
-		 *
 		 * @param renewable {@literal false} to disable the ability of the token to be
-		 *     renewed past its initial TTL. {@literal true}, or omitting this option,
-		 *     will allow the token to be renewable up to the system/mount maximum TTL.
+		 * renewed past its initial TTL. {@literal true}, or omitting this option, will
+		 * allow the token to be renewable up to the system/mount maximum TTL.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder renewable(boolean renewable) {
@@ -317,7 +304,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure a TTL (seconds) for the token.
-		 *
 		 * @param ttl the time to live in seconds, must not be negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
@@ -329,7 +315,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure a TTL (seconds) for the token.
-		 *
 		 * @param ttl the time to live, must not be negative.
 		 * @param timeUnit the time to live time unit, must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
@@ -346,7 +331,6 @@ public class VaultTokenRequest {
 		/**
 		 * Configure a TTL for the token using
 		 * {@link java.time.temporal.ChronoUnit#SECONDS} resolution.
-		 *
 		 * @param ttl the time to live, must not be {@literal null} or negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 * @since 2.0
@@ -365,7 +349,6 @@ public class VaultTokenRequest {
 		 * TTL cannot be changed later, and unlike with normal tokens, updates to the
 		 * system/mount max TTL value will have no effect at renewal time - the token will
 		 * never be able to be renewed or used past the value set at issue time.
-		 *
 		 * @param explicitMaxTtl the time to live in seconds, must not be negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 * @deprecated since 2.0, use {@link #explicitMaxTtl(Duration)} for time unit
@@ -381,19 +364,16 @@ public class VaultTokenRequest {
 		 * be changed later, and unlike with normal tokens, updates to the system/mount
 		 * max TTL value will have no effect at renewal time - the token will never be
 		 * able to be renewed or used past the value set at issue time.
-		 *
 		 * @param explicitMaxTtl the time to live, must not be negative.
 		 * @param timeUnit the time to live, must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
-		public VaultTokenRequestBuilder explicitMaxTtl(long explicitMaxTtl,
-				TimeUnit timeUnit) {
+		public VaultTokenRequestBuilder explicitMaxTtl(long explicitMaxTtl, TimeUnit timeUnit) {
 
 			Assert.isTrue(explicitMaxTtl >= 0, "TTL must not be negative");
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
 
-			this.explicitMaxTtl = String.format("%ss",
-					timeUnit.toSeconds(explicitMaxTtl));
+			this.explicitMaxTtl = String.format("%ss", timeUnit.toSeconds(explicitMaxTtl));
 			return this;
 		}
 
@@ -402,9 +382,8 @@ public class VaultTokenRequest {
 		 * be changed later, and unlike with normal tokens, updates to the system/mount
 		 * max TTL value will have no effect at renewal time - the token will never be
 		 * able to be renewed or used past the value set at issue time.
-		 *
 		 * @param explicitMaxTtl the time to live, must not be {@literal null} or
-		 *     negative.
+		 * negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 * @since 2.0
 		 */
@@ -421,7 +400,6 @@ public class VaultTokenRequest {
 		 * Configure the maximum uses for the token. This can be used to create a
 		 * one-time-token or limited use token. Defaults to {@literal 0}, which has no
 		 * limit to the number of uses.
-		 *
 		 * @param numUses number of uses, must not be negative.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -435,7 +413,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure a display name for the token, defaults to "token".
-		 *
 		 * @param displayName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
@@ -449,7 +426,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Build a new {@link VaultTokenRequest} instance.
-		 *
 		 * @return a new {@link VaultCertificateRequest}.
 		 */
 		public VaultTokenRequest build() {
@@ -475,8 +451,8 @@ public class VaultTokenRequest {
 				meta = Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
 			}
 
-			return new VaultTokenRequest(id, policies, meta, noParent, noDefaultPolicy,
-					renewable, ttl, explicitMaxTtl, displayName, numUses);
+			return new VaultTokenRequest(this.id, policies, meta, this.noParent, this.noDefaultPolicy, this.renewable,
+					this.ttl, this.explicitMaxTtl, this.displayName, this.numUses);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {
@@ -488,5 +464,7 @@ public class VaultTokenRequest {
 
 			return list;
 		}
+
 	}
+
 }

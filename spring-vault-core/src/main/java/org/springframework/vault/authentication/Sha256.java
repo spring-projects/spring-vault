@@ -34,7 +34,6 @@ class Sha256 {
 
 	/**
 	 * Generates a hex-encoded SHA256 checksum from the supplied {@code content}.
-	 *
 	 * @param content must not be {@literal null} and not empty.
 	 * @return hex-encoded SHA256 checksum
 	 */
@@ -50,12 +49,10 @@ class Sha256 {
 	/**
 	 * Get a MessageDigest instance for the given algorithm. Throws an
 	 * IllegalArgumentException if <i>algorithm</i> is unknown
-	 *
 	 * @return MessageDigest instance
 	 * @throws IllegalArgumentException if NoSuchAlgorithmException is thrown
 	 */
-	private static MessageDigest getMessageDigest(String algorithm)
-			throws IllegalArgumentException {
+	private static MessageDigest getMessageDigest(String algorithm) throws IllegalArgumentException {
 		try {
 			return MessageDigest.getInstance(algorithm);
 		}
@@ -74,4 +71,5 @@ class Sha256 {
 
 		return sb.toString();
 	}
+
 }

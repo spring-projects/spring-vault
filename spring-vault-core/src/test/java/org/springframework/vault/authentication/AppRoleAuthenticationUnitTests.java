@@ -71,19 +71,16 @@ class AppRoleAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided("hello")) //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(RoleId.provided("hello")) //
 				.secretId(SecretId.provided("world")) //
 				.build();
 
-		mockRest.expect(requestTo("/auth/approle/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role_id").value("hello"))
-				.andExpect(jsonPath("$.secret_id").value("world"))
+		this.mockRest.expect(requestTo("/auth/approle/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("hello")).andExpect(jsonPath("$.secret_id").value("world"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
 
@@ -94,29 +91,23 @@ class AppRoleAuthenticationUnitTests {
 	@Test
 	void loginShouldPullRoleIdAndSecretId() {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.appRole("app_role").initialToken(VaultToken.of("initial_token")).build();
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().appRole("app_role")
+				.initialToken(VaultToken.of("initial_token")).build();
 
-		mockRest.expect(requestTo("/auth/approle/role/app_role/role-id"))
-				.andExpect(method(HttpMethod.GET))
-				.andExpect(header("X-Vault-token", "initial_token"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\": {\"role_id\": \"hello\"}}"));
+		this.mockRest.expect(requestTo("/auth/approle/role/app_role/role-id")).andExpect(method(HttpMethod.GET))
+				.andExpect(header("X-Vault-token", "initial_token")).andRespond(withSuccess()
+						.contentType(MediaType.APPLICATION_JSON).body("{\"data\": {\"role_id\": \"hello\"}}"));
 
-		mockRest.expect(requestTo("/auth/approle/role/app_role/secret-id"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(header("X-Vault-token", "initial_token"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\": {\"secret_id\": \"world\"}}"));
+		this.mockRest.expect(requestTo("/auth/approle/role/app_role/secret-id")).andExpect(method(HttpMethod.POST))
+				.andExpect(header("X-Vault-token", "initial_token")).andRespond(withSuccess()
+						.contentType(MediaType.APPLICATION_JSON).body("{\"data\": {\"secret_id\": \"world\"}}"));
 
-		mockRest.expect(requestTo("/auth/approle/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role_id").value("hello"))
-				.andExpect(jsonPath("$.secret_id").value("world"))
+		this.mockRest.expect(requestTo("/auth/approle/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("hello")).andExpect(jsonPath("$.secret_id").value("world"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
 
@@ -126,105 +117,89 @@ class AppRoleAuthenticationUnitTests {
 
 	@Test
 	void optionsShouldRequireTokenOrRoleIdIfNothingIsSet() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> AppRoleAuthenticationOptions.builder().build());
+		assertThatIllegalArgumentException().isThrownBy(() -> AppRoleAuthenticationOptions.builder().build());
 	}
 
 	@Test
 	void optionsShouldRequireTokenOrRoleIdIfTokenIsSet() {
-		assertThatIllegalArgumentException().isThrownBy(() -> AppRoleAuthenticationOptions
-				.builder().initialToken(VaultToken.of("foo")).build());
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> AppRoleAuthenticationOptions.builder().initialToken(VaultToken.of("foo")).build());
 	}
 
 	@Test
 	void optionsShouldRequireTokenOrRoleIdIfAppRoleIdIsSet() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> AppRoleAuthenticationOptions.builder().appRole("app_role").build());
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> AppRoleAuthenticationOptions.builder().appRole("app_role").build());
 	}
 
 	@Test
 	void loginShouldObtainTokenWithoutSecretId() {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided("hello")) //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(RoleId.provided("hello")) //
 				.build();
 
-		mockRest.expect(requestTo("/auth/approle/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role_id").value("hello"))
-				.andExpect(jsonPath("$.secret_id").doesNotExist())
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
-						+ "}"));
+		this.mockRest.expect(requestTo("/auth/approle/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("hello")).andExpect(jsonPath("$.secret_id").doesNotExist())
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+								+ "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
 	@Test
 	void loginShouldFail() {
 
-		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided("hello")) //
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(RoleId.provided("hello")) //
 				.build();
 
-		mockRest.expect(requestTo("/auth/approle/login")) //
+		this.mockRest.expect(requestTo("/auth/approle/login")) //
 				.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new AppRoleAuthentication(options, restTemplate).login());
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new AppRoleAuthentication(options, this.restTemplate).login());
 	}
 
 	@Test
 	void loginShouldUnwrapCubbyholeSecretIdResponse() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided("my_role_id"))
-				.secretId(SecretId.wrapped(VaultToken.of("unwrapping_token")))
+				.roleId(RoleId.provided("my_role_id")).secretId(SecretId.wrapped(VaultToken.of("unwrapping_token")))
 				.unwrappingEndpoints(UnwrappingEndpoints.Cubbyhole).build();
 
-		String wrappedResponse = "{"
-				+ "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
-				+ "  \"lease_id\": \"\"," + "  \"renewable\": false,"
-				+ "  \"lease_duration\": 0," + "  \"data\": {"
-				+ "    \"secret_id\": \"my_secret_id\","
-				+ "    \"secret_id_accessor\": \"my_secret_id_accessor\"" + "  },"
-				+ "  \"wrap_info\": null," + "  \"warnings\": null," + "  \"auth\": null"
-				+ "}";
+		String wrappedResponse = "{" + "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
+				+ "  \"lease_id\": \"\"," + "  \"renewable\": false," + "  \"lease_duration\": 0," + "  \"data\": {"
+				+ "    \"secret_id\": \"my_secret_id\"," + "    \"secret_id_accessor\": \"my_secret_id_accessor\""
+				+ "  }," + "  \"wrap_info\": null," + "  \"warnings\": null," + "  \"auth\": null" + "}";
 
 		// Expect a first request to unwrap the response
-		mockRest.expect(requestTo("/cubbyhole/response"))
-				.andExpect(header("X-Vault-Token", "unwrapping_token"))
+		this.mockRest.expect(requestTo("/cubbyhole/response")).andExpect(header("X-Vault-Token", "unwrapping_token"))
 				.andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\":{\"response\":"
-								+ OBJECT_MAPPER.writeValueAsString(wrappedResponse)
-								+ "} }"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{\"data\":{\"response\":" + this.OBJECT_MAPPER.writeValueAsString(wrappedResponse) + "} }"));
 
 		// Also expect a second request to retrieve a token
-		mockRest.expect(requestTo("/auth/approle/login"))
-				.andExpect(method(HttpMethod.POST))
+		this.mockRest.expect(requestTo("/auth/approle/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role_id").value("my_role_id"))
 				.andExpect(jsonPath("$.secret_id").value("my_secret_id"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
-						+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+								+ "}"));
 
-		AppRoleAuthentication auth = new AppRoleAuthentication(options, restTemplate);
+		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.restTemplate);
 
 		VaultToken login = auth.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
@@ -232,41 +207,35 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldUnwrapSecretIdResponse() throws Exception {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided("my_role_id"))
-				.secretId(SecretId.wrapped(VaultToken.of("unwrapping_token"))).build();
+				.roleId(RoleId.provided("my_role_id")).secretId(SecretId.wrapped(VaultToken.of("unwrapping_token")))
+				.build();
 
-		String wrappedResponse = "{"
-				+ "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
-				+ "  \"lease_id\": \"\"," + "  \"renewable\": false,"
-				+ "  \"lease_duration\": 0," + "  \"data\": {"
-				+ "    \"secret_id\": \"my_secret_id\","
-				+ "    \"secret_id_accessor\": \"my_secret_id_accessor\"" + "  },"
-				+ "  \"wrap_info\": null," + "  \"warnings\": null," + "  \"auth\": null"
-				+ "}";
+		String wrappedResponse = "{" + "  \"request_id\": \"aad6a19b-a42b-b750-cafb-51087662f53e\","
+				+ "  \"lease_id\": \"\"," + "  \"renewable\": false," + "  \"lease_duration\": 0," + "  \"data\": {"
+				+ "    \"secret_id\": \"my_secret_id\"," + "    \"secret_id_accessor\": \"my_secret_id_accessor\""
+				+ "  }," + "  \"wrap_info\": null," + "  \"warnings\": null," + "  \"auth\": null" + "}";
 
 		// Expect a first request to unwrap the response
-		mockRest.expect(requestTo("/sys/wrapping/unwrap"))
-				.andExpect(header("X-Vault-Token", "unwrapping_token"))
-				.andExpect(method(HttpMethod.POST)).andRespond(withSuccess()
-						.contentType(MediaType.APPLICATION_JSON).body(wrappedResponse));
+		this.mockRest.expect(requestTo("/sys/wrapping/unwrap")).andExpect(header("X-Vault-Token", "unwrapping_token"))
+				.andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(wrappedResponse));
 
 		// Also expect a second request to retrieve a token
-		mockRest.expect(requestTo("/auth/approle/login"))
-				.andExpect(method(HttpMethod.POST))
+		this.mockRest.expect(requestTo("/auth/approle/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role_id").value("my_role_id"))
 				.andExpect(jsonPath("$.secret_id").value("my_secret_id"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
-						+ "}"));
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
+								+ "}"));
 
-		AppRoleAuthentication auth = new AppRoleAuthentication(options, restTemplate);
+		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.restTemplate);
 
 		VaultToken login = auth.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
+
 }

@@ -33,7 +33,6 @@ public class SimpleVaultEndpointProvider implements VaultEndpointProvider {
 
 	/**
 	 * Creates a new {@link VaultEndpointProvider} given {@link VaultEndpoint}.
-	 *
 	 * @param endpoint must not be {@literal null}.
 	 */
 	public static VaultEndpointProvider of(VaultEndpoint endpoint) {
@@ -45,6 +44,7 @@ public class SimpleVaultEndpointProvider implements VaultEndpointProvider {
 
 	@Override
 	public VaultEndpoint getVaultEndpoint() {
-		return endpoint;
+		return this.endpoint;
 	}
+
 }

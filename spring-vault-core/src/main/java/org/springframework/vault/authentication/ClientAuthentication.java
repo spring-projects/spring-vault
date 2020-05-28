@@ -31,8 +31,8 @@ public interface ClientAuthentication {
 	/**
 	 * Return a {@link VaultToken}. This method can optionally log into Vault to obtain a
 	 * {@link VaultToken token}.
-	 *
 	 * @return a {@link VaultToken}.
 	 */
 	VaultToken login() throws VaultException;
+
 }

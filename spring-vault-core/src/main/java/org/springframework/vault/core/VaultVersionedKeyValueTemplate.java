@@ -48,15 +48,13 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @author Maciej Drozdzowski
  * @since 2.1
  */
-public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
-		implements VaultVersionedKeyValueOperations {
+public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements VaultVersionedKeyValueOperations {
 
 	private final VaultOperations vaultOperations;
 
 	/**
 	 * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
 	 * and the mount {@code path}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -93,23 +91,19 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()
-				? String.format("%s?version=%d", createDataPath(path),
-						version.getVersion())
-				: createDataPath(path);
+				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		VersionedResponse response = vaultOperations.doWithSession(restOperations -> {
+		VersionedResponse response = this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				return restOperations.exchange(secretPath, HttpMethod.GET, null,
-						VersionedResponse.class).getBody();
+				return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 
 				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
 					if (e.getResponseBodyAsString().contains("deletion_time")) {
 
-						return VaultResponses.unwrap(e.getResponseBodyAsString(),
-								VersionedResponse.class);
+						return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
 					}
 
 					return null;
@@ -185,8 +179,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 	}
 
 	@Nullable
-	private static TemporalAccessor getDate(Map<String, Object> responseMetadata,
-			String key) {
+	private static TemporalAccessor getDate(Map<String, Object> responseMetadata, String key) {
 
 		String date = (String) responseMetadata.getOrDefault(key, "");
 		if (StringUtils.hasText(date)) {
@@ -208,13 +201,12 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		doWrite(createBackendPath("delete", path),
-				Collections.singletonMap("versions", versions));
+		doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions));
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
-		return Arrays.stream(versionsToDelete).filter(Version::isVersioned)
-				.map(Version::getVersion).collect(Collectors.toList());
+		return Arrays.stream(versionsToDelete).filter(Version::isVersioned).map(Version::getVersion)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -225,8 +217,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		doWrite(createBackendPath("undelete", path),
-				Collections.singletonMap("versions", versions));
+		doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions));
 	}
 
 	@Override
@@ -237,11 +228,11 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor
 
 		List<Integer> versions = toVersionList(versionsToDelete);
 
-		doWrite(createBackendPath("destroy", path),
-				Collections.singletonMap("versions", versions));
+		doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions));
 	}
 
-	private static class VersionedResponse
-			extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
+	private static class VersionedResponse extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
+
 	}
+
 }

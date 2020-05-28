@@ -31,7 +31,6 @@ public interface CredentialSupplier extends Supplier<String> {
 
 	/**
 	 * Get a credential to be used with an authentication mechanism.
-	 *
 	 * @return the credential.
 	 */
 	@Override
@@ -44,7 +43,6 @@ public interface CredentialSupplier extends Supplier<String> {
 	 * <p>
 	 * Reusing a cached token can lead to authentication failures if the credential
 	 * expires.
-	 *
 	 * @return a caching {@link CredentialSupplier}.
 	 */
 	default CredentialSupplier cached() {
@@ -53,4 +51,5 @@ public interface CredentialSupplier extends Supplier<String> {
 
 		return () -> credential;
 	}
+
 }

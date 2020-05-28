@@ -58,9 +58,10 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 	@SuppressWarnings("unchecked")
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 
-		VaultPersistentEntity<T> entity = (VaultPersistentEntity<T>) operations
-				.getMappingContext().getPersistentEntity(domainClass);
+		VaultPersistentEntity<T> entity = (VaultPersistentEntity<T>) this.operations.getMappingContext()
+				.getPersistentEntity(domainClass);
 
 		return new MappingVaultEntityInformation<>(entity);
 	}
+
 }

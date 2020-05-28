@@ -48,11 +48,10 @@ public class ClientOptions {
 
 	/**
 	 * Create new {@link ClientOptions}.
-	 *
 	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must
-	 *     not be negative.
+	 * not be negative.
 	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must not be
-	 *     negative.
+	 * negative.
 	 * @deprecated since 2.0, use {@link #ClientOptions(Duration, Duration)} for time unit
 	 * safety.
 	 */
@@ -63,7 +62,6 @@ public class ClientOptions {
 
 	/**
 	 * Create new {@link ClientOptions}.
-	 *
 	 * @param connectionTimeout connection timeout, must not be {@literal null}.
 	 * @param readTimeout read timeout in, must not be {@literal null}.
 	 * @since 2.0
@@ -81,13 +79,14 @@ public class ClientOptions {
 	 * @return the connection timeout in {@link TimeUnit#MILLISECONDS}.
 	 */
 	public Duration getConnectionTimeout() {
-		return connectionTimeout;
+		return this.connectionTimeout;
 	}
 
 	/**
 	 * @return the read timeout in {@link TimeUnit#MILLISECONDS}.
 	 */
 	public Duration getReadTimeout() {
-		return readTimeout;
+		return this.readTimeout;
 	}
+
 }

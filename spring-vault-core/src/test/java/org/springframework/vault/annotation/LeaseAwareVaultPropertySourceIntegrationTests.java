@@ -43,17 +43,17 @@ import static org.assertj.core.api.Assertions.fail;
 @ExtendWith(VaultExtension.class)
 class LeaseAwareVaultPropertySourceIntegrationTests {
 
-	@VaultPropertySource(value = { "secret/myapp",
-			"secret/myapp/profile" }, renewal = Renewal.RENEW)
+	@VaultPropertySource(value = { "secret/myapp", "secret/myapp/profile" }, renewal = Renewal.RENEW)
 	static class Config extends VaultIntegrationTestConfiguration {
+
 	}
 
 	@VaultPropertySource(value = { "unknown" }, ignoreSecretNotFound = false)
 	static class FailingConfig extends VaultIntegrationTestConfiguration {
+
 	}
 
-	@VaultPropertySource(value = {
-			"unknown" }, ignoreSecretNotFound = false, renewal = Renewal.RENEW)
+	@VaultPropertySource(value = { "unknown" }, ignoreSecretNotFound = false, renewal = Renewal.RENEW)
 	static class FailingRenewableConfig extends VaultIntegrationTestConfiguration {
 
 	}
@@ -63,17 +63,15 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 
 		VaultOperations vaultOperations = vaultInitializer.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp",
-				Collections.singletonMap("myapp", "myvalue"));
-		vaultOperations.write("secret/myapp/profile",
-				Collections.singletonMap("myprofile", "myprofilevalue"));
+		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp/profile", Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
 
 	@Test
 	void shouldLoadProperties() {
 
-		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class, PropertyConsumer.class)) {
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class,
+				PropertyConsumer.class)) {
 			ConfigurableEnvironment env = context.getEnvironment();
 			PropertyConsumer consumer = context.getBean(PropertyConsumer.class);
 
@@ -86,13 +84,11 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 	@Test
 	void shouldFailIfPropertiesNotFound() {
 
-		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				FailingConfig.class)) {
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(FailingConfig.class)) {
 			fail("AnnotationConfigApplicationContext startup did not fail");
 		}
 		catch (Exception e) {
-			assertThat(e)
-					.hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
+			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
 					.hasMessageContaining("Vault location [unknown] not resolvable");
 		}
 	}
@@ -106,15 +102,17 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 			fail("AnnotationConfigApplicationContext startup did not fail");
 		}
 		catch (Exception e) {
-			assertThat(e)
-					.hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
+			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
 					.hasMessageContaining("Vault location [unknown] not resolvable");
 		}
 	}
 
 	@Component
 	static class PropertyConsumer {
+
 		@Value("${myapp}")
 		String myapp;
+
 	}
+
 }

@@ -31,7 +31,7 @@ class VaultMappingContextUnitTests {
 	@Test
 	void shouldCreatePersistentEntity() {
 
-		VaultPersistentEntity<?> entity = context.getPersistentEntity(Person.class);
+		VaultPersistentEntity<?> entity = this.context.getPersistentEntity(Person.class);
 
 		assertThat(entity).isNotNull();
 		assertThat(entity.getSecretBackend()).isEqualTo("secret");
@@ -41,26 +41,25 @@ class VaultMappingContextUnitTests {
 	@Test
 	void shouldDetermineKeyspace() {
 
-		assertThat(context.getRequiredPersistentEntity(Login.class).getSecretBackend())
-				.isEqualTo("secret");
-		assertThat(context.getRequiredPersistentEntity(Login.class).getKeySpace())
-				.isEqualTo("secret/login");
+		assertThat(this.context.getRequiredPersistentEntity(Login.class).getSecretBackend()).isEqualTo("secret");
+		assertThat(this.context.getRequiredPersistentEntity(Login.class).getKeySpace()).isEqualTo("secret/login");
 
-		assertThat(
-				context.getRequiredPersistentEntity(Credentials.class).getSecretBackend())
-						.isEqualTo("shared");
-		assertThat(context.getRequiredPersistentEntity(Credentials.class).getKeySpace())
-				.isEqualTo("shared/Email");
+		assertThat(this.context.getRequiredPersistentEntity(Credentials.class).getSecretBackend()).isEqualTo("shared");
+		assertThat(this.context.getRequiredPersistentEntity(Credentials.class).getKeySpace()).isEqualTo("shared/Email");
 	}
 
 	private static class Person {
+
 	}
 
 	@Secret
 	private static class Login {
+
 	}
 
 	@Secret(value = "Email", backend = "shared")
 	private static class Credentials {
+
 	}
+
 }

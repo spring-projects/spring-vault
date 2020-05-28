@@ -30,7 +30,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new token.
-	 *
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/create</a>
@@ -39,7 +38,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new token for the given {@link VaultTokenRequest}.
-	 *
 	 * @param request must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
@@ -49,7 +47,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new orphan token.
-	 *
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/create-orphan</a>
@@ -58,7 +55,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Create a new orphan token for the given {@link VaultTokenRequest}.
-	 *
 	 * @param request must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
@@ -68,7 +64,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Renew a {@link VaultToken}.
-	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @return a {@link VaultTokenResponse}
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
@@ -78,7 +73,6 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Revoke a {@link VaultToken}.
-	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/revoke</a>
@@ -87,10 +81,10 @@ public interface VaultTokenOperations {
 
 	/**
 	 * Revoke a {@link VaultToken} but not its child tokens.
-	 *
 	 * @param vaultToken must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/auth/token.html">POST
 	 * /auth/token/revoke-orphan</a>
 	 */
 	void revokeOrphan(VaultToken vaultToken);
+
 }

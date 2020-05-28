@@ -56,21 +56,20 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-		tokenOperations = vaultOperations.opsForToken();
+		this.tokenOperations = this.vaultOperations.opsForToken();
 	}
 
 	@Test
 	void createTokenShouldCreateANewToken() {
 
-		VaultTokenResponse tokenResponse = tokenOperations.create();
+		VaultTokenResponse tokenResponse = this.tokenOperations.create();
 		assertThat(tokenResponse.getAuth()).containsKey("client_token");
 	}
 
 	@Test
 	void createTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.displayName("display") //
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().displayName("display") //
 				.explicitMaxTtl(Duration.ofHours(5)) //
 				.ttl(Duration.ofMinutes(30 * 60)) //
 				.policies(Collections.singleton("root")) //
@@ -81,23 +80,21 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 				.id(UUID.randomUUID().toString()) //
 				.build();
 
-		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
-		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
-				tokenRequest.getId());
+		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
+		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
 	}
 
 	@Test
 	void createOrphanTokenShouldCreateAToken() {
 
-		VaultTokenResponse tokenResponse = tokenOperations.createOrphan();
+		VaultTokenResponse tokenResponse = this.tokenOperations.createOrphan();
 		assertThat(tokenResponse.getAuth()).containsKey("client_token");
 	}
 
 	@Test
 	void createOrphanTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.displayName("display") //
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().displayName("display") //
 				.explicitMaxTtl(Duration.ofHours(5)) //
 				.ttl(Duration.ofMinutes(30 * 60)) //
 				.policies(Collections.singleton("root")) //
@@ -108,22 +105,20 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 				.id(UUID.randomUUID().toString()) //
 				.build();
 
-		VaultTokenResponse tokenResponse = tokenOperations.createOrphan(tokenRequest);
-		assertThat(tokenResponse.getAuth()).containsEntry("client_token",
-				tokenRequest.getId());
+		VaultTokenResponse tokenResponse = this.tokenOperations.createOrphan(tokenRequest);
+		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
 	}
 
 	@Test
 	void renewShouldRenewToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.explicitMaxTtl(Duration.ofHours(5)) //
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().explicitMaxTtl(Duration.ofHours(5)) //
 				.ttl(Duration.ofMinutes(30 * 60)) //
 				.renewable() //
 				.build();
 
-		VaultTokenResponse tokenResponse = tokenOperations.create(tokenRequest);
-		VaultTokenResponse renew = tokenOperations.renew(tokenResponse.getToken());
+		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
+		VaultTokenResponse renew = this.tokenOperations.renew(tokenResponse.getToken());
 
 		assertThat(renew.getAuth()).containsKey("client_token");
 	}
@@ -131,17 +126,17 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void renewShouldFailForNonRenewableRenewTokens() {
 
-		VaultTokenResponse tokenResponse = tokenOperations.create();
+		VaultTokenResponse tokenResponse = this.tokenOperations.create();
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> tokenOperations.renew(tokenResponse.getToken()));
+				.isThrownBy(() -> this.tokenOperations.renew(tokenResponse.getToken()));
 	}
 
 	@Test
 	void revokeShouldRevokeToken() {
 
-		final VaultTokenResponse tokenResponse = tokenOperations.create();
-		tokenOperations.revoke(tokenResponse.getToken());
+		final VaultTokenResponse tokenResponse = this.tokenOperations.create();
+		this.tokenOperations.revoke(tokenResponse.getToken());
 
 		try {
 			lookupSelf(tokenResponse);
@@ -154,7 +149,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void createdTokenShouldBeUsableWithVaultClient() {
 
-		final VaultTokenResponse tokenResponse = tokenOperations.create();
+		final VaultTokenResponse tokenResponse = this.tokenOperations.create();
 
 		ResponseEntity<String> response = lookupSelf(tokenResponse);
 
@@ -164,14 +159,14 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@SuppressWarnings("ConstantConditions")
 	private ResponseEntity<String> lookupSelf(final VaultTokenResponse tokenResponse) {
 
-		return vaultOperations.doWithVault(restOperations -> {
+		return this.vaultOperations.doWithVault(restOperations -> {
 			HttpHeaders headers = new HttpHeaders();
-			headers.add(VaultHttpHeaders.VAULT_TOKEN,
-					tokenResponse.getToken().getToken());
+			headers.add(VaultHttpHeaders.VAULT_TOKEN, tokenResponse.getToken().getToken());
 
-			return restOperations.exchange("auth/token/lookup-self", HttpMethod.GET,
-					new HttpEntity<>(headers), String.class);
+			return restOperations.exchange("auth/token/lookup-self", HttpMethod.GET, new HttpEntity<>(headers),
+					String.class);
 		});
 
 	}
+
 }

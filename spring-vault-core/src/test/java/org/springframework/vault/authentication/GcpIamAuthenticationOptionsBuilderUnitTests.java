@@ -35,11 +35,10 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential).role("foo").build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential).role("foo")
+				.build();
 
-		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential))
-				.isEqualTo("hello@world");
+		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential)).isEqualTo("hello@world");
 	}
 
 	@Test
@@ -47,12 +46,10 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential).serviceAccountId("override@foo.com").role("foo")
-				.build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential)
+				.serviceAccountId("override@foo.com").role("foo").build();
 
-		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential))
-				.isEqualTo("override@foo.com");
+		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential)).isEqualTo("override@foo.com");
 	}
 
 	@Test
@@ -60,14 +57,11 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential)
-				.serviceAccountIdAccessor(
-						(GoogleCredential googleCredential) -> "override@foo.com")
-				.role("foo").build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential)
+				.serviceAccountIdAccessor((GoogleCredential googleCredential) -> "override@foo.com").role("foo")
+				.build();
 
-		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential))
-				.isEqualTo("override@foo.com");
+		assertThat(options.getServiceAccountIdAccessor().getServiceAccountId(credential)).isEqualTo("override@foo.com");
 	}
 
 	@Test
@@ -75,11 +69,10 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential).role("foo").build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential).role("foo")
+				.build();
 
-		assertThat(options.getProjectIdAccessor().getProjectId(credential))
-				.isEqualTo("project-id");
+		assertThat(options.getProjectIdAccessor().getProjectId(credential)).isEqualTo("project-id");
 	}
 
 	@Test
@@ -87,11 +80,10 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential).projectId("my-project").role("foo").build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential)
+				.projectId("my-project").role("foo").build();
 
-		assertThat(options.getProjectIdAccessor().getProjectId(credential))
-				.isEqualTo("my-project");
+		assertThat(options.getProjectIdAccessor().getProjectId(credential)).isEqualTo("my-project");
 	}
 
 	@Test
@@ -99,25 +91,21 @@ class GcpIamAuthenticationOptionsBuilderUnitTests {
 
 		GoogleCredential credential = createGoogleCredential();
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.credential(credential)
-				.projectIdAccessor((GoogleCredential googleCredential) -> "my-project")
-				.role("foo").build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().credential(credential)
+				.projectIdAccessor((GoogleCredential googleCredential) -> "my-project").role("foo").build();
 
-		assertThat(options.getProjectIdAccessor().getProjectId(credential))
-				.isEqualTo("my-project");
+		assertThat(options.getProjectIdAccessor().getProjectId(credential)).isEqualTo("my-project");
 	}
 
 	private static GoogleCredential createGoogleCredential() {
 
-		GoogleCredential credential = new GoogleCredential.Builder()
-				.setServiceAccountId("hello@world")
-				.setServiceAccountProjectId("project-id")
-				.setServiceAccountPrivateKey(mock(PrivateKey.class))
+		GoogleCredential credential = new GoogleCredential.Builder().setServiceAccountId("hello@world")
+				.setServiceAccountProjectId("project-id").setServiceAccountPrivateKey(mock(PrivateKey.class))
 				.setServiceAccountPrivateKeyId("key-id").build();
 
 		credential.setAccessToken("foobar");
 
 		return credential;
 	}
+
 }

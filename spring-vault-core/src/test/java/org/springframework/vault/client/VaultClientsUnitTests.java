@@ -44,8 +44,7 @@ class VaultClientsUnitTests {
 	void uriHandlerShouldPrefixRelativeUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
-				() -> localhost);
+		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
 
 		URI uri = handler.expand("/path/{bar}", "bar");
 
@@ -56,21 +55,18 @@ class VaultClientsUnitTests {
 	void uriHandlerShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
-				() -> localhost);
+		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
 
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
 
-		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1)
-				.hasPath("/path/bar");
+		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1).hasPath("/path/bar");
 	}
 
 	@Test
 	void uriBuilderShouldPrefixRelativeUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
-				() -> localhost);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
 
 		URI uri = handler.expand("/path/{bar}", "bar");
 
@@ -81,28 +77,24 @@ class VaultClientsUnitTests {
 	void uriBuilderShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(
-				() -> localhost);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
 
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
 
-		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1)
-				.hasPath("/path/bar");
+		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1).hasPath("/path/bar");
 	}
 
 	@Test
 	void shouldApplyNamespace() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.getInterceptors()
-				.add(VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
 		mockRest.expect(requestTo("/auth/foo")).andExpect(method(HttpMethod.GET))
-				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
-				.andRespond(withSuccess());
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar")).andRespond(withSuccess());
 
 		restTemplate.getForEntity("/auth/foo", String.class);
 	}
@@ -111,21 +103,18 @@ class VaultClientsUnitTests {
 	void shouldAllowNamespaceOverride() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.getInterceptors()
-				.add(VaultClients.createNamespaceInterceptor("foo/bar"));
+		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
 		mockRest.expect(requestTo("/auth/foo")).andExpect(method(HttpMethod.GET))
-				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "baz"))
-				.andRespond(withSuccess());
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "baz")).andRespond(withSuccess());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "baz");
 
-		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers),
-				String.class);
+		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 	}
 
 	@Test
@@ -133,11 +122,11 @@ class VaultClientsUnitTests {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		localhost.setPath("foo/v1");
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(
-				() -> localhost);
+		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
 
 		URI uri = handler.expand("/path/{bar}", "bar");
 
 		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/foo/v1/path/bar");
 	}
+
 }

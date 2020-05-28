@@ -35,7 +35,6 @@ public interface VaultWrappingOperations {
 	/**
 	 * Looks up {@link WrappedMetadata metadata} for the given token containing a wrapped
 	 * response.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @return the {@link WrappedMetadata} the {@code token} or {@literal null} if the
 	 * token was invalid or expired.
@@ -45,7 +44,6 @@ public interface VaultWrappingOperations {
 
 	/**
 	 * Read a wrapped secret.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
@@ -54,7 +52,6 @@ public interface VaultWrappingOperations {
 
 	/**
 	 * Read a wrapped secret of type {@link Class responseType}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
@@ -68,7 +65,6 @@ public interface VaultWrappingOperations {
 	 * invalidated. This can be used for long-term storage of a secret in a
 	 * response-wrapped token when rotation is a requirement. Rewrapping with an invalid
 	 * token throws {@link VaultException}.
-	 *
 	 * @param token must not be {@literal null}.
 	 * @return the {@link WrappedMetadata} for this wrapping operation.
 	 */
@@ -76,7 +72,6 @@ public interface VaultWrappingOperations {
 
 	/**
 	 * Wraps the given user-supplied data inside a response-wrapped token.
-	 *
 	 * @param body must not be {@literal null}.
 	 * @param ttl must not be {@literal null}.
 	 * @return the {@link WrappedMetadata} for this wrapping operation.

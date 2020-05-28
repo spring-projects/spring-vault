@@ -63,12 +63,10 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * Create a new {@link GcpComputeAuthentication} instance given
 	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault and
 	 * Google API use.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 */
-	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options,
-			RestOperations vaultRestOperations) {
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations) {
 		this(options, vaultRestOperations, vaultRestOperations);
 	}
 
@@ -76,20 +74,17 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * Create a new {@link GcpComputeAuthentication} instance given
 	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault and
 	 * Google API use.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param googleMetadataRestOperations must not be {@literal null}.
 	 */
-	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options,
-			RestOperations vaultRestOperations,
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations googleMetadataRestOperations) {
 
 		super(vaultRestOperations);
 
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
-		Assert.notNull(googleMetadataRestOperations,
-				"Google Metadata RestOperations must not be null");
+		Assert.notNull(googleMetadataRestOperations, "Google Metadata RestOperations must not be null");
 
 		this.options = options;
 		this.googleMetadataRestOperations = googleMetadataRestOperations;
@@ -98,22 +93,19 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	/**
 	 * Creates a {@link AuthenticationSteps} for GCE authentication given
 	 * {@link GcpComputeAuthenticationOptions}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for cubbyhole authentication.
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			GcpComputeAuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(GcpComputeAuthenticationOptions options) {
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 
 		String serviceAccount = options.getServiceAccount();
 		String audience = getAudience(options.getRole());
 
-		HttpRequest<String> jwtRequest = get(COMPUTE_METADATA_URL_TEMPLATE,
-				serviceAccount, audience, "full") //
-						.with(getMetadataHttpHeaders()) //
-						.as(String.class);
+		HttpRequest<String> jwtRequest = get(COMPUTE_METADATA_URL_TEMPLATE, serviceAccount, audience, "full") //
+				.with(getMetadataHttpHeaders()) //
+				.as(String.class);
 
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 				//
@@ -126,13 +118,12 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 
 		String signedJwt = signJwt();
 
-		return doLogin("GCP-GCE", signedJwt, this.options.getPath(),
-				this.options.getRole());
+		return doLogin("GCP-GCE", signedJwt, this.options.getPath(), this.options.getRole());
 	}
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(options);
+		return createAuthenticationSteps(this.options);
 	}
 
 	protected String signJwt() {
@@ -146,9 +137,8 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 			HttpHeaders headers = getMetadataHttpHeaders();
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
 
-			ResponseEntity<String> response = googleMetadataRestOperations.exchange(
-					COMPUTE_METADATA_URL_TEMPLATE, HttpMethod.GET, entity, String.class,
-					urlParameters);
+			ResponseEntity<String> response = this.googleMetadataRestOperations.exchange(COMPUTE_METADATA_URL_TEMPLATE,
+					HttpMethod.GET, entity, String.class, urlParameters);
 
 			return response.getBody();
 		}
@@ -169,4 +159,5 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	private static String getAudience(String role) {
 		return String.format("https://localhost:8200/vault/%s", role);
 	}
+
 }

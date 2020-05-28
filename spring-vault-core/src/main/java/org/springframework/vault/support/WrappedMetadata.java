@@ -44,8 +44,7 @@ public class WrappedMetadata {
 	 * @param creationTime must not be {@literal null}.
 	 * @param path can be {@literal null}.
 	 */
-	public WrappedMetadata(VaultToken token, Duration ttl, Instant creationTime,
-			@Nullable String path) {
+	public WrappedMetadata(VaultToken token, Duration ttl, Instant creationTime, @Nullable String path) {
 
 		Assert.notNull(token, "VaultToken must not be null");
 		Assert.notNull(ttl, "TTL duration must not be null");
@@ -58,19 +57,20 @@ public class WrappedMetadata {
 	}
 
 	public VaultToken getToken() {
-		return token;
+		return this.token;
 	}
 
 	public Duration getTtl() {
-		return ttl;
+		return this.ttl;
 	}
 
 	public Instant getCreationTime() {
-		return creationTime;
+		return this.creationTime;
 	}
 
 	@Nullable
 	public String getPath() {
-		return path;
+		return this.path;
 	}
+
 }

@@ -37,8 +37,7 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  * @author Michal Budzyn
  */
 @RequiresVaultVersion("0.8.3")
-public abstract class KubernetesAuthenticationIntegrationTestBase
-		extends IntegrationTestSupport {
+public abstract class KubernetesAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	@BeforeEach
 	public void before() {
@@ -50,30 +49,26 @@ public abstract class KubernetesAuthenticationIntegrationTestBase
 			prepare().mountAuth("kubernetes");
 		}
 
-		prepare().getVaultOperations()
-				.doWithSession((RestOperationsCallback<Object>) restOperations -> {
-					File workDir = findWorkDir();
+		prepare().getVaultOperations().doWithSession((RestOperationsCallback<Object>) restOperations -> {
+			File workDir = findWorkDir();
 
-					String certificate = Files.contentOf(
-							new File(workDir, "minikube/ca.crt"),
-							StandardCharsets.US_ASCII);
+			String certificate = Files.contentOf(new File(workDir, "minikube/ca.crt"), StandardCharsets.US_ASCII);
 
-					String host = String.format("https://%s:8443", minikubeIp);
+			String host = String.format("https://%s:8443", minikubeIp);
 
-					Map<String, String> kubeConfig = new HashMap<>();
-					kubeConfig.put("kubernetes_ca_cert", certificate);
-					kubeConfig.put("kubernetes_host", host);
-					restOperations.postForEntity("auth/kubernetes/config", kubeConfig,
-							Map.class);
+			Map<String, String> kubeConfig = new HashMap<>();
+			kubeConfig.put("kubernetes_ca_cert", certificate);
+			kubeConfig.put("kubernetes_host", host);
+			restOperations.postForEntity("auth/kubernetes/config", kubeConfig, Map.class);
 
-					Map<String, String> roleData = new HashMap<>();
-					roleData.put("bound_service_account_names", "default");
-					roleData.put("bound_service_account_namespaces", "default");
-					roleData.put("policies", "default");
-					roleData.put("ttl", "1h");
+			Map<String, String> roleData = new HashMap<>();
+			roleData.put("bound_service_account_names", "default");
+			roleData.put("bound_service_account_namespaces", "default");
+			roleData.put("policies", "default");
+			roleData.put("ttl", "1h");
 
-					return restOperations.postForEntity("auth/kubernetes/role/my-role",
-							roleData, Map.class);
-				});
+			return restOperations.postForEntity("auth/kubernetes/role/my-role", roleData, Map.class);
+		});
 	}
+
 }

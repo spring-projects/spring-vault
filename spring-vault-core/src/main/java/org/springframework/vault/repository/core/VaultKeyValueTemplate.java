@@ -30,7 +30,6 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	/**
 	 * Create a new {@link VaultKeyValueTemplate} given {@link KeyValueAdapter} and
 	 * {@link VaultMappingContext}.
-	 *
 	 * @param adapter must not be {@literal null}.
 	 */
 	public VaultKeyValueTemplate(KeyValueAdapter adapter) {
@@ -40,12 +39,10 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	/**
 	 * Create a new {@link VaultKeyValueTemplate} given {@link KeyValueAdapter} and
 	 * {@link VaultMappingContext}.
-	 *
 	 * @param adapter must not be {@literal null}.
 	 * @param mappingContext must not be {@literal null}.
 	 */
-	public VaultKeyValueTemplate(KeyValueAdapter adapter,
-			VaultMappingContext mappingContext) {
+	public VaultKeyValueTemplate(KeyValueAdapter adapter, VaultMappingContext mappingContext) {
 		super(adapter, mappingContext);
 	}
 
@@ -53,4 +50,5 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	public void destroy() throws Exception {
 		// no-op to prevent clear() call.
 	}
+
 }

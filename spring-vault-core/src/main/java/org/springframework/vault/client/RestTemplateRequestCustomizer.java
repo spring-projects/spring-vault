@@ -31,8 +31,8 @@ public interface RestTemplateRequestCustomizer<T extends ClientHttpRequest> {
 
 	/**
 	 * Customize the specified {@link ClientHttpRequest}.
-	 *
 	 * @param request the request to customize.
 	 */
 	void customize(T request);
+
 }

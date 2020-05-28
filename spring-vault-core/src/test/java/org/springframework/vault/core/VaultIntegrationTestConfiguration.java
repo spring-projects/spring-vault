@@ -30,8 +30,7 @@ import org.springframework.vault.util.TestRestTemplateFactory;
  * @author Mark Paluch
  */
 @Configuration
-public class VaultIntegrationTestConfiguration
-		extends AbstractReactiveVaultConfiguration {
+public class VaultIntegrationTestConfiguration extends AbstractReactiveVaultConfiguration {
 
 	@Override
 	public VaultEndpoint vaultEndpoint() {
@@ -47,4 +46,5 @@ public class VaultIntegrationTestConfiguration
 	public SslConfiguration sslConfiguration() {
 		return Settings.createSslConfiguration();
 	}
+
 }

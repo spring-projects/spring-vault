@@ -63,8 +63,7 @@ import org.springframework.web.client.RestOperations;
  * "https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
  * projects.serviceAccounts.signJwt</a>
  */
-public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
-		implements ClientAuthentication {
+public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
 
 	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
@@ -78,12 +77,10 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 	 * Create a new instance of {@link GcpIamAuthentication} given
 	 * {@link GcpIamAuthenticationOptions} and {@link RestOperations}. This constructor
 	 * initializes {@link GoogleApacheHttpTransport} for Google API usage.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
 	 */
-	public GcpIamAuthentication(GcpIamAuthenticationOptions options,
-			RestOperations restOperations) {
+	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations) {
 		this(options, restOperations, new NetHttpTransport());
 	}
 
@@ -91,13 +88,12 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 	 * Create a new instance of {@link GcpIamAuthentication} given
 	 * {@link GcpIamAuthenticationOptions}, {@link RestOperations} and
 	 * {@link HttpTransport}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
 	 * @param httpTransport HTTP client for Google API use, must not be {@literal null}.
 	 */
-	public GcpIamAuthentication(GcpIamAuthenticationOptions options,
-			RestOperations restOperations, HttpTransport httpTransport) {
+	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations,
+			HttpTransport httpTransport) {
 
 		super(restOperations);
 
@@ -115,17 +111,16 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 
 		String signedJwt = signJwt();
 
-		return doLogin("GCP-IAM", signedJwt, this.options.getPath(),
-				this.options.getRole());
+		return doLogin("GCP-IAM", signedJwt, this.options.getPath(), this.options.getRole());
 	}
 
 	protected String signJwt() {
 
 		String projectId = getProjectId();
 		String serviceAccount = getServiceAccountId();
-		Map<String, Object> jwtPayload = getJwtPayload(options, serviceAccount);
+		Map<String, Object> jwtPayload = getJwtPayload(this.options, serviceAccount);
 
-		Iam iam = new Builder(httpTransport, JSON_FACTORY, credential)
+		Iam iam = new Builder(this.httpTransport, JSON_FACTORY, this.credential)
 				.setApplicationName("Spring Vault/" + getClass().getName()).build();
 
 		try {
@@ -134,9 +129,8 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 			SignJwtRequest request = new SignJwtRequest();
 			request.setPayload(payload);
 
-			SignJwt signJwt = iam.projects().serviceAccounts().signJwt(String
-					.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount),
-					request);
+			SignJwt signJwt = iam.projects().serviceAccounts()
+					.signJwt(String.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount), request);
 
 			SignJwtResponse response = signJwt.execute();
 
@@ -148,15 +142,14 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 	}
 
 	private String getServiceAccountId() {
-		return options.getServiceAccountIdAccessor().getServiceAccountId(credential);
+		return this.options.getServiceAccountIdAccessor().getServiceAccountId(this.credential);
 	}
 
 	private String getProjectId() {
-		return options.getProjectIdAccessor().getProjectId(credential);
+		return this.options.getProjectIdAccessor().getProjectId(this.credential);
 	}
 
-	private static Map<String, Object> getJwtPayload(GcpIamAuthenticationOptions options,
-			String serviceAccount) {
+	private static Map<String, Object> getJwtPayload(GcpIamAuthenticationOptions options, String serviceAccount) {
 
 		Instant validUntil = options.getClock().instant().plus(options.getJwtValidity());
 
@@ -168,4 +161,5 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport
 
 		return payload;
 	}
+
 }

@@ -37,7 +37,6 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 
 	/**
 	 * Read the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -46,7 +45,6 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 
 	/**
 	 * Read the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -56,9 +54,9 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 
 	/**
 	 * Write the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param body must not be {@literal null}.
 	 */
 	void put(String path, Object body);
+
 }

@@ -28,21 +28,19 @@ import org.springframework.web.reactive.function.client.WebClient;
  *
  * @author Mark Paluch
  */
-class AppIdAuthenticationOperatorIntegrationTests
-		extends AppIdAuthenticationIntegrationTestBase {
+class AppIdAuthenticationOperatorIntegrationTests extends AppIdAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
 	void authenticationStepsShouldLoginSuccessfully() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("myapp") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
-				AppIdAuthentication.createAuthenticationSteps(options), webClient);
+				AppIdAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		supplier.getVaultToken() //
 				.as(StepVerifier::create) //
@@ -53,17 +51,17 @@ class AppIdAuthenticationOperatorIntegrationTests
 	@Test
 	void authenticationStepsLoginShouldFail() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("wrong") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("wrong") //
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
-				AppIdAuthentication.createAuthenticationSteps(options), webClient);
+				AppIdAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		supplier.getVaultToken() //
 				.as(StepVerifier::create) //
 				.expectError() //
 				.verify();
 	}
+
 }

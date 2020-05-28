@@ -72,7 +72,6 @@ public class Versioned<T> {
 
 	/**
 	 * Create a {@link Version#unversioned() unversioned} given secret.
-	 *
 	 * @param secret must not be {@literal null}.
 	 * @return the {@link Versioned} object for {@code secret}
 	 */
@@ -87,7 +86,6 @@ public class Versioned<T> {
 	 * Create a versioned secret object given {@code secret} and {@link Version}.
 	 * Versioned secret may contain no actual data as they can be in a deleted/destroyed
 	 * state.
-	 *
 	 * @param secret can be {@literal null}.
 	 * @param version must not be {@literal null}.
 	 * @return the {@link Versioned} object for {@code secret} and {@code Version}.
@@ -103,7 +101,6 @@ public class Versioned<T> {
 	 * Create a versioned secret object given {@code secret} and {@link Metadata}.
 	 * Versioned secret may contain no actual data as they can be in a deleted/destroyed
 	 * state.
-	 *
 	 * @param secret can be {@literal null}.
 	 * @param metadata must not be {@literal null}.
 	 * @return the {@link Versioned} object for {@code secret} and {@link Metadata}.
@@ -119,7 +116,7 @@ public class Versioned<T> {
 	 * @return the {@link Version} associated with this {@link Versioned} object.
 	 */
 	public Version getVersion() {
-		return version;
+		return this.version;
 	}
 
 	/**
@@ -127,18 +124,17 @@ public class Versioned<T> {
 	 * otherwise {@code false}
 	 */
 	public boolean hasMetadata() {
-		return metadata != null;
+		return this.metadata != null;
 	}
 
 	@Nullable
 	public Metadata getMetadata() {
-		return metadata;
+		return this.metadata;
 	}
 
 	/**
 	 * Returns the required {@link Metadata} for this versioned object. Throws
 	 * {@link IllegalStateException} if no metadata is associated.
-	 *
 	 * @return the non-null {@link Metadata} held by this for this versioned object.
 	 * @throws IllegalStateException if no metadata is present.
 	 */
@@ -158,7 +154,7 @@ public class Versioned<T> {
 	 * {@code false}, of the version is deleted or destroyed.
 	 */
 	public boolean hasData() {
-		return data != null;
+		return this.data != null;
 	}
 
 	/**
@@ -167,13 +163,12 @@ public class Versioned<T> {
 	 */
 	@Nullable
 	public T getData() {
-		return data;
+		return this.data;
 	}
 
 	/**
 	 * Returns the required data for this versioned object. Throws
 	 * {@link IllegalStateException} if no data is associated.
-	 *
 	 * @return the non-null value held by this for this versioned object.
 	 * @throws IllegalStateException if no data is present.
 	 */
@@ -190,13 +185,12 @@ public class Versioned<T> {
 
 	/**
 	 * Convert the data element of this versioned object to an {@link Optional}.
-	 *
 	 * @return {@link Optional#of(Object) Optional} holding the actual value of this
 	 * versioned object if {@link #hasData() data is present}, {@link Optional#empty()} if
 	 * no data is associated.
 	 */
 	public Optional<T> toOptional() {
-		return Optional.ofNullable(data);
+		return Optional.ofNullable(this.data);
 	}
 
 	@Override
@@ -206,15 +200,14 @@ public class Versioned<T> {
 		if (!(o instanceof Versioned))
 			return false;
 		Versioned<?> versioned = (Versioned<?>) o;
-		return Objects.equals(data, versioned.data)
-				&& Objects.equals(version, versioned.version)
-				&& Objects.equals(metadata, versioned.metadata);
+		return Objects.equals(this.data, versioned.data) && Objects.equals(this.version, versioned.version)
+				&& Objects.equals(this.metadata, versioned.metadata);
 	}
 
 	@Override
 	public int hashCode() {
 
-		return Objects.hash(data, version, metadata);
+		return Objects.hash(this.data, this.version, this.metadata);
 	}
 
 	/**
@@ -230,8 +223,7 @@ public class Versioned<T> {
 
 		private final Version version;
 
-		private Metadata(Instant createdAt, @Nullable Instant deletedAt,
-				boolean destroyed, Version version) {
+		private Metadata(Instant createdAt, @Nullable Instant deletedAt, boolean destroyed, Version version) {
 			this.createdAt = createdAt;
 			this.deletedAt = deletedAt;
 			this.destroyed = destroyed;
@@ -240,7 +232,6 @@ public class Versioned<T> {
 
 		/**
 		 * Creates a new {@link MetadataBuilder} to build {@link Metadata} objects.
-		 *
 		 * @return a new {@link MetadataBuilder} to build {@link Metadata} objects.
 		 */
 		public static MetadataBuilder builder() {
@@ -251,14 +242,14 @@ public class Versioned<T> {
 		 * @return {@link Instant} at which the version was created.
 		 */
 		public Instant getCreatedAt() {
-			return createdAt;
+			return this.createdAt;
 		}
 
 		/**
 		 * @return {@literal true} if the version was deleted.
 		 */
 		public boolean isDeleted() {
-			return deletedAt != null;
+			return this.deletedAt != null;
 		}
 
 		/**
@@ -267,29 +258,28 @@ public class Versioned<T> {
 		 */
 		@Nullable
 		public Instant getDeletedAt() {
-			return deletedAt;
+			return this.deletedAt;
 		}
 
 		/**
 		 * @return the version number.
 		 */
 		public Version getVersion() {
-			return version;
+			return this.version;
 		}
 
 		/**
 		 * @return {@literal true} if the version was destroyed.
 		 */
 		public boolean isDestroyed() {
-			return destroyed;
+			return this.destroyed;
 		}
 
 		@Override
 		public String toString() {
 
-			return getClass().getSimpleName() + " [createdAt=" + createdAt
-					+ ", deletedAt=" + deletedAt + ", destroyed=" + destroyed
-					+ ", version=" + version + ']';
+			return getClass().getSimpleName() + " [createdAt=" + this.createdAt + ", deletedAt=" + this.deletedAt
+					+ ", destroyed=" + this.destroyed + ", version=" + this.version + ']';
 		}
 
 		/**
@@ -310,9 +300,8 @@ public class Versioned<T> {
 
 			/**
 			 * Configure a created at {@link Instant}.
-			 *
 			 * @param createdAt timestamp at which the version was created, must not be
-			 *     {@literal null}.
+			 * {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder createdAt(Instant createdAt) {
@@ -325,9 +314,8 @@ public class Versioned<T> {
 
 			/**
 			 * Configure a deleted at {@link Instant}.
-			 *
 			 * @param deletedAt timestamp at which the version was deleted, must not be
-			 *     {@literal null}.
+			 * {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder deletedAt(Instant deletedAt) {
@@ -340,7 +328,6 @@ public class Versioned<T> {
 
 			/**
 			 * Configure the version was destroyed.
-			 *
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
 			public MetadataBuilder destroyed() {
@@ -349,7 +336,6 @@ public class Versioned<T> {
 
 			/**
 			 * Configure the version was destroyed.
-			 *
 			 * @param destroyed
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
@@ -360,7 +346,6 @@ public class Versioned<T> {
 
 			/**
 			 * Configure the {@link Version}.
-			 *
 			 * @param version must not be {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
@@ -373,19 +358,21 @@ public class Versioned<T> {
 			}
 
 			/**
-			 * Build the {@link Versioned.Metadata} object. Requires {@link #createdAt(Instant)} and
-			 * {@link #version(Versioned.Version)} to be set.
-			 *
+			 * Build the {@link Versioned.Metadata} object. Requires
+			 * {@link #createdAt(Instant)} and {@link #version(Versioned.Version)} to be
+			 * set.
 			 * @return the {@link Versioned.Metadata} object.
 			 */
 			public Metadata build() {
 
-				Assert.notNull(createdAt, "CreatedAt must not be null");
-				Assert.notNull(version, "Version must not be null");
+				Assert.notNull(this.createdAt, "CreatedAt must not be null");
+				Assert.notNull(this.version, "Version must not be null");
 
-				return new Metadata(createdAt, deletedAt, destroyed, version);
+				return new Metadata(this.createdAt, this.deletedAt, this.destroyed, this.version);
 			}
+
 		}
+
 	}
 
 	/**
@@ -417,7 +404,6 @@ public class Versioned<T> {
 
 		/**
 		 * Create a {@link Version} given a {@code versionNumber}.
-		 *
 		 * @param versionNumber the version number.
 		 * @return the {@link Version} for {@code versionNumber}.
 		 */
@@ -438,14 +424,14 @@ public class Versioned<T> {
 		 * latest versions in the context of particular versioning operations.
 		 */
 		public boolean isVersioned() {
-			return version > 0;
+			return this.version > 0;
 		}
 
 		/**
 		 * @return the version number.
 		 */
 		public int getVersion() {
-			return version;
+			return this.version;
 		}
 
 		@Override
@@ -455,17 +441,19 @@ public class Versioned<T> {
 			if (!(o instanceof Version))
 				return false;
 			Version version1 = (Version) o;
-			return version == version1.version;
+			return this.version == version1.version;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(version);
+			return Objects.hash(this.version);
 		}
 
 		@Override
 		public String toString() {
-			return String.format("Version[%d]", version);
+			return String.format("Version[%d]", this.version);
 		}
+
 	}
+
 }

@@ -31,11 +31,11 @@ public class LoginTokenExpiredEvent extends AuthenticationEvent {
 
 	/**
 	 * Create a new {@link LoginTokenExpiredEvent} given {@link VaultToken}.
-	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 */
 	public LoginTokenExpiredEvent(VaultToken source) {
 		super(source);
 	}
+
 }

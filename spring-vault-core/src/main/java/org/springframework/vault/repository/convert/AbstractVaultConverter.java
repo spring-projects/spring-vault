@@ -39,7 +39,6 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 	/**
 	 * Creates a new {@link AbstractVaultConverter} using the given
 	 * {@link GenericConversionService}.
-	 *
 	 * @param conversionService must not be {@literal null}.
 	 */
 	public AbstractVaultConverter(GenericConversionService conversionService) {
@@ -48,7 +47,6 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 
 	/**
 	 * Registers the given custom conversions with the converter.
-	 *
 	 * @param conversions
 	 */
 	public void setCustomConversions(CustomConversions conversions) {
@@ -57,7 +55,6 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 
 	/**
 	 * Registers {@link EntityInstantiators} to customize entity instantiation.
-	 *
 	 * @param instantiators
 	 */
 	public void setInstantiators(EntityInstantiators instantiators) {
@@ -66,7 +63,7 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 
 	@Override
 	public ConversionService getConversionService() {
-		return conversionService;
+		return this.conversionService;
 	}
 
 	@Override
@@ -79,6 +76,7 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 	 * {@link ConversionService} directly (e.g. for id conversion).
 	 */
 	private void initializeConverters() {
-		conversions.registerConvertersIn(conversionService);
+		this.conversions.registerConvertersIn(this.conversionService);
 	}
+
 }

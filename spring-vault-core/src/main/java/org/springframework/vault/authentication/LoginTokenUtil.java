@@ -28,13 +28,11 @@ import org.springframework.util.Assert;
 final class LoginTokenUtil {
 
 	private LoginTokenUtil() {
-		throw new UnsupportedOperationException(
-				"This is a utility class and cannot be instantiated");
+		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 
 	/**
 	 * Construct a {@link LoginToken} from an auth response.
-	 *
 	 * @param auth {@link Map} holding a login response.
 	 * @return the {@link LoginToken}
 	 */
@@ -49,7 +47,6 @@ final class LoginTokenUtil {
 
 	/**
 	 * Construct a {@link LoginToken} from an auth response.
-	 *
 	 * @param auth {@link Map} holding a login response.
 	 * @return the {@link LoginToken}
 	 * @since 2.0
@@ -66,8 +63,7 @@ final class LoginTokenUtil {
 		}
 
 		if (renewable != null && renewable) {
-			return LoginToken.renewable(token,
-					Duration.ofSeconds(leaseDuration.longValue()));
+			return LoginToken.renewable(token, Duration.ofSeconds(leaseDuration.longValue()));
 		}
 
 		if (leaseDuration != null) {
@@ -76,4 +72,5 @@ final class LoginTokenUtil {
 
 		return LoginToken.of(token);
 	}
+
 }

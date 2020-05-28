@@ -35,7 +35,6 @@ public class TestWebClientFactory {
 	 * Create a new {@link WebClient} using the {@link SslConfiguration}. See
 	 * {@link ReactiveVaultClients#createWebClient(VaultEndpoint, ClientHttpConnector)} to
 	 * create {@link WebClient} for a given {@link ClientHttpConnector}.
-	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -44,12 +43,12 @@ public class TestWebClientFactory {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
 
 		try {
-			ClientHttpConnector connector = ClientHttpConnectorFactory
-					.create(new ClientOptions(), sslConfiguration);
+			ClientHttpConnector connector = ClientHttpConnectorFactory.create(new ClientOptions(), sslConfiguration);
 			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT, connector);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 }

@@ -39,8 +39,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=http://null", "vault.authentication=azure",
-		"vault.azure-msi.role=role", "vault.azure-msi.metadata-service=http://foo" })
+@TestPropertySource(properties = { "vault.uri=http://null", "vault.authentication=azure", "vault.azure-msi.role=role",
+		"vault.azure-msi.metadata-service=http://foo" })
 class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 
 	@Configuration
@@ -50,20 +50,18 @@ class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldConfigureAuthentication(
-			@Autowired EnvironmentVaultConfiguration configuration) {
+	void shouldConfigureAuthentication(@Autowired EnvironmentVaultConfiguration configuration) {
 
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(AzureMsiAuthentication.class);
 
 		DirectFieldAccessor accessor = new DirectFieldAccessor(clientAuthentication);
-		AzureMsiAuthenticationOptions options = (AzureMsiAuthenticationOptions) accessor
-				.getPropertyValue("options");
+		AzureMsiAuthenticationOptions options = (AzureMsiAuthenticationOptions) accessor.getPropertyValue("options");
 
-		assertThat(options.getIdentityTokenServiceUri()).isEqualTo(
-				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
-		assertThat(options.getInstanceMetadataServiceUri())
-				.isEqualTo(URI.create("http://foo"));
+		assertThat(options.getIdentityTokenServiceUri())
+				.isEqualTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
+		assertThat(options.getInstanceMetadataServiceUri()).isEqualTo(URI.create("http://foo"));
 	}
+
 }

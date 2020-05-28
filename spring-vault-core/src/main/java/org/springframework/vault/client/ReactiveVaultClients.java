@@ -46,13 +46,11 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpoint must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the configured {@link WebClient}.
 	 */
-	public static WebClient createWebClient(VaultEndpoint endpoint,
-			ClientHttpConnector connector) {
+	public static WebClient createWebClient(VaultEndpoint endpoint, ClientHttpConnector connector) {
 		return createWebClient(SimpleVaultEndpointProvider.of(endpoint), connector);
 	}
 
@@ -62,13 +60,11 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the configured {@link WebClient}.
 	 */
-	public static WebClient createWebClient(VaultEndpointProvider endpointProvider,
-			ClientHttpConnector connector) {
+	public static WebClient createWebClient(VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
@@ -82,42 +78,38 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the prepared {@link WebClient.Builder}.
 	 */
-	static WebClient.Builder createWebClientBuilder(
-			VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
+	static WebClient.Builder createWebClientBuilder(VaultEndpointProvider endpointProvider,
+			ClientHttpConnector connector) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
-		UriBuilderFactory uriBuilderFactory = VaultClients
-				.createUriBuilderFactory(endpointProvider);
+		UriBuilderFactory uriBuilderFactory = VaultClients.createUriBuilderFactory(endpointProvider);
 
-		ExchangeStrategies strategies = ExchangeStrategies.builder()
-				.codecs(configurer -> {
+		ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(configurer -> {
 
-					CustomCodecs cc = configurer.customCodecs();
+			CustomCodecs cc = configurer.customCodecs();
 
-					cc.decoder(new ByteArrayDecoder());
-					cc.decoder(new Jackson2JsonDecoder());
-					cc.decoder(StringDecoder.allMimeTypes());
+			cc.decoder(new ByteArrayDecoder());
+			cc.decoder(new Jackson2JsonDecoder());
+			cc.decoder(StringDecoder.allMimeTypes());
 
-					cc.encoder(new ByteArrayEncoder());
-					cc.encoder(new Jackson2JsonEncoder());
+			cc.encoder(new ByteArrayEncoder());
+			cc.encoder(new Jackson2JsonEncoder());
 
-				}).build();
+		}).build();
 
-		return WebClient.builder().uriBuilderFactory(uriBuilderFactory)
-				.exchangeStrategies(strategies).clientConnector(connector);
+		return WebClient.builder().uriBuilderFactory(uriBuilderFactory).exchangeStrategies(strategies)
+				.clientConnector(connector);
 	}
 
 	/**
 	 * Create a {@link ExchangeFilterFunction} that associates each request with a
 	 * {@code X-Vault-Namespace} header if the header is not present.
-	 *
 	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
 	 * @return the {@link ExchangeFilterFunction} to register with {@link WebClient}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
@@ -140,4 +132,5 @@ public class ReactiveVaultClients {
 			});
 		});
 	}
+
 }

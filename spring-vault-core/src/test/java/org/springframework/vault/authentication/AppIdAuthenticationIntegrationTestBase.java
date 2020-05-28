@@ -27,8 +27,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
  *
  * @author Mark Paluch
  */
-public abstract class AppIdAuthenticationIntegrationTestBase
-		extends IntegrationTestSupport {
+public abstract class AppIdAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	@BeforeEach
 	public void before() {
@@ -43,15 +42,13 @@ public abstract class AppIdAuthenticationIntegrationTestBase
 			appIdData.put("value", "dummy"); // policy
 			appIdData.put("display_name", "this is my test application");
 
-			restOperations.postForEntity("auth/app-id/map/app-id/myapp", appIdData,
-					Map.class);
+			restOperations.postForEntity("auth/app-id/map/app-id/myapp", appIdData, Map.class);
 
 			Map<String, String> userIdData = new HashMap<String, String>();
 			userIdData.put("value", "myapp"); // name of the app-id
 			userIdData.put("cidr_block", "0.0.0.0/0");
 
-			restOperations.postForEntity("auth/app-id/map/user-id/static-userid-value",
-					userIdData, Map.class);
+			restOperations.postForEntity("auth/app-id/map/user-id/static-userid-value", userIdData, Map.class);
 
 			return null;
 		});

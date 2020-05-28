@@ -62,32 +62,28 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  */
 class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport {
 
-	static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*")
-			.capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE)
-			.build());
+	static final Policy POLICY = Policy
+			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
+					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
 
 	@BeforeEach
 	void before() {
 
-		Assumptions.assumeTrue(prepare().getVersion().isEnterprise(),
-				"Namespaces require enterprise version");
+		Assumptions.assumeTrue(prepare().getVersion().isEnterprise(), "Namespaces require enterprise version");
 
 		List<String> namespaces = new ArrayList<>(Arrays.asList("dev/", "marketing/"));
 		List<String> list = prepare().getVaultOperations().list("sys/namespaces");
 		namespaces.removeAll(list);
 
 		for (String namespace : namespaces) {
-			prepare().getVaultOperations()
-					.write("sys/namespaces/" + namespace.replaceAll("/", ""));
+			prepare().getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
 		}
 
 		RestTemplateBuilder devRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(ClientHttpRequestFactoryFactory
-						.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.customizers(restTemplate -> restTemplate.getInterceptors()
-						.add(VaultClients.createNamespaceInterceptor("dev")));
+				.requestFactory(
+						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).customizers(restTemplate -> restTemplate
+						.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
 
 		VaultTemplate dev = new VaultTemplate(devRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
@@ -103,8 +99,7 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 
 			File workDir = findWorkDir();
 
-			String certificate = Files.contentOf(
-					new File(workDir, "ca/certs/client.cert.pem"),
+			String certificate = Files.contentOf(new File(workDir, "ca/certs/client.cert.pem"),
 					StandardCharsets.US_ASCII);
 
 			Map<String, String> role = new LinkedHashMap<>();
@@ -112,8 +107,7 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 			role.put("policies", "relaxed");
 			role.put("certificate", certificate);
 
-			return restOperations.postForEntity("auth/cert/certs/relaxed", role,
-					Map.class);
+			return restOperations.postForEntity("auth/cert/certs/relaxed", role, Map.class);
 		});
 	}
 
@@ -124,67 +118,56 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 		Map<String, VaultMount> mounts = vaultSysOperations.getMounts();
 
 		if (!mounts.containsKey(path + "/")) {
-			vaultSysOperations.mount(path, VaultMount.builder().type("kv")
-					.options(Collections.singletonMap("version", "1")).build());
+			vaultSysOperations.mount(path,
+					VaultMount.builder().type("kv").options(Collections.singletonMap("version", "1")).build());
 		}
 	}
 
 	@Test
 	void shouldAuthenticateWithNamespace() {
 
-		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-				.create(new ClientOptions(),
-						ClientCertificateAuthenticationIntegrationTestBase
-								.prepareCertAuthenticationMethod());
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+				ClientCertificateAuthenticationIntegrationTestBase.prepareCertAuthenticationMethod());
 
 		RestTemplateBuilder builder = RestTemplateBuilder.builder()
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.requestFactory(clientHttpRequestFactory)
+				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).requestFactory(clientHttpRequestFactory)
 				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
 
 		RestTemplate forAuthentication = builder.build();
 
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				forAuthentication);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(forAuthentication);
 
-		VaultTemplate dev = new VaultTemplate(builder,
-				new SimpleSessionManager(authentication));
+		VaultTemplate dev = new VaultTemplate(builder, new SimpleSessionManager(authentication));
 
 		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev"));
 
-		assertThat(dev.read("dev-secrets/my-secret").getRequiredData())
-				.containsEntry("key", "dev");
+		assertThat(dev.read("dev-secrets/my-secret").getRequiredData()).containsEntry("key", "dev");
 	}
 
 	@Test
 	void shouldAuthenticateReactiveWithNamespace() {
 
-		ClientHttpConnector connector = ClientHttpConnectorFactory.create(
-				new ClientOptions(), ClientCertificateAuthenticationIntegrationTestBase
-						.prepareCertAuthenticationMethod());
+		ClientHttpConnector connector = ClientHttpConnectorFactory.create(new ClientOptions(),
+				ClientCertificateAuthenticationIntegrationTestBase.prepareCertAuthenticationMethod());
 
-		WebClientBuilder builder = WebClientBuilder.builder()
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.httpConnector(connector)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
+		WebClientBuilder builder = WebClientBuilder.builder().endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+				.httpConnector(connector).defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
 
 		WebClient forAuthentication = builder.build();
 
-		AuthenticationSteps steps = ClientCertificateAuthentication
-				.createAuthenticationSteps();
+		AuthenticationSteps steps = ClientCertificateAuthentication.createAuthenticationSteps();
 
-		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps,
-				forAuthentication);
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps, forAuthentication);
 
 		ReactiveVaultTemplate dev = new ReactiveVaultTemplate(builder, operator);
 
-		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev"))
-				.as(StepVerifier::create).verifyComplete();
+		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev")).as(StepVerifier::create)
+				.verifyComplete();
 
-		dev.read("dev-secrets/my-secret").as(StepVerifier::create)
-				.consumeNextWith(actual -> {
+		dev.read("dev-secrets/my-secret").as(StepVerifier::create).consumeNextWith(actual -> {
 
-					assertThat(actual.getRequiredData()).containsEntry("key", "dev");
-				}).verifyComplete();
+			assertThat(actual.getRequiredData()).containsEntry("key", "dev");
+		}).verifyComplete();
 	}
+
 }

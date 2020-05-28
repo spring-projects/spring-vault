@@ -40,8 +40,7 @@ import org.springframework.vault.repository.query.VaultQuery;
  * @see VaultQuery
  * @see org.springframework.vault.repository.query.VaultQueryCreator
  */
-class VaultQueryEngine
-		extends QueryEngine<VaultKeyValueAdapter, VaultQuery, Comparator<?>> {
+class VaultQueryEngine extends QueryEngine<VaultKeyValueAdapter, VaultQuery, Comparator<?>> {
 
 	private static final SpelExpressionParser parser = new SpelExpressionParser();
 
@@ -51,16 +50,15 @@ class VaultQueryEngine
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Collection<?> execute(@Nullable VaultQuery vaultQuery,
-			@Nullable Comparator<?> comparator, long offset, int rows, String keyspace) {
+	public Collection<?> execute(@Nullable VaultQuery vaultQuery, @Nullable Comparator<?> comparator, long offset,
+			int rows, String keyspace) {
 		return execute(vaultQuery, comparator, offset, rows, keyspace, Object.class);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> Collection<T> execute(@Nullable VaultQuery vaultQuery,
-			@Nullable Comparator<?> comparator, long offset, int rows, String keyspace,
-			Class<T> type) {
+	public <T> Collection<T> execute(@Nullable VaultQuery vaultQuery, @Nullable Comparator<?> comparator, long offset,
+			int rows, String keyspace, Class<T> type) {
 
 		Stream<String> stream = getRequiredAdapter().doList(keyspace).stream();
 
@@ -112,10 +110,12 @@ class VaultQueryEngine
 	enum VaultCriteriaAccessor implements CriteriaAccessor<VaultQuery> {
 
 		INSTANCE;
+
 		@Override
 		public VaultQuery resolve(KeyValueQuery<?> query) {
 			return (VaultQuery) query.getCriteria();
 		}
+
 	}
 
 }

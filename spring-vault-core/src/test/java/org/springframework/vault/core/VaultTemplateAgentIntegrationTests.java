@@ -39,8 +39,8 @@ import org.springframework.vault.util.Settings;
  */
 class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 
-	ClientHttpRequestFactory requestFactory = ClientHttpRequestFactoryFactory
-			.create(new ClientOptions(), Settings.createSslConfiguration());
+	ClientHttpRequestFactory requestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+			Settings.createSslConfiguration());
 
 	VaultEndpoint endpoint = VaultEndpoint.create("localhost", 8202);
 
@@ -49,19 +49,18 @@ class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 
 		try (Socket socket = new Socket()) {
 
-			socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()),
+			socket.connect(new InetSocketAddress(this.endpoint.getHost(), this.endpoint.getPort()),
 					(int) new ClientOptions().getConnectionTimeout().toMillis());
 		}
 		catch (IOException e) {
-			throw new TestAbortedException(
-					"Vault Agent not available: " + e.getMessage());
+			throw new TestAbortedException("Vault Agent not available: " + e.getMessage());
 		}
 	}
 
 	@Test
 	void shouldUseAgentAuthentication() {
 
-		VaultTemplate vaultTemplate = new VaultTemplate(endpoint, requestFactory);
+		VaultTemplate vaultTemplate = new VaultTemplate(this.endpoint, this.requestFactory);
 
 		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"));
 	}
@@ -69,11 +68,12 @@ class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldUseAgentAuthenticationWithBuilder() {
 
-		RestTemplateBuilder builder = RestTemplateBuilder.builder().endpoint(endpoint)
-				.requestFactory(requestFactory);
+		RestTemplateBuilder builder = RestTemplateBuilder.builder().endpoint(this.endpoint)
+				.requestFactory(this.requestFactory);
 
 		VaultTemplate vaultTemplate = new VaultTemplate(builder);
 
 		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"));
 	}
+
 }

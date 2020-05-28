@@ -58,8 +58,7 @@ public class CubbyholeAuthenticationOptions {
 	private final boolean selfLookup;
 
 	private CubbyholeAuthenticationOptions(VaultToken initialToken, String path,
-			UnwrappingEndpoints unwrappingEndpoints, boolean wrappedToken,
-			boolean selfLookup) {
+			UnwrappingEndpoints unwrappingEndpoints, boolean wrappedToken, boolean selfLookup) {
 
 		this.initialToken = initialToken;
 		this.path = path;
@@ -79,14 +78,14 @@ public class CubbyholeAuthenticationOptions {
 	 * @return the initial {@link VaultToken} to access Cubbyhole.
 	 */
 	public VaultToken getInitialToken() {
-		return initialToken;
+		return this.initialToken;
 	}
 
 	/**
 	 * @return the path of the Cubbyhole response path.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
@@ -94,7 +93,7 @@ public class CubbyholeAuthenticationOptions {
 	 * @since 2.2
 	 */
 	public UnwrappingEndpoints getUnwrappingEndpoints() {
-		return unwrappingEndpoints;
+		return this.unwrappingEndpoints;
 	}
 
 	/**
@@ -103,7 +102,7 @@ public class CubbyholeAuthenticationOptions {
 	 * response.
 	 */
 	public boolean isWrappedToken() {
-		return wrappedToken;
+		return this.wrappedToken;
 	}
 
 	/**
@@ -114,7 +113,7 @@ public class CubbyholeAuthenticationOptions {
 	 * @since 1.0.1
 	 */
 	public boolean isSelfLookup() {
-		return selfLookup;
+		return this.selfLookup;
 	}
 
 	/**
@@ -139,12 +138,10 @@ public class CubbyholeAuthenticationOptions {
 
 		/**
 		 * Configure the initial {@link VaultToken} to access Cubbyhole.
-		 *
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
-		public CubbyholeAuthenticationOptionsBuilder initialToken(
-				VaultToken initialToken) {
+		public CubbyholeAuthenticationOptionsBuilder initialToken(VaultToken initialToken) {
 
 			Assert.notNull(initialToken, "Initial Vault Token must not be null");
 
@@ -155,7 +152,6 @@ public class CubbyholeAuthenticationOptions {
 		/**
 		 * Configure the cubbyhole path, such as {@code cubbyhole/token}. Expects a token
 		 * in the {@code data} response.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
@@ -169,13 +165,11 @@ public class CubbyholeAuthenticationOptions {
 
 		/**
 		 * Configure the {@link UnwrappingEndpoints} to use.
-		 *
 		 * @param endpoints must not be {@literal null}.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}
 		 * @since 2.2
 		 */
-		public CubbyholeAuthenticationOptionsBuilder unwrappingEndpoints(
-				UnwrappingEndpoints endpoints) {
+		public CubbyholeAuthenticationOptionsBuilder unwrappingEndpoints(UnwrappingEndpoints endpoints) {
 
 			Assert.notNull(endpoints, "UnwrappingEndpoints must not be empty");
 
@@ -185,7 +179,6 @@ public class CubbyholeAuthenticationOptions {
 
 		/**
 		 * Configure whether to use wrapped token responses.
-		 *
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 */
 		public CubbyholeAuthenticationOptionsBuilder wrapped() {
@@ -198,9 +191,8 @@ public class CubbyholeAuthenticationOptions {
 		/**
 		 * Configure whether to perform a self-lookup after token retrieval. Defaults to
 		 * {@literal true}.
-		 *
 		 * @param selfLookup {@literal true} to perform a self-lookup or {@literal false}
-		 *     to disable it.
+		 * to disable it.
 		 * @return {@code this} {@link CubbyholeAuthenticationOptionsBuilder}.
 		 * @since 1.0.1
 		 */
@@ -213,16 +205,17 @@ public class CubbyholeAuthenticationOptions {
 		/**
 		 * Build a new {@link CubbyholeAuthenticationOptions} instance. Requires
 		 * {@link #path(String)} or {@link #wrapped()} to be configured.
-		 *
 		 * @return a new {@link CubbyholeAuthenticationOptions}.
 		 */
 		public CubbyholeAuthenticationOptions build() {
 
-			Assert.notNull(initialToken, "Initial Vault Token must not be null");
-			Assert.notNull(path, "Path must not be null");
+			Assert.notNull(this.initialToken, "Initial Vault Token must not be null");
+			Assert.notNull(this.path, "Path must not be null");
 
-			return new CubbyholeAuthenticationOptions(initialToken, path, endpoints,
-					wrappedToken, selfLookup);
+			return new CubbyholeAuthenticationOptions(this.initialToken, this.path, this.endpoints, this.wrappedToken,
+					this.selfLookup);
 		}
+
 	}
+
 }

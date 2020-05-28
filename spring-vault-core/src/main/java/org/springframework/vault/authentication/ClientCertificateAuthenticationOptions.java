@@ -53,7 +53,7 @@ public class ClientCertificateAuthenticationOptions {
 	 * @return the path of the azure authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
@@ -68,7 +68,6 @@ public class ClientCertificateAuthenticationOptions {
 
 		/**
 		 * Configure the mount path, defaults to {@literal azure}.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link ClientCertificateAuthenticationOptionsBuilder}.
 		 */
@@ -82,11 +81,12 @@ public class ClientCertificateAuthenticationOptions {
 
 		/**
 		 * Build a new {@link ClientCertificateAuthenticationOptions} instance.
-		 *
 		 * @return a new {@link ClientCertificateAuthenticationOptions}.
 		 */
 		public ClientCertificateAuthenticationOptions build() {
-			return new ClientCertificateAuthenticationOptions(path);
+			return new ClientCertificateAuthenticationOptions(this.path);
 		}
+
 	}
+
 }

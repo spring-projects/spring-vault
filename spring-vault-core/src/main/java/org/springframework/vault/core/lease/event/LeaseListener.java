@@ -25,8 +25,8 @@ public interface LeaseListener {
 
 	/**
 	 * Callback for a {@link SecretLeaseEvent}
-	 *
 	 * @param leaseEvent the event object, must not be {@literal null}.
 	 */
 	void onLeaseEvent(SecretLeaseEvent leaseEvent);
+
 }

@@ -57,8 +57,7 @@ public class KubernetesAuthenticationOptions {
 	 */
 	private final Supplier<String> jwtSupplier;
 
-	private KubernetesAuthenticationOptions(String path, String role,
-			Supplier<String> jwtSupplier) {
+	private KubernetesAuthenticationOptions(String path, String role, Supplier<String> jwtSupplier) {
 
 		this.path = path;
 		this.role = role;
@@ -76,21 +75,21 @@ public class KubernetesAuthenticationOptions {
 	 * @return the path of the kubernetes authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return name of the role against which the login is being attempted.
 	 */
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	/**
 	 * @return JSON Web Token supplier.
 	 */
 	public Supplier<String> getJwtSupplier() {
-		return jwtSupplier;
+		return this.jwtSupplier;
 	}
 
 	/**
@@ -108,7 +107,6 @@ public class KubernetesAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 *
 		 * @param path must not be {@literal null} or empty.
 		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
 		 */
@@ -122,9 +120,8 @@ public class KubernetesAuthenticationOptions {
 
 		/**
 		 * Configure the role.
-		 *
 		 * @param role name of the role against which the login is being attempted, must
-		 *     not be {@literal null} or empty.
+		 * not be {@literal null} or empty.
 		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
 		 */
 		public KubernetesAuthenticationOptionsBuilder role(String role) {
@@ -137,13 +134,11 @@ public class KubernetesAuthenticationOptions {
 
 		/**
 		 * Configure the {@link Supplier} to obtain a Kubernetes authentication token.
-		 *
 		 * @param jwtSupplier the supplier, must not be {@literal null}.
 		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
 		 * @see KubernetesJwtSupplier
 		 */
-		public KubernetesAuthenticationOptionsBuilder jwtSupplier(
-				Supplier<String> jwtSupplier) {
+		public KubernetesAuthenticationOptionsBuilder jwtSupplier(Supplier<String> jwtSupplier) {
 
 			Assert.notNull(jwtSupplier, "JwtSupplier must not be null");
 
@@ -153,16 +148,16 @@ public class KubernetesAuthenticationOptions {
 
 		/**
 		 * Build a new {@link KubernetesAuthenticationOptions} instance.
-		 *
 		 * @return a new {@link KubernetesAuthenticationOptions}.
 		 */
 		public KubernetesAuthenticationOptions build() {
 
-			Assert.notNull(role, "Role must not be null");
+			Assert.notNull(this.role, "Role must not be null");
 
-			return new KubernetesAuthenticationOptions(path, role,
-					jwtSupplier == null ? new KubernetesServiceAccountTokenFile().cached()
-							: jwtSupplier);
+			return new KubernetesAuthenticationOptions(this.path, this.role,
+					this.jwtSupplier == null ? new KubernetesServiceAccountTokenFile().cached() : this.jwtSupplier);
 		}
+
 	}
+
 }

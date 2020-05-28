@@ -38,13 +38,11 @@ public class VaultInitializationRequest {
 	/**
 	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and
 	 * {@code secretThreshold}.
-	 *
 	 * @param secretShares number of key shares.
 	 * @param secretThreshold number of required keys for unsealing.
 	 * @return a new {@link VaultInitializationRequest}.
 	 */
-	public static VaultInitializationRequest create(int secretShares,
-			int secretThreshold) {
+	public static VaultInitializationRequest create(int secretShares, int secretThreshold) {
 		return new VaultInitializationRequest(secretShares, secretThreshold);
 	}
 
@@ -52,14 +50,14 @@ public class VaultInitializationRequest {
 	 * @return number of secret shares.
 	 */
 	public int getSecretShares() {
-		return secretShares;
+		return this.secretShares;
 	}
 
 	/**
 	 * @return required number of secret shares to unseal Vault.
 	 */
 	public int getSecretThreshold() {
-		return secretThreshold;
+		return this.secretThreshold;
 	}
 
 }

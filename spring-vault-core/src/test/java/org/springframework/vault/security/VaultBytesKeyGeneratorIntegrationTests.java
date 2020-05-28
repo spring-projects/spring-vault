@@ -42,10 +42,10 @@ class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldGenerateRandomBytes() {
 
-		VaultBytesKeyGenerator generator = new VaultBytesKeyGenerator(
-				prepare().getVaultOperations(), "transit", 16);
+		VaultBytesKeyGenerator generator = new VaultBytesKeyGenerator(prepare().getVaultOperations(), "transit", 16);
 
 		assertThat(generator.generateKey()).hasSize(16);
 		assertThat(generator.getKeyLength()).isEqualTo(16);
 	}
+
 }

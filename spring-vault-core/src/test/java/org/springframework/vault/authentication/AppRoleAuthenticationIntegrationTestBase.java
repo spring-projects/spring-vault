@@ -59,8 +59,7 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			withSecretId.put("token_ttl", "60s");
 			withSecretId.put("token_max_ttl", "60s");
 
-			restOperations.postForEntity("auth/approle/role/with-secret-id", withSecretId,
-					Map.class);
+			restOperations.postForEntity("auth/approle/role/with-secret-id", withSecretId, Map.class);
 
 			Map<String, String> noSecretIdRole = new HashMap<>();
 			noSecretIdRole.put("policies", "dummy"); // policy
@@ -68,8 +67,7 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			noSecretIdRole.put("bind_secret_id", "false");
 			noSecretIdRole.put("max_ttl", "60s");
 
-			restOperations.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole,
-					Map.class);
+			restOperations.postForEntity("auth/approle/role/no-secret-id", noSecretIdRole, Map.class);
 
 			return null;
 		});
@@ -80,8 +78,7 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 	}
 
 	String getRoleId(String roleName) {
-		return (String) getVaultOperations()
-				.read(String.format("auth/approle/role/%s/role-id", roleName))
+		return (String) getVaultOperations().read(String.format("auth/approle/role/%s/role-id", roleName))
 				.getRequiredData().get("role_id");
 	}
 
@@ -91,10 +88,8 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-			VaultResponse response = restOperations
-					.exchange("auth/approle/role/with-secret-id/secret-id",
-							HttpMethod.PUT, httpEntity, VaultResponse.class)
-					.getBody();
+			VaultResponse response = restOperations.exchange("auth/approle/role/with-secret-id/secret-id",
+					HttpMethod.PUT, httpEntity, VaultResponse.class).getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
@@ -106,18 +101,15 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-			VaultResponse response = restOperations
-					.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET,
-							httpEntity, VaultResponse.class)
-					.getBody();
+			VaultResponse response = restOperations.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET,
+					httpEntity, VaultResponse.class).getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
 	}
 
 	UnwrappingEndpoints getUnwrappingEndpoints() {
-		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping
-				: UnwrappingEndpoints.Cubbyhole;
+		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping : UnwrappingEndpoints.Cubbyhole;
 	}
 
 	private boolean useSysWrapping() {
@@ -131,4 +123,5 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 		headers.set("X-Vault-Token", Settings.token().getToken());
 		return new HttpEntity<>(null, headers);
 	}
+
 }

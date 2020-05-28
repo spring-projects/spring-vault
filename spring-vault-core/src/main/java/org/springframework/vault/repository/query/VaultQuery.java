@@ -44,7 +44,6 @@ public class VaultQuery {
 
 	/**
 	 * Create a new {@link VaultQuery} given {@link Predicate}.
-	 *
 	 * @param predicate must not be {@literal null}.
 	 */
 	public VaultQuery(Predicate<String> predicate) {
@@ -56,20 +55,18 @@ public class VaultQuery {
 
 	/**
 	 * Evaluate the query against a {@link SecretDocument}.
-	 *
 	 * @param document must not be {@literal null}.
 	 * @return {@literal true} if the predicate matches, {@literal false} otherwise.
 	 */
 	public boolean test(SecretDocument document) {
 
-		Assert.notNull(predicate, "Predicate must not be null");
+		Assert.notNull(this.predicate, "Predicate must not be null");
 
-		return predicate.test(document.getId());
+		return this.predicate.test(document.getId());
 	}
 
 	/**
 	 * Evaluate the query against a {@link String}.
-	 *
 	 * @param id must not be {@literal null}.
 	 * @return {@literal true} if the predicate matches, {@literal false} otherwise.
 	 */
@@ -77,13 +74,12 @@ public class VaultQuery {
 
 		Assert.notNull(id, "Id to test must not be null");
 
-		return predicate.test(id);
+		return this.predicate.test(id);
 	}
 
 	/**
 	 * Compose a new {@link VaultQuery} using predicates of {@literal this} and the
 	 * {@code other} query using logical {@code AND}.
-	 *
 	 * @param other must not be {@literal null}.
 	 * @return a new composed {@link VaultQuery}.
 	 * @see Predicate#and(Predicate)
@@ -95,7 +91,6 @@ public class VaultQuery {
 	/**
 	 * Compose a new {@link VaultQuery} using predicates of {@literal this} and the
 	 * {@code other} query using logical {@code AND}.
-	 *
 	 * @param predicate must not be {@literal null}.
 	 * @return a new composed {@link VaultQuery}.
 	 * @see Predicate#and(Predicate)
@@ -107,7 +102,6 @@ public class VaultQuery {
 	/**
 	 * Compose a new {@link VaultQuery} using predicates of {@literal this} and the
 	 * {@code other} query using logical {@code OR}.
-	 *
 	 * @param other must not be {@literal null}.
 	 * @return a new composed {@link VaultQuery}.
 	 * @see Predicate#and(Predicate)
@@ -120,6 +114,7 @@ public class VaultQuery {
 	 * @return the underlying predicate.
 	 */
 	public Predicate<String> getPredicate() {
-		return predicate;
+		return this.predicate;
 	}
+
 }

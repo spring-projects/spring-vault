@@ -32,18 +32,16 @@ import org.junit.platform.commons.util.AnnotationUtils;
  */
 class VaultVersionExtension implements ExecutionCondition {
 
-	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace
-			.create("vault.version");
+	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace.create("vault.version");
 
 	private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = ConditionEvaluationResult
 			.enabled("@VaultVersion is not present");
 
 	@Override
-	public ConditionEvaluationResult evaluateExecutionCondition(
-			ExtensionContext context) {
+	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
 
-		Optional<RequiresVaultVersion> optional = AnnotationUtils
-				.findAnnotation(context.getElement(), RequiresVaultVersion.class);
+		Optional<RequiresVaultVersion> optional = AnnotationUtils.findAnnotation(context.getElement(),
+				RequiresVaultVersion.class);
 
 		if (!optional.isPresent()) {
 			return ENABLED_BY_DEFAULT;
@@ -51,26 +49,24 @@ class VaultVersionExtension implements ExecutionCondition {
 
 		ExtensionContext.Store store = context.getStore(VAULT);
 
-		Version runningVersion = store.getOrComputeIfAbsent(Version.class,
-				versionClass -> {
+		Version runningVersion = store.getOrComputeIfAbsent(Version.class, versionClass -> {
 
-					VaultInitializer initializer = new VaultInitializer();
-					initializer.initialize();
-					return initializer.prepare().getVersion();
-				}, Version.class);
+			VaultInitializer initializer = new VaultInitializer();
+			initializer.initialize();
+			return initializer.prepare().getVersion();
+		}, Version.class);
 
 		RequiresVaultVersion requiredVersion = optional.get();
 
 		Version required = Version.parse(requiredVersion.value());
 
 		if (runningVersion.isGreaterThanOrEqualTo(required)) {
-			return ConditionEvaluationResult.enabled(String.format(
-					"@VaultVersion check passed current Vault version is %s",
-					runningVersion));
+			return ConditionEvaluationResult
+					.enabled(String.format("@VaultVersion check passed current Vault version is %s", runningVersion));
 		}
 
 		return ConditionEvaluationResult.disabled(String.format(
-				"@VaultVersion requires since version %s, current Vault version is %s",
-				required, runningVersion));
+				"@VaultVersion requires since version %s, current Vault version is %s", required, runningVersion));
 	}
+
 }

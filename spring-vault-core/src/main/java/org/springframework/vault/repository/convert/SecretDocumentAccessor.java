@@ -42,9 +42,8 @@ class SecretDocumentAccessor {
 
 	/**
 	 * Creates a new {@link SecretDocumentAccessor} for the given {@link SecretDocument}.
-	 *
 	 * @param document must be a {@link SecretDocument} effectively, must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 */
 	SecretDocumentAccessor(SecretDocument document) {
 
@@ -57,9 +56,8 @@ class SecretDocumentAccessor {
 	/**
 	 * Creates a new {@link SecretDocumentAccessor} for the given {@link SecretDocument}
 	 * and {@link Map body}.
-	 *
 	 * @param document must be a {@link SecretDocument} effectively, must not be
-	 *     {@literal null}
+	 * {@literal null}
 	 * @param body must not be {@literal null}.
 	 */
 	private SecretDocumentAccessor(SecretDocument document, Map<String, Object> body) {
@@ -76,7 +74,6 @@ class SecretDocumentAccessor {
 	 * coordinates defined through the given {@link VaultPersistentProperty}. By default
 	 * this will be the plain field name. But field names might also consist of path
 	 * traversals so we might need to create intermediate {@link Map}s.
-	 *
 	 * @param prop must not be {@literal null}.
 	 * @param value
 	 */
@@ -116,7 +113,6 @@ class SecretDocumentAccessor {
 	 * this will be a direct field but the method will also transparently resolve nested
 	 * values the {@link VaultPersistentProperty} might refer to through a path expression
 	 * in the field name metadata.
-	 *
 	 * @param property must not be {@literal null}.
 	 * @return
 	 */
@@ -152,7 +148,6 @@ class SecretDocumentAccessor {
 	/**
 	 * Returns whether the underlying {@link SecretDocument} has a value ({@literal null}
 	 * or non-{@literal null}) for the given {@link VaultPersistentProperty}.
-	 *
 	 * @param property must not be {@literal null}.
 	 * @return
 	 */
@@ -191,7 +186,6 @@ class SecretDocumentAccessor {
 	/**
 	 * Returns the given source object as map, i.e. maps as is or {@literal null}
 	 * otherwise.
-	 *
 	 * @param source can be {@literal null}.
 	 * @return
 	 */
@@ -210,14 +204,12 @@ class SecretDocumentAccessor {
 	 * Returns the {@link Map} which either already exists in the given source under the
 	 * given key, or creates a new nested one, registers it with the source and returns
 	 * it.
-	 *
 	 * @param key must not be {@literal null} or empty.
 	 * @param source must not be {@literal null}.
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getOrCreateNestedDocument(String key,
-			Map<String, Object> source) {
+	private static Map<String, Object> getOrCreateNestedDocument(String key, Map<String, Object> source) {
 
 		Object existing = source.get(key);
 
@@ -232,7 +224,7 @@ class SecretDocumentAccessor {
 	}
 
 	public Map<String, Object> getBody() {
-		return body;
+		return this.body;
 	}
 
 	public void setId(String id) {
@@ -243,7 +235,6 @@ class SecretDocumentAccessor {
 	 * Obtains a nested {@link SecretDocumentAccessor} for a
 	 * {@link VaultPersistentProperty}. Nested accessors allows mapping of structured
 	 * hierarchies and represent accessors to nested maps.
-	 *
 	 * @param property must not be {@literal null}.
 	 * @return
 	 */
@@ -257,6 +248,7 @@ class SecretDocumentAccessor {
 			put(property, body);
 		}
 
-		return new SecretDocumentAccessor(document, body);
+		return new SecretDocumentAccessor(this.document, body);
 	}
+
 }

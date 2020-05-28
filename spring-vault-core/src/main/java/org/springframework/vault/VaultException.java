@@ -27,7 +27,6 @@ public class VaultException extends NestedRuntimeException {
 
 	/**
 	 * Create a {@code VaultException} with the specified detail message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultException(String msg) {
@@ -37,11 +36,11 @@ public class VaultException extends NestedRuntimeException {
 	/**
 	 * Create a {@code VaultException} with the specified detail message and nested
 	 * exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
 	public VaultException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

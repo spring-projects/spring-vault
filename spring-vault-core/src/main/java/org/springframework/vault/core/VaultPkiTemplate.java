@@ -48,7 +48,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	/**
 	 * Create a new {@link VaultPkiTemplate} given {@link VaultOperations} and the mount
 	 * {@code path}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -62,20 +61,19 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	}
 
 	@Override
-	public VaultCertificateResponse issueCertificate(String roleName,
-			VaultCertificateRequest certificateRequest) throws VaultException {
+	public VaultCertificateResponse issueCertificate(String roleName, VaultCertificateRequest certificateRequest)
+			throws VaultException {
 
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
 
-		return requestCertificate(roleName, "{path}/issue/{roleName}",
-				createIssueRequest(certificateRequest), VaultCertificateResponse.class);
+		return requestCertificate(roleName, "{path}/issue/{roleName}", createIssueRequest(certificateRequest),
+				VaultCertificateResponse.class);
 	}
 
 	@Override
-	public VaultSignCertificateRequestResponse signCertificateRequest(String roleName,
-			String csr, VaultCertificateRequest certificateRequest)
-			throws VaultException {
+	public VaultSignCertificateRequestResponse signCertificateRequest(String roleName, String csr,
+			VaultCertificateRequest certificateRequest) throws VaultException {
 
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.hasText(csr, "CSR name must not be empty");
@@ -84,20 +82,18 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Map<String, Object> body = createIssueRequest(certificateRequest);
 		body.put("csr", csr);
 
-		return requestCertificate(roleName, "{path}/sign/{roleName}", body,
-				VaultSignCertificateRequestResponse.class);
+		return requestCertificate(roleName, "{path}/sign/{roleName}", body, VaultSignCertificateRequestResponse.class);
 	}
 
-	private <T> T requestCertificate(String roleName, String requestPath,
-			Map<String, Object> request, Class<T> responseType) {
+	private <T> T requestCertificate(String roleName, String requestPath, Map<String, Object> request,
+			Class<T> responseType) {
 
 		request.put("format", "der");
 
-		T response = vaultOperations.doWithSession(restOperations -> {
+		T response = this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				return restOperations.postForObject(requestPath, request, responseType,
-						path, roleName);
+				return restOperations.postForObject(requestPath, request, responseType, this.path, roleName);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -114,12 +110,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
 
-		vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				restOperations.postForObject("{path}/revoke",
-						Collections.singletonMap("serial_number", serialNumber),
-						Map.class, path);
+				restOperations.postForObject("{path}/revoke", Collections.singletonMap("serial_number", serialNumber),
+						Map.class, this.path);
 
 				return null;
 			}
@@ -134,13 +129,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.notNull(encoding, "Encoding must not be null");
 
-		return vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSession(restOperations -> {
 
-			String requestPath = encoding == Encoding.DER ? "{path}/crl"
-					: "{path}/crl/pem";
+			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {
-				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath,
-						byte[].class, path);
+				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path);
 
 				if (response.getStatusCode() == HttpStatus.OK) {
 					return new ByteArrayInputStream(response.getBody());
@@ -157,12 +150,10 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	/**
 	 * Create a request body stub for {@code pki/issue} and {@code pki/sign} from
 	 * {@link VaultCertificateRequest}.
-	 *
 	 * @param certificateRequest must not be {@literal null}.
 	 * @return the body as {@link Map}.
 	 */
-	private static Map<String, Object> createIssueRequest(
-			VaultCertificateRequest certificateRequest) {
+	private static Map<String, Object> createIssueRequest(VaultCertificateRequest certificateRequest) {
 
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
 
@@ -170,18 +161,17 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		request.put("common_name", certificateRequest.getCommonName());
 
 		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put("alt_names", StringUtils
-					.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
+			request.put("alt_names", StringUtils.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
 		}
 
 		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put("ip_sans", StringUtils.collectionToDelimitedString(
-					certificateRequest.getIpSubjectAltNames(), ","));
+			request.put("ip_sans",
+					StringUtils.collectionToDelimitedString(certificateRequest.getIpSubjectAltNames(), ","));
 		}
 
 		if (!certificateRequest.getUriSubjectAltNames().isEmpty()) {
-			request.put("uri_sans", StringUtils.collectionToDelimitedString(
-					certificateRequest.getUriSubjectAltNames(), ","));
+			request.put("uri_sans",
+					StringUtils.collectionToDelimitedString(certificateRequest.getUriSubjectAltNames(), ","));
 		}
 
 		if (certificateRequest.getTtl() != null) {
@@ -193,4 +183,5 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		}
 		return request;
 	}
+
 }

@@ -28,8 +28,8 @@ import org.springframework.vault.repository.mapping.VaultPersistentEntity;
  * @author Mark Paluch
  * @since 2.0
  */
-public class MappingVaultEntityInformation<T, ID> extends
-		PersistentEntityInformation<T, ID> implements VaultEntityInformation<T, ID> {
+public class MappingVaultEntityInformation<T, ID> extends PersistentEntityInformation<T, ID>
+		implements VaultEntityInformation<T, ID> {
 
 	/**
 	 * @param entity
@@ -45,4 +45,5 @@ public class MappingVaultEntityInformation<T, ID> extends
 					entity.getName()));
 		}
 	}
+
 }

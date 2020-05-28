@@ -40,8 +40,7 @@ public class VaultInitializer {
 
 	public static final String VERSIONING_INTRODUCED_WITH_VALUE = "0.10.0";
 
-	private static final Version VERSIONING_INTRODUCED_WITH = Version
-			.parse(VERSIONING_INTRODUCED_WITH_VALUE);
+	private static final Version VERSIONING_INTRODUCED_WITH = Version.parse(VERSIONING_INTRODUCED_WITH_VALUE);
 
 	private final VaultEndpoint vaultEndpoint;
 
@@ -62,12 +61,10 @@ public class VaultInitializer {
 	/**
 	 * Create a new {@link VaultInitializer} with the given {@link SslConfiguration} and
 	 * {@link VaultEndpoint}.
-	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 */
-	public VaultInitializer(SslConfiguration sslConfiguration,
-			VaultEndpoint vaultEndpoint) {
+	public VaultInitializer(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
 
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
@@ -75,14 +72,13 @@ public class VaultInitializer {
 		RestTemplate restTemplate = TestRestTemplateFactory.create(sslConfiguration);
 		WebClient webClient = TestWebClientFactory.create(sslConfiguration);
 
-		VaultTemplate vaultTemplate = new VaultTemplate(
-				TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
+		VaultTemplate vaultTemplate = new VaultTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				restTemplate.getRequestFactory(), new PreparingSessionManager());
 
 		this.token = Settings.token();
 
-		this.prepareVault = new PrepareVault(webClient,
-				TestRestTemplateFactory.create(sslConfiguration), vaultTemplate);
+		this.prepareVault = new PrepareVault(webClient, TestRestTemplateFactory.create(sslConfiguration),
+				vaultTemplate);
 		this.vaultEndpoint = vaultEndpoint;
 	}
 
@@ -91,11 +87,10 @@ public class VaultInitializer {
 		assertRunningVault();
 
 		if (!this.prepareVault.isAvailable()) {
-			this.token = prepareVault.initializeVault();
+			this.token = this.prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 
-			if (this.prepareVault.getVersion()
-					.isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
+			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
 			}
@@ -106,13 +101,12 @@ public class VaultInitializer {
 
 		try (Socket socket = new Socket()) {
 
-			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"),
-					vaultEndpoint.getPort()));
+			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), this.vaultEndpoint.getPort()));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException(String.format(
-					"Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-					vaultEndpoint.getPort(), getClass().getSimpleName()));
+			throw new IllegalStateException(
+					String.format("Vault is not running on localhost:%d which is required to run a test using @Rule %s",
+							this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 	}
 
@@ -120,14 +114,16 @@ public class VaultInitializer {
 	 * @return the {@link PrepareVault} object.
 	 */
 	public PrepareVault prepare() {
-		return prepareVault;
+		return this.prepareVault;
 	}
 
 	private class PreparingSessionManager implements SessionManager {
 
 		@Override
 		public VaultToken getSessionToken() {
-			return token;
+			return VaultInitializer.this.token;
 		}
+
 	}
+
 }

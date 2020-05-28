@@ -40,7 +40,6 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	/**
 	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
 	 * from a {@code path}.
-	 *
 	 * @param path path to the file holding the credential.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -51,7 +50,6 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	/**
 	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
 	 * from a {@link File} handle.
-	 *
 	 * @param file path to the file holding the credential.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -62,14 +60,12 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	/**
 	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
 	 * from a {@link Resource} handle.
-	 *
 	 * @param resource resource pointing to the resource holding the credential.
 	 * @throws IllegalArgumentException if the {@link Resource} does not exist.
 	 */
 	public ResourceCredentialSupplier(Resource resource) {
 
-		Assert.isTrue(resource.exists(),
-				() -> String.format("Resource %s does not exist", resource));
+		Assert.isTrue(resource.exists(), () -> String.format("Resource %s does not exist", resource));
 
 		this.resource = resource;
 	}
@@ -81,15 +77,12 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 			return new String(readToken(this.resource), StandardCharsets.US_ASCII);
 		}
 		catch (IOException e) {
-			throw new VaultException(
-					String.format("Credential retrieval from %s failed", this.resource),
-					e);
+			throw new VaultException(String.format("Credential retrieval from %s failed", this.resource), e);
 		}
 	}
 
 	/**
 	 * Read the token from {@link Resource}.
-	 *
 	 * @param resource the resource to read from, must not be {@literal null}.
 	 * @return the new byte array that has been copied to (possibly empty).
 	 * @throws IOException in case of I/O errors.
@@ -102,4 +95,5 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 			return StreamUtils.copyToByteArray(is);
 		}
 	}
+
 }

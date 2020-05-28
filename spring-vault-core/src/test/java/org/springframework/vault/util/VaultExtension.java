@@ -30,8 +30,7 @@ import org.junit.jupiter.api.extension.ParameterResolver;
  */
 public class VaultExtension implements BeforeAllCallback, ParameterResolver {
 
-	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace
-			.create("vault.initializer");
+	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace.create("vault.initializer");
 
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -41,21 +40,20 @@ public class VaultExtension implements BeforeAllCallback, ParameterResolver {
 	}
 
 	@Override
-	public boolean supportsParameter(ParameterContext parameterContext,
-			ExtensionContext extensionContext) throws ParameterResolutionException {
-		return parameterContext.getParameter().getType()
-				.isAssignableFrom(VaultInitializer.class);
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+			throws ParameterResolutionException {
+		return parameterContext.getParameter().getType().isAssignableFrom(VaultInitializer.class);
 	}
 
 	@Override
-	public Object resolveParameter(ParameterContext parameterContext,
-			ExtensionContext extensionContext) throws ParameterResolutionException {
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+			throws ParameterResolutionException {
 		return getInitializer(extensionContext);
 	}
 
 	private VaultInitializer getInitializer(ExtensionContext extensionContext) {
 		ExtensionContext.Store store = extensionContext.getStore(VAULT);
-		return store.getOrComputeIfAbsent(VaultInitializer.class,
-				k -> new VaultInitializer(), VaultInitializer.class);
+		return store.getOrComputeIfAbsent(VaultInitializer.class, k -> new VaultInitializer(), VaultInitializer.class);
 	}
+
 }

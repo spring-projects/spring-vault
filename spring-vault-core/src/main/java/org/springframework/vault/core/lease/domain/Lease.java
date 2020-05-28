@@ -46,7 +46,6 @@ public class Lease {
 
 	/**
 	 * Create a new {@link Lease}.
-	 *
 	 * @param leaseId must not be empty or {@literal null}.
 	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
 	 * @param renewable {@literal true} if this lease is renewable.
@@ -64,7 +63,6 @@ public class Lease {
 
 	/**
 	 * Create a new {@link Lease}.
-	 *
 	 * @param leaseId must not be empty or {@literal null}.
 	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
 	 * @param renewable {@literal true} if this lease is renewable.
@@ -83,7 +81,6 @@ public class Lease {
 	/**
 	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
 	 * duration.
-	 *
 	 * @param leaseDuration the lease duration in seconds, must not be negative.
 	 * @return the created {@link Lease}
 	 * @since 1.1
@@ -100,7 +97,6 @@ public class Lease {
 	/**
 	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
 	 * duration.
-	 *
 	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
 	 * @return the created {@link Lease}
 	 * @since 2.0
@@ -115,7 +111,6 @@ public class Lease {
 
 	/**
 	 * Factory method to return a non-renewable, zero-duration {@link Lease}.
-	 *
 	 * @return a non-renewable, zero-duration {@link Lease}.
 	 */
 	public static Lease none() {
@@ -127,7 +122,7 @@ public class Lease {
 	 * @since 1.1
 	 */
 	public boolean hasLeaseId() {
-		return leaseId != null;
+		return this.leaseId != null;
 	}
 
 	/**
@@ -135,21 +130,21 @@ public class Lease {
 	 */
 	@Nullable
 	public String getLeaseId() {
-		return leaseId;
+		return this.leaseId;
 	}
 
 	/**
 	 * @return the lease duration in seconds.
 	 */
 	public Duration getLeaseDuration() {
-		return leaseDuration;
+		return this.leaseDuration;
 	}
 
 	/**
 	 * @return {@literal true} if the lease is renewable.
 	 */
 	public boolean isRenewable() {
-		return renewable;
+		return this.renewable;
 	}
 
 	@Override
@@ -162,19 +157,19 @@ public class Lease {
 
 		Lease lease = (Lease) o;
 
-		if (leaseDuration != lease.leaseDuration)
+		if (this.leaseDuration != lease.leaseDuration)
 			return false;
-		if (renewable != lease.renewable)
+		if (this.renewable != lease.renewable)
 			return false;
-		return leaseId != null ? leaseId.equals(lease.leaseId) : lease.leaseId == null;
+		return this.leaseId != null ? this.leaseId.equals(lease.leaseId) : lease.leaseId == null;
 	}
 
 	@Override
 	public int hashCode() {
 
-		int result = leaseId != null ? leaseId.hashCode() : 0;
-		result = 31 * result + leaseDuration.hashCode();
-		result = 31 * result + (renewable ? 1 : 0);
+		int result = this.leaseId != null ? this.leaseId.hashCode() : 0;
+		result = 31 * result + this.leaseDuration.hashCode();
+		result = 31 * result + (this.renewable ? 1 : 0);
 		return result;
 	}
 
@@ -183,10 +178,11 @@ public class Lease {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [leaseId='").append(leaseId).append('\'');
-		sb.append(", leaseDuration=").append(leaseDuration);
-		sb.append(", renewable=").append(renewable);
+		sb.append(" [leaseId='").append(this.leaseId).append('\'');
+		sb.append(", leaseDuration=").append(this.leaseDuration);
+		sb.append(", renewable=").append(this.renewable);
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

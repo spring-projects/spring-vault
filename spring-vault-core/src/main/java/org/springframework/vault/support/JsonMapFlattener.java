@@ -62,7 +62,6 @@ public abstract class JsonMapFlattener {
 	/**
 	 * Flatten a hierarchical {@link Map} into a flat {@link Map} with key names using
 	 * property dot notation.
-	 *
 	 * @param inputMap must not be {@literal null}.
 	 * @return the resulting {@link Map}.
 	 */
@@ -72,8 +71,7 @@ public abstract class JsonMapFlattener {
 
 		Map<String, Object> resultMap = new LinkedHashMap<>();
 
-		doFlatten("", inputMap.entrySet().iterator(), resultMap,
-				UnaryOperator.identity());
+		doFlatten("", inputMap.entrySet().iterator(), resultMap, UnaryOperator.identity());
 
 		return resultMap;
 	}
@@ -81,28 +79,23 @@ public abstract class JsonMapFlattener {
 	/**
 	 * Flatten a hierarchical {@link Map} into a flat {@link Map} with key names using
 	 * property dot notation.
-	 *
 	 * @param inputMap must not be {@literal null}.
 	 * @return the resulting {@link Map}.
 	 * @since 2.0
 	 */
-	public static Map<String, String> flattenToStringMap(
-			Map<String, ? extends Object> inputMap) {
+	public static Map<String, String> flattenToStringMap(Map<String, ? extends Object> inputMap) {
 
 		Assert.notNull(inputMap, "Input Map must not be null");
 
 		Map<String, String> resultMap = new LinkedHashMap<>();
 
-		doFlatten("", inputMap.entrySet().iterator(), resultMap,
-				it -> it == null ? null : it.toString());
+		doFlatten("", inputMap.entrySet().iterator(), resultMap, it -> it == null ? null : it.toString());
 
 		return resultMap;
 	}
 
-	private static void doFlatten(String propertyPrefix,
-			Iterator<? extends Entry<String, ?>> inputMap,
-			Map<String, ? extends Object> resultMap,
-			Function<Object, Object> valueTransformer) {
+	private static void doFlatten(String propertyPrefix, Iterator<? extends Entry<String, ?>> inputMap,
+			Map<String, ? extends Object> resultMap, Function<Object, Object> valueTransformer) {
 
 		if (StringUtils.hasText(propertyPrefix)) {
 			propertyPrefix = propertyPrefix + ".";
@@ -111,40 +104,36 @@ public abstract class JsonMapFlattener {
 		while (inputMap.hasNext()) {
 
 			Entry<String, ? extends Object> entry = inputMap.next();
-			flattenElement(propertyPrefix.concat(entry.getKey()), entry.getValue(),
-					resultMap, valueTransformer);
+			flattenElement(propertyPrefix.concat(entry.getKey()), entry.getValue(), resultMap, valueTransformer);
 		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void flattenElement(String propertyPrefix, @Nullable Object source,
-			Map<String, ?> resultMap, Function<Object, Object> valueTransformer) {
+	private static void flattenElement(String propertyPrefix, @Nullable Object source, Map<String, ?> resultMap,
+			Function<Object, Object> valueTransformer) {
 
 		if (source instanceof Iterable) {
-			flattenCollection(propertyPrefix, (Iterable<Object>) source, resultMap,
-					valueTransformer);
+			flattenCollection(propertyPrefix, (Iterable<Object>) source, resultMap, valueTransformer);
 			return;
 		}
 
 		if (source instanceof Map) {
-			doFlatten(propertyPrefix, ((Map<String, ?>) source).entrySet().iterator(),
-					resultMap, valueTransformer);
+			doFlatten(propertyPrefix, ((Map<String, ?>) source).entrySet().iterator(), resultMap, valueTransformer);
 			return;
 		}
 
 		((Map) resultMap).put(propertyPrefix, valueTransformer.apply(source));
 	}
 
-	private static void flattenCollection(String propertyPrefix,
-			Iterable<Object> iterable, Map<String, ?> resultMap,
+	private static void flattenCollection(String propertyPrefix, Iterable<Object> iterable, Map<String, ?> resultMap,
 			Function<Object, Object> valueTransformer) {
 
 		int counter = 0;
 
 		for (Object element : iterable) {
-			flattenElement(propertyPrefix + "[" + counter + "]", element, resultMap,
-					valueTransformer);
+			flattenElement(propertyPrefix + "[" + counter + "]", element, resultMap, valueTransformer);
 			counter++;
 		}
 	}
+
 }

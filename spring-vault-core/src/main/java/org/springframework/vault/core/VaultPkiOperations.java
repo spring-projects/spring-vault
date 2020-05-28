@@ -45,7 +45,6 @@ public interface VaultPkiOperations {
 	 * backend given a {@code roleName} and {@link VaultCertificateRequest}. The issuing
 	 * CA certificate is returned as well, so that only the root CA need be in a client's
 	 * trust store. Certificates use DER format and are base64 encoded.
-	 *
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param certificateRequest must not be {@literal null}.
 	 * @return the {@link VaultCertificateResponse} containing a {@link CertificateBundle}
@@ -54,15 +53,14 @@ public interface VaultPkiOperations {
 	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
 	 * /pki/issue/[role name]</a>
 	 */
-	VaultCertificateResponse issueCertificate(String roleName,
-			VaultCertificateRequest certificateRequest) throws VaultException;
+	VaultCertificateResponse issueCertificate(String roleName, VaultCertificateRequest certificateRequest)
+			throws VaultException;
 
 	/**
 	 * Signs a CSR using Vault's PKI backend given a {@code roleName}, {@code csr} and
 	 * {@link VaultCertificateRequest}. The issuing CA certificate is returned as well, so
 	 * that only the root CA need be in a client's trust store. Certificates use DER
 	 * format and are base64 encoded.
-	 *
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param csr must not be empty or {@literal null}.
 	 * @param certificateRequest must not be {@literal null}.
@@ -73,14 +71,13 @@ public interface VaultPkiOperations {
 	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
 	 * /pki/sign/[role name]</a>
 	 */
-	VaultSignCertificateRequestResponse signCertificateRequest(String roleName,
-			String csr, VaultCertificateRequest certificateRequest) throws VaultException;
+	VaultSignCertificateRequestResponse signCertificateRequest(String roleName, String csr,
+			VaultCertificateRequest certificateRequest) throws VaultException;
 
 	/**
 	 * Revokes a certificate using its serial number. This is an alternative option to the
 	 * standard method of revoking using Vault lease IDs. A successful revocation will
 	 * rotate the CRL
-	 *
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @since 2.0
 	 * @see <a href=
@@ -97,7 +94,6 @@ public interface VaultPkiOperations {
 	 * <p>
 	 * If Vault reports no content under the CRL URL, then the result of this method call
 	 * is {@literal null}.
-	 *
 	 * @return {@link java.io.InputStream} containing the encoded CRL or {@literal null}
 	 * if Vault responds with 204 No Content.
 	 * @since 2.0
@@ -108,6 +104,9 @@ public interface VaultPkiOperations {
 	InputStream getCrl(Encoding encoding) throws VaultException;
 
 	enum Encoding {
+
 		DER, PEM,
+
 	}
+
 }

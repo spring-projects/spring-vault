@@ -35,12 +35,11 @@ public abstract class AbstractResult<V> {
 	 * Create a {@link AbstractResult} completed without an {@link VaultException}.
 	 */
 	protected AbstractResult() {
-		exception = null;
+		this.exception = null;
 	}
 
 	/**
 	 * Create a {@link AbstractResult} completed with an {@link VaultException}.
-	 *
 	 * @param exception must not be {@literal null}.
 	 */
 	protected AbstractResult(VaultException exception) {
@@ -54,28 +53,25 @@ public abstract class AbstractResult<V> {
 	 * Returns {@literal true} if and only if the batch operation was completed
 	 * successfully. Use {@link #getCause()} to obtain the actual exception if the
 	 * operation completed with an error.
-	 *
 	 * @return {@literal true} if the batch operation was completed successfully.
 	 */
 	public boolean isSuccessful() {
-		return exception == null;
+		return this.exception == null;
 	}
 
 	/**
 	 * Returns the cause of the failed operation if the operation completed with an error.
-	 *
 	 * @return the cause of the failure or {@literal null} if succeeded.
 	 */
 	@Nullable
 	public Exception getCause() {
-		return exception;
+		return this.exception;
 	}
 
 	/**
 	 * Return the result or throw a {@link VaultException} if the operation completed with
 	 * an error. Use {@link #isSuccessful()} to verify the success status of this result
 	 * without throwing an exception.
-	 *
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
@@ -86,7 +82,7 @@ public abstract class AbstractResult<V> {
 			return get0();
 		}
 
-		throw new VaultException(exception.getMessage());
+		throw new VaultException(this.exception.getMessage());
 	}
 
 	/**
@@ -94,4 +90,5 @@ public abstract class AbstractResult<V> {
 	 */
 	@Nullable
 	protected abstract V get0();
+
 }

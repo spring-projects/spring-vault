@@ -40,9 +40,7 @@ public enum UnwrappingEndpoints {
 
 		@Override
 		VaultResponse unwrap(VaultResponse vaultResponse) {
-			return VaultResponses.unwrap(
-					(String) vaultResponse.getRequiredData().get("response"),
-					VaultResponse.class);
+			return VaultResponses.unwrap((String) vaultResponse.getRequiredData().get("response"), VaultResponse.class);
 		}
 
 		@Override
@@ -75,14 +73,12 @@ public enum UnwrappingEndpoints {
 
 	/**
 	 * Retrieve the path of the unwrapping endpoint.
-	 *
 	 * @return the unwrapping endpoint path.
 	 */
 	abstract String getPath();
 
 	/**
 	 * Unwrap the response data from {@link VaultResponses}.
-	 *
 	 * @param response the raw response entity.
 	 * @return unwrapped {@link VaultResponse}.
 	 */
@@ -90,8 +86,8 @@ public enum UnwrappingEndpoints {
 
 	/**
 	 * Unwrapping request {@link HttpMethod method}.
-	 *
 	 * @return the unwrapping request {@link HttpMethod method}.
 	 */
 	abstract HttpMethod getUnwrapRequestMethod();
+
 }

@@ -27,4 +27,5 @@ import java.util.Map;
  * @author Mark Paluch
  */
 public class VaultResponse extends VaultResponseSupport<Map<String, Object>> {
+
 }

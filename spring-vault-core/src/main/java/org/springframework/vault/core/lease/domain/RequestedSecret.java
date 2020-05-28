@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 public class RequestedSecret {
 
 	private final String path;
+
 	private final Mode mode;
 
 	private RequestedSecret(String path, Mode mode) {
@@ -46,7 +47,6 @@ public class RequestedSecret {
 	 * Create a renewable {@link RequestedSecret} at {@code path}. A lease associated with
 	 * this secret will be renewed if the lease is qualified for renewal. The lease is no
 	 * longer valid after expiry.
-	 *
 	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @return the renewable {@link RequestedSecret}.
 	 */
@@ -58,7 +58,6 @@ public class RequestedSecret {
 	 * Create a rotating {@link RequestedSecret} at {@code path}. A lease associated with
 	 * this secret will be renewed if the lease is qualified for renewal. Once the lease
 	 * expires, a new secret with a new lease is obtained.
-	 *
 	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @return the rotating {@link RequestedSecret}.
 	 */
@@ -68,7 +67,6 @@ public class RequestedSecret {
 
 	/**
 	 * Create a {@link RequestedSecret} given {@link Mode} at {@code path}.
-	 *
 	 * @param mode must not be {@literal null}.
 	 * @param path must not be {@literal null} or empty, must not start with a slash.
 	 * @see #rotating(String)
@@ -86,7 +84,7 @@ public class RequestedSecret {
 	 * @return the Vault path of the requested secret.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
@@ -94,7 +92,7 @@ public class RequestedSecret {
 	 * @see Mode
 	 */
 	public Mode getMode() {
-		return mode;
+		return this.mode;
 	}
 
 	@Override
@@ -107,16 +105,16 @@ public class RequestedSecret {
 
 		RequestedSecret that = (RequestedSecret) o;
 
-		if (!path.equals(that.path))
+		if (!this.path.equals(that.path))
 			return false;
-		return mode == that.mode;
+		return this.mode == that.mode;
 	}
 
 	@Override
 	public int hashCode() {
 
-		int result = path.hashCode();
-		result = 31 * result + mode.hashCode();
+		int result = this.path.hashCode();
+		result = 31 * result + this.mode.hashCode();
 		return result;
 	}
 
@@ -125,8 +123,8 @@ public class RequestedSecret {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [path='").append(path).append('\'');
-		sb.append(", mode=").append(mode);
+		sb.append(" [path='").append(this.path).append('\'');
+		sb.append(", mode=").append(this.mode);
 		sb.append(']');
 		return sb.toString();
 	}
@@ -143,5 +141,7 @@ public class RequestedSecret {
 		 * the previous lease expires its max lease time.
 		 */
 		ROTATE;
+
 	}
+
 }

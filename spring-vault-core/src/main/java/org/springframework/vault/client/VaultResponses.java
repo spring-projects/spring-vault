@@ -60,13 +60,11 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s: %s",
-					e.getRawStatusCode(), e.getStatusText(), message), e);
+			return new VaultException(
+					String.format("Status %s %s: %s", e.getRawStatusCode(), e.getStatusText(), message), e);
 		}
 
-		return new VaultException(
-				String.format("Status %s %s", e.getRawStatusCode(), e.getStatusText()),
-				e);
+		return new VaultException(String.format("Status %s %s", e.getRawStatusCode(), e.getStatusText()), e);
 	}
 
 	/**
@@ -83,20 +81,17 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s %s [%s]: %s",
-					e.getRawStatusCode(), e.getStatusText(), path, message), e);
+			return new VaultException(
+					String.format("Status %s %s [%s]: %s", e.getRawStatusCode(), e.getStatusText(), path, message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s [%s]", e.getRawStatusCode(),
-				e.getStatusText(), path), e);
+		return new VaultException(String.format("Status %s %s [%s]", e.getRawStatusCode(), e.getStatusText(), path), e);
 	}
 
-	public static VaultException buildException(HttpStatus statusCode, String path,
-			String message) {
+	public static VaultException buildException(HttpStatus statusCode, String path, String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(
-					String.format("Status %s [%s]: %s", statusCode, path, message));
+			return new VaultException(String.format("Status %s [%s]: %s", statusCode, path, message));
 		}
 
 		return new VaultException(String.format("Status %s [%s]", statusCode, path));
@@ -140,7 +135,6 @@ public abstract class VaultResponses {
 
 	/**
 	 * Obtain the error message from a JSON response.
-	 *
 	 * @param json must not be {@literal null}.
 	 * @return extracted error string.
 	 */
@@ -152,8 +146,7 @@ public abstract class VaultResponses {
 		if (json.contains("\"errors\":")) {
 
 			try {
-				Map<String, Object> map = OBJECT_MAPPER.readValue(json.getBytes(),
-						Map.class);
+				Map<String, Object> map = OBJECT_MAPPER.readValue(json.getBytes(), Map.class);
 				if (map.containsKey("errors")) {
 
 					Collection<String> errors = (Collection<String>) map.get("errors");
@@ -173,7 +166,6 @@ public abstract class VaultResponses {
 
 	/**
 	 * Unwrap a wrapped response created by Vault Response Wrapping
-	 *
 	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
 	 * @param responseType the type of the return value.
 	 * @return the unwrapped response.
@@ -200,4 +192,5 @@ public abstract class VaultResponses {
 			throw new IllegalStateException(e);
 		}
 	}
+
 }

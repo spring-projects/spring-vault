@@ -51,15 +51,12 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.h
  */
 public class ClientHttpConnectorFactory {
 
-	private static final boolean REACTOR_NETTY_PRESENT = isPresent(
-			"reactor.netty.http.client.HttpClient");
+	private static final boolean REACTOR_NETTY_PRESENT = isPresent("reactor.netty.http.client.HttpClient");
 
-	private static final boolean JETTY_PRESENT = isPresent(
-			"org.eclipse.jetty.client.HttpClient");
+	private static final boolean JETTY_PRESENT = isPresent("org.eclipse.jetty.client.HttpClient");
 
 	/**
 	 * Checks for presence of all {@code classNames} using this class' classloader.
-	 *
 	 * @param classNames
 	 * @return {@literal true} if all classes are present; {@literal false} if at least
 	 * one class cannot be found.
@@ -67,8 +64,7 @@ public class ClientHttpConnectorFactory {
 	private static boolean isPresent(String... classNames) {
 
 		for (String className : classNames) {
-			if (!ClassUtils.isPresent(className,
-					ClientHttpConnectorFactory.class.getClassLoader())) {
+			if (!ClassUtils.isPresent(className, ClientHttpConnectorFactory.class.getClassLoader())) {
 				return false;
 			}
 		}
@@ -79,13 +75,11 @@ public class ClientHttpConnectorFactory {
 	/**
 	 * Create a {@link ClientHttpConnector} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
-	 *
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
 	 * @return a new {@link ClientHttpConnector}.
 	 */
-	public static ClientHttpConnector create(ClientOptions options,
-			SslConfiguration sslConfiguration) {
+	public static ClientHttpConnector create(ClientOptions options, SslConfiguration sslConfiguration) {
 
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
@@ -98,23 +92,20 @@ public class ClientHttpConnectorFactory {
 			return JettyClient.usingJetty(options, sslConfiguration);
 		}
 
-		throw new IllegalStateException(
-				"No supported Reactive Http Client library available (Reactor Netty, Jetty)");
+		throw new IllegalStateException("No supported Reactive Http Client library available (Reactor Netty, Jetty)");
 	}
 
-	private static void configureSsl(SslConfiguration sslConfiguration,
-			SslContextBuilder sslContextBuilder) {
+	private static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
 
 		try {
 
 			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-				sslContextBuilder.trustManager(createTrustManagerFactory(
-						sslConfiguration.getTrustStoreConfiguration()));
+				sslContextBuilder
+						.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
 			}
 
 			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-				sslContextBuilder.keyManager(createKeyManagerFactory(
-						sslConfiguration.getKeyStoreConfiguration(),
+				sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
 						sslConfiguration.getKeyConfiguration()));
 			}
 		}
@@ -130,8 +121,7 @@ public class ClientHttpConnectorFactory {
 	 */
 	static class ReactorNetty {
 
-		static ClientHttpConnector usingReactorNetty(ClientOptions options,
-				SslConfiguration sslConfiguration) {
+		static ClientHttpConnector usingReactorNetty(ClientOptions options, SslConfiguration sslConfiguration) {
 			HttpClient client = HttpClient.create();
 
 			if (hasSslConfiguration(sslConfiguration)) {
@@ -144,21 +134,20 @@ public class ClientHttpConnectorFactory {
 				});
 			}
 
-			client = client.tcpConfiguration(
-					it -> it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-							Math.toIntExact(options.getConnectionTimeout().toMillis())));
+			client = client.tcpConfiguration(it -> it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+					Math.toIntExact(options.getConnectionTimeout().toMillis())));
 
 			return new ReactorClientHttpConnector(client);
 		}
+
 	}
 
 	static class JettyClient {
-		static ClientHttpConnector usingJetty(ClientOptions options,
-				SslConfiguration sslConfiguration) {
+
+		static ClientHttpConnector usingJetty(ClientOptions options, SslConfiguration sslConfiguration) {
 
 			try {
-				return new JettyClientHttpConnector(
-						configureClient(getHttpClient(sslConfiguration), options));
+				return new JettyClientHttpConnector(configureClient(getHttpClient(sslConfiguration), options));
 			}
 			catch (GeneralSecurityException | IOException e) {
 				throw new IllegalStateException(e);
@@ -169,15 +158,13 @@ public class ClientHttpConnectorFactory {
 				org.eclipse.jetty.client.HttpClient httpClient, ClientOptions options) {
 
 			httpClient.setConnectTimeout(options.getConnectionTimeout().toMillis());
-			httpClient.setAddressResolutionTimeout(
-					options.getConnectionTimeout().toMillis());
+			httpClient.setAddressResolutionTimeout(options.getConnectionTimeout().toMillis());
 
 			return httpClient;
 		}
 
-		private static org.eclipse.jetty.client.HttpClient getHttpClient(
-				SslConfiguration sslConfiguration) throws KeyStoreException, IOException,
-				NoSuchAlgorithmException, CertificateException {
+		private static org.eclipse.jetty.client.HttpClient getHttpClient(SslConfiguration sslConfiguration)
+				throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
@@ -195,16 +182,14 @@ public class ClientHttpConnectorFactory {
 					sslContextFactory.setTrustStore(keyStore);
 				}
 
-				SslConfiguration.KeyConfiguration keyConfiguration = sslConfiguration
-						.getKeyConfiguration();
+				SslConfiguration.KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
 
 				if (keyConfiguration.getKeyAlias() != null) {
 					sslContextFactory.setCertAlias(keyConfiguration.getKeyAlias());
 				}
 
 				if (keyConfiguration.getKeyPassword() != null) {
-					sslContextFactory.setKeyManagerPassword(
-							new String(keyConfiguration.getKeyPassword()));
+					sslContextFactory.setKeyManagerPassword(new String(keyConfiguration.getKeyPassword()));
 				}
 
 				return new org.eclipse.jetty.client.HttpClient(sslContextFactory);
@@ -212,5 +197,7 @@ public class ClientHttpConnectorFactory {
 
 			return new org.eclipse.jetty.client.HttpClient();
 		}
+
 	}
+
 }

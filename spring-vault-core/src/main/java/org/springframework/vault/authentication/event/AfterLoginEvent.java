@@ -31,11 +31,11 @@ public class AfterLoginEvent extends AuthenticationEvent {
 
 	/**
 	 * Create a new {@link AfterLoginEvent} given {@link VaultToken}.
-	 *
 	 * @param source the {@link VaultToken} associated with this event, must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 */
 	public AfterLoginEvent(VaultToken source) {
 		super(source);
 	}
+
 }

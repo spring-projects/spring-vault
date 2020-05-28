@@ -64,9 +64,8 @@ public class VaultCertificateRequest {
 	 */
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
-	private VaultCertificateRequest(String commonName, List<String> altNames,
-			List<String> ipSubjectAltNames, List<String> uriSubjectAltNames,
-			@Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
+	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
+			List<String> uriSubjectAltNames, @Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
@@ -85,7 +84,6 @@ public class VaultCertificateRequest {
 
 	/**
 	 * Create a new {@link VaultCertificateRequest} given a {@code commonName}.
-	 *
 	 * @param commonName must not be empty or {@literal null}.
 	 * @return the created {@link VaultCertificateRequest}.
 	 */
@@ -94,28 +92,28 @@ public class VaultCertificateRequest {
 	}
 
 	public String getCommonName() {
-		return commonName;
+		return this.commonName;
 	}
 
 	public List<String> getAltNames() {
-		return altNames;
+		return this.altNames;
 	}
 
 	public List<String> getIpSubjectAltNames() {
-		return ipSubjectAltNames;
+		return this.ipSubjectAltNames;
 	}
 
 	public List<String> getUriSubjectAltNames() {
-		return uriSubjectAltNames;
+		return this.uriSubjectAltNames;
 	}
 
 	@Nullable
 	public Duration getTtl() {
-		return ttl;
+		return this.ttl;
 	}
 
 	public boolean isExcludeCommonNameFromSubjectAltNames() {
-		return excludeCommonNameFromSubjectAltNames;
+		return this.excludeCommonNameFromSubjectAltNames;
 	}
 
 	public static class VaultCertificateRequestBuilder {
@@ -139,7 +137,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure the common name.
-		 *
 		 * @param commonName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
@@ -153,7 +150,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure alternative names. Replaces previously configured alt names.
-		 *
 		 * @param altNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
@@ -167,7 +163,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Add an alternative name.
-		 *
 		 * @param altName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
@@ -182,12 +177,10 @@ public class VaultCertificateRequest {
 		/**
 		 * Configure IP subject alternative names. Replaces previously configured IP
 		 * subject alt names.
-		 *
 		 * @param ipSubjectAltNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
-		public VaultCertificateRequestBuilder ipSubjectAltNames(
-				Iterable<String> ipSubjectAltNames) {
+		public VaultCertificateRequestBuilder ipSubjectAltNames(Iterable<String> ipSubjectAltNames) {
 
 			Assert.notNull(ipSubjectAltNames, "IP subject alt names must not be null");
 
@@ -197,12 +190,10 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Add an IP subject alternative name.
-		 *
 		 * @param ipSubjectAltName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
-		public VaultCertificateRequestBuilder withIpSubjectAltName(
-				String ipSubjectAltName) {
+		public VaultCertificateRequestBuilder withIpSubjectAltName(String ipSubjectAltName) {
 
 			Assert.hasText(ipSubjectAltName, "IP subject alt name must not be empty");
 
@@ -213,13 +204,11 @@ public class VaultCertificateRequest {
 		/**
 		 * Configure URI subject alternative names. Replaces previously configured URI
 		 * subject alt names.
-		 *
 		 * @param uriSubjectAltNames must not be {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 * @since 2.2
 		 */
-		public VaultCertificateRequestBuilder uriSubjectAltNames(
-				Iterable<String> uriSubjectAltNames) {
+		public VaultCertificateRequestBuilder uriSubjectAltNames(Iterable<String> uriSubjectAltNames) {
 
 			Assert.notNull(uriSubjectAltNames, "URI subject alt names must not be null");
 
@@ -229,13 +218,11 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Add an URI subject alternative name.
-		 *
 		 * @param uriSubjectAltName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 * @since 2.2
 		 */
-		public VaultCertificateRequestBuilder withUriSubjectAltName(
-				String uriSubjectAltName) {
+		public VaultCertificateRequestBuilder withUriSubjectAltName(String uriSubjectAltName) {
 
 			Assert.hasText(uriSubjectAltName, "URI subject alt name must not be empty");
 
@@ -245,7 +232,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure a TTL.
-		 *
 		 * @param ttl the time to live, in seconds, must not be negative.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
@@ -261,7 +247,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure a TTL.
-		 *
 		 * @param ttl the time to live, must not be negative.
 		 * @param timeUnit must not be {@literal null}
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -277,7 +262,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure a TTL.
-		 *
 		 * @param ttl the time to live, must not be {@literal null} or negative.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 * @since 2.0
@@ -295,7 +279,6 @@ public class VaultCertificateRequest {
 		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
 		 * appropriate). Useful if the CN is not a hostname or email address, but is
 		 * instead some human-readable identifier.
-		 *
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 */
 		public VaultCertificateRequestBuilder excludeCommonNameFromSubjectAltNames() {
@@ -307,13 +290,12 @@ public class VaultCertificateRequest {
 		/**
 		 * Build a new {@link VaultCertificateRequest} instance. Requires
 		 * {@link #commonName(String)} to be configured.
-		 *
 		 * @return a new {@link VaultCertificateRequest}.
 		 */
 		public VaultCertificateRequest build() {
 
-			Assert.notNull(commonName, "Common name must not be null");
-			Assert.hasText(commonName, "Common name must not be empty");
+			Assert.notNull(this.commonName, "Common name must not be null");
+			Assert.hasText(this.commonName, "Common name must not be empty");
 
 			List<String> altNames;
 			switch (this.altNames.size()) {
@@ -324,8 +306,7 @@ public class VaultCertificateRequest {
 				altNames = java.util.Collections.singletonList(this.altNames.get(0));
 				break;
 			default:
-				altNames = java.util.Collections
-						.unmodifiableList(new ArrayList<>(this.altNames));
+				altNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.altNames));
 			}
 
 			List<String> ipSubjectAltNames;
@@ -334,12 +315,10 @@ public class VaultCertificateRequest {
 				ipSubjectAltNames = java.util.Collections.emptyList();
 				break;
 			case 1:
-				ipSubjectAltNames = java.util.Collections
-						.singletonList(this.ipSubjectAltNames.get(0));
+				ipSubjectAltNames = java.util.Collections.singletonList(this.ipSubjectAltNames.get(0));
 				break;
 			default:
-				ipSubjectAltNames = java.util.Collections
-						.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
+				ipSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
 			}
 
 			List<String> uriSubjectAltNames;
@@ -348,16 +327,14 @@ public class VaultCertificateRequest {
 				uriSubjectAltNames = java.util.Collections.emptyList();
 				break;
 			case 1:
-				uriSubjectAltNames = java.util.Collections
-						.singletonList(this.uriSubjectAltNames.get(0));
+				uriSubjectAltNames = java.util.Collections.singletonList(this.uriSubjectAltNames.get(0));
 				break;
 			default:
-				uriSubjectAltNames = java.util.Collections
-						.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
+				uriSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
 			}
 
-			return new VaultCertificateRequest(commonName, altNames, ipSubjectAltNames,
-					uriSubjectAltNames, ttl, excludeCommonNameFromSubjectAltNames);
+			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
+					this.ttl, this.excludeCommonNameFromSubjectAltNames);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {
@@ -369,5 +346,7 @@ public class VaultCertificateRequest {
 
 			return list;
 		}
+
 	}
+
 }

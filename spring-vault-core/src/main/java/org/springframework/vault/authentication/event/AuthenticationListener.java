@@ -27,8 +27,8 @@ public interface AuthenticationListener {
 
 	/**
 	 * Callback for a {@link AuthenticationEvent}
-	 *
 	 * @param leaseEvent the event object, must not be {@literal null}.
 	 */
 	void onAuthenticationEvent(AuthenticationEvent leaseEvent);
+
 }

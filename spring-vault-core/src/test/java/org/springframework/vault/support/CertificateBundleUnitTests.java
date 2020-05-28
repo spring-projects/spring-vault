@@ -40,18 +40,17 @@ class CertificateBundleUnitTests {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = OBJECT_MAPPER
-				.readValue(getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
 
-		certificateBundle = CertificateBundle.of(data.get("serial_number"),
-				data.get("certificate"), data.get("issuing_ca"), data.get("private_key"));
+		this.certificateBundle = CertificateBundle.of(data.get("serial_number"), data.get("certificate"),
+				data.get("issuing_ca"), data.get("private_key"));
 	}
 
 	@Test
 	void getPrivateKeySpecShouldCreatePrivateKey() throws Exception {
 
 		KeyFactory kf = KeyFactory.getInstance("RSA");
-		PrivateKey privateKey = kf.generatePrivate(certificateBundle.getPrivateKeySpec());
+		PrivateKey privateKey = kf.generatePrivate(this.certificateBundle.getPrivateKeySpec());
 
 		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
 		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
@@ -60,9 +59,10 @@ class CertificateBundleUnitTests {
 	@Test
 	void getAsKeystore() throws Exception {
 
-		KeyStore keyStore = certificateBundle.createKeyStore("mykey");
+		KeyStore keyStore = this.certificateBundle.createKeyStore("mykey");
 
 		assertThat(keyStore.size()).isEqualTo(1);
 		assertThat(keyStore.getCertificateChain("mykey")).hasSize(2);
 	}
+
 }

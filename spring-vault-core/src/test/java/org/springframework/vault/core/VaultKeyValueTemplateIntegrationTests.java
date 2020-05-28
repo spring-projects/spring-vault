@@ -36,8 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-class VaultKeyValueTemplateIntegrationTests
-		extends AbstractVaultKeyValueTemplateIntegrationTests {
+class VaultKeyValueTemplateIntegrationTests extends AbstractVaultKeyValueTemplateIntegrationTests {
 
 	VaultKeyValueTemplateIntegrationTests() {
 		super("secret", KeyValueBackend.unversioned());
@@ -50,11 +49,12 @@ class VaultKeyValueTemplateIntegrationTests
 		secret.put("key", "value");
 		secret.put("ttl", "5");
 
-		kvOperations.put("my-secret", secret);
+		this.kvOperations.put("my-secret", secret);
 
-		VaultResponse response = kvOperations.get("my-secret");
+		VaultResponse response = this.kvOperations.get("my-secret");
 
 		assertThat(response.getRequiredData()).containsEntry("key", "value");
 		assertThat(response.getLeaseDuration()).isEqualTo(5L);
 	}
+
 }

@@ -33,11 +33,9 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  */
-public class ClientCertificateAuthentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class ClientCertificateAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory
-			.getLog(ClientCertificateAuthentication.class);
+	private static final Log logger = LogFactory.getLog(ClientCertificateAuthentication.class);
 
 	private final ClientCertificateAuthenticationOptions options;
 
@@ -45,7 +43,6 @@ public class ClientCertificateAuthentication
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
-	 *
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public ClientCertificateAuthentication(RestOperations restOperations) {
@@ -54,7 +51,6 @@ public class ClientCertificateAuthentication
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 2.2.3
@@ -62,8 +58,7 @@ public class ClientCertificateAuthentication
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options,
 			RestOperations restOperations) {
 
-		Assert.notNull(options,
-				"ClientCertificateAuthenticationOptions must not be null");
+		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.restOperations = restOperations;
@@ -72,31 +67,25 @@ public class ClientCertificateAuthentication
 
 	/**
 	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
-	 *
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps() {
-		return createAuthenticationSteps(
-				ClientCertificateAuthenticationOptions.builder().build());
+		return createAuthenticationSteps(ClientCertificateAuthenticationOptions.builder().build());
 	}
 
 	/**
 	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.2.3
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			ClientCertificateAuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(ClientCertificateAuthenticationOptions options) {
 
-		Assert.notNull(options,
-				"ClientCertificateAuthenticationOptions must not be null");
+		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 
 		return AuthenticationSteps
-				.just(post(AuthenticationUtil.getLoginPath(options.getPath()))
-						.as(VaultResponse.class));
+				.just(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
 	}
 
 	@Override
@@ -106,15 +95,15 @@ public class ClientCertificateAuthentication
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(options);
+		return createAuthenticationSteps(this.options);
 	}
 
 	private VaultToken createTokenUsingTlsCertAuthentication() {
 
 		try {
-			VaultResponse response = restOperations.postForObject(
-					AuthenticationUtil.getLoginPath(options.getPath()),
-					Collections.emptyMap(), VaultResponse.class);
+			VaultResponse response = this.restOperations.postForObject(
+					AuthenticationUtil.getLoginPath(this.options.getPath()), Collections.emptyMap(),
+					VaultResponse.class);
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 
@@ -126,4 +115,5 @@ public class ClientCertificateAuthentication
 			throw VaultLoginException.create("TLS Certificates", e);
 		}
 	}
+
 }

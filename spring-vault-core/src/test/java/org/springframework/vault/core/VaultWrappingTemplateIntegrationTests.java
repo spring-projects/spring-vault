@@ -60,7 +60,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		wrappingOperations = vaultOperations.opsForWrapping();
+		this.wrappingOperations = this.vaultOperations.opsForWrapping();
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
-		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
+		WrappedMetadata metadata = this.wrappingOperations.wrap(map, Duration.ofSeconds(100));
 
 		assertThat(metadata.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(metadata.getToken()).isNotNull();
@@ -81,9 +81,9 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
-		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
+		WrappedMetadata metadata = this.wrappingOperations.wrap(map, Duration.ofSeconds(100));
 
-		WrappedMetadata lookup = wrappingOperations.lookup(metadata.getToken());
+		WrappedMetadata lookup = this.wrappingOperations.lookup(metadata.getToken());
 
 		assertThat(lookup.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(lookup.getToken()).isNotNull();
@@ -96,11 +96,10 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
-		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
-		VaultResponse response = wrappingOperations.read(metadata.getToken());
+		WrappedMetadata metadata = this.wrappingOperations.wrap(map, Duration.ofSeconds(100));
+		VaultResponse response = this.wrappingOperations.read(metadata.getToken());
 
-		assertThat(response.getRequiredData())
-				.isEqualTo(Collections.singletonMap("key", "value"));
+		assertThat(response.getRequiredData()).isEqualTo(Collections.singletonMap("key", "value"));
 	}
 
 	@Test
@@ -108,9 +107,8 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
-		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
-		VaultResponseSupport<Secret> response = wrappingOperations
-				.read(metadata.getToken(), Secret.class);
+		WrappedMetadata metadata = this.wrappingOperations.wrap(map, Duration.ofSeconds(100));
+		VaultResponseSupport<Secret> response = this.wrappingOperations.read(metadata.getToken(), Secret.class);
 
 		assertThat(response.getRequiredData()).isEqualTo(new Secret("value"));
 	}
@@ -118,14 +116,14 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReturnNullForNonExistentSecret() {
 
-		assertThat(wrappingOperations.read(VaultToken.of("foo"))).isNull();
-		assertThat(wrappingOperations.read(VaultToken.of("foo"), Map.class)).isNull();
+		assertThat(this.wrappingOperations.read(VaultToken.of("foo"))).isNull();
+		assertThat(this.wrappingOperations.read(VaultToken.of("foo"), Map.class)).isNull();
 	}
 
 	@Test
 	void shouldLookupAbsentSecret() {
 
-		WrappedMetadata lookup = wrappingOperations.lookup(VaultToken.of("foo"));
+		WrappedMetadata lookup = this.wrappingOperations.lookup(VaultToken.of("foo"));
 
 		assertThat(lookup).isNull();
 	}
@@ -135,9 +133,9 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Map<String, String> map = Collections.singletonMap("key", "value");
 
-		WrappedMetadata metadata = wrappingOperations.wrap(map, Duration.ofSeconds(100));
+		WrappedMetadata metadata = this.wrappingOperations.wrap(map, Duration.ofSeconds(100));
 
-		WrappedMetadata rewrap = wrappingOperations.rewrap(metadata.getToken());
+		WrappedMetadata rewrap = this.wrappingOperations.rewrap(metadata.getToken());
 
 		assertThat(rewrap.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(rewrap.getToken()).isNotEqualTo(metadata.getToken());
@@ -148,10 +146,11 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldRewrapAbsentSecret() {
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> wrappingOperations.rewrap(VaultToken.of("foo")));
+				.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
 	static final class Secret {
+
 		private final String key;
 
 		Secret(@JsonProperty("key") String key) {
@@ -163,8 +162,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		public String toString() {
-			return "VaultWrappingTemplateIntegrationTests.Secret(key=" + this.getKey()
-					+ ")";
+			return "VaultWrappingTemplateIntegrationTests.Secret(key=" + this.getKey() + ")";
 		}
 
 		public boolean equals(final Object o) {
@@ -187,5 +185,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 			result = result * PRIME + ($key == null ? 43 : $key.hashCode());
 			return result;
 		}
+
 	}
+
 }

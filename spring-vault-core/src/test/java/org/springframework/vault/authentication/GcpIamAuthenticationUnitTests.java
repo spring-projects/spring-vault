@@ -71,27 +71,24 @@ class GcpIamAuthenticationUnitTests {
 		response.setStatusCode(200);
 		response.setContent("{\"keyId\":\"keyid\", \"signedJwt\":\"my-jwt\"}");
 
-		mockHttpTransport = new MockHttpTransport.Builder()
-				.setLowLevelHttpResponse(response).build();
+		this.mockHttpTransport = new MockHttpTransport.Builder().setLowLevelHttpResponse(response).build();
 
-		mockRest.expect(requestTo("/auth/gcp/login")).andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("dev-role"))
-				.andExpect(jsonPath("$.jwt").value("my-jwt"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+		this.mockRest.expect(requestTo("/auth/gcp/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-jwt"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		PrivateKey privateKeyMock = mock(PrivateKey.class);
 		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")
-				.setServiceAccountProjectId("foobar")
-				.setServiceAccountPrivateKey(privateKeyMock)
+				.setServiceAccountProjectId("foobar").setServiceAccountPrivateKey(privateKeyMock)
 				.setServiceAccountPrivateKeyId("key-id").build();
 		credential.setAccessToken("foobar");
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.role("dev-role").credential(credential).build();
-		GcpIamAuthentication authentication = new GcpIamAuthentication(options,
-				restTemplate, mockHttpTransport);
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().role("dev-role")
+				.credential(credential).build();
+		GcpIamAuthentication authentication = new GcpIamAuthentication(options, this.restTemplate,
+				this.mockHttpTransport);
 
 		VaultToken login = authentication.login();
 
@@ -104,19 +101,18 @@ class GcpIamAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldCreateNewGcpIamObjectInstance()
-			throws GeneralSecurityException, IOException {
+	void shouldCreateNewGcpIamObjectInstance() throws GeneralSecurityException, IOException {
 
 		PrivateKey privateKeyMock = mock(PrivateKey.class);
 		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")
-				.setServiceAccountProjectId("foobar")
-				.setServiceAccountPrivateKey(privateKeyMock)
+				.setServiceAccountProjectId("foobar").setServiceAccountPrivateKey(privateKeyMock)
 				.setServiceAccountPrivateKeyId("key-id").build();
 		credential.setAccessToken("foobar");
 
-		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-				.role("dev-role").credential(credential).build();
+		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().role("dev-role")
+				.credential(credential).build();
 
-		new GcpIamAuthentication(options, restTemplate);
+		new GcpIamAuthentication(options, this.restTemplate);
 	}
+
 }

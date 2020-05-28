@@ -70,7 +70,6 @@ import org.springframework.vault.support.VaultToken;
  * {@link AuthenticationSteps} describes the authentication flow. Computation on the
  * source data is only performed when the flow definition is interpreted by an executor.
  *
- *
  * @author Mark Paluch
  * @since 2.0
  * @see AuthenticationStepsFactory
@@ -83,17 +82,15 @@ public class AuthenticationSteps {
 
 	/**
 	 * Create a flow definition using a provided {@link VaultToken}.
-	 *
 	 * @param token the token to be used from this {@link AuthenticationSteps}, must not
-	 *     be {@literal null}.
+	 * be {@literal null}.
 	 * @return the {@link AuthenticationSteps}.
 	 */
 	public static AuthenticationSteps just(VaultToken token) {
 
 		Assert.notNull(token, "Vault token must not be null");
 
-		return new AuthenticationSteps(
-				new SupplierStep<>(() -> token, AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(new SupplierStep<>(() -> token, AuthenticationSteps.HEAD));
 	}
 
 	/**
@@ -106,15 +103,13 @@ public class AuthenticationSteps {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 
-		return new AuthenticationSteps(
-				new HttpRequestNode<>(request, AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(new HttpRequestNode<>(request, AuthenticationSteps.HEAD));
 	}
 
 	/**
 	 * Start flow composition from a {@link Supplier}.
-	 *
 	 * @param supplier supplier function that will produce the flow value, must not be
-	 *     {@literal null}.
+	 * {@literal null}.
 	 * @return the first {@link Node}.
 	 */
 	public static <T> Node<T> fromSupplier(Supplier<T> supplier) {
@@ -126,7 +121,6 @@ public class AuthenticationSteps {
 
 	/**
 	 * Start flow composition from a {@link HttpRequest}.
-	 *
 	 * @param request the HTTP request definition, must not be {@literal null}.
 	 * @return the first {@link Node}.
 	 */
@@ -143,7 +137,6 @@ public class AuthenticationSteps {
 
 	/**
 	 * Return a {@link List} of node given a {@link PathAware} starting point.
-	 *
 	 * @param pathAware must not be {@literal null}.
 	 * @return
 	 */
@@ -182,9 +175,8 @@ public class AuthenticationSteps {
 
 		/**
 		 * Transform the state object into a different object.
-		 *
 		 * @param mappingFunction mapping function to be applied to the state object, must
-		 *     not be {@literal null}.
+		 * not be {@literal null}.
 		 * @param <R> resulting object type
 		 * @return the next {@link Node}.
 		 */
@@ -197,7 +189,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Combine the result from this {@link Node} and another into a {@link Pair}.
-		 *
 		 * @return the next {@link Node}.
 		 * @since 2.1
 		 */
@@ -211,9 +202,8 @@ public class AuthenticationSteps {
 
 		/**
 		 * Callback with the current state object.
-		 *
 		 * @param consumerFunction consumer function to be called with the state object,
-		 *     must not be {@literal null}.
+		 * must not be {@literal null}.
 		 * @return the next {@link Node}.
 		 */
 		public Node<T> onNext(Consumer<? super T> consumerFunction) {
@@ -225,7 +215,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Request data using a {@link HttpRequest}.
-		 *
 		 * @param request the HTTP request definition, must not be {@literal null}.
 		 * @return the next {@link Node}.
 		 */
@@ -239,9 +228,8 @@ public class AuthenticationSteps {
 		/**
 		 * Terminal operation requesting a {@link VaultToken token} from Vault by posting
 		 * the current state to Vaults {@code uriTemplate}.
-		 *
 		 * @param uriTemplate Vault authentication endpoint, must not be {@literal null}
-		 *     or empty.
+		 * or empty.
 		 * @param uriVariables URI variables for URI template expansion.
 		 * @return the {@link AuthenticationSteps}.
 		 */
@@ -249,14 +237,12 @@ public class AuthenticationSteps {
 
 			Assert.hasText(uriTemplate, "URI template must not be null or empty");
 
-			return login(HttpRequestBuilder.post(uriTemplate, uriVariables)
-					.as(VaultResponse.class));
+			return login(HttpRequestBuilder.post(uriTemplate, uriVariables).as(VaultResponse.class));
 		}
 
 		/**
 		 * Terminal operation requesting a {@link VaultToken token} from Vault by issuing
 		 * a HTTP request with the current state to Vaults {@code uriTemplate}.
-		 *
 		 * @param request HTTP request definition.
 		 * @return the {@link AuthenticationSteps}.
 		 */
@@ -270,18 +256,17 @@ public class AuthenticationSteps {
 		/**
 		 * Terminal operation resulting in a {@link VaultToken token} by applying a
 		 * mapping {@link Function} to the current state object.
-		 *
 		 * @param mappingFunction mapping function to be applied to the state object, must
-		 *     not be {@literal null}.
+		 * not be {@literal null}.
 		 * @return the {@link AuthenticationSteps}.
 		 */
-		public AuthenticationSteps login(
-				Function<? super T, ? extends VaultToken> mappingFunction) {
+		public AuthenticationSteps login(Function<? super T, ? extends VaultToken> mappingFunction) {
 
 			Assert.notNull(mappingFunction, "Mapping function must not be null");
 
 			return new AuthenticationSteps(new MapStep<>(mappingFunction, this));
 		}
+
 	}
 
 	/**
@@ -305,7 +290,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Builder entry point to {@code GET} from {@code uriTemplate}.
-		 *
 		 * @param uriTemplate must not be {@literal null} or empty.
 		 * @param uriVariables the variables to expand the template.
 		 * @return a new {@link HttpRequestBuilder}.
@@ -316,7 +300,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Builder entry point to {@code GET} from {@code uri}.
-		 *
 		 * @param uri must not be {@literal null}.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
@@ -326,19 +309,16 @@ public class AuthenticationSteps {
 
 		/**
 		 * Builder entry point to {@code POST} to {@code uriTemplate}.
-		 *
 		 * @param uriTemplate must not be {@literal null} or empty.
 		 * @param uriVariables the variables to expand the template.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
-		public static HttpRequestBuilder post(String uriTemplate,
-				String... uriVariables) {
+		public static HttpRequestBuilder post(String uriTemplate, String... uriVariables) {
 			return new HttpRequestBuilder(HttpMethod.POST, uriTemplate, uriVariables);
 		}
 
 		/**
 		 * Builder entry point to {@code POST} to {@code uri}.
-		 *
 		 * @param uri must not be {@literal null}.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
@@ -348,14 +328,12 @@ public class AuthenticationSteps {
 
 		/**
 		 * Builder entry point to use {@link HttpMethod} for {@code uriTemplate}.
-		 *
 		 * @param uriTemplate must not be {@literal null} or empty.
 		 * @param uriVariables the variables to expand the template.
 		 * @return a new {@link HttpRequestBuilder}.
 		 * @since 2.2
 		 */
-		public static HttpRequestBuilder method(HttpMethod method, String uriTemplate,
-				String... uriVariables) {
+		public static HttpRequestBuilder method(HttpMethod method, String uriTemplate, String... uriVariables) {
 			return new HttpRequestBuilder(method, uriTemplate, uriVariables);
 		}
 
@@ -364,16 +342,14 @@ public class AuthenticationSteps {
 			this.uri = uri;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate,
-				@Nullable String[] urlVariables) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate, @Nullable String[] urlVariables) {
 			this.method = method;
 			this.uriTemplate = uriTemplate;
 			this.urlVariables = urlVariables;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, @Nullable URI uri,
-				@Nullable String uriTemplate, @Nullable String[] urlVariables,
-				@Nullable HttpEntity<?> entity) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable URI uri, @Nullable String uriTemplate,
+				@Nullable String[] urlVariables, @Nullable HttpEntity<?> entity) {
 			this.method = method;
 			this.uri = uri;
 			this.uriTemplate = uriTemplate;
@@ -383,7 +359,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Configure a request {@link HttpEntity entity}.
-		 *
 		 * @param httpEntity must not be {@literal null}.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
@@ -391,13 +366,11 @@ public class AuthenticationSteps {
 
 			Assert.notNull(httpEntity, "HttpEntity must not be null");
 
-			return new HttpRequestBuilder(method, uri, uriTemplate, urlVariables,
-					httpEntity);
+			return new HttpRequestBuilder(this.method, this.uri, this.uriTemplate, this.urlVariables, httpEntity);
 		}
 
 		/**
 		 * Configure a request {@link HttpHeaders headers}.
-		 *
 		 * @param headers must not be {@literal null}.
 		 * @return a new {@link HttpRequestBuilder}.
 		 */
@@ -405,7 +378,7 @@ public class AuthenticationSteps {
 
 			Assert.notNull(headers, "HttpHeaders must not be null");
 
-			return new HttpRequestBuilder(method, uri, uriTemplate, urlVariables,
+			return new HttpRequestBuilder(this.method, this.uri, this.uriTemplate, this.urlVariables,
 					new HttpEntity<>(headers));
 		}
 
@@ -420,6 +393,7 @@ public class AuthenticationSteps {
 
 			return new HttpRequest<>(this, type);
 		}
+
 	}
 
 	/**
@@ -456,8 +430,8 @@ public class AuthenticationSteps {
 
 		@Override
 		public String toString() {
-			return String.format("%s %s AS %s", getMethod(),
-					getUri() != null ? getUri() : getUriTemplate(), getResponseType());
+			return String.format("%s %s AS %s", getMethod(), getUri() != null ? getUri() : getUriTemplate(),
+					getResponseType());
 		}
 
 		HttpMethod getMethod() {
@@ -487,6 +461,7 @@ public class AuthenticationSteps {
 		Class<T> getResponseType() {
 			return this.responseType;
 		}
+
 	}
 
 	static final class HttpRequestNode<T> extends Node<T> implements PathAware {
@@ -502,7 +477,7 @@ public class AuthenticationSteps {
 
 		@Override
 		public String toString() {
-			return definition.toString();
+			return this.definition.toString();
 		}
 
 		public HttpRequest<T> getDefinition() {
@@ -520,13 +495,14 @@ public class AuthenticationSteps {
 			if (!(o instanceof HttpRequestNode))
 				return false;
 			HttpRequestNode<?> that = (HttpRequestNode<?>) o;
-			return definition.equals(that.definition) && previous.equals(that.previous);
+			return this.definition.equals(that.definition) && this.previous.equals(that.previous);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(definition, previous);
+			return Objects.hash(this.definition, this.previous);
 		}
+
 	}
 
 	static final class MapStep<I, O> extends Node<O> implements PathAware {
@@ -541,12 +517,12 @@ public class AuthenticationSteps {
 		}
 
 		O apply(I in) {
-			return mapper.apply(in);
+			return this.mapper.apply(in);
 		}
 
 		@Override
 		public String toString() {
-			return "Map: " + mapper.toString();
+			return "Map: " + this.mapper.toString();
 		}
 
 		public Function<? super I, ? extends O> getMapper() {
@@ -564,13 +540,14 @@ public class AuthenticationSteps {
 			if (!(o instanceof MapStep))
 				return false;
 			MapStep<?, ?> mapStep = (MapStep<?, ?>) o;
-			return mapper.equals(mapStep.mapper) && previous.equals(mapStep.previous);
+			return this.mapper.equals(mapStep.mapper) && this.previous.equals(mapStep.previous);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(mapper, previous);
+			return Objects.hash(this.mapper, this.previous);
 		}
+
 	}
 
 	static final class ZipStep<L, R> extends Node<Pair<L, R>> implements PathAware {
@@ -586,7 +563,7 @@ public class AuthenticationSteps {
 
 		@Override
 		public Node<?> getPrevious() {
-			return left;
+			return this.left;
 		}
 
 		@Override
@@ -609,13 +586,14 @@ public class AuthenticationSteps {
 			if (!(o instanceof ZipStep))
 				return false;
 			ZipStep<?, ?> zipStep = (ZipStep<?, ?>) o;
-			return left.equals(zipStep.left) && right.equals(zipStep.right);
+			return this.left.equals(zipStep.left) && this.right.equals(zipStep.right);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(left, right);
+			return Objects.hash(this.left, this.right);
 		}
+
 	}
 
 	static final class OnNextStep<T> extends Node<T> implements PathAware {
@@ -630,13 +608,13 @@ public class AuthenticationSteps {
 		}
 
 		T apply(T in) {
-			consumer.accept(in);
+			this.consumer.accept(in);
 			return in;
 		}
 
 		@Override
 		public String toString() {
-			return "Consumer: " + consumer.toString();
+			return "Consumer: " + this.consumer.toString();
 		}
 
 		public Consumer<? super T> getConsumer() {
@@ -654,13 +632,14 @@ public class AuthenticationSteps {
 			if (!(o instanceof OnNextStep))
 				return false;
 			OnNextStep<?> that = (OnNextStep<?>) o;
-			return consumer.equals(that.consumer) && previous.equals(that.previous);
+			return this.consumer.equals(that.consumer) && this.previous.equals(that.previous);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(consumer, previous);
+			return Objects.hash(this.consumer, this.previous);
 		}
+
 	}
 
 	static final class SupplierStep<T> extends Node<T> implements PathAware {
@@ -675,12 +654,12 @@ public class AuthenticationSteps {
 		}
 
 		public T get() {
-			return supplier.get();
+			return this.supplier.get();
 		}
 
 		@Override
 		public String toString() {
-			return "Supplier: " + supplier.toString();
+			return "Supplier: " + this.supplier.toString();
 		}
 
 		public Supplier<T> getSupplier() {
@@ -698,17 +677,20 @@ public class AuthenticationSteps {
 			if (!(o instanceof SupplierStep))
 				return false;
 			SupplierStep<?> that = (SupplierStep<?>) o;
-			return supplier.equals(that.supplier) && previous.equals(that.previous);
+			return this.supplier.equals(that.supplier) && this.previous.equals(that.previous);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(supplier, previous);
+			return Objects.hash(this.supplier, this.previous);
 		}
+
 	}
 
 	interface PathAware {
+
 		Node<?> getPrevious();
+
 	}
 
 	/**
@@ -731,7 +713,6 @@ public class AuthenticationSteps {
 
 		/**
 		 * Create a new {@link Pair} given {@code left} and {@code right} values.
-		 *
 		 * @param left the left value.
 		 * @param right the right value.
 		 * @return the {@link Pair}.
@@ -742,20 +723,18 @@ public class AuthenticationSteps {
 
 		/**
 		 * Type-safe way to get the fist object of this {@link Pair}.
-		 *
 		 * @return The first object
 		 */
 		public L getLeft() {
-			return left;
+			return this.left;
 		}
 
 		/**
 		 * Type-safe way to get the second object of this {@link Pair}.
-		 *
 		 * @return The second object
 		 */
 		public R getRight() {
-			return right;
+			return this.right;
 		}
 
 		@Override
@@ -765,22 +744,24 @@ public class AuthenticationSteps {
 			if (!(o instanceof Pair))
 				return false;
 			Pair<?, ?> pair = (Pair<?, ?>) o;
-			return left.equals(pair.left) && right.equals(pair.right);
+			return this.left.equals(pair.left) && this.right.equals(pair.right);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(left, right);
+			return Objects.hash(this.left, this.right);
 		}
 
 		@Override
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append(getClass().getSimpleName());
-			sb.append(" [left=").append(left);
-			sb.append(", right=").append(right);
+			sb.append(" [left=").append(this.left);
+			sb.append(", right=").append(this.right);
 			sb.append(']');
 			return sb.toString();
 		}
+
 	}
+
 }

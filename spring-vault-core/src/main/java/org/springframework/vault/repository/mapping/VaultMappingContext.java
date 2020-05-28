@@ -30,13 +30,12 @@ import org.springframework.util.StringUtils;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultMappingContext extends
-		KeyValueMappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> {
+public class VaultMappingContext extends KeyValueMappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> {
 
 	private KeySpaceResolver fallbackKeySpaceResolver = SimpleClassNameKeySpaceResolver.INSTANCE;
 
 	public KeySpaceResolver getFallbackKeySpaceResolver() {
-		return fallbackKeySpaceResolver;
+		return this.fallbackKeySpaceResolver;
 	}
 
 	@Override
@@ -45,15 +44,13 @@ public class VaultMappingContext extends
 	}
 
 	@Override
-	protected <T> VaultPersistentEntity<?> createPersistentEntity(
-			TypeInformation<T> typeInformation) {
-		return new BasicVaultPersistentEntity<>(typeInformation,
-				fallbackKeySpaceResolver);
+	protected <T> VaultPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
+		return new BasicVaultPersistentEntity<>(typeInformation, this.fallbackKeySpaceResolver);
 	}
 
 	@Override
-	protected VaultPersistentProperty createPersistentProperty(Property property,
-			VaultPersistentEntity<?> owner, SimpleTypeHolder simpleTypeHolder) {
+	protected VaultPersistentProperty createPersistentProperty(Property property, VaultPersistentEntity<?> owner,
+			SimpleTypeHolder simpleTypeHolder) {
 		return new VaultPersistentProperty(property, owner, simpleTypeHolder);
 	}
 
@@ -71,8 +68,9 @@ public class VaultMappingContext extends
 		public String resolveKeySpace(Class<?> type) {
 
 			Assert.notNull(type, "Type must not be null");
-			return StringUtils
-					.uncapitalize(ClassUtils.getUserClass(type).getSimpleName());
+			return StringUtils.uncapitalize(ClassUtils.getUserClass(type).getSimpleName());
 		}
+
 	}
+
 }

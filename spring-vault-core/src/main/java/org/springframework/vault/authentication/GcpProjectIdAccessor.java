@@ -31,9 +31,9 @@ public interface GcpProjectIdAccessor {
 
 	/**
 	 * Get a the GCP project id to used in Google Cloud IAM API calls.
-	 *
 	 * @param credential the credential object to obtain the project id from.
 	 * @return the service account id to use.
 	 */
 	String getProjectId(GoogleCredential credential);
+
 }

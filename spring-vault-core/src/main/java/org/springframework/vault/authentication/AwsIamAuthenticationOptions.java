@@ -71,8 +71,7 @@ public class AwsIamAuthenticationOptions {
 	 */
 	private final URI endpointUri;
 
-	private AwsIamAuthenticationOptions(String path,
-			AWSCredentialsProvider credentialsProvider, @Nullable String role,
+	private AwsIamAuthenticationOptions(String path, AWSCredentialsProvider credentialsProvider, @Nullable String role,
 			@Nullable String serverId, URI endpointUri) {
 
 		this.path = path;
@@ -93,14 +92,14 @@ public class AwsIamAuthenticationOptions {
 	 * @return the path of the aws authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return the credentials provider to obtain AWS credentials.
 	 */
 	public AWSCredentialsProvider getCredentialsProvider() {
-		return credentialsProvider;
+		return this.credentialsProvider;
 	}
 
 	/**
@@ -108,7 +107,7 @@ public class AwsIamAuthenticationOptions {
 	 */
 	@Nullable
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	/**
@@ -119,7 +118,7 @@ public class AwsIamAuthenticationOptions {
 	 */
 	@Nullable
 	public String getServerId() {
-		return serverId;
+		return this.serverId;
 	}
 
 	/**
@@ -130,14 +129,14 @@ public class AwsIamAuthenticationOptions {
 	@Nullable
 	@Deprecated
 	public String getServerName() {
-		return serverId;
+		return this.serverId;
 	}
 
 	/**
 	 * @return STS server URI.
 	 */
 	public URI getEndpointUri() {
-		return endpointUri;
+		return this.endpointUri;
 	}
 
 	/**
@@ -163,7 +162,6 @@ public class AwsIamAuthenticationOptions {
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 */
@@ -179,13 +177,11 @@ public class AwsIamAuthenticationOptions {
 		 * Configure static AWS credentials, required to calculate the signature. Either
 		 * use static credentials or provide a
 		 * {@link #credentialsProvider(AWSCredentialsProvider) credentials provider}.
-		 *
 		 * @param credentials must not be {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 * @see #credentialsProvider(AWSCredentialsProvider)
 		 */
-		public AwsIamAuthenticationOptionsBuilder credentials(
-				AWSCredentials credentials) {
+		public AwsIamAuthenticationOptionsBuilder credentials(AWSCredentials credentials) {
 
 			Assert.notNull(credentials, "Credentials must not be null");
 
@@ -196,16 +192,13 @@ public class AwsIamAuthenticationOptions {
 		 * Configure an {@link AWSCredentialsProvider}, required to calculate the
 		 * signature. Alternatively, configure static {@link #credentials(AWSCredentials)
 		 * credentials}.
-		 *
 		 * @param credentialsProvider must not be {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 * @see #credentials(AWSCredentials)
 		 */
-		public AwsIamAuthenticationOptionsBuilder credentialsProvider(
-				AWSCredentialsProvider credentialsProvider) {
+		public AwsIamAuthenticationOptionsBuilder credentialsProvider(AWSCredentialsProvider credentialsProvider) {
 
-			Assert.notNull(credentialsProvider,
-					"AWSCredentialsProvider must not be null");
+			Assert.notNull(credentialsProvider, "AWSCredentialsProvider must not be null");
 
 			this.credentialsProvider = credentialsProvider;
 			return this;
@@ -215,7 +208,6 @@ public class AwsIamAuthenticationOptions {
 		 * Configure the name of the role against which the login is being attempted. If
 		 * role is not specified, the friendly name (i.e., role name or username) of the
 		 * IAM principal authenticated. If a matching role is not found, login fails.
-		 *
 		 * @param role must not be empty or {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 */
@@ -231,7 +223,6 @@ public class AwsIamAuthenticationOptions {
 		 * Configure a server name (used for {@literal Vault-AWS-IAM-Server-ID}) that is
 		 * included in the signature to mitigate the risk of replay attacks. Preferably
 		 * use the Vault server DNS name.
-		 *
 		 * @param serverId must not be {@literal null} or empty.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 * @since 2.1
@@ -247,7 +238,6 @@ public class AwsIamAuthenticationOptions {
 		/**
 		 * Configure a server name that is included in the signature to mitigate the risk
 		 * of replay attacks. Preferably use the Vault server DNS name.
-		 *
 		 * @param serverName must not be {@literal null} or empty.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 */
@@ -258,7 +248,6 @@ public class AwsIamAuthenticationOptions {
 		/**
 		 * Configure an endpoint URI of the STS API, defaults to
 		 * {@literal https://sts.amazonaws.com/}.
-		 *
 		 * @param endpointUri must not be {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
 		 */
@@ -272,16 +261,16 @@ public class AwsIamAuthenticationOptions {
 
 		/**
 		 * Build a new {@link AwsIamAuthenticationOptions} instance.
-		 *
 		 * @return a new {@link AwsIamAuthenticationOptions}.
 		 */
 		public AwsIamAuthenticationOptions build() {
 
-			Assert.state(credentialsProvider != null,
-					"Credentials or CredentialProvider must not be null");
+			Assert.state(this.credentialsProvider != null, "Credentials or CredentialProvider must not be null");
 
-			return new AwsIamAuthenticationOptions(path, credentialsProvider, role,
-					serverId, endpointUri);
+			return new AwsIamAuthenticationOptions(this.path, this.credentialsProvider, this.role, this.serverId,
+					this.endpointUri);
 		}
+
 	}
+
 }

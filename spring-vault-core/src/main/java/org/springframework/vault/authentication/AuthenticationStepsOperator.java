@@ -52,8 +52,7 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodySpe
  */
 public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
-	private static final Log logger = LogFactory
-			.getLog(AuthenticationStepsOperator.class);
+	private static final Log logger = LogFactory.getLog(AuthenticationStepsOperator.class);
 
 	private final AuthenticationSteps chain;
 
@@ -62,7 +61,6 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	/**
 	 * Create a new {@link AuthenticationStepsOperator} given {@link AuthenticationSteps}
 	 * and {@link WebClient}.
-	 *
 	 * @param steps must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
 	 */
@@ -78,7 +76,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	@Override
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
-		Mono<Object> state = createMono(chain.steps);
+		Mono<Object> state = createMono(this.chain.steps);
 
 		return state.map(stateObject -> {
 
@@ -95,11 +93,9 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 				return LoginTokenUtil.from(response.getAuth());
 			}
 
-			throw new IllegalStateException(String.format(
-					"Cannot retrieve VaultToken from authentication chain. Got instead %s",
-					stateObject));
-		}).onErrorMap(t -> new VaultLoginException(
-				"Cannot retrieve VaultToken from authentication chain", t));
+			throw new IllegalStateException(
+					String.format("Cannot retrieve VaultToken from authentication chain. Got instead %s", stateObject));
+		}).onErrorMap(t -> new VaultLoginException("Cannot retrieve VaultToken from authentication chain", t));
 	}
 
 	private Mono<Object> createMono(Iterable<Node<?>> steps) {
@@ -109,19 +105,15 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-						String.format("Executing %s with current state %s", o, state));
+				logger.debug(String.format("Executing %s with current state %s", o, state));
 			}
 
 			if (o instanceof HttpRequestNode) {
-				state = state
-						.flatMap(stateObject -> doHttpRequest((HttpRequestNode<Object>) o,
-								stateObject));
+				state = state.flatMap(stateObject -> doHttpRequest((HttpRequestNode<Object>) o, stateObject));
 			}
 
 			if (o instanceof MapStep) {
-				state = state.map(stateObject -> doMapStep((MapStep<Object, Object>) o,
-						stateObject));
+				state = state.map(stateObject -> doMapStep((MapStep<Object, Object>) o, stateObject));
 			}
 
 			if (o instanceof ZipStep) {
@@ -130,18 +122,15 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			}
 
 			if (o instanceof OnNextStep) {
-				state = state.doOnNext(
-						stateObject -> doOnNext((OnNextStep<Object>) o, stateObject));
+				state = state.doOnNext(stateObject -> doOnNext((OnNextStep<Object>) o, stateObject));
 			}
 
 			if (o instanceof SupplierStep<?>) {
-				state = state
-						.map(stateObject -> doSupplierStep((SupplierStep<Object>) o));
+				state = state.map(stateObject -> doSupplierStep((SupplierStep<Object>) o));
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-						String.format("Executed %s with current state %s", o, state));
+				logger.debug(String.format("Executed %s with current state %s", o, state));
 			}
 		}
 		return state;
@@ -171,11 +160,11 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		RequestBodySpec spec;
 		if (definition.getUri() == null) {
 
-			spec = webClient.method(definition.getMethod()).uri(
-					definition.getUriTemplate(), definition.getUrlVariables());
+			spec = this.webClient.method(definition.getMethod()).uri(definition.getUriTemplate(),
+					definition.getUrlVariables());
 		}
 		else {
-			spec = webClient.method(definition.getMethod()).uri(definition.getUri());
+			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
 		}
 
 		for (Entry<String, List<String>> header : entity.getHeaders().entrySet()) {
@@ -183,8 +172,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		}
 
 		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.INSTANCE)) {
-			return spec.bodyValue(entity.getBody()).retrieve()
-					.bodyToMono(definition.getResponseType());
+			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
 		}
 
 		return spec.retrieve().bodyToMono(definition.getResponseType());
@@ -209,5 +197,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 		private Undefinded() {
 		}
+
 	}
+
 }

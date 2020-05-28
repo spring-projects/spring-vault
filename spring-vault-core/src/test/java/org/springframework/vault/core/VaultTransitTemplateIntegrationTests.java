@@ -84,13 +84,13 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		transitOperations = vaultOperations.opsForTransit();
+		this.transitOperations = this.vaultOperations.opsForTransit();
 
-		if (!vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
-			vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
+		if (!this.vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
+			this.vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
 		}
 
-		vaultVersion = prepare().getVersion();
+		this.vaultVersion = prepare().getVersion();
 
 		removeKeys();
 	}
@@ -103,14 +103,14 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			transitOperations.configureKey(keyName,
+			this.transitOperations.configureKey(keyName,
 					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
 
 		try {
-			transitOperations.deleteKey(keyName);
+			this.transitOperations.deleteKey(keyName);
 		}
 		catch (Exception e) {
 		}
@@ -118,8 +118,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 	private void removeKeys() {
 
-		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
-			List<String> keys = vaultOperations.opsForTransit().getKeys();
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+			List<String> keys = this.vaultOperations.opsForTransit().getKeys();
 			for (String keyName : keys) {
 				deleteKey(keyName);
 			}
@@ -135,9 +135,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void createKeyShouldCreateKey() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		VaultTransitKey mykey = transitOperations.getKey("mykey");
+		VaultTransitKey mykey = this.transitOperations.getKey("mykey");
 
 		assertThat(mykey.getType()).startsWith("aes");
 
@@ -147,7 +147,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 		assertThat(mykey.getLatestVersion()).isEqualTo(1);
 
-		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0"))) {
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0"))) {
 
 			assertThat(mykey.supportsDecryption()).isTrue();
 			assertThat(mykey.supportsEncryption()).isTrue();
@@ -162,7 +162,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		VaultTransitKey mykey = transitOperations.getKey(keyName);
+		VaultTransitKey mykey = this.transitOperations.getKey(keyName);
 
 		assertThat(mykey.getType()).startsWith("ecdsa");
 		assertThat(mykey.getKeys()).isNotEmpty();
@@ -172,12 +172,11 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void createKeyShouldCreateEdKey() {
 
-		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest
-				.ofKeyType("ed25519");
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
 
-		transitOperations.createKey("ed-key", request);
+		this.transitOperations.createKey("ed-key", request);
 
-		VaultTransitKey mykey = transitOperations.getKey("ed-key");
+		VaultTransitKey mykey = this.transitOperations.getKey("ed-key");
 
 		assertThat(mykey.getType()).startsWith("ed");
 		assertThat(mykey.getKeys()).isNotEmpty();
@@ -191,9 +190,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 				.derived(true) //
 				.build();
 
-		transitOperations.createKey("mykey", request);
+		this.transitOperations.createKey("mykey", request);
 
-		VaultTransitKey mykey = transitOperations.getKey("mykey");
+		VaultTransitKey mykey = this.transitOperations.getKey("mykey");
 
 		assertThat(mykey.getName()).isEqualTo("mykey");
 		assertThat(mykey.isDeletionAllowed()).isFalse();
@@ -205,21 +204,20 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldConfigureKey() {
 
-		transitOperations.createKey("mykey");
-		transitOperations.rotate("mykey");
-		transitOperations.rotate("mykey");
+		this.transitOperations.createKey("mykey");
+		this.transitOperations.rotate("mykey");
+		this.transitOperations.rotate("mykey");
 
-		VaultTransitKeyConfiguration configuration = VaultTransitKeyConfiguration
-				.builder().deletionAllowed(true).minDecryptionVersion(1)
-				.minEncryptionVersion(2).build();
+		VaultTransitKeyConfiguration configuration = VaultTransitKeyConfiguration.builder().deletionAllowed(true)
+				.minDecryptionVersion(1).minEncryptionVersion(2).build();
 
-		transitOperations.configureKey("mykey", configuration);
+		this.transitOperations.configureKey("mykey", configuration);
 
-		VaultTransitKey mykey = transitOperations.getKey("mykey");
+		VaultTransitKey mykey = this.transitOperations.getKey("mykey");
 
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 
-		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.8.0"))) {
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.8.0"))) {
 			assertThat(mykey.getMinEncryptionVersion()).isEqualTo(2);
 		}
 		else {
@@ -231,17 +229,17 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion("0.6.4")
 	void shouldEnumerateKey() {
 
-		assertThat(transitOperations.getKeys()).isEmpty();
+		assertThat(this.transitOperations.getKeys()).isEmpty();
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		assertThat(transitOperations.getKeys()).contains("mykey");
+		assertThat(this.transitOperations.getKeys()).contains("mykey");
 	}
 
 	@Test
 	void getKeyShouldReturnNullIfKeyNotExists() {
 
-		VaultTransitKey key = transitOperations.getKey("hello-world");
+		VaultTransitKey key = this.transitOperations.getKey("hello-world");
 		assertThat(key).isNull();
 	}
 
@@ -249,7 +247,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	void deleteKeyShouldFailIfKeyNotExists() {
 
 		try {
-			transitOperations.deleteKey("hello-world");
+			this.transitOperations.deleteKey("hello-world");
 			fail("Missing VaultException");
 		}
 		catch (VaultException e) {
@@ -260,36 +258,34 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void deleteKeyShouldDeleteKey() {
 
-		transitOperations.createKey("mykey");
-		transitOperations.configureKey("mykey",
+		this.transitOperations.createKey("mykey");
+		this.transitOperations.configureKey("mykey",
 				VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
-		transitOperations.deleteKey("mykey");
+		this.transitOperations.deleteKey("mykey");
 
-		assertThat(transitOperations.getKey("mykey")).isNull();
+		assertThat(this.transitOperations.getKey("mykey")).isNull();
 	}
 
 	@Test
 	void encryptShouldCreateCiphertext() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world");
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world");
 		assertThat(ciphertext).startsWith("vault:v");
 	}
 
 	@Test
 	void encryptShouldCreateCiphertextWithNonceAndContext() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitContext transitRequest = VaultTransitContext.builder()
-				.context("blubb".getBytes()) //
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(),
-				transitRequest);
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
 		assertThat(ciphertext).startsWith("vault:v1:");
 	}
 
@@ -297,16 +293,14 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void encryptShouldEncryptEmptyValues() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitContext context = VaultTransitContext.builder()
-				.context("blubb".getBytes()) //
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		Ciphertext ciphertext = transitOperations.encrypt("mykey",
-				Plaintext.of("").with(context));
+		Ciphertext ciphertext = this.transitOperations.encrypt("mykey", Plaintext.of("").with(context));
 
 		assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
 		assertThat(ciphertext.getContext()).isEqualTo(context);
@@ -315,16 +309,14 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
-		VaultTransitContext context = VaultTransitContext.builder()
-				.context("blubb".getBytes()) //
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		Ciphertext ciphertext = transitOperations.encrypt("mykey",
-				Plaintext.of("hello-world").with(context));
+		Ciphertext ciphertext = this.transitOperations.encrypt("mykey", Plaintext.of("hello-world").with(context));
 
 		assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
 		assertThat(ciphertext.getContext()).isEqualTo(context);
@@ -333,10 +325,10 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void decryptShouldCreatePlaintext() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world");
-		String plaintext = transitOperations.decrypt("mykey", ciphertext);
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world");
+		String plaintext = this.transitOperations.decrypt("mykey", ciphertext);
 
 		assertThat(plaintext).isEqualTo("hello-world");
 	}
@@ -344,35 +336,33 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void decryptShouldCreatePlaintextWithNonceAndContext() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
 		VaultTransitContext transitRequest = VaultTransitContext.builder() //
 				.context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(),
-				transitRequest);
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
 
-		byte[] plaintext = transitOperations.decrypt("mykey", ciphertext, transitRequest);
+		byte[] plaintext = this.transitOperations.decrypt("mykey", ciphertext, transitRequest);
 		assertThat(new String(plaintext)).isEqualTo("hello-world");
 	}
 
 	@Test
 	void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
 		VaultTransitContext context = VaultTransitContext.builder() //
 				.context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		Ciphertext ciphertext = transitOperations.encrypt("mykey",
-				Plaintext.of("hello-world").with(context));
-		Plaintext plaintext = transitOperations.decrypt("mykey", ciphertext);
+		Ciphertext ciphertext = this.transitOperations.encrypt("mykey", Plaintext.of("hello-world").with(context));
+		Plaintext plaintext = this.transitOperations.decrypt("mykey", ciphertext);
 
 		assertThat(plaintext.asString()).isEqualTo("hello-world");
 		assertThat(plaintext.getContext()).isEqualTo(context);
@@ -381,12 +371,12 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encryptAndRewrapShouldCreateCiphertext() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world");
-		transitOperations.rotate("mykey");
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world");
+		this.transitOperations.rotate("mykey");
 
-		String rewrapped = transitOperations.rewrap("mykey", ciphertext);
+		String rewrapped = this.transitOperations.rewrap("mykey", ciphertext);
 
 		assertThat(rewrapped).startsWith("vault:v2:");
 	}
@@ -394,15 +384,13 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncryptBinaryPlaintext() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
 		byte[] plaintext = new byte[] { 1, 2, 3, 4, 5 };
 
-		String ciphertext = transitOperations.encrypt("mykey", plaintext,
-				VaultTransitContext.empty());
+		String ciphertext = this.transitOperations.encrypt("mykey", plaintext, VaultTransitContext.empty());
 
-		byte[] decrypted = transitOperations.decrypt("mykey", ciphertext,
-				VaultTransitContext.empty());
+		byte[] decrypted = this.transitOperations.decrypt("mykey", ciphertext, VaultTransitContext.empty());
 
 		assertThat(decrypted).isEqualTo(plaintext);
 	}
@@ -410,19 +398,18 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
 
-		transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder()
-				.convergentEncryption(true).derived(true).build());
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
 
 		VaultTransitContext transitRequest = VaultTransitContext.builder() //
 				.context("blubb".getBytes()) //
 				.nonce("123456789012".getBytes()) //
 				.build();
 
-		String ciphertext = transitOperations.encrypt("mykey", "hello-world".getBytes(),
-				transitRequest);
-		transitOperations.rotate("mykey");
+		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
+		this.transitOperations.rotate("mykey");
 
-		String rewrapped = transitOperations.rewrap("mykey", ciphertext, transitRequest);
+		String rewrapped = this.transitOperations.rewrap("mykey", ciphertext, transitRequest);
 		assertThat(rewrapped).startsWith("vault:v2");
 	}
 
@@ -430,9 +417,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchEncrypt() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+		List<VaultEncryptionResult> encrypted = this.transitOperations.encrypt("mykey",
 				Arrays.asList(Plaintext.of("one"), Plaintext.of("two")));
 
 		assertThat(encrypted.get(0).get().getCiphertext()).startsWith("vault:");
@@ -443,16 +430,15 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecrypt() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		Ciphertext one = transitOperations.encrypt("mykey", Plaintext.of("one"));
-		Ciphertext two = transitOperations.encrypt("mykey", Plaintext.of("two"));
+		Ciphertext one = this.transitOperations.encrypt("mykey", Plaintext.of("one"));
+		Ciphertext two = this.transitOperations.encrypt("mykey", Plaintext.of("two"));
 
-		Plaintext plainOne = transitOperations.decrypt("mykey", one);
-		Plaintext plainTwo = transitOperations.decrypt("mykey", two);
+		Plaintext plainOne = this.transitOperations.decrypt("mykey", one);
+		Plaintext plainTwo = this.transitOperations.decrypt("mykey", two);
 
-		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
-				Arrays.asList(one, two));
+		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey", Arrays.asList(one, two));
 
 		assertThat(decrypted.get(0).get()).isEqualTo(plainOne);
 		assertThat(decrypted.get(0).getAsString()).isEqualTo("one");
@@ -468,16 +454,15 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 				.derived(true) //
 				.build();
 
-		transitOperations.createKey("mykey", request);
+		this.transitOperations.createKey("mykey", request);
 
-		Plaintext one = Plaintext.of("one").with(
-				VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		Plaintext one = Plaintext.of("one")
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-		Plaintext two = Plaintext.of("two").with(
-				VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		Plaintext two = Plaintext.of("two")
+				.with(VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
-				Arrays.asList(one, two));
+		List<VaultEncryptionResult> encrypted = this.transitOperations.encrypt("mykey", Arrays.asList(one, two));
 
 		assertThat(encrypted.get(0).get().getContext()).isEqualTo(one.getContext());
 		assertThat(encrypted.get(1).get().getContext()).isEqualTo(two.getContext());
@@ -491,17 +476,16 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 				.derived(true) //
 				.build();
 
-		transitOperations.createKey("mykey", request);
+		this.transitOperations.createKey("mykey", request);
 
-		Plaintext one = Plaintext.of("one").with(
-				VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		Plaintext one = Plaintext.of("one")
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-		Plaintext two = Plaintext.of("two").with(
-				VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		Plaintext two = Plaintext.of("two")
+				.with(VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
-				Arrays.asList(one, two));
-		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+		List<VaultEncryptionResult> encrypted = this.transitOperations.encrypt("mykey", Arrays.asList(one, two));
+		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
 				Arrays.asList(encrypted.get(0).get(), encrypted.get(1).get()));
 
 		assertThat(decrypted.get(0).get()).isEqualTo(one);
@@ -516,23 +500,22 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 				.derived(true) //
 				.build();
 
-		transitOperations.createKey("mykey", request);
+		this.transitOperations.createKey("mykey", request);
 
-		Plaintext one = Plaintext.of("one").with(
-				VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		Plaintext one = Plaintext.of("one")
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-		Plaintext two = Plaintext.of("two").with(
-				VaultTransitContext.builder().context("twoContext".getBytes()).build());
+		Plaintext two = Plaintext.of("two")
+				.with(VaultTransitContext.builder().context("twoContext".getBytes()).build());
 
-		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
-				Arrays.asList(one, two));
+		List<VaultEncryptionResult> encrypted = this.transitOperations.encrypt("mykey", Arrays.asList(one, two));
 
 		Ciphertext encryptedOne = encrypted.get(0).get();
 		Ciphertext decryptedTwo = encrypted.get(1).get();
 
 		Ciphertext tampered = decryptedTwo.with(encryptedOne.getContext());
 
-		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
 				Arrays.asList(encryptedOne, tampered));
 
 		assertThat(decrypted.get(0).get()).isEqualTo(one);
@@ -544,11 +527,11 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecryptEmptyPlaintext() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		Ciphertext empty = transitOperations.encrypt("mykey", Plaintext.empty());
+		Ciphertext empty = this.transitOperations.encrypt("mykey", Plaintext.empty());
 
-		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
 				Collections.singletonList(empty));
 
 		assertThat(decrypted.get(0).getAsString()).isEqualTo("");
@@ -562,14 +545,14 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 				.derived(true) //
 				.build();
 
-		transitOperations.createKey("mykey", request);
+		this.transitOperations.createKey("mykey", request);
 
-		Plaintext empty = Plaintext.empty().with(
-				VaultTransitContext.builder().context("oneContext".getBytes()).build());
+		Plaintext empty = Plaintext.empty()
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
 
-		List<VaultEncryptionResult> encrypted = transitOperations.encrypt("mykey",
+		List<VaultEncryptionResult> encrypted = this.transitOperations.encrypt("mykey",
 				Collections.singletonList(empty));
-		List<VaultDecryptionResult> decrypted = transitOperations.decrypt("mykey",
+		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
 				Collections.singletonList(encrypted.get(0).get()));
 
 		assertThat(decrypted.get(0).get()).isEqualTo(empty);
@@ -581,7 +564,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		Hmac hmac = transitOperations.getHmac(keyName, Plaintext.of("hello-world"));
+		Hmac hmac = this.transitOperations.getHmac(keyName, Plaintext.of("hello-world"));
 		assertThat(hmac.getHmac()).isNotEmpty();
 	}
 
@@ -590,12 +573,12 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	void generateHmacShouldCreateHmacForRotatedKey() {
 
 		String keyName = createEcdsaP256Key();
-		transitOperations.rotate(keyName);
+		this.transitOperations.rotate(keyName);
 
-		VaultHmacRequest request = VaultHmacRequest.builder()
-				.plaintext(Plaintext.of("hello-world")).keyVersion(2).build();
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world")).keyVersion(2)
+				.build();
 
-		Hmac hmac = transitOperations.getHmac(keyName, request);
+		Hmac hmac = this.transitOperations.getHmac(keyName, request);
 		assertThat(hmac.getHmac()).isNotEmpty();
 	}
 
@@ -605,10 +588,10 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		VaultHmacRequest request = VaultHmacRequest.builder()
-				.plaintext(Plaintext.of("hello-world")).algorithm("sha2-512").build();
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world"))
+				.algorithm("sha2-512").build();
 
-		Hmac hmac = transitOperations.getHmac(keyName, request);
+		Hmac hmac = this.transitOperations.getHmac(keyName, request);
 		assertThat(hmac.getHmac()).isNotEmpty();
 	}
 
@@ -617,11 +600,11 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		VaultHmacRequest request = VaultHmacRequest.builder()
-				.plaintext(Plaintext.of("hello-world")).algorithm("blah-512").build();
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world"))
+				.algorithm("blah-512").build();
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> transitOperations.getHmac(keyName, request));
+				.isThrownBy(() -> this.transitOperations.getHmac(keyName, request));
 	}
 
 	@Test
@@ -630,8 +613,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String keyName = createEcdsaP256Key();
 
-		Signature signature = transitOperations.sign(keyName,
-				Plaintext.of("hello-world"));
+		Signature signature = this.transitOperations.sign(keyName, Plaintext.of("hello-world"));
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
@@ -639,22 +621,20 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void signShouldCreateSignatureUsingEd25519() {
 
-		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest
-				.ofKeyType("ed25519");
-		transitOperations.createKey("ed-key", keyCreationRequest);
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
+		this.transitOperations.createKey("ed-key", keyCreationRequest);
 
-		Signature signature = transitOperations.sign("ed-key",
-				Plaintext.of("hello-world"));
+		Signature signature = this.transitOperations.sign("ed-key", Plaintext.of("hello-world"));
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
 	@Test
 	void signWithInvalidKeyFormatShouldFail() {
 
-		transitOperations.createKey("mykey");
+		this.transitOperations.createKey("mykey");
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> transitOperations.sign("mykey", Plaintext.of("hello-world")));
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> this.transitOperations.sign("mykey", Plaintext.of("hello-world")));
 	}
 
 	@Test
@@ -664,10 +644,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext)
-				.algorithm("sha2-512").build();
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).algorithm("sha2-512").build();
 
-		Signature signature = transitOperations.sign(keyName, request);
+		Signature signature = this.transitOperations.sign(keyName, request);
 		assertThat(signature.getSignature()).isNotEmpty();
 	}
 
@@ -678,9 +657,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		Signature signature = transitOperations.sign(keyName, plaintext);
+		Signature signature = this.transitOperations.sign(keyName, plaintext);
 
-		boolean valid = transitOperations.verify(keyName, plaintext, signature);
+		boolean valid = this.transitOperations.verify(keyName, plaintext, signature);
 		assertThat(valid).isTrue();
 	}
 
@@ -691,9 +670,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		Hmac hmac = transitOperations.getHmac(keyName, plaintext);
+		Hmac hmac = this.transitOperations.getHmac(keyName, plaintext);
 
-		SignatureValidation valid = transitOperations.verify(keyName,
+		SignatureValidation valid = this.transitOperations.verify(keyName,
 				VaultSignatureVerificationRequest.create(plaintext, hmac));
 		assertThat(valid).isEqualTo(SignatureValidation.valid());
 	}
@@ -705,17 +684,14 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext)
-				.algorithm("sha2-512").build();
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).algorithm("sha2-512").build();
 
-		Signature signature = transitOperations.sign(keyName, request);
+		Signature signature = this.transitOperations.sign(keyName, request);
 
-		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest
-				.builder().algorithm("sha2-512").plaintext(plaintext).signature(signature)
-				.build();
+		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest.builder()
+				.algorithm("sha2-512").plaintext(plaintext).signature(signature).build();
 
-		SignatureValidation valid = transitOperations.verify(keyName,
-				verificationRequest);
+		SignatureValidation valid = this.transitOperations.verify(keyName, verificationRequest);
 		assertThat(valid).isEqualTo(SignatureValidation.valid());
 	}
 
@@ -723,9 +699,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldCreateNewExportableKey() {
 
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
-		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest
-				.builder().exportable(true).derived(true).build();
+		VaultTransitOperations vaultTransitOperations = this.vaultOperations.opsForTransit();
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
+				.exportable(true).derived(true).build();
 
 		vaultTransitOperations.createKey("export-test", vaultTransitKeyCreationRequest);
 
@@ -739,7 +715,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldCreateNotExportableKeyByDefault() {
 
-		VaultTransitOperations vaultTransitOperations = vaultOperations.opsForTransit();
+		VaultTransitOperations vaultTransitOperations = this.vaultOperations.opsForTransit();
 
 		vaultTransitOperations.createKey("no-export");
 
@@ -753,11 +729,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldExportEncryptionKey() {
 
-		vaultOperations.write("transit/keys/export",
-				Collections.singletonMap("exportable", true));
+		this.vaultOperations.write("transit/keys/export", Collections.singletonMap("exportable", true));
 
-		RawTransitKey rawTransitKey = transitOperations.exportKey("export",
-				TransitKeyType.ENCRYPTION_KEY);
+		RawTransitKey rawTransitKey = this.transitOperations.exportKey("export", TransitKeyType.ENCRYPTION_KEY);
 
 		assertThat(rawTransitKey.getName()).isEqualTo("export");
 		assertThat(rawTransitKey.getKeys()).isNotEmpty();
@@ -768,22 +742,19 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldNotAllowExportSigningKey() {
 
-		vaultOperations.write("transit/keys/export",
-				Collections.singletonMap("exportable", true));
+		this.vaultOperations.write("transit/keys/export", Collections.singletonMap("exportable", true));
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY));
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> this.transitOperations.exportKey("export", TransitKeyType.SIGNING_KEY));
 	}
 
 	@Test
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldExportHmacKey() {
 
-		vaultOperations.write("transit/keys/export",
-				Collections.singletonMap("exportable", true));
+		this.vaultOperations.write("transit/keys/export", Collections.singletonMap("exportable", true));
 
-		RawTransitKey rawTransitKey = transitOperations.exportKey("export",
-				TransitKeyType.HMAC_KEY);
+		RawTransitKey rawTransitKey = this.transitOperations.exportKey("export", TransitKeyType.HMAC_KEY);
 
 		assertThat(rawTransitKey.getName()).isEqualTo("export");
 		assertThat(rawTransitKey.getKeys()).isNotEmpty();
@@ -794,17 +765,15 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldExportEcDsaKey() {
 
-		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
+		VaultTransitOperations transitOperations = this.vaultOperations.opsForTransit();
 
-		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
-				.type("ecdsa-p256").exportable(true).build();
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().type("ecdsa-p256")
+				.exportable(true).build();
 
 		transitOperations.createKey("ecdsa-key", request);
 
-		RawTransitKey hmacKey = transitOperations.exportKey("ecdsa-key",
-				TransitKeyType.HMAC_KEY);
-		RawTransitKey signingKey = transitOperations.exportKey("ecdsa-key",
-				TransitKeyType.SIGNING_KEY);
+		RawTransitKey hmacKey = transitOperations.exportKey("ecdsa-key", TransitKeyType.HMAC_KEY);
+		RawTransitKey signingKey = transitOperations.exportKey("ecdsa-key", TransitKeyType.SIGNING_KEY);
 
 		assertThat(hmacKey.getKeys()).isNotEmpty();
 		assertThat(signingKey.getKeys()).isNotEmpty();
@@ -814,17 +783,15 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void shouldExportEdKey() {
 
-		VaultTransitOperations transitOperations = vaultOperations.opsForTransit();
+		VaultTransitOperations transitOperations = this.vaultOperations.opsForTransit();
 
-		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
-				.type("ed25519").exportable(true).build();
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().type("ed25519")
+				.exportable(true).build();
 
 		transitOperations.createKey("ed-key", request);
 
-		RawTransitKey hmacKey = transitOperations.exportKey("ed-key",
-				TransitKeyType.HMAC_KEY);
-		RawTransitKey signingKey = transitOperations.exportKey("ed-key",
-				TransitKeyType.SIGNING_KEY);
+		RawTransitKey hmacKey = transitOperations.exportKey("ed-key", TransitKeyType.HMAC_KEY);
+		RawTransitKey signingKey = transitOperations.exportKey("ed-key", TransitKeyType.SIGNING_KEY);
 
 		assertThat(hmacKey.getKeys()).isNotEmpty();
 		assertThat(signingKey.getKeys()).isNotEmpty();
@@ -833,10 +800,10 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	private String createEcdsaP256Key() {
 
 		String keyName = "ecdsa-key";
-		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest
-				.ofKeyType("ecdsa-p256");
-		transitOperations.createKey(keyName, keyCreationRequest);
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		this.transitOperations.createKey(keyName, keyCreationRequest);
 
 		return keyName;
 	}
+
 }

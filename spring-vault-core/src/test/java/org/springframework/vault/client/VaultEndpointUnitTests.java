@@ -63,11 +63,10 @@ class VaultEndpointUnitTests {
 	@Test
 	void shouldCreateEndpointWithPath() {
 
-		VaultEndpoint endpoint = VaultEndpoint
-				.from(URI.create("http://127.0.0.1/context"));
+		VaultEndpoint endpoint = VaultEndpoint.from(URI.create("http://127.0.0.1/context"));
 
 		assertThat(endpoint.getPath()).isEqualTo("context");
-		assertThat(endpoint.createUri("foo"))
-				.isEqualTo(URI.create("http://127.0.0.1:80/context/foo"));
+		assertThat(endpoint.createUri("foo")).isEqualTo(URI.create("http://127.0.0.1:80/context/foo"));
 	}
+
 }

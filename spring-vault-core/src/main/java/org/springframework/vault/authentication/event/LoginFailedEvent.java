@@ -36,12 +36,12 @@ public class LoginFailedEvent extends AuthenticationErrorEvent {
 
 	/**
 	 * Create a new {@link LoginFailedEvent} given {@link Exception}.
-	 *
 	 * @param source the {@link ClientAuthentication} or {@link VaultTokenSupplier}
-	 *     associated with this event, must not be {@literal null}.
+	 * associated with this event, must not be {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
 	public LoginFailedEvent(Object source, Throwable exception) {
 		super(source, exception);
 	}
+
 }

@@ -35,15 +35,13 @@ public class ClientHttpRequestFactoryFactory {
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
-	 *
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
 	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be initialized
 	 * after obtaining.
 	 */
-	public static ClientHttpRequestFactory create(ClientOptions options,
-			SslConfiguration sslConfiguration) {
-		return org.springframework.vault.client.ClientHttpRequestFactoryFactory
-				.create(options, sslConfiguration);
+	public static ClientHttpRequestFactory create(ClientOptions options, SslConfiguration sslConfiguration) {
+		return org.springframework.vault.client.ClientHttpRequestFactoryFactory.create(options, sslConfiguration);
 	}
+
 }
