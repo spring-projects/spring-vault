@@ -1,13 +1,29 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.vault.core;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.VaultMetadataRequest;
@@ -17,87 +33,125 @@ import org.springframework.vault.support.Versioned;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Integration tests for {@link VaultKeyValueMetadataOperations}.
+ *
+ * @author Zakaria Amine
+ * @author Mark Paluch
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-public class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValueTemplateIntegrationTests {
+class VaultKeyValueMetadataTemplateIntegrationTests
+		extends AbstractVaultKeyValueTemplateIntegrationTests {
 
-  private static final String SECRET_NAME = "test";
-  private VaultKeyValueMetadataOperations vaultKeyValueMetadataOperations;
+	private static final String SECRET_NAME = "regular-test";
 
-  VaultKeyValueMetadataTemplateIntegrationTests() {
-    super("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
-  }
+	private static final String CAS_SECRET_NAME = "cas-test";
 
-  @BeforeEach
-  void setup() {
-    Map<String, Object> secret = new HashMap<>();
-    secret.put("key", "value");
+	private VaultKeyValueMetadataOperations vaultKeyValueMetadataOperations;
 
-    kvOperations.put(SECRET_NAME, secret);
-    vaultKeyValueMetadataOperations = vaultOperations.opsForVersionedKeyValue("versioned").opsForKeyValueMetadata();
-  }
+	VaultKeyValueMetadataTemplateIntegrationTests() {
+		super("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
+	}
 
-  @Test
-  public void shouldReadMetadataForANewKVEntry() {
+	@BeforeEach
+	void setup() {
 
-    VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations.get(SECRET_NAME);
+		vaultKeyValueMetadataOperations = vaultOperations
+				.opsForVersionedKeyValue("versioned").opsForKeyValueMetadata();
 
-    assertThat(metadataResponse.getMaxVersions()).isEqualTo(0);
-    assertThat(metadataResponse.getCurrentVersion()).isEqualTo(1);
-    assertThat(metadataResponse.getVersions()).hasSize(1);
-    assertThat(metadataResponse.isCasRequired()).isFalse();
-    assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo("0s");
-    assertThat(metadataResponse.getCreatedTime().isBefore(Instant.now())).isTrue();
-    assertThat(metadataResponse.getUpdatedTime().isBefore(Instant.now())).isTrue();
+		try {
+			vaultKeyValueMetadataOperations.delete(SECRET_NAME);
+		}
+		catch (Exception e) {
+			// ignore
+		}
 
-    Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
+		try {
+			vaultKeyValueMetadataOperations.delete(CAS_SECRET_NAME);
+		}
+		catch (Exception e) {
+			// ignore
+		}
 
-    assertThat(version1.getDeletedAt()).isNull();
-    assertThat(version1.getCreatedAt()).isBefore(Instant.now());
-    assertThat(version1.getVersion().getVersion()).isEqualTo(1);
-  }
+		Map<String, Object> secret = new HashMap<>();
+		secret.put("key", "value");
 
-  @Test
-  public void shouldUpdateMetadataVersions() {
-    Map<String, Object> secret = new HashMap<>();
-    secret.put("newkey", "newvalue");
-    kvOperations.put(SECRET_NAME, secret);
+		kvOperations.put(SECRET_NAME, secret);
+	}
 
-    VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations.get(SECRET_NAME);
+	@Test
+	void shouldReadMetadataForANewKVEntry() {
 
-    assertThat(metadataResponse.getCurrentVersion()).isEqualTo(2);
-    assertThat(metadataResponse.getVersions()).hasSize(2);
-  }
+		VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations
+				.get(SECRET_NAME);
 
-  @Test
-  public void shouldUpdateKVMetadata() {
-    VaultMetadataRequest request = VaultMetadataRequest.builder().casRequired(true).deleteVersionAfter("6h30m0s").maxVersions(20).build();
+		assertThat(metadataResponse.getMaxVersions()).isEqualTo(0);
+		assertThat(metadataResponse.getCurrentVersion()).isEqualTo(1);
+		assertThat(metadataResponse.getVersions()).hasSize(1);
+		assertThat(metadataResponse.isCasRequired()).isFalse();
+		assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo(Duration.ZERO);
+		assertThat(metadataResponse.getCreatedTime().isBefore(Instant.now())).isTrue();
+		assertThat(metadataResponse.getUpdatedTime().isBefore(Instant.now())).isTrue();
 
-    vaultKeyValueMetadataOperations.put(SECRET_NAME, request);
+		Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
 
-    VaultMetadataResponse metadataResponseAfterUpdate = vaultKeyValueMetadataOperations.get(SECRET_NAME);
+		assertThat(version1.getDeletedAt()).isNull();
+		assertThat(version1.getCreatedAt()).isBefore(Instant.now());
+		assertThat(version1.getVersion().getVersion()).isEqualTo(1);
+	}
 
-    assertThat(metadataResponseAfterUpdate.isCasRequired()).isEqualTo(request.isCasRequired());
-    assertThat(metadataResponseAfterUpdate.getMaxVersions()).isEqualTo(request.getMaxVersions());
-    assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(request.getDeleteVersionAfter());
-  }
+	@Test
+	void shouldUpdateMetadataVersions() {
 
-  @Test
-  public void shouldDeleteMetadata() {
-    kvOperations.delete(SECRET_NAME);
-    VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations.get(SECRET_NAME);
-    Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
-    assertThat(version1.getDeletedAt()).isBefore(Instant.now());
+		Map<String, Object> secret = new HashMap<>();
+		secret.put("newkey", "newvalue");
+		kvOperations.put(SECRET_NAME, secret);
 
-    vaultKeyValueMetadataOperations.delete(SECRET_NAME);
+		VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations
+				.get(SECRET_NAME);
 
-    VaultResponse response = kvOperations.get(SECRET_NAME);
+		assertThat(metadataResponse.getCurrentVersion()).isEqualTo(2);
+		assertThat(metadataResponse.getVersions()).hasSize(2);
+	}
 
-    assertThat(response).isNull();
-  }
+	@Test
+	void shouldUpdateKVMetadata() {
 
-  @AfterEach
-  void cleanup() {
-    vaultKeyValueMetadataOperations.delete(SECRET_NAME);
-  }
+		Map<String, Object> secret = new HashMap<>();
+		secret.put("key", "value");
+
+		kvOperations.put(CAS_SECRET_NAME, secret);
+
+		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30);
+		VaultMetadataRequest request = VaultMetadataRequest.builder().casRequired(true)
+				.deleteVersionAfter(duration).maxVersions(20).build();
+
+		vaultKeyValueMetadataOperations.put(CAS_SECRET_NAME, request);
+
+		VaultMetadataResponse metadataResponseAfterUpdate = vaultKeyValueMetadataOperations
+				.get(CAS_SECRET_NAME);
+
+		assertThat(metadataResponseAfterUpdate.isCasRequired())
+				.isEqualTo(request.isCasRequired());
+		assertThat(metadataResponseAfterUpdate.getMaxVersions())
+				.isEqualTo(request.getMaxVersions());
+		assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter())
+				.isEqualTo(duration);
+	}
+
+	@Test
+	void shouldDeleteMetadata() {
+
+		kvOperations.delete(SECRET_NAME);
+		VaultMetadataResponse metadataResponse = vaultKeyValueMetadataOperations
+				.get(SECRET_NAME);
+		Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
+		assertThat(version1.getDeletedAt()).isBefore(Instant.now());
+
+		vaultKeyValueMetadataOperations.delete(SECRET_NAME);
+
+		VaultResponse response = kvOperations.get(SECRET_NAME);
+		assertThat(response).isNull();
+	}
 }
