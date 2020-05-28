@@ -42,8 +42,7 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
-public class KubernetesAuthentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class KubernetesAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(KubernetesAuthentication.class);
 
@@ -54,12 +53,10 @@ public class KubernetesAuthentication
 	/**
 	 * Create a {@link KubernetesAuthentication} using
 	 * {@link KubernetesAuthenticationOptions} and {@link RestOperations}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public KubernetesAuthentication(KubernetesAuthenticationOptions options,
-			RestOperations restOperations) {
+	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestOperations restOperations) {
 
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -71,33 +68,28 @@ public class KubernetesAuthentication
 	/**
 	 * Creates a {@link AuthenticationSteps} for kubernetes authentication given
 	 * {@link KubernetesAuthenticationOptions}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for kubernetes authentication.
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			KubernetesAuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(KubernetesAuthenticationOptions options) {
 
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 
 		String token = options.getJwtSupplier().get();
-		return AuthenticationSteps
-				.fromSupplier(() -> getKubernetesLogin(options.getRole(), token))
+		return AuthenticationSteps.fromSupplier(() -> getKubernetesLogin(options.getRole(), token))
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		Map<String, String> login = getKubernetesLogin(options.getRole(),
-				options.getJwtSupplier().get());
+		Map<String, String> login = getKubernetesLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
 		try {
-			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
-					login, VaultResponse.class);
+			VaultResponse response = this.restOperations
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null,
-					"Auth field must not be null");
+			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using Kubernetes authentication");
 
@@ -125,4 +117,5 @@ public class KubernetesAuthentication
 
 		return login;
 	}
+
 }

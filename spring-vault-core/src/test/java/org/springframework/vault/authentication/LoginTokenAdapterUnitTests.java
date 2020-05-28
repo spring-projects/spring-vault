@@ -56,17 +56,13 @@ class LoginTokenAdapterUnitTests {
 	@Test
 	void shouldSelfLookupToken() throws Exception {
 
-		mockRest.expect(requestTo("/auth/token/lookup-self"))
-				.andExpect(method(HttpMethod.GET))
-				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN,
-						"5e6332cf-f003-6369-8cba-5bce2330f6cc"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\"data\": {\n" + "    \"creation_ttl\": 600,\n"
-								+ "    \"renewable\": false,\n" + "    \"ttl\": 456} }"));
+		this.mockRest.expect(requestTo("/auth/token/lookup-self")).andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "5e6332cf-f003-6369-8cba-5bce2330f6cc"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{\"data\": {\n"
+						+ "    \"creation_ttl\": 600,\n" + "    \"renewable\": false,\n" + "    \"ttl\": 456} }"));
 
 		LoginTokenAdapter adapter = new LoginTokenAdapter(
-				new TokenAuthentication("5e6332cf-f003-6369-8cba-5bce2330f6cc"),
-				restTemplate);
+				new TokenAuthentication("5e6332cf-f003-6369-8cba-5bce2330f6cc"), this.restTemplate);
 
 		VaultToken login = adapter.login();
 

@@ -39,15 +39,15 @@ class MappingVaultConverterUnitTests {
 
 	VaultMappingContext context = new VaultMappingContext();
 
-	MappingVaultConverter converter = new MappingVaultConverter(context);
+	MappingVaultConverter converter = new MappingVaultConverter(this.context);
 
 	@BeforeEach
 	void before() {
 
-		VaultCustomConversions conversions = new VaultCustomConversions(Arrays.asList(
-				DocumentToPersonConverter.INSTANCE, PersonToDocumentConverter.INSTANCE));
-		converter.setCustomConversions(conversions);
-		converter.afterPropertiesSet();
+		VaultCustomConversions conversions = new VaultCustomConversions(
+				Arrays.asList(DocumentToPersonConverter.INSTANCE, PersonToDocumentConverter.INSTANCE));
+		this.converter.setCustomConversions(conversions);
+		this.converter.afterPropertiesSet();
 	}
 
 	@Test
@@ -57,7 +57,7 @@ class MappingVaultConverterUnitTests {
 		document.put("username", "walter");
 		document.put("password", "hb");
 
-		SimpleEntity entity = converter.read(SimpleEntity.class, document);
+		SimpleEntity entity = this.converter.read(SimpleEntity.class, document);
 
 		assertThat(entity.getId()).isEqualTo("heisenberg");
 		assertThat(entity.getUsername()).isEqualTo("walter");
@@ -70,7 +70,7 @@ class MappingVaultConverterUnitTests {
 		SecretDocument document = new SecretDocument("heisenberg");
 		document.put("the_name", "walter");
 
-		Person entity = converter.read(Person.class, document);
+		Person entity = this.converter.read(Person.class, document);
 
 		assertThat(entity.getName()).isEqualTo("walter");
 	}
@@ -84,7 +84,7 @@ class MappingVaultConverterUnitTests {
 		document.put("password", "hb");
 		document.put("location", "Albuquerque");
 
-		SimpleEntity entity = converter.read(SimpleEntity.class, document);
+		SimpleEntity entity = this.converter.read(SimpleEntity.class, document);
 
 		assertThat(entity).isInstanceOf(ExtendedEntity.class);
 		assertThat(entity.getId()).isEqualTo("heisenberg");
@@ -99,7 +99,7 @@ class MappingVaultConverterUnitTests {
 		SecretDocument document = new SecretDocument();
 		document.put("condition", "BAD");
 
-		EntityWithEnum entity = converter.read(EntityWithEnum.class, document);
+		EntityWithEnum entity = this.converter.read(EntityWithEnum.class, document);
 
 		assertThat(entity.getCondition()).isEqualTo(Condition.BAD);
 	}
@@ -111,7 +111,7 @@ class MappingVaultConverterUnitTests {
 		document.put("username", "walter");
 		document.put("password", "hb");
 
-		ConstructorCreation entity = converter.read(ConstructorCreation.class, document);
+		ConstructorCreation entity = this.converter.read(ConstructorCreation.class, document);
 
 		assertThat(entity.getId()).isEqualTo("heisenberg");
 		assertThat(entity.getUsername()).isEqualTo("walter");
@@ -121,11 +121,10 @@ class MappingVaultConverterUnitTests {
 	@Test
 	void shouldReadEntityWithList() {
 
-		SecretDocument document = new SecretDocument(Collections.singletonMap("usernames",
-				Arrays.asList("walter", "heisenberg")));
+		SecretDocument document = new SecretDocument(
+				Collections.singletonMap("usernames", Arrays.asList("walter", "heisenberg")));
 
-		EntityWithListOfStrings entity = converter.read(EntityWithListOfStrings.class,
-				document);
+		EntityWithListOfStrings entity = this.converter.read(EntityWithListOfStrings.class, document);
 
 		assertThat(entity.getUsernames()).containsSequence("walter", "heisenberg");
 	}
@@ -137,10 +136,9 @@ class MappingVaultConverterUnitTests {
 		keyVersions.put("foo", 1);
 		keyVersions.put("bar", 2);
 
-		SecretDocument document = new SecretDocument(
-				Collections.singletonMap("keyVersions", keyVersions));
+		SecretDocument document = new SecretDocument(Collections.singletonMap("keyVersions", keyVersions));
 
-		EntityWithMap entity = converter.read(EntityWithMap.class, document);
+		EntityWithMap entity = this.converter.read(EntityWithMap.class, document);
 
 		assertThat(entity.getKeyVersions()).containsAllEntriesOf(keyVersions);
 	}
@@ -155,8 +153,7 @@ class MappingVaultConverterUnitTests {
 		SecretDocument document = new SecretDocument();
 		document.put("nested", walter);
 
-		EntityWithNestedType entity = converter.read(EntityWithNestedType.class,
-				document);
+		EntityWithNestedType entity = this.converter.read(EntityWithNestedType.class, document);
 
 		assertThat(entity.getNested()).isEqualTo(new NestedType("heisenberg", "hb"));
 	}
@@ -175,11 +172,9 @@ class MappingVaultConverterUnitTests {
 		SecretDocument document = new SecretDocument();
 		document.put("nested", Arrays.asList(walter, skyler));
 
-		EntityWithListOfEntities entity = converter.read(EntityWithListOfEntities.class,
-				document);
+		EntityWithListOfEntities entity = this.converter.read(EntityWithListOfEntities.class, document);
 
-		assertThat(entity.getNested()).contains(new NestedType("heisenberg", "hb"),
-				new NestedType("skyler", "marie"));
+		assertThat(entity.getNested()).contains(new NestedType("heisenberg", "hb"), new NestedType("skyler", "marie"));
 	}
 
 	@Test
@@ -197,7 +192,7 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(entity, sink);
+		this.converter.write(entity, sink);
 
 		assertThat(sink).isEqualTo(expected);
 	}
@@ -210,7 +205,7 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(new Person("walter"), sink);
+		this.converter.write(new Person("walter"), sink);
 
 		assertThat(sink).isEqualTo(expected);
 	}
@@ -223,7 +218,7 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(entity, sink);
+		this.converter.write(entity, sink);
 
 		assertThat(sink.getBody()).containsEntry("condition", "BAD");
 	}
@@ -236,10 +231,9 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(entity, sink);
+		this.converter.write(entity, sink);
 
-		assertThat(sink.getBody()).containsEntry("usernames",
-				Arrays.asList("walter", "heisenberg"));
+		assertThat(sink.getBody()).containsEntry("usernames", Arrays.asList("walter", "heisenberg"));
 	}
 
 	@Test
@@ -254,7 +248,7 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(entity, sink);
+		this.converter.write(entity, sink);
 
 		assertThat(sink.getBody()).containsEntry("keyVersions", keyVersions);
 	}
@@ -264,8 +258,7 @@ class MappingVaultConverterUnitTests {
 	void shouldWriteEntityWithListOfEntities() {
 
 		EntityWithListOfEntities entity = new EntityWithListOfEntities();
-		entity.setNested(Arrays.asList(new NestedType("heisenberg", "hb"),
-				new NestedType("skyler", "marie")));
+		entity.setNested(Arrays.asList(new NestedType("heisenberg", "hb"), new NestedType("skyler", "marie")));
 
 		Map<String, Object> walter = new LinkedHashMap<>();
 		walter.put("username", "heisenberg");
@@ -277,16 +270,17 @@ class MappingVaultConverterUnitTests {
 
 		SecretDocument sink = new SecretDocument();
 
-		converter.write(entity, sink);
+		this.converter.write(entity, sink);
 
-		assertThat((List<Map<String, Object>>) sink.get("nested")).contains(walter,
-				skyler);
+		assertThat((List<Map<String, Object>>) sink.get("nested")).contains(walter, skyler);
 	}
 
 	static class SimpleEntity {
 
 		String id;
+
 		String username;
+
 		String password;
 
 		public String getId() {
@@ -312,6 +306,7 @@ class MappingVaultConverterUnitTests {
 		public void setPassword(String password) {
 			this.password = password;
 		}
+
 	}
 
 	static class ExtendedEntity extends SimpleEntity {
@@ -325,6 +320,7 @@ class MappingVaultConverterUnitTests {
 		public void setLocation(String location) {
 			this.location = location;
 		}
+
 	}
 
 	static class EntityWithNestedType {
@@ -338,6 +334,7 @@ class MappingVaultConverterUnitTests {
 		public void setNested(NestedType nested) {
 			this.nested = nested;
 		}
+
 	}
 
 	static class EntityWithEnum {
@@ -351,12 +348,15 @@ class MappingVaultConverterUnitTests {
 		public void setCondition(Condition condition) {
 			this.condition = condition;
 		}
+
 	}
 
 	static class ConstructorCreation {
 
 		final String id;
+
 		final String username;
+
 		String password;
 
 		public ConstructorCreation(String id, String username) {
@@ -379,6 +379,7 @@ class MappingVaultConverterUnitTests {
 		public void setPassword(String password) {
 			this.password = password;
 		}
+
 	}
 
 	static class EntityWithListOfStrings {
@@ -392,6 +393,7 @@ class MappingVaultConverterUnitTests {
 		public void setUsernames(List<String> usernames) {
 			this.usernames = usernames;
 		}
+
 	}
 
 	static class EntityWithListOfEntities {
@@ -405,6 +407,7 @@ class MappingVaultConverterUnitTests {
 		public void setNested(List<NestedType> nested) {
 			this.nested = nested;
 		}
+
 	}
 
 	static class EntityWithMap {
@@ -421,11 +424,13 @@ class MappingVaultConverterUnitTests {
 		public void setKeyVersions(Map<String, Integer> keyVersions) {
 			this.keyVersions = keyVersions;
 		}
+
 	}
 
 	static class NestedType {
 
 		String username;
+
 		String password;
 
 		public NestedType(String username, String password) {
@@ -456,21 +461,24 @@ class MappingVaultConverterUnitTests {
 			if (!(o instanceof NestedType))
 				return false;
 			NestedType that = (NestedType) o;
-			return Objects.equals(username, that.username)
-					&& Objects.equals(password, that.password);
+			return Objects.equals(this.username, that.username) && Objects.equals(this.password, that.password);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(username, password);
+			return Objects.hash(this.username, this.password);
 		}
+
 	}
 
 	enum Condition {
+
 		GOOD, BAD
+
 	}
 
 	static class Person {
+
 		final String name;
 
 		public Person(String name) {
@@ -480,6 +488,7 @@ class MappingVaultConverterUnitTests {
 		public String getName() {
 			return this.name;
 		}
+
 	}
 
 	enum DocumentToPersonConverter implements Converter<SecretDocument, Person> {
@@ -490,6 +499,7 @@ class MappingVaultConverterUnitTests {
 		public Person convert(SecretDocument secretDocument) {
 			return new Person((String) secretDocument.get("the_name"));
 		}
+
 	}
 
 	enum PersonToDocumentConverter implements Converter<Person, SecretDocument> {
@@ -503,5 +513,7 @@ class MappingVaultConverterUnitTests {
 			document.put("the_name", person.getName());
 			return document;
 		}
+
 	}
+
 }

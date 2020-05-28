@@ -29,8 +29,8 @@ public interface ReactiveVaultEndpointProvider {
 
 	/**
 	 * Provides access to {@link VaultEndpoint}.
-	 *
 	 * @return a mono emitting the {@link VaultEndpoint}.
 	 */
 	Mono<VaultEndpoint> getVaultEndpoint();
+
 }

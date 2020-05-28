@@ -39,7 +39,6 @@ public class VaultToken {
 
 	/**
 	 * Create a new {@link VaultToken}.
-	 *
 	 * @param token must not be empty or {@literal null}.
 	 * @return the created {@link VaultToken}
 	 */
@@ -52,7 +51,6 @@ public class VaultToken {
 
 	/**
 	 * Create a new {@link VaultToken}.
-	 *
 	 * @param token must not be empty or {@literal null}.
 	 * @return the created {@link VaultToken}
 	 * @since 1.1
@@ -65,7 +63,7 @@ public class VaultToken {
 	 * @return the token value.
 	 */
 	public String getToken() {
-		return new String(token);
+		return new String(this.token);
 	}
 
 	/**
@@ -73,7 +71,7 @@ public class VaultToken {
 	 * @since 1.1
 	 */
 	public char[] toCharArray() {
-		return token;
+		return this.token;
 	}
 
 	@Override
@@ -83,15 +81,16 @@ public class VaultToken {
 		if (!(o instanceof VaultToken))
 			return false;
 		VaultToken that = (VaultToken) o;
-		return Arrays.equals(token, that.token);
+		return Arrays.equals(this.token, that.token);
 	}
 
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(token);
+		return Arrays.hashCode(this.token);
 	}
 
 	public String toString() {
 		return getClass().getSimpleName();
 	}
+
 }

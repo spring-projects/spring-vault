@@ -30,7 +30,6 @@ public class StaticUserId implements AppIdUserIdMechanism {
 
 	/**
 	 * Create a new {@link StaticUserId} for a given {@code userId}.
-	 *
 	 * @param userId must not be empty or {@literal null}.
 	 */
 	public StaticUserId(String userId) {
@@ -41,6 +40,7 @@ public class StaticUserId implements AppIdUserIdMechanism {
 
 	@Override
 	public String createUserId() {
-		return userId;
+		return this.userId;
 	}
+
 }

@@ -30,8 +30,7 @@ import org.springframework.util.Assert;
  */
 public class Plaintext {
 
-	private static final Plaintext EMPTY = new Plaintext(new byte[0],
-			VaultTransitContext.empty());
+	private static final Plaintext EMPTY = new Plaintext(new byte[0], VaultTransitContext.empty());
 
 	private final byte[] plaintext;
 
@@ -45,7 +44,6 @@ public class Plaintext {
 
 	/**
 	 * Factory method to create an empty {@link Plaintext}.
-	 *
 	 * @return the empty {@link Plaintext} object.
 	 * @since 1.1.2
 	 */
@@ -55,7 +53,6 @@ public class Plaintext {
 
 	/**
 	 * Factory method to create {@link Plaintext} from a byte sequence.
-	 *
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
@@ -74,7 +71,6 @@ public class Plaintext {
 	 * Factory method to create {@link Plaintext} using from {@link String}.
 	 * {@link String} is encoded to {@code byte} using the default
 	 * {@link java.nio.charset.Charset}.
-	 *
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
@@ -90,17 +86,16 @@ public class Plaintext {
 	}
 
 	public byte[] getPlaintext() {
-		return plaintext;
+		return this.plaintext;
 	}
 
 	public VaultTransitContext getContext() {
-		return context;
+		return this.context;
 	}
 
 	/**
 	 * Create a new {@link Plaintext} object from this plaintext associated with the given
 	 * {@link VaultTransitContext}.
-	 *
 	 * @param context transit context.
 	 * @return the new {@link Plaintext} object.
 	 */
@@ -123,14 +118,14 @@ public class Plaintext {
 		if (!(o instanceof Plaintext))
 			return false;
 		Plaintext plaintext1 = (Plaintext) o;
-		return Arrays.equals(plaintext, plaintext1.plaintext)
-				&& context.equals(plaintext1.context);
+		return Arrays.equals(this.plaintext, plaintext1.plaintext) && this.context.equals(plaintext1.context);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = Objects.hash(context);
-		result = 31 * result + Arrays.hashCode(plaintext);
+		int result = Objects.hash(this.context);
+		result = 31 * result + Arrays.hashCode(this.plaintext);
 		return result;
 	}
+
 }

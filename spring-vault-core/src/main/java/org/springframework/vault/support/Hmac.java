@@ -36,7 +36,6 @@ public class Hmac {
 
 	/**
 	 * Factory method to create a {@link Hmac} from the given {@code hmac}.
-	 *
 	 * @param hmac the Hmac digest, must not be {@literal null} or empty.
 	 * @return the {@link Hmac} encapsulating {@code hmac}.
 	 */
@@ -48,7 +47,7 @@ public class Hmac {
 	}
 
 	public String getHmac() {
-		return hmac;
+		return this.hmac;
 	}
 
 	@Override
@@ -58,20 +57,21 @@ public class Hmac {
 		if (!(o instanceof Hmac))
 			return false;
 		Hmac other = (Hmac) o;
-		return hmac.equals(other.hmac);
+		return this.hmac.equals(other.hmac);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(hmac);
+		return Objects.hash(this.hmac);
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [hmac='").append(hmac).append('\'');
+		sb.append(" [hmac='").append(this.hmac).append('\'');
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

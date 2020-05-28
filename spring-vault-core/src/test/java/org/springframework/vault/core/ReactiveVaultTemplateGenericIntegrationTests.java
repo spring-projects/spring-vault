@@ -53,59 +53,48 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 
 	@Test
 	void readShouldReturnAbsentKey() {
-		vaultOperations.read("secret/absent").as(StepVerifier::create).verifyComplete();
+		this.vaultOperations.read("secret/absent").as(StepVerifier::create).verifyComplete();
 	}
 
 	@Test
 	void readShouldReturnExistingKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
-				.as(StepVerifier::create) //
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world")).as(StepVerifier::create) //
 				.verifyComplete();
 
-		vaultOperations.read("secret/mykey").as(StepVerifier::create)
-				.consumeNextWith(actual -> assertThat(actual.getRequiredData())
-						.containsEntry("hello", "world")) //
+		this.vaultOperations.read("secret/mykey").as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual.getRequiredData()).containsEntry("hello", "world")) //
 				.verifyComplete();
 	}
 
 	@Test
 	void readShouldReturnNestedPropertiesKey() throws IOException {
 
-		Map map = OBJECT_MAPPER.readValue(
-				"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
-				Map.class);
+		Map map = this.OBJECT_MAPPER
+				.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
 
-		vaultOperations.write("secret/mykey", map).as(StepVerifier::create)
-				.verifyComplete();
+		this.vaultOperations.write("secret/mykey", map).as(StepVerifier::create).verifyComplete();
 
-		vaultOperations.read("secret/mykey").as(StepVerifier::create)
-				.consumeNextWith(actual -> {
-					assertThat(actual.getRequiredData()).containsEntry("hello.array[0]",
-							"array-value0");
-					assertThat(actual.getRequiredData()).containsEntry("hello.array[1]",
-							"array-value1");
-				}).verifyComplete();
+		this.vaultOperations.read("secret/mykey").as(StepVerifier::create).consumeNextWith(actual -> {
+			assertThat(actual.getRequiredData()).containsEntry("hello.array[0]", "array-value0");
+			assertThat(actual.getRequiredData()).containsEntry("hello.array[1]", "array-value1");
+		}).verifyComplete();
 
 	}
 
 	@Test
 	void readShouldReturnNestedObjects() throws IOException {
 
-		Map map = OBJECT_MAPPER.readValue(
-				"{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
+		Map map = this.OBJECT_MAPPER.readValue("{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
 				Map.class);
-		vaultOperations.write("secret/mykey", map).as(StepVerifier::create)
-				.verifyComplete();
+		this.vaultOperations.write("secret/mykey", map).as(StepVerifier::create).verifyComplete();
 
-		List<Map<String, String>> expected = Arrays.asList(
-				Collections.singletonMap("hello", "world"),
+		List<Map<String, String>> expected = Arrays.asList(Collections.singletonMap("hello", "world"),
 				Collections.singletonMap("hello1", "world1"));
 
-		vaultOperations.read("secret/mykey").as(StepVerifier::create)
-				.consumeNextWith(actual -> {
-					assertThat(actual.getRequiredData()).containsEntry("array", expected);
-				}).verifyComplete();
+		this.vaultOperations.read("secret/mykey").as(StepVerifier::create).consumeNextWith(actual -> {
+			assertThat(actual.getRequiredData()).containsEntry("array", expected);
+		}).verifyComplete();
 	}
 
 	@Test
@@ -115,11 +104,11 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 		data.put("firstname", "Walter");
 		data.put("password", "Secret");
 
-		vaultOperations.write("secret/mykey", data) //
+		this.vaultOperations.write("secret/mykey", data) //
 				.as(StepVerifier::create) //
 				.verifyComplete();
 
-		vaultOperations.read("secret/mykey", Person.class) //
+		this.vaultOperations.read("secret/mykey", Person.class) //
 				.as(StepVerifier::create) //
 				.consumeNextWith(actual -> {
 
@@ -133,34 +122,31 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 	@Test
 	void listShouldNotReturnAbsentKey() {
 
-		vaultOperations.list("foo").collectList().as(StepVerifier::create)
+		this.vaultOperations.list("foo").collectList().as(StepVerifier::create)
 				.consumeNextWith(actual -> assertThat(actual).isEmpty()).verifyComplete();
 	}
 
 	@Test
 	void listShouldReturnExistingKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
-				.as(StepVerifier::create) //
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world")).as(StepVerifier::create) //
 				.verifyComplete();
 
-		vaultOperations.list("secret").collectList().as(StepVerifier::create)
-				.consumeNextWith(actual -> assertThat(actual).contains("mykey"))
-				.verifyComplete();
+		this.vaultOperations.list("secret").collectList().as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual).contains("mykey")).verifyComplete();
 	}
 
 	@Test
 	void deleteShouldRemoveKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world")).as(StepVerifier::create) //
+				.verifyComplete();
+
+		this.vaultOperations.delete("secret/mykey") //
 				.as(StepVerifier::create) //
 				.verifyComplete();
 
-		vaultOperations.delete("secret/mykey") //
-				.as(StepVerifier::create) //
-				.verifyComplete();
-
-		vaultOperations.read("secret/mykey") //
+		this.vaultOperations.read("secret/mykey") //
 				.as(StepVerifier::create) //
 				.verifyComplete();
 	}
@@ -168,25 +154,23 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 	@Test
 	void writeShouldReturnResponse() {
 
-		vaultOperations.write("auth/token/create").as(StepVerifier::create)
-				.assertNext(response -> {
+		this.vaultOperations.write("auth/token/create").as(StepVerifier::create).assertNext(response -> {
 
-					assertThat(response.getAuth()).isNotNull();
+			assertThat(response.getAuth()).isNotNull();
 
-				}).verifyComplete();
+		}).verifyComplete();
 	}
 
 	@Test
 	void deleteUnknownPathShouldFail() {
 
-		vaultOperations.delete("foobar").as(StepVerifier::create)
-				.verifyError(VaultException.class);
+		this.vaultOperations.delete("foobar").as(StepVerifier::create).verifyError(VaultException.class);
 	}
 
 	@Test
 	void writeUnknownPathShouldFail() {
 
-		vaultOperations.write("foobar").as(StepVerifier::create)
-				.verifyError(VaultException.class);
+		this.vaultOperations.write("foobar").as(StepVerifier::create).verifyError(VaultException.class);
 	}
+
 }

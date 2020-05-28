@@ -50,8 +50,7 @@ public class AppIdAuthenticationOptions {
 	 */
 	private final AppIdUserIdMechanism userIdMechanism;
 
-	private AppIdAuthenticationOptions(String path, String appId,
-			AppIdUserIdMechanism userIdMechanism) {
+	private AppIdAuthenticationOptions(String path, String appId, AppIdUserIdMechanism userIdMechanism) {
 
 		this.path = path;
 		this.appId = appId;
@@ -69,21 +68,21 @@ public class AppIdAuthenticationOptions {
 	 * @return the mount path.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return the AppId.
 	 */
 	public String getAppId() {
-		return appId;
+		return this.appId;
 	}
 
 	/**
 	 * @return the {@link AppIdUserIdMechanism}.
 	 */
 	public AppIdUserIdMechanism getUserIdMechanism() {
-		return userIdMechanism;
+		return this.userIdMechanism;
 	}
 
 	/**
@@ -102,7 +101,6 @@ public class AppIdAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_APPID_AUTHENTICATION_PATH
@@ -117,7 +115,6 @@ public class AppIdAuthenticationOptions {
 
 		/**
 		 * Configure the AppId.
-		 *
 		 * @param appId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
 		 */
@@ -131,12 +128,10 @@ public class AppIdAuthenticationOptions {
 
 		/**
 		 * Configure the {@link AppIdUserIdMechanism}.
-		 *
 		 * @param userIdMechanism must not be {@literal null}.
 		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
 		 */
-		public AppIdAuthenticationOptionsBuilder userIdMechanism(
-				AppIdUserIdMechanism userIdMechanism) {
+		public AppIdAuthenticationOptionsBuilder userIdMechanism(AppIdUserIdMechanism userIdMechanism) {
 
 			Assert.notNull(userIdMechanism, "AppIdUserIdMechanism must not be null");
 
@@ -147,15 +142,16 @@ public class AppIdAuthenticationOptions {
 		/**
 		 * Build a new {@link AppIdAuthenticationOptions} instance. Requires
 		 * {@link #userIdMechanism(AppIdUserIdMechanism)} to be configured.
-		 *
 		 * @return a new {@link AppIdAuthenticationOptions}.
 		 */
 		public AppIdAuthenticationOptions build() {
 
-			Assert.hasText(appId, "AppId must not be empty");
-			Assert.notNull(userIdMechanism, "AppIdUserIdMechanism must not be null");
+			Assert.hasText(this.appId, "AppId must not be empty");
+			Assert.notNull(this.userIdMechanism, "AppIdUserIdMechanism must not be null");
 
-			return new AppIdAuthenticationOptions(path, appId, userIdMechanism);
+			return new AppIdAuthenticationOptions(this.path, this.appId, this.userIdMechanism);
 		}
+
 	}
+
 }

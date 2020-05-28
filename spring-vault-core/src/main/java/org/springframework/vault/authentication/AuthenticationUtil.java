@@ -9,7 +9,6 @@ abstract class AuthenticationUtil {
 
 	/**
 	 * Returns the login path for a {@code authMount}.
-	 *
 	 * @param authMount
 	 * @return
 	 */
@@ -19,4 +18,5 @@ abstract class AuthenticationUtil {
 
 	private AuthenticationUtil() {
 	}
+
 }

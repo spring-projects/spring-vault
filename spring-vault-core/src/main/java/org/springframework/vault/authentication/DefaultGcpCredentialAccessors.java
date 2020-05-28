@@ -29,14 +29,12 @@ import org.springframework.util.StringUtils;
  * @since 2.1
  * @see GcpIamAuthentication
  */
-enum DefaultGcpCredentialAccessors
-		implements GcpProjectIdAccessor, GcpServiceAccountIdAccessor {
+enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor, GcpServiceAccountIdAccessor {
 
 	INSTANCE;
 
 	/**
 	 * Get a the service account id (email) to be placed in the signed JWT.
-	 *
 	 * @param credential credential object to obtain the service account id from.
 	 * @return the service account id to use.
 	 */
@@ -52,7 +50,6 @@ enum DefaultGcpCredentialAccessors
 
 	/**
 	 * Get a the GCP project id to used in Google Cloud IAM API calls.
-	 *
 	 * @param credential the credential object to obtain the project id from.
 	 * @return the service account id to use.
 	 */
@@ -64,4 +61,5 @@ enum DefaultGcpCredentialAccessors
 		return StringUtils.isEmpty(credential.getServiceAccountProjectId()) ? "-"
 				: credential.getServiceAccountProjectId();
 	}
+
 }

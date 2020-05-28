@@ -34,7 +34,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Integration tests for {@link AbstractReactiveVaultConfiguration}.
- * 
+ *
  * @author Mark Paluch
  */
 class AbstractReactiveVaultConfigurationUnitTests {
@@ -48,8 +48,7 @@ class AbstractReactiveVaultConfigurationUnitTests {
 		WebClientFactory factory = context.getBean(WebClientFactory.class);
 		WebClient webClient = factory.create();
 
-		webClient.get().uri("/foo").exchange().as(StepVerifier::create)
-				.verifyError(CustomizedSignal.class);
+		webClient.get().uri("/foo").exchange().as(StepVerifier::create).verifyError(CustomizedSignal.class);
 	}
 
 	@Test
@@ -58,16 +57,13 @@ class AbstractReactiveVaultConfigurationUnitTests {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
 				WebClientCustomizerConfiguration.class);
 
-		ReactiveVaultOperations operations = context
-				.getBean(ReactiveVaultOperations.class);
+		ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
 
-		operations.read("/foo").as(StepVerifier::create)
-				.verifyError(CustomizedSignal.class);
+		operations.read("/foo").as(StepVerifier::create).verifyError(CustomizedSignal.class);
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	static class WebClientCustomizerConfiguration
-			extends AbstractReactiveVaultConfiguration {
+	static class WebClientCustomizerConfiguration extends AbstractReactiveVaultConfiguration {
 
 		@Override
 		public VaultEndpoint vaultEndpoint() {
@@ -90,9 +86,11 @@ class AbstractReactiveVaultConfigurationUnitTests {
 				throw new CustomizedSignal();
 			});
 		}
+
 	}
 
 	static class CustomizedSignal extends RuntimeException {
 
 	}
+
 }

@@ -68,24 +68,20 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * does not use a {@link ClientAuthentication} mechanism. It is intended for usage
 	 * with Vault Agent to inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
-	 *
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @since 2.2.1
 	 */
 	public VaultTemplate(VaultEndpoint vaultEndpoint) {
-		this(SimpleVaultEndpointProvider.of(vaultEndpoint),
-				new SimpleClientHttpRequestFactory());
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), new SimpleClientHttpRequestFactory());
 	}
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint} and
 	 * {@link ClientAuthentication}.
-	 *
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultEndpoint vaultEndpoint,
-			ClientAuthentication clientAuthentication) {
+	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientAuthentication clientAuthentication) {
 
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
@@ -95,8 +91,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
 
-		VaultEndpointProvider endpointProvider = SimpleVaultEndpointProvider
-				.of(vaultEndpoint);
+		VaultEndpointProvider endpointProvider = SimpleVaultEndpointProvider.of(vaultEndpoint);
 
 		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
@@ -108,29 +103,24 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * {@link ClientAuthentication} mechanism. It is intended for usage with Vault Agent
 	 * to inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
-	 *
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @since 2.2.1
 	 */
-	public VaultTemplate(VaultEndpoint vaultEndpoint,
-			ClientHttpRequestFactory clientHttpRequestFactory) {
+	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory);
 	}
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
-	 *
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 */
-	public VaultTemplate(VaultEndpoint vaultEndpoint,
-			ClientHttpRequestFactory clientHttpRequestFactory,
+	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory,
 			SessionManager sessionManager) {
-		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory,
-				sessionManager);
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory, sessionManager);
 	}
 
 	/**
@@ -139,19 +129,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * not use a {@link ClientAuthentication} mechanism. It is intended for usage with
 	 * Vault Agent to inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @since 2.2.1
 	 */
-	public VaultTemplate(VaultEndpointProvider endpointProvider,
-			ClientHttpRequestFactory requestFactory) {
+	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
 
-		RestTemplate restTemplate = doCreateRestTemplate(endpointProvider,
-				requestFactory);
+		RestTemplate restTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 
 		this.sessionManager = NoSessionManager.INSTANCE;
 		this.dedicatedSessionManager = false;
@@ -162,14 +149,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpointProvider},
 	 * {@link ClientHttpRequestFactory} and {@link SessionManager}.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 1.1
 	 */
-	public VaultTemplate(VaultEndpointProvider endpointProvider,
-			ClientHttpRequestFactory requestFactory, SessionManager sessionManager) {
+	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory,
+			SessionManager sessionManager) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
@@ -187,7 +173,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * {@link ClientAuthentication} mechanism. It is intended for usage with Vault Agent
 	 * to inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
-	 *
 	 * @param restTemplateBuilder must not be {@literal null}.
 	 * @since 2.2.1
 	 */
@@ -206,13 +191,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	/**
 	 * Create a new {@link VaultTemplate} through a {@link RestTemplateBuilder} and
 	 * {@link SessionManager}.
-	 *
 	 * @param restTemplateBuilder must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 2.2
 	 */
-	public VaultTemplate(RestTemplateBuilder restTemplateBuilder,
-			SessionManager sessionManager) {
+	public VaultTemplate(RestTemplateBuilder restTemplateBuilder, SessionManager sessionManager) {
 
 		Assert.notNull(restTemplateBuilder, "RestTemplateBuilder must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
@@ -231,7 +214,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * {@link ClientHttpRequestFactory}. {@link VaultEndpointProvider} is used to
 	 * contribute host and port details for relative URLs typically used by the Template
 	 * API. Subclasses may override this method to customize the {@link RestTemplate}.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate} used for Vault communication.
@@ -240,8 +222,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	protected RestTemplate doCreateRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
-				.requestFactory(requestFactory).build();
+		return RestTemplateBuilder.builder().endpointProvider(endpointProvider).requestFactory(requestFactory).build();
 	}
 
 	/**
@@ -251,7 +232,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * {@link VaultEndpointProvider} is used to contribute host and port details for
 	 * relative URLs typically used by the Template API. Subclasses may override this
 	 * method to customize the {@link RestTemplate}.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate} used for Vault communication.
@@ -260,20 +240,17 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	protected RestTemplate doCreateSessionTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		return RestTemplateBuilder.builder().endpointProvider(endpointProvider)
-				.requestFactory(requestFactory).customizers(restTemplate -> restTemplate
-						.getInterceptors().add(getSessionInterceptor()))
-				.build();
+		return RestTemplateBuilder.builder().endpointProvider(endpointProvider).requestFactory(requestFactory)
+				.customizers(restTemplate -> restTemplate.getInterceptors().add(getSessionInterceptor())).build();
 	}
 
 	private ClientHttpRequestInterceptor getSessionInterceptor() {
 
 		return (request, body, execution) -> {
 
-			Assert.notNull(sessionManager, "SessionManager must not be null");
+			Assert.notNull(this.sessionManager, "SessionManager must not be null");
 
-			request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN,
-					sessionManager.getSessionToken().getToken());
+			request.getHeaders().add(VaultHttpHeaders.VAULT_TOKEN, this.sessionManager.getSessionToken().getToken());
 
 			return execution.execute(request, body);
 		};
@@ -281,7 +258,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	/**
 	 * Set the {@link SessionManager}.
-	 *
 	 * @param sessionManager must not be {@literal null}.
 	 */
 	public void setSessionManager(SessionManager sessionManager) {
@@ -293,20 +269,19 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	@Override
 	public void afterPropertiesSet() {
-		Assert.notNull(sessionManager, "SessionManager must not be null");
+		Assert.notNull(this.sessionManager, "SessionManager must not be null");
 	}
 
 	@Override
 	public void destroy() throws Exception {
 
-		if (dedicatedSessionManager && sessionManager instanceof DisposableBean) {
-			((DisposableBean) sessionManager).destroy();
+		if (this.dedicatedSessionManager && this.sessionManager instanceof DisposableBean) {
+			((DisposableBean) this.sessionManager).destroy();
 		}
 	}
 
 	@Override
-	public VaultKeyValueOperations opsForKeyValue(String path,
-			KeyValueBackend apiVersion) {
+	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
 
 		switch (apiVersion) {
 		case KV_1:
@@ -372,14 +347,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@Nullable
 	public <T> VaultResponseSupport<T> read(String path, Class<T> responseType) {
 
-		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses
-				.getTypeReference(responseType);
+		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
 		return doWithSession(restOperations -> {
 
 			try {
-				ResponseEntity<VaultResponseSupport<T>> exchange = restOperations
-						.exchange(path, HttpMethod.GET, null, ref);
+				ResponseEntity<VaultResponseSupport<T>> exchange = restOperations.exchange(path, HttpMethod.GET, null,
+						ref);
 
 				return exchange.getBody();
 			}
@@ -401,8 +375,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		VaultListResponse read = doRead(
-				String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
+		VaultListResponse read = doRead(String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
 				VaultListResponse.class);
 		if (read == null) {
 			return Collections.emptyList();
@@ -417,8 +390,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doWithSession(restOperations -> restOperations.postForObject(path, body,
-				VaultResponse.class));
+		return doWithSession(restOperations -> restOperations.postForObject(path, body, VaultResponse.class));
 	}
 
 	@Override
@@ -450,7 +422,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
 		try {
-			return clientCallback.doWithRestOperations(statelessTemplate);
+			return clientCallback.doWithRestOperations(this.statelessTemplate);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
@@ -463,7 +435,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
 		try {
-			return sessionCallback.doWithRestOperations(sessionTemplate);
+			return sessionCallback.doWithRestOperations(this.sessionTemplate);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
@@ -490,11 +462,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	private enum NoSessionManager implements SessionManager {
+
 		INSTANCE;
 
 		@Override
 		public VaultToken getSessionToken() {
 			throw new UnsupportedOperationException();
 		}
+
 	}
+
 }

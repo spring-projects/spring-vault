@@ -27,7 +27,6 @@ public class VaultTokenLookupException extends VaultException {
 
 	/**
 	 * Create a {@code VaultTokenLookupException} with the specified detail message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultTokenLookupException(String msg) {
@@ -37,7 +36,6 @@ public class VaultTokenLookupException extends VaultException {
 	/**
 	 * Create a {@code VaultTokenLookupException} with the specified detail message and
 	 * nested exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 * @since 2.1
@@ -45,4 +43,5 @@ public class VaultTokenLookupException extends VaultException {
 	public VaultTokenLookupException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

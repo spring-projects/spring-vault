@@ -33,8 +33,8 @@ public interface VaultTokenSupplier {
 	/**
 	 * Return a {@link VaultToken}. This can declare a Vault login flow to obtain a
 	 * {@link VaultToken token}.
-	 *
 	 * @return a {@link Mono} with the {@link VaultToken}.
 	 */
 	Mono<VaultToken> getVaultToken();
+
 }

@@ -33,4 +33,5 @@ public interface VaultInitializationResponse {
 	 * @return the root {@link VaultToken}.
 	 */
 	VaultToken getRootToken();
+
 }

@@ -40,7 +40,6 @@ public class SimpleSessionManager implements SessionManager {
 
 	/**
 	 * Create a new {@link SimpleSessionManager} using a {@link ClientAuthentication}.
-	 *
 	 * @param clientAuthentication must not be {@literal null}.
 	 */
 	public SimpleSessionManager(ClientAuthentication clientAuthentication) {
@@ -53,15 +52,15 @@ public class SimpleSessionManager implements SessionManager {
 	@Override
 	public VaultToken getSessionToken() {
 
-		if (!token.isPresent()) {
-			synchronized (lock) {
-				if (!token.isPresent()) {
-					token = Optional.of(clientAuthentication.login());
+		if (!this.token.isPresent()) {
+			synchronized (this.lock) {
+				if (!this.token.isPresent()) {
+					this.token = Optional.of(this.clientAuthentication.login());
 				}
 			}
 		}
 
-		return token
-				.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
+		return this.token.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
+
 }

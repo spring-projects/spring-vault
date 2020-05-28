@@ -50,12 +50,14 @@ class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 	@VaultPropertySource("versioned/my/path")
 	@Configuration
 	static class NonRotatingSecret {
+
 	}
 
 	@VaultPropertySource(value = "versioned/my/path", renewal = VaultPropertySource.Renewal.ROTATE)
 	@PropertySource(value = "http://foo", ignoreResourceNotFound = true)
 	@Configuration
 	static class RotatingSecret {
+
 	}
 
 	@BeforeAll
@@ -63,8 +65,8 @@ class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 
 		PrepareVault prepare = initializer.prepare();
 
-		VaultKeyValueOperations versionedKv = prepare.getVaultOperations().opsForKeyValue(
-				"versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
+		VaultKeyValueOperations versionedKv = prepare.getVaultOperations().opsForKeyValue("versioned",
+				VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
 
 		versionedKv.put("my/path", Collections.singletonMap("my-key", "my-value"));
 	}
@@ -92,5 +94,5 @@ class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 
 		context.stop();
 	}
-}
 
+}

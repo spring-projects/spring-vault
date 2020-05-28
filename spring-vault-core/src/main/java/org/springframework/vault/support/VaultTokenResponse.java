@@ -24,10 +24,10 @@ public class VaultTokenResponse extends VaultResponse {
 
 	/**
 	 * Return a {@link VaultToken} from the {@link VaultResponse}.
-	 *
 	 * @return the {@link VaultToken}.
 	 */
 	public VaultToken getToken() {
 		return VaultToken.of((String) getRequiredAuth().get("client_token"));
 	}
+
 }

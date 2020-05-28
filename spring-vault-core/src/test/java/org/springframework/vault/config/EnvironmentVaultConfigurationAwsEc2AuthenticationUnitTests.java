@@ -34,13 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=aws-ec2", "vault.aws-ec2.role=role" })
+@TestPropertySource(
+		properties = { "vault.uri=https://localhost:8123", "vault.authentication=aws-ec2", "vault.aws-ec2.role=role" })
 class EnvironmentVaultConfigurationAwsEc2AuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
+
 	}
 
 	@Autowired
@@ -49,8 +50,9 @@ class EnvironmentVaultConfigurationAwsEc2AuthenticationUnitTests {
 	@Test
 	void shouldConfigureAuthentication() {
 
-		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
+		ClientAuthentication clientAuthentication = this.configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(AwsEc2Authentication.class);
 	}
+
 }

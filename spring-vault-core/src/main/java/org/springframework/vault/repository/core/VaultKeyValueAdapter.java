@@ -49,7 +49,6 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	/**
 	 * Create a new {@link VaultKeyValueAdapter} given {@link VaultOperations}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultKeyValueAdapter(VaultOperations vaultOperations) {
@@ -59,12 +58,10 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	/**
 	 * Create a new {@link VaultKeyValueAdapter} given {@link VaultOperations} and
 	 * {@link VaultConverter}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param vaultConverter must not be {@literal null}.
 	 */
-	public VaultKeyValueAdapter(VaultOperations vaultOperations,
-			VaultConverter vaultConverter) {
+	public VaultKeyValueAdapter(VaultOperations vaultOperations, VaultConverter vaultConverter) {
 
 		super(new VaultQueryEngine());
 
@@ -79,9 +76,9 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	public Object put(Object id, Object item, String keyspace) {
 
 		SecretDocument secretDocument = new SecretDocument(id.toString());
-		vaultConverter.write(item, secretDocument);
+		this.vaultConverter.write(item, secretDocument);
 
-		vaultOperations.write(createKey(id, keyspace), secretDocument.getBody());
+		this.vaultOperations.write(createKey(id, keyspace), secretDocument.getBody());
 
 		return secretDocument;
 	}
@@ -101,7 +98,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	@Override
 	public <T> T get(Object id, String keyspace, Class<T> type) {
 
-		VaultResponse response = vaultOperations.read(createKey(id, keyspace));
+		VaultResponse response = this.vaultOperations.read(createKey(id, keyspace));
 
 		if (response == null) {
 			return null;
@@ -109,7 +106,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 		SecretDocument document = SecretDocument.from(id.toString(), response);
 
-		return vaultConverter.read(type, document);
+		return this.vaultConverter.read(type, document);
 	}
 
 	@Nullable
@@ -128,7 +125,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			return null;
 		}
 
-		vaultOperations.delete(createKey(id, keyspace));
+		this.vaultOperations.delete(createKey(id, keyspace));
 
 		return entity;
 	}
@@ -200,7 +197,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		List<String> ids = doList(keyspace);
 
 		for (String id : ids) {
-			vaultOperations.delete(createKey(id, keyspace));
+			this.vaultOperations.delete(createKey(id, keyspace));
 		}
 	}
 
@@ -223,7 +220,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	List<String> doList(String keyspace) {
 
-		List<String> list = vaultOperations.list(keyspace);
+		List<String> list = this.vaultOperations.list(keyspace);
 
 		return list == null ? Collections.emptyList() : list;
 	}
@@ -233,6 +230,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	}
 
 	MappingContext<? extends VaultPersistentEntity<?>, VaultPersistentProperty> getMappingContext() {
-		return vaultConverter.getMappingContext();
+		return this.vaultConverter.getMappingContext();
 	}
+
 }

@@ -28,9 +28,9 @@ public interface LeaseErrorListener {
 
 	/**
 	 * Callback for a {@link SecretLeaseEvent}.
-	 *
 	 * @param leaseEvent the event object, must not be {@literal null}.
 	 * @param exception the thrown {@link Exception}.
 	 */
 	void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception);
+
 }

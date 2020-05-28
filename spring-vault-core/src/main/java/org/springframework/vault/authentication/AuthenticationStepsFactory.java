@@ -30,8 +30,8 @@ public interface AuthenticationStepsFactory {
 
 	/**
 	 * Get the {@link AuthenticationSteps} describing an authentication flow.
-	 *
 	 * @return the {@link AuthenticationSteps} describing an authentication flow.
 	 */
 	AuthenticationSteps getAuthenticationSteps();
+
 }

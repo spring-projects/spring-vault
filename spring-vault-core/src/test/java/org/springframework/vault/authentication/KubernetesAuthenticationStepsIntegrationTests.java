@@ -33,26 +33,23 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  *
  * @author Mark Paluch
  */
-class KubernetesAuthenticationStepsIntegrationTests
-		extends KubernetesAuthenticationIntegrationTestBase {
+class KubernetesAuthenticationStepsIntegrationTests extends KubernetesAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldLoginSuccessfully() {
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions
-				.builder().role("my-role")
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder().role("my-role")
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				KubernetesAuthentication.createAuthenticationSteps(options),
-				restTemplate);
+				KubernetesAuthentication.createAuthenticationSteps(options), restTemplate);
 
 		VaultToken login = executor.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
+
 }

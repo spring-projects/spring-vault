@@ -50,6 +50,7 @@ class VaultPropertySourceInBeanConfigurationIntegrationTest {
 		ClientClass clientClass(@Value("${myapp}") String myapp) {
 			return new ClientClass(myapp);
 		}
+
 	}
 
 	@Autowired
@@ -60,28 +61,30 @@ class VaultPropertySourceInBeanConfigurationIntegrationTest {
 
 		VaultOperations vaultOperations = initializer.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp",
-				Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
 	}
 
 	@Test
 	void clientClassShouldContainResolvedProperty() {
-		assertThat(clientClass.getMyapp()).isEqualTo("myvalue");
+		assertThat(this.clientClass.getMyapp()).isEqualTo("myvalue");
 	}
 
 	static class ClientClass {
+
 		String myapp;
 
-		public ClientClass(String myapp) {
+		ClientClass(String myapp) {
 			this.myapp = myapp;
 		}
 
-		public String getMyapp() {
+		String getMyapp() {
 			return this.myapp;
 		}
 
-		public void setMyapp(String myapp) {
+		void setMyapp(String myapp) {
 			this.myapp = myapp;
 		}
+
 	}
+
 }

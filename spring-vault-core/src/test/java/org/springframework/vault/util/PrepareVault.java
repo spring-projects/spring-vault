@@ -52,13 +52,11 @@ public class PrepareVault {
 
 	/**
 	 * Create a new {@link PrepareVault} object.
-	 *
 	 * @param webClient must not be {@literal null}.
 	 * @param restTemplate must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
-	public PrepareVault(WebClient webClient, RestTemplate restTemplate,
-			VaultOperations vaultOperations) {
+	public PrepareVault(WebClient webClient, RestTemplate restTemplate, VaultOperations vaultOperations) {
 
 		this.webClient = webClient;
 		this.restTemplate = restTemplate;
@@ -68,7 +66,6 @@ public class PrepareVault {
 
 	/**
 	 * Initialize Vault and unseal the vault.
-	 *
 	 * @return the root token.
 	 */
 	public VaultToken initializeVault() {
@@ -76,13 +73,12 @@ public class PrepareVault {
 		int createKeys = 2;
 		int requiredKeys = 2;
 
-		VaultInitializationResponse initialized = vaultOperations.opsForSys()
+		VaultInitializationResponse initialized = this.vaultOperations.opsForSys()
 				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 
-			VaultUnsealStatus unsealStatus = vaultOperations.opsForSys()
-					.unseal(initialized.getKeys().get(i));
+			VaultUnsealStatus unsealStatus = this.vaultOperations.opsForSys().unseal(initialized.getKeys().get(i));
 
 			if (!unsealStatus.isSealed()) {
 				break;
@@ -94,7 +90,6 @@ public class PrepareVault {
 
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 *
 	 * @param tokenId must not be {@literal null}.
 	 * @param policy must not be {@literal null}.
 	 * @return the created {@link VaultToken}.
@@ -107,35 +102,31 @@ public class PrepareVault {
 			builder.withPolicy(policy);
 		}
 
-		VaultTokenResponse vaultTokenResponse = vaultOperations.opsForToken()
-				.create(builder.build());
+		VaultTokenResponse vaultTokenResponse = this.vaultOperations.opsForToken().create(builder.build());
 		return vaultTokenResponse.getToken();
 	}
 
 	/**
 	 * Check whether Vault is available (vault created and unsealed).
-	 *
 	 * @return {@literal true} if Vault is available (vault created and unsealed).
 	 */
 	public boolean isAvailable() {
-		return adminOperations.isInitialized() && !adminOperations.health().isSealed();
+		return this.adminOperations.isInitialized() && !this.adminOperations.health().isSealed();
 	}
 
 	/**
 	 * Mount an auth backend.
-	 *
 	 * @param authBackend must not be {@literal null} or empty.
 	 */
 	public void mountAuth(String authBackend) {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
 
-		adminOperations.authMount(authBackend, VaultMount.create(authBackend));
+		this.adminOperations.authMount(authBackend, VaultMount.create(authBackend));
 	}
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 *
 	 * @param authBackend must not be {@literal null} or empty.
 	 * @return {@literal true} if a auth-backend is enabled.
 	 */
@@ -143,12 +134,11 @@ public class PrepareVault {
 
 		Assert.hasText(authBackend, "AuthBackend must not be empty");
 
-		return adminOperations.getAuthMounts().containsKey(authBackend + "/");
+		return this.adminOperations.getAuthMounts().containsKey(authBackend + "/");
 	}
 
 	/**
 	 * Mount an secret backend.
-	 *
 	 * @param secretBackend must not be {@literal null} or empty.
 	 */
 	public void mountSecret(String secretBackend) {
@@ -157,33 +147,29 @@ public class PrepareVault {
 
 	/**
 	 * Mount an secret backend {@code secretBackend} at {@code path}.
-	 *
 	 * @param secretBackend must not be {@literal null} or empty.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	private void mountSecret(String secretBackend, String path,
-			Map<String, Object> config) {
+	private void mountSecret(String secretBackend, String path, Map<String, Object> config) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
 		Assert.notNull(config, "Configuration must not be null");
 
-		VaultMount mount = VaultMount.builder().type(secretBackend).config(config)
-				.build();
-		adminOperations.mount(path, mount);
+		VaultMount mount = VaultMount.builder().type(secretBackend).config(config).build();
+		this.adminOperations.mount(path, mount);
 	}
 
 	/**
 	 * Check whether a auth-backend is enabled.
-	 *
 	 * @param secretBackend must not be {@literal null} or empty.
 	 * @return {@literal true} if a auth-backend is enabled.
 	 */
 	public boolean hasSecret(String secretBackend) {
 
 		Assert.hasText(secretBackend, "SecretBackend must not be empty");
-		return adminOperations.getMounts().containsKey(secretBackend + "/");
+		return this.adminOperations.getMounts().containsKey(secretBackend + "/");
 	}
 
 	/**
@@ -214,29 +200,29 @@ public class PrepareVault {
 	 */
 	public void disableGenericVersioning() {
 
-		vaultOperations.opsForSys().unmount("secret");
+		this.vaultOperations.opsForSys().unmount("secret");
 
-		VaultMount kv = VaultMount.builder().type("kv")
-				.config(Collections.singletonMap("versioned", false)).build();
-		vaultOperations.opsForSys().mount("secret", kv);
+		VaultMount kv = VaultMount.builder().type("kv").config(Collections.singletonMap("versioned", false)).build();
+		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
 	public void mountVersionedKvBackend() {
 
 		mountSecret("kv", "versioned", Collections.emptyMap());
-		vaultOperations.write("sys/mounts/versioned/tune", Collections
-				.singletonMap("options", Collections.singletonMap("version", "2")));
+		this.vaultOperations.write("sys/mounts/versioned/tune",
+				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
 	}
 
 	public VaultOperations getVaultOperations() {
-		return vaultOperations;
+		return this.vaultOperations;
 	}
 
 	public RestTemplate getRestTemplate() {
-		return restTemplate;
+		return this.restTemplate;
 	}
 
 	public WebClient getWebClient() {
-		return webClient;
+		return this.webClient;
 	}
+
 }

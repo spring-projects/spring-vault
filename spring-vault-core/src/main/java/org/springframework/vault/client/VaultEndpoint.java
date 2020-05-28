@@ -59,7 +59,6 @@ public class VaultEndpoint implements Serializable {
 	/**
 	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
 	 * {@code https}.
-	 *
 	 * @param host must not be empty or {@literal null}.
 	 * @param port must be a valid port in the range of 1-65535
 	 * @return a new {@link VaultEndpoint}.
@@ -78,9 +77,8 @@ public class VaultEndpoint implements Serializable {
 
 	/**
 	 * Create a {@link VaultEndpoint} given a {@link URI}.
-	 *
 	 * @param uri must contain hostname, port and scheme, must not be empty or
-	 *     {@literal null}.
+	 * {@literal null}.
 	 * @return a new {@link VaultEndpoint}.
 	 */
 	public static VaultEndpoint from(URI uri) {
@@ -93,12 +91,10 @@ public class VaultEndpoint implements Serializable {
 
 		vaultEndpoint.setHost(uri.getHost());
 		try {
-			vaultEndpoint.setPort(
-					uri.getPort() == -1 ? uri.toURL().getDefaultPort() : uri.getPort());
+			vaultEndpoint.setPort(uri.getPort() == -1 ? uri.toURL().getDefaultPort() : uri.getPort());
 		}
 		catch (MalformedURLException e) {
-			throw new IllegalArgumentException(
-					String.format("Can't retrieve default port from %s", uri), e);
+			throw new IllegalArgumentException(String.format("Can't retrieve default port from %s", uri), e);
 		}
 		vaultEndpoint.setScheme(uri.getScheme());
 
@@ -122,12 +118,11 @@ public class VaultEndpoint implements Serializable {
 	 * @return the hostname.
 	 */
 	public String getHost() {
-		return host;
+		return this.host;
 	}
 
 	/**
 	 * Sets the hostname.
-	 *
 	 * @param host must not be empty or {@literal null}.
 	 */
 	public void setHost(String host) {
@@ -138,7 +133,7 @@ public class VaultEndpoint implements Serializable {
 	 * @return the port.
 	 */
 	public int getPort() {
-		return port;
+		return this.port;
 	}
 
 	/**
@@ -146,8 +141,7 @@ public class VaultEndpoint implements Serializable {
 	 */
 	public void setPort(int port) {
 
-		Assert.isTrue(port >= 1 && port <= 65535,
-				"Port must be a valid port in the range between 1 and 65535");
+		Assert.isTrue(port >= 1 && port <= 65535, "Port must be a valid port in the range between 1 and 65535");
 
 		this.port = port;
 	}
@@ -156,7 +150,7 @@ public class VaultEndpoint implements Serializable {
 	 * @return the protocol scheme.
 	 */
 	public String getScheme() {
-		return scheme;
+		return this.scheme;
 	}
 
 	/**
@@ -164,8 +158,7 @@ public class VaultEndpoint implements Serializable {
 	 */
 	public void setScheme(String scheme) {
 
-		Assert.isTrue("http".equals(scheme) || "https".equals(scheme),
-				"Scheme must be http or https");
+		Assert.isTrue("http".equals(scheme) || "https".equals(scheme), "Scheme must be http or https");
 
 		this.scheme = scheme;
 	}
@@ -175,26 +168,24 @@ public class VaultEndpoint implements Serializable {
 	 * @since 2.1
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @param path context path prefix. Must not be {@literal null} or empty and must not
-	 *     start with a leading slash.
+	 * start with a leading slash.
 	 * @since 2.1
 	 */
 	public void setPath(String path) {
 
 		Assert.hasText(path, "Path must not be null or empty");
-		Assert.isTrue(!path.startsWith("/"),
-				() -> String.format("Path %s must not start with a leading slash", path));
+		Assert.isTrue(!path.startsWith("/"), () -> String.format("Path %s must not start with a leading slash", path));
 
 		this.path = path;
 	}
 
 	/**
 	 * Build the Vault {@link URI} based on the given {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @return constructed {@link URI}.
 	 */
@@ -204,7 +195,6 @@ public class VaultEndpoint implements Serializable {
 
 	/**
 	 * Build the Vault URI string based on the given {@code path}.
-	 *
 	 * @param path must not be empty or {@literal null}.
 	 * @return constructed URI String.
 	 */
@@ -212,8 +202,7 @@ public class VaultEndpoint implements Serializable {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(),
-				getPath(), path);
+		return String.format("%s://%s:%s/%s/%s", getScheme(), getHost(), getPort(), getPath(), path);
 	}
 
 	@Override
@@ -223,17 +212,18 @@ public class VaultEndpoint implements Serializable {
 		if (!(o instanceof VaultEndpoint))
 			return false;
 		VaultEndpoint that = (VaultEndpoint) o;
-		return port == that.port && host.equals(that.host) && scheme.equals(that.scheme)
-				&& path.equals(that.path);
+		return this.port == that.port && this.host.equals(that.host) && this.scheme.equals(that.scheme)
+				&& this.path.equals(that.path);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(host, port, scheme, path);
+		return Objects.hash(this.host, this.port, this.scheme, this.path);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("%s://%s:%d", scheme, host, port);
+		return String.format("%s://%s:%d", this.scheme, this.host, this.port);
 	}
+
 }

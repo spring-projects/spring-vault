@@ -41,14 +41,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=kubernetes", "vault.kubernetes.role=my-role",
-		"vault.kubernetes.service-account-token-file=target/token" })
+@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.authentication=kubernetes",
+		"vault.kubernetes.role=my-role", "vault.kubernetes.service-account-token-file=target/token" })
 class EnvironmentVaultConfigurationKubernetesAuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
+
 	}
 
 	@BeforeAll
@@ -62,8 +62,9 @@ class EnvironmentVaultConfigurationKubernetesAuthenticationUnitTests {
 	@Test
 	void shouldConfigureAuthentication() {
 
-		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
+		ClientAuthentication clientAuthentication = this.configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(KubernetesAuthentication.class);
 	}
+
 }

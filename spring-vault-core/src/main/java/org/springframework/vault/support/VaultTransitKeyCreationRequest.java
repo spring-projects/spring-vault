@@ -37,8 +37,8 @@ public class VaultTransitKeyCreationRequest {
 
 	private final boolean exportable;
 
-	private VaultTransitKeyCreationRequest(boolean derived, String type,
-			boolean convergentEncryption, boolean exportable) {
+	private VaultTransitKeyCreationRequest(boolean derived, String type, boolean convergentEncryption,
+			boolean exportable) {
 		this.derived = derived;
 		this.type = type;
 		this.convergentEncryption = convergentEncryption;
@@ -65,32 +65,28 @@ public class VaultTransitKeyCreationRequest {
 	}
 
 	/**
-	 *
 	 * @return {@literal true} if key derivation MUST be used.
 	 */
 	public boolean getDerived() {
-		return derived;
+		return this.derived;
 	}
 
 	/**
-	 *
 	 * @return {@literal true} if convergent encryption should be used (where the same
 	 * plaintext creates the same cipher text).
 	 */
 	public boolean getConvergentEncryption() {
-		return convergentEncryption;
+		return this.convergentEncryption;
 	}
 
 	/**
-	 *
 	 * @return the key type.
 	 */
 	public String getType() {
-		return type;
+		return this.type;
 	}
 
 	/**
-	 *
 	 * @return {@literal true} if key MUST be exportable.
 	 */
 	public boolean getExportable() {
@@ -103,8 +99,11 @@ public class VaultTransitKeyCreationRequest {
 	public static class VaultTransitKeyCreationRequestBuilder {
 
 		private boolean derived;
+
 		private String type = "aes256-gcm96";
+
 		private boolean convergentEncryption;
+
 		private boolean exportable;
 
 		VaultTransitKeyCreationRequestBuilder() {
@@ -112,7 +111,6 @@ public class VaultTransitKeyCreationRequest {
 
 		/**
 		 * Configure the key type.
-		 *
 		 * @param type the type of key to create, must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
@@ -126,10 +124,9 @@ public class VaultTransitKeyCreationRequest {
 
 		/**
 		 * Configure key derivation.
-		 *
 		 * @param derived {@literal true} if key derivation MUST be used. If enabled, all
-		 *     encrypt/decrypt requests to this named key must provide a context which is
-		 *     used for key derivation. Defaults to {@literal false}.
+		 * encrypt/decrypt requests to this named key must provide a context which is used
+		 * for key derivation. Defaults to {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder derived(boolean derived) {
@@ -141,13 +138,11 @@ public class VaultTransitKeyCreationRequest {
 		/**
 		 * Configure convergent encryption where the same plaintext creates the same
 		 * ciphertext. Requires {@link #derived(boolean)} to be {@literal true}.
-		 *
 		 * @param convergentEncryption {@literal true} the same plaintext creates the same
-		 *     ciphertext. Defaults to {@literal false}.
+		 * ciphertext. Defaults to {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
-		public VaultTransitKeyCreationRequestBuilder convergentEncryption(
-				boolean convergentEncryption) {
+		public VaultTransitKeyCreationRequestBuilder convergentEncryption(boolean convergentEncryption) {
 
 			this.convergentEncryption = convergentEncryption;
 			return this;
@@ -155,9 +150,8 @@ public class VaultTransitKeyCreationRequest {
 
 		/**
 		 * Configure if the raw key is exportable.
-		 *
 		 * @param exportable {@literal true} the raw key is exportable. Defaults to
-		 *     {@literal false}.
+		 * {@literal false}.
 		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
 		 */
 		public VaultTransitKeyCreationRequestBuilder exportable(boolean exportable) {
@@ -169,15 +163,16 @@ public class VaultTransitKeyCreationRequest {
 		/**
 		 * Build a new {@link VaultTransitKeyCreationRequest} instance. Requires
 		 * {@link #type(String)} to be configured.
-		 *
 		 * @return a new {@link VaultTransitKeyCreationRequest}.
 		 */
 		public VaultTransitKeyCreationRequest build() {
 
-			Assert.hasText(type, "Type must not be empty");
+			Assert.hasText(this.type, "Type must not be empty");
 
-			return new VaultTransitKeyCreationRequest(derived, type, convergentEncryption,
-					exportable);
+			return new VaultTransitKeyCreationRequest(this.derived, this.type, this.convergentEncryption,
+					this.exportable);
 		}
+
 	}
+
 }

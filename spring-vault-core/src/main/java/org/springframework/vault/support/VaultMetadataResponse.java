@@ -44,9 +44,9 @@ public class VaultMetadataResponse {
 
 	private final List<Versioned.Metadata> versions;
 
-	private VaultMetadataResponse(boolean casRequired, Instant createdTime,
-			int currentVersion, Duration deleteVersionAfter, int maxVersions,
-			int oldestVersion, Instant updatedTime, List<Versioned.Metadata> versions) {
+	private VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion,
+			Duration deleteVersionAfter, int maxVersions, int oldestVersion, Instant updatedTime,
+			List<Versioned.Metadata> versions) {
 		this.casRequired = casRequired;
 		this.createdTime = createdTime;
 		this.currentVersion = currentVersion;
@@ -118,7 +118,6 @@ public class VaultMetadataResponse {
 	 * "deletion_time": "2020-05-18T12:31:00.66257744Z", "destroyed": false }, "2": {
 	 * "created_time": "2020-05-18T12:23:10.122081788Z", "deletion_time": "", "destroyed":
 	 * false } }
-	 *
 	 * @return the key versions and their details
 	 */
 	public List<Versioned.Metadata> getVersions() {
@@ -128,12 +127,19 @@ public class VaultMetadataResponse {
 	public static class VaultMetadataResponseBuilder {
 
 		private boolean casRequired;
+
 		private Instant createdTime;
+
 		private int currentVersion;
+
 		private Duration deleteVersionAfter;
+
 		private int maxVersions;
+
 		private int oldestVersion;
+
 		private Instant updatedTime;
+
 		private List<Versioned.Metadata> versions;
 
 		public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
@@ -151,8 +157,7 @@ public class VaultMetadataResponse {
 			return this;
 		}
 
-		public VaultMetadataResponseBuilder deleteVersionAfter(
-				Duration deleteVersionAfter) {
+		public VaultMetadataResponseBuilder deleteVersionAfter(Duration deleteVersionAfter) {
 			this.deleteVersionAfter = deleteVersionAfter;
 			return this;
 		}
@@ -178,9 +183,10 @@ public class VaultMetadataResponse {
 		}
 
 		public VaultMetadataResponse build() {
-			return new VaultMetadataResponse(this.casRequired, this.createdTime,
-					this.currentVersion, this.deleteVersionAfter, this.maxVersions,
-					this.oldestVersion, this.updatedTime, this.versions);
+			return new VaultMetadataResponse(this.casRequired, this.createdTime, this.currentVersion,
+					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions);
 		}
+
 	}
+
 }

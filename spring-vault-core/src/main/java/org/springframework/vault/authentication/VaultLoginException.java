@@ -29,7 +29,6 @@ public class VaultLoginException extends VaultException {
 
 	/**
 	 * Create a {@code VaultLoginException} with the specified detail message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultLoginException(String msg) {
@@ -39,7 +38,6 @@ public class VaultLoginException extends VaultException {
 	/**
 	 * Create a {@code VaultLoginException} with the specified detail message and nested
 	 * exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
@@ -50,7 +48,6 @@ public class VaultLoginException extends VaultException {
 	/**
 	 * Create a {@link VaultLoginException} given {@code authMethod} and a
 	 * {@link Throwable cause}.
-	 *
 	 * @param authMethod must not be {@literal null}.
 	 * @param cause must not be {@literal null}.
 	 * @return the {@link VaultLoginException}.
@@ -59,12 +56,12 @@ public class VaultLoginException extends VaultException {
 
 		if (cause instanceof RestClientResponseException) {
 
-			String response = ((RestClientResponseException) cause)
-					.getResponseBodyAsString();
-			return new VaultLoginException(String.format("Cannot login using %s: %s",
-					authMethod, VaultResponses.getError(response)), cause);
+			String response = ((RestClientResponseException) cause).getResponseBodyAsString();
+			return new VaultLoginException(
+					String.format("Cannot login using %s: %s", authMethod, VaultResponses.getError(response)), cause);
 		}
 
 		return new VaultLoginException(String.format("Cannot login using %s", cause));
 	}
+
 }

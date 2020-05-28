@@ -38,7 +38,8 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 	 * Utility class which will give our tests a reference to the
 	 * {@link LeaseAwareVaultPropertySource} which holds our secrets.
 	 */
-	@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "secret/rotating", renewal = VaultPropertySource.Renewal.ROTATE)
+	@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "secret/rotating",
+			renewal = VaultPropertySource.Renewal.ROTATE)
 	public static class PropertySourceHolder implements InitializingBean {
 
 		@Autowired
@@ -50,24 +51,21 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 		 * Searches the {@link ApplicationContext} for the
 		 * {@link LeaseAwareVaultPropertySource} corresponding to the secret path we are
 		 * testing.
-		 *
 		 * @throws Exception if bad things happen (for example, if the property source
-		 *     does not exist).
+		 * does not exist).
 		 */
 		@Override
 		public void afterPropertiesSet() throws Exception {
-			Assert.notNull(appContext, "application context must be set");
-			Map<String, LeaseAwareVaultPropertySource> leaseAwareVaultPropertySources = appContext
+			Assert.notNull(this.appContext, "application context must be set");
+			Map<String, LeaseAwareVaultPropertySource> leaseAwareVaultPropertySources = this.appContext
 					.getBeansOfType(LeaseAwareVaultPropertySource.class);
-			for (LeaseAwareVaultPropertySource candidate : leaseAwareVaultPropertySources
-					.values()) {
+			for (LeaseAwareVaultPropertySource candidate : leaseAwareVaultPropertySources.values()) {
 				if (candidate.getRequestedSecret().getPath().equals("secret/rotating")) {
 					this.propertySource = candidate;
 					break;
 				}
 			}
-			Assert.notNull(propertySource,
-					"Vault property source for generic secret not found");
+			Assert.notNull(this.propertySource, "Vault property source for generic secret not found");
 		}
 
 		/**
@@ -75,14 +73,13 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 		 * @return the property source for our tested secrets
 		 */
 		public LeaseAwareVaultPropertySource getPropertySource() {
-			return propertySource;
+			return this.propertySource;
 		}
 
 	}
 
 	/**
 	 * Creates a {@link PropertySourceHolder}.
-	 *
 	 * @return the {@link PropertySourceHolder}
 	 */
 	@Bean

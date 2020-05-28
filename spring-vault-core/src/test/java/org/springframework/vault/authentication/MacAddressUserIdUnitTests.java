@@ -38,8 +38,7 @@ class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
-				.doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
 	}
 
 	@Test
@@ -50,20 +49,17 @@ class MacAddressUserIdUnitTests {
 
 		String userId = new MacAddressUserId(index).createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
-				.doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
 	}
 
 	/**
 	 * Obtain index for {@link NetworkInterface} with a HardwareAddress.
-	 *
 	 * @return -1 if none, otherwise index.
 	 * @throws SocketException
 	 */
 	private int getValidNetworkInterfaceIndex() throws SocketException {
 
-		List<NetworkInterface> interfaces = Collections
-				.list(NetworkInterface.getNetworkInterfaces());
+		List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
 
 		int index = -1;
 
@@ -75,4 +71,5 @@ class MacAddressUserIdUnitTests {
 		}
 		return index;
 	}
+
 }

@@ -63,8 +63,8 @@ public class PcfAuthenticationOptions {
 	 */
 	private final Supplier<String> instanceKeySupplier;
 
-	private PcfAuthenticationOptions(String path, String role, Clock clock,
-			Supplier<String> instanceCertSupplier, Supplier<String> instanceKeySupplier) {
+	private PcfAuthenticationOptions(String path, String role, Clock clock, Supplier<String> instanceCertSupplier,
+			Supplier<String> instanceKeySupplier) {
 		this.path = path;
 		this.role = role;
 		this.clock = clock;
@@ -83,35 +83,35 @@ public class PcfAuthenticationOptions {
 	 * @return the path of the pcf authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return name of the role against which the login is being attempted.
 	 */
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	/**
 	 * @return the {@link Clock}.
 	 */
 	public Clock getClock() {
-		return clock;
+		return this.clock;
 	}
 
 	/**
 	 * @return the instance certificate {@link Supplier}.
 	 */
 	public Supplier<String> getInstanceCertSupplier() {
-		return instanceCertSupplier;
+		return this.instanceCertSupplier;
 	}
 
 	/**
 	 * @return the instance key {@link Supplier}.
 	 */
 	public Supplier<String> getInstanceKeySupplier() {
-		return instanceKeySupplier;
+		return this.instanceKeySupplier;
 	}
 
 	/**
@@ -137,7 +137,6 @@ public class PcfAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_PCF_AUTHENTICATION_PATH
@@ -152,9 +151,8 @@ public class PcfAuthenticationOptions {
 
 		/**
 		 * Configure the role.
-		 *
 		 * @param role name of the role against which the login is being attempted, must
-		 *     not be {@literal null} or empty.
+		 * not be {@literal null} or empty.
 		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
 		 */
 		public PcfAuthenticationOptionsBuilder role(String role) {
@@ -167,7 +165,6 @@ public class PcfAuthenticationOptions {
 
 		/**
 		 * Configure the {@link Clock}.
-		 *
 		 * @param clock must not be {@literal null}.
 		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
 		 */
@@ -181,16 +178,13 @@ public class PcfAuthenticationOptions {
 
 		/**
 		 * Configure the {@link Supplier} to obtain the instance certificate.
-		 *
 		 * @param instanceCertSupplier the supplier, must not be {@literal null}.
 		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
 		 * @see ResourceCredentialSupplier
 		 */
-		public PcfAuthenticationOptionsBuilder instanceCertificate(
-				Supplier<String> instanceCertSupplier) {
+		public PcfAuthenticationOptionsBuilder instanceCertificate(Supplier<String> instanceCertSupplier) {
 
-			Assert.notNull(instanceCertSupplier,
-					"Instance certificate supplier must not be null");
+			Assert.notNull(instanceCertSupplier, "Instance certificate supplier must not be null");
 
 			this.instanceCertSupplier = instanceCertSupplier;
 			return this;
@@ -198,16 +192,13 @@ public class PcfAuthenticationOptions {
 
 		/**
 		 * Configure the {@link Supplier} to obtain the instance key.
-		 *
 		 * @param instanceKeySupplier the supplier, must not be {@literal null}.
 		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
 		 * @see ResourceCredentialSupplier
 		 */
-		public PcfAuthenticationOptionsBuilder instanceKey(
-				Supplier<String> instanceKeySupplier) {
+		public PcfAuthenticationOptionsBuilder instanceKey(Supplier<String> instanceKeySupplier) {
 
-			Assert.notNull(instanceKeySupplier,
-					"Instance certificate supplier must not be null");
+			Assert.notNull(instanceKeySupplier, "Instance certificate supplier must not be null");
 
 			this.instanceKeySupplier = instanceKeySupplier;
 			return this;
@@ -219,31 +210,28 @@ public class PcfAuthenticationOptions {
 		 * Falls back to the instance certificate at {@code CF_INSTANCE_CERT} if
 		 * {@link #instanceCertificate(Supplier)} is not configured respective
 		 * {@code CF_INSTANCE_KEY} if {@link #instanceKey(Supplier)} is not configured.
-		 *
 		 * @return a new {@link PcfAuthenticationOptions}.
 		 * @throws IllegalStateException if {@link #instanceCertificate(Supplier)} or
-		 *     {@link #instanceKey(Supplier)} are not set and the corresponding
-		 *     environment variable {@code CF_INSTANCE_CERT} respective
-		 *     {@code CF_INSTANCE_KEY} is not set.
+		 * {@link #instanceKey(Supplier)} are not set and the corresponding environment
+		 * variable {@code CF_INSTANCE_CERT} respective {@code CF_INSTANCE_KEY} is not
+		 * set.
 		 */
 		public PcfAuthenticationOptions build() {
 
-			Assert.notNull(role, "Role must not be null");
+			Assert.notNull(this.role, "Role must not be null");
 
 			Supplier<String> instanceCertSupplier = this.instanceCertSupplier;
 
 			if (instanceCertSupplier == null) {
-				instanceCertSupplier = new ResourceCredentialSupplier(
-						resolveEnvVariable("CF_INSTANCE_CERT")).cached();
+				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT")).cached();
 			}
 
 			Supplier<String> instanceKeySupplier = this.instanceKeySupplier;
 			if (instanceKeySupplier == null) {
-				instanceKeySupplier = new ResourceCredentialSupplier(
-						resolveEnvVariable("CF_INSTANCE_KEY")).cached();
+				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY")).cached();
 			}
 
-			return new PcfAuthenticationOptions(path, role, clock, instanceCertSupplier,
+			return new PcfAuthenticationOptions(this.path, this.role, this.clock, instanceCertSupplier,
 					instanceKeySupplier);
 		}
 
@@ -252,11 +240,12 @@ public class PcfAuthenticationOptions {
 			String value = System.getenv(name);
 
 			if (StringUtils.isEmpty(value)) {
-				throw new IllegalStateException(
-						String.format("Environment variable %s not set", name));
+				throw new IllegalStateException(String.format("Environment variable %s not set", name));
 			}
 
 			return value;
 		}
+
 	}
+
 }

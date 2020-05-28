@@ -236,6 +236,21 @@
 	<build>
 		<plugins>
 			<plugin>
+				<groupId>io.spring.javaformat</groupId>
+				<artifactId>spring-javaformat-maven-plugin</artifactId>
+				<version>0.0.22</version>
+				<executions>
+					<execution>
+						<phase>validate</phase>
+						<inherited>true</inherited>
+						<goals>
+							<goal>apply</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
 				<groupId>org.jetbrains.kotlin</groupId>
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
@@ -750,13 +765,13 @@
 
 				</plugins>
 			</build>
-
-			<pluginRepositories>
-				<pluginRepository>
-					<id>spring-plugins-release</id>
-					<url>https://repo.spring.io/plugins-release</url>
-				</pluginRepository>
-			</pluginRepositories>
 		</profile>
 	</profiles>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-plugins-release</id>
+			<url>https://repo.spring.io/plugins-release</url>
+		</pluginRepository>
+	</pluginRepositories>
 </project>

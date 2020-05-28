@@ -27,7 +27,6 @@ public abstract class VaultSessionManagerException extends VaultException {
 
 	/**
 	 * Create a {@code VaultSessionManagerException} with the specified detail message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultSessionManagerException(String msg) {
@@ -37,11 +36,11 @@ public abstract class VaultSessionManagerException extends VaultException {
 	/**
 	 * Create a {@code VaultSessionManagerException} with the specified detail message and
 	 * nested exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
 	public VaultSessionManagerException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

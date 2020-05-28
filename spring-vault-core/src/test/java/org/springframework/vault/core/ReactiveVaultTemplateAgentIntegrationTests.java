@@ -50,34 +50,32 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 
 		try (Socket socket = new Socket()) {
 
-			socket.connect(new InetSocketAddress(endpoint.getHost(), endpoint.getPort()),
+			socket.connect(new InetSocketAddress(this.endpoint.getHost(), this.endpoint.getPort()),
 					(int) new ClientOptions().getConnectionTimeout().toMillis());
 		}
 		catch (IOException e) {
-			throw new TestAbortedException(
-					"Vault Agent not available: " + e.getMessage());
+			throw new TestAbortedException("Vault Agent not available: " + e.getMessage());
 		}
 	}
 
 	@Test
 	void shouldUseAgentAuthentication() {
 
-		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(endpoint,
-				connector);
+		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(this.endpoint, this.connector);
 
-		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
-				.as(StepVerifier::create).verifyComplete();
+		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value")).as(StepVerifier::create)
+				.verifyComplete();
 	}
 
 	@Test
 	void shouldUseAgentAuthenticationWithBuilder() {
 
-		WebClientBuilder builder = WebClientBuilder.builder().endpoint(endpoint)
-				.httpConnector(connector);
+		WebClientBuilder builder = WebClientBuilder.builder().endpoint(this.endpoint).httpConnector(this.connector);
 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(builder);
 
-		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
-				.as(StepVerifier::create).verifyComplete();
+		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value")).as(StepVerifier::create)
+				.verifyComplete();
 	}
+
 }

@@ -77,7 +77,6 @@ public class Policy {
 
 	/**
 	 * Create an empty {@link Policy} without rules.
-	 *
 	 * @return an empty {@link Policy}.
 	 */
 	public static Policy empty() {
@@ -86,7 +85,6 @@ public class Policy {
 
 	/**
 	 * Create a {@link Policy} from one or more {@code rules}.
-	 *
 	 * @param rules must not be {@literal null}.
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
@@ -100,7 +98,6 @@ public class Policy {
 
 	/**
 	 * Create a {@link Policy} from one or more {@code rules}.
-	 *
 	 * @param rules must not be {@literal null}.
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
@@ -115,7 +112,6 @@ public class Policy {
 	 * Create a new {@link Policy} object containing all configured rules and add the
 	 * given {@link Rule} to the new policy object. If the given {@link Rule} matches an
 	 * existing rule path, the exiting rule will be overridden by the new rule object.
-	 *
 	 * @param rule must not be {@literal null}.
 	 * @return the new {@link Policy} object containing all configured rules and the given
 	 * {@link Rule}.
@@ -132,13 +128,12 @@ public class Policy {
 	}
 
 	public Set<Rule> getRules() {
-		return rules;
+		return this.rules;
 	}
 
 	/**
 	 * Lookup a {@link Rule} by its path. Returns {@literal null} if the rule was not
 	 * found.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the {@link Rule} or {@literal null}, if not found.
 	 */
@@ -147,7 +142,7 @@ public class Policy {
 
 		Assert.notNull(path, "Path must not be null");
 
-		for (Rule rule : rules) {
+		for (Rule rule : this.rules) {
 			if (rule.getPath().equals(path)) {
 				return rule;
 			}
@@ -163,12 +158,12 @@ public class Policy {
 		if (!(o instanceof Policy))
 			return false;
 		Policy policy = (Policy) o;
-		return rules.equals(policy.rules);
+		return this.rules.equals(policy.rules);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(rules);
+		return Objects.hash(this.rules);
 	}
 
 	/**
@@ -231,8 +226,10 @@ public class Policy {
 
 		@JsonCreator
 		private Rule(@JsonProperty("capabilities") List<Capability> capabilities,
-				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration minWrappingTtl,
-				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration maxWrappingTtl,
+				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(
+						converter = StringToDurationConverter.class) Duration minWrappingTtl,
+				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(
+						converter = StringToDurationConverter.class) Duration maxWrappingTtl,
 				@JsonProperty("allowed_parameters") Map<String, List<String>> allowedParameters,
 				@JsonProperty("denied_parameters") Map<String, List<String>> deniedParameters) {
 
@@ -244,9 +241,8 @@ public class Policy {
 			this.deniedParameters = deniedParameters;
 		}
 
-		private Rule(String path, List<Capability> capabilities,
-				@Nullable Duration minWrappingTtl, @Nullable Duration maxWrappingTtl,
-				Map<String, List<String>> allowedParameters,
+		private Rule(String path, List<Capability> capabilities, @Nullable Duration minWrappingTtl,
+				@Nullable Duration maxWrappingTtl, Map<String, List<String>> allowedParameters,
 				Map<String, List<String>> deniedParameters) {
 
 			this.path = path;
@@ -259,7 +255,6 @@ public class Policy {
 
 		/**
 		 * Create a new builder for {@link Rule}.
-		 *
 		 * @return a new {@link RuleBuilder}.
 		 */
 		public static RuleBuilder builder() {
@@ -267,34 +262,34 @@ public class Policy {
 		}
 
 		private Rule withPath(String path) {
-			return new Rule(path, capabilities, minWrappingTtl, maxWrappingTtl,
-					allowedParameters, deniedParameters);
+			return new Rule(path, this.capabilities, this.minWrappingTtl, this.maxWrappingTtl, this.allowedParameters,
+					this.deniedParameters);
 		}
 
 		public String getPath() {
-			return path;
+			return this.path;
 		}
 
 		public List<Capability> getCapabilities() {
-			return capabilities;
+			return this.capabilities;
 		}
 
 		@Nullable
 		public Duration getMinWrappingTtl() {
-			return minWrappingTtl;
+			return this.minWrappingTtl;
 		}
 
 		@Nullable
 		public Duration getMaxWrappingTtl() {
-			return maxWrappingTtl;
+			return this.maxWrappingTtl;
 		}
 
 		public Map<String, List<String>> getAllowedParameters() {
-			return allowedParameters;
+			return this.allowedParameters;
 		}
 
 		public Map<String, List<String>> getDeniedParameters() {
-			return deniedParameters;
+			return this.deniedParameters;
 		}
 
 		@Override
@@ -304,12 +299,12 @@ public class Policy {
 			if (!(o instanceof Rule))
 				return false;
 			Rule rule = (Rule) o;
-			return path.equals(rule.path);
+			return this.path.equals(rule.path);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(path);
+			return Objects.hash(this.path);
 		}
 
 		/**
@@ -329,11 +324,12 @@ public class Policy {
 
 			private Map<String, List<String>> allowedParameters = new LinkedHashMap<String, List<String>>();
 
-			private Map<String, List<String>> deniedParameters = new LinkedHashMap<String, List<String>>();;
+			private Map<String, List<String>> deniedParameters = new LinkedHashMap<String, List<String>>();
+
+			;
 
 			/**
 			 * Associate a {@code path} with the rule.
-			 *
 			 * @param path must not be {@literal null} or empty.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -348,7 +344,6 @@ public class Policy {
 			/**
 			 * Configure a {@link Capability} for the rule. Capabilities are added when
 			 * calling this method and do not replace already configured capabilities.
-			 *
 			 * @param capability must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -363,15 +358,13 @@ public class Policy {
 			/**
 			 * Configure capabilities. apabilities are added when calling this method and
 			 * do not replace already configured capabilities.
-			 *
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
 			public RuleBuilder capabilities(Capability... capabilities) {
 
 				Assert.notNull(capabilities, "Capabilities must not be null");
-				Assert.noNullElements(capabilities,
-						"Capabilities must not contain null elements");
+				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
 
 				return capabilities(Arrays.asList(capabilities));
 			}
@@ -381,25 +374,22 @@ public class Policy {
 			 * resolves capabilities using {@link BuiltinCapabilities}. Capabilities are
 			 * added when calling this method and do not replace already configured
 			 * capabilities.
-			 *
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 * @throws IllegalArgumentException if the capability cannot be resolved to a
-			 *     built-in {@link Capability}.
+			 * built-in {@link Capability}.
 			 */
 			public RuleBuilder capabilities(String... capabilities) {
 
 				Assert.notNull(capabilities, "Capabilities must not be null");
-				Assert.noNullElements(capabilities,
-						"Capabilities must not contain null elements");
+				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
 
 				List<Capability> mapped = Arrays.stream(capabilities).map(value -> {
 
 					Capability capability = BuiltinCapabilities.find(value);
 
 					if (capability == null) {
-						throw new IllegalArgumentException(
-								"Cannot resolve " + value + " to a capability");
+						throw new IllegalArgumentException("Cannot resolve " + value + " to a capability");
 					}
 					return capability;
 				}).collect(Collectors.toList());
@@ -418,7 +408,6 @@ public class Policy {
 
 			/**
 			 * Configure a min TTL for response wrapping.
-			 *
 			 * @param ttl must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -432,7 +421,6 @@ public class Policy {
 
 			/**
 			 * Configure a max TTL for response wrapping.
-			 *
 			 * @param ttl must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
 			 */
@@ -449,7 +437,6 @@ public class Policy {
 			 * Allowing parameter values replaces previously configured allowed parameter
 			 * values. Empty {@code values} allow all values for the given parameter
 			 * {@code name}.
-			 *
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
@@ -468,7 +455,6 @@ public class Policy {
 			 * Configure denied parameter values given {@code name} and {@code values}.
 			 * Denying parameter values replaces previously configured denied parameter
 			 * values. Empty {@code values} deny parameter usage.
-			 *
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
@@ -486,14 +472,12 @@ public class Policy {
 			/**
 			 * Build the {@link Rule} object. Requires a configured {@link #path(String)}
 			 * and at least one {@link #capability(Policy.Capability)}.
-			 *
 			 * @return the new {@link Rule} object.
 			 */
 			public Rule build() {
 
-				Assert.state(StringUtils.hasText(path), "Path must not be empty");
-				Assert.state(!capabilities.isEmpty(),
-						"Rule must define one or more capabilities");
+				Assert.state(StringUtils.hasText(this.path), "Path must not be empty");
+				Assert.state(!this.capabilities.isEmpty(), "Rule must define one or more capabilities");
 
 				List<Capability> capabilities;
 				switch (this.capabilities.size()) {
@@ -501,21 +485,17 @@ public class Policy {
 					capabilities = Collections.emptyList();
 					break;
 				case 1:
-					capabilities = Collections
-							.singletonList(this.capabilities.iterator().next());
+					capabilities = Collections.singletonList(this.capabilities.iterator().next());
 					break;
 				default:
-					capabilities = Collections
-							.unmodifiableList(new ArrayList<>(this.capabilities));
+					capabilities = Collections.unmodifiableList(new ArrayList<>(this.capabilities));
 				}
 
-				return new Rule(path, capabilities, minWrappingTtl, maxWrappingTtl,
-						createMap(this.allowedParameters),
-						createMap(this.deniedParameters));
+				return new Rule(this.path, capabilities, this.minWrappingTtl, this.maxWrappingTtl,
+						createMap(this.allowedParameters), createMap(this.deniedParameters));
 			}
 
-			private Map<String, List<String>> createMap(
-					Map<String, List<String>> source) {
+			private Map<String, List<String>> createMap(Map<String, List<String>> source) {
 
 				if (source.isEmpty()) {
 					return Collections.emptyMap();
@@ -523,7 +503,9 @@ public class Policy {
 
 				return Collections.unmodifiableMap(new LinkedHashMap<>(source));
 			}
+
 		}
+
 	}
 
 	/**
@@ -535,6 +517,7 @@ public class Policy {
 		 * @return the capability literal.
 		 */
 		String name();
+
 	}
 
 	/**
@@ -594,7 +577,6 @@ public class Policy {
 
 		/**
 		 * Find a {@link Capability} by its name. The name is compared case-insensitive.
-		 *
 		 * @param value must not be {@literal null}.
 		 * @return the {@link Capability} or {@literal null}, if not found.
 		 */
@@ -609,13 +591,13 @@ public class Policy {
 
 			return null;
 		}
+
 	}
 
 	static class PolicySerializer extends JsonSerializer<Policy> {
 
 		@Override
-		public void serialize(Policy value, JsonGenerator gen,
-				SerializerProvider serializers) throws IOException {
+		public void serialize(Policy value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
 
 			gen.writeStartObject();
 
@@ -630,13 +612,13 @@ public class Policy {
 			gen.writeEndObject();
 
 		}
+
 	}
 
 	static class PolicyDeserializer extends JsonDeserializer<Policy> {
 
 		@Override
-		public Policy deserialize(JsonParser p, DeserializationContext ctxt)
-				throws IOException {
+		public Policy deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
 
 			Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
 					"Expected START_OBJECT, got: " + p.getCurrentToken());
@@ -679,6 +661,7 @@ public class Policy {
 					"Expected END_OBJECT, got: " + p.getCurrentToken());
 			return Policy.of(rules);
 		}
+
 	}
 
 	static class CapabilityToStringConverter implements Converter<Capability, String> {
@@ -697,6 +680,7 @@ public class Policy {
 		public JavaType getOutputType(TypeFactory typeFactory) {
 			return typeFactory.constructType(String.class);
 		}
+
 	}
 
 	static class StringToCapabilityConverter implements Converter<String, Capability> {
@@ -718,6 +702,7 @@ public class Policy {
 		public JavaType getOutputType(TypeFactory typeFactory) {
 			return typeFactory.constructType(Capability.class);
 		}
+
 	}
 
 	static class DurationToStringConverter implements Converter<Duration, String> {
@@ -736,6 +721,7 @@ public class Policy {
 		public JavaType getOutputType(TypeFactory typeFactory) {
 			return typeFactory.constructType(String.class);
 		}
+
 	}
 
 	static class StringToDurationConverter implements Converter<String, Duration> {
@@ -767,8 +753,7 @@ public class Policy {
 					return Duration.ofHours(Long.parseLong(matcher.group(1)));
 				}
 
-				throw new IllegalArgumentException(
-						"Unsupported duration value: " + value);
+				throw new IllegalArgumentException("Unsupported duration value: " + value);
 			}
 		}
 
@@ -781,5 +766,7 @@ public class Policy {
 		public JavaType getOutputType(TypeFactory typeFactory) {
 			return typeFactory.constructType(Capability.class);
 		}
+
 	}
+
 }

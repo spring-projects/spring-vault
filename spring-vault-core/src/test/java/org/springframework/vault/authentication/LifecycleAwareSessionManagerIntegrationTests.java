@@ -46,12 +46,12 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 
 	@BeforeEach
 	void before() {
-		taskScheduler.afterPropertiesSet();
+		this.taskScheduler.afterPropertiesSet();
 	}
 
 	@AfterEach
 	void tearDown() {
-		taskScheduler.destroy();
+		this.taskScheduler.destroy();
 	}
 
 	@Test
@@ -60,8 +60,8 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskScheduler, prepare().getRestTemplate());
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
+				this.taskScheduler, prepare().getRestTemplate());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -70,8 +70,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 	@Test
 	void shouldRenewToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
-				.opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
 				.renewable().ttl(1, TimeUnit.HOURS) //
@@ -84,8 +83,8 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 				LoginToken.renewable(token.getToken().toCharArray(), Duration.ZERO));
 
 		final AtomicInteger counter = new AtomicInteger();
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskScheduler, prepare().getRestTemplate()) {
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
+				this.taskScheduler, prepare().getRestTemplate()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -106,8 +105,8 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		final LoginToken loginToken = createLoginToken();
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
-		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(
-				tokenAuthentication, taskScheduler, prepare().getRestTemplate());
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
+				this.taskScheduler, prepare().getRestTemplate());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
@@ -115,14 +114,12 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		prepare().getVaultOperations().doWithSession(restOperations -> {
 
 			try {
-				restOperations.getForEntity("auth/token/lookup/{token}", Map.class,
-						loginToken.toCharArray());
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
 			}
 			catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
-						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;
@@ -131,10 +128,10 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 
 	private LoginToken createLoginToken() {
 
-		VaultTokenOperations tokenOperations = prepare().getVaultOperations()
-				.opsForToken();
+		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 		VaultToken token = tokenOperations.createOrphan().getToken();
 
 		return LoginToken.of(token.getToken());
 	}
+
 }

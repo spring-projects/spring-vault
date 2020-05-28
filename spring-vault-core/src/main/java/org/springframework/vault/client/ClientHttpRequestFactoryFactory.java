@@ -83,21 +83,17 @@ import static org.springframework.vault.support.SslConfiguration.KeyConfiguratio
  */
 public class ClientHttpRequestFactoryFactory {
 
-	private static final Log logger = LogFactory
-			.getLog(ClientHttpRequestFactoryFactory.class);
+	private static final Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent(
-			"org.apache.http.client.HttpClient");
+	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
 
 	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
 
-	private static final boolean NETTY_PRESENT = isPresent(
-			"io.netty.channel.nio.NioEventLoopGroup", "io.netty.handler.ssl.SslContext",
-			"io.netty.handler.codec.http.HttpClientCodec");
+	private static final boolean NETTY_PRESENT = isPresent("io.netty.channel.nio.NioEventLoopGroup",
+			"io.netty.handler.ssl.SslContext", "io.netty.handler.codec.http.HttpClientCodec");
 
 	/**
 	 * Checks for presence of all {@code classNames} using this class' classloader.
-	 *
 	 * @param classNames
 	 * @return {@literal true} if all classes are present; {@literal false} if at least
 	 * one class cannot be found.
@@ -105,8 +101,7 @@ public class ClientHttpRequestFactoryFactory {
 	private static boolean isPresent(String... classNames) {
 
 		for (String className : classNames) {
-			if (!ClassUtils.isPresent(className,
-					ClientHttpRequestFactoryFactory.class.getClassLoader())) {
+			if (!ClassUtils.isPresent(className, ClientHttpRequestFactoryFactory.class.getClassLoader())) {
 				return false;
 			}
 		}
@@ -117,14 +112,12 @@ public class ClientHttpRequestFactoryFactory {
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
-	 *
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
 	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be initialized
 	 * after obtaining.
 	 */
-	public static ClientHttpRequestFactory create(ClientOptions options,
-			SslConfiguration sslConfiguration) {
+	public static ClientHttpRequestFactory create(ClientOptions options, SslConfiguration sslConfiguration) {
 
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
@@ -155,13 +148,13 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	private static SSLContext getSSLContext(SslConfiguration sslConfiguration,
-			TrustManager[] trustManagers) throws GeneralSecurityException, IOException {
+	private static SSLContext getSSLContext(SslConfiguration sslConfiguration, TrustManager[] trustManagers)
+			throws GeneralSecurityException, IOException {
 
 		KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
 		KeyManager[] keyManagers = sslConfiguration.getKeyStoreConfiguration().isPresent()
-				? createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
-						keyConfiguration).getKeyManagers()
+				? createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(), keyConfiguration)
+						.getKeyManagers()
 				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
@@ -175,26 +168,20 @@ public class ClientHttpRequestFactoryFactory {
 			throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()
-				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration())
-						.getTrustManagers()
-				: null;
+				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;
 	}
 
-	static KeyManagerFactory createKeyManagerFactory(
-			KeyStoreConfiguration keyStoreConfiguration,
-			KeyConfiguration keyConfiguration)
-			throws GeneralSecurityException, IOException {
+	static KeyManagerFactory createKeyManagerFactory(KeyStoreConfiguration keyStoreConfiguration,
+			KeyConfiguration keyConfiguration) throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = getKeyStore(keyStoreConfiguration);
 
-		KeyManagerFactory keyManagerFactory = KeyManagerFactory
-				.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 
 		char[] keyPasswordToUse = keyConfiguration.getKeyPassword();
 
 		if (keyPasswordToUse == null) {
-			keyPasswordToUse = keyStoreConfiguration.getStorePassword() == null
-					? new char[0]
+			keyPasswordToUse = keyStoreConfiguration.getStorePassword() == null ? new char[0]
 					: keyStoreConfiguration.getStorePassword();
 		}
 
@@ -219,16 +206,14 @@ public class ClientHttpRequestFactoryFactory {
 	private static String getKeyStoreType(KeyStoreConfiguration keyStoreConfiguration) {
 
 		if (StringUtils.hasText(keyStoreConfiguration.getStoreType())
-				&& !SslConfiguration.PEM_KEYSTORE_TYPE
-						.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
+				&& !SslConfiguration.PEM_KEYSTORE_TYPE.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
 			return keyStoreConfiguration.getStoreType();
 		}
 
 		return KeyStore.getDefaultType();
 	}
 
-	static TrustManagerFactory createTrustManagerFactory(
-			KeyStoreConfiguration keyStoreConfiguration)
+	static TrustManagerFactory createTrustManagerFactory(KeyStoreConfiguration keyStoreConfiguration)
 			throws GeneralSecurityException, IOException {
 
 		KeyStore trustStore = getKeyStore(keyStoreConfiguration);
@@ -240,20 +225,18 @@ public class ClientHttpRequestFactoryFactory {
 		return trustManagerFactory;
 	}
 
-	private static void loadKeyStore(KeyStoreConfiguration keyStoreConfiguration,
-			KeyStore keyStore) throws IOException, GeneralSecurityException {
+	private static void loadKeyStore(KeyStoreConfiguration keyStoreConfiguration, KeyStore keyStore)
+			throws IOException, GeneralSecurityException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Loading keystore from %s",
-					keyStoreConfiguration.getResource()));
+			logger.debug(String.format("Loading keystore from %s", keyStoreConfiguration.getResource()));
 		}
 
 		InputStream inputStream = null;
 		try {
 			inputStream = keyStoreConfiguration.getResource().getInputStream();
 
-			if (SslConfiguration.PEM_KEYSTORE_TYPE
-					.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
+			if (SslConfiguration.PEM_KEYSTORE_TYPE.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
 
 				keyStore.load(null);
 				loadFromPem(keyStore, inputStream);
@@ -263,8 +246,7 @@ public class ClientHttpRequestFactoryFactory {
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Keystore loaded with %d entries",
-						keyStore.size()));
+				logger.debug(String.format("Keystore loaded with %d entries", keyStore.size()));
 			}
 		}
 		finally {
@@ -274,11 +256,9 @@ public class ClientHttpRequestFactoryFactory {
 		}
 	}
 
-	private static void loadFromPem(KeyStore keyStore, InputStream inputStream)
-			throws IOException, KeyStoreException {
+	private static void loadFromPem(KeyStore keyStore, InputStream inputStream) throws IOException, KeyStoreException {
 
-		List<PemObject> pemObjects = PemObject
-				.parse(new String(FileCopyUtils.copyToByteArray(inputStream)));
+		List<PemObject> pemObjects = PemObject.parse(new String(FileCopyUtils.copyToByteArray(inputStream)));
 
 		for (PemObject pemObject : pemObjects) {
 			if (pemObject.isCertificate()) {
@@ -286,8 +266,7 @@ public class ClientHttpRequestFactoryFactory {
 				String alias = cert.getSubjectX500Principal().getName();
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							String.format("Adding certificate with alias %s", alias));
+					logger.debug(String.format("Adding certificate with alias %s", alias));
 				}
 
 				keyStore.setCertificateEntry(alias, cert);
@@ -307,31 +286,26 @@ public class ClientHttpRequestFactoryFactory {
 	 */
 	static class HttpComponents {
 
-		static ClientHttpRequestFactory usingHttpComponents(ClientOptions options,
-				SslConfiguration sslConfiguration)
+		static ClientHttpRequestFactory usingHttpComponents(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
 
-			httpClientBuilder.setRoutePlanner(new SystemDefaultRoutePlanner(
-					DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
+			httpClientBuilder.setRoutePlanner(
+					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
-				SSLContext sslContext = getSSLContext(sslConfiguration,
-						getTrustManagers(sslConfiguration));
-				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(
-						sslContext);
+				SSLContext sslContext = getSSLContext(sslConfiguration, getTrustManagers(sslConfiguration));
+				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
 				httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
 				httpClientBuilder.setSSLContext(sslContext);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
 					//
-					.setConnectTimeout(
-							Math.toIntExact(options.getConnectionTimeout().toMillis())) //
-					.setSocketTimeout(
-							Math.toIntExact(options.getReadTimeout().toMillis())) //
+					.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis())) //
+					.setSocketTimeout(Math.toIntExact(options.getReadTimeout().toMillis())) //
 					.setAuthenticationEnabled(true) //
 					.build();
 
@@ -342,6 +316,7 @@ public class ClientHttpRequestFactoryFactory {
 
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
+
 	}
 
 	/**
@@ -351,8 +326,7 @@ public class ClientHttpRequestFactoryFactory {
 	 */
 	static class OkHttp3 {
 
-		static ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
-				SslConfiguration sslConfiguration)
+		static ClientHttpRequestFactory usingOkHttp3(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 
 			Builder builder = new Builder();
@@ -361,10 +335,9 @@ public class ClientHttpRequestFactoryFactory {
 
 				TrustManager[] trustManagers = getTrustManagers(sslConfiguration);
 
-				if (trustManagers.length != 1
-						|| !(trustManagers[0] instanceof X509TrustManager)) {
-					throw new IllegalStateException("Unexpected default trust managers:"
-							+ Arrays.toString(trustManagers));
+				if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+					throw new IllegalStateException(
+							"Unexpected default trust managers:" + Arrays.toString(trustManagers));
 				}
 
 				X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
@@ -373,12 +346,12 @@ public class ClientHttpRequestFactoryFactory {
 				builder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
 			}
 
-			builder.connectTimeout(options.getConnectionTimeout().toMillis(),
-					TimeUnit.MILLISECONDS).readTimeout(
-							options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
+			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
+					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
 
 			return new OkHttp3ClientHttpRequestFactory(builder.build());
 		}
+
 	}
 
 	/**
@@ -388,8 +361,7 @@ public class ClientHttpRequestFactoryFactory {
 	 */
 	static class Netty {
 
-		static ClientHttpRequestFactory usingNetty(ClientOptions options,
-				SslConfiguration sslConfiguration)
+		static ClientHttpRequestFactory usingNetty(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 
 			Netty4ClientHttpRequestFactory requestFactory = new Netty4ClientHttpRequestFactory();
@@ -400,44 +372,38 @@ public class ClientHttpRequestFactoryFactory {
 						.forClient();
 
 				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-					sslContextBuilder.trustManager(createTrustManagerFactory(
-							sslConfiguration.getTrustStoreConfiguration()));
+					sslContextBuilder
+							.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
 				}
 
 				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-					sslContextBuilder.keyManager(createKeyManagerFactory(
-							sslConfiguration.getKeyStoreConfiguration(),
+					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
 							sslConfiguration.getKeyConfiguration()));
 				}
 
-				requestFactory.setSslContext(
-						sslContextBuilder.sslProvider(SslProvider.JDK).build());
+				requestFactory.setSslContext(sslContextBuilder.sslProvider(SslProvider.JDK).build());
 			}
 
-			requestFactory.setConnectTimeout(
-					Math.toIntExact(options.getConnectionTimeout().toMillis()));
-			requestFactory
-					.setReadTimeout(Math.toIntExact(options.getReadTimeout().toMillis()));
+			requestFactory.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()));
+			requestFactory.setReadTimeout(Math.toIntExact(options.getReadTimeout().toMillis()));
 
 			return requestFactory;
 		}
+
 	}
 
 	static class KeySelectingKeyManagerFactory extends KeyManagerFactory {
 
-		KeySelectingKeyManagerFactory(KeyManagerFactory factory,
-				KeyConfiguration keyConfiguration) {
+		KeySelectingKeyManagerFactory(KeyManagerFactory factory, KeyConfiguration keyConfiguration) {
 			super(new KeyManagerFactorySpi() {
 				@Override
 				protected void engineInit(KeyStore keyStore, char[] chars)
-						throws KeyStoreException, NoSuchAlgorithmException,
-						UnrecoverableKeyException {
+						throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
 					factory.init(keyStore, chars);
 				}
 
 				@Override
-				protected void engineInit(
-						ManagerFactoryParameters managerFactoryParameters)
+				protected void engineInit(ManagerFactoryParameters managerFactoryParameters)
 						throws InvalidAlgorithmParameterException {
 					factory.init(managerFactoryParameters);
 				}
@@ -447,66 +413,64 @@ public class ClientHttpRequestFactoryFactory {
 
 					KeyManager[] keyManagers = factory.getKeyManagers();
 
-					if (keyManagers.length == 1
-							&& keyManagers[0] instanceof X509ExtendedKeyManager) {
+					if (keyManagers.length == 1 && keyManagers[0] instanceof X509ExtendedKeyManager) {
 
 						return new KeyManager[] { new KeySelectingX509KeyManager(
-								(X509ExtendedKeyManager) keyManagers[0],
-								keyConfiguration) };
+								(X509ExtendedKeyManager) keyManagers[0], keyConfiguration) };
 					}
 
 					return keyManagers;
 				}
 			}, factory.getProvider(), factory.getAlgorithm());
 		}
+
 	}
 
 	private static class KeySelectingX509KeyManager extends X509ExtendedKeyManager {
 
 		private final X509ExtendedKeyManager delegate;
+
 		private final KeyConfiguration keyConfiguration;
 
-		KeySelectingX509KeyManager(X509ExtendedKeyManager delegate,
-				KeyConfiguration keyConfiguration) {
+		KeySelectingX509KeyManager(X509ExtendedKeyManager delegate, KeyConfiguration keyConfiguration) {
 			this.delegate = delegate;
 			this.keyConfiguration = keyConfiguration;
 		}
 
 		@Override
 		public String[] getClientAliases(String keyType, Principal[] issuers) {
-			return delegate.getClientAliases(keyType, issuers);
+			return this.delegate.getClientAliases(keyType, issuers);
 		}
 
 		@Override
-		public String chooseClientAlias(String[] keyType, Principal[] issuers,
-				Socket socket) {
-			return keyConfiguration.getKeyAlias();
+		public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
+			return this.keyConfiguration.getKeyAlias();
 		}
 
-		public String chooseEngineClientAlias(String[] keyType, Principal[] issuers,
-				SSLEngine engine) {
-			return keyConfiguration.getKeyAlias();
+		public String chooseEngineClientAlias(String[] keyType, Principal[] issuers, SSLEngine engine) {
+			return this.keyConfiguration.getKeyAlias();
 		}
 
 		@Override
 		public String[] getServerAliases(String keyType, Principal[] issuers) {
-			return delegate.getServerAliases(keyType, issuers);
+			return this.delegate.getServerAliases(keyType, issuers);
 		}
 
 		@Override
-		public String chooseServerAlias(String keyType, Principal[] issuers,
-				Socket socket) {
-			return delegate.chooseServerAlias(keyType, issuers, socket);
+		public String chooseServerAlias(String keyType, Principal[] issuers, Socket socket) {
+			return this.delegate.chooseServerAlias(keyType, issuers, socket);
 		}
 
 		@Override
 		public X509Certificate[] getCertificateChain(String alias) {
-			return delegate.getCertificateChain(alias);
+			return this.delegate.getCertificateChain(alias);
 		}
 
 		@Override
 		public PrivateKey getPrivateKey(String alias) {
-			return delegate.getPrivateKey(alias);
+			return this.delegate.getPrivateKey(alias);
 		}
+
 	}
+
 }

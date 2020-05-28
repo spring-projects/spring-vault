@@ -33,8 +33,7 @@ import static org.assertj.core.api.Assertions.fail;
  *
  * @author Mark Paluch
  */
-class CubbyholeAuthenticationIntegrationTests
-		extends CubbyholeAuthenticationIntegrationTestBase {
+class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationIntegrationTestBase {
 
 	@Test
 	void shouldCreateWrappedToken() {
@@ -44,13 +43,11 @@ class CubbyholeAuthenticationIntegrationTests
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints())
-				.initialToken(VaultToken.of(initialToken)).wrapped().build();
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of(initialToken)).wrapped()
+				.build();
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
 		VaultToken login = authentication.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
@@ -59,13 +56,10 @@ class CubbyholeAuthenticationIntegrationTests
 	void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints())
-				.initialToken(VaultToken.of("Hello")).wrapped().build();
+				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of("Hello")).wrapped().build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options,
-				restTemplate);
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
 
 		try {
 			authentication.login();
@@ -75,4 +69,5 @@ class CubbyholeAuthenticationIntegrationTests
 			assertThat(e).hasMessageContaining("Cannot login using Cubbyhole");
 		}
 	}
+
 }

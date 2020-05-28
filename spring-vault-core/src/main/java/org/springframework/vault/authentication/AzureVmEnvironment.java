@@ -39,13 +39,11 @@ public class AzureVmEnvironment {
 
 	/**
 	 * Creates a new {@link AzureVmEnvironment}.
-	 *
 	 * @param subscriptionId must not be {@literal null}.
 	 * @param resourceGroupName must not be {@literal null}.
 	 * @param vmName must not be {@literal null}.
 	 */
-	public AzureVmEnvironment(String subscriptionId, String resourceGroupName,
-			String vmName) {
+	public AzureVmEnvironment(String subscriptionId, String resourceGroupName, String vmName) {
 
 		Assert.notNull(subscriptionId, "SubscriptionId must not be null");
 		Assert.notNull(resourceGroupName, "Resource group name must not be null");
@@ -57,14 +55,15 @@ public class AzureVmEnvironment {
 	}
 
 	public String getSubscriptionId() {
-		return subscriptionId;
+		return this.subscriptionId;
 	}
 
 	public String getResourceGroupName() {
-		return resourceGroupName;
+		return this.resourceGroupName;
 	}
 
 	public String getVmName() {
-		return vmName;
+		return this.vmName;
 	}
+
 }

@@ -77,7 +77,6 @@ public class SecretDocument {
 	/**
 	 * Factory method to create a {@link SecretDocument} from an {@code id} and
 	 * {@link VaultResponse}.
-	 *
 	 * @param id must not be {@literal null}.
 	 * @param vaultResponse must not be {@literal null}.
 	 * @return the {@link SecretDocument}.
@@ -92,12 +91,11 @@ public class SecretDocument {
 	 */
 	@Nullable
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	/**
 	 * Set the Id.
-	 *
 	 * @param id may be {@literal null}.
 	 */
 	public void setId(@Nullable String id) {
@@ -108,23 +106,21 @@ public class SecretDocument {
 	 * @return the body of this {@link SecretDocument}
 	 */
 	public Map<String, Object> getBody() {
-		return body;
+		return this.body;
 	}
 
 	/**
 	 * Retrieve a value from the secret document by its {@code key}.
-	 *
 	 * @param key must not be {@literal null}.
 	 * @return the value or {@literal null}, if the value is not present.
 	 */
 	@Nullable
 	public Object get(String key) {
-		return body.get(key);
+		return this.body.get(key);
 	}
 
 	/**
 	 * Set a value in the secret document.
-	 *
 	 * @param key must not be {@literal null}.
 	 * @param value must not be {@literal null}.
 	 */
@@ -139,21 +135,22 @@ public class SecretDocument {
 		if (!(o instanceof SecretDocument))
 			return false;
 		SecretDocument that = (SecretDocument) o;
-		return Objects.equals(id, that.id) && Objects.equals(body, that.body);
+		return Objects.equals(this.id, that.id) && Objects.equals(this.body, that.body);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, body);
+		return Objects.hash(this.id, this.body);
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [id='").append(id).append('\'');
-		sb.append(", body=").append(body);
+		sb.append(" [id='").append(this.id).append('\'');
+		sb.append(", body=").append(this.body);
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

@@ -34,8 +34,8 @@ public interface SessionManager {
 
 	/**
 	 * Obtain a session token.
-	 *
 	 * @return a session token.
 	 */
 	VaultToken getSessionToken();
+
 }

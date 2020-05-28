@@ -69,12 +69,10 @@ public class AwsEc2AuthenticationOptions {
 	private final Nonce nonce;
 
 	private AwsEc2AuthenticationOptions() {
-		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "",
-				Nonce.generated());
+		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "", Nonce.generated());
 	}
 
-	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri,
-			@Nullable String role, Nonce nonce) {
+	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, @Nullable String role, Nonce nonce) {
 
 		this.path = path;
 		this.identityDocumentUri = identityDocumentUri;
@@ -93,14 +91,14 @@ public class AwsEc2AuthenticationOptions {
 	 * @return the path of the aws-ec2 authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return the {@link URI} to the AWS EC2 PKCS#7-signed identity document.
 	 */
 	public URI getIdentityDocumentUri() {
-		return identityDocumentUri;
+		return this.identityDocumentUri;
 	}
 
 	/**
@@ -108,14 +106,14 @@ public class AwsEc2AuthenticationOptions {
 	 */
 	@Nullable
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	/**
 	 * @return the configured {@link Nonce}.
 	 */
 	public Nonce getNonce() {
-		return nonce;
+		return this.nonce;
 	}
 
 	/**
@@ -124,6 +122,7 @@ public class AwsEc2AuthenticationOptions {
 	public static class AwsEc2AuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;
+
 		private URI identityDocumentUri = DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI;
 
 		@Nullable
@@ -136,7 +135,6 @@ public class AwsEc2AuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 */
@@ -150,13 +148,11 @@ public class AwsEc2AuthenticationOptions {
 
 		/**
 		 * Configure the Identity Document {@link URI}.
-		 *
 		 * @param identityDocumentUri must not be {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI
 		 */
-		public AwsEc2AuthenticationOptionsBuilder identityDocumentUri(
-				URI identityDocumentUri) {
+		public AwsEc2AuthenticationOptionsBuilder identityDocumentUri(URI identityDocumentUri) {
 
 			Assert.notNull(identityDocumentUri, "Identity document URI must not be null");
 
@@ -168,7 +164,6 @@ public class AwsEc2AuthenticationOptions {
 		 * Configure the name of the role against which the login is being attempted.If
 		 * role is not specified, then the login endpoint looks for a role bearing the
 		 * name of the AMI ID of the EC2 instance that is trying to login.
-		 *
 		 * @param role may be empty or {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 */
@@ -181,7 +176,6 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Configure a {@link Nonce} for login requests. Defaults to
 		 * {@link Nonce#generated()}.
-		 *
 		 * @param nonce must not be {@literal null}.
 		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
 		 * @since 1.1
@@ -196,16 +190,15 @@ public class AwsEc2AuthenticationOptions {
 
 		/**
 		 * Build a new {@link AwsEc2AuthenticationOptions} instance.
-		 *
 		 * @return a new {@link AwsEc2AuthenticationOptions}.
 		 */
 		public AwsEc2AuthenticationOptions build() {
 
-			Assert.notNull(identityDocumentUri, "IdentityDocumentUri must not be null");
+			Assert.notNull(this.identityDocumentUri, "IdentityDocumentUri must not be null");
 
-			return new AwsEc2AuthenticationOptions(path, identityDocumentUri, role,
-					nonce);
+			return new AwsEc2AuthenticationOptions(this.path, this.identityDocumentUri, this.role, this.nonce);
 		}
+
 	}
 
 	/**
@@ -223,7 +216,6 @@ public class AwsEc2AuthenticationOptions {
 
 		/**
 		 * Create a new generated {@link Nonce} using {@link UUID}.
-		 *
 		 * @return a new generated {@link Nonce} using {@link UUID}.
 		 */
 		public static Nonce generated() {
@@ -232,7 +224,6 @@ public class AwsEc2AuthenticationOptions {
 
 		/**
 		 * Create a wrapped {@link Nonce} given a {@code nonce} value.
-		 *
 		 * @return a wrapped {@link Nonce} given for the {@code nonce} value.
 		 */
 		public static Nonce provided(char[] nonce) {
@@ -246,7 +237,7 @@ public class AwsEc2AuthenticationOptions {
 		 * @return the nonce value.
 		 */
 		public char[] getValue() {
-			return value;
+			return this.value;
 		}
 
 		static class Generated extends Nonce {
@@ -254,6 +245,7 @@ public class AwsEc2AuthenticationOptions {
 			Generated() {
 				super(UUID.randomUUID().toString().toCharArray());
 			}
+
 		}
 
 		static class Provided extends Nonce {
@@ -261,6 +253,9 @@ public class AwsEc2AuthenticationOptions {
 			Provided(char[] nonce) {
 				super(nonce);
 			}
+
 		}
+
 	}
+
 }

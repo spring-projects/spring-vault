@@ -51,13 +51,11 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpoint must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the configured {@link WebClient}.
 	 */
-	public static WebClient createWebClient(VaultEndpoint endpoint,
-			ClientHttpConnector connector) {
+	public static WebClient createWebClient(VaultEndpoint endpoint, ClientHttpConnector connector) {
 		return createWebClient(SimpleVaultEndpointProvider.of(endpoint), connector);
 	}
 
@@ -69,13 +67,11 @@ public class ReactiveVaultClients {
 	 * Requires Jackson 2 for Object-to-JSON mapping. {@link VaultEndpointProvider} is
 	 * called on {@link Schedulers#boundedElastic()} to ensure that I/O threads are never
 	 * blocked.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the configured {@link WebClient}.
 	 */
-	public static WebClient createWebClient(VaultEndpointProvider endpointProvider,
-			ClientHttpConnector connector) {
+	public static WebClient createWebClient(VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
 		return createWebClient(wrap(endpointProvider), connector);
 	}
 
@@ -85,14 +81,12 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the configured {@link WebClient}.
 	 * @since 2.3
 	 */
-	public static WebClient createWebClient(
-			ReactiveVaultEndpointProvider endpointProvider,
+	public static WebClient createWebClient(ReactiveVaultEndpointProvider endpointProvider,
 			ClientHttpConnector connector) {
 		return createWebClientBuilder(endpointProvider, connector).build();
 	}
@@ -103,35 +97,30 @@ public class ReactiveVaultClients {
 	 * slash that are expanded to use {@link VaultEndpoint}.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the prepared {@link WebClient.Builder}.
 	 */
-	static WebClient.Builder createWebClientBuilder(
-			ReactiveVaultEndpointProvider endpointProvider,
+	static WebClient.Builder createWebClientBuilder(ReactiveVaultEndpointProvider endpointProvider,
 			ClientHttpConnector connector) {
 
-		Assert.notNull(endpointProvider,
-				"ReactiveVaultEndpointProvider must not be null");
+		Assert.notNull(endpointProvider, "ReactiveVaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
-		ExchangeStrategies strategies = ExchangeStrategies.builder()
-				.codecs(configurer -> {
+		ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(configurer -> {
 
-					CustomCodecs cc = configurer.customCodecs();
+			CustomCodecs cc = configurer.customCodecs();
 
-					cc.decoder(new ByteArrayDecoder());
-					cc.decoder(new Jackson2JsonDecoder());
-					cc.decoder(StringDecoder.allMimeTypes());
+			cc.decoder(new ByteArrayDecoder());
+			cc.decoder(new Jackson2JsonDecoder());
+			cc.decoder(StringDecoder.allMimeTypes());
 
-					cc.encoder(new ByteArrayEncoder());
-					cc.encoder(new Jackson2JsonEncoder());
+			cc.encoder(new ByteArrayEncoder());
+			cc.encoder(new Jackson2JsonEncoder());
 
-				}).build();
+		}).build();
 
-		WebClient.Builder builder = WebClient.builder().exchangeStrategies(strategies)
-				.clientConnector(connector);
+		WebClient.Builder builder = WebClient.builder().exchangeStrategies(strategies).clientConnector(connector);
 
 		boolean simpleSource = false;
 		if (endpointProvider instanceof VaultEndpointProviderAdapter) {
@@ -140,8 +129,7 @@ public class ReactiveVaultClients {
 				simpleSource = true;
 
 				UriBuilderFactory uriBuilderFactory = VaultClients
-						.createUriBuilderFactory(
-								((VaultEndpointProviderAdapter) endpointProvider).source);
+						.createUriBuilderFactory(((VaultEndpointProviderAdapter) endpointProvider).source);
 				builder.uriBuilderFactory(uriBuilderFactory);
 			}
 		}
@@ -155,15 +143,11 @@ public class ReactiveVaultClients {
 
 					return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
 
-						UriComponents uriComponents = UriComponentsBuilder
-								.fromUri(uri).scheme(endpoint.getScheme())
-								.host(endpoint.getHost()).port(endpoint.getPort())
-								.replacePath(endpoint.getPath()).path(VaultClients
-										.normalizePath(endpoint.getPath(), uri.getPath()))
-								.build();
+						UriComponents uriComponents = UriComponentsBuilder.fromUri(uri).scheme(endpoint.getScheme())
+								.host(endpoint.getHost()).port(endpoint.getPort()).replacePath(endpoint.getPath())
+								.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath())).build();
 
-						ClientRequest requestToSend = ClientRequest.from(request)
-								.url(uriComponents.toUri()).build();
+						ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
 
 						return next.exchange(requestToSend);
 					});
@@ -179,7 +163,6 @@ public class ReactiveVaultClients {
 	/**
 	 * Create a {@link ExchangeFilterFunction} that associates each request with a
 	 * {@code X-Vault-Namespace} header if the header is not present.
-	 *
 	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
 	 * @return the {@link ExchangeFilterFunction} to register with {@link WebClient}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
@@ -207,36 +190,35 @@ public class ReactiveVaultClients {
 	 * Wrap a {@link VaultEndpointProvider} into a {@link ReactiveVaultEndpointProvider}
 	 * to invoke {@link VaultEndpointProvider#getVaultEndpoint()} on a dedicated
 	 * {@link Schedulers#boundedElastic() scheduler}.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @return {@link ReactiveVaultEndpointProvider} wrapping
 	 * {@link VaultEndpointProvider}.
 	 * @since 2.3
 	 */
-	public static ReactiveVaultEndpointProvider wrap(
-			VaultEndpointProvider endpointProvider) {
+	public static ReactiveVaultEndpointProvider wrap(VaultEndpointProvider endpointProvider) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 
 		return new VaultEndpointProviderAdapter(endpointProvider);
 	}
 
-	private static class VaultEndpointProviderAdapter
-			implements ReactiveVaultEndpointProvider {
+	private static class VaultEndpointProviderAdapter implements ReactiveVaultEndpointProvider {
 
 		private final VaultEndpointProvider source;
+
 		private final Mono<VaultEndpoint> mono;
 
 		VaultEndpointProviderAdapter(VaultEndpointProvider provider) {
 
 			this.source = provider;
-			this.mono = Mono.fromSupplier(provider::getVaultEndpoint)
-					.subscribeOn(Schedulers.boundedElastic());
+			this.mono = Mono.fromSupplier(provider::getVaultEndpoint).subscribeOn(Schedulers.boundedElastic());
 		}
 
 		@Override
 		public Mono<VaultEndpoint> getVaultEndpoint() {
-			return mono;
+			return this.mono;
 		}
+
 	}
+
 }

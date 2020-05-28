@@ -33,7 +33,6 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 	/**
 	 * Create {@link VaultDecryptionResult} for a successfully decrypted {@link Plaintext}
 	 * .
-	 *
 	 * @param plaintext must not be {@literal null}.
 	 */
 	public VaultDecryptionResult(Plaintext plaintext) {
@@ -45,7 +44,6 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 
 	/**
 	 * Create {@link VaultDecryptionResult} for an error during decryption.
-	 *
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultDecryptionResult(VaultException exception) {
@@ -57,14 +55,13 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 	@Nullable
 	@Override
 	protected Plaintext get0() {
-		return plaintext;
+		return this.plaintext;
 	}
 
 	/**
 	 * Return the result as {@link String} or throw a {@link VaultException} if the
 	 * operation completed with an error. Use {@link #isSuccessful()} to verify the
 	 * success status of this result without throwing an exception.
-	 *
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
@@ -74,4 +71,5 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 		Plaintext plaintext = get();
 		return plaintext == null ? null : plaintext.asString();
 	}
+
 }

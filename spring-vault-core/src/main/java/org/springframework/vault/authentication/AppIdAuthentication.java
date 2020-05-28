@@ -40,8 +40,7 @@ import org.springframework.web.client.RestOperations;
  * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
 @Deprecated
-public class AppIdAuthentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class AppIdAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
 
@@ -52,12 +51,10 @@ public class AppIdAuthentication
 	/**
 	 * Create a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
 	 * {@link RestOperations}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public AppIdAuthentication(AppIdAuthenticationOptions options,
-			RestOperations restOperations) {
+	public AppIdAuthentication(AppIdAuthenticationOptions options, RestOperations restOperations) {
 
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -69,19 +66,16 @@ public class AppIdAuthentication
 	/**
 	 * Creates a {@link AuthenticationSteps} for AppId authentication given
 	 * {@link AppIdAuthenticationOptions}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for AppId authentication.
 	 * @since 2.0
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			AppIdAuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(AppIdAuthenticationOptions options) {
 
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 
 		return AuthenticationSteps
-				.fromSupplier(() -> getAppIdLogin(options.getAppId(),
-						options.getUserIdMechanism().createUserId())) //
+				.fromSupplier(() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId())) //
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
@@ -92,20 +86,19 @@ public class AppIdAuthentication
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(options);
+		return createAuthenticationSteps(this.options);
 	}
 
 	private VaultToken createTokenUsingAppId() {
 
-		Map<String, String> login = getAppIdLogin(options.getAppId(),
-				options.getUserIdMechanism().createUserId());
+		Map<String, String> login = getAppIdLogin(this.options.getAppId(),
+				this.options.getUserIdMechanism().createUserId());
 
 		try {
-			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
-					login, VaultResponse.class);
+			VaultResponse response = this.restOperations
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null,
-					"Auth field must not be null");
+			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using AppId authentication");
 
@@ -125,4 +118,5 @@ public class AppIdAuthentication
 
 		return login;
 	}
+
 }

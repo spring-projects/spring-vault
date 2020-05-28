@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link AbstractVaultConfiguration}.
- * 
+ *
  * @author Mark Paluch
  */
 class AbstractVaultConfigurationUnitTests {
@@ -50,8 +50,7 @@ class AbstractVaultConfigurationUnitTests {
 		RestTemplateFactory factory = context.getBean(RestTemplateFactory.class);
 		RestTemplate restTemplate = factory.create();
 
-		assertThatExceptionOfType(CustomizedSignal.class)
-				.isThrownBy(() -> restTemplate.delete("/foo"));
+		assertThatExceptionOfType(CustomizedSignal.class).isThrownBy(() -> restTemplate.delete("/foo"));
 	}
 
 	@Test
@@ -62,8 +61,7 @@ class AbstractVaultConfigurationUnitTests {
 
 		VaultOperations operations = context.getBean(VaultOperations.class);
 
-		assertThatExceptionOfType(CustomizedSignal.class)
-				.isThrownBy(() -> operations.opsForSys().health());
+		assertThatExceptionOfType(CustomizedSignal.class).isThrownBy(() -> operations.opsForSys().health());
 	}
 
 	@Configuration(proxyBeanMethods = false)
@@ -86,14 +84,15 @@ class AbstractVaultConfigurationUnitTests {
 
 		@Bean
 		public RestTemplateCustomizer customizer() {
-			return restTemplate -> restTemplate
-					.setRequestFactory((ClientHttpRequestFactory) (uri, httpMethod) -> {
-						throw new CustomizedSignal();
-					});
+			return restTemplate -> restTemplate.setRequestFactory((ClientHttpRequestFactory) (uri, httpMethod) -> {
+				throw new CustomizedSignal();
+			});
 		}
+
 	}
 
 	static class CustomizedSignal extends RuntimeException {
 
 	}
+
 }

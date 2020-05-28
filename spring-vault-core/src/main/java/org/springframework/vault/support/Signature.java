@@ -36,7 +36,6 @@ public class Signature {
 
 	/**
 	 * Factory method to create a {@link Signature} from the given {@code signature}.
-	 *
 	 * @param signature the signature, must not be {@literal null} or empty.
 	 * @return the {@link Signature} encapsulating {@code signature}.
 	 */
@@ -48,7 +47,7 @@ public class Signature {
 	}
 
 	public String getSignature() {
-		return signature;
+		return this.signature;
 	}
 
 	@Override
@@ -58,20 +57,21 @@ public class Signature {
 		if (!(o instanceof Signature))
 			return false;
 		Signature that = (Signature) o;
-		return signature.equals(that.signature);
+		return this.signature.equals(that.signature);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(signature);
+		return Objects.hash(this.signature);
 	}
 
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
-		sb.append(" [signature='").append(signature).append('\'');
+		sb.append(" [signature='").append(this.signature).append('\'');
 		sb.append(']');
 		return sb.toString();
 	}
+
 }

@@ -60,34 +60,32 @@ class ClientCertificateAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		mockRest.expect(requestTo("/auth/my/path/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+		this.mockRest.expect(requestTo("/auth/my/path/login")).andExpect(method(HttpMethod.POST))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
-		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions
-				.builder().path("my/path").build();
+		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
+				.path("my/path").build();
 
-		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(
-				options, restTemplate);
+		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
 	@Test
 	void loginShouldFail() {
 
-		mockRest.expect(requestTo("/auth/cert/login")) //
+		this.mockRest.expect(requestTo("/auth/cert/login")) //
 				.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(
-				() -> new ClientCertificateAuthentication(restTemplate).login());
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
 	}
+
 }

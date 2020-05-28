@@ -34,14 +34,12 @@ import org.springframework.util.StringUtils;
  */
 public class DurationParser {
 
-	private static final Pattern PARSE_PATTERN = Pattern
-			.compile("([0-9]+)(ns|us|ms|s|m|h|d)");
-	private static final Pattern VERIFY_PATTERN = Pattern
-			.compile("(([0-9]+)(ns|us|ms|s|m|h|d))+");
+	private static final Pattern PARSE_PATTERN = Pattern.compile("([0-9]+)(ns|us|ms|s|m|h|d)");
+
+	private static final Pattern VERIFY_PATTERN = Pattern.compile("(([0-9]+)(ns|us|ms|s|m|h|d))+");
 
 	/**
 	 * Parse a Go format duration into a {@link Duration} object.
-	 *
 	 * @param duration the duration string to parse in Go's duration format.
 	 * @return the duration object. Can be {@literal null} if {@code duration} is empty.
 	 * @throws IllegalArgumentException if unable to parse the requested duration.
@@ -58,8 +56,7 @@ public class DurationParser {
 		}
 
 		if (!VERIFY_PATTERN.matcher(duration.toLowerCase(Locale.ENGLISH)).matches()) {
-			throw new IllegalArgumentException(
-					String.format("Cannot parse '%s' into a Duration", duration));
+			throw new IllegalArgumentException(String.format("Cannot parse '%s' into a Duration", duration));
 		}
 
 		Matcher matcher = PARSE_PATTERN.matcher(duration.toLowerCase(Locale.ENGLISH));
@@ -102,7 +99,6 @@ public class DurationParser {
 
 	/**
 	 * Format a {@link Duration} into the Go format representation.
-	 *
 	 * @param duration the duration object to format.
 	 * @return the duration formatted in Go's duration format.
 	 */
@@ -131,4 +127,5 @@ public class DurationParser {
 
 		return builder.toString();
 	}
+
 }

@@ -25,7 +25,6 @@ public class VaultTokenRenewalException extends VaultSessionManagerException {
 
 	/**
 	 * Create a {@code VaultTokenRenewalException} with the specified detail message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultTokenRenewalException(String msg) {
@@ -35,11 +34,11 @@ public class VaultTokenRenewalException extends VaultSessionManagerException {
 	/**
 	 * Create a {@code VaultTokenRenewalException} with the specified detail message and
 	 * nested exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
 	public VaultTokenRenewalException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

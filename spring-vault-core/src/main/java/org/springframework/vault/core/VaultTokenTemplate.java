@@ -40,7 +40,6 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 	/**
 	 * Create a new {@link VaultTokenTemplate} with the given {@link VaultOperations}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultTokenTemplate(VaultOperations vaultOperations) {
@@ -73,8 +72,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return writeAndReturn("auth/token/create-orphan", request,
-				VaultTokenResponse.class);
+		return writeAndReturn("auth/token/create-orphan", request, VaultTokenResponse.class);
 	}
 
 	@Override
@@ -101,17 +99,15 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		writeToken("auth/token/revoke-orphan", vaultToken, VaultTokenResponse.class);
 	}
 
-	private <T extends VaultResponseSupport<?>> T writeAndReturn(String path,
-			@Nullable Object body, Class<T> responseType) {
+	private <T extends VaultResponseSupport<?>> T writeAndReturn(String path, @Nullable Object body,
+			Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		T response = vaultOperations.doWithSession(restOperations -> {
+		T response = this.vaultOperations.doWithSession(restOperations -> {
 			try {
-				ResponseEntity<T> exchange = restOperations.exchange(path,
-						HttpMethod.POST,
-						body == null ? HttpEntity.EMPTY : new HttpEntity<>(body),
-						responseType);
+				ResponseEntity<T> exchange = restOperations.exchange(path, HttpMethod.POST,
+						body == null ? HttpEntity.EMPTY : new HttpEntity<>(body), responseType);
 
 				return exchange.getBody();
 			}
@@ -130,13 +126,11 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
 				restOperations.exchange(path, HttpMethod.POST,
-						new HttpEntity<>(
-								Collections.singletonMap("token", token.getToken())),
-						responseType);
+						new HttpEntity<>(Collections.singletonMap("token", token.getToken())), responseType);
 
 				return null;
 			}
@@ -145,4 +139,5 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 			}
 		});
 	}
+
 }

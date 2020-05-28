@@ -38,15 +38,14 @@ abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTes
 
 	Map<String, String> prepareWrappedToken() {
 
-		ResponseEntity<VaultResponse> response = prepare().getVaultOperations()
-				.doWithSession(restOperations -> {
+		ResponseEntity<VaultResponse> response = prepare().getVaultOperations().doWithSession(restOperations -> {
 
-					HttpHeaders headers = new HttpHeaders();
-					headers.add("X-Vault-Wrap-TTL", "10m");
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("X-Vault-Wrap-TTL", "10m");
 
-					return restOperations.exchange("auth/token/create", HttpMethod.POST,
-							new HttpEntity<>(headers), VaultResponse.class);
-				});
+			return restOperations.exchange("auth/token/create", HttpMethod.POST, new HttpEntity<>(headers),
+					VaultResponse.class);
+		});
 
 		Map<String, String> wrapInfo = response.getBody().getWrapInfo();
 
@@ -56,11 +55,11 @@ abstract class CubbyholeAuthenticationIntegrationTestBase extends IntegrationTes
 	}
 
 	UnwrappingEndpoints getUnwrappingEndpoints() {
-		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping
-				: UnwrappingEndpoints.Cubbyhole;
+		return useSysWrapping() ? UnwrappingEndpoints.SysWrapping : UnwrappingEndpoints.Cubbyhole;
 	}
 
 	private boolean useSysWrapping() {
 		return prepare().getVersion().isGreaterThanOrEqualTo(sysUnwrapSince);
 	}
+
 }

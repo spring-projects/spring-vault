@@ -37,21 +37,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PemObjectUnitTests {
 
 	final File workdir = Settings.findWorkDir();
-	final File privateDir = new File(workdir, "ca/private");
+
+	final File privateDir = new File(this.workdir, "ca/private");
 
 	@BeforeEach
 	void setUp() {
-		assertThat(privateDir).exists().isDirectoryContaining(
-				file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
-		assertThat(privateDir).exists().isDirectoryContaining(
-				file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
+		assertThat(this.privateDir).exists()
+				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
+		assertThat(this.privateDir).exists()
+				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
 	}
 
 	@Test
 	void shouldDecodePublicKey() throws IOException {
 
-		String content = new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.public.key.pem")));
+		String content = new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")));
 
 		PemObject pemObject = PemObject.parseFirst(content);
 		assertThat(pemObject.isPrivateKey()).isFalse();
@@ -62,8 +63,8 @@ class PemObjectUnitTests {
 	@Test
 	void shouldDecodePrivateKey() throws IOException {
 
-		String content = new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.decrypted.key.pem")));
+		String content = new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")));
 
 		PemObject pemObject = PemObject.parseFirst(content);
 		assertThat(pemObject.isPrivateKey()).isTrue();
@@ -74,10 +75,10 @@ class PemObjectUnitTests {
 	@Test
 	void shouldDecodeConcatenatedPEMContent() throws IOException {
 
-		String content1 = new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.public.key.pem")));
-		String content2 = new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.decrypted.key.pem")));
+		String content1 = new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")));
+		String content2 = new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")));
 
 		List<PemObject> pemObjects = PemObject.parse(content1 + content2);
 
@@ -89,31 +90,28 @@ class PemObjectUnitTests {
 	@Test
 	void keysShouldMatch() throws IOException {
 
-		PemObject publicKey = PemObject.parseFirst(new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.public.key.pem"))));
+		PemObject publicKey = PemObject.parseFirst(
+				new String(FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem"))));
 
-		PemObject privateKey = PemObject.parseFirst(new String(FileCopyUtils
-				.copyToByteArray(new File(privateDir, "localhost.decrypted.key.pem"))));
+		PemObject privateKey = PemObject.parseFirst(
+				new String(FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem"))));
 
 		RSAPublicKeySpec publicSpec = publicKey.getRSAPublicKeySpec();
 		RSAPrivateCrtKeySpec privateKeySpec = privateKey.getRSAPrivateKeySpec();
 
 		assertThat(publicSpec.getModulus()).isEqualTo(privateKeySpec.getModulus());
-		assertThat(publicSpec.getPublicExponent())
-				.isEqualTo(privateKeySpec.getPublicExponent());
+		assertThat(publicSpec.getPublicExponent()).isEqualTo(privateKeySpec.getPublicExponent());
 	}
 
 	@Test
 	void shouldDecodeX509Certificate() throws IOException {
 
-		String content = new String(
-				FileCopyUtils.copyToByteArray(new File(workdir, "ca/certs/ca.cert.pem")));
+		String content = new String(FileCopyUtils.copyToByteArray(new File(this.workdir, "ca/certs/ca.cert.pem")));
 
 		PemObject pemObject = PemObject.parseFirst(content);
 
 		assertThat(pemObject.isCertificate()).isTrue();
-		assertThat(pemObject.getCertificate().getSubjectDN().getName())
-				.contains("O=spring-cloud-vault-config");
+		assertThat(pemObject.getCertificate().getSubjectDN().getName()).contains("O=spring-cloud-vault-config");
 	}
 
 }

@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=approle", "vault.app-role.role-id=role",
-		"vault.app-role.secret-id=foo" })
+@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.authentication=approle",
+		"vault.app-role.role-id=role", "vault.app-role.secret-id=foo" })
 class EnvironmentVaultConfigurationAppRoleAuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
+
 	}
 
 	@Autowired
@@ -50,8 +50,9 @@ class EnvironmentVaultConfigurationAppRoleAuthenticationUnitTests {
 	@Test
 	void shouldConfigureAuthentication() {
 
-		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
+		ClientAuthentication clientAuthentication = this.configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(AppRoleAuthentication.class);
 	}
+
 }

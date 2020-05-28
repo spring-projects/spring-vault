@@ -41,12 +41,11 @@ public class VaultMetadataRequest {
 	@JsonProperty("delete_version_after")
 	private final String deleteVersionAfter;
 
-	private VaultMetadataRequest(int maxVersions, boolean casRequired,
-			@Nullable Duration deleteVersionAfter) {
+	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter) {
 		this.maxVersions = maxVersions;
 		this.casRequired = casRequired;
-		this.deleteVersionAfter = DurationParser.formatDuration(
-				deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
+		this.deleteVersionAfter = DurationParser
+				.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
 	}
 
 	public static VaultMetadataRequestBuilder builder() {
@@ -79,6 +78,7 @@ public class VaultMetadataRequest {
 	public static class VaultMetadataRequestBuilder {
 
 		private int maxVersions;
+
 		private boolean casRequired;
 
 		@Nullable
@@ -86,7 +86,6 @@ public class VaultMetadataRequest {
 
 		/**
 		 * Set the number of versions to keep per key.
-		 *
 		 * @param maxVersions
 		 * @return {@link VaultMetadataRequest}
 		 */
@@ -98,7 +97,6 @@ public class VaultMetadataRequest {
 		/**
 		 * Set the cas_required parameter. If true all keys will require the cas parameter
 		 * to be set on all write requests.
-		 *
 		 * @param casRequired
 		 * @return {@link VaultMetadataRequest}
 		 */
@@ -109,12 +107,10 @@ public class VaultMetadataRequest {
 
 		/**
 		 * Sets the deletion time for all new versions written to this key.
-		 *
 		 * @param deleteVersionAfter
 		 * @return {@link VaultMetadataRequest}
 		 */
-		public VaultMetadataRequestBuilder deleteVersionAfter(
-				Duration deleteVersionAfter) {
+		public VaultMetadataRequestBuilder deleteVersionAfter(Duration deleteVersionAfter) {
 			this.deleteVersionAfter = deleteVersionAfter;
 			return this;
 		}
@@ -123,8 +119,9 @@ public class VaultMetadataRequest {
 		 * @return a new {@link VaultMetadataRequest}
 		 */
 		public VaultMetadataRequest build() {
-			return new VaultMetadataRequest(this.maxVersions, this.casRequired,
-					this.deleteVersionAfter);
+			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter);
 		}
+
 	}
+
 }

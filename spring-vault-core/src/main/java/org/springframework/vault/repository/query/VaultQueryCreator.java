@@ -44,15 +44,13 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultQueryCreator
-		extends AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
+public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
 
 	private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
 	/**
 	 * Create a new {@link VaultQueryCreator} given {@link PartTree} and
 	 * {@link ParameterAccessor}.
-	 *
 	 * @param tree must not be {@literal null}.
 	 * @param parameters must not be {@literal null}.
 	 * @param mappingContext must not be {@literal null}.
@@ -76,14 +74,12 @@ public class VaultQueryCreator
 
 	private Predicate<String> createPredicate(Part part, Iterator<Object> parameters) {
 
-		PersistentPropertyPath<VaultPersistentProperty> propertyPath = mappingContext
+		PersistentPropertyPath<VaultPersistentProperty> propertyPath = this.mappingContext
 				.getPersistentPropertyPath(part.getProperty());
 
-		if (propertyPath.getLeafProperty() != null
-				&& !propertyPath.getLeafProperty().isIdProperty()) {
+		if (propertyPath.getLeafProperty() != null && !propertyPath.getLeafProperty().isIdProperty()) {
 			throw new InvalidDataAccessApiUsageException(
-					String.format("Cannot create criteria for non-@Id property %s",
-							propertyPath.getLeafProperty()));
+					String.format("Cannot create criteria for non-@Id property %s", propertyPath.getLeafProperty()));
 		}
 
 		VariableAccessor accessor = getVariableAccessor(part);
@@ -95,31 +91,25 @@ public class VaultQueryCreator
 
 	/**
 	 * Return a {@link Predicate} depending on the {@link Part} given.
-	 *
 	 * @param part
 	 * @param parameters
 	 * @return
 	 */
-	private static Predicate<String> from(Part part, VariableAccessor accessor,
-			Iterator<Object> parameters) {
+	private static Predicate<String> from(Part part, VariableAccessor accessor, Iterator<Object> parameters) {
 
 		Type type = part.getType();
 
 		switch (type) {
 		case AFTER:
 		case GREATER_THAN:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.compareTo(value) > 0);
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) > 0);
 		case GREATER_THAN_EQUAL:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.compareTo(value) >= 0);
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) >= 0);
 		case BEFORE:
 		case LESS_THAN:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.compareTo(value) < 0);
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) < 0);
 		case LESS_THAN_EQUAL:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.compareTo(value) <= 0);
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) <= 0);
 		case BETWEEN:
 
 			String from = accessor.nextString(parameters);
@@ -127,38 +117,28 @@ public class VaultQueryCreator
 
 			return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
 		case NOT_IN:
-			return new Criteria<>(accessor.nextAsArray(parameters),
-					(value, it) -> Arrays.binarySearch(value, it) < 0);
+			return new Criteria<>(accessor.nextAsArray(parameters), (value, it) -> Arrays.binarySearch(value, it) < 0);
 		case IN:
-			return new Criteria<>(accessor.nextAsArray(parameters),
-					(value, it) -> Arrays.binarySearch(value, it) >= 0);
+			return new Criteria<>(accessor.nextAsArray(parameters), (value, it) -> Arrays.binarySearch(value, it) >= 0);
 		case STARTING_WITH:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.startsWith(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
 		case ENDING_WITH:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.endsWith(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.endsWith(value));
 		case CONTAINING:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.contains(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.contains(value));
 		case NOT_CONTAINING:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> !it.contains(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
 		case REGEX:
-			return Pattern
-					.compile((String) parameters.next(),
-							isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
+			return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
 					.asPredicate();
 		case TRUE:
 			return it -> it.equalsIgnoreCase("true");
 		case FALSE:
 			return it -> it.equalsIgnoreCase("false");
 		case SIMPLE_PROPERTY:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> it.equals(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.equals(value));
 		case NEGATING_SIMPLE_PROPERTY:
-			return new Criteria<>(accessor.nextString(parameters),
-					(value, it) -> !it.equals(value));
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.equals(value));
 		default:
 			throw new IllegalArgumentException("Unsupported keyword!");
 		}
@@ -192,6 +172,7 @@ public class VaultQueryCreator
 	static final class Criteria<T> implements Predicate<String> {
 
 		private final T value;
+
 		private final BiPredicate<T, String> predicate;
 
 		public Criteria(T value, BiPredicate<T, String> predicate) {
@@ -201,7 +182,7 @@ public class VaultQueryCreator
 
 		@Override
 		public boolean test(String s) {
-			return predicate.test(value, s);
+			return this.predicate.test(this.value, s);
 		}
 
 		public T getValue() {
@@ -220,13 +201,11 @@ public class VaultQueryCreator
 			final Criteria<?> other = (Criteria<?>) o;
 			final Object this$value = this.getValue();
 			final Object other$value = other.getValue();
-			if (this$value == null ? other$value != null
-					: !this$value.equals(other$value))
+			if (this$value == null ? other$value != null : !this$value.equals(other$value))
 				return false;
 			final Object this$predicate = this.getPredicate();
 			final Object other$predicate = other.getPredicate();
-			if (this$predicate == null ? other$predicate != null
-					: !this$predicate.equals(other$predicate))
+			if (this$predicate == null ? other$predicate != null : !this$predicate.equals(other$predicate))
 				return false;
 			return true;
 		}
@@ -245,11 +224,12 @@ public class VaultQueryCreator
 		public String toString() {
 			StringBuffer sb = new StringBuffer();
 			sb.append(getClass().getSimpleName());
-			sb.append(" [value=").append(value);
-			sb.append(", predicate=").append(predicate);
+			sb.append(" [value=").append(this.value);
+			sb.append(", predicate=").append(this.predicate);
 			sb.append(']');
 			return sb.toString();
 		}
+
 	}
 
 	enum VariableAccessor {
@@ -313,5 +293,7 @@ public class VaultQueryCreator
 		abstract String nextString(Iterator<Object> iterator);
 
 		abstract String toString(String value);
+
 	}
+
 }

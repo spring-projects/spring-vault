@@ -34,13 +34,11 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 	/**
 	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@link Throwable}.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease can be {@literal null}.
 	 * @param exception must not be {@literal null}.
 	 */
-	public SecretLeaseErrorEvent(RequestedSecret requestedSecret, @Nullable Lease lease,
-			Throwable exception) {
+	public SecretLeaseErrorEvent(RequestedSecret requestedSecret, @Nullable Lease lease, Throwable exception) {
 
 		super(requestedSecret, lease);
 
@@ -48,6 +46,7 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 	}
 
 	public Throwable getException() {
-		return exception;
+		return this.exception;
 	}
+
 }

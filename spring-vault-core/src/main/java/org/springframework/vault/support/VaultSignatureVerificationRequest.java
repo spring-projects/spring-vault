@@ -35,8 +35,7 @@ public class VaultSignatureVerificationRequest {
 
 	private final @Nullable String algorithm;
 
-	private VaultSignatureVerificationRequest(Plaintext plaintext,
-			@Nullable Signature signature, @Nullable Hmac hmac,
+	private VaultSignatureVerificationRequest(Plaintext plaintext, @Nullable Signature signature, @Nullable Hmac hmac,
 			@Nullable String algorithm) {
 
 		this.plaintext = plaintext;
@@ -55,28 +54,24 @@ public class VaultSignatureVerificationRequest {
 	/**
 	 * Create a new {@link VaultSignatureVerificationRequest} given {@link Plaintext} and
 	 * {@link Signature}.
-	 *
 	 * @param plaintext the plaintext, must not be {@literal null}.
 	 * @param signature the signature, must not be {@literal null}.
 	 * @return a new {@link VaultSignatureVerificationRequest} for {@link Plaintext} and
 	 * {@link Signature}.
 	 */
-	public static VaultSignatureVerificationRequest create(Plaintext plaintext,
-			Signature signature) {
+	public static VaultSignatureVerificationRequest create(Plaintext plaintext, Signature signature) {
 		return builder().plaintext(plaintext).signature(signature).build();
 	}
 
 	/**
 	 * Create a new {@link VaultSignatureVerificationRequest} given {@link Plaintext} and
 	 * {@link Hmac}.
-	 *
 	 * @param plaintext the plaintext, must not be {@literal null}.
 	 * @param hmac the hmac, must not be {@literal null}.
 	 * @return a new {@link VaultSignatureVerificationRequest} for {@link Plaintext} and
 	 * {@link Hmac}.
 	 */
-	public static VaultSignatureVerificationRequest create(Plaintext plaintext,
-			Hmac hmac) {
+	public static VaultSignatureVerificationRequest create(Plaintext plaintext, Hmac hmac) {
 		return builder().plaintext(plaintext).hmac(hmac).build();
 	}
 
@@ -84,7 +79,7 @@ public class VaultSignatureVerificationRequest {
 	 * @return plain text input used as basis to verify the signature.
 	 */
 	public Plaintext getPlaintext() {
-		return plaintext;
+		return this.plaintext;
 	}
 
 	/**
@@ -93,7 +88,7 @@ public class VaultSignatureVerificationRequest {
 	 */
 	@Nullable
 	public Signature getSignature() {
-		return signature;
+		return this.signature;
 	}
 
 	/**
@@ -102,7 +97,7 @@ public class VaultSignatureVerificationRequest {
 	 */
 	@Nullable
 	public Hmac getHmac() {
-		return hmac;
+		return this.hmac;
 	}
 
 	/**
@@ -111,7 +106,7 @@ public class VaultSignatureVerificationRequest {
 	 */
 	@Nullable
 	public String getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
 	/**
@@ -129,7 +124,6 @@ public class VaultSignatureVerificationRequest {
 
 		/**
 		 * Configure the {@link Plaintext} input to be used to verify the signature.
-		 *
 		 * @param input base input, must not be {@literal null}.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 */
@@ -145,7 +139,6 @@ public class VaultSignatureVerificationRequest {
 		 * Configure the {@link Signature} to be verified. Signature verification requires
 		 * either a {@link Signature} or a {@link #hmac(Hmac)} to be configured. Clears
 		 * any previously configured {@link #hmac(Hmac)}.
-		 *
 		 * @param signature to be verified, must not be {@literal null}.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 */
@@ -162,7 +155,6 @@ public class VaultSignatureVerificationRequest {
 		 * Configure the {@link Hmac} to be verified. Signature verification requires
 		 * either a {@link Hmac} or a {@link #signature(Signature)} to be configured.
 		 * Clears any previously configured {@link Signature}.
-		 *
 		 * @param hmac to be verified, must not be {@literal null}.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 */
@@ -177,11 +169,9 @@ public class VaultSignatureVerificationRequest {
 
 		/**
 		 * Configure the algorithm to be used for the operation.
-		 *
 		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 *     algorithms are: {@literal sha2-224}, {@literal sha2-256},
-		 *     {@literal sha2-384}, {@literal sha2-512}. Defaults to {@literal sha2-256}
-		 *     if not set.
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 */
 		public VaultSignatureVerificationRequestBuilder algorithm(String algorithm) {
@@ -196,17 +186,16 @@ public class VaultSignatureVerificationRequest {
 		 * Build a new {@link VaultSignatureVerificationRequest} instance. Requires
 		 * {@link #plaintext(Plaintext)} and one of {@link #hmac(Hmac)},
 		 * {@link #signature(Signature)} to be configured.
-		 *
 		 * @return a new {@link VaultHmacRequest}.
 		 */
 		public VaultSignatureVerificationRequest build() {
 
-			Assert.notNull(input, "Plaintext input must not be null");
-			Assert.isTrue(hmac != null || signature != null,
-					"Either Signature or Hmac must not be null");
+			Assert.notNull(this.input, "Plaintext input must not be null");
+			Assert.isTrue(this.hmac != null || this.signature != null, "Either Signature or Hmac must not be null");
 
-			return new VaultSignatureVerificationRequest(input, signature, hmac,
-					algorithm);
+			return new VaultSignatureVerificationRequest(this.input, this.signature, this.hmac, this.algorithm);
 		}
+
 	}
+
 }

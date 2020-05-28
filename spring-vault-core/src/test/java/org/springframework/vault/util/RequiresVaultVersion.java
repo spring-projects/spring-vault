@@ -51,4 +51,5 @@ public @interface RequiresVaultVersion {
 	 * Minimum version to run a test.
 	 */
 	String value();
+
 }

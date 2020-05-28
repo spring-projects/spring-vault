@@ -33,7 +33,7 @@ class IpAddressUserIdTests {
 
 		String userId = new IpAddressUserId().createUserId();
 
-		assertThat(userId).matches(Pattern.compile("[0-9A-F]+"))
-				.doesNotMatch(Pattern.compile("[a-f]"));
+		assertThat(userId).matches(Pattern.compile("[0-9A-F]+")).doesNotMatch(Pattern.compile("[a-f]"));
 	}
+
 }

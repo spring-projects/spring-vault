@@ -41,4 +41,5 @@ public interface VaultUnsealStatus {
 	 * @return number of remaining required keyshares to unseal Vault.
 	 */
 	int getProgress();
+
 }

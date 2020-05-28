@@ -37,8 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
-abstract class AbstractVaultKeyValueTemplateIntegrationTests
-		extends IntegrationTestSupport {
+abstract class AbstractVaultKeyValueTemplateIntegrationTests extends IntegrationTestSupport {
 
 	private final String path;
 
@@ -49,20 +48,19 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests
 
 	VaultKeyValueOperations kvOperations;
 
-	AbstractVaultKeyValueTemplateIntegrationTests(String path,
-			KeyValueBackend apiVersion) {
+	AbstractVaultKeyValueTemplateIntegrationTests(String path, KeyValueBackend apiVersion) {
 		this.path = path;
 		this.apiVersion = apiVersion;
 	}
 
 	@BeforeEach
 	void before() {
-		kvOperations = vaultOperations.opsForKeyValue(path, apiVersion);
+		this.kvOperations = this.vaultOperations.opsForKeyValue(this.path, this.apiVersion);
 	}
 
 	@Test
 	void shouldReportExpectedApiVersion() {
-		assertThat(kvOperations.getApiVersion()).isEqualTo(apiVersion);
+		assertThat(this.kvOperations.getApiVersion()).isEqualTo(this.apiVersion);
 	}
 
 	@Test
@@ -72,9 +70,9 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests
 
 		String key = UUID.randomUUID().toString();
 
-		kvOperations.put(key, secret);
+		this.kvOperations.put(key, secret);
 
-		assertThat(kvOperations.list("/")).contains(key);
+		assertThat(this.kvOperations.list("/")).contains(key);
 	}
 
 	@Test
@@ -84,16 +82,16 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests
 
 		String key = UUID.randomUUID().toString();
 
-		kvOperations.put(key, secret);
+		this.kvOperations.put(key, secret);
 
-		assertThat(kvOperations.get(key).getRequiredData()).containsEntry("key", "value");
+		assertThat(this.kvOperations.get(key).getRequiredData()).containsEntry("key", "value");
 	}
 
 	@Test
 	void shouldReadAbsentSecret() {
 
-		assertThat(kvOperations.get("absent")).isNull();
-		assertThat(kvOperations.get("absent", Person.class)).isNull();
+		assertThat(this.kvOperations.get("absent")).isNull();
+		assertThat(this.kvOperations.get("absent", Person.class)).isNull();
 	}
 
 	@Test
@@ -103,12 +101,10 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests
 		person.setFirstname("Walter");
 		person.setLastname("Heisenberg");
 
-		kvOperations.put("my-secret", person);
+		this.kvOperations.put("my-secret", person);
 
-		assertThat(kvOperations.get("my-secret").getRequiredData())
-				.containsEntry("firstname", "Walter");
-		assertThat(kvOperations.get("my-secret", Person.class).getRequiredData())
-				.isEqualTo(person);
+		assertThat(this.kvOperations.get("my-secret").getRequiredData()).containsEntry("firstname", "Walter");
+		assertThat(this.kvOperations.get("my-secret", Person.class).getRequiredData()).isEqualTo(person);
 	}
 
 	@Test
@@ -118,9 +114,10 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests
 
 		String key = UUID.randomUUID().toString();
 
-		kvOperations.put(key, secret);
-		kvOperations.delete(key);
+		this.kvOperations.put(key, secret);
+		this.kvOperations.delete(key);
 
-		assertThat(kvOperations.get(key)).isNull();
+		assertThat(this.kvOperations.get(key)).isNull();
 	}
+
 }

@@ -40,7 +40,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 
 	/**
 	 * Read the most recent secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -51,7 +50,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 
 	/**
 	 * Read the requested {@link Version} of the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param version must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -62,7 +60,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	/**
 	 * Read the most recent secret at {@code path} and deserialize the secret to the given
 	 * {@link Class responseType}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -75,7 +72,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	/**
 	 * Read the requested {@link Version} of the secret at {@code path} and deserialize
 	 * the secret to the given {@link Class responseType}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param version must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
@@ -88,7 +84,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body} may be
 	 * either plain secrets (e.g. map) or {@link Versioned} objects. Using
 	 * {@link Versioned} will apply versioning for Compare-and-Set (CAS).
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param body must not be {@literal null}.
 	 * @return the resulting {@link Metadata}.
@@ -97,7 +92,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 
 	/**
 	 * Delete one or more {@link Version versions} of the secret at {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param versionsToDelete must not be {@literal null} or empty.
 	 */
@@ -106,7 +100,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	/**
 	 * Undelete (restore) one or more {@link Version versions} of the secret at
 	 * {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param versionsToDelete must not be {@literal null} or empty.
 	 */
@@ -115,7 +108,6 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	/**
 	 * Permanently remove the specified {@link Version versions} of the secret at
 	 * {@code path}.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param versionsToDelete must not be {@literal null} or empty.
 	 */
@@ -123,8 +115,9 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 
 	/**
 	 * Return {@link VaultKeyValueMetadataOperations}
-	 *
-	 * @return the operations interface to interact with the Vault Key/Value metadata backend
+	 * @return the operations interface to interact with the Vault Key/Value metadata
+	 * backend
 	 */
 	VaultKeyValueMetadataOperations opsForKeyValueMetadata();
+
 }

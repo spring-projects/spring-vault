@@ -39,14 +39,12 @@ import org.springframework.lang.Nullable;
  * @author Mark Paluch
  * @since 2.0
  */
-public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object>>
-		implements VaultTypeMapper {
+public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object>> implements VaultTypeMapper {
 
 	public static final String DEFAULT_TYPE_KEY = "_class";
 
 	@SuppressWarnings("rawtypes")
-	private static final TypeInformation<Map> MAP_TYPE_INFO = ClassTypeInformation
-			.from(Map.class);
+	private static final TypeInformation<Map> MAP_TYPE_INFO = ClassTypeInformation.from(Map.class);
 
 	private final @Nullable String typeKey;
 
@@ -61,7 +59,6 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	/**
 	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey}.
-	 *
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 */
 	public DefaultVaultTypeMapper(@Nullable String typeKey) {
@@ -71,7 +68,6 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	/**
 	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey} and {@link MappingContext}.
-	 *
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 * @param mappingContext must not be {@literal null} or empty.
 	 */
@@ -81,13 +77,11 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 				Collections.singletonList(new SimpleTypeInformationMapper()));
 	}
 
-	public DefaultVaultTypeMapper(@Nullable String typeKey,
-			List<? extends TypeInformationMapper> mappers) {
+	public DefaultVaultTypeMapper(@Nullable String typeKey, List<? extends TypeInformationMapper> mappers) {
 		this(typeKey, new SecretDocumentTypeAliasAccessor(typeKey), null, mappers);
 	}
 
-	private DefaultVaultTypeMapper(@Nullable String typeKey,
-			TypeAliasAccessor<Map<String, Object>> accessor,
+	private DefaultVaultTypeMapper(@Nullable String typeKey, TypeAliasAccessor<Map<String, Object>> accessor,
 			MappingContext<? extends PersistentEntity<?, ?>, ?> mappingContext,
 			List<? extends TypeInformationMapper> mappers) {
 
@@ -98,12 +92,11 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 
 	/**
 	 * Checks whether the given key name matches the {@literal typeKey}.
-	 *
 	 * @param key
 	 * @return {@literal true} if {@code key} matches the {@literal typeKey}.
 	 */
 	public boolean isTypeKey(String key) {
-		return typeKey != null && typeKey.equals(key);
+		return this.typeKey != null && this.typeKey.equals(key);
 	}
 
 	@Override
@@ -116,8 +109,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	 *
 	 * @author Mark Paluch
 	 */
-	static class SecretDocumentTypeAliasAccessor
-			implements TypeAliasAccessor<Map<String, Object>> {
+	static class SecretDocumentTypeAliasAccessor implements TypeAliasAccessor<Map<String, Object>> {
 
 		private final @Nullable String typeKey;
 
@@ -126,13 +118,15 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 		}
 
 		public Alias readAliasFrom(Map<String, Object> source) {
-			return typeKey == null ? Alias.NONE : Alias.ofNullable(source.get(typeKey));
+			return this.typeKey == null ? Alias.NONE : Alias.ofNullable(source.get(this.typeKey));
 		}
 
 		public void writeTypeTo(Map<String, Object> sink, Object alias) {
-			if (typeKey != null) {
-				sink.put(typeKey, alias);
+			if (this.typeKey != null) {
+				sink.put(this.typeKey, alias);
 			}
 		}
+
 	}
+
 }

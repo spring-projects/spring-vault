@@ -37,4 +37,5 @@ public class IpAddressUserId implements AppIdUserIdMechanism {
 			throw new IllegalStateException(e);
 		}
 	}
+
 }

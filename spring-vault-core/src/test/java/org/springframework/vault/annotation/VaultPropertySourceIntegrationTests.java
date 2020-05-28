@@ -47,20 +47,25 @@ class VaultPropertySourceIntegrationTests {
 
 	@Import({ Partial1.class, Partial2.class })
 	static class Config extends VaultIntegrationTestConfiguration {
+
 	}
 
 	@VaultPropertySource({ "secret/myapp", "secret/myapp/profile" })
 	static class Partial1 {
+
 	}
 
 	@VaultPropertySource("secret/generic")
 	static class Partial2 {
+
 	}
 
 	@Autowired
 	Environment env;
+
 	@Autowired
 	ApplicationContext context;
+
 	@Value("${myapp}")
 	String myapp;
 
@@ -69,24 +74,22 @@ class VaultPropertySourceIntegrationTests {
 
 		VaultOperations vaultOperations = initializer.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp",
-				Collections.singletonMap("myapp", "myvalue"));
-		vaultOperations.write("secret/generic",
-				Collections.singletonMap("generic", "generic-value"));
-		vaultOperations.write("secret/myapp/profile",
-				Collections.singletonMap("myprofile", "myprofilevalue"));
+		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/generic", Collections.singletonMap("generic", "generic-value"));
+		vaultOperations.write("secret/myapp/profile", Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
 
 	@Test
 	void environmentShouldResolveProperties() {
 
-		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
-		assertThat(env.getProperty("myprofile")).isEqualTo("myprofilevalue");
-		assertThat(env.getProperty("generic")).isEqualTo("generic-value");
+		assertThat(this.env.getProperty("myapp")).isEqualTo("myvalue");
+		assertThat(this.env.getProperty("myprofile")).isEqualTo("myprofilevalue");
+		assertThat(this.env.getProperty("generic")).isEqualTo("generic-value");
 	}
 
 	@Test
 	void valueShouldInjectProperty() {
-		assertThat(myapp).isEqualTo("myvalue");
+		assertThat(this.myapp).isEqualTo("myvalue");
 	}
+
 }

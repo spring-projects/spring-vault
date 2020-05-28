@@ -53,7 +53,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void readShouldReturnAbsentKey() {
 
-		VaultResponse read = vaultOperations.read("secret/absent");
+		VaultResponse read = this.vaultOperations.read("secret/absent");
 
 		assertThat(read).isNull();
 	}
@@ -61,9 +61,9 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void readShouldReturnExistingKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
-		VaultResponse read = vaultOperations.read("secret/mykey");
+		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
 		assertThat(read.getRequiredData()).containsEntry("hello", "world");
 	}
@@ -71,32 +71,27 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void readShouldReturnNestedPropertiesKey() throws Exception {
 
-		Map map = OBJECT_MAPPER.readValue(
-				"{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }",
-				Map.class);
-		vaultOperations.write("secret/mykey", map);
+		Map map = this.OBJECT_MAPPER
+				.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
+		this.vaultOperations.write("secret/mykey", map);
 
-		VaultResponse read = vaultOperations.read("secret/mykey");
+		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getRequiredData()).containsEntry("hello.array[0]",
-				"array-value0");
-		assertThat(read.getRequiredData()).containsEntry("hello.array[1]",
-				"array-value1");
+		assertThat(read.getRequiredData()).containsEntry("hello.array[0]", "array-value0");
+		assertThat(read.getRequiredData()).containsEntry("hello.array[1]", "array-value1");
 	}
 
 	@Test
 	void readShouldReturnNestedObjects() throws Exception {
 
-		Map map = OBJECT_MAPPER.readValue(
-				"{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
+		Map map = this.OBJECT_MAPPER.readValue("{ \"array\": [ {\"hello\": \"world\"}, {\"hello1\": \"world1\"} ] }",
 				Map.class);
-		vaultOperations.write("secret/mykey", map);
+		this.vaultOperations.write("secret/mykey", map);
 
-		VaultResponse read = vaultOperations.read("secret/mykey");
+		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
-		assertThat(read.getRequiredData()).containsEntry("array",
-				Arrays.asList(Collections.singletonMap("hello", "world"),
-						Collections.singletonMap("hello1", "world1")));
+		assertThat(read.getRequiredData()).containsEntry("array", Arrays
+				.asList(Collections.singletonMap("hello", "world"), Collections.singletonMap("hello1", "world1")));
 	}
 
 	@Test
@@ -106,10 +101,9 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 		data.put("firstname", "Walter");
 		data.put("password", "Secret");
 
-		vaultOperations.write("secret/mykey", data);
+		this.vaultOperations.write("secret/mykey", data);
 
-		VaultResponseSupport<Person> read = vaultOperations.read("secret/mykey",
-				Person.class);
+		VaultResponseSupport<Person> read = this.vaultOperations.read("secret/mykey", Person.class);
 		assertThat(read).isNotNull();
 
 		Person person = read.getRequiredData();
@@ -120,27 +114,28 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void listShouldReturnExistingKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
-		List<String> keys = vaultOperations.list("secret");
+		List<String> keys = this.vaultOperations.list("secret");
 		assertThat(keys).contains("mykey");
 	}
 
 	@Test
 	void listShouldNotReturnAbsentKey() {
 
-		List<String> keys = vaultOperations.list("foo");
+		List<String> keys = this.vaultOperations.list("foo");
 		assertThat(keys).isEmpty();
 	}
 
 	@Test
 	void deleteShouldRemoveKey() {
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
-		vaultOperations.delete("secret/mykey");
+		this.vaultOperations.delete("secret/mykey");
 
-		VaultResponse read = vaultOperations.read("secret/mykey");
+		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNull();
 	}
+
 }

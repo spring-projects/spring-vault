@@ -47,6 +47,7 @@ class VaultPropertySourceMultipleIntegrationTests {
 	@VaultPropertySource(value = "secret/myapp/profile", propertyNamePrefix = "database.")
 	@VaultPropertySource("secret/myapp")
 	static class Config extends VaultIntegrationTestConfiguration {
+
 	}
 
 	@Autowired
@@ -63,21 +64,20 @@ class VaultPropertySourceMultipleIntegrationTests {
 
 		VaultOperations vaultOperations = initializer.prepare().getVaultOperations();
 
-		vaultOperations.write("secret/myapp",
-				Collections.singletonMap("myapp", "myvalue"));
-		vaultOperations.write("secret/myapp/profile",
-				Collections.singletonMap("myprofile", "myprofilevalue"));
+		vaultOperations.write("secret/myapp", Collections.singletonMap("myapp", "myvalue"));
+		vaultOperations.write("secret/myapp/profile", Collections.singletonMap("myprofile", "myprofilevalue"));
 	}
 
 	@Test
 	void environmentShouldResolveProperties() {
 
-		assertThat(env.getProperty("myapp")).isEqualTo("myvalue");
-		assertThat(env.getProperty("database.myprofile")).isEqualTo("myprofilevalue");
+		assertThat(this.env.getProperty("myapp")).isEqualTo("myvalue");
+		assertThat(this.env.getProperty("database.myprofile")).isEqualTo("myprofilevalue");
 	}
 
 	@Test
 	void valueShouldInjectProperty() {
-		assertThat(myapp).isEqualTo("myvalue");
+		assertThat(this.myapp).isEqualTo("myvalue");
 	}
+
 }

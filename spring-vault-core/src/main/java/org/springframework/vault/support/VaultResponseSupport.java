@@ -68,7 +68,7 @@ public class VaultResponseSupport<T> {
 	 */
 	@Nullable
 	public Map<String, Object> getAuth() {
-		return auth;
+		return this.auth;
 	}
 
 	/**
@@ -77,8 +77,8 @@ public class VaultResponseSupport<T> {
 	 */
 	public Map<String, Object> getRequiredAuth() {
 
-		if (auth != null) {
-			return auth;
+		if (this.auth != null) {
+			return this.auth;
 		}
 
 		throw new IllegalStateException("Auth field is empty");
@@ -96,7 +96,7 @@ public class VaultResponseSupport<T> {
 	 */
 	@Nullable
 	public T getData() {
-		return data;
+		return this.data;
 	}
 
 	/**
@@ -105,8 +105,8 @@ public class VaultResponseSupport<T> {
 	 */
 	public T getRequiredData() {
 
-		if (data != null) {
-			return data;
+		if (this.data != null) {
+			return this.data;
 		}
 
 		throw new IllegalStateException("Data field is empty");
@@ -124,11 +124,10 @@ public class VaultResponseSupport<T> {
 	 */
 	@Nullable
 	public Map<String, Object> getMetadata() {
-		return metadata;
+		return this.metadata;
 	}
 
 	/**
-	 *
 	 * @param metadata request metadata.
 	 */
 	public void setMetadata(@Nullable Map<String, Object> metadata) {
@@ -136,15 +135,13 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return the lease duration.
 	 */
 	public long getLeaseDuration() {
-		return leaseDuration;
+		return this.leaseDuration;
 	}
 
 	/**
-	 *
 	 * @param leaseDuration the lease duration.
 	 */
 	public void setLeaseDuration(long leaseDuration) {
@@ -152,16 +149,14 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return the lease Id.
 	 */
 	@Nullable
 	public String getLeaseId() {
-		return leaseId;
+		return this.leaseId;
 	}
 
 	/**
-	 *
 	 * @param leaseId the lease Id.
 	 */
 	public void setLeaseId(@Nullable String leaseId) {
@@ -169,15 +164,13 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return {@literal true} if the lease is renewable.
 	 */
 	public boolean isRenewable() {
-		return renewable;
+		return this.renewable;
 	}
 
 	/**
-	 *
 	 * @param renewable {@literal true} if the lease is renewable.
 	 */
 	public void setRenewable(boolean renewable) {
@@ -185,16 +178,14 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return response wrapping details.
 	 */
 	@Nullable
 	public Map<String, String> getWrapInfo() {
-		return wrapInfo;
+		return this.wrapInfo;
 	}
 
 	/**
-	 *
 	 * @param wrapInfo response wrapping details.
 	 */
 	public void setWrapInfo(@Nullable Map<String, String> wrapInfo) {
@@ -202,16 +193,14 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return the request Id.
 	 */
 	@Nullable
 	public String getRequestId() {
-		return requestId;
+		return this.requestId;
 	}
 
 	/**
-	 *
 	 * @param requestId the request Id.
 	 */
 	public void setRequestId(@Nullable String requestId) {
@@ -219,19 +208,18 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 *
 	 * @return the warnings.
 	 */
 	@Nullable
 	public List<String> getWarnings() {
-		return warnings;
+		return this.warnings;
 	}
 
 	/**
-	 *
 	 * @param warnings the warnings.
 	 */
 	public void setWarnings(@Nullable List<String> warnings) {
 		this.warnings = warnings;
 	}
+
 }

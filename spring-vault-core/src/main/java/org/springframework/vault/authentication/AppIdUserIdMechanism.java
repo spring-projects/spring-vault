@@ -30,8 +30,8 @@ public interface AppIdUserIdMechanism {
 
 	/**
 	 * Create a UserId for AppId authentication.
-	 *
 	 * @return the UserId.
 	 */
 	String createUserId();
+
 }

@@ -60,13 +60,13 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-		adminOperations = vaultOperations.opsForSys();
+		this.adminOperations = this.vaultOperations.opsForSys();
 	}
 
 	@Test
 	void getMountsShouldContainSecretBackend() {
 
-		Map<String, VaultMount> mounts = adminOperations.getMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
 
 		assertThat(mounts).containsKey("secret/");
 
@@ -77,17 +77,16 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void mountShouldMountGenericSecret() {
 
-		if (adminOperations.getMounts().containsKey("other/")) {
-			adminOperations.unmount("other");
+		if (this.adminOperations.getMounts().containsKey("other/")) {
+			this.adminOperations.unmount("other");
 		}
 
 		VaultMount mount = VaultMount.builder().type("generic")
-				.config(Collections.singletonMap("default_lease_ttl", "1h"))
-				.description("hello, world").build();
+				.config(Collections.singletonMap("default_lease_ttl", "1h")).description("hello, world").build();
 
-		adminOperations.mount("other", mount);
+		this.adminOperations.mount("other", mount);
 
-		Map<String, VaultMount> mounts = adminOperations.getMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
 
 		assertThat(mounts).containsKey("other/");
 
@@ -101,17 +100,16 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
 	void mountShouldMountKv1Secret() {
 
-		if (adminOperations.getMounts().containsKey("kVv1/")) {
-			adminOperations.unmount("kVv1");
+		if (this.adminOperations.getMounts().containsKey("kVv1/")) {
+			this.adminOperations.unmount("kVv1");
 		}
 
-		VaultMount mount = VaultMount.builder().type("kv")
-				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+		VaultMount mount = VaultMount.builder().type("kv").config(Collections.singletonMap("default_lease_ttl", "1h"))
 				.description("hello, world").build();
 
-		adminOperations.mount("kVv1", mount);
+		this.adminOperations.mount("kVv1", mount);
 
-		Map<String, VaultMount> mounts = adminOperations.getMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
 
 		assertThat(mounts).containsKey("kVv1/");
 
@@ -120,9 +118,9 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(kVv1.getConfig()).containsEntry("default_lease_ttl", 3600);
 		assertThat(kVv1.getType()).isEqualTo("kv");
 
-		vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
+		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"));
 
-		VaultResponse read = vaultOperations.read("secret/mykey");
+		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
 		assertThat(read.getRequiredData()).containsEntry("hello", "world");
 	}
@@ -131,18 +129,16 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
 	void mountShouldMountKv2Secret() {
 
-		if (adminOperations.getMounts().containsKey("kVv2/")) {
-			adminOperations.unmount("kVv2");
+		if (this.adminOperations.getMounts().containsKey("kVv2/")) {
+			this.adminOperations.unmount("kVv2");
 		}
 
-		VaultMount mount = VaultMount.builder().type("kv")
-				.config(Collections.singletonMap("default_lease_ttl", "1h"))
-				.options(Collections.singletonMap("version", "2"))
-				.description("hello, world").build();
+		VaultMount mount = VaultMount.builder().type("kv").config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.options(Collections.singletonMap("version", "2")).description("hello, world").build();
 
-		adminOperations.mount("kVv2", mount);
+		this.adminOperations.mount("kVv2", mount);
 
-		Map<String, VaultMount> mounts = adminOperations.getMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getMounts();
 
 		assertThat(mounts).containsKey("kVv2/");
 
@@ -152,18 +148,16 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(kVv2.getType()).isEqualTo("kv");
 		assertThat(kVv2.getOptions()).containsEntry("version", "2");
 
-		VaultVersionedKeyValueOperations versionedOperations = vaultOperations
-				.opsForVersionedKeyValue("kVv2");
+		VaultVersionedKeyValueOperations versionedOperations = this.vaultOperations.opsForVersionedKeyValue("kVv2");
 
 		versionedOperations.put("secret/mykey", Collections.singletonMap("key", "value"));
-		assertThat(versionedOperations.get("secret/mykey").getRequiredData())
-				.containsEntry("key", "value");
+		assertThat(versionedOperations.get("secret/mykey").getRequiredData()).containsEntry("key", "value");
 	}
 
 	@Test
 	void getAuthMountsShouldContainSecretBackend() {
 
-		Map<String, VaultMount> mounts = adminOperations.getAuthMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getAuthMounts();
 
 		assertThat(mounts).containsKey("token/");
 
@@ -175,16 +169,15 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void authMountShouldMountGenericSecret() {
 
-		if (adminOperations.getAuthMounts().containsKey("other/")) {
-			adminOperations.authUnmount("other");
+		if (this.adminOperations.getAuthMounts().containsKey("other/")) {
+			this.adminOperations.authUnmount("other");
 		}
 
-		VaultMount mount = VaultMount.builder().type("userpass")
-				.description("hello, world").build();
+		VaultMount mount = VaultMount.builder().type("userpass").description("hello, world").build();
 
-		adminOperations.authMount("other", mount);
+		this.adminOperations.authMount("other", mount);
 
-		Map<String, VaultMount> mounts = adminOperations.getAuthMounts();
+		Map<String, VaultMount> mounts = this.adminOperations.getAuthMounts();
 
 		assertThat(mounts).containsKey("other/");
 
@@ -197,7 +190,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion("0.6.1")
 	void shouldEnumeratePolicyNames() {
 
-		List<String> policyNames = adminOperations.getPolicyNames();
+		List<String> policyNames = this.adminOperations.getPolicyNames();
 
 		assertThat(policyNames).contains("root", "default");
 	}
@@ -206,7 +199,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion("0.6.1")
 	void shouldReadRootPolicy() {
 
-		Policy root = adminOperations.getPolicy("root");
+		Policy root = this.adminOperations.getPolicy("root");
 
 		assertThat(root).isEqualTo(Policy.empty());
 	}
@@ -215,7 +208,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion("0.6.1")
 	void shouldReadAbsentRootPolicy() {
 
-		Policy root = adminOperations.getPolicy("absent-policy");
+		Policy root = this.adminOperations.getPolicy("absent-policy");
 
 		assertThat(root).isNull();
 	}
@@ -225,22 +218,21 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	void shouldReadDefaultPolicy() {
 
 		assertThatExceptionOfType(UnsupportedOperationException.class)
-				.isThrownBy(() -> adminOperations.getPolicy("default"));
+				.isThrownBy(() -> this.adminOperations.getPolicy("default"));
 	}
 
 	@Test
 	@RequiresVaultVersion("0.7.0")
 	void shouldCreatePolicy() {
 
-		Rule rule = Rule.builder().path("foo").capabilities(READ, UPDATE)
-				.minWrappingTtl(Duration.ofSeconds(100))
+		Rule rule = Rule.builder().path("foo").capabilities(READ, UPDATE).minWrappingTtl(Duration.ofSeconds(100))
 				.maxWrappingTtl(Duration.ofHours(2)).build();
 
-		adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
+		this.adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
 
-		assertThat(adminOperations.getPolicyNames()).contains("foo");
+		assertThat(this.adminOperations.getPolicyNames()).contains("foo");
 
-		Policy loaded = adminOperations.getPolicy("foo");
+		Policy loaded = this.adminOperations.getPolicy("foo");
 		assertThat(loaded.getRules()).contains(rule);
 	}
 
@@ -250,18 +242,18 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Rule rule = Rule.builder().path("foo").capabilities(READ).build();
 
-		adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
+		this.adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
 
-		adminOperations.deletePolicy("foo");
+		this.adminOperations.deletePolicy("foo");
 
-		assertThat(adminOperations.getPolicyNames()).doesNotContain("foo");
+		assertThat(this.adminOperations.getPolicyNames()).doesNotContain("foo");
 	}
 
 	@Test
 	@RequiresVaultVersion("0.6.1")
 	void shouldReportHealth() {
 
-		VaultHealth health = adminOperations.health();
+		VaultHealth health = this.adminOperations.health();
 
 		assertThat(health.isInitialized()).isTrue();
 		assertThat(health.isSealed()).isFalse();
@@ -272,15 +264,16 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	void isInitializedShouldReturnTrue() {
-		assertThat(adminOperations.isInitialized()).isTrue();
+		assertThat(this.adminOperations.isInitialized()).isTrue();
 	}
 
 	@Test
 	void getUnsealStatusShouldReturnStatus() {
 
-		VaultUnsealStatus unsealStatus = adminOperations.getUnsealStatus();
+		VaultUnsealStatus unsealStatus = this.adminOperations.getUnsealStatus();
 
 		assertThat(unsealStatus.isSealed()).isFalse();
 		assertThat(unsealStatus.getProgress()).isEqualTo(0);
 	}
+
 }

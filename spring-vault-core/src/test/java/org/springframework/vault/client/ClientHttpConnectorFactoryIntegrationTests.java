@@ -52,8 +52,7 @@ class ClientHttpConnectorFactoryIntegrationTests {
 	@Test
 	void jettyClientShouldWork() {
 
-		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(),
-				Settings.createSslConfiguration());
+		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(), Settings.createSslConfiguration());
 
 		WebClient webClient = WebClient.builder().clientConnector(factory).build();
 
@@ -66,10 +65,11 @@ class ClientHttpConnectorFactoryIntegrationTests {
 
 		// Uninitialized and sealed can cause status 500
 		try {
-			return webClient.get().uri(url).retrieve().bodyToMono(String.class).block();
+			return webClient.get().uri(this.url).retrieve().bodyToMono(String.class).block();
 		}
 		catch (WebClientResponseException e) {
 			return e.getResponseBodyAsString();
 		}
 	}
+
 }

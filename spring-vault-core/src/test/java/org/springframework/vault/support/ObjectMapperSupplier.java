@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * {@link ObjectMapper} supplier for testing holding a singleton {@link ObjectMapper}
  * instance.
+ *
  * @author Mark Paluch
  */
 public class ObjectMapperSupplier {
@@ -31,4 +32,5 @@ public class ObjectMapperSupplier {
 	public static ObjectMapper get() {
 		return instance.objectMapper;
 	}
+
 }

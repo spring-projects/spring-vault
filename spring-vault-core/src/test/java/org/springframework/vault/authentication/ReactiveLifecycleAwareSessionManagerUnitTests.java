@@ -115,21 +115,21 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	void before() {
 
 		// POST
-		when(webClient.post()).thenReturn(requestBodyUriSpec);
-		when(requestBodyUriSpec.uri(anyString())).thenReturn(requestBodySpec);
-		when(requestBodySpec.headers(any())).thenReturn(requestBodySpec);
-		when(requestBodySpec.retrieve()).thenReturn(responseSpec);
+		when(this.webClient.post()).thenReturn(this.requestBodyUriSpec);
+		when(this.requestBodyUriSpec.uri(anyString())).thenReturn(this.requestBodySpec);
+		when(this.requestBodySpec.headers(any())).thenReturn(this.requestBodySpec);
+		when(this.requestBodySpec.retrieve()).thenReturn(this.responseSpec);
 
 		// GET
-		when(webClient.get()).thenReturn(requestHeadersUriSpec);
-		when(requestHeadersUriSpec.uri(anyString())).thenReturn(requestHeadersSpec);
-		when(requestHeadersSpec.headers(any())).thenReturn(requestHeadersSpec);
-		when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
+		when(this.webClient.get()).thenReturn(this.requestHeadersUriSpec);
+		when(this.requestHeadersUriSpec.uri(anyString())).thenReturn(this.requestHeadersSpec);
+		when(this.requestHeadersSpec.headers(any())).thenReturn(this.requestHeadersSpec);
+		when(this.requestHeadersSpec.retrieve()).thenReturn(this.responseSpec);
 
-		sessionManager = new ReactiveLifecycleAwareSessionManager(tokenSupplier,
-				taskScheduler, webClient);
-		sessionManager.addAuthenticationListener(listener);
-		sessionManager.addErrorListener(errorListener);
+		this.sessionManager = new ReactiveLifecycleAwareSessionManager(this.tokenSupplier, this.taskScheduler,
+				this.webClient);
+		this.sessionManager.addAuthenticationListener(this.listener);
+		this.sessionManager.addErrorListener(this.errorListener);
 	}
 
 	@Test
@@ -137,24 +137,23 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.of("login"));
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNext(LoginToken.of("login")) //
 				.verifyComplete();
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 	}
 
 	@Test
 	void loginShouldFail() {
 
-		when(tokenSupplier.getVaultToken())
-				.thenReturn(Mono.error(new VaultLoginException("foo")));
+		when(this.tokenSupplier.getVaultToken()).thenReturn(Mono.error(new VaultLoginException("foo")));
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.verifyError();
-		verifyZeroInteractions(listener);
-		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
+		verifyZeroInteractions(this.listener);
+		verify(this.errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
 
 	@Test
@@ -166,18 +165,17 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(VaultToken.of("login"));
 
-		when(responseSpec.bodyToMono((Class) any())).thenReturn(Mono.just(vaultResponse));
+		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(Mono.just(vaultResponse));
 
-		sessionManager.getSessionToken().as(StepVerifier::create).assertNext(it -> {
+		this.sessionManager.getSessionToken().as(StepVerifier::create).assertNext(it -> {
 
 			LoginToken sessionToken = (LoginToken) it;
-			assertThat(sessionToken.getLeaseDuration())
-					.isEqualTo(Duration.ofSeconds(100));
+			assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
 		}).verifyComplete();
 
-		verify(webClient.get()).uri("auth/token/lookup-self");
-		verify(listener).onAuthenticationEvent(captor.capture());
-		AfterLoginEvent event = (AfterLoginEvent) captor.getValue();
+		verify(this.webClient.get()).uri("auth/token/lookup-self");
+		verify(this.listener).onAuthenticationEvent(this.captor.capture());
+		AfterLoginEvent event = (AfterLoginEvent) this.captor.getValue();
 		assertThat(event.getSource()).isInstanceOf(LoginToken.class);
 	}
 
@@ -190,17 +188,16 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(VaultToken.of("login"));
 
-		when(responseSpec.bodyToMono((Class) any()))
-				.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403,
-						"Forbidden", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(
+				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.assertNext(it -> {
 					assertThat(it).isExactlyInstanceOf(VaultToken.class);
 				}).verifyComplete();
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verify(errorListener).onAuthenticationError(any());
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.errorListener).onAuthenticationError(any());
 	}
 
 	@Test
@@ -208,22 +205,17 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
 
-		when(responseSpec.bodyToMono((Class) any()))
-				.thenReturn(Mono.error(new WebClientResponseException("Some server error",
-						500, "Some server error", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(Mono.error(
+				new WebClientResponseException("Some server error", 500, "Some server error", null, null, null)));
 
 		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
-		sessionManager.addErrorListener(listener::set);
+		this.sessionManager.addErrorListener(listener::set);
 
-		sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1)
-				.verifyComplete();
-		sessionManager.renewToken().as(StepVerifier::create)
-				.verifyComplete();
-		assertThat(listener.get().getException())
-				.isInstanceOf(VaultTokenRenewalException.class)
-							.hasCauseInstanceOf(WebClientResponseException.class)
-							.hasMessageContaining(
-									"Cannot renew token: Status 500 Some server error");
+		this.sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1).verifyComplete();
+		this.sessionManager.renewToken().as(StepVerifier::create).verifyComplete();
+		assertThat(listener.get().getException()).isInstanceOf(VaultTokenRenewalException.class)
+				.hasCauseInstanceOf(WebClientResponseException.class)
+				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
 
 	}
 
@@ -234,19 +226,18 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
 
 		mockToken(LoginToken.of("login"));
-		when(responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("OK"));
+		when(this.responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("OK"));
 
-		sessionManager.getVaultToken() //
+		this.sessionManager.getVaultToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
 
-		sessionManager.destroy();
+		this.sessionManager.destroy();
 
-		verify(webClient.post()).uri("auth/token/revoke-self");
-		verify(listener)
-				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
-		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
+		verify(this.webClient.post()).uri("auth/token/revoke-self");
+		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
 	}
 
 	@Test
@@ -254,17 +245,17 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(VaultToken.of("login"));
 
-		sessionManager.setTokenSelfLookupEnabled(false);
-		sessionManager.renewToken() //
+		this.sessionManager.setTokenSelfLookupEnabled(false);
+		this.sessionManager.renewToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		sessionManager.destroy();
+		this.sessionManager.destroy();
 
-		verify(webClient, never()).post();
-		verify(webClient.post(), never()).uri("auth/token/revoke-self");
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verifyNoMoreInteractions(listener);
+		verify(this.webClient, never()).post();
+		verify(this.webClient.post(), never()).uri("auth/token/revoke-self");
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(this.listener);
 	}
 
 	@Test
@@ -272,17 +263,16 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.of("login"));
 
-		when(responseSpec.bodyToMono((Class) any()))
-				.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403,
-						"Forbidden", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(
+				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
 
-		sessionManager.renewToken() //
+		this.sessionManager.renewToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		sessionManager.destroy();
+		this.sessionManager.destroy();
 
-		verify(requestBodyUriSpec).uri("auth/token/revoke-self");
+		verify(this.requestBodyUriSpec).uri("auth/token/revoke-self");
 	}
 
 	@Test
@@ -290,12 +280,12 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
 
-		verify(taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
@@ -310,24 +300,23 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		auth.put("ttl", 100);
 		vaultResponse.setAuth(auth);
 
-		when(responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.just(vaultResponse));
+		when(this.responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(vaultResponse));
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
 
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(webClient).post();
-		verify(webClient.post()).uri("auth/token/renew-self");
+		verify(this.webClient).post();
+		verify(this.webClient.post()).uri("auth/token/renew-self");
 
-		verify(tokenSupplier, times(1)).getVaultToken();
-		verify(listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
-		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
+		verify(this.tokenSupplier, times(1)).getVaultToken();
+		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
 	}
 
 	@Test
@@ -335,122 +324,107 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
-				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10)))));
+		when(this.responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
-				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
+		when(this.responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1)
-				.verifyComplete();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken().as(StepVerifier::create).expectNextCount(1).verifyComplete();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	void shouldReLoginIfRenewalTtlExceedsThreshold() {
 
-		when(tokenSupplier.getVaultToken()).thenReturn(
-				Mono.just(LoginToken.renewable("login".toCharArray(),
-						Duration.ofSeconds(5))),
-				Mono.just(LoginToken.renewable("bar".toCharArray(),
-						Duration.ofSeconds(5))));
-		when(responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(
-				fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
+		when(this.tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))));
+		when(this.responseSpec.bodyToMono(VaultResponse.class))
+				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(
-						LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
-				.verifyComplete();
+		this.sessionManager.getSessionToken().as(StepVerifier::create)
+				.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
 
-		verify(tokenSupplier, times(2)).getVaultToken();
-		verify(listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verify(listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
+		verify(this.tokenSupplier, times(2)).getVaultToken();
+		verify(this.listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
 	}
 
 	@Test
 	void shouldReLoginIfRenewFails() {
 
-		when(tokenSupplier.getVaultToken()).thenReturn(
-				Mono.just(LoginToken.renewable("login".toCharArray(),
-						Duration.ofSeconds(5))),
-				Mono.just(LoginToken.renewable("bar".toCharArray(),
-						Duration.ofSeconds(5))));
-		when(responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.error(new RuntimeException("foo")));
+		when(this.tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))));
+		when(this.responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.error(new RuntimeException("foo")));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(
-						LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
-				.verifyComplete();
+		this.sessionManager.getSessionToken().as(StepVerifier::create)
+				.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
 
-		verify(tokenSupplier, times(2)).getVaultToken();
+		verify(this.tokenSupplier, times(2)).getVaultToken();
 	}
 
 	@Test
 	void shouldRetainTokenAfterRenewalFailure() {
 
-		when(tokenSupplier.getVaultToken()).thenReturn(
-				Mono.just(LoginToken.renewable("login".toCharArray(),
-						Duration.ofSeconds(5))),
-				Mono.just(LoginToken.renewable("bar".toCharArray(),
-						Duration.ofSeconds(5))));
-		when(responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.error(new RuntimeException("foo")));
-		sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
+		when(this.tokenSupplier.getVaultToken()).thenReturn(
+				Mono.just(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))),
+				Mono.just(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))));
+		when(this.responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.error(new RuntimeException("foo")));
+		this.sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken() //
+		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.expectNextCount(1) //
 				.verifyComplete();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		sessionManager
-				.getSessionToken().as(StepVerifier::create).expectNext(LoginToken
-						.renewable("login".toCharArray(), Duration.ofSeconds(5)))
-				.verifyComplete();
+		this.sessionManager.getSessionToken().as(StepVerifier::create)
+				.expectNext(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
 
-		verify(tokenSupplier).getVaultToken();
+		verify(this.tokenSupplier).getVaultToken();
 	}
 
 	private static VaultResponse fromToken(LoginToken loginToken) {
@@ -468,6 +442,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	private void mockToken(VaultToken token) {
-		when(tokenSupplier.getVaultToken()).thenReturn(Mono.just(token));
+		when(this.tokenSupplier.getVaultToken()).thenReturn(Mono.just(token));
 	}
+
 }

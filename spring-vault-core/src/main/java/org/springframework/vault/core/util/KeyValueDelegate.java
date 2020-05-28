@@ -48,15 +48,13 @@ public class KeyValueDelegate {
 	}
 
 	@SuppressWarnings("unchecked")
-	public KeyValueDelegate(VaultOperations operations,
-			Supplier<Map<String, ?>> cacheSupplier) {
+	public KeyValueDelegate(VaultOperations operations, Supplier<Map<String, ?>> cacheSupplier) {
 		this.operations = operations;
 		this.mountInfo = (Map) cacheSupplier.get();
 	}
 
 	/**
 	 * Determine whether the {@code path} belongs to a versioned Key-Value mount.
-	 *
 	 * @param path the path to inspect.
 	 * @return {@literal true} if the {@code path} belongs to a versioned Key-Value mount.
 	 */
@@ -67,7 +65,6 @@ public class KeyValueDelegate {
 	/**
 	 * Read a secret from a key-value backend. Considers the backend type and whether the
 	 * backend is a versioned key-value backend.
-	 *
 	 * @param path the path to fetch the secret from.
 	 * @return the secret, can be {@literal null}.
 	 */
@@ -80,8 +77,7 @@ public class KeyValueDelegate {
 			return this.operations.read(path);
 		}
 
-		VaultResponse response = this.operations
-				.read(getKeyValue2Path(mountInfo.getPath(), path));
+		VaultResponse response = this.operations.read(getKeyValue2Path(mountInfo.getPath(), path));
 		unwrapDataResponse(response);
 
 		return response;
@@ -101,21 +97,18 @@ public class KeyValueDelegate {
 	@SuppressWarnings("unchecked")
 	private static void unwrapDataResponse(@Nullable VaultResponse response) {
 
-		if (response == null || response.getData() == null
-				|| !response.getData().containsKey("data")) {
+		if (response == null || response.getData() == null || !response.getData().containsKey("data")) {
 			return;
 		}
 
-		Map<String, Object> nested = new LinkedHashMap<>(
-				(Map) response.getRequiredData().get("data"));
+		Map<String, Object> nested = new LinkedHashMap<>((Map) response.getRequiredData().get("data"));
 		response.setData(nested);
 	}
 
 	@SuppressWarnings("unchecked")
 	private MountInfo doGetMountInfo(String path) {
 
-		VaultResponse response = this.operations
-				.read(String.format("sys/internal/ui/mounts/%s", path));
+		VaultResponse response = this.operations.read(String.format("sys/internal/ui/mounts/%s", path));
 
 		if (response == null || response.getData() == null) {
 			return MountInfo.unavailable();
@@ -145,15 +138,15 @@ public class KeyValueDelegate {
 
 	static class MountInfo {
 
-		static final MountInfo UNAVAILABLE = new MountInfo("", Collections.emptyMap(),
-				false);
+		static final MountInfo UNAVAILABLE = new MountInfo("", Collections.emptyMap(), false);
 
 		final String path;
+
 		final @Nullable Map<String, Object> options;
+
 		final boolean available;
 
-		private MountInfo(String path, @Nullable Map<String, Object> options,
-				boolean available) {
+		private MountInfo(String path, @Nullable Map<String, Object> options, boolean available) {
 			this.path = path;
 			this.options = options;
 			this.available = available;
@@ -161,7 +154,6 @@ public class KeyValueDelegate {
 
 		/**
 		 * Creates a new {@link MountInfo} representing an absent {@link MountInfo}.
-		 *
 		 * @return a new {@link MountInfo} representing an absent {@link MountInfo}.
 		 */
 		static MountInfo unavailable() {
@@ -170,7 +162,6 @@ public class KeyValueDelegate {
 
 		/**
 		 * Creates a new {@link MountInfo} given {@code path} and {@link Map options map}.
-		 *
 		 * @param path
 		 * @param options
 		 * @return a new {@link MountInfo} for {@code path} and {@link Map options map}.
@@ -181,11 +172,11 @@ public class KeyValueDelegate {
 
 		boolean isKeyValue(KeyValueBackend versioned) {
 
-			if (!isAvailable() || !StringUtils.hasText(path) || options == null) {
+			if (!isAvailable() || !StringUtils.hasText(this.path) || this.options == null) {
 				return false;
 			}
 
-			Object version = options.get("version");
+			Object version = this.options.get("version");
 
 			if (version != null) {
 
@@ -213,5 +204,7 @@ public class KeyValueDelegate {
 		public boolean isAvailable() {
 			return this.available;
 		}
+
 	}
+
 }

@@ -35,47 +35,43 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Mark Paluch
  */
-class TokenAuthenticationStepsIntegrationTests
-		extends TokenAuthenticationIntegrationTestBase {
+class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegrationTestBase {
 
-	RestTemplate restTemplate = TestRestTemplateFactory
-			.create(Settings.createSslConfiguration());
+	RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 	@Test
 	void shouldSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
+				.build();
 
-		VaultToken token = prepare().getVaultOperations().opsForToken()
-				.create(tokenRequest).getToken();
+		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), restTemplate);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.restTemplate);
 
 		VaultToken login = operator.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
 
 		LoginToken loginToken = (LoginToken) login;
 
-		assertThat(loginToken.getLeaseDuration()).isBetween(Duration.ofSeconds(40),
-				Duration.ofSeconds(60));
+		assertThat(loginToken.getLeaseDuration()).isBetween(Duration.ofSeconds(40), Duration.ofSeconds(60));
 		assertThat(loginToken.isRenewable()).isTrue();
 	}
 
 	@Test
 	void shouldFailDuringSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
+				.build();
 
-		VaultToken token = prepare().getVaultOperations().opsForToken()
-				.create(tokenRequest).getToken();
+		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), restTemplate);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.restTemplate);
 
 		operator.login();
 		assertThatExceptionOfType(VaultException.class).isThrownBy(operator::login);
 	}
+
 }

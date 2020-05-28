@@ -29,7 +29,6 @@ public class VaultPropertySourceNotFoundException extends VaultException {
 	/**
 	 * Create a {@code VaultPropertySourceNotFoundException} with the specified detail
 	 * message.
-	 *
 	 * @param msg the detail message.
 	 */
 	public VaultPropertySourceNotFoundException(String msg) {
@@ -39,11 +38,11 @@ public class VaultPropertySourceNotFoundException extends VaultException {
 	/**
 	 * Create a {@code VaultPropertySourceNotFoundException} with the specified detail
 	 * message and nested exception.
-	 *
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
 	public VaultPropertySourceNotFoundException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

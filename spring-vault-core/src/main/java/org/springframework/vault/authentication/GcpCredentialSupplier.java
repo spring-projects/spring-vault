@@ -33,7 +33,6 @@ public interface GcpCredentialSupplier extends Supplier<GoogleCredential> {
 
 	/**
 	 * Exception-safe helper to get {@link GoogleCredential} from {@link #getCredential}.
-	 *
 	 * @return the GoogleCredential for JWT signing.
 	 */
 	@Override
@@ -49,9 +48,9 @@ public interface GcpCredentialSupplier extends Supplier<GoogleCredential> {
 
 	/**
 	 * Get a {@link GoogleCredential} for GCP IAM authentication via JWT signing.
-	 *
 	 * @return the {@link GoogleCredential}.
 	 * @throws IOException if the credential lookup fails.
 	 */
 	GoogleCredential getCredential() throws IOException;
+
 }

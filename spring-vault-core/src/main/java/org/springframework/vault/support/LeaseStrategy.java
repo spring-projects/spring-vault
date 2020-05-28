@@ -28,7 +28,6 @@ public interface LeaseStrategy {
 	/**
 	 * Return {@literal true} to drop the lease after {@link Throwable error} happened.
 	 * {@literal false} to retain the lease.
-	 *
 	 * @param error the error that occurred.
 	 * @return {@literal true} to drop the lease after {@link Throwable error} happened.
 	 * {@literal false} to retain the lease.
@@ -37,7 +36,6 @@ public interface LeaseStrategy {
 
 	/**
 	 * Predefined strategy to drop leases on error.
-	 *
 	 * @return the drop on error strategy.
 	 */
 	static LeaseStrategy dropOnError() {
@@ -46,10 +44,10 @@ public interface LeaseStrategy {
 
 	/**
 	 * Predefined strategy to retain leases on error.
-	 *
 	 * @return the retain on error strategy.
 	 */
 	static LeaseStrategy retainOnError() {
 		return error -> false;
 	}
+
 }

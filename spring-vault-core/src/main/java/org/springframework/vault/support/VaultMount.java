@@ -56,8 +56,7 @@ public class VaultMount {
 	 */
 	private final Map<String, String> options;
 
-	VaultMount(@JsonProperty("type") String type,
-			@Nullable @JsonProperty("description") String description,
+	VaultMount(@JsonProperty("type") String type, @Nullable @JsonProperty("description") String description,
 			@Nullable @JsonProperty("config") Map<String, Object> config,
 			@Nullable @JsonProperty("options") Map<String, String> options) {
 
@@ -69,7 +68,6 @@ public class VaultMount {
 
 	/**
 	 * Create a new {@link VaultMount} given a {@code type}.
-	 *
 	 * @param type backend type, must not be empty or {@literal null}.
 	 * @return the created {@link VaultMount}.
 	 */
@@ -88,7 +86,7 @@ public class VaultMount {
 	 * @return the backend type.
 	 */
 	public String getType() {
-		return type;
+		return this.type;
 	}
 
 	/**
@@ -96,7 +94,7 @@ public class VaultMount {
 	 */
 	@Nullable
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	/**
@@ -104,7 +102,7 @@ public class VaultMount {
 	 */
 	@Nullable
 	public Map<String, Object> getConfig() {
-		return config;
+		return this.config;
 	}
 
 	/**
@@ -113,7 +111,7 @@ public class VaultMount {
 	 */
 	@Nullable
 	public Map<String, String> getOptions() {
-		return options;
+		return this.options;
 	}
 
 	/**
@@ -136,7 +134,6 @@ public class VaultMount {
 
 		/**
 		 * Configure the backend type.
-		 *
 		 * @param type the backend type, must not be empty or {@literal null}.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
@@ -150,7 +147,6 @@ public class VaultMount {
 
 		/**
 		 * Configure a human readable description of this mount.
-		 *
 		 * @param description a human readable description of this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
@@ -162,7 +158,6 @@ public class VaultMount {
 
 		/**
 		 * Set additional configuration details for this mount.
-		 *
 		 * @param config additional configuration details for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
@@ -176,7 +171,6 @@ public class VaultMount {
 
 		/**
 		 * Set mount type specific options for this mount.
-		 *
 		 * @param options mount type specific options for this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 * @since 2.2
@@ -192,15 +186,16 @@ public class VaultMount {
 		/**
 		 * Build a new {@link VaultMount} instance. Requires {@link #type(String)} to be
 		 * configured.
-		 *
 		 * @return a new {@link VaultMount}.
 		 */
 		public VaultMount build() {
 
-			Assert.notNull(type, "Type must not be null");
-			Assert.hasText(type, "Type must not be empty or null");
+			Assert.notNull(this.type, "Type must not be null");
+			Assert.hasText(this.type, "Type must not be empty or null");
 
-			return new VaultMount(type, description, config, options);
+			return new VaultMount(this.type, this.description, this.config, this.options);
 		}
+
 	}
+
 }

@@ -39,7 +39,6 @@ public class VaultRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exten
 	/**
 	 * Creates a new {@link VaultRepositoryFactoryBean} for the given repository
 	 * interface.
-	 *
 	 * @param repositoryInterface must not be {@literal null}.
 	 */
 	public VaultRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
@@ -47,11 +46,11 @@ public class VaultRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exten
 	}
 
 	@Override
-	protected VaultRepositoryFactory createRepositoryFactory(
-			KeyValueOperations operations,
+	protected VaultRepositoryFactory createRepositoryFactory(KeyValueOperations operations,
 			Class<? extends AbstractQueryCreator<?, ?>> queryCreator,
 			Class<? extends RepositoryQuery> repositoryQueryType) {
 
 		return new VaultRepositoryFactory(operations, queryCreator, repositoryQueryType);
 	}
+
 }

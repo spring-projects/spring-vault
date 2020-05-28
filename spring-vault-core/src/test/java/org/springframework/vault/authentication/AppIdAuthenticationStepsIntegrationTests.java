@@ -32,19 +32,16 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  *
  * @author Mark Paluch
  */
-class AppIdAuthenticationStepsIntegrationTests
-		extends AppIdAuthenticationIntegrationTestBase {
+class AppIdAuthenticationStepsIntegrationTests extends AppIdAuthenticationIntegrationTestBase {
 
 	@Test
 	void authenticationStepsShouldLoginSuccessfully() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("myapp") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
 				.userIdMechanism(new StaticUserId("static-userid-value")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppIdAuthentication.createAuthenticationSteps(options), restTemplate);
@@ -57,17 +54,16 @@ class AppIdAuthenticationStepsIntegrationTests
 	@Test
 	void authenticationStepsLoginShouldFail() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("wrong") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("wrong") //
 				.userIdMechanism(new StaticUserId("wrong")) //
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory
-				.create(Settings.createSslConfiguration());
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AppIdAuthentication.createAuthenticationSteps(options), restTemplate);
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(executor::login);
 	}
+
 }

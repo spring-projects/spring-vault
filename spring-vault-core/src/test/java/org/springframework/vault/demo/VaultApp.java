@@ -36,8 +36,7 @@ public class VaultApp {
 
 		vaultTemplate.write("secret/myapp", secrets);
 
-		VaultResponseSupport<Secrets> response = vaultTemplate.read("secret/myapp",
-				Secrets.class);
+		VaultResponseSupport<Secrets> response = vaultTemplate.read("secret/myapp", Secrets.class);
 		System.out.println(response.getRequiredData().getUsername());
 
 		vaultTemplate.delete("secret/myapp");
@@ -46,14 +45,17 @@ public class VaultApp {
 	static class Secrets {
 
 		String username;
+
 		String password;
 
 		String getUsername() {
-			return username;
+			return this.username;
 		}
 
 		public String getPassword() {
-			return password;
+			return this.password;
 		}
+
 	}
+
 }

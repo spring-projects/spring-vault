@@ -46,8 +46,7 @@ import org.springframework.web.client.RestOperations;
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
  * aws-ec2</a>
  */
-public class AwsEc2Authentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class AwsEc2Authentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
@@ -63,31 +62,26 @@ public class AwsEc2Authentication
 
 	/**
 	 * Create a new {@link AwsEc2Authentication}.
-	 *
 	 * @param vaultRestOperations must not be {@literal null}.
 	 */
 	public AwsEc2Authentication(RestOperations vaultRestOperations) {
-		this(AwsEc2AuthenticationOptions.DEFAULT, vaultRestOperations,
-				vaultRestOperations);
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultRestOperations, vaultRestOperations);
 	}
 
 	/**
 	 * Create a new {@link AwsEc2Authentication} specifying
 	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
 	 * {@link RestOperations}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param awsMetadataRestOperations must not be {@literal null}.
 	 */
-	public AwsEc2Authentication(AwsEc2AuthenticationOptions options,
-			RestOperations vaultRestOperations,
+	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations awsMetadataRestOperations) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
-		Assert.notNull(awsMetadataRestOperations,
-				"AWS Metadata RestOperations must not be null");
+		Assert.notNull(awsMetadataRestOperations, "AWS Metadata RestOperations must not be null");
 
 		this.options = options;
 		this.vaultRestOperations = vaultRestOperations;
@@ -97,13 +91,11 @@ public class AwsEc2Authentication
 	/**
 	 * Creates a {@link AuthenticationSteps} for AWS-EC2 authentication given
 	 * {@link AwsEc2AuthenticationOptions}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for AWS-EC2 authentication.
 	 * @since 2.0
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			AwsEc2AuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(AwsEc2AuthenticationOptions options) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 
@@ -112,14 +104,11 @@ public class AwsEc2Authentication
 		return createAuthenticationSteps(options, nonce, () -> doCreateNonce(options));
 	}
 
-	protected static AuthenticationSteps createAuthenticationSteps(
-			AwsEc2AuthenticationOptions options, AtomicReference<char[]> nonce,
-			Supplier<char[]> nonceSupplier) {
+	protected static AuthenticationSteps createAuthenticationSteps(AwsEc2AuthenticationOptions options,
+			AtomicReference<char[]> nonce, Supplier<char[]> nonceSupplier) {
 
 		return AuthenticationSteps
-				.fromHttpRequest(HttpRequestBuilder
-						.get(options.getIdentityDocumentUri().toString())
-						.as(String.class)) //
+				.fromHttpRequest(HttpRequestBuilder.get(options.getIdentityDocumentUri().toString()).as(String.class)) //
 				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
 				.map(pkcs7 -> pkcs7.replace("\\n", "")) //
 				.map(pkcs7 -> {
@@ -158,19 +147,16 @@ public class AwsEc2Authentication
 
 		try {
 
-			VaultResponse response = this.vaultRestOperations.postForObject(
-					AuthenticationUtil.getLoginPath(options.getPath()), login, VaultResponse.class);
+			VaultResponse response = this.vaultRestOperations
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null,
-					"Auth field must not be null");
+			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			if (logger.isDebugEnabled()) {
 
 				if (response.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) response
-							.getAuth().get("metadata");
-					logger.debug(String.format(
-							"Login successful using AWS-EC2 authentication for instance %s, AMI %s",
+					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
+					logger.debug(String.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
 							metadata.get("instance_id"), metadata.get("instance_id")));
 				}
 				else {
@@ -189,8 +175,8 @@ public class AwsEc2Authentication
 
 		Map<String, String> login = new HashMap<>();
 
-		if (StringUtils.hasText(options.getRole())) {
-			login.put("role", options.getRole());
+		if (StringUtils.hasText(this.options.getRole())) {
+			login.put("role", this.options.getRole());
 		}
 
 		if (Objects.equals(this.nonce.get(), EMPTY)) {
@@ -200,8 +186,8 @@ public class AwsEc2Authentication
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = this.awsMetadataRestOperations
-					.getForObject(this.options.getIdentityDocumentUri(), String.class);
+			String pkcs7 = this.awsMetadataRestOperations.getForObject(this.options.getIdentityDocumentUri(),
+					String.class);
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
 			}
@@ -210,9 +196,7 @@ public class AwsEc2Authentication
 		}
 		catch (RestClientException e) {
 			throw new VaultLoginException(
-					String.format("Cannot obtain Identity Document from %s",
-							options.getIdentityDocumentUri()),
-					e);
+					String.format("Cannot obtain Identity Document from %s", this.options.getIdentityDocumentUri()), e);
 		}
 	}
 
@@ -223,4 +207,5 @@ public class AwsEc2Authentication
 	private static char[] doCreateNonce(AwsEc2AuthenticationOptions options) {
 		return options.getNonce().getValue();
 	}
+
 }

@@ -36,20 +36,17 @@ class KubeServiceAccountTokenFileUnitTests {
 			+ "9rZW4tNHcydmciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZp"
 			+ "Y2UtYWNjb3VudC5uYW1lIjoiZGVmYXVsdCIsImt1YmVybmV0ZXMuaW8vc2Vydm"
 			+ "ljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjllMjQzNWY0LTgxNDctMT"
-			+ "FlNy05MGFiLTA4MDAyN2NlZTQwNyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3"
-			+ "VudDpkZWZhdWx0OmRlZmF1bHQifQ."
+			+ "FlNy05MGFiLTA4MDAyN2NlZTQwNyIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3" + "VudDpkZWZhdWx0OmRlZmF1bHQifQ."
 			+ "asFRZRZ1gRj9sF0lQqbbxrNhW_lOdj9WjqUpH_4TstxqZZ7B36a0xKKXg6XaFW"
 			+ "JY1eMsytpwa7uMzvsvf2pYCcklinaSE_F-wc42IOWcpwSLl4PND92Tp7n_JYEAbb"
 			+ "SQVfZPzQ2Y7b6cWu6NRzDs638LwVTqYeWMWbcWlOMaTxjMzGTcgDe5RWslkKUPkY"
 			+ "svPOAFtt5ZErwtVcvTUmplJfHzdWwatlpZRQhYkxGgRIJ6LabXfZOd2N_TchJ3tH"
-			+ "jAVBzUDTQq3APQssGb9df2RxVTUiyzbhdRGt7129-LCZ8rZYE7E-Mr3SSpExGYcD"
-			+ "k-v0It8hky0CKtCLs2UHiABA";
+			+ "jAVBzUDTQq3APQssGb9df2RxVTUiyzbhdRGt7129-LCZ8rZYE7E-Mr3SSpExGYcD" + "k-v0It8hky0CKtCLs2UHiABA";
 
 	@Test
 	void shouldGetJwtTokenFromResource() {
 
-		String jwt = new KubernetesServiceAccountTokenFile(
-				new ClassPathResource("kube-jwt-token")).get();
+		String jwt = new KubernetesServiceAccountTokenFile(new ClassPathResource("kube-jwt-token")).get();
 
 		assertThat(jwt).isEqualTo(TEST_TOKEN);
 	}
@@ -57,9 +54,9 @@ class KubeServiceAccountTokenFileUnitTests {
 	@Test
 	void shouldGetJwtTokenFromFile() throws Exception {
 
-		String fileName = new ClassPathResource("kube-jwt-token").getFile()
-				.getAbsolutePath();
+		String fileName = new ClassPathResource("kube-jwt-token").getFile().getAbsolutePath();
 		String jwt = new KubernetesServiceAccountTokenFile(fileName).get();
 		assertThat(jwt).isEqualTo(TEST_TOKEN);
 	}
+
 }

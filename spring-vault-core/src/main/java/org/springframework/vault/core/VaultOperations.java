@@ -45,7 +45,6 @@ public interface VaultOperations {
 
 	/**
 	 * Return {@link VaultKeyValueOperations}.
-	 *
 	 * @param path the mount path, must not be empty or {@literal null}.
 	 * @param apiVersion API version to use, must not be {@literal null}.
 	 * @return the operations interface to interact with the Vault Key/Value backend.
@@ -55,7 +54,6 @@ public interface VaultOperations {
 
 	/**
 	 * Return {@link VaultVersionedKeyValueOperations}.
-	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the versioned Vault Key/Value
 	 * (version 2) backend.
@@ -71,7 +69,6 @@ public interface VaultOperations {
 	/**
 	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a different path
 	 * than {@code pki}.
-	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault PKI backend.
 	 */
@@ -95,7 +92,6 @@ public interface VaultOperations {
 	/**
 	 * Return {@link VaultTransitOperations} if the transit backend is mounted on a
 	 * different path than {@code transit}.
-	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transit backend.
 	 */
@@ -111,7 +107,6 @@ public interface VaultOperations {
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
 	 * calls/secret backends that do not require a request body.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -121,7 +116,6 @@ public interface VaultOperations {
 	/**
 	 * Read from a secret backend. Reading data using this method is suitable for secret
 	 * backends that do not require a request body.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -131,7 +125,6 @@ public interface VaultOperations {
 
 	/**
 	 * Enumerate keys from a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -140,7 +133,6 @@ public interface VaultOperations {
 
 	/**
 	 * Write to a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the response, may be {@literal null}.
 	 * @since 2.0
@@ -152,7 +144,6 @@ public interface VaultOperations {
 
 	/**
 	 * Write to a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
 	 * @return the response, may be {@literal null}.
@@ -162,7 +153,6 @@ public interface VaultOperations {
 
 	/**
 	 * Delete a path.
-	 *
 	 * @param path must not be {@literal null}.
 	 */
 	void delete(String path);
@@ -171,31 +161,27 @@ public interface VaultOperations {
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
 	 * using {@link org.springframework.web.client.RestOperations} without requiring a
 	 * session.
-	 *
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws RestClientException exceptions from
-	 *     {@link org.springframework.web.client.RestOperations}.
+	 * {@link org.springframework.web.client.RestOperations}.
 	 */
 	@Nullable
-	<T> T doWithVault(RestOperationsCallback<T> clientCallback)
-			throws VaultException, RestClientException;
+	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException, RestClientException;
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
 	 * an authenticated session.
-	 *
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws RestClientException exceptions from
-	 *     {@link org.springframework.web.client.RestOperations}.
+	 * {@link org.springframework.web.client.RestOperations}.
 	 */
 	@Nullable
-	<T> T doWithSession(RestOperationsCallback<T> sessionCallback)
-			throws VaultException, RestClientException;
+	<T> T doWithSession(RestOperationsCallback<T> sessionCallback) throws VaultException, RestClientException;
 
 }

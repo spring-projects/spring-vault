@@ -102,14 +102,13 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
 	 * {@link TaskScheduler} and {@link RestOperations}.
-	 *
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 1.0.1
 	 */
-	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
-			TaskScheduler taskScheduler, RestOperations restOperations) {
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
+			RestOperations restOperations) {
 
 		super(taskScheduler);
 
@@ -124,16 +123,14 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
 	 * {@link TaskScheduler} and {@link RestOperations}.
-	 *
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
 	 * @since 1.0.1
 	 */
-	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication,
-			TaskScheduler taskScheduler, RestOperations restOperations,
-			RefreshTrigger refreshTrigger) {
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
+			RestOperations restOperations, RefreshTrigger refreshTrigger) {
 
 		super(taskScheduler, refreshTrigger);
 
@@ -151,7 +148,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * session.
 	 */
 	protected Optional<TokenWrapper> getToken() {
-		return token;
+		return this.token;
 	}
 
 	protected void setToken(Optional<TokenWrapper> token) {
@@ -164,25 +161,23 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		Optional<TokenWrapper> token = getToken();
 		setToken(Optional.empty());
 
-		token.filter(TokenWrapper::isRevocable).map(TokenWrapper::getToken)
-				.ifPresent(this::revoke);
+		token.filter(TokenWrapper::isRevocable).map(TokenWrapper::getToken).ifPresent(this::revoke);
 	}
 
 	/**
 	 * Revoke a {@link VaultToken}.
-	 *
 	 * @param token the token to revoke, must not be {@literal null}.
 	 */
 	protected void revoke(VaultToken token) {
 
 		try {
 			dispatch(new BeforeLoginTokenRevocationEvent(token));
-			restOperations.postForObject("auth/token/revoke-self",
-					new HttpEntity<>(VaultHttpHeaders.from(token)), Map.class);
+			this.restOperations.postForObject("auth/token/revoke-self", new HttpEntity<>(VaultHttpHeaders.from(token)),
+					Map.class);
 			dispatch(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
-			logger.warn("Cannot revoke VaultToken: %s", e);
+			this.logger.warn("Cannot revoke VaultToken: %s", e);
 			dispatch(new LoginTokenRevocationFailedEvent(token, e));
 		}
 	}
@@ -192,13 +187,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * token was obtained before, it uses self-renewal to renew the current token.
 	 * Client-side errors (like permission denied) indicate the token cannot be renewed
 	 * because it's expired or simply not found.
-	 *
 	 * @return {@literal true} if the refresh was successful. {@literal false} if a new
 	 * token was obtained or refresh failed.
 	 */
 	public boolean renewToken() {
 
-		logger.info("Renewing token");
+		this.logger.info("Renewing token");
 
 		Optional<TokenWrapper> token = getToken();
 		if (!token.isPresent()) {
@@ -212,22 +206,20 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 		catch (RuntimeException e) {
 
-			VaultTokenRenewalException exception = new VaultTokenRenewalException(
-					format("Cannot renew token", e), e);
+			VaultTokenRenewalException exception = new VaultTokenRenewalException(format("Cannot renew token", e), e);
 
 			if (getLeaseStrategy().shouldDrop(exception)) {
 				setToken(Optional.empty());
 			}
 
-			if (logger.isDebugEnabled()) {
-				logger.debug(exception.getMessage(), exception);
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug(exception.getMessage(), exception);
 			}
 			else {
-				logger.warn(exception.getMessage());
+				this.logger.warn(exception.getMessage());
 			}
 
-			dispatch(
-					new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
+			dispatch(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
 			return false;
 		}
 	}
@@ -235,24 +227,20 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	private boolean doRenew(TokenWrapper wrapper) {
 
 		dispatch(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
-		VaultResponse vaultResponse = restOperations.postForObject(
-				"auth/token/renew-self",
-				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)),
-				VaultResponse.class);
+		VaultResponse vaultResponse = this.restOperations.postForObject("auth/token/renew-self",
+				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)), VaultResponse.class);
 
 		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getRequiredAuth());
 
 		if (isExpired(renewed)) {
 
-			if (logger.isDebugEnabled()) {
-				Duration validTtlThreshold = getRefreshTrigger()
-						.getValidTtlThreshold(renewed);
-				logger.info(String.format(
-						"Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
+			if (this.logger.isDebugEnabled()) {
+				Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(renewed);
+				this.logger.info(String.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
 						renewed.getLeaseDuration(), validTtlThreshold));
 			}
 			else {
-				logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
+				this.logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
 			}
 
 			setToken(Optional.empty());
@@ -271,7 +259,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		if (!getToken().isPresent()) {
 
-			synchronized (lock) {
+			synchronized (this.lock) {
 
 				if (!getToken().isPresent()) {
 					doGetSessionToken();
@@ -288,25 +276,22 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		VaultToken token;
 
 		try {
-			token = clientAuthentication.login();
+			token = this.clientAuthentication.login();
 		}
 		catch (VaultException e) {
-			dispatch(new LoginFailedEvent(clientAuthentication, e));
+			dispatch(new LoginFailedEvent(this.clientAuthentication, e));
 			throw e;
 		}
 
 		TokenWrapper wrapper = new TokenWrapper(token, token instanceof LoginToken);
 
-		if (isTokenSelfLookupEnabled()
-				&& !ClassUtils.isAssignableValue(LoginToken.class, token)) {
+		if (isTokenSelfLookupEnabled() && !ClassUtils.isAssignableValue(LoginToken.class, token)) {
 			try {
-				token = LoginTokenAdapter.augmentWithSelfLookup(this.restOperations,
-						token);
+				token = LoginTokenAdapter.augmentWithSelfLookup(this.restOperations, token);
 				wrapper = new TokenWrapper(token, false);
 			}
 			catch (VaultTokenLookupException e) {
-				logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s",
-						e.getMessage()));
+				this.logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
 				dispatch(new AuthenticationErrorEvent(token, e));
 			}
 		}
@@ -320,7 +305,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	}
 
 	protected VaultToken login() {
-		return clientAuthentication.login();
+		return this.clientAuthentication.login();
 	}
 
 	/**
@@ -333,14 +318,13 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				.filter(it -> {
 
 					LoginToken loginToken = (LoginToken) it;
-					return !loginToken.getLeaseDuration().isZero()
-							&& loginToken.isRenewable();
+					return !loginToken.getLeaseDuration().isZero() && loginToken.isRenewable();
 				}).isPresent();
 	}
 
 	private void scheduleRenewal() {
 
-		logger.info("Scheduling Token renewal");
+		this.logger.info("Scheduling Token renewal");
 
 		Runnable task = () -> {
 			Optional<TokenWrapper> tokenWrapper = getToken();
@@ -359,21 +343,19 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				}
 			}
 			catch (Exception e) {
-				logger.error("Cannot renew VaultToken", e);
+				this.logger.error("Cannot renew VaultToken", e);
 				dispatch(new LoginTokenRenewalFailedEvent(token, e));
 			}
 		};
 
 		Optional<TokenWrapper> token = getToken();
 
-		token.ifPresent(tokenWrapper -> getTaskScheduler().schedule(task,
-				createTrigger(tokenWrapper)));
+		token.ifPresent(tokenWrapper -> getTaskScheduler().schedule(task, createTrigger(tokenWrapper)));
 	}
 
 	private OneShotTrigger createTrigger(TokenWrapper tokenWrapper) {
 
-		return new OneShotTrigger(getRefreshTrigger()
-				.nextExecutionTime((LoginToken) tokenWrapper.getToken()));
+		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime((LoginToken) tokenWrapper.getToken()));
 	}
 
 	private static String format(String message, RuntimeException e) {
@@ -381,8 +363,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		if (e instanceof HttpStatusCodeException) {
 
 			HttpStatusCodeException hsce = (HttpStatusCodeException) e;
-			return String.format("%s: Status %s %s %s", message, hsce.getRawStatusCode(),
-					hsce.getStatusText(),
+			return String.format("%s: Status %s %s %s", message, hsce.getRawStatusCode(), hsce.getStatusText(),
 					VaultResponses.getError(hsce.getResponseBodyAsString()));
 		}
 
@@ -398,6 +379,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	protected static class TokenWrapper {
 
 		private final VaultToken token;
+
 		private final boolean revocable;
 
 		TokenWrapper(VaultToken token, boolean revocable) {
@@ -412,5 +394,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		public boolean isRevocable() {
 			return this.revocable;
 		}
+
 	}
+
 }

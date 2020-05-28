@@ -41,8 +41,7 @@ class RestTemplateBuilderUnitTests {
 
 		ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
-		RestTemplate restTemplate = RestTemplateBuilder.builder()
-				.endpoint(VaultEndpoint.create("localhost", 8200))
+		RestTemplate restTemplate = RestTemplateBuilder.builder().endpoint(VaultEndpoint.create("localhost", 8200))
 				.errorHandler(errorHandler).build();
 
 		assertThat(restTemplate.getErrorHandler()).isSameAs(errorHandler);
@@ -53,8 +52,7 @@ class RestTemplateBuilderUnitTests {
 
 		ResponseErrorHandler errorHandler = new DefaultResponseErrorHandler();
 
-		RestTemplate restTemplate = RestTemplateBuilder.builder()
-				.endpoint(VaultEndpoint.create("localhost", 8200))
+		RestTemplate restTemplate = RestTemplateBuilder.builder().endpoint(VaultEndpoint.create("localhost", 8200))
 				.customizers(it -> it.setErrorHandler(errorHandler)).build();
 
 		assertThat(restTemplate.getErrorHandler()).isSameAs(errorHandler);
@@ -63,17 +61,14 @@ class RestTemplateBuilderUnitTests {
 	@Test
 	void shouldApplyRequestCustomizers() throws IOException {
 
-		RestTemplate restTemplate = RestTemplateBuilder.builder()
-				.endpoint(VaultEndpoint.create("localhost", 8200)).requestCustomizers(
-						request -> request.getHeaders().add("header", "value"))
-				.build();
+		RestTemplate restTemplate = RestTemplateBuilder.builder().endpoint(VaultEndpoint.create("localhost", 8200))
+				.requestCustomizers(request -> request.getHeaders().add("header", "value")).build();
 
 		restTemplate.getInterceptors().clear();
 
-		ClientHttpRequest request = restTemplate.getRequestFactory()
-				.createRequest(URI.create("/"), HttpMethod.GET);
+		ClientHttpRequest request = restTemplate.getRequestFactory().createRequest(URI.create("/"), HttpMethod.GET);
 
-		assertThat(request.getHeaders()).containsEntry("header",
-				Collections.singletonList("value"));
+		assertThat(request.getHeaders()).containsEntry("header", Collections.singletonList("value"));
 	}
+
 }

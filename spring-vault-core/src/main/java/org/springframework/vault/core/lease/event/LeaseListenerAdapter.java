@@ -33,4 +33,5 @@ public abstract class LeaseListenerAdapter implements LeaseListener, LeaseErrorL
 	public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
 		// empty listener method
 	}
+
 }

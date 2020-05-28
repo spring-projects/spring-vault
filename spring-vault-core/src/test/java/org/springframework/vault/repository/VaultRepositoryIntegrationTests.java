@@ -50,8 +50,8 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableVaultRepositories(considerNestedRepositories = true)
-	static class VaultRepositoryTestConfiguration
-			extends VaultIntegrationTestConfiguration {
+	static class VaultRepositoryTestConfiguration extends VaultIntegrationTestConfiguration {
+
 	}
 
 	@Autowired
@@ -62,7 +62,7 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-		vaultRepository.deleteAll();
+		this.vaultRepository.deleteAll();
 	}
 
 	@Test
@@ -72,12 +72,12 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		person.setId("foo-key");
 		person.setFirstname("bar");
 
-		vaultRepository.save(person);
+		this.vaultRepository.save(person);
 
-		Iterable<Person> all = vaultRepository.findAll();
+		Iterable<Person> all = this.vaultRepository.findAll();
 
 		assertThat(all).contains(person);
-		assertThat(vaultRepository.findById("foo-key")).contains(person);
+		assertThat(this.vaultRepository.findById("foo-key")).contains(person);
 	}
 
 	@Test
@@ -87,15 +87,15 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		walter.setId("walter");
 		walter.setFirstname("Walter");
 
-		vaultRepository.save(walter);
+		this.vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
 		skyler.setFirstname("Skyler");
 
-		vaultRepository.save(skyler);
+		this.vaultRepository.save(skyler);
 
-		Iterable<Person> all = vaultRepository.findByIdStartsWith("walt");
+		Iterable<Person> all = this.vaultRepository.findByIdStartsWith("walt");
 
 		assertThat(all).contains(walter).doesNotContain(skyler);
 	}
@@ -107,18 +107,16 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		walter.setId("walter");
 		walter.setFirstname("Walter");
 
-		vaultRepository.save(walter);
+		this.vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
 		skyler.setFirstname("Skyler");
 
-		vaultRepository.save(skyler);
+		this.vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findAllByOrderByFirstnameAsc())
-				.containsSequence(skyler, walter);
-		assertThat(vaultRepository.findAllByOrderByFirstnameDesc())
-				.containsSequence(walter, skyler);
+		assertThat(this.vaultRepository.findAllByOrderByFirstnameAsc()).containsSequence(skyler, walter);
+		assertThat(this.vaultRepository.findAllByOrderByFirstnameDesc()).containsSequence(walter, skyler);
 	}
 
 	@Test
@@ -128,22 +126,21 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		walter.setId("walter");
 		walter.setFirstname("Walter");
 
-		vaultRepository.save(walter);
+		this.vaultRepository.save(walter);
 
 		Person skyler = new Person();
 		skyler.setId("skyler");
 		skyler.setFirstname("Skyler");
 
-		vaultRepository.save(skyler);
+		this.vaultRepository.save(skyler);
 
-		assertThat(vaultRepository.findTop1By(Sort.by(asc("firstname"))))
-				.containsOnly(skyler);
+		assertThat(this.vaultRepository.findTop1By(Sort.by(asc("firstname")))).containsOnly(skyler);
 	}
 
 	@Test
 	void shouldFailForNonIdCriteria() {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-				.isThrownBy(() -> vaultRepository.findInvalidByFirstname("foo"));
+				.isThrownBy(() -> this.vaultRepository.findInvalidByFirstname("foo"));
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {
@@ -157,5 +154,7 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 		List<Person> findTop1By(Sort sort);
 
 		List<Person> findInvalidByFirstname(String name);
+
 	}
+
 }

@@ -28,6 +28,7 @@ public abstract class IntegrationTestSupport {
 	private final VaultInitializer initializer = new VaultInitializer();
 
 	protected final PrepareVault prepare() {
-		return initializer.prepare();
+		return this.initializer.prepare();
 	}
+
 }

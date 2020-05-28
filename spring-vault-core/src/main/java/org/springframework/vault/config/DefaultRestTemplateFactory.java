@@ -26,12 +26,13 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Default {@link RestTemplateFactory} implementation.
- * 
+ *
  * @author Mark Paluch
  */
 class DefaultRestTemplateFactory implements RestTemplateFactory {
 
 	private final ClientHttpRequestFactory requestFactory;
+
 	private final Function<ClientHttpRequestFactory, RestTemplateBuilder> builderFunction;
 
 	DefaultRestTemplateFactory(ClientHttpRequestFactory requestFactory,
@@ -43,7 +44,7 @@ class DefaultRestTemplateFactory implements RestTemplateFactory {
 	@Override
 	public RestTemplate create(@Nullable Consumer<RestTemplateBuilder> customizer) {
 
-		RestTemplateBuilder builder = builderFunction.apply(requestFactory);
+		RestTemplateBuilder builder = this.builderFunction.apply(this.requestFactory);
 
 		if (customizer != null) {
 			customizer.accept(builder);
@@ -51,4 +52,5 @@ class DefaultRestTemplateFactory implements RestTemplateFactory {
 
 		return builder.build();
 	}
+
 }

@@ -39,36 +39,33 @@ class CertificateUnitTests {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = OBJECT_MAPPER
-				.readValue(getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
 
-		certificate = Certificate.of(data.get("serial_number"), data.get("certificate"),
-				data.get("issuing_ca"));
+		this.certificate = Certificate.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"));
 	}
 
 	@Test
 	void getX509CertificateShouldReturnCertificate() {
 
-		X509Certificate x509Certificate = certificate.getX509Certificate();
+		X509Certificate x509Certificate = this.certificate.getX509Certificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName())
-				.isEqualTo("CN=hello.example.com");
+		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo("CN=hello.example.com");
 	}
 
 	@Test
 	void getX509IssuerCertificateShouldReturnCertificate() {
 
-		X509Certificate x509Certificate = certificate.getX509IssuerCertificate();
+		X509Certificate x509Certificate = this.certificate.getX509IssuerCertificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName())
-				.startsWith("CN=Intermediate CA Certificate");
+		assertThat(x509Certificate.getSubjectDN().getName()).startsWith("CN=Intermediate CA Certificate");
 	}
 
 	@Test
 	void getAsTrustStore() throws Exception {
 
-		KeyStore keyStore = certificate.createTrustStore();
+		KeyStore keyStore = this.certificate.createTrustStore();
 
 		assertThat(keyStore.size()).isEqualTo(2);
 	}
+
 }

@@ -52,7 +52,6 @@ public interface ReactiveVaultOperations {
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
 	 * calls/secret backends that do not require a request body.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
 	 */
@@ -61,7 +60,6 @@ public interface ReactiveVaultOperations {
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
 	 * calls/secret backends that do not require a request body.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
@@ -70,7 +68,6 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Enumerate keys from a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
 	 */
@@ -78,7 +75,6 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Write to a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @return the response. May be empty if the response has no body.
 	 */
@@ -88,7 +84,6 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Write to a Vault path.
-	 *
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
 	 * @return the response. May be empty if the response has no body.
@@ -97,7 +92,6 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Delete a path.
-	 *
 	 * @param path must not be {@literal null}.
 	 */
 	Mono<Void> delete(String path);
@@ -106,30 +100,27 @@ public interface ReactiveVaultOperations {
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
 	 * using {@link org.springframework.web.client.RestOperations} without requiring a
 	 * session.
-	 *
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws WebClientException exceptions from
-	 *     {@link org.springframework.web.reactive.function.client.WebClient}.
+	 * {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
-	<V, T extends Publisher<V>> T doWithVault(
-			Function<WebClient, ? extends T> clientCallback)
+	<V, T extends Publisher<V>> T doWithVault(Function<WebClient, ? extends T> clientCallback)
 			throws VaultException, WebClientException;
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
 	 * an authenticated session.
-	 *
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
-	 *     {@link org.springframework.web.client.HttpStatusCodeException} occurs.
+	 * {@link org.springframework.web.client.HttpStatusCodeException} occurs.
 	 * @throws WebClientException exceptions from
-	 *     {@link org.springframework.web.reactive.function.client.WebClient}.
+	 * {@link org.springframework.web.reactive.function.client.WebClient}.
 	 */
-	<V, T extends Publisher<V>> T doWithSession(
-			Function<WebClient, ? extends T> sessionCallback)
+	<V, T extends Publisher<V>> T doWithSession(Function<WebClient, ? extends T> sessionCallback)
 			throws VaultException, WebClientException;
+
 }

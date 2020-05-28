@@ -43,12 +43,10 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldSerialize() throws Exception {
 
-		Rule rule = Rule.builder().path("secret/*")
-				.capabilities("create", "read", "update")
+		Rule rule = Rule.builder().path("secret/*").capabilities("create", "read", "update")
 				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
 
-		Rule another = Rule.builder().path("secret/foo")
-				.capabilities("create", "read", "update", "delete", "list")
+		Rule another = Rule.builder().path("secret/foo").capabilities("create", "read", "update", "delete", "list")
 				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
 				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
 
@@ -57,29 +55,26 @@ class PolicySerializationUnitTests {
 		try (InputStream is = new ClassPathResource("policy.json").getInputStream()) {
 
 			String expected = StreamUtils.copyToString(is, StandardCharsets.UTF_8);
-			JSONAssert.assertEquals(expected, OBJECT_MAPPER.writeValueAsString(policy),
-					JSONCompareMode.STRICT);
+			JSONAssert.assertEquals(expected, this.OBJECT_MAPPER.writeValueAsString(policy), JSONCompareMode.STRICT);
 		}
 	}
 
 	@Test
 	void shouldDeserialize() throws Exception {
 
-		Rule rule = Rule.builder().path("secret/*")
-				.capabilities("create", "read", "update", "update")
+		Rule rule = Rule.builder().path("secret/*").capabilities("create", "read", "update", "update")
 				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
 
-		Rule another = Rule.builder().path("secret/foo")
-				.capabilities("create", "read", "update", "delete", "list")
+		Rule another = Rule.builder().path("secret/foo").capabilities("create", "read", "update", "delete", "list")
 				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
-				.allowedParameter("ttl", "1h", "2h").allowedParameter("ttl", "1h", "2h")
-				.deniedParameter("password").build();
+				.allowedParameter("ttl", "1h", "2h").allowedParameter("ttl", "1h", "2h").deniedParameter("password")
+				.build();
 
 		Policy expected = Policy.of(rule, another);
 
 		try (InputStream is = new ClassPathResource("policy.json").getInputStream()) {
 
-			Policy actual = OBJECT_MAPPER.readValue(is, Policy.class);
+			Policy actual = this.OBJECT_MAPPER.readValue(is, Policy.class);
 
 			assertThat(actual.getRules()).hasSameClassAs(expected.getRules());
 
@@ -87,45 +82,39 @@ class PolicySerializationUnitTests {
 
 			assertThat(secretAll.getPath()).isEqualTo(rule.getPath());
 			assertThat(secretAll.getCapabilities()).isEqualTo(rule.getCapabilities());
-			assertThat(secretAll.getAllowedParameters())
-					.isEqualTo(rule.getAllowedParameters());
-			assertThat(secretAll.getDeniedParameters())
-					.isEqualTo(rule.getDeniedParameters());
+			assertThat(secretAll.getAllowedParameters()).isEqualTo(rule.getAllowedParameters());
+			assertThat(secretAll.getDeniedParameters()).isEqualTo(rule.getDeniedParameters());
 
 			Rule secretFoo = actual.getRule("secret/foo");
 
 			assertThat(secretFoo.getPath()).isEqualTo(another.getPath());
 			assertThat(secretFoo.getCapabilities()).isEqualTo(another.getCapabilities());
-			assertThat(secretFoo.getMinWrappingTtl())
-					.isEqualTo(another.getMinWrappingTtl());
-			assertThat(secretFoo.getMaxWrappingTtl())
-					.isEqualTo(another.getMaxWrappingTtl());
-			assertThat(secretFoo.getAllowedParameters())
-					.isEqualTo(another.getAllowedParameters());
-			assertThat(secretFoo.getDeniedParameters())
-					.isEqualTo(another.getDeniedParameters());
+			assertThat(secretFoo.getMinWrappingTtl()).isEqualTo(another.getMinWrappingTtl());
+			assertThat(secretFoo.getMaxWrappingTtl()).isEqualTo(another.getMaxWrappingTtl());
+			assertThat(secretFoo.getAllowedParameters()).isEqualTo(another.getAllowedParameters());
+			assertThat(secretFoo.getDeniedParameters()).isEqualTo(another.getDeniedParameters());
 		}
 	}
 
 	@Test
 	void shouldDeserializeEmptyPolicy() throws Exception {
 
-		assertThat(OBJECT_MAPPER.readValue("{}", Policy.class)).isEqualTo(Policy.empty());
+		assertThat(this.OBJECT_MAPPER.readValue("{}", Policy.class)).isEqualTo(Policy.empty());
 	}
 
 	@Test
 	void shouldRejectUnknownFieldNames() throws Exception {
 
-		assertThatIllegalArgumentException().isThrownBy(() -> OBJECT_MAPPER
-				.readValue("{\"foo\":1, \"path\": {} }", Policy.class));
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":1, \"path\": {} }", Policy.class));
+		assertThatIllegalArgumentException()
+				.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
 	}
 
 	@Test
 	void shouldDeserializePolicyWithEmptyRules() throws Exception {
 
-		Policy actual = OBJECT_MAPPER.readValue("{ \"path\": {} }", Policy.class);
+		Policy actual = this.OBJECT_MAPPER.readValue("{ \"path\": {} }", Policy.class);
 
 		assertThat(actual).isEqualTo(Policy.empty());
 	}
@@ -133,11 +122,11 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldDeserializeRuleWithHour() throws Exception {
 
-		Policy actual = OBJECT_MAPPER.readValue(
-				"{ \"path\": { \"secret\" : {\"min_wrapping_ttl\":\"1h\"} } }",
+		Policy actual = this.OBJECT_MAPPER.readValue("{ \"path\": { \"secret\" : {\"min_wrapping_ttl\":\"1h\"} } }",
 				Policy.class);
 
 		Rule rule = actual.getRule("secret");
 		assertThat(rule.getMinWrappingTtl()).isEqualTo(Duration.ofHours(1));
 	}
+
 }

@@ -47,7 +47,6 @@ public class TestRestTemplateFactory {
 	 * underlying {@link ClientHttpRequestFactory} is cached. See
 	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
 	 * given {@link ClientHttpRequestFactory}.
-	 *
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -70,7 +69,6 @@ public class TestRestTemplateFactory {
 	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
 	 * cases and behave in that aspect like the regular
 	 * {@link org.springframework.web.client.RestTemplate}.
-	 *
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
 	 */
@@ -81,8 +79,7 @@ public class TestRestTemplateFactory {
 		return VaultClients.createRestTemplate(TEST_VAULT_ENDPOINT, requestFactory);
 	}
 
-	private static void initializeClientHttpRequestFactory(
-			SslConfiguration sslConfiguration) throws Exception {
+	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {
 
 		if (factoryCache.get() != null) {
 			return;
@@ -99,20 +96,20 @@ public class TestRestTemplateFactory {
 
 			if (clientHttpRequestFactory instanceof DisposableBean) {
 
-				Runtime.getRuntime().addShutdownHook(
-						new Thread("ClientHttpRequestFactory Shutdown Hook") {
+				Runtime.getRuntime().addShutdownHook(new Thread("ClientHttpRequestFactory Shutdown Hook") {
 
-							@Override
-							public void run() {
-								try {
-									((DisposableBean) clientHttpRequestFactory).destroy();
-								}
-								catch (Exception e) {
-									e.printStackTrace();
-								}
-							}
-						});
+					@Override
+					public void run() {
+						try {
+							((DisposableBean) clientHttpRequestFactory).destroy();
+						}
+						catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				});
 			}
 		}
 	}
+
 }

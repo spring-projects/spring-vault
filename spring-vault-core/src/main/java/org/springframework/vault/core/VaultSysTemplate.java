@@ -86,7 +86,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	/**
 	 * Create a new {@link VaultSysTemplate} with the given {@link VaultOperations}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultSysTemplate(VaultOperations vaultOperations) {
@@ -101,15 +100,13 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@SuppressWarnings("unchecked")
 	public boolean isInitialized() {
 
-		return requireResponse(vaultOperations.doWithSession(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
-				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) restOperations
-						.exchange("sys/init", HttpMethod.GET, emptyNamespace(null),
-								Map.class);
+				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) restOperations.exchange("sys/init",
+						HttpMethod.GET, emptyNamespace(null), Map.class);
 
-				Assert.state(body.getBody() != null,
-						"Initialization response must not be null");
+				Assert.state(body.getBody() != null, "Initialization response must not be null");
 
 				return body.getBody().get("initialized");
 			}
@@ -120,22 +117,18 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	public VaultInitializationResponse initialize(
-			VaultInitializationRequest vaultInitializationRequest) {
+	public VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) {
 
-		Assert.notNull(vaultInitializationRequest,
-				"VaultInitialization must not be null");
+		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
-		return requireResponse(vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
 
 			try {
-				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations
-						.exchange("sys/init", HttpMethod.PUT,
-								emptyNamespace(vaultInitializationRequest),
-								VaultInitializationResponseImpl.class);
+				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations.exchange("sys/init",
+						HttpMethod.PUT, emptyNamespace(vaultInitializationRequest),
+						VaultInitializationResponseImpl.class);
 
-				Assert.state(exchange.getBody() != null,
-						"Initialization response must not be null");
+				Assert.state(exchange.getBody() != null, "Initialization response must not be null");
 
 				return exchange.getBody();
 			}
@@ -147,18 +140,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void seal() {
-		vaultOperations.doWithSession(SEAL);
+		this.vaultOperations.doWithSession(SEAL);
 	}
 
 	@Override
 	public VaultUnsealStatus unseal(String keyShare) {
 
-		return requireResponse(vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
 
-			ResponseEntity<VaultUnsealStatusImpl> response = restOperations.exchange(
-					"sys/unseal", HttpMethod.PUT,
-					new HttpEntity<Object>(Collections.singletonMap("key", keyShare)),
-					VaultUnsealStatusImpl.class);
+			ResponseEntity<VaultUnsealStatusImpl> response = restOperations.exchange("sys/unseal", HttpMethod.PUT,
+					new HttpEntity<Object>(Collections.singletonMap("key", keyShare)), VaultUnsealStatusImpl.class);
 
 			Assert.state(response.getBody() != null, "Unseal response must not be null");
 
@@ -168,7 +159,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultUnsealStatus getUnsealStatus() {
-		return requireResponse(vaultOperations.doWithVault(GET_UNSEAL_STATUS));
+		return requireResponse(this.vaultOperations.doWithVault(GET_UNSEAL_STATUS));
 	}
 
 	@Override
@@ -177,12 +168,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.write(String.format("sys/mounts/%s", path), vaultMount);
+		this.vaultOperations.write(String.format("sys/mounts/%s", path), vaultMount);
 	}
 
 	@Override
 	public Map<String, VaultMount> getMounts() {
-		return requireResponse(vaultOperations.doWithSession(GET_MOUNTS));
+		return requireResponse(this.vaultOperations.doWithSession(GET_MOUNTS));
 	}
 
 	@Override
@@ -190,7 +181,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.delete(String.format("sys/mounts/%s", path));
+		this.vaultOperations.delete(String.format("sys/mounts/%s", path));
 	}
 
 	@Override
@@ -199,12 +190,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		vaultOperations.write(String.format("sys/auth/%s", path), vaultMount);
+		this.vaultOperations.write(String.format("sys/auth/%s", path), vaultMount);
 	}
 
 	@Override
 	public Map<String, VaultMount> getAuthMounts() throws VaultException {
-		return requireResponse(vaultOperations.doWithSession(GET_AUTH_MOUNTS));
+		return requireResponse(this.vaultOperations.doWithSession(GET_AUTH_MOUNTS));
 	}
 
 	@Override
@@ -212,14 +203,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		vaultOperations.delete(String.format("sys/auth/%s", path));
+		this.vaultOperations.delete(String.format("sys/auth/%s", path));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public List<String> getPolicyNames() throws VaultException {
-		return requireResponse((List<String>) vaultOperations.read("sys/policy")
-				.getRequiredData().get("policies"));
+		return requireResponse(
+				(List<String>) this.vaultOperations.read("sys/policy").getRequiredData().get("policies"));
 	}
 
 	@Nullable
@@ -228,13 +219,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		return vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSession(restOperations -> {
 
 			ResponseEntity<VaultResponse> response;
 
 			try {
-				response = restOperations.getForEntity("sys/policy/{name}",
-						VaultResponse.class, name);
+				response = restOperations.getForEntity("sys/policy/{name}", VaultResponse.class, name);
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -274,11 +264,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 			throw new VaultException("Cannot serialize policy to JSON", e);
 		}
 
-		vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession(restOperations -> {
 
 			restOperations.exchange("sys/policy/{name}", HttpMethod.PUT,
-					new HttpEntity<>(Collections.singletonMap("rules", rules)),
-					VaultResponse.class, name);
+					new HttpEntity<>(Collections.singletonMap("rules", rules)), VaultResponse.class, name);
 
 			return null;
 		});
@@ -289,12 +278,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		vaultOperations.delete(String.format("sys/policy/%s", name));
+		this.vaultOperations.delete(String.format("sys/policy/%s", name));
 	}
 
 	@Override
 	public VaultHealth health() {
-		return requireResponse(vaultOperations.doWithVault(HEALTH));
+		return requireResponse(this.vaultOperations.doWithVault(HEALTH));
 	}
 
 	private static <T> T requireResponse(@Nullable T response) {
@@ -304,14 +293,13 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return response;
 	}
 
-	private static class GetUnsealStatus
-			implements RestOperationsCallback<VaultUnsealStatus> {
+	private static class GetUnsealStatus implements RestOperationsCallback<VaultUnsealStatus> {
 
 		@Override
 		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
-			return restOperations.getForObject("sys/seal-status",
-					VaultUnsealStatusImpl.class);
+			return restOperations.getForObject("sys/seal-status", VaultUnsealStatusImpl.class);
 		}
+
 	}
 
 	private static class Seal implements RestOperationsCallback<Void> {
@@ -324,8 +312,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class GetMounts
-			implements RestOperationsCallback<Map<String, VaultMount>> {
+	private static class GetMounts implements RestOperationsCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
@@ -337,11 +324,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 		@Override
-		public Map<String, VaultMount> doWithRestOperations(
-				RestOperations restOperations) {
+		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
 
-			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(path,
-					HttpMethod.GET, null, MOUNT_TYPE_REF, Collections.emptyMap());
+			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(this.path, HttpMethod.GET, null,
+					MOUNT_TYPE_REF, Collections.emptyMap());
 
 			VaultMountsResponse body = exchange.getBody();
 
@@ -354,14 +340,13 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return body.getTopLevelMounts();
 		}
 
-		private static class VaultMountsResponse
-				extends VaultResponseSupport<Map<String, VaultMount>> {
+		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
 
 			private Map<String, VaultMount> topLevelMounts = new HashMap<>();
 
 			@JsonIgnore
 			public Map<String, VaultMount> getTopLevelMounts() {
-				return topLevelMounts;
+				return this.topLevelMounts;
 			}
 
 			@SuppressWarnings("unchecked")
@@ -386,10 +371,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 					VaultMount vaultMount = builder.build();
 
-					topLevelMounts.put(name, vaultMount);
+					this.topLevelMounts.put(name, vaultMount);
 				}
 			}
+
 		}
+
 	}
 
 	private static <T> HttpEntity<T> emptyNamespace(@Nullable T body) {
@@ -404,23 +391,22 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public VaultHealth doWithRestOperations(RestOperations restOperations) {
 
 			try {
-				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange(
-						"sys/health", HttpMethod.GET, emptyNamespace(null),
-						VaultHealthImpl.class);
+				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange("sys/health", HttpMethod.GET,
+						emptyNamespace(null), VaultHealthImpl.class);
 				return healthResponse.getBody();
 			}
 			catch (RestClientResponseException responseError) {
 
 				try {
 					ObjectMapper mapper = new ObjectMapper();
-					return mapper.readValue(responseError.getResponseBodyAsString(),
-							VaultHealthImpl.class);
+					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
 				}
 				catch (Exception jsonError) {
 					throw responseError;
 				}
 			}
 		}
+
 	}
 
 	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
@@ -434,7 +420,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 		public VaultToken getRootToken() {
-			return VaultToken.of(rootToken);
+			return VaultToken.of(this.rootToken);
 		}
 
 		public List<String> getKeys() {
@@ -456,13 +442,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 			if (!(o instanceof VaultInitializationResponseImpl))
 				return false;
 			VaultInitializationResponseImpl that = (VaultInitializationResponseImpl) o;
-			return keys.equals(that.keys) && rootToken.equals(that.rootToken);
+			return this.keys.equals(that.keys) && this.rootToken.equals(that.rootToken);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(keys, rootToken);
+			return Objects.hash(this.keys, this.rootToken);
 		}
+
 	}
 
 	static class VaultUnsealStatusImpl implements VaultUnsealStatus {
@@ -519,36 +506,40 @@ public class VaultSysTemplate implements VaultSysOperations {
 			if (!(o instanceof VaultUnsealStatusImpl))
 				return false;
 			VaultUnsealStatusImpl that = (VaultUnsealStatusImpl) o;
-			return sealed == that.sealed && secretThreshold == that.secretThreshold
-					&& secretShares == that.secretShares && progress == that.progress;
+			return this.sealed == that.sealed && this.secretThreshold == that.secretThreshold
+					&& this.secretShares == that.secretShares && this.progress == that.progress;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(sealed, secretThreshold, secretShares, progress);
+			return Objects.hash(this.sealed, this.secretThreshold, this.secretShares, this.progress);
 		}
+
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class VaultHealthImpl implements VaultHealth {
 
 		private final boolean initialized;
+
 		private final boolean sealed;
+
 		private final boolean standby;
+
 		private final boolean performanceStandby;
+
 		private final boolean replicationRecoverySecondary;
+
 		private final int serverTimeUtc;
 
 		@Nullable
 		private final String version;
 
-		VaultHealthImpl(@JsonProperty("initialized") boolean initialized,
-				@JsonProperty("sealed") boolean sealed,
+		VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
 				@JsonProperty("performance_standby") boolean performanceStandby,
 				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
-				@JsonProperty("server_time_utc") int serverTimeUtc,
-				@Nullable @JsonProperty("version") String version) {
+				@JsonProperty("server_time_utc") int serverTimeUtc, @Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
@@ -573,11 +564,11 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 		public boolean isPerformanceStandby() {
-			return performanceStandby;
+			return this.performanceStandby;
 		}
 
 		public boolean isRecoveryReplicationSecondary() {
-			return replicationRecoverySecondary;
+			return this.replicationRecoverySecondary;
 		}
 
 		public int getServerTimeUtc() {
@@ -596,18 +587,18 @@ public class VaultSysTemplate implements VaultSysOperations {
 			if (!(o instanceof VaultHealthImpl))
 				return false;
 			VaultHealthImpl that = (VaultHealthImpl) o;
-			return initialized == that.initialized && sealed == that.sealed
-					&& standby == that.standby
-					&& performanceStandby == that.performanceStandby
-					&& replicationRecoverySecondary == that.replicationRecoverySecondary
-					&& serverTimeUtc == that.serverTimeUtc
-					&& Objects.equals(version, that.version);
+			return this.initialized == that.initialized && this.sealed == that.sealed && this.standby == that.standby
+					&& this.performanceStandby == that.performanceStandby
+					&& this.replicationRecoverySecondary == that.replicationRecoverySecondary
+					&& this.serverTimeUtc == that.serverTimeUtc && Objects.equals(this.version, that.version);
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(initialized, sealed, standby, performanceStandby,
-					replicationRecoverySecondary, serverTimeUtc, version);
+			return Objects.hash(this.initialized, this.sealed, this.standby, this.performanceStandby,
+					this.replicationRecoverySecondary, this.serverTimeUtc, this.version);
 		}
+
 	}
+
 }

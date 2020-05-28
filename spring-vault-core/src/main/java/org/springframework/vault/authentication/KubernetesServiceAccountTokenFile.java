@@ -31,8 +31,7 @@ import org.springframework.core.io.Resource;
  * @since 2.0
  * @see KubernetesJwtSupplier
  */
-public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplier
-		implements KubernetesJwtSupplier {
+public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplier implements KubernetesJwtSupplier {
 
 	/**
 	 * Default path to the service account token file.
@@ -43,9 +42,8 @@ public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplie
 	 * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
 	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE}. Construction fails with an
 	 * exception if the file does not exist.
-	 *
 	 * @throws IllegalArgumentException if the
-	 *     {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
+	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
 	 */
 	public KubernetesServiceAccountTokenFile() {
 		this(DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
@@ -54,7 +52,6 @@ public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplie
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile}
 	 * {@link KubernetesServiceAccountTokenFile} from a {@code path}.
-	 *
 	 * @param path path to the service account token file.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -65,7 +62,6 @@ public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplie
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile}
 	 * {@link KubernetesServiceAccountTokenFile} from a {@link File} handle.
-	 *
 	 * @param file path to the service account token file.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -76,11 +72,11 @@ public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplie
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile}
 	 * {@link KubernetesServiceAccountTokenFile} from a {@link Resource} handle.
-	 *
 	 * @param resource resource pointing to the service account token file.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
 	public KubernetesServiceAccountTokenFile(Resource resource) {
 		super(resource);
 	}
+
 }

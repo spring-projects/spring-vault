@@ -42,4 +42,5 @@ import org.springframework.context.annotation.Import;
 public @interface VaultPropertySources {
 
 	VaultPropertySource[] value();
+
 }

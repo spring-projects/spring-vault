@@ -74,9 +74,8 @@ public class AppRoleAuthenticationOptions {
 	@Deprecated
 	private final VaultToken initialToken;
 
-	private AppRoleAuthenticationOptions(String path, RoleId roleId, SecretId secretId,
-			@Nullable String appRole, UnwrappingEndpoints unwrappingEndpoints,
-			@Nullable VaultToken initialToken) {
+	private AppRoleAuthenticationOptions(String path, RoleId roleId, SecretId secretId, @Nullable String appRole,
+			UnwrappingEndpoints unwrappingEndpoints, @Nullable VaultToken initialToken) {
 
 		this.path = path;
 		this.roleId = roleId;
@@ -97,21 +96,21 @@ public class AppRoleAuthenticationOptions {
 	 * @return the mount path.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return the RoleId.
 	 */
 	public RoleId getRoleId() {
-		return roleId;
+		return this.roleId;
 	}
 
 	/**
 	 * @return the bound SecretId.
 	 */
 	public SecretId getSecretId() {
-		return secretId;
+		return this.secretId;
 	}
 
 	/**
@@ -120,7 +119,7 @@ public class AppRoleAuthenticationOptions {
 	 */
 	@Nullable
 	public String getAppRole() {
-		return appRole;
+		return this.appRole;
 	}
 
 	/**
@@ -128,7 +127,7 @@ public class AppRoleAuthenticationOptions {
 	 * @since 2.2
 	 */
 	public UnwrappingEndpoints getUnwrappingEndpoints() {
-		return unwrappingEndpoints;
+		return this.unwrappingEndpoints;
 	}
 
 	/**
@@ -140,7 +139,7 @@ public class AppRoleAuthenticationOptions {
 	@Nullable
 	@Deprecated
 	public VaultToken getInitialToken() {
-		return initialToken;
+		return this.initialToken;
 	}
 
 	/**
@@ -176,7 +175,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure the mount path.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @see #DEFAULT_APPROLE_AUTHENTICATION_PATH
@@ -191,7 +189,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure the RoleId.
-		 *
 		 * @param roleId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @since 2.0
@@ -206,10 +203,10 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure the RoleId.
-		 *
 		 * @param roleId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 * @deprecated since 2.0, use {@link #roleId(AppRoleAuthenticationOptions.RoleId)}.
+		 * @deprecated since 2.0, use
+		 * {@link #roleId(AppRoleAuthenticationOptions.RoleId)}.
 		 */
 		@Deprecated
 		public AppRoleAuthenticationOptionsBuilder roleId(String roleId) {
@@ -222,7 +219,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure a {@code secretId}.
-		 *
 		 * @param secretId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @since 2.0
@@ -237,10 +233,10 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure a {@code secretId}.
-		 *
 		 * @param secretId must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
-		 * @deprecated since 2.0, use {@link #secretId(AppRoleAuthenticationOptions.SecretId)}.
+		 * @deprecated since 2.0, use
+		 * {@link #secretId(AppRoleAuthenticationOptions.SecretId)}.
 		 */
 		@Deprecated
 		public AppRoleAuthenticationOptionsBuilder secretId(String secretId) {
@@ -253,7 +249,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure a {@code appRole}.
-		 *
 		 * @param appRole must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @since 1.1
@@ -268,13 +263,11 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure the {@link UnwrappingEndpoints} to use.
-		 *
 		 * @param endpoints must not be {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}
 		 * @since 2.2
 		 */
-		public AppRoleAuthenticationOptionsBuilder unwrappingEndpoints(
-				UnwrappingEndpoints endpoints) {
+		public AppRoleAuthenticationOptionsBuilder unwrappingEndpoints(UnwrappingEndpoints endpoints) {
 
 			Assert.notNull(endpoints, "UnwrappingEndpoints must not be empty");
 
@@ -284,7 +277,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Configure a {@code initialToken}.
-		 *
 		 * @param initialToken must not be empty or {@literal null}.
 		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
 		 * @since 1.1
@@ -305,47 +297,47 @@ public class AppRoleAuthenticationOptions {
 		 * Build a new {@link AppRoleAuthenticationOptions} instance. Requires
 		 * {@link #roleId(String)} for push mode or {@link #appRole(String)} and
 		 * {@link #initialToken(VaultToken)} for pull mode to be configured.
-		 *
 		 * @return a new {@link AppRoleAuthenticationOptions}.
 		 */
 		public AppRoleAuthenticationOptions build() {
 
-			Assert.hasText(path, "Path must not be empty");
+			Assert.hasText(this.path, "Path must not be empty");
 
-			if (secretId == null) {
+			if (this.secretId == null) {
 
-				if (providedSecretId != null) {
-					secretId(SecretId.provided(providedSecretId));
+				if (this.providedSecretId != null) {
+					secretId(SecretId.provided(this.providedSecretId));
 				}
-				else if (initialToken != null) {
-					secretId(SecretId.pull(initialToken));
+				else if (this.initialToken != null) {
+					secretId(SecretId.pull(this.initialToken));
 				}
 				else {
 					secretId(SecretId.absent());
 				}
 			}
 
-			if (roleId == null) {
+			if (this.roleId == null) {
 
-				if (providedRoleId != null) {
-					roleId(RoleId.provided(providedRoleId));
+				if (this.providedRoleId != null) {
+					roleId(RoleId.provided(this.providedRoleId));
 				}
 				else {
 
-					Assert.notNull(initialToken,
+					Assert.notNull(this.initialToken,
 							"AppRole authentication configured for pull mode. InitialToken must not be null (pull mode)");
-					roleId(RoleId.pull(initialToken));
+					roleId(RoleId.pull(this.initialToken));
 				}
 			}
 
-			if (roleId instanceof Pull || secretId instanceof Pull) {
-				Assert.notNull(appRole,
+			if (this.roleId instanceof Pull || this.secretId instanceof Pull) {
+				Assert.notNull(this.appRole,
 						"AppRole authentication configured for pull mode. AppRole must not be null.");
 			}
 
-			return new AppRoleAuthenticationOptions(path, roleId, secretId, appRole,
-					unwrappingEndpoints, initialToken);
+			return new AppRoleAuthenticationOptions(this.path, this.roleId, this.secretId, this.appRole,
+					this.unwrappingEndpoints, this.initialToken);
 		}
+
 	}
 
 	/**
@@ -360,7 +352,6 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Create a {@link RoleId} object that obtains its value from unwrapping a
 		 * response using the {@link VaultToken initial token} from a Cubbyhole.
-		 *
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@link RoleId} object that obtains its value from unwrapping a response
 		 * using the {@link VaultToken initial token}.
@@ -377,7 +368,6 @@ public class AppRoleAuthenticationOptions {
 		 * Create a {@link RoleId} that obtains its value using pull-mode, specifying a
 		 * {@link VaultToken initial token}. The token policy must allow reading the
 		 * roleId from {@code auth/approle/role/(role-name)/role-id}.
-		 *
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@link RoleId} that obtains its value using pull-mode.
 		 */
@@ -390,7 +380,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Create a {@link RoleId} that encapsulates a static {@code roleId}.
-		 *
 		 * @param roleId must not be {@literal null} or empty.
 		 * @return {@link RoleId} that encapsulates a static {@code roleId}.
 		 */
@@ -400,6 +389,7 @@ public class AppRoleAuthenticationOptions {
 
 			return new Provided(roleId);
 		}
+
 	}
 
 	/**
@@ -414,7 +404,6 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Create a {@link SecretId} object that obtains its value from unwrapping a
 		 * response using the {@link VaultToken initial token} from a Cubbyhole.
-		 *
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@link SecretId} object that obtains its value from unwrapping a
 		 * response using the {@link VaultToken initial token}.
@@ -431,7 +420,6 @@ public class AppRoleAuthenticationOptions {
 		 * Create a {@link SecretId} that obtains its value using pull-mode, specifying a
 		 * {@link VaultToken initial token}. The token policy must allow reading the
 		 * SecretId from {@code auth/approle/role/(role-name)/secret-id}.
-		 *
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@link SecretId} that obtains its value using pull-mode.
 		 */
@@ -444,7 +432,6 @@ public class AppRoleAuthenticationOptions {
 
 		/**
 		 * Create a {@link SecretId} that encapsulates a static {@code secretId}.
-		 *
 		 * @param secretId must not be {@literal null} or empty.
 		 * @return {@link SecretId} that encapsulates a static {@code SecretId}.
 		 */
@@ -458,11 +445,12 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Create a {@link SecretId} that represents an absent secretId. Using this object
 		 * will not send a secretId during AppRole login.
-		 *
 		 * @return a {@link SecretId} that represents an absent secretId
 		 */
 		static SecretId absent() {
 			return AbsentSecretId.INSTANCE;
 		}
+
 	}
+
 }

@@ -40,8 +40,7 @@ import org.springframework.vault.repository.mapping.VaultSimpleTypes;
  * @see org.springframework.data.mapping.model.SimpleTypeHolder
  * @see VaultSimpleTypes
  */
-public class VaultCustomConversions
-		extends org.springframework.data.convert.CustomConversions {
+public class VaultCustomConversions extends org.springframework.data.convert.CustomConversions {
 
 	private static final StoreConversions STORE_CONVERSIONS;
 
@@ -55,8 +54,7 @@ public class VaultCustomConversions
 		converters.addAll(JodaTimeConverters.getConvertersToRegister());
 
 		STORE_CONVERTERS = Collections.unmodifiableList(converters);
-		STORE_CONVERSIONS = StoreConversions.of(VaultSimpleTypes.HOLDER,
-				STORE_CONVERTERS);
+		STORE_CONVERSIONS = StoreConversions.of(VaultSimpleTypes.HOLDER, STORE_CONVERTERS);
 	}
 
 	/**
@@ -69,7 +67,6 @@ public class VaultCustomConversions
 	/**
 	 * Create a new {@link VaultCustomConversions} instance registering the given
 	 * converters.
-	 *
 	 * @param converters must not be {@literal null}.
 	 */
 	public VaultCustomConversions(List<?> converters) {
@@ -83,18 +80,17 @@ public class VaultCustomConversions
 
 		public Set<ConvertiblePair> getConvertibleTypes() {
 
-			ConvertiblePair localeToString = new ConvertiblePair(Locale.class,
-					String.class);
-			ConvertiblePair booleanToString = new ConvertiblePair(Character.class,
-					String.class);
+			ConvertiblePair localeToString = new ConvertiblePair(Locale.class, String.class);
+			ConvertiblePair booleanToString = new ConvertiblePair(Character.class, String.class);
 
 			return new HashSet<>(Arrays.asList(localeToString, booleanToString));
 		}
 
 		@Nullable
-		public Object convert(@Nullable Object source, TypeDescriptor sourceType,
-				TypeDescriptor targetType) {
+		public Object convert(@Nullable Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
 			return source != null ? source.toString() : null;
 		}
+
 	}
+
 }

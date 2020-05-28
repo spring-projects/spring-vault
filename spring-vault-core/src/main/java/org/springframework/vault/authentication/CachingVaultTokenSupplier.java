@@ -32,15 +32,13 @@ import org.springframework.vault.support.VaultToken;
  * @see VaultTokenSupplier
  * @see VaultToken
  */
-public class CachingVaultTokenSupplier
-		implements VaultTokenSupplier, ReactiveSessionManager {
+public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSessionManager {
 
 	private static final Mono<VaultToken> EMPTY = Mono.empty();
 
 	private final VaultTokenSupplier clientAuthentication;
 
-	private final AtomicReference<Mono<VaultToken>> tokenRef = new AtomicReference<>(
-			EMPTY);
+	private final AtomicReference<Mono<VaultToken>> tokenRef = new AtomicReference<>(EMPTY);
 
 	private CachingVaultTokenSupplier(VaultTokenSupplier clientAuthentication) {
 		this.clientAuthentication = clientAuthentication;
@@ -49,7 +47,6 @@ public class CachingVaultTokenSupplier
 	/**
 	 * Creates a new {@link CachingVaultTokenSupplier} given a {@link VaultTokenSupplier
 	 * delegate supplier}.
-	 *
 	 * @param delegate must not be {@literal null}.
 	 * @return the {@link CachingVaultTokenSupplier} for a {@link VaultTokenSupplier
 	 * delegate supplier}.
@@ -61,10 +58,11 @@ public class CachingVaultTokenSupplier
 	@Override
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
-		if (Objects.equals(tokenRef.get(), EMPTY)) {
-			tokenRef.compareAndSet(EMPTY, clientAuthentication.getVaultToken().cache());
+		if (Objects.equals(this.tokenRef.get(), EMPTY)) {
+			this.tokenRef.compareAndSet(EMPTY, this.clientAuthentication.getVaultToken().cache());
 		}
 
-		return tokenRef.get();
+		return this.tokenRef.get();
 	}
+
 }

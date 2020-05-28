@@ -65,10 +65,9 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * Create a new {@link VaultPropertySource} given a {@link VaultTemplate} and
 	 * {@code path} inside of Vault. This property source loads properties upon
 	 * construction.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 *     be empty or {@literal null}.
+	 * be empty or {@literal null}.
 	 */
 	public VaultPropertySource(VaultOperations vaultOperations, String path) {
 		this(path, vaultOperations, path);
@@ -78,14 +77,12 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * Create a new {@link VaultPropertySource} given a {@code name},
 	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
 	 * properties upon construction.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 *     be empty or {@literal null}.
+	 * be empty or {@literal null}.
 	 */
-	public VaultPropertySource(String name, VaultOperations vaultOperations,
-			String path) {
+	public VaultPropertySource(String name, VaultOperations vaultOperations, String path) {
 		this(name, vaultOperations, path, PropertyTransformers.noop());
 	}
 
@@ -94,11 +91,10 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
 	 * properties upon construction and transforms these by applying
 	 * {@link PropertyTransformer}.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 *     be empty or {@literal null}.
+	 * be empty or {@literal null}.
 	 * @param propertyTransformer object to transform properties.
 	 * @see PropertyTransformers
 	 */
@@ -112,14 +108,13 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * {@link VaultTemplate} and {@code path} inside of Vault. This property source loads
 	 * properties upon construction and transforms these by applying
 	 * {@link PropertyTransformer}.
-	 *
 	 * @param name name of the property source, must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path the path inside Vault (e.g. {@code secret/myapp/myproperties}. Must not
-	 *     be empty or {@literal null}.
+	 * be empty or {@literal null}.
 	 * @param propertyTransformer object to transform properties.
 	 * @param ignoreSecretNotFound indicate if failure to find a secret at {@code path}
-	 *     should be ignored.
+	 * should be ignored.
 	 * @since 2.2
 	 * @see PropertyTransformers
 	 */
@@ -134,8 +129,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 		this.path = path;
 		this.keyValueDelegate = new KeyValueDelegate(vaultOperations, LinkedHashMap::new);
-		this.propertyTransformer = propertyTransformer
-				.andThen(PropertyTransformers.removeNullProperties());
+		this.propertyTransformer = propertyTransformer.andThen(PropertyTransformers.removeNullProperties());
 		this.ignoreSecretNotFound = ignoreSecretNotFound;
 
 		loadProperties();
@@ -146,16 +140,16 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 */
 	protected void loadProperties() {
 
-		synchronized (lock) {
+		synchronized (this.lock) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Fetching properties from Vault at %s", path));
+				logger.debug(String.format("Fetching properties from Vault at %s", this.path));
 			}
 
 			Map<String, Object> properties = null;
 			RuntimeException error = null;
 
 			try {
-				properties = doGetProperties(path);
+				properties = doGetProperties(this.path);
 			}
 			catch (RuntimeException e) {
 				error = e;
@@ -163,12 +157,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 			if (properties == null) {
 
-				String msg = String.format("Vault location [%s] not resolvable", path);
+				String msg = String.format("Vault location [%s] not resolvable", this.path);
 
-				if (ignoreSecretNotFound) {
+				if (this.ignoreSecretNotFound) {
 					if (logger.isInfoEnabled()) {
-						logger.info(String.format("%s: %s", msg,
-								error != null ? error.getMessage() : "Not found"));
+						logger.info(String.format("%s: %s", msg, error != null ? error.getMessage() : "Not found"));
 					}
 				}
 				else {
@@ -202,7 +195,6 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	/**
 	 * Hook method to obtain properties from Vault.
-	 *
 	 * @param path the path, must not be empty or {@literal null}.
 	 * @return the resulting {@link Map} or {@literal null} if properties were not found.
 	 * @throws VaultException on problems retrieving properties
@@ -232,7 +224,6 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	/**
 	 * Hook method to transform properties using {@link PropertyTransformer}.
-	 *
 	 * @param properties must not be {@literal null}.
 	 * @return the transformed properties.
 	 */
@@ -243,7 +234,6 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	/**
 	 * Utility method converting a {@code String/Object} map to a flat
 	 * {@code String/String} map.
-	 *
 	 * @param data the map
 	 * @return the flattened map.
 	 * @deprecated since 2.0, use {@link #flattenMap(Map)} to retain JSON data types.
@@ -256,7 +246,6 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	/**
 	 * Utility method converting a {@code String/Object} map to a flat
 	 * {@code String/Object} map. Nested objects are represented with property path keys.
-	 *
 	 * @param data the map
 	 * @return the flattened map.
 	 * @since 2.0
@@ -264,4 +253,5 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	protected Map<String, Object> flattenMap(Map<String, Object> data) {
 		return JsonMapFlattener.flatten(data);
 	}
+
 }

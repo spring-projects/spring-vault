@@ -23,7 +23,7 @@ import org.springframework.web.client.RestTemplate;
  * Factory interface that produces a {@link RestTemplate} object. Factory implementations
  * are expected to create a new {@link RestTemplate} object when calling
  * {@link #create()}.
- * 
+ *
  * @author Mark Paluch
  * @since 2.3
  * @see RestTemplateBuilder
@@ -34,7 +34,6 @@ public interface RestTemplateFactory {
 
 	/**
 	 * Create a {@link RestTemplate} instance.
-	 * 
 	 * @return a {@link RestTemplate} instance.
 	 */
 	default RestTemplate create() {
@@ -45,9 +44,9 @@ public interface RestTemplateFactory {
 	/**
 	 * Create a {@link RestTemplate} instance by applying {@code customizer} to the
 	 * underlying {@link RestTemplateBuilder}.
-	 * 
 	 * @param customizer builder customizer.
 	 * @return a {@link RestTemplate} instance.
 	 */
 	RestTemplate create(Consumer<RestTemplateBuilder> customizer);
+
 }

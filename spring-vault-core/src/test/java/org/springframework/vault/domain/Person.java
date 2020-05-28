@@ -34,7 +34,7 @@ public class Person {
 	private String password;
 
 	public String getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(String id) {
@@ -42,7 +42,7 @@ public class Person {
 	}
 
 	public String getFirstname() {
-		return firstname;
+		return this.firstname;
 	}
 
 	public void setFirstname(String firstname) {
@@ -50,7 +50,7 @@ public class Person {
 	}
 
 	public String getLastname() {
-		return lastname;
+		return this.lastname;
 	}
 
 	public void setLastname(String lastname) {
@@ -58,7 +58,7 @@ public class Person {
 	}
 
 	public String getPassword() {
-		return password;
+		return this.password;
 	}
 
 	public void setPassword(String password) {
@@ -72,13 +72,13 @@ public class Person {
 		if (!(o instanceof Person))
 			return false;
 		Person person = (Person) o;
-		return Objects.equals(id, person.id)
-				&& Objects.equals(firstname, person.firstname)
-				&& Objects.equals(password, person.password);
+		return Objects.equals(this.id, person.id) && Objects.equals(this.firstname, person.firstname)
+				&& Objects.equals(this.password, person.password);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, firstname, password);
+		return Objects.hash(this.id, this.firstname, this.password);
 	}
+
 }

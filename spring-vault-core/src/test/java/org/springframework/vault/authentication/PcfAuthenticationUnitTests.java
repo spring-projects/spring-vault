@@ -72,8 +72,7 @@ class PcfAuthenticationUnitTests {
 			+ "TaqiSKrR62qswte+TKq/psakoNH9xhkCsltQ3MMfc6k0kSwwhda9p1pXWK3VFkUh\n"
 			+ "EazY3PECgYAoo8jvvQTKlXBmnVU1R//16fCklJXqYcEeOAO0CgyPCxHuAULK++M/\n"
 			+ "HRHd+6FippoH4ppSACEqQO5TwBTYxgOCwOcYZaRDvYZqEbgPNlf3oZ73kRyoIeAK\n"
-			+ "zvaXPNUuUEoW4E9Y2M+9SzF+975TTjqwjBgoCIF3xd+xQfgV9vkB6w==\n"
-			+ "-----END RSA PRIVATE KEY-----";
+			+ "zvaXPNUuUEoW4E9Y2M+9SzF+975TTjqwjBgoCIF3xd+xQfgV9vkB6w==\n" + "-----END RSA PRIVATE KEY-----";
 
 	Clock clock = Clock.fixed(Instant.parse("2007-12-03T10:15:30.00Z"), ZoneId.of("UTC"));
 
@@ -90,14 +89,13 @@ class PcfAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder()
-				.instanceCertificate(() -> "foo") //
-				.instanceKey(() -> instanceKey) //
+		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder().instanceCertificate(() -> "foo") //
+				.instanceKey(() -> this.instanceKey) //
 				.role("dev-role") //
-				.clock(clock) //
+				.clock(this.clock) //
 				.build();
 
-		PcfAuthentication authentication = new PcfAuthentication(options, restTemplate);
+		PcfAuthentication authentication = new PcfAuthentication(options, this.restTemplate);
 
 		expectLoginRequest();
 
@@ -109,17 +107,16 @@ class PcfAuthenticationUnitTests {
 	@Test
 	void loginWithStepsShouldObtainToken() {
 
-		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder()
-				.instanceCertificate(() -> "foo") //
-				.instanceKey(() -> instanceKey) //
+		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder().instanceCertificate(() -> "foo") //
+				.instanceKey(() -> this.instanceKey) //
 				.role("dev-role") //
-				.clock(clock) //
+				.clock(this.clock) //
 				.build();
 
 		expectLoginRequest();
 
 		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
-				PcfAuthentication.createAuthenticationSteps(options), restTemplate);
+				PcfAuthentication.createAuthenticationSteps(options), this.restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -128,12 +125,12 @@ class PcfAuthenticationUnitTests {
 
 	private void expectLoginRequest() {
 
-		mockRest.expect(requestTo("/auth/pcf/login")).andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("dev-role"))
-				.andExpect(jsonPath("$.signature").exists())
+		this.mockRest.expect(requestTo("/auth/pcf/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.signature").exists())
 				.andExpect(jsonPath("$.cf_instance_cert").value("foo"))
 				.andExpect(jsonPath("$.signing_time").value("2007-12-03T10:15:30Z"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 	}
+
 }

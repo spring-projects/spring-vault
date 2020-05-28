@@ -42,14 +42,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.token=my-token", "vault.ssl.key-store-password=key store password",
-		"vault.ssl.trust-store-password=trust store password" })
+@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.token=my-token",
+		"vault.ssl.key-store-password=key store password", "vault.ssl.trust-store-password=trust store password" })
 class EnvironmentVaultConfigurationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
+
 	}
 
 	@Autowired
@@ -60,13 +60,13 @@ class EnvironmentVaultConfigurationUnitTests {
 
 	@Test
 	void shouldConfigureEndpoint() {
-		assertThat(configuration.vaultEndpoint().getPort()).isEqualTo(8123);
+		assertThat(this.configuration.vaultEndpoint().getPort()).isEqualTo(8123);
 	}
 
 	@Test
 	void shouldConfigureTokenAuthentication() {
 
-		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
+		ClientAuthentication clientAuthentication = this.configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(TokenAuthentication.class);
 		assertThat(clientAuthentication.login()).isEqualTo(VaultToken.of("my-token"));
@@ -79,21 +79,18 @@ class EnvironmentVaultConfigurationUnitTests {
 		map.put("vault.ssl.key-store", "classpath:certificate.json");
 		map.put("vault.ssl.trust-store", "classpath:certificate.json");
 
-		MapPropertySource propertySource = new MapPropertySource("shouldConfigureSsl",
-				map);
-		configurableEnvironment.getPropertySources().addFirst(propertySource);
+		MapPropertySource propertySource = new MapPropertySource("shouldConfigureSsl", map);
+		this.configurableEnvironment.getPropertySources().addFirst(propertySource);
 
-		SslConfiguration sslConfiguration = configuration.sslConfiguration();
+		SslConfiguration sslConfiguration = this.configuration.sslConfiguration();
 
 		assertThat(sslConfiguration.getKeyStore()).isInstanceOf(ClassPathResource.class);
-		assertThat(sslConfiguration.getKeyStorePassword())
-				.isEqualTo("key store password");
+		assertThat(sslConfiguration.getKeyStorePassword()).isEqualTo("key store password");
 
-		assertThat(sslConfiguration.getTrustStore())
-				.isInstanceOf(ClassPathResource.class);
-		assertThat(sslConfiguration.getTrustStorePassword())
-				.isEqualTo("trust store password");
+		assertThat(sslConfiguration.getTrustStore()).isInstanceOf(ClassPathResource.class);
+		assertThat(sslConfiguration.getTrustStorePassword()).isEqualTo("trust store password");
 
-		configurableEnvironment.getPropertySources().remove(propertySource.getName());
+		this.configurableEnvironment.getPropertySources().remove(propertySource.getName());
 	}
+
 }

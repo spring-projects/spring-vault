@@ -56,10 +56,11 @@ public class PemObject {
 					"-+END\\s+.*CERTIFICATE[^-]*-+", // Footer
 					Pattern.CASE_INSENSITIVE);
 
-	private static final Pattern[] PATTERNS = new Pattern[] { PRIVATE_KEY_PATTERN,
-			PUBLIC_KEY_PATTERN, CERTIFICATE_PATTERN };
+	private static final Pattern[] PATTERNS = new Pattern[] { PRIVATE_KEY_PATTERN, PUBLIC_KEY_PATTERN,
+			CERTIFICATE_PATTERN };
 
 	private final byte[] content;
+
 	private final Pattern matchingPattern;
 
 	private PemObject(String content, Pattern matchingPattern) {
@@ -74,7 +75,6 @@ public class PemObject {
 	 * {@code -BEGIN PRIVATE KEY-} and {@code -END PRIVATE KEY-}. This method returns
 	 * either the first PEM object ot throws {@link IllegalArgumentException} of no object
 	 * could be found.
-	 *
 	 * @param content the PEM content.
 	 * @return the {@link PemObject} from PEM {@code content}.
 	 * @throws IllegalArgumentException if no PEM object could be found.
@@ -94,7 +94,6 @@ public class PemObject {
 	 * {@code -BEGIN PRIVATE KEY-} or {@code -BEGIN PUBLIC KEY-}. This method returns
 	 * either the first PEM object ot throws {@link IllegalArgumentException} of no object
 	 * could be found.
-	 *
 	 * @param content the PEM content.
 	 * @return the {@link PemObject} from PEM {@code content}.
 	 * @throws IllegalArgumentException if no PEM object could be found.
@@ -114,7 +113,6 @@ public class PemObject {
 	/**
 	 * Create one or more {@link PemObject}s from PEM {@code content}. Accepts
 	 * concatenated PEM objects.
-	 *
 	 * @param content the PEM content.
 	 * @return the list of {@link PemObject} from PEM {@code content}.
 	 * @since 2.3
@@ -151,8 +149,7 @@ public class PemObject {
 			if (discoveredMatcher != null) {
 				found = true;
 				index = discoveredMatcher.end();
-				objects.add(new PemObject(discoveredMatcher.group(1),
-						discoveredMatcher.pattern()));
+				objects.add(new PemObject(discoveredMatcher.group(1), discoveredMatcher.pattern()));
 			}
 
 		}
@@ -187,7 +184,6 @@ public class PemObject {
 
 	/**
 	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
-	 *
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 * @deprecated since 2.3. Use {@link #getRSAPrivateKeySpec()} instead that uses an
 	 * improved name to indicate what the method is supposed to return.
@@ -199,7 +195,6 @@ public class PemObject {
 
 	/**
 	 * Retrieve a {@link X509Certificate}.
-	 *
 	 * @return the {@link X509Certificate}.
 	 * @since 2.3
 	 */
@@ -219,7 +214,6 @@ public class PemObject {
 
 	/**
 	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
-	 *
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 * @since 2.3
 	 */
@@ -239,7 +233,6 @@ public class PemObject {
 
 	/**
 	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
-	 *
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 */
 	public RSAPublicKeySpec getRSAPublicKeySpec() {
@@ -255,4 +248,5 @@ public class PemObject {
 			throw new IllegalStateException("Cannot obtain PrivateKey", e);
 		}
 	}
+
 }

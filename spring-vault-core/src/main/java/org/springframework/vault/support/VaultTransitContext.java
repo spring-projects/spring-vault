@@ -30,8 +30,7 @@ public class VaultTransitContext {
 	 * Empty (default) {@link VaultTransitContext} without a {@literal context} and
 	 * {@literal nonce}.
 	 */
-	private static final VaultTransitContext EMPTY = new VaultTransitContext(new byte[0],
-			new byte[0]);
+	private static final VaultTransitContext EMPTY = new VaultTransitContext(new byte[0], new byte[0]);
 
 	private final byte[] context;
 
@@ -58,7 +57,6 @@ public class VaultTransitContext {
 
 	/**
 	 * Create a {@link VaultTransitContext} given {@code context} bytes.
-	 *
 	 * @param context context bytes, must not be {@literal null}.
 	 * @return a {@link VaultTransitContext} for {@code context}.
 	 * @since 2.0
@@ -69,7 +67,6 @@ public class VaultTransitContext {
 
 	/**
 	 * Create a {@link VaultTransitContext} given {@code nonce} bytes.
-	 *
 	 * @param nonce nonce bytes, must not be {@literal null}.
 	 * @return a {@link VaultTransitContext} for {@code nonce}.
 	 * @since 2.0
@@ -82,14 +79,14 @@ public class VaultTransitContext {
 	 * @return the key derivation context.
 	 */
 	public byte[] getContext() {
-		return context;
+		return this.context;
 	}
 
 	/**
 	 * @return the
 	 */
 	public byte[] getNonce() {
-		return nonce;
+		return this.nonce;
 	}
 
 	@Override
@@ -99,13 +96,13 @@ public class VaultTransitContext {
 		if (!(o instanceof VaultTransitContext))
 			return false;
 		VaultTransitContext that = (VaultTransitContext) o;
-		return Arrays.equals(context, that.context) && Arrays.equals(nonce, that.nonce);
+		return Arrays.equals(this.context, that.context) && Arrays.equals(this.nonce, that.nonce);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = Arrays.hashCode(context);
-		result = 31 * result + Arrays.hashCode(nonce);
+		int result = Arrays.hashCode(this.context);
+		result = 31 * result + Arrays.hashCode(this.nonce);
 		return result;
 	}
 
@@ -115,6 +112,7 @@ public class VaultTransitContext {
 	public static class VaultTransitRequestBuilder {
 
 		private byte[] context = new byte[0];
+
 		private byte[] nonce = new byte[0];
 
 		VaultTransitRequestBuilder() {
@@ -122,9 +120,8 @@ public class VaultTransitContext {
 
 		/**
 		 * Configure a key derivation context for the {@code transit} operation.
-		 *
 		 * @param context key derivation context, provided as a binary data. Must be
-		 *     provided if derivation is enabled.
+		 * provided if derivation is enabled.
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitRequestBuilder context(byte[] context) {
@@ -139,10 +136,9 @@ public class VaultTransitContext {
 		 * Configure the nonce value for a {@code transit} operation. Must be provided if
 		 * convergent encryption is enabled for this key and the key was generated with
 		 * Vault 0.6.1. Not required for keys created in 0.6.2+.
-		 *
 		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must
-		 *     ensure that for any given context (and thus, any given encryption key) this
-		 *     nonce value is never reused
+		 * ensure that for any given context (and thus, any given encryption key) this
+		 * nonce value is never reused
 		 * @return {@code this} {@link VaultTransitRequestBuilder}.
 		 */
 		public VaultTransitRequestBuilder nonce(byte[] nonce) {
@@ -155,11 +151,12 @@ public class VaultTransitContext {
 
 		/**
 		 * Build a new {@link VaultTransitContext} instance.
-		 *
 		 * @return a new {@link VaultTransitContext}.
 		 */
 		public VaultTransitContext build() {
-			return new VaultTransitContext(context, nonce);
+			return new VaultTransitContext(this.context, this.nonce);
 		}
+
 	}
+
 }

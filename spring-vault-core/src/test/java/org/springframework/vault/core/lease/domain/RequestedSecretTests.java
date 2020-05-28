@@ -43,4 +43,5 @@ class RequestedSecretTests {
 
 		assertThat(requestedSecret.getMode()).isEqualTo(Mode.RENEW);
 	}
+
 }

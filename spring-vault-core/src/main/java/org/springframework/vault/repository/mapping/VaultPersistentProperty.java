@@ -30,8 +30,7 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
  * @author Mark Paluch
  * @since 2.0
  */
-public class VaultPersistentProperty
-		extends KeyValuePersistentProperty<VaultPersistentProperty> {
+public class VaultPersistentProperty extends KeyValuePersistentProperty<VaultPersistentProperty> {
 
 	private static final Set<String> SUPPORTED_ID_PROPERTY_NAMES = new HashSet<String>();
 
@@ -41,13 +40,11 @@ public class VaultPersistentProperty
 
 	/**
 	 * Create a new {@link VaultPersistentProperty}.
-	 *
 	 * @param property must not be {@literal null}.
 	 * @param owner must not be {@literal null}.
 	 * @param simpleTypeHolder must not be {@literal null}.
 	 */
-	public VaultPersistentProperty(Property property,
-			PersistentEntity<?, VaultPersistentProperty> owner,
+	public VaultPersistentProperty(Property property, PersistentEntity<?, VaultPersistentProperty> owner,
 			SimpleTypeHolder simpleTypeHolder) {
 
 		super(property, owner, simpleTypeHolder);
@@ -57,4 +54,5 @@ public class VaultPersistentProperty
 	public boolean isIdProperty() {
 		return super.isIdProperty() || SUPPORTED_ID_PROPERTY_NAMES.contains(getName());
 	}
+
 }

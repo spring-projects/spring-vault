@@ -44,14 +44,12 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Creates a new {@link Version} from the given integer values. At least one value has
 	 * to be given but a maximum of 4.
-	 *
 	 * @param parts must not be {@literal null} or empty.
 	 */
 	private Version(boolean enterprise, int... parts) {
 
 		Assert.notNull(parts, "Parts must not be null");
-		Assert.isTrue(parts.length > 0 && parts.length < 5,
-				"Parts must contain one to four segments");
+		Assert.isTrue(parts.length > 0 && parts.length < 5, "Parts must contain one to four segments");
 
 		this.major = parts[0];
 		this.minor = parts.length > 1 ? parts[1] : 0;
@@ -59,15 +57,14 @@ public class Version implements Comparable<Version> {
 		this.build = parts.length > 3 ? parts[3] : 0;
 		this.enterprise = enterprise;
 
-		Assert.isTrue(major >= 0, "Major version must be greater or equal zero!");
-		Assert.isTrue(minor >= 0, "Minor version must be greater or equal zero!");
-		Assert.isTrue(bugfix >= 0, "Bugfix version must be greater or equal zero!");
-		Assert.isTrue(build >= 0, "Build version must be greater or equal zero!");
+		Assert.isTrue(this.major >= 0, "Major version must be greater or equal zero!");
+		Assert.isTrue(this.minor >= 0, "Minor version must be greater or equal zero!");
+		Assert.isTrue(this.bugfix >= 0, "Bugfix version must be greater or equal zero!");
+		Assert.isTrue(this.build >= 0, "Build version must be greater or equal zero!");
 	}
 
 	/**
 	 * Parses the given string representation of a version into a {@link Version} object.
-	 *
 	 * @param version must not be {@literal null} or empty.
 	 * @return
 	 */
@@ -81,16 +78,14 @@ public class Version implements Comparable<Version> {
 
 		for (int i = 0; i < parts.length; i++) {
 
-			String input = i == parts.length - 1 ? parts[i].replaceAll("\\D.*", "")
-					: parts[i];
+			String input = i == parts.length - 1 ? parts[i].replaceAll("\\D.*", "") : parts[i];
 
 			if (StringUtils.hasText(input)) {
 				try {
 					intParts[i] = Integer.parseInt(input);
 				}
 				catch (IllegalArgumentException o_O) {
-					throw new IllegalArgumentException(
-							String.format(VERSION_PARSE_ERROR, input, version), o_O);
+					throw new IllegalArgumentException(String.format(VERSION_PARSE_ERROR, input, version), o_O);
 				}
 			}
 		}
@@ -100,7 +95,6 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) than the given one.
-	 *
 	 * @param version
 	 * @return
 	 */
@@ -111,7 +105,6 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is greater (newer) or the same as the
 	 * given one.
-	 *
 	 * @param version
 	 * @return
 	 */
@@ -121,7 +114,6 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is the same as the given one.
-	 *
 	 * @param version
 	 * @return
 	 */
@@ -131,7 +123,6 @@ public class Version implements Comparable<Version> {
 
 	/**
 	 * Returns whether the current {@link Version} is less (older) than the given one.
-	 *
 	 * @param version
 	 * @return
 	 */
@@ -142,7 +133,6 @@ public class Version implements Comparable<Version> {
 	/**
 	 * Returns whether the current {@link Version} is less (older) or equal to the current
 	 * one.
-	 *
 	 * @param version
 	 * @return
 	 */
@@ -161,27 +151,27 @@ public class Version implements Comparable<Version> {
 			return 1;
 		}
 
-		if (major != that.major) {
-			return major - that.major;
+		if (this.major != that.major) {
+			return this.major - that.major;
 		}
 
-		if (minor != that.minor) {
-			return minor - that.minor;
+		if (this.minor != that.minor) {
+			return this.minor - that.minor;
 		}
 
-		if (bugfix != that.bugfix) {
-			return bugfix - that.bugfix;
+		if (this.bugfix != that.bugfix) {
+			return this.bugfix - that.bugfix;
 		}
 
-		if (build != that.build) {
-			return build - that.build;
+		if (this.build != that.build) {
+			return this.build - that.build;
 		}
 
 		return 0;
 	}
 
 	public boolean isEnterprise() {
-		return enterprise;
+		return this.enterprise;
 	}
 
 	/*
@@ -193,19 +183,18 @@ public class Version implements Comparable<Version> {
 	public String toString() {
 
 		List<Integer> digits = new ArrayList<Integer>();
-		digits.add(major);
-		digits.add(minor);
+		digits.add(this.major);
+		digits.add(this.minor);
 
-		if (build != 0 || bugfix != 0) {
-			digits.add(bugfix);
+		if (this.build != 0 || this.bugfix != 0) {
+			digits.add(this.bugfix);
 		}
 
-		if (build != 0) {
-			digits.add(build);
+		if (this.build != 0) {
+			digits.add(this.build);
 		}
 
-		return StringUtils.collectionToDelimitedString(digits, ".")
-				+ (isEnterprise() ? "+ent" : "");
+		return StringUtils.collectionToDelimitedString(digits, ".") + (isEnterprise() ? "+ent" : "");
 	}
 
 	@Override
@@ -215,13 +204,13 @@ public class Version implements Comparable<Version> {
 		if (!(o instanceof Version))
 			return false;
 		Version version = (Version) o;
-		return major == version.major && minor == version.minor
-				&& bugfix == version.bugfix && build == version.build
-				&& enterprise == version.enterprise;
+		return this.major == version.major && this.minor == version.minor && this.bugfix == version.bugfix
+				&& this.build == version.build && this.enterprise == version.enterprise;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(major, minor, bugfix, build, enterprise);
+		return Objects.hash(this.major, this.minor, this.bugfix, this.build, this.enterprise);
 	}
+
 }

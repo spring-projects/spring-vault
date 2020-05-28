@@ -47,21 +47,19 @@ class ReactiveVaultClientsIntegrationTests extends IntegrationTestSupport {
 				resolver.set(Thread.currentThread());
 				return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
 			});
-		}, ClientHttpConnectorFactory.create(new ClientOptions(),
-				Settings.createSslConfiguration()));
+		}, ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()));
 
-		client.get().uri("/sys/health").exchange()
-				.flatMap(it -> it.bodyToMono(String.class)).as(StepVerifier::create)
+		client.get().uri("/sys/health").exchange().flatMap(it -> it.bodyToMono(String.class)).as(StepVerifier::create)
 				.consumeNextWith(actual -> {
 					assertThat(actual).contains("initialized").contains("standby");
 				}).verifyComplete();
 
-		client.get().uri("sys/health").exchange()
-				.flatMap(it -> it.bodyToMono(String.class)).as(StepVerifier::create)
+		client.get().uri("sys/health").exchange().flatMap(it -> it.bodyToMono(String.class)).as(StepVerifier::create)
 				.consumeNextWith(actual -> {
 					assertThat(actual).contains("initialized").contains("standby");
 				}).verifyComplete();
 
 		assertThat(resolver).hasValue(Thread.currentThread());
 	}
+
 }

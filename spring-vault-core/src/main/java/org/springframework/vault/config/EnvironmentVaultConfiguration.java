@@ -80,8 +80,7 @@ import org.springframework.web.client.RestOperations;
  * &#64;Import(EnvironmentVaultConfiguration.class)
  * public class MyConfiguration {
  * }
- *     </code>
- * </pre>
+ *     </code> </pre>
  *
  * Supplied properties:
  *
@@ -89,8 +88,7 @@ import org.springframework.web.client.RestOperations;
  *     <code>
  * vault.uri=https://localhost:8200
  * vault.token=00000000-0000-0000-0000-000000000000
- *     </code>
- * </pre>
+ *     </code> </pre>
  *
  * <h3>Property keys</h3>
  *
@@ -187,13 +185,12 @@ import org.springframework.web.client.RestOperations;
  * @see KubernetesAuthentication
  */
 @Configuration
-public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
-		implements ApplicationContextAware {
+public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration implements ApplicationContextAware {
 
-	private static final Log logger = LogFactory
-			.getLog(EnvironmentVaultConfiguration.class);
+	private static final Log logger = LogFactory.getLog(EnvironmentVaultConfiguration.class);
 
 	private @Nullable RestOperations cachedRestOperations;
+
 	private @Nullable ApplicationContext applicationContext;
 
 	@Override
@@ -208,8 +205,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext)
-			throws BeansException {
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 
 		this.applicationContext = applicationContext;
 		super.setApplicationContext(applicationContext);
@@ -229,32 +225,28 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	@Override
 	public SslConfiguration sslConfiguration() {
 
-		KeyStoreConfiguration keyStoreConfiguration = getKeyStoreConfiguration(
-				"vault.ssl.key-store", "vault.ssl.key-store-password",
-				"vault.ssl.key-store-type");
+		KeyStoreConfiguration keyStoreConfiguration = getKeyStoreConfiguration("vault.ssl.key-store",
+				"vault.ssl.key-store-password", "vault.ssl.key-store-type");
 
-		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration(
-				"vault.ssl.trust-store", "vault.ssl.trust-store-password",
-				"vault.ssl.trust-store-type");
+		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration("vault.ssl.trust-store",
+				"vault.ssl.trust-store-password", "vault.ssl.trust-store-type");
 
 		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration);
 	}
 
-	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty,
-			String passwordProperty, String keystoreTypeProperty) {
+	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty, String passwordProperty,
+			String keystoreTypeProperty) {
 
 		Resource keyStore = getResource(resourceProperty);
 		String keyStorePassword = getProperty(passwordProperty);
-		String keystoreType = getProperty(keystoreTypeProperty,
-				SslConfiguration.PEM_KEYSTORE_TYPE);
+		String keystoreType = getProperty(keystoreTypeProperty, SslConfiguration.PEM_KEYSTORE_TYPE);
 
 		if (keyStore == null) {
 			return KeyStoreConfiguration.unconfigured();
 		}
 
 		if (StringUtils.hasText(keyStorePassword)) {
-			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray(),
-					keystoreType);
+			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray(), keystoreType);
 		}
 
 		return KeyStoreConfiguration.of(keyStore).withStoreType(keystoreType);
@@ -263,11 +255,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	@Override
 	public ClientAuthentication clientAuthentication() {
 
-		String authentication = getProperty("vault.authentication",
-				AuthenticationMethod.TOKEN.name()).toUpperCase().replace('-', '_');
+		String authentication = getProperty("vault.authentication", AuthenticationMethod.TOKEN.name()).toUpperCase()
+				.replace('-', '_');
 
-		AuthenticationMethod authenticationMethod = AuthenticationMethod
-				.valueOf(authentication);
+		AuthenticationMethod authenticationMethod = AuthenticationMethod.valueOf(authentication);
 
 		switch (authenticationMethod) {
 
@@ -288,8 +279,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		case KUBERNETES:
 			return kubeAuthentication();
 		default:
-			throw new IllegalStateException(String.format(
-					"Vault authentication method %s is not supported with %s",
+			throw new IllegalStateException(String.format("Vault authentication method %s is not supported with %s",
 					authenticationMethod, getClass().getSimpleName()));
 		}
 	}
@@ -301,27 +291,23 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	protected ClientAuthentication tokenAuthentication() {
 
 		String token = getProperty("vault.token");
-		Assert.hasText(token,
-				"Vault Token authentication: Token (vault.token) must not be empty");
+		Assert.hasText(token, "Vault Token authentication: Token (vault.token) must not be empty");
 
 		return new TokenAuthentication(token);
 	}
 
 	protected ClientAuthentication appIdAuthentication() {
 
-		String appId = getProperty("vault.app-id.app-id",
-				getProperty("spring.application.name"));
+		String appId = getProperty("vault.app-id.app-id", getProperty("spring.application.name"));
 		String userId = getProperty("vault.app-id.user-id");
 		String path = getProperty("vault.app-id.app-id-path",
 				AppIdAuthenticationOptions.DEFAULT_APPID_AUTHENTICATION_PATH);
 
-		Assert.hasText(appId,
-				"Vault AppId authentication: AppId (vault.app-id.app-id) must not be empty");
-		Assert.hasText(userId,
-				"Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
+		Assert.hasText(appId, "Vault AppId authentication: AppId (vault.app-id.app-id) must not be empty");
+		Assert.hasText(userId, "Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder()
-				.appId(appId).userIdMechanism(getAppIdUserIdMechanism(userId)).path(path);
+		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder().appId(appId)
+				.userIdMechanism(getAppIdUserIdMechanism(userId)).path(path);
 
 		return new AppIdAuthentication(builder.build(), restOperations());
 	}
@@ -333,11 +319,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 		String path = getProperty("vault.app-role.app-role-path",
 				AppRoleAuthenticationOptions.DEFAULT_APPROLE_AUTHENTICATION_PATH);
 
-		Assert.hasText(roleId,
-				"Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
+		Assert.hasText(roleId, "Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
 
-		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions
-				.builder().roleId(RoleId.provided(roleId)).path(path);
+		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
+				.roleId(RoleId.provided(roleId)).path(path);
 
 		if (StringUtils.hasText(secretId)) {
 			builder = builder.secretId(SecretId.provided(secretId));
@@ -371,9 +356,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 				"Vault AWS-EC2 authentication: Role (vault.aws-ec2.role) must not be empty");
 
 		if (StringUtils.hasText(roleId) && StringUtils.hasText(role)) {
-			throw new IllegalStateException(
-					"AWS-EC2 Authentication: Only one of Role (vault.aws-ec2.role) or"
-							+ " RoleId (deprecated, vault.aws-ec2.roleId) must be provided");
+			throw new IllegalStateException("AWS-EC2 Authentication: Only one of Role (vault.aws-ec2.role) or"
+					+ " RoleId (deprecated, vault.aws-ec2.roleId) must be provided");
 		}
 
 		if (StringUtils.hasText(roleId)) {
@@ -388,8 +372,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 			builder.identityDocumentUri(URI.create(identityDocument));
 		}
 
-		return new AwsEc2Authentication(builder.build(), restOperations(),
-				restOperations());
+		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
@@ -401,12 +384,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 				AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI);
 		URI identityTokenServiceUri = getUri("vault.azure-msi.identity-token-service",
 				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
-		Assert.hasText(role,
-				"Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
+		Assert.hasText(role, "Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
-		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions
-				.builder().role(role).path(path).instanceMetadataUri(metadataServiceUri)
-				.identityTokenServiceUri(identityTokenServiceUri);
+		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions.builder().role(role).path(path)
+				.instanceMetadataUri(metadataServiceUri).identityTokenServiceUri(identityTokenServiceUri);
 
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
@@ -414,11 +395,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	protected ClientAuthentication cubbyholeAuthentication() {
 
 		String token = getProperty("vault.token");
-		Assert.hasText(token,
-				"Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
+		Assert.hasText(token, "Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
 
-		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions
-				.builder().wrapped().initialToken(VaultToken.of(token));
+		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions.builder().wrapped()
+				.initialToken(VaultToken.of(token));
 
 		return new CubbyholeAuthentication(builder.build(), restOperations());
 	}
@@ -433,11 +413,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 
 		Assert.hasText(role, "Vault Kubernetes authentication: role must not be empty");
 
-		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(
-				tokenFile);
+		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(tokenFile);
 
-		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions
-				.builder().role(role).jwtSupplier(jwtSupplier).path(path);
+		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions.builder().role(role)
+				.jwtSupplier(jwtSupplier).path(path);
 
 		return new KubernetesAuthentication(builder.build(), restOperations());
 	}
@@ -459,14 +438,19 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration
 	private Resource getResource(String key) {
 
 		String value = getProperty(key);
-		return value != null ? applicationContext.getResource(value) : null;
+		return value != null ? this.applicationContext.getResource(value) : null;
 	}
 
 	enum AppIdUserId {
+
 		IP_ADDRESS, MAC_ADDRESS;
+
 	}
 
 	enum AuthenticationMethod {
+
 		TOKEN, APPID, APPROLE, AWS_EC2, AZURE, CERT, CUBBYHOLE, KUBERNETES;
+
 	}
+
 }

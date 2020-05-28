@@ -58,20 +58,16 @@ class AppIdAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainTokenWithStaticUserId() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("hello") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("hello") //
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
-		mockRest.expect(requestTo("/auth/app-id/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.app_id").value("hello"))
-				.andExpect(jsonPath("$.user_id").value("world"))
+		this.mockRest.expect(requestTo("/auth/app-id/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.app_id").value("hello")).andExpect(jsonPath("$.user_id").value("world"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppIdAuthentication authentication = new AppIdAuthentication(options,
-				restTemplate);
+		AppIdAuthentication authentication = new AppIdAuthentication(options, this.restTemplate);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -81,15 +77,15 @@ class AppIdAuthenticationUnitTests {
 	@Test
 	void loginShouldFail() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-				.appId("hello") //
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("hello") //
 				.userIdMechanism(new StaticUserId("world")) //
 				.build();
 
-		mockRest.expect(requestTo("/auth/app-id/login")) //
+		this.mockRest.expect(requestTo("/auth/app-id/login")) //
 				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new AppIdAuthentication(options, restTemplate).login());
+				.isThrownBy(() -> new AppIdAuthentication(options, this.restTemplate).login());
 	}
+
 }

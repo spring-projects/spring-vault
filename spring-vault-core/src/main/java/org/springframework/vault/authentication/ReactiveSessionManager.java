@@ -37,10 +37,10 @@ public interface ReactiveSessionManager extends VaultTokenSupplier {
 
 	/**
 	 * Obtain a session token.
-	 *
 	 * @return a session token.
 	 */
 	default Mono<VaultToken> getSessionToken() {
 		return getVaultToken();
 	}
+
 }

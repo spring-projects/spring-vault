@@ -31,7 +31,6 @@ class CanConnect {
 	/**
 	 * Performs a check whether a connection can be established to the
 	 * {@code socketAddress}.
-	 *
 	 * @param socketAddress the address to test, must not be {@literal null}.
 	 * @return {@literal true}, if a connection can be established
 	 */
@@ -54,4 +53,5 @@ class CanConnect {
 			}
 		}
 	}
+
 }

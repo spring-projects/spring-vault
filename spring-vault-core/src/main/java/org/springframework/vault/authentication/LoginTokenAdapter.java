@@ -52,12 +52,10 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
 	 * decorate and {@link RestOperations}.
-	 *
 	 * @param delegate must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public LoginTokenAdapter(ClientAuthentication delegate,
-			RestOperations restOperations) {
+	public LoginTokenAdapter(ClientAuthentication delegate, RestOperations restOperations) {
 
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -68,15 +66,14 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 	@Override
 	public LoginToken login() throws VaultException {
-		return augmentWithSelfLookup(delegate.login());
+		return augmentWithSelfLookup(this.delegate.login());
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
 		return augmentWithSelfLookup(this.restOperations, token);
 	}
 
-	static LoginToken augmentWithSelfLookup(RestOperations restOperations,
-			VaultToken token) {
+	static LoginToken augmentWithSelfLookup(RestOperations restOperations, VaultToken token) {
 
 		Map<String, Object> data = lookupSelf(restOperations, token);
 
@@ -90,23 +87,19 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		return LoginToken.of(token.toCharArray(), getLeaseDuration(ttl));
 	}
 
-	private static Map<String, Object> lookupSelf(RestOperations restOperations,
-			VaultToken token) {
+	private static Map<String, Object> lookupSelf(RestOperations restOperations, VaultToken token) {
 
 		try {
-			ResponseEntity<VaultResponse> entity = restOperations.exchange(
-					"auth/token/lookup-self", HttpMethod.GET,
+			ResponseEntity<VaultResponse> entity = restOperations.exchange("auth/token/lookup-self", HttpMethod.GET,
 					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
 
-			Assert.state(entity.getBody() != null && entity.getBody().getData() != null,
-					"Token response is null");
+			Assert.state(entity.getBody() != null && entity.getBody().getData() != null, "Token response is null");
 
 			return entity.getBody().getData();
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultTokenLookupException(
-					String.format("Token self-lookup failed: %s %s", e.getRawStatusCode(),
-							VaultResponses.getError(e.getResponseBodyAsString())));
+			throw new VaultTokenLookupException(String.format("Token self-lookup failed: %s %s", e.getRawStatusCode(),
+					VaultResponses.getError(e.getResponseBodyAsString())));
 		}
 		catch (RestClientException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed", e);
@@ -116,4 +109,5 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	static Duration getLeaseDuration(@Nullable Number ttl) {
 		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
+
 }

@@ -38,7 +38,6 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	/**
 	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and the
 	 * mount {@code path}.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -54,13 +53,10 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	@SuppressWarnings("unchecked")
 	public List<String> list(String path) {
 
-		String pathToUse = path.equals("/") ? ""
-				: path.endsWith("/") ? path : (path + "/");
+		String pathToUse = path.equals("/") ? "" : path.endsWith("/") ? path : (path + "/");
 
 		VaultListResponse read = doRead(restOperations -> {
-			return restOperations.exchange(
-					String.format("%s?list=true",
-							createBackendPath("metadata", pathToUse)),
+			return restOperations.exchange(String.format("%s?list=true", createBackendPath("metadata", pathToUse)),
 					HttpMethod.GET, null, VaultListResponse.class);
 		});
 
@@ -87,4 +83,5 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	String createBackendPath(String segment, String path) {
 		return String.format("%s/%s/%s", this.path, segment, path);
 	}
+
 }

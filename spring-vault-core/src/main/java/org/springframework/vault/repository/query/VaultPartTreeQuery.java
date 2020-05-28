@@ -39,25 +39,20 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 	 * Creates a new {@link VaultPartTreeQuery} for the given {@link QueryMethod},
 	 * {@link EvaluationContextProvider}, {@link KeyValueOperations} and query creator
 	 * type.
-	 *
 	 * @param queryMethod must not be {@literal null}.
 	 * @param evaluationContextProvider must not be {@literal null}.
 	 * @param keyValueOperations must not be {@literal null}.
 	 * @param queryCreator must not be {@literal null}.
 	 */
 	@SuppressWarnings("unchecked")
-	public VaultPartTreeQuery(QueryMethod queryMethod,
-			QueryMethodEvaluationContextProvider evaluationContextProvider,
-			KeyValueOperations keyValueOperations,
-			Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
+	public VaultPartTreeQuery(QueryMethod queryMethod, QueryMethodEvaluationContextProvider evaluationContextProvider,
+			KeyValueOperations keyValueOperations, Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 
 		super(queryMethod, evaluationContextProvider, keyValueOperations,
-				new VaultQueryCreatorFactory(
-						(MappingContext) keyValueOperations.getMappingContext()));
+				new VaultQueryCreatorFactory((MappingContext) keyValueOperations.getMappingContext()));
 	}
 
-	static class VaultQueryCreatorFactory
-			implements QueryCreatorFactory<VaultQueryCreator> {
+	static class VaultQueryCreatorFactory implements QueryCreatorFactory<VaultQueryCreator> {
 
 		private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
@@ -67,9 +62,10 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 		}
 
 		@Override
-		public VaultQueryCreator queryCreatorFor(PartTree partTree,
-				ParameterAccessor accessor) {
-			return new VaultQueryCreator(partTree, accessor, mappingContext);
+		public VaultQueryCreator queryCreatorFor(PartTree partTree, ParameterAccessor accessor) {
+			return new VaultQueryCreator(partTree, accessor, this.mappingContext);
 		}
+
 	}
+
 }

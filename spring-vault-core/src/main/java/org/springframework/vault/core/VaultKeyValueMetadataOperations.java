@@ -40,7 +40,6 @@ public interface VaultKeyValueMetadataOperations {
 
 	/**
 	 * Update the secret metadata, or creates new metadata if not present.
-	 *
 	 * @param path the secret path, must not be {@literal null} or empty.
 	 * @param body {@link VaultMetadataRequest}
 	 */
@@ -52,4 +51,5 @@ public interface VaultKeyValueMetadataOperations {
 	 * @param path the secret path, must not be {@literal null} or empty.
 	 */
 	void delete(String path);
+
 }

@@ -134,4 +134,5 @@ public @interface EnableVaultRepositories {
 	 * {@literal vaultTemplate}.
 	 */
 	String vaultTemplateRef() default "vaultTemplate";
+
 }

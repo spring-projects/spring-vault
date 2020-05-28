@@ -56,12 +56,10 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	/**
 	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
 	 * and {@link RestOperations}.
-	 *
 	 * @param steps must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public AuthenticationStepsExecutor(AuthenticationSteps steps,
-			RestOperations restOperations) {
+	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
 
 		Assert.notNull(steps, "AuthenticationSteps must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -74,7 +72,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	@SuppressWarnings("unchecked")
 	public VaultToken login() throws VaultException {
 
-		Iterable<Node<?>> steps = chain.steps;
+		Iterable<Node<?>> steps = this.chain.steps;
 
 		Object state = evaluate(steps);
 
@@ -89,9 +87,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 			return LoginTokenUtil.from(response.getAuth());
 		}
 
-		throw new IllegalStateException(String.format(
-				"Cannot retrieve VaultToken from authentication chain. Got instead %s",
-				state));
+		throw new IllegalStateException(
+				String.format("Cannot retrieve VaultToken from authentication chain. Got instead %s", state));
 	}
 
 	private Object evaluate(Iterable<Node<?>> steps) {
@@ -101,8 +98,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-						String.format("Executing %s with current state %s", o, state));
+				logger.debug(String.format("Executing %s with current state %s", o, state));
 			}
 
 			try {
@@ -127,19 +123,17 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				}
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							String.format("Executed %s with current state %s", o, state));
+					logger.debug(String.format("Executed %s with current state %s", o, state));
 				}
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultLoginException(String.format(
-						"HTTP request %s in state %s failed with Status %s and body %s",
-						o, state, e.getRawStatusCode(),
-						VaultResponses.getError(e.getResponseBodyAsString())), e);
+				throw new VaultLoginException(
+						String.format("HTTP request %s in state %s failed with Status %s and body %s", o, state,
+								e.getRawStatusCode(), VaultResponses.getError(e.getResponseBodyAsString())),
+						e);
 			}
 			catch (RuntimeException e) {
-				throw new VaultLoginException(
-						String.format("Authentication execution failed in %s", o), e);
+				throw new VaultLoginException(String.format("Authentication execution failed in %s", o), e);
 			}
 		}
 		return state;
@@ -171,17 +165,14 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		if (definition.getUri() == null) {
 
-			ResponseEntity<?> exchange = restOperations.exchange(
-					definition.getUriTemplate(), definition.getMethod(),
-					getEntity(definition.getEntity(), state),
-					definition.getResponseType(),
+			ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUriTemplate(),
+					definition.getMethod(), getEntity(definition.getEntity(), state), definition.getResponseType(),
 					(Object[]) definition.getUrlVariables());
 
 			return exchange.getBody();
 		}
-		ResponseEntity<?> exchange = restOperations.exchange(definition.getUri(),
-				definition.getMethod(), getEntity(definition.getEntity(), state),
-				definition.getResponseType());
+		ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUri(), definition.getMethod(),
+				getEntity(definition.getEntity(), state), definition.getResponseType());
 
 		return exchange.getBody();
 
@@ -199,4 +190,5 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		return entity;
 	}
+
 }

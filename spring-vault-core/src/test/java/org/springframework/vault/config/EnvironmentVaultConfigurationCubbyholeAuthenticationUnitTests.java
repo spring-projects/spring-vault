@@ -34,13 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123",
-		"vault.authentication=cubbyhole", "vault.token=my-token" })
+@TestPropertySource(
+		properties = { "vault.uri=https://localhost:8123", "vault.authentication=cubbyhole", "vault.token=my-token" })
 class EnvironmentVaultConfigurationCubbyholeAuthenticationUnitTests {
 
 	@Configuration
 	@Import(EnvironmentVaultConfiguration.class)
 	static class ApplicationConfiguration {
+
 	}
 
 	@Autowired
@@ -49,8 +50,9 @@ class EnvironmentVaultConfigurationCubbyholeAuthenticationUnitTests {
 	@Test
 	void shouldConfigureAuthentication() {
 
-		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
+		ClientAuthentication clientAuthentication = this.configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(CubbyholeAuthentication.class);
 	}
+
 }

@@ -44,7 +44,6 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	/**
 	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@code 32}
 	 * random bytes using {@code transit} for transit mount path.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultBytesKeyGenerator(VaultOperations vaultOperations) {
@@ -54,14 +53,12 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	/**
 	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@code length}
 	 * random bytes.
-	 *
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param transitPath path of the transit backend, must not be {@literal null} or
-	 *     empty.
+	 * empty.
 	 * @param length number of random bytes to generate. Must be greater than zero.
 	 */
-	public VaultBytesKeyGenerator(VaultOperations vaultOperations, String transitPath,
-			int length) {
+	public VaultBytesKeyGenerator(VaultOperations vaultOperations, String transitPath, int length) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(transitPath, "Transit path must not be null or empty");
@@ -74,17 +71,18 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 
 	@Override
 	public int getKeyLength() {
-		return length;
+		return this.length;
 	}
 
 	@Override
 	public byte[] generateKey() {
 
-		VaultResponse response = vaultOperations.write(
-				String.format("%s/random/%d", transitPath, getKeyLength()),
+		VaultResponse response = this.vaultOperations.write(
+				String.format("%s/random/%d", this.transitPath, getKeyLength()),
 				Collections.singletonMap("format", "base64"));
 
 		String randomBytes = (String) response.getRequiredData().get("random_bytes");
 		return Base64Utils.decodeFromString(randomBytes);
 	}
+
 }

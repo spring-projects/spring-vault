@@ -26,13 +26,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Default implementation of {@link WebClientFactory}.
- * 
+ *
  * @author Mark Paluch
  * @since 2.3
  */
 class DefaultWebClientFactory implements WebClientFactory {
 
 	private final ClientHttpConnector connector;
+
 	private final Function<ClientHttpConnector, WebClientBuilder> builderFunction;
 
 	DefaultWebClientFactory(ClientHttpConnector connector,
@@ -44,7 +45,7 @@ class DefaultWebClientFactory implements WebClientFactory {
 	@Override
 	public WebClient create(@Nullable Consumer<WebClientBuilder> customizer) {
 
-		WebClientBuilder builder = builderFunction.apply(connector);
+		WebClientBuilder builder = this.builderFunction.apply(this.connector);
 
 		if (customizer != null) {
 			customizer.accept(builder);
@@ -52,4 +53,5 @@ class DefaultWebClientFactory implements WebClientFactory {
 
 		return builder.build();
 	}
+
 }

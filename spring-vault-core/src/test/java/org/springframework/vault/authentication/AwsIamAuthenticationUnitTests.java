@@ -59,58 +59,49 @@ class AwsIamAuthenticationUnitTests {
 	@Test
 	void shouldAuthenticate() {
 
-		mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
+		this.mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
-				.andExpect(jsonPath("$.iam_request_url").exists())
-				.andExpect(jsonPath("$.iam_request_body").exists())
-				.andExpect(jsonPath("$.iam_request_headers").exists())
-				.andExpect(jsonPath("$.role").value("foo-role"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(jsonPath("$.iam_request_url").exists()).andExpect(jsonPath("$.iam_request_body").exists())
+				.andExpect(jsonPath("$.iam_request_headers").exists()).andExpect(jsonPath("$.role").value("foo-role"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
-		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
-				.role("foo-role").credentials(new BasicAWSCredentials("foo", "bar"))
-				.build();
-		AwsIamAuthentication sut = new AwsIamAuthentication(options, restTemplate);
+		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
+				.credentials(new BasicAWSCredentials("foo", "bar")).build();
+		AwsIamAuthentication sut = new AwsIamAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
 
 	@Test
 	void shouldUsingAuthenticationSteps() {
 
-		mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
+		this.mockRest.expect(requestTo("/auth/aws/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
-				.andExpect(jsonPath("$.iam_request_url").exists())
-				.andExpect(jsonPath("$.iam_request_body").exists())
-				.andExpect(jsonPath("$.iam_request_headers").exists())
-				.andExpect(jsonPath("$.role").value("foo-role"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{"
-						+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(jsonPath("$.iam_request_url").exists()).andExpect(jsonPath("$.iam_request_body").exists())
+				.andExpect(jsonPath("$.iam_request_headers").exists()).andExpect(jsonPath("$.role").value("foo-role"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
+						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
-		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
-				.role("foo-role").credentials(new BasicAWSCredentials("foo", "bar"))
-				.build();
+		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
+				.credentials(new BasicAWSCredentials("foo", "bar")).build();
 
-		AuthenticationSteps steps = AwsIamAuthentication
-				.createAuthenticationSteps(options);
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps,
-				restTemplate);
+		AuthenticationSteps steps = AwsIamAuthentication.createAuthenticationSteps(options);
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);
 
 		VaultToken login = executor.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
-		assertThat(((LoginToken) login).getLeaseDuration())
-				.isEqualTo(Duration.ofSeconds(10));
+		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
 	}
+
 }

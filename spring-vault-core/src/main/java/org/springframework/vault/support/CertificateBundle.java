@@ -43,8 +43,7 @@ public class CertificateBundle extends Certificate {
 	private final String privateKey;
 
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
-			@JsonProperty("certificate") String certificate,
-			@JsonProperty("issuing_ca") String issuingCaCertificate,
+			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("private_key") String privateKey) {
 
 		super(serialNumber, certificate, issuingCaCertificate);
@@ -54,23 +53,21 @@ public class CertificateBundle extends Certificate {
 	/**
 	 * Create a {@link CertificateBundle} given a private key with certificates and the
 	 * serial number.
-	 *
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param privateKey must not be empty or {@literal null}.
 	 * @return the {@link CertificateBundle}
 	 */
-	public static CertificateBundle of(String serialNumber, String certificate,
-			String issuingCaCertificate, String privateKey) {
+	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
+			String privateKey) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 		Assert.hasText(privateKey, "Private key must not be empty");
 
-		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				privateKey);
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate, privateKey);
 	}
 
 	/**
@@ -83,7 +80,6 @@ public class CertificateBundle extends Certificate {
 	/**
 	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is
 	 * DER-encoded.
-	 *
 	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate
 	 * a {@link java.security.PrivateKey} from this {@link KeySpec}.
 	 */
@@ -102,7 +98,6 @@ public class CertificateBundle extends Certificate {
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
 	 * private key and certificate chain. Only supported if certificate and private key
 	 * are DER-encoded.
-	 *
 	 * @param keyAlias the key alias to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
@@ -111,11 +106,12 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(keyAlias, "Key alias must not be empty");
 
 		try {
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
-					getX509Certificate(), getX509IssuerCertificate());
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), getX509Certificate(),
+					getX509IssuerCertificate());
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
 	}
+
 }

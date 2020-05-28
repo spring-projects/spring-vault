@@ -35,22 +35,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  * @author Mark Paluch
  */
-class TokenAuthenticationOperatorIntegrationTests
-		extends TokenAuthenticationIntegrationTestBase {
+class TokenAuthenticationOperatorIntegrationTests extends TokenAuthenticationIntegrationTestBase {
 
 	WebClient webClient = TestWebClientFactory.create(Settings.createSslConfiguration());
 
 	@Test
 	void shouldSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
+				.build();
 
-		VaultToken token = prepare().getVaultOperations().opsForToken()
-				.create(tokenRequest).getToken();
+		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
-				TokenAuthentication.createAuthenticationSteps(token, true), webClient);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.webClient);
 
 		operator.getVaultToken().as(StepVerifier::create).consumeNextWith(actual -> {
 
@@ -58,8 +56,7 @@ class TokenAuthenticationOperatorIntegrationTests
 
 			LoginToken loginToken = (LoginToken) actual;
 
-			assertThat(loginToken.getLeaseDuration()).isBetween(Duration.ofSeconds(40),
-					Duration.ofSeconds(60));
+			assertThat(loginToken.getLeaseDuration()).isBetween(Duration.ofSeconds(40), Duration.ofSeconds(60));
 			assertThat(loginToken.isRenewable()).isTrue();
 
 		}).verifyComplete();
@@ -68,14 +65,13 @@ class TokenAuthenticationOperatorIntegrationTests
 	@Test
 	void shouldFailDuringSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-				.ttl(Duration.ofSeconds(60)).renewable().numUses(1).build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
+				.build();
 
-		VaultToken token = prepare().getVaultOperations().opsForToken()
-				.create(tokenRequest).getToken();
+		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
-				TokenAuthentication.createAuthenticationSteps(token, true), webClient);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.webClient);
 
 		// first usage
 		operator.getVaultToken() //
@@ -88,4 +84,5 @@ class TokenAuthenticationOperatorIntegrationTests
 				.expectError(VaultException.class) //
 				.verify();
 	}
+
 }

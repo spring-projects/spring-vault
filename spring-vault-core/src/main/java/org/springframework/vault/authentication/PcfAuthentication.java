@@ -52,13 +52,11 @@ import org.springframework.web.client.RestOperations;
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/pcf.html">Auth Backend: PCF</a>
  */
-public class PcfAuthentication
-		implements ClientAuthentication, AuthenticationStepsFactory {
+public class PcfAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(PcfAuthentication.class);
 
-	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter
-			.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
 	// SHA256 hash and a salt length of 222
 	private static final int SALT_LENGTH = 222;
@@ -70,12 +68,10 @@ public class PcfAuthentication
 	/**
 	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
 	 * {@link RestOperations}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
-	public PcfAuthentication(PcfAuthenticationOptions options,
-			RestOperations restOperations) {
+	public PcfAuthentication(PcfAuthenticationOptions options, RestOperations restOperations) {
 
 		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
@@ -87,36 +83,31 @@ public class PcfAuthentication
 	/**
 	 * Creates a {@link AuthenticationSteps} for pcf authentication given
 	 * {@link PcfAuthenticationOptions}.
-	 *
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for pcf authentication.
 	 */
-	public static AuthenticationSteps createAuthenticationSteps(
-			PcfAuthenticationOptions options) {
+	public static AuthenticationSteps createAuthenticationSteps(PcfAuthenticationOptions options) {
 
 		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
 
 		String instanceCert = options.getInstanceCertSupplier().get();
 		String instanceKey = options.getInstanceKeySupplier().get();
 		return AuthenticationSteps
-				.fromSupplier(() -> getPcfLogin(options.getRole(), options.getClock(),
-						instanceCert, instanceKey)) //
+				.fromSupplier(() -> getPcfLogin(options.getRole(), options.getClock(), instanceCert, instanceKey)) //
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		Map<String, String> login = getPcfLogin(options.getRole(), options.getClock(),
-				options.getInstanceCertSupplier().get(),
-				options.getInstanceKeySupplier().get());
+		Map<String, String> login = getPcfLogin(this.options.getRole(), this.options.getClock(),
+				this.options.getInstanceCertSupplier().get(), this.options.getInstanceKeySupplier().get());
 
 		try {
-			VaultResponse response = restOperations.postForObject(AuthenticationUtil.getLoginPath(options.getPath()),
-					login, VaultResponse.class);
+			VaultResponse response = this.restOperations
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null,
-					"Auth field must not be null");
+			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using PCF authentication");
 
@@ -132,8 +123,7 @@ public class PcfAuthentication
 		return createAuthenticationSteps(this.options);
 	}
 
-	private static Map<String, String> getPcfLogin(String role, Clock clock,
-			String instanceCert, String instanceKey) {
+	private static Map<String, String> getPcfLogin(String role, Clock clock, String instanceCert, String instanceKey) {
 
 		Assert.hasText(role, "Role must not be empty");
 
@@ -160,23 +150,20 @@ public class PcfAuthentication
 		}
 	}
 
-	private static String getMessage(String role, String signingTime,
-			String instanceCertPem) {
+	private static String getMessage(String role, String signingTime, String instanceCertPem) {
 		return signingTime + instanceCertPem + role;
 	}
 
-	private static String doSign(byte[] message, String instanceKeyPem)
-			throws CryptoException {
+	private static String doSign(byte[] message, String instanceKeyPem) throws CryptoException {
 
 		RSAPrivateKeySpec privateKey = PemObject.fromKey(instanceKeyPem).getRSAKeySpec();
-		PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(),
-				SALT_LENGTH);
+		PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
 
-		signer.init(true, new RSAKeyParameters(true, privateKey.getModulus(),
-				privateKey.getPrivateExponent()));
+		signer.init(true, new RSAKeyParameters(true, privateKey.getModulus(), privateKey.getPrivateExponent()));
 		signer.update(message, 0, message.length);
 
 		byte[] signature = signer.generateSignature();
 		return Base64Utils.encodeToUrlSafeString(signature);
 	}
+
 }

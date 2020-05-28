@@ -33,8 +33,7 @@ public class VaultHmacRequest {
 
 	private final @Nullable Integer keyVersion;
 
-	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm,
-			@Nullable Integer keyVersion) {
+	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {
 
 		this.algorithm = algorithm;
 		this.plaintext = plaintext;
@@ -51,7 +50,6 @@ public class VaultHmacRequest {
 	/**
 	 * Create a new {@link VaultHmacRequest} given {@link Plaintext}. Uses the default
 	 * signature algorithm.
-	 *
 	 * @return a new {@link VaultHmacRequest} for the given {@link Plaintext input}.
 	 */
 	public static VaultHmacRequest create(Plaintext input) {
@@ -62,7 +60,7 @@ public class VaultHmacRequest {
 	 * @return plain text input used as basis to generate the digest.
 	 */
 	public Plaintext getPlaintext() {
-		return plaintext;
+		return this.plaintext;
 	}
 
 	/**
@@ -71,7 +69,7 @@ public class VaultHmacRequest {
 	 */
 	@Nullable
 	public String getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
 	/**
@@ -79,7 +77,7 @@ public class VaultHmacRequest {
 	 */
 	@Nullable
 	public Integer getKeyVersion() {
-		return keyVersion;
+		return this.keyVersion;
 	}
 
 	/**
@@ -95,7 +93,6 @@ public class VaultHmacRequest {
 
 		/**
 		 * Configure the input to be used to create the digest.
-		 *
 		 * @param input base input to create the digest, must not be {@literal null}.
 		 * @return {@code this} {@link VaultHmacRequestBuilder}.
 		 */
@@ -109,11 +106,9 @@ public class VaultHmacRequest {
 
 		/**
 		 * Configure the algorithm to be used for the operation.
-		 *
 		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 *     algorithms are: {@literal sha2-224}, {@literal sha2-256},
-		 *     {@literal sha2-384}, {@literal sha2-512}. Defaults to {@literal sha2-256}
-		 *     if not set.
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultHmacRequestBuilder}.
 		 */
 		public VaultHmacRequestBuilder algorithm(String algorithm) {
@@ -126,7 +121,6 @@ public class VaultHmacRequest {
 
 		/**
 		 * Configure the key version to be used for the operation.
-		 *
 		 * @param version key version to be used. If not set, uses the latest version.
 		 * @return {@code this} {@link VaultHmacRequestBuilder}.
 		 */
@@ -139,14 +133,15 @@ public class VaultHmacRequest {
 		/**
 		 * Build a new {@link VaultHmacRequest} instance. Requires
 		 * {@link #plaintext(Plaintext)} to be configured.
-		 *
 		 * @return a new {@link VaultHmacRequest}.
 		 */
 		public VaultHmacRequest build() {
 
-			Assert.notNull(plaintext, "Plaintext input must not be null");
+			Assert.notNull(this.plaintext, "Plaintext input must not be null");
 
-			return new VaultHmacRequest(plaintext, algorithm, keyVersion);
+			return new VaultHmacRequest(this.plaintext, this.algorithm, this.keyVersion);
 		}
+
 	}
+
 }

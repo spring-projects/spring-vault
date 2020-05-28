@@ -58,17 +58,14 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
 	 * @see MappingJackson2HttpMessageConverter
 	 */
-	public static RestTemplate createRestTemplate(VaultEndpoint endpoint,
-			ClientHttpRequestFactory requestFactory) {
-		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint),
-				requestFactory);
+	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
+		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint), requestFactory);
 	}
 
 	/**
@@ -82,7 +79,6 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
@@ -110,7 +106,6 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
-	 *
 	 * @return the {@link RestTemplate}.
 	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
 	 * @see MappingJackson2HttpMessageConverter
@@ -124,8 +119,7 @@ public class VaultClients {
 
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
 
-		restTemplate.getInterceptors()
-				.add((request, body, execution) -> execution.execute(request, body));
+		restTemplate.getInterceptors().add((request, body, execution) -> execution.execute(request, body));
 
 		return restTemplate;
 	}
@@ -133,15 +127,13 @@ public class VaultClients {
 	/**
 	 * Create a {@link ClientHttpRequestInterceptor} that associates each request with a
 	 * {@code X-Vault-Namespace} header if the header is not present.
-	 *
 	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
 	 * @return the {@link ClientHttpRequestInterceptor} to register with
 	 * {@link RestTemplate}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
 	 * @since 2.2
 	 */
-	public static ClientHttpRequestInterceptor createNamespaceInterceptor(
-			String namespace) {
+	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
 
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");
 
@@ -157,8 +149,7 @@ public class VaultClients {
 		};
 	}
 
-	public static UriBuilderFactory createUriBuilderFactory(
-			VaultEndpointProvider endpointProvider) {
+	public static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider) {
 		return new PrefixAwareUriBuilderFactory(endpointProvider);
 	}
 
@@ -177,27 +168,26 @@ public class VaultClients {
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
-			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate),
-					uriVariables);
+			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate), uriVariables);
 		}
 
 		@Override
 		protected URI expandInternal(String uriTemplate, Object... uriVariables) {
-			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate),
-					uriVariables);
+			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate), uriVariables);
 		}
 
 		@Override
 		public String getBaseUrl() {
 
-			if (endpointProvider != null) {
+			if (this.endpointProvider != null) {
 
-				VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
+				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 				return toBaseUri(endpoint);
 			}
 
 			return super.getBaseUrl();
 		}
+
 	}
 
 	/**
@@ -218,27 +208,26 @@ public class VaultClients {
 				return UriComponentsBuilder.fromUriString(uriTemplate);
 			}
 
-			VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
+			VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 
 			String baseUri = toBaseUri(endpoint);
-			UriComponents uriComponents = UriComponentsBuilder
-					.fromUriString(prepareUriTemplate(baseUri, uriTemplate)).build();
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+					.build();
 
-			return UriComponentsBuilder.fromUriString(baseUri)
-					.uriComponents(uriComponents);
+			return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
 		}
+
 	}
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
 
-		return String.format("%s://%s:%s/%s", endpoint.getScheme(), endpoint.getHost(),
-				endpoint.getPort(), endpoint.getPath());
+		return String.format("%s://%s:%s/%s", endpoint.getScheme(), endpoint.getHost(), endpoint.getPort(),
+				endpoint.getPath());
 	}
 
 	/**
 	 * Strip/add leading slashes from {@code uriTemplate} depending on whether the base
 	 * url has a trailing slash.
-	 *
 	 * @param uriTemplate
 	 * @return
 	 */
@@ -271,7 +260,6 @@ public class VaultClients {
 
 	/**
 	 * Normalize the URI {@code path} so that it can be combined with {@code prefix}.
-	 *
 	 * @param prefix
 	 * @param path
 	 * @return
@@ -288,4 +276,5 @@ public class VaultClients {
 
 		return path;
 	}
+
 }

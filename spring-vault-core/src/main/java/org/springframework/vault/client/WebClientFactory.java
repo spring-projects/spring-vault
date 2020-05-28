@@ -22,7 +22,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 /**
  * Factory interface that produces a {@link WebClient} object. Factory implementations are
  * expected to create a new {@link WebClient} object when calling {@link #create()}.
- * 
+ *
  * @author Mark Paluch
  * @since 2.3
  * @see WebClientBuilder
@@ -33,7 +33,6 @@ public interface WebClientFactory {
 
 	/**
 	 * Create a {@link WebClient} instance.
-	 * 
 	 * @return a {@link WebClient} instance.
 	 */
 	default WebClient create() {
@@ -44,9 +43,9 @@ public interface WebClientFactory {
 	/**
 	 * Create a {@link WebClient} instance by applying {@code customizer} to the
 	 * underlying {@link WebClientBuilder}.
-	 * 
 	 * @param customizer builder customizer.
 	 * @return a {@link WebClient} instance.
 	 */
 	WebClient create(Consumer<WebClientBuilder> customizer);
+
 }

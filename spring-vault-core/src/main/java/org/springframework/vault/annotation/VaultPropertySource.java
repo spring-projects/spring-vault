@@ -130,5 +130,7 @@ public @interface VaultPropertySource {
 		 * expires.
 		 */
 		ROTATE;
+
 	}
+
 }

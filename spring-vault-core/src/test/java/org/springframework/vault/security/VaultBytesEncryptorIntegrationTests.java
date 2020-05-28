@@ -43,21 +43,21 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		transit = prepare().getVaultOperations().opsForTransit();
-		vaultVersion = prepare().getVersion();
+		this.transit = prepare().getVaultOperations().opsForTransit();
+		this.vaultVersion = prepare().getVersion();
 
 		if (!prepare().hasSecret("transit")) {
 			prepare().mountSecret("transit");
 		}
 
 		removeKeys();
-		transit.createKey(KEY_NAME);
+		this.transit.createKey(KEY_NAME);
 	}
 
 	private void removeKeys() {
 
-		if (vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
-			List<String> keys = transit.getKeys();
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
+			List<String> keys = this.transit.getKeys();
 			keys.forEach(this::deleteKey);
 		}
 		else {
@@ -68,14 +68,13 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			transit.configureKey(keyName,
-					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
+			this.transit.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
 
 		try {
-			transit.deleteKey(keyName);
+			this.transit.deleteKey(keyName);
 		}
 		catch (Exception e) {
 		}
@@ -84,7 +83,7 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncryptAndDecrypt() {
 
-		VaultBytesEncryptor encryptor = new VaultBytesEncryptor(transit, KEY_NAME);
+		VaultBytesEncryptor encryptor = new VaultBytesEncryptor(this.transit, KEY_NAME);
 
 		byte[] plaintext = "foo-bar+ü¿ß~€¢".getBytes();
 		byte[] ciphertext = encryptor.encrypt(plaintext);
@@ -94,4 +93,5 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 		assertThat(ciphertext).isNotEqualTo(plaintext).startsWith("vault:v1".getBytes());
 		assertThat(result).isEqualTo(plaintext);
 	}
+
 }

@@ -41,22 +41,20 @@ class DurationParserUnitTests {
 	@Test
 	void shouldParseComplexDuration() {
 
-		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30)
-				.plusMillis(100).plusNanos(1100);
+		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30).plusMillis(100).plusNanos(1100);
 
-		assertThat(DurationParser.parseDuration("6h30m30s100ms1us100ns"))
-				.isEqualTo(duration);
+		assertThat(DurationParser.parseDuration("6h30m30s100ms1us100ns")).isEqualTo(duration);
 		assertThat(DurationParser.parseDuration("23430s100001100ns")).isEqualTo(duration);
 	}
 
 	@Test
 	void shouldFormatComplexDuration() {
 
-		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30)
-				.plusMillis(100).plusNanos(1100);
+		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30).plusMillis(100).plusNanos(1100);
 
 		String result = DurationParser.formatDuration(duration);
 
 		assertThat(result).isEqualTo("23430s100001100ns");
 	}
+
 }

@@ -32,7 +32,6 @@ public class VaultEncryptionResult extends AbstractResult<Ciphertext> {
 	/**
 	 * Create {@link VaultEncryptionResult} for a successfully encrypted
 	 * {@link Ciphertext} .
-	 *
 	 * @param cipherText must not be {@literal null}.
 	 */
 	public VaultEncryptionResult(Ciphertext cipherText) {
@@ -41,7 +40,6 @@ public class VaultEncryptionResult extends AbstractResult<Ciphertext> {
 
 	/**
 	 * Create {@link VaultEncryptionResult} for an error during encryption.
-	 *
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultEncryptionResult(VaultException exception) {
@@ -53,6 +51,7 @@ public class VaultEncryptionResult extends AbstractResult<Ciphertext> {
 	@Nullable
 	@Override
 	protected Ciphertext get0() {
-		return cipherText;
+		return this.cipherText;
 	}
+
 }

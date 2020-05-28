@@ -41,18 +41,15 @@ class ReactiveVaultClientsUnitTests {
 	@Test
 	void shouldApplyNamespace() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
-				"/auth/foo");
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
-				.then(Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector)
 				.filter(ReactiveVaultClients.namespace("foo/bar")).build();
 
-		webClient.get().uri("/auth/foo").retrieve().bodyToMono(String.class)
-				.as(StepVerifier::create) //
+		webClient.get().uri("/auth/foo").retrieve().bodyToMono(String.class).as(StepVerifier::create) //
 				.verifyComplete();
 
 		assertThat(request.getHeaders()).containsEntry(VaultHttpHeaders.VAULT_NAMESPACE,
@@ -62,22 +59,21 @@ class ReactiveVaultClientsUnitTests {
 	@Test
 	void shouldAllowNamespaceOverride() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
-				"/auth/foo");
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
-				.then(Mono.just(response));
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector)
 				.filter(ReactiveVaultClients.namespace("foo/bar")).build();
 
-		webClient.get().uri("/auth/foo").header(VaultHttpHeaders.VAULT_NAMESPACE, "baz")
-				.retrieve().bodyToMono(String.class) //
+		webClient.get().uri("/auth/foo").header(VaultHttpHeaders.VAULT_NAMESPACE, "baz").retrieve()
+				.bodyToMono(String.class) //
 				.as(StepVerifier::create) //
 				.verifyComplete();
 
 		assertThat(request.getHeaders()).containsEntry(VaultHttpHeaders.VAULT_NAMESPACE,
 				Collections.singletonList("baz"));
 	}
+
 }

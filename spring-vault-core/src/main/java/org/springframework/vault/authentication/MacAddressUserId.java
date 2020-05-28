@@ -57,13 +57,11 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceIndex}. The
 	 * index is applied to {@link NetworkInterface#getNetworkInterfaces()} to obtain the
 	 * desired network interface.
-	 *
 	 * @param networkInterfaceIndex must be greater or equal to zero.
 	 */
 	public MacAddressUserId(int networkInterfaceIndex) {
 
-		Assert.isTrue(networkInterfaceIndex >= 0,
-				"NetworkInterfaceIndex must be greater or equal to 0");
+		Assert.isTrue(networkInterfaceIndex >= 0, "NetworkInterfaceIndex must be greater or equal to 0");
 
 		this.networkInterfaceHint = "" + networkInterfaceIndex;
 	}
@@ -72,7 +70,6 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceName}. This
 	 * name is compared with {@link NetworkInterface#getName()} and
 	 * {@link NetworkInterface#getDisplayName()} to obtain the desired network interface.
-	 *
 	 * @param networkInterfaceName must not be {@literal null}.
 	 */
 	public MacAddressUserId(String networkInterfaceName) {
@@ -88,35 +85,29 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		try {
 
 			Optional<NetworkInterface> networkInterface = Optional.empty();
-			List<NetworkInterface> interfaces = Collections
-					.list(NetworkInterface.getNetworkInterfaces());
+			List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
 
-			if (StringUtils.hasText(networkInterfaceHint)) {
+			if (StringUtils.hasText(this.networkInterfaceHint)) {
 
 				try {
-					networkInterface = getNetworkInterface(
-							Integer.parseInt(networkInterfaceHint), interfaces);
+					networkInterface = getNetworkInterface(Integer.parseInt(this.networkInterfaceHint), interfaces);
 				}
 				catch (NumberFormatException e) {
-					networkInterface = getNetworkInterface((networkInterfaceHint),
-							interfaces);
+					networkInterface = getNetworkInterface((this.networkInterfaceHint), interfaces);
 				}
 			}
 
 			if (!networkInterface.isPresent()) {
 
-				if (StringUtils.hasText(networkInterfaceHint)) {
-					log.warn(String.format(
-							"Did not find a NetworkInterface applying hint %s",
-							networkInterfaceHint));
+				if (StringUtils.hasText(this.networkInterfaceHint)) {
+					this.log.warn(String.format("Did not find a NetworkInterface applying hint %s",
+							this.networkInterfaceHint));
 				}
 
 				InetAddress localHost = InetAddress.getLocalHost();
-				networkInterface = Optional
-						.ofNullable(NetworkInterface.getByInetAddress(localHost));
+				networkInterface = Optional.ofNullable(NetworkInterface.getByInetAddress(localHost));
 
-				if (!networkInterface.filter(MacAddressUserId::hasNetworkAddress)
-						.isPresent()) {
+				if (!networkInterface.filter(MacAddressUserId::hasNetworkAddress).isPresent()) {
 					networkInterface = getNetworkInterfaceWithHardwareAddress(interfaces);
 				}
 			}
@@ -124,8 +115,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			return networkInterface.map(MacAddressUserId::getRequiredNetworkAddress) //
 					.map(Sha256::toHexString) //
 					.map(Sha256::toSha256) //
-					.orElseThrow(() -> new IllegalStateException(
-							"Cannot determine NetworkInterface"));
+					.orElseThrow(() -> new IllegalStateException("Cannot determine NetworkInterface"));
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -133,8 +123,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 	}
 
-	private static Optional<NetworkInterface> getNetworkInterface(Number hint,
-			List<NetworkInterface> interfaces) {
+	private static Optional<NetworkInterface> getNetworkInterface(Number hint, List<NetworkInterface> interfaces) {
 
 		if (interfaces.size() > hint.intValue() && hint.intValue() >= 0) {
 			return Optional.of(interfaces.get(hint.intValue()));
@@ -143,8 +132,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 		return Optional.empty();
 	}
 
-	private static Optional<NetworkInterface> getNetworkInterface(String hint,
-			List<NetworkInterface> interfaces) {
+	private static Optional<NetworkInterface> getNetworkInterface(String hint, List<NetworkInterface> interfaces) {
 
 		return interfaces.stream() //
 				.filter(anInterface -> matchesHint(hint, anInterface)) //
@@ -153,8 +141,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 	private static boolean matchesHint(String hint, NetworkInterface networkInterface) {
 
-		return hint.equals(networkInterface.getDisplayName())
-				|| hint.equals(networkInterface.getName());
+		return hint.equals(networkInterface.getDisplayName()) || hint.equals(networkInterface.getName());
 	}
 
 	private static Optional<NetworkInterface> getNetworkInterfaceWithHardwareAddress(
@@ -172,19 +159,19 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			return Optional.ofNullable(it.getHardwareAddress());
 		}
 		catch (SocketException e) {
-			throw new IllegalStateException(String
-					.format("Cannot determine hardware address for %s", it.getName()));
+			throw new IllegalStateException(String.format("Cannot determine hardware address for %s", it.getName()));
 		}
 	}
 
 	private static byte[] getRequiredNetworkAddress(NetworkInterface it) {
 
 		return getNetworkAddress(it) //
-				.orElseThrow(() -> new IllegalStateException(String.format(
-						"Network interface %s has no hardware address", it.getName())));
+				.orElseThrow(() -> new IllegalStateException(
+						String.format("Network interface %s has no hardware address", it.getName())));
 	}
 
 	private static boolean hasNetworkAddress(NetworkInterface it) {
 		return getNetworkAddress(it).isPresent();
 	}
+
 }

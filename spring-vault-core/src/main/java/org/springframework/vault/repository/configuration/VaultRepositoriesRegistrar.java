@@ -38,4 +38,5 @@ public class VaultRepositoriesRegistrar extends RepositoryBeanDefinitionRegistra
 	protected RepositoryConfigurationExtension getExtension() {
 		return new VaultRepositoryConfigurationExtension();
 	}
+
 }

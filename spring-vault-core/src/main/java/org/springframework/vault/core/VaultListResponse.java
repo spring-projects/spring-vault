@@ -25,4 +25,5 @@ import org.springframework.vault.support.VaultResponseSupport;
  * @author Mark Paluch
  */
 class VaultListResponse extends VaultResponseSupport<Map<String, Object>> {
+
 }

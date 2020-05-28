@@ -45,8 +45,7 @@ public class Certificate {
 
 	private final String issuingCaCertificate;
 
-	Certificate(@JsonProperty("serial_number") String serialNumber,
-			@JsonProperty("certificate") String certificate,
+	Certificate(@JsonProperty("serial_number") String serialNumber, @JsonProperty("certificate") String certificate,
 			@JsonProperty("issuing_ca") String issuingCaCertificate) {
 
 		this.serialNumber = serialNumber;
@@ -57,14 +56,12 @@ public class Certificate {
 	/**
 	 * Create a {@link Certificate} given a private key with certificates and the serial
 	 * number.
-	 *
 	 * @param serialNumber must not be empty or {@literal null}.
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @return the {@link Certificate}
 	 */
-	public static Certificate of(String serialNumber, String certificate,
-			String issuingCaCertificate) {
+	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
@@ -97,7 +94,6 @@ public class Certificate {
 	/**
 	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate
 	 * is DER-encoded.
-	 *
 	 * @return the {@link X509Certificate}.
 	 */
 	public X509Certificate getX509Certificate() {
@@ -114,7 +110,6 @@ public class Certificate {
 	/**
 	 * Retrieve the issuing CA certificate as {@link X509Certificate}. Only supported if
 	 * certificate is DER-encoded.
-	 *
 	 * @return the issuing CA {@link X509Certificate}.
 	 */
 	public X509Certificate getX509IssuerCertificate() {
@@ -124,25 +119,23 @@ public class Certificate {
 			return KeystoreUtil.getCertificate(bytes);
 		}
 		catch (CertificateException e) {
-			throw new VaultException(
-					"Cannot create Certificate from issuing CA certificate", e);
+			throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
 		}
 	}
 
 	/**
 	 * Create a trust store as {@link KeyStore} from this {@link Certificate} containing
 	 * the certificate chain. Only supported if certificate is DER-encoded.
-	 *
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
 	public KeyStore createTrustStore() {
 
 		try {
-			return KeystoreUtil.createKeyStore(getX509Certificate(),
-					getX509IssuerCertificate());
+			return KeystoreUtil.createKeyStore(getX509Certificate(), getX509IssuerCertificate());
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
 	}
+
 }

@@ -42,6 +42,7 @@ import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link LeaseAwareVaultPropertySource}.
+ *
  * @author Mark Paluch
  */
 @ExtendWith(MockitoExtension.class)
@@ -59,17 +60,16 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		doAnswer(invocation -> {
 			listeners.add(invocation.getArgument(0));
 			return null;
-		}).when(leaseContainer).addLeaseListener(any());
-		when(leaseContainer.addRequestedSecret(any())).then(invocation -> {
+		}).when(this.leaseContainer).addLeaseListener(any());
+		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
-			listeners.forEach(leaseListener -> leaseListener
-					.onLeaseEvent(new SecretLeaseCreatedEvent(invocation.getArgument(0),
+			listeners.forEach(
+					leaseListener -> leaseListener.onLeaseEvent(new SecretLeaseCreatedEvent(invocation.getArgument(0),
 							Lease.none(), Collections.singletonMap("key", "value"))));
 			return invocation.getArgument(0);
 		});
 
-		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(
-				leaseContainer, secret);
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(this.leaseContainer, secret);
 
 		assertThat(propertySource.getPropertyNames()).containsOnly("key");
 	}
@@ -83,16 +83,15 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		doAnswer(invocation -> {
 			listeners.add(invocation.getArgument(0));
 			return null;
-		}).when(leaseContainer).addLeaseListener(any());
-		when(leaseContainer.addRequestedSecret(any())).then(invocation -> {
+		}).when(this.leaseContainer).addLeaseListener(any());
+		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
-			listeners.forEach(leaseListener -> leaseListener.onLeaseEvent(
-					new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
+			listeners.forEach(leaseListener -> leaseListener
+					.onLeaseEvent(new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
 			return invocation.getArgument(0);
 		});
 
-		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(
-				leaseContainer, secret);
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(this.leaseContainer, secret);
 
 		assertThat(propertySource.getPropertyNames()).isEmpty();
 	}
@@ -106,20 +105,17 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		doAnswer(invocation -> {
 			errorListeners.add(invocation.getArgument(0));
 			return null;
-		}).when(leaseContainer).addErrorListener(any());
-		when(leaseContainer.addRequestedSecret(any())).then(invocation -> {
+		}).when(this.leaseContainer).addErrorListener(any());
+		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
 			errorListeners.forEach(leaseListener -> {
 				RuntimeException exception = new RuntimeException("Backend error");
-				leaseListener.onLeaseError(
-						new SecretLeaseErrorEvent(secret, Lease.none(), exception),
-						exception);
+				leaseListener.onLeaseError(new SecretLeaseErrorEvent(secret, Lease.none(), exception), exception);
 			});
 			return invocation.getArgument(0);
 		});
 
-		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(
-				leaseContainer, secret);
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(this.leaseContainer, secret);
 
 		assertThat(propertySource.getPropertyNames()).isEmpty();
 	}
@@ -133,21 +129,19 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		doAnswer(invocation -> {
 			errorListeners.add(invocation.getArgument(0));
 			return null;
-		}).when(leaseContainer).addErrorListener(any());
-		when(leaseContainer.addRequestedSecret(any())).then(invocation -> {
+		}).when(this.leaseContainer).addErrorListener(any());
+		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
 			errorListeners.forEach(leaseListener -> {
 				RuntimeException exception = new RuntimeException("Backend error");
-				leaseListener.onLeaseError(
-						new SecretLeaseErrorEvent(secret, Lease.none(), exception),
-						exception);
+				leaseListener.onLeaseError(new SecretLeaseErrorEvent(secret, Lease.none(), exception), exception);
 			});
 			return invocation.getArgument(0);
 		});
 
-		assertThatThrownBy(() -> new LeaseAwareVaultPropertySource("name", leaseContainer,
-				secret, PropertyTransformers.noop(), false))
-						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+		assertThatThrownBy(() -> new LeaseAwareVaultPropertySource("name", this.leaseContainer, secret,
+				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
 						.hasRootCauseExactlyInstanceOf(RuntimeException.class);
 	}
+
 }

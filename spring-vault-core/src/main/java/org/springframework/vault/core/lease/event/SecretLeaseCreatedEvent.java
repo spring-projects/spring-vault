@@ -36,18 +36,17 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 	/**
 	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
-	 *
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
-	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease,
-			Map<String, Object> secrets) {
+	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease, Map<String, Object> secrets) {
 
 		super(requestedSecret, lease);
 		this.secrets = Collections.unmodifiableMap(new LinkedHashMap<>(secrets));
 	}
 
 	public Map<String, Object> getSecrets() {
-		return secrets;
+		return this.secrets;
 	}
+
 }

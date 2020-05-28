@@ -58,8 +58,7 @@ class AuthenticationStepsOperatorUnitTests {
 	@Test
 	void supplierOfStringShouldLoginWithMap() {
 
-		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token")
-				.login(VaultToken::of);
+		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token").login(VaultToken::of);
 
 		login(steps).as(StepVerifier::create) //
 				.expectNext(VaultToken.of("my-token")) //
@@ -69,15 +68,12 @@ class AuthenticationStepsOperatorUnitTests {
 	@Test
 	void justLoginRequestShouldLogin() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
-				"/auth/cert/login");
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/cert/login");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 		response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-		response.setBody("{"
-				+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-				+ "}");
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
-				.then(Mono.just(response));
+		response.setBody(
+				"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}" + "}");
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector).build();
 
@@ -92,12 +88,9 @@ class AuthenticationStepsOperatorUnitTests {
 	@Test
 	void justLoginShouldFail() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST,
-				"/auth/cert/login");
-		MockClientHttpResponse response = new MockClientHttpResponse(
-				HttpStatus.BAD_REQUEST);
-		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request)
-				.then(Mono.just(response));
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/cert/login");
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.BAD_REQUEST);
+		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder().clientConnector(connector).build();
 
@@ -112,14 +105,12 @@ class AuthenticationStepsOperatorUnitTests {
 	@Test
 	void zipWithShouldRequestTwoItems() {
 
-		ClientHttpRequest leftRequest = new MockClientHttpRequest(HttpMethod.GET,
-				"/auth/login/left");
+		ClientHttpRequest leftRequest = new MockClientHttpRequest(HttpMethod.GET, "/auth/login/left");
 		MockClientHttpResponse leftResponse = new MockClientHttpResponse(HttpStatus.OK);
 		leftResponse.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		leftResponse.setBody("{" + "\"request_id\": \"left\"}");
 
-		ClientHttpRequest rightRequest = new MockClientHttpRequest(HttpMethod.GET,
-				"/auth/login/right");
+		ClientHttpRequest rightRequest = new MockClientHttpRequest(HttpMethod.GET, "/auth/login/right");
 		MockClientHttpResponse rightResponse = new MockClientHttpResponse(HttpStatus.OK);
 		rightResponse.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		rightResponse.setBody("{" + "\"request_id\": \"right\"}");
@@ -141,8 +132,8 @@ class AuthenticationStepsOperatorUnitTests {
 		Node<VaultResponse> right = AuthenticationSteps
 				.fromHttpRequest(post("/auth/login/right").as(VaultResponse.class));
 
-		AuthenticationSteps steps = left.zipWith(right).login(it -> VaultToken
-				.of(it.getLeft().getRequestId() + "-" + it.getRight().getRequestId()));
+		AuthenticationSteps steps = left.zipWith(right)
+				.login(it -> VaultToken.of(it.getLeft().getRequestId() + "-" + it.getRight().getRequestId()));
 
 		login(steps, webClient).as(StepVerifier::create) //
 				.expectNext(VaultToken.of("left-right")) //
@@ -151,15 +142,14 @@ class AuthenticationStepsOperatorUnitTests {
 
 	private Mono<VaultToken> login(AuthenticationSteps steps) {
 
-		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps,
-				WebClient.create());
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps, WebClient.create());
 		return operator.getVaultToken();
 	}
 
 	private Mono<VaultToken> login(AuthenticationSteps steps, WebClient webClient) {
 
-		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps,
-				webClient);
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(steps, webClient);
 		return operator.getVaultToken();
 	}
+
 }

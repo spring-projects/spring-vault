@@ -98,30 +98,29 @@ class LifecycleAwareSessionManagerUnitTests {
 
 	@BeforeEach
 	void before() {
-		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
-				taskScheduler, restOperations);
-		sessionManager.addAuthenticationListener(listener);
-		sessionManager.addErrorListener(errorListener);
+		this.sessionManager = new LifecycleAwareSessionManager(this.clientAuthentication, this.taskScheduler,
+				this.restOperations);
+		this.sessionManager.addAuthenticationListener(this.listener);
+		this.sessionManager.addErrorListener(this.errorListener);
 	}
 
 	@Test
 	void shouldObtainTokenFromClientAuthentication() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(LoginToken.of("login"));
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		assertThat(this.sessionManager.getSessionToken()).isEqualTo(LoginToken.of("login"));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 	}
 
 	@Test
 	void loginShouldFail() {
 
-		when(clientAuthentication.login()).thenThrow(new VaultLoginException("foo"));
+		when(this.clientAuthentication.login()).thenThrow(new VaultLoginException("foo"));
 
-		assertThatExceptionOfType(VaultLoginException.class)
-				.isThrownBy(() -> sessionManager.getSessionToken());
-		verifyZeroInteractions(listener);
-		verify(errorListener).onAuthenticationError(any(LoginFailedEvent.class));
+		assertThatExceptionOfType(VaultLoginException.class).isThrownBy(() -> this.sessionManager.getSessionToken());
+		verifyZeroInteractions(this.listener);
+		verify(this.errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
 
 	@Test
@@ -131,21 +130,19 @@ class LifecycleAwareSessionManagerUnitTests {
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
 
-		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
-		when(restOperations.exchange(anyString(), any(), any(),
-				ArgumentMatchers.<Class> any()))
-						.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
+		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
+				.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
 
-		LoginToken sessionToken = (LoginToken) sessionManager.getSessionToken();
+		LoginToken sessionToken = (LoginToken) this.sessionManager.getSessionToken();
 		assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
 
-		verify(restOperations).exchange(eq("auth/token/lookup-self"), eq(HttpMethod.GET),
-				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
-				any(Class.class));
+		verify(this.restOperations).exchange(eq("auth/token/lookup-self"), eq(HttpMethod.GET),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))), any(Class.class));
 
-		verify(listener).onAuthenticationEvent(captor.capture());
-		AfterLoginEvent event = (AfterLoginEvent) captor.getValue();
+		verify(this.listener).onAuthenticationEvent(this.captor.capture());
+		AfterLoginEvent event = (AfterLoginEvent) this.captor.getValue();
 		assertThat(event.getSource()).isSameAs(sessionToken);
 	}
 
@@ -156,35 +153,32 @@ class LifecycleAwareSessionManagerUnitTests {
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(Collections.singletonMap("ttl", 100));
 
-		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
-		when(restOperations.exchange(anyString(), any(), any(),
-				ArgumentMatchers.<Class> any()))
-						.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
+				.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
 
-		VaultToken sessionToken = sessionManager.getSessionToken();
+		VaultToken sessionToken = this.sessionManager.getSessionToken();
 		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verify(errorListener).onAuthenticationError(any());
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.errorListener).onAuthenticationError(any());
 	}
 
 	@Test
 	void shouldTranslateExceptionOnTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofMinutes(5)));
-		when(restOperations.postForObject(anyString(), any(HttpEntity.class), any()))
-				.thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,
-						"Some server error"));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofMinutes(5)));
+		when(this.restOperations.postForObject(anyString(), any(HttpEntity.class), any()))
+				.thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Some server error"));
 
 		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
-		sessionManager.addErrorListener(listener::set);
+		this.sessionManager.addErrorListener(listener::set);
 
-		sessionManager.getSessionToken();
-		sessionManager.renewToken();
+		this.sessionManager.getSessionToken();
+		this.sessionManager.renewToken();
 
-		assertThat(listener.get().getException())
-				.isInstanceOf(VaultTokenRenewalException.class)
+		assertThat(listener.get().getException()).isInstanceOf(VaultTokenRenewalException.class)
 				.hasCauseInstanceOf(HttpServerErrorException.class)
 				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
 	}
@@ -193,210 +187,200 @@ class LifecycleAwareSessionManagerUnitTests {
 	@SuppressWarnings("unchecked")
 	void shouldRevokeLoginTokenOnDestroy() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
-		sessionManager.renewToken();
-		sessionManager.destroy();
+		this.sessionManager.renewToken();
+		this.sessionManager.destroy();
 
-		verify(restOperations).postForObject(eq("auth/token/revoke-self"),
-				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
-				any(Class.class));
+		verify(this.restOperations).postForObject(eq("auth/token/revoke-self"),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))), any(Class.class));
 
-		verify(listener)
-				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
-		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
 	}
 
 	@Test
 	void shouldNotRevokeRegularTokenOnDestroy() {
 
-		when(clientAuthentication.login()).thenReturn(VaultToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
-		sessionManager.setTokenSelfLookupEnabled(false);
-		sessionManager.renewToken();
-		sessionManager.destroy();
+		this.sessionManager.setTokenSelfLookupEnabled(false);
+		this.sessionManager.renewToken();
+		this.sessionManager.destroy();
 
-		verifyZeroInteractions(restOperations);
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verifyNoMoreInteractions(listener);
+		verifyZeroInteractions(this.restOperations);
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(this.listener);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void shouldNotThrowExceptionsOnRevokeErrors() {
 
-		when(clientAuthentication.login()).thenReturn(LoginToken.of("login"));
+		when(this.clientAuthentication.login()).thenReturn(LoginToken.of("login"));
 
-		when(restOperations.postForObject(anyString(), any(),
-				ArgumentMatchers.<Class> any())).thenThrow(
-						new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+		when(this.restOperations.postForObject(anyString(), any(), ArgumentMatchers.<Class>any()))
+				.thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-		sessionManager.renewToken();
-		sessionManager.destroy();
+		this.sessionManager.renewToken();
+		this.sessionManager.destroy();
 
-		verify(restOperations).postForObject(eq("auth/token/revoke-self"),
-				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))),
-				any(Class.class));
-		verify(listener).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verify(listener)
-				.onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
-		verifyNoMoreInteractions(listener);
-		verify(errorListener)
-				.onAuthenticationError(any(LoginTokenRevocationFailedEvent.class));
+		verify(this.restOperations).postForObject(eq("auth/token/revoke-self"),
+				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken.of("login")))), any(Class.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
+		verifyNoMoreInteractions(this.listener);
+		verify(this.errorListener).onAuthenticationError(any(LoginTokenRevocationFailedEvent.class));
 	}
 
 	@Test
 	void shouldScheduleTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		sessionManager.getSessionToken();
+		this.sessionManager.getSessionToken();
 
-		verify(taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void shouldRunTokenRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
-				.thenReturn(fromToken(
-						LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10))));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(restOperations).postForObject(eq("auth/token/renew-self"),
-				eq(new HttpEntity<>(VaultHttpHeaders.from(LoginToken
-						.renewable("login".toCharArray(), Duration.ofSeconds(5))))),
+		verify(this.restOperations).postForObject(eq("auth/token/renew-self"),
+				eq(new HttpEntity<>(
+						VaultHttpHeaders.from(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))))),
 				any(Class.class));
-		verify(clientAuthentication, times(1)).login();
-		verify(listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
-		verify(listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
+		verify(this.clientAuthentication, times(1)).login();
+		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginTokenRenewedEvent.class));
 	}
 
 	@Test
 	void shouldReScheduleTokenRenewalAfterSuccessfulRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
-				.thenReturn(fromToken(
-						LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10))));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler, times(2)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	void shouldNotScheduleRenewalIfRenewalTtlExceedsThreshold() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
-				.thenReturn(fromToken(
-						LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2))));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	void shouldReLoginIfRenewalTtlExceedsThreshold() {
 
-		when(clientAuthentication.login()).thenReturn(
+		when(this.clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
 				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
-				.thenReturn(fromToken(
-						LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2))));
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+				.thenReturn(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(
-				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
+		assertThat(this.sessionManager.getSessionToken())
+				.isEqualTo(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
 
-		verify(clientAuthentication, times(2)).login();
-		verify(listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
-		verify(listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
+		verify(this.clientAuthentication, times(2)).login();
+		verify(this.listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(LoginTokenExpiredEvent.class));
 	}
 
 	@Test
 	void shouldReLoginIfRenewalFails() {
 
-		when(clientAuthentication.login()).thenReturn(
+		when(this.clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
 				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
 				.thenThrow(new ResourceAccessException("Connection refused"));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(
-				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
+		assertThat(this.sessionManager.getSessionToken())
+				.isEqualTo(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
 
-		verify(clientAuthentication, times(2)).login();
+		verify(this.clientAuthentication, times(2)).login();
 	}
 
 	@Test
 	void shouldRetainTokenAfterRenewalFailure() {
 
-		when(clientAuthentication.login()).thenReturn(
+		when(this.clientAuthentication.login()).thenReturn(
 				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)),
 				LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
+		when(this.restOperations.postForObject(anyString(), any(), eq(VaultResponse.class)))
 				.thenThrow(new ResourceAccessException("Connection refused"));
-		sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
+		this.sessionManager.setLeaseStrategy(LeaseStrategy.retainOnError());
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		assertThat(this.sessionManager.getSessionToken())
+				.isEqualTo(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		verify(clientAuthentication).login();
+		verify(this.clientAuthentication).login();
 	}
 
 	@Test
 	void shouldUseTaskScheduler() {
 
-		sessionManager = new LifecycleAwareSessionManager(clientAuthentication,
-				taskScheduler, restOperations);
+		this.sessionManager = new LifecycleAwareSessionManager(this.clientAuthentication, this.taskScheduler,
+				this.restOperations);
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(any(Runnable.class), triggerCaptor.capture());
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(any(Runnable.class), triggerCaptor.capture());
 
 		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNotNull();
 		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNull();
@@ -406,49 +390,47 @@ class LifecycleAwareSessionManagerUnitTests {
 	@SuppressWarnings("unchecked")
 	void shouldNotReScheduleTokenRenewalAfterFailedRenewal() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), any(),
-				ArgumentMatchers.<Class> any())).thenThrow(
-						new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), any(), ArgumentMatchers.<Class>any()))
+				.thenThrow(new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
-		sessionManager.getSessionToken();
-		verify(taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
+		this.sessionManager.getSessionToken();
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
 
-		verify(taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
+		verify(this.taskScheduler, times(1)).schedule(any(Runnable.class), any(Trigger.class));
 	}
 
 	@Test
 	void shouldObtainTokenIfNoTokenAvailable() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
-		sessionManager.renewToken();
+		this.sessionManager.renewToken();
 
-		assertThat(sessionManager.getSessionToken()).isEqualTo(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		verify(clientAuthentication, times(1)).login();
+		assertThat(this.sessionManager.getSessionToken())
+				.isEqualTo(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		verify(this.clientAuthentication, times(1)).login();
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	void renewShouldReportFalseIfTokenRenewalFails() {
 
-		when(clientAuthentication.login()).thenReturn(
-				LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
-		when(restOperations.postForObject(anyString(), ArgumentMatchers.any(),
-				ArgumentMatchers.<Class> any()))
-						.thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), ArgumentMatchers.any(), ArgumentMatchers.<Class>any()))
+				.thenThrow(new HttpServerErrorException(HttpStatus.BAD_REQUEST));
 
-		sessionManager.getSessionToken();
+		this.sessionManager.getSessionToken();
 
-		assertThat(sessionManager.renewToken()).isFalse();
-		verify(clientAuthentication, times(1)).login();
+		assertThat(this.sessionManager.renewToken()).isFalse();
+		verify(this.clientAuthentication, times(1)).login();
 	}
 
 	private static VaultResponse fromToken(LoginToken loginToken) {
@@ -464,4 +446,5 @@ class LifecycleAwareSessionManagerUnitTests {
 
 		return response;
 	}
+
 }

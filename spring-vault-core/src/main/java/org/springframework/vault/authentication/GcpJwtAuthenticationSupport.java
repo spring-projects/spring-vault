@@ -35,8 +35,7 @@ import org.springframework.web.client.RestOperations;
  */
 public abstract class GcpJwtAuthenticationSupport {
 
-	private static final Log logger = LogFactory
-			.getLog(GcpJwtAuthenticationSupport.class);
+	private static final Log logger = LogFactory.getLog(GcpJwtAuthenticationSupport.class);
 
 	private final RestOperations restOperations;
 
@@ -49,39 +48,33 @@ public abstract class GcpJwtAuthenticationSupport {
 
 	/**
 	 * Perform the actual Vault login given {@code signedJwt}.
-	 *
 	 * @param authenticationName authentication name for logging.
 	 * @param signedJwt the JSON web token.
 	 * @param path GCP authentication mount path.
 	 * @param role Vault role.
 	 * @return the {@link VaultToken}.
 	 */
-	VaultToken doLogin(String authenticationName, String signedJwt, String path,
-			String role) {
+	VaultToken doLogin(String authenticationName, String signedJwt, String path, String role) {
 
 		Map<String, String> login = createRequestBody(role, signedJwt);
 
 		try {
 
-			VaultResponse response = this.restOperations.postForObject(
-					AuthenticationUtil.getLoginPath(path), login, VaultResponse.class);
+			VaultResponse response = this.restOperations.postForObject(AuthenticationUtil.getLoginPath(path), login,
+					VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null,
-					"Auth field must not be null");
+			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			if (logger.isDebugEnabled()) {
 
 				if (response.getAuth().get("metadata") instanceof Map) {
 
-					Map<Object, Object> metadata = (Map<Object, Object>) response
-							.getAuth().get("metadata");
-					logger.debug(String.format(
-							"Login successful using %s authentication for user id %s",
+					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
+					logger.debug(String.format("Login successful using %s authentication for user id %s",
 							authenticationName, metadata.get("service_account_email")));
 				}
 				else {
-					logger.debug("Login successful using " + authenticationName
-							+ " authentication");
+					logger.debug("Login successful using " + authenticationName + " authentication");
 				}
 			}
 
@@ -101,4 +94,5 @@ public abstract class GcpJwtAuthenticationSupport {
 
 		return login;
 	}
+
 }

@@ -47,44 +47,39 @@ class VaultPropertySourceUnitTests {
 
 	@Test
 	void shouldRejectEmptyPath() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new VaultPropertySource("hello", vaultTemplate, "",
-						PropertyTransformers.noop()));
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
 
 	}
 
 	@Test
 	void shouldRejectPathStartingWithSlash() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
-						"/secret", PropertyTransformers.noop()));
+		assertThatIllegalArgumentException().isThrownBy(
+				() -> new VaultPropertySource("hello", this.vaultTemplate, "/secret", PropertyTransformers.noop()));
 	}
 
 	@Test
 	void propertiesNotFoundShouldFailOnIgnoreSecretNotFoundDisabled() {
 
-		assertThatThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
-				"secret/myapp", PropertyTransformers.noop(), false))
-						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+		assertThatThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
 						.hasNoCause();
 	}
 
 	@Test
 	void shouldPropagateFetchErrorIgnoreSecretNotFoundDisabled() {
 
-		when(vaultTemplate.read("secret/myapp"))
-				.thenThrow(new VaultException("HTTP error"));
-		assertThatThrownBy(() -> new VaultPropertySource("hello", vaultTemplate,
-				"secret/myapp", PropertyTransformers.noop(), false))
-						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+		when(this.vaultTemplate.read("secret/myapp")).thenThrow(new VaultException("HTTP error"));
+		assertThatThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
 						.hasRootCauseExactlyInstanceOf(VaultException.class);
 	}
 
 	@Test
 	void propertiesNotFoundShouldBeIgnoredByDefault() {
 
-		VaultPropertySource source = new VaultPropertySource("hello", vaultTemplate,
-				"secret/myapp", PropertyTransformers.noop());
+		VaultPropertySource source = new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop());
 
 		assertThat(source.getPropertyNames()).isEmpty();
 	}
@@ -92,11 +87,10 @@ class VaultPropertySourceUnitTests {
 	@Test
 	void shouldIgnoreFetchErrorByDefault() {
 
-		when(vaultTemplate.read("secret/myapp"))
-				.thenThrow(new VaultException("HTTP error"));
+		when(this.vaultTemplate.read("secret/myapp")).thenThrow(new VaultException("HTTP error"));
 
-		VaultPropertySource source = new VaultPropertySource("hello", vaultTemplate,
-				"secret/myapp", PropertyTransformers.noop());
+		VaultPropertySource source = new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop());
 
 		assertThat(source.getPropertyNames()).isEmpty();
 	}
@@ -106,8 +100,8 @@ class VaultPropertySourceUnitTests {
 
 		prepareResponse();
 
-		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
-				vaultTemplate, "secret/myapp", PropertyTransformers.noop());
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop());
 
 		assertThat(vaultPropertySource.getProperty("key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("integer")).isEqualTo(1);
@@ -121,8 +115,7 @@ class VaultPropertySourceUnitTests {
 
 		prepareResponse();
 
-		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
-				vaultTemplate, "secret/myapp",
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
 				PropertyTransformers.propertyNamePrefix("database."));
 
 		assertThat(vaultPropertySource.containsProperty("database.key")).isTrue();
@@ -130,8 +123,7 @@ class VaultPropertySourceUnitTests {
 		assertThat(vaultPropertySource.getProperty("database.key")).isEqualTo("value");
 		assertThat(vaultPropertySource.getProperty("key")).isNull();
 		assertThat(vaultPropertySource.getProperty("database.integer")).isEqualTo(1);
-		assertThat(vaultPropertySource.getProperty("database.complex.key"))
-				.isEqualTo("value");
+		assertThat(vaultPropertySource.getProperty("database.complex.key")).isEqualTo("value");
 	}
 
 	@Test
@@ -139,11 +131,10 @@ class VaultPropertySourceUnitTests {
 
 		prepareResponse();
 
-		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello",
-				vaultTemplate, "secret/myapp", PropertyTransformers.noop());
+		VaultPropertySource vaultPropertySource = new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
+				PropertyTransformers.noop());
 
-		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer",
-				"complex.key");
+		assertThat(vaultPropertySource.getPropertyNames()).contains("key", "integer", "complex.key");
 	}
 
 	private void prepareResponse() {
@@ -157,6 +148,7 @@ class VaultPropertySourceUnitTests {
 		VaultResponse vaultResponse = new VaultResponse();
 		vaultResponse.setData(data);
 
-		when(vaultTemplate.read("secret/myapp")).thenReturn(vaultResponse);
+		when(this.vaultTemplate.read("secret/myapp")).thenReturn(vaultResponse);
 	}
+
 }

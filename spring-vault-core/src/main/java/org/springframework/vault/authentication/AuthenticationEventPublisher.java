@@ -46,7 +46,6 @@ public abstract class AuthenticationEventPublisher {
 	/**
 	 * Add a {@link AuthenticationListener}. The listener starts receiving events as soon
 	 * as possible.
-	 *
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addAuthenticationListener(AuthenticationListener listener) {
@@ -58,7 +57,6 @@ public abstract class AuthenticationEventPublisher {
 
 	/**
 	 * Remove a {@link AuthenticationListener}.
-	 *
 	 * @param listener must not be {@literal null}.
 	 */
 	public void removeAuthenticationListener(AuthenticationListener listener) {
@@ -68,7 +66,6 @@ public abstract class AuthenticationEventPublisher {
 	/**
 	 * Add a {@link AuthenticationErrorListener}. The listener starts receiving events as
 	 * soon as possible.
-	 *
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addErrorListener(AuthenticationErrorListener listener) {
@@ -80,7 +77,6 @@ public abstract class AuthenticationEventPublisher {
 
 	/**
 	 * Remove a {@link AuthenticationErrorListener}.
-	 *
 	 * @param listener must not be {@literal null}.
 	 */
 	public void removeErrorListener(AuthenticationErrorListener listener) {
@@ -89,25 +85,24 @@ public abstract class AuthenticationEventPublisher {
 
 	/**
 	 * Dispatch the event to all {@link AuthenticationListener}s.
-	 *
 	 * @param authenticationEvent the event to dispatch.
 	 */
 	void dispatch(AuthenticationEvent authenticationEvent) {
 
-		for (AuthenticationListener listener : listeners) {
+		for (AuthenticationListener listener : this.listeners) {
 			listener.onAuthenticationEvent(authenticationEvent);
 		}
 	}
 
 	/**
 	 * Dispatch the event to all {@link AuthenticationErrorListener}s.
-	 *
 	 * @param authenticationEvent the event to dispatch.
 	 */
 	void dispatch(AuthenticationErrorEvent authenticationEvent) {
 
-		for (AuthenticationErrorListener listener : errorListeners) {
+		for (AuthenticationErrorListener listener : this.errorListeners) {
 			listener.onAuthenticationError(authenticationEvent);
 		}
 	}
+
 }

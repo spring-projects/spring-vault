@@ -50,8 +50,7 @@ public class GcpComputeAuthenticationOptions {
 	 */
 	private final String role;
 
-	private GcpComputeAuthenticationOptions(String path, String serviceAccount,
-			String role) {
+	private GcpComputeAuthenticationOptions(String path, String serviceAccount, String role) {
 
 		this.path = path;
 		this.serviceAccount = serviceAccount;
@@ -69,21 +68,21 @@ public class GcpComputeAuthenticationOptions {
 	 * @return the path of the gcp authentication backend mount.
 	 */
 	public String getPath() {
-		return path;
+		return this.path;
 	}
 
 	/**
 	 * @return the GCE service account identifier.
 	 */
 	public String getServiceAccount() {
-		return serviceAccount;
+		return this.serviceAccount;
 	}
 
 	/**
 	 * @return name of the role against which the login is being attempted.
 	 */
 	public String getRole() {
-		return role;
+		return this.role;
 	}
 
 	/**
@@ -103,7 +102,6 @@ public class GcpComputeAuthenticationOptions {
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
-		 *
 		 * @param path must not be empty or {@literal null}.
 		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
 		 */
@@ -118,12 +116,10 @@ public class GcpComputeAuthenticationOptions {
 		/**
 		 * Configure the service account identifier. Uses the {@code default} service
 		 * account if left unconfigured.
-		 *
 		 * @param serviceAccount must not be empty or {@literal null}.
 		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
 		 */
-		public GcpComputeAuthenticationOptionsBuilder serviceAccount(
-				String serviceAccount) {
+		public GcpComputeAuthenticationOptionsBuilder serviceAccount(String serviceAccount) {
 
 			Assert.hasText(serviceAccount, "Service account must not be null");
 
@@ -133,7 +129,6 @@ public class GcpComputeAuthenticationOptions {
 
 		/**
 		 * Configure the name of the role against which the login is being attempted.
-		 *
 		 * @param role must not be empty or {@literal null}.
 		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
 		 */
@@ -147,14 +142,15 @@ public class GcpComputeAuthenticationOptions {
 
 		/**
 		 * Build a new {@link GcpComputeAuthenticationOptions} instance.
-		 *
 		 * @return a new {@link GcpComputeAuthenticationOptions}.
 		 */
 		public GcpComputeAuthenticationOptions build() {
 
-			Assert.notNull(role, "Role must not be null");
+			Assert.notNull(this.role, "Role must not be null");
 
-			return new GcpComputeAuthenticationOptions(path, serviceAccount, role);
+			return new GcpComputeAuthenticationOptions(this.path, this.serviceAccount, this.role);
 		}
+
 	}
+
 }

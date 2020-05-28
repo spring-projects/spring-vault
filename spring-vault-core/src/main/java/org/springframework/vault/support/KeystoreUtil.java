@@ -66,15 +66,13 @@ class KeystoreUtil {
 	/**
 	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
 	 * certificates} using the given {@code keyAlias}.
-	 *
 	 * @param keyAlias
 	 * @param certificates
 	 * @return
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec,
-			X509Certificate... certificates)
+	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, X509Certificate... certificates)
 			throws GeneralSecurityException, IOException {
 
 		PrivateKey privateKey = KEY_FACTORY.generatePrivate(privateKeySpec);
@@ -93,22 +91,19 @@ class KeystoreUtil {
 	/**
 	 * Create a {@link KeyStore} containing the {@link X509Certificate certificates}
 	 * stored with as {@code cert_0, cert_1...cert_N}.
-	 *
 	 * @param certificates
 	 * @return
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 * @since 2.0
 	 */
-	static KeyStore createKeyStore(X509Certificate... certificates)
-			throws GeneralSecurityException, IOException {
+	static KeyStore createKeyStore(X509Certificate... certificates) throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = createKeyStore();
 
 		int counter = 0;
 		for (X509Certificate certificate : certificates) {
-			keyStore.setCertificateEntry(String.format("cert_%d", counter++),
-					certificate);
+			keyStore.setCertificateEntry(String.format("cert_%d", counter++), certificate);
 		}
 
 		return keyStore;
@@ -118,19 +113,17 @@ class KeystoreUtil {
 
 		List<X509Certificate> certificates = getCertificates(CERTIFICATE_FACTORY, source);
 
-		return certificates.stream().findFirst().orElseThrow(
-				() -> new IllegalArgumentException("No X509Certificate found"));
+		return certificates.stream().findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No X509Certificate found"));
 	}
 
 	/**
 	 * Create an empty {@link KeyStore}.
-	 *
 	 * @return the {@link KeyStore}.
 	 * @throws GeneralSecurityException
 	 * @throws IOException
 	 */
-	private static KeyStore createKeyStore()
-			throws GeneralSecurityException, IOException {
+	private static KeyStore createKeyStore() throws GeneralSecurityException, IOException {
 
 		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keyStore.load(null, new char[0]);
@@ -138,8 +131,8 @@ class KeystoreUtil {
 		return keyStore;
 	}
 
-	private static List<X509Certificate> getCertificates(CertificateFactory cf,
-			byte[] source) throws CertificateException {
+	private static List<X509Certificate> getCertificates(CertificateFactory cf, byte[] source)
+			throws CertificateException {
 
 		List<X509Certificate> x509Certificates = new ArrayList<>();
 
@@ -175,13 +168,11 @@ class KeystoreUtil {
 	 * Supports PEM objects with a {@code SEQUENCE} and {@code OBJECT IDENTIFIER} header
 	 * where the actual key sequence is represented as {@code BIT_STRING} (as of
 	 * {@code openssl -pubout} format).
-	 *
 	 * @param keyBytes PKCS#1 encoded key
 	 * @return KeySpec
 	 * @since 2.3
 	 */
-	static RSAPublicKeySpec getRSAPublicKeySpec(byte[] keyBytes)
-			throws IOException, IllegalStateException {
+	static RSAPublicKeySpec getRSAPublicKeySpec(byte[] keyBytes) throws IOException, IllegalStateException {
 		DerParser parser = new DerParser(keyBytes);
 
 		Asn1Object sequence = parser.read();
@@ -197,10 +188,8 @@ class KeystoreUtil {
 
 			Asn1Object read = object.getParser().read();
 			if (!ObjectIdentifiers.RSA.equalsIgnoreCase(read.getString())) {
-				throw new IllegalStateException(
-						"Unsupported Public Key Algorithm. Expected RSA ("
-								+ ObjectIdentifiers.RSA + "), but was: "
-								+ read.getString());
+				throw new IllegalStateException("Unsupported Public Key Algorithm. Expected RSA ("
+						+ ObjectIdentifiers.RSA + "), but was: " + read.getString());
 			}
 
 			Asn1Object bitString = parser.read();
@@ -248,7 +237,6 @@ class KeystoreUtil {
 	 *   otherPrimeInfos   OtherPrimeInfos OPTIONAL
 	 * }
 	 * </pre>
-	 *
 	 * @param keyBytes PKCS#1 encoded key
 	 * @return KeySpec
 	 */
@@ -273,12 +261,13 @@ class KeystoreUtil {
 		BigInteger exp2 = parser.read().getInteger();
 		BigInteger crtCoef = parser.read().getInteger();
 
-		return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2,
-				exp1, exp2, crtCoef);
+		return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2, exp1, exp2, crtCoef);
 	}
 
 	private static class ObjectIdentifiers {
+
 		static final String RSA = "1.2.840.113549.1.1.1";
+
 	}
 
 	/**
@@ -338,7 +327,6 @@ class KeystoreUtil {
 
 		/**
 		 * Create a new DER decoder from an input stream.
-		 *
 		 * @param in The DER encoded stream
 		 */
 		DerParser(InputStream in) {
@@ -347,7 +335,6 @@ class KeystoreUtil {
 
 		/**
 		 * Create a new DER decoder from a byte array.
-		 *
 		 * @param bytes The encoded bytes
 		 */
 		DerParser(byte[] bytes) {
@@ -357,31 +344,28 @@ class KeystoreUtil {
 		/**
 		 * Read next object. If it's constructed, the value holds encoded content and it
 		 * should be parsed by a new parser from <code>Asn1Object.getParser</code>.
-		 *
 		 * @return A object
 		 */
 		public Asn1Object read() throws IOException {
 
-			int tag = in.read();
+			int tag = this.in.read();
 
 			if (tag == -1) {
-				throw new IllegalStateException(
-						"Invalid DER: stream too short, missing tag");
+				throw new IllegalStateException("Invalid DER: stream too short, missing tag");
 			}
 
 			int length = getLength();
 
 			if (tag == BIT_STRING) {
 				// Not sure what to do with this one.
-				int padBits = in.read();
+				int padBits = this.in.read();
 				length--;
 			}
 
 			byte[] value = new byte[length];
-			int n = in.read(value);
+			int n = this.in.read(value);
 			if (n < length) {
-				throw new IllegalStateException(
-						"Invalid DER: stream too short, missing value");
+				throw new IllegalStateException("Invalid DER: stream too short, missing value");
 			}
 
 			return new Asn1Object(tag, length, value);
@@ -400,12 +384,11 @@ class KeystoreUtil {
 		 * Second and following octets give the length, base 256, most significant digit
 		 * first.
 		 * </ul>
-		 *
 		 * @return The length as integer
 		 */
 		private int getLength() throws IOException {
 
-			int i = in.read();
+			int i = this.in.read();
 			if (i == -1) {
 				throw new IllegalStateException("Invalid DER: length missing");
 			}
@@ -419,18 +402,18 @@ class KeystoreUtil {
 
 			// We can't handle length longer than 4 bytes
 			if (i >= 0xFF || num > 4) {
-				throw new IllegalStateException(
-						"Invalid DER: length field too big (" + i + ")");
+				throw new IllegalStateException("Invalid DER: length field too big (" + i + ")");
 			}
 
 			byte[] bytes = new byte[num];
-			int n = in.read(bytes);
+			int n = this.in.read(bytes);
 			if (n < num) {
 				throw new IllegalStateException("Invalid DER: length too short");
 			}
 
 			return new BigInteger(1, bytes).intValue();
 		}
+
 	}
 
 	/**
@@ -441,8 +424,11 @@ class KeystoreUtil {
 		private static final long LONG_LIMIT = (Long.MAX_VALUE >> 7) - 0x7f;
 
 		private final int type;
+
 		private final int length;
+
 		private final byte[] value;
+
 		private final int tag;
 
 		/**
@@ -466,7 +452,6 @@ class KeystoreUtil {
 		 * <li>Type: This is actually called tag in ASN.1. It indicates data type
 		 * (Integer, String) or a construct (sequence, choice, set).
 		 * </ul>
-		 *
 		 * @param tag Tag or Identifier
 		 * @param length Length of the field
 		 * @param value Encoded octet string for the field.
@@ -479,61 +464,56 @@ class KeystoreUtil {
 		}
 
 		int getType() {
-			return type;
+			return this.type;
 		}
 
 		int getLength() {
-			return length;
+			return this.length;
 		}
 
 		byte[] getValue() {
-			return value;
+			return this.value;
 		}
 
 		boolean isConstructed() {
-			return (tag & DerParser.CONSTRUCTED) == DerParser.CONSTRUCTED;
+			return (this.tag & DerParser.CONSTRUCTED) == DerParser.CONSTRUCTED;
 		}
 
 		/**
 		 * For constructed field, return a parser for its content.
-		 *
 		 * @return A parser for the construct.
 		 */
 		DerParser getParser() throws IOException {
 
 			if (!isConstructed()) {
-				throw new IllegalStateException(
-						"Invalid DER: can't parse primitive entity");
+				throw new IllegalStateException("Invalid DER: can't parse primitive entity");
 			}
 
-			return new DerParser(value);
+			return new DerParser(this.value);
 		}
 
 		/**
 		 * Get the value as integer
-		 *
 		 * @return BigInteger
 		 */
 		BigInteger getInteger() {
 
-			if (type != DerParser.INTEGER) {
-				throw new IllegalStateException(
-						String.format("Invalid DER: object (%d) is not integer.", type));
+			if (this.type != DerParser.INTEGER) {
+				throw new IllegalStateException(String.format("Invalid DER: object (%d) is not integer.", this.type));
 			}
 
-			return new BigInteger(value);
+			return new BigInteger(this.value);
 		}
 
 		/**
 		 * Get value as string. Most strings are treated as ISO-8859-1.
-		 *
 		 * @return Java string
 		 */
 		String getString() throws IOException {
 
 			String encoding;
 
-			switch (type) {
+			switch (this.type) {
 
 			// Not all are ISO-8859-1 but it's the closest thing
 			case DerParser.NUMERIC_STRING:
@@ -558,13 +538,12 @@ class KeystoreUtil {
 				throw new IOException("Invalid DER: can't handle UCS-4 string");
 
 			case DerParser.OID:
-				return getObjectIdentifier(value);
+				return getObjectIdentifier(this.value);
 			default:
-				throw new IOException(
-						String.format("Invalid DER: object (%d) is not a string", type));
+				throw new IOException(String.format("Invalid DER: object (%d) is not a string", this.type));
 			}
 
-			return new String(value, encoding);
+			return new String(this.value, encoding);
 		}
 
 		private static String getObjectIdentifier(byte bytes[]) {
@@ -628,5 +607,7 @@ class KeystoreUtil {
 
 			return objId.toString();
 		}
+
 	}
+
 }

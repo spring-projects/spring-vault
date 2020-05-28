@@ -60,11 +60,9 @@ public class SecurePropertyUsage {
 
 		vaultOperations.write("secret/secure-introduction", data);
 
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				Config.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 
-		System.out.println(context.getEnvironment()
-				.getProperty("my-property-that-references-vault"));
+		System.out.println(context.getEnvironment().getProperty("my-property-that-references-vault"));
 		System.out.println(context.getEnvironment().getProperty("encrypted"));
 
 		System.out.println(context.getBean(Client.class).myValue);
@@ -72,8 +70,7 @@ public class SecurePropertyUsage {
 		context.stop();
 	}
 
-	@PropertySources({
-			@PropertySource("classpath:/org/springframework/vault/demo/secure-introduction.properties"),
+	@PropertySources({ @PropertySource("classpath:/org/springframework/vault/demo/secure-introduction.properties"),
 			@PropertySource("classpath:/org/springframework/vault/demo/other.properties") })
 	@VaultPropertySource({ "secret/secure-introduction" })
 	@Configuration
@@ -84,6 +81,7 @@ public class SecurePropertyUsage {
 		public ClientAuthentication clientAuthentication() {
 			return new TokenAuthentication(getEnvironment().getProperty("vault.token"));
 		}
+
 	}
 
 	@Component
@@ -93,4 +91,5 @@ public class SecurePropertyUsage {
 		String myValue;
 
 	}
+
 }
