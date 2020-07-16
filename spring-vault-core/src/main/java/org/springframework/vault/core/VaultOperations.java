@@ -85,6 +85,19 @@ public interface VaultOperations {
 	VaultTokenOperations opsForToken();
 
 	/**
+	 * @return the operations interface to interact with the Vault transform backend.
+	 */
+	VaultTransformOperations opsForTransform();
+
+	/**
+	 * Return {@link VaultTransformOperations} if the transit backend is mounted on a
+	 * different path than {@code transform}.
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault transform backend.
+	 */
+	VaultTransformOperations opsForTransform(String path);
+
+	/**
 	 * @return the operations interface to interact with the Vault transit backend.
 	 */
 	VaultTransitOperations opsForTransit();
