@@ -321,6 +321,16 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	public VaultTransformOperations opsForTransform() {
+		return opsForTransform("transform");
+	}
+
+	@Override
+	public VaultTransformOperations opsForTransform(String path) {
+		return new VaultTransformTemplate(this, path);
+	}
+
+	@Override
 	public VaultTransitOperations opsForTransit() {
 		return opsForTransit("transit");
 	}

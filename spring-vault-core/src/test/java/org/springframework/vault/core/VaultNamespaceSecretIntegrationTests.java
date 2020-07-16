@@ -67,7 +67,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 
 	RestTemplateBuilder devRestTemplate;
 
-	RestTemplateBuilder maketingRestTemplate;
+	RestTemplateBuilder marketingRestTemplate;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
 			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
@@ -97,7 +97,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).customizers(restTemplate -> restTemplate
 						.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
 
-		this.maketingRestTemplate = RestTemplateBuilder.builder()
+		this.marketingRestTemplate = RestTemplateBuilder.builder()
 				.requestFactory(
 						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
 				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
@@ -111,7 +111,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		this.devToken = dev.opsForToken().create(VaultTokenRequest.builder().withPolicy("relaxed").build()).getToken()
 				.getToken();
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(marketing, "marketing-secrets");
@@ -137,7 +137,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 
 		VaultTemplate dev = new VaultTemplate(this.devRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(this.devToken)));
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev"));
@@ -163,7 +163,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void reactiveNamespaceSecretsAreIsolated() {
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(this.marketingWebClientBuilder,
@@ -181,7 +181,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReportInitialized() {
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		assertThat(marketing.opsForSys().isInitialized()).isTrue();
@@ -190,7 +190,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReportHealth() {
 
-		VaultTemplate marketing = new VaultTemplate(this.maketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		assertThat(marketing.opsForSys().health().isInitialized()).isTrue();
