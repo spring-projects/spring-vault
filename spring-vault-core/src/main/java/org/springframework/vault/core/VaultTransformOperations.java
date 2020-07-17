@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
  * @author Lauren Voswinkel
  * @see <a href="https://www.vaultproject.io/docs/secrets/transform/index.html">Transform
  * Secrets Engine</a>
+ * @since 2.3
  */
 public interface VaultTransformOperations {
 	/**
@@ -39,7 +40,6 @@ public interface VaultTransformOperations {
 	 * Encodes the provided plaintext using the named role.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
-	 * @since 1.1
 	 * @return cipher text.
 	 */
 	TransformCiphertext encode(String roleName, TransformPlaintext plaintext);
@@ -62,7 +62,6 @@ public interface VaultTransformOperations {
 	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
 	 * optional context.
 	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
-	 * @since 1.1
 	 */
 	List<VaultTransformEncodeResult> encode(String roleName, List<TransformPlaintext> batchRequest);
 
@@ -79,7 +78,6 @@ public interface VaultTransformOperations {
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param ciphertext must not be {@literal null}.
 	 * @return plain text.
-	 * @since 1.1
 	 */
 	TransformPlaintext decode(String roleName, TransformCiphertext ciphertext);
 
@@ -101,7 +99,6 @@ public interface VaultTransformOperations {
 	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
 	 * optional context.
 	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
-	 * @since 1.1
 	 */
 	List<VaultTransformDecodeResult> decode(String roleName, List<TransformCiphertext> batchRequest);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Arrays;
  * Transform backend encode/decode context object.
  *
  * @author Lauren Voswinkel
+ * @since 2.3
  */
 public class VaultTransformContext {
 
@@ -59,7 +60,6 @@ public class VaultTransformContext {
 	 * Create a {@link VaultTransformContext} given {@code transformation} bytes.
 	 * @param transformation name as a byte array, must not be {@literal null}.
 	 * @return a {@link VaultTransformContext} for {@code transformation}.
-	 * @since 2.0
 	 */
 	public static VaultTransformContext fromTransformation(String transformation) {
 		return builder().transformation(transformation).build();
@@ -69,7 +69,6 @@ public class VaultTransformContext {
 	 * Create a {@link VaultTransformContext} given {@code tweak} String.
 	 * @param tweak bytes, must be 7 characters long, must not be {@literal null}.
 	 * @return a {@link VaultTransformContext} for {@code tweak}.
-	 * @since 2.0
 	 */
 	public static VaultTransformContext fromTweak(byte[] tweak) {
 		return builder().tweak(tweak).build();

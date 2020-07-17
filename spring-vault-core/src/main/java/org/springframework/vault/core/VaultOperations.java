@@ -86,6 +86,7 @@ public interface VaultOperations {
 
 	/**
 	 * @return the operations interface to interact with the Vault transform backend.
+	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform();
 
@@ -94,6 +95,7 @@ public interface VaultOperations {
 	 * different path than {@code transform}.
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transform backend.
+	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform(String path);
 
