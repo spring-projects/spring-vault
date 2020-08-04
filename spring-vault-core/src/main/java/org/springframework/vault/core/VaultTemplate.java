@@ -97,6 +97,23 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
 	}
 
+    public VaultTemplate(VaultEndpoint vaultEndpoint, ClientAuthentication clientAuthentication, RestTemplate restTemplate) {
+
+        Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
+        Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
+        Assert.notNull(restTemplate, "RestTemplate must not be null");
+
+        this.sessionManager = new SimpleSessionManager(clientAuthentication);
+        this.dedicatedSessionManager = true;
+
+        ClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+
+        VaultEndpointProvider endpointProvider = SimpleVaultEndpointProvider.of(vaultEndpoint);
+
+        this.statelessTemplate = restTemplate;
+        this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
+    }
+
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultEndpoint}, and
 	 * {@link ClientHttpRequestFactory}. This constructor does not use a
