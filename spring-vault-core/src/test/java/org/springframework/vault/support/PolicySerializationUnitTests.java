@@ -129,4 +129,18 @@ class PolicySerializationUnitTests {
 		assertThat(rule.getMinWrappingTtl()).isEqualTo(Duration.ofHours(1));
 	}
 
+	@Test
+	void crudShouldReturnCrudCapabilities() {
+
+		assertThat(Policy.BuiltinCapabilities.crud()).hasSize(5).contains(Policy.BuiltinCapabilities.CREATE)
+				.doesNotContain(Policy.BuiltinCapabilities.SUDO);
+	}
+
+	@Test
+	void sudoShouldReturnCrudAndSudoCapabilities() {
+
+		assertThat(Policy.BuiltinCapabilities.crudAndSudo()).hasSize(6).contains(Policy.BuiltinCapabilities.CREATE)
+				.contains(Policy.BuiltinCapabilities.SUDO);
+	}
+
 }

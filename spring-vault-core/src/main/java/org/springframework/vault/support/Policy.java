@@ -546,7 +546,6 @@ public class Policy {
 		/**
 		 * Deprecated: Previous capability literal before it was split into
 		 * {@link #CREATE} and {@link #UPDATE}.
-		 *
 		 * @deprecated since 2.3 and Vault 0.5.
 		 */
 		@Deprecated
@@ -593,6 +592,27 @@ public class Policy {
 			}
 
 			return null;
+		}
+
+		/**
+		 * Return all capabilities ({@link #CREATE},{@link #READ},{@link #UPDATE},
+		 * {@link #DELETE}, {@link #LIST}) for regular CRUD operations.
+		 * @return all CRUD operations.
+		 * @since 2.3
+		 */
+		public static List<Capability> crud() {
+			return Arrays.asList(CREATE, READ, UPDATE, DELETE, LIST);
+		}
+
+		/**
+		 * Return all capabilities ({@link #CREATE},{@link #READ},{@link #UPDATE},
+		 * {@link #DELETE}, {@link #LIST}) for regular CRUD operations including
+		 * {@link #SUDO}.
+		 * @return all CRUD operations including SUDO.
+		 * @since 2.3
+		 */
+		public static List<Capability> crudAndSudo() {
+			return Arrays.asList(CREATE, READ, UPDATE, DELETE, LIST, SUDO);
 		}
 
 	}
