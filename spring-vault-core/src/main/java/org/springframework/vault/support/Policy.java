@@ -546,7 +546,10 @@ public class Policy {
 		/**
 		 * Deprecated: Previous capability literal before it was split into
 		 * {@link #CREATE} and {@link #UPDATE}.
+		 *
+		 * @deprecated since 2.3 and Vault 0.5.
 		 */
+		@Deprecated
 		WRITE,
 
 		/**
@@ -610,7 +613,6 @@ public class Policy {
 
 			gen.writeEndObject();
 			gen.writeEndObject();
-
 		}
 
 	}
