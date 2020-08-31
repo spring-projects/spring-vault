@@ -110,7 +110,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		return AuthenticationSteps
 				.fromHttpRequest(HttpRequestBuilder.get(options.getIdentityDocumentUri().toString()).as(String.class)) //
 				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
-				.map(pkcs7 -> pkcs7.replace("\\n", "")) //
+				.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
 				.map(pkcs7 -> {
 
 					Map<String, String> login = new HashMap<>();
@@ -189,7 +189,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 			String pkcs7 = this.awsMetadataRestOperations.getForObject(this.options.getIdentityDocumentUri(),
 					String.class);
 			if (StringUtils.hasText(pkcs7)) {
-				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replace("\\n", ""));
+				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replaceAll("\\n", ""));
 			}
 
 			return login;

@@ -74,6 +74,18 @@ class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
+	void shouldCleanUpIdentityResponse() {
+
+		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("Hello, \r\r\n\nworld"));
+
+		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
+
+		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world");
+	}
+
+	@Test
 	void shouldContainRole() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder().role("ami").build();
