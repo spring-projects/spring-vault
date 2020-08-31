@@ -28,30 +28,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.Ciphertext;
-import org.springframework.vault.support.Hmac;
-import org.springframework.vault.support.Plaintext;
-import org.springframework.vault.support.RawTransitKey;
-import org.springframework.vault.support.Signature;
-import org.springframework.vault.support.SignatureValidation;
-import org.springframework.vault.support.TransitKeyType;
-import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultEncryptionResult;
-import org.springframework.vault.support.VaultHmacRequest;
-import org.springframework.vault.support.VaultMount;
-import org.springframework.vault.support.VaultSignRequest;
-import org.springframework.vault.support.VaultSignatureVerificationRequest;
-import org.springframework.vault.support.VaultTransitContext;
-import org.springframework.vault.support.VaultTransitKey;
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
-import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+import org.springframework.vault.support.*;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link VaultTransitTemplate} through
@@ -73,6 +55,12 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	static final String SIGN_VERIFY_INTRODUCED_IN_VERSION = "0.6.2";
 
 	static final String ED25519_INTRODUCED_IN_VERSION = "0.7.3";
+
+	static final String RSA3072_INTRODUCED_IN_VERSION = "1.4.0";
+
+	static final String ECDSA521_INTRODUCED_IN_VERSION = "1.4.0";
+
+	static final String AES256_GCM96_INTRODUCED_IN_VERSION = "1.4.0";
 
 	@Autowired
 	VaultOperations vaultOperations;
@@ -129,6 +117,9 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 			deleteKey("export");
 			deleteKey("ecdsa-key");
 			deleteKey("ed-key");
+			deleteKey("rsa-3072-key");
+			deleteKey("ecdsa-p521-key");
+			deleteKey("aes256-gcm96-key");
 		}
 	}
 
@@ -179,6 +170,48 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultTransitKey mykey = this.transitOperations.getKey("ed-key");
 
 		assertThat(mykey.getType()).startsWith("ed");
+		assertThat(mykey.getKeys()).isNotEmpty();
+	}
+
+	@Test
+	@RequiresVaultVersion(ECDSA521_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateEcdsaKey() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p521");
+
+		this.transitOperations.createKey("ecdsa-p521-key", request);
+
+		VaultTransitKey mykey = this.transitOperations.getKey("ecdsa-p521-key");
+
+		assertThat(mykey.getType()).isEqualTo("ecdsa-p521");
+		assertThat(mykey.getKeys()).isNotEmpty();
+	}
+
+	@Test
+	@RequiresVaultVersion(RSA3072_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateRsa3072Key() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("rsa-3072");
+
+		this.transitOperations.createKey("rsa-3072-key", request);
+
+		VaultTransitKey mykey = this.transitOperations.getKey("rsa-3072-key");
+
+		assertThat(mykey.getType()).isEqualTo("rsa-3072");
+		assertThat(mykey.getKeys()).isNotEmpty();
+	}
+
+	@Test
+	@RequiresVaultVersion(AES256_GCM96_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateAes256Gcm96Key() {
+
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("aes256-gcm96");
+
+		this.transitOperations.createKey("aes256-gcm96-key", request);
+
+		VaultTransitKey mykey = this.transitOperations.getKey("aes256-gcm96-key");
+
+		assertThat(mykey.getType()).isEqualTo("aes256-gcm96");
 		assertThat(mykey.getKeys()).isNotEmpty();
 	}
 
