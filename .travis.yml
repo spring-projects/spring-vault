@@ -20,7 +20,8 @@ env:
     - VAULT_VER=1.1.5
     - VAULT_VER=1.2.4
     - VAULT_VER=1.3.4
-    - EDITION=enterprise VAULT_VER=0.11.0
+    - VAULT_VER=1.5.3
+    - EDITION=enterprise
 
 before_install:
   - test ! -f ~/.m2/settings.xml || rm ~/.m2/settings.xml

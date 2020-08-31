@@ -8,8 +8,8 @@
 set -o errexit
 
 EDITION="${EDITION:-oss}"
-VAULT_OSS="${VAULT_OSS:-1.3.1}"
-VAULT_ENT="${VAULT_ENT:-0.11.0}"
+VAULT_OSS="${VAULT_OSS:-1.5.3}"
+VAULT_ENT="${VAULT_ENT:-1.5.3}"
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
 VAULT_DIRECTORY=vault
@@ -135,9 +135,9 @@ function download_oss() {
 function download_enterprise() {
 
   VAULT_VER="${VAULT_VER:-${VAULT_ENT}}"
-  VAULT_ZIP="vault-enterprise_${VAULT_VER}%2Bent_${UNAME}_${PLATFORM}.zip"
-  VAULT_FILE="vault-enterprise_${VAULT_VER}+ent_${UNAME}_${PLATFORM}.zip"
-  VAULT_URL="http://hc-enterprise-binaries.s3.amazonaws.com/vault/ent/${VAULT_VER}/${VAULT_ZIP}"
+  VAULT_ZIP="vault_${VAULT_VER}%2Bent_${UNAME}_${PLATFORM}.zip"
+  VAULT_FILE="vault_${VAULT_VER}+ent_${UNAME}_${PLATFORM}.zip"
+  VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}%2Bent/${VAULT_ZIP}"
 
   download
   unpack
