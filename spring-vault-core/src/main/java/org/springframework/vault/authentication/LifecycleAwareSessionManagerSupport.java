@@ -235,51 +235,57 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 		private final Duration duration;
 
-		private final Duration validTtlThreshold;
+		private final Duration expiryThreshold;
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
 		 * {@code timeout} before the {@link LoginToken} expires
-		 * @param timeout timeout value, non-negative long value.
+		 * @param refreshBeforeExpiry timeout value, non-negative long value that
+		 * schedules an execution of {@code lease duration - refreshBeforeExpiry}.
 		 * @param timeUnit must not be {@literal null}.
 		 */
-		public FixedTimeoutRefreshTrigger(long timeout, TimeUnit timeUnit) {
+		public FixedTimeoutRefreshTrigger(long refreshBeforeExpiry, TimeUnit timeUnit) {
 
-			Assert.isTrue(timeout >= 0, "Timeout duration must be greater or equal to zero");
+			Assert.isTrue(refreshBeforeExpiry >= 0, "Duration must be greater or equal to zero");
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
 
-			this.duration = Duration.ofMillis(timeUnit.toMillis(timeout));
-			this.validTtlThreshold = Duration.ofMillis(timeUnit.toMillis(timeout) + 2000);
+			this.duration = Duration.ofMillis(timeUnit.toMillis(refreshBeforeExpiry));
+			this.expiryThreshold = Duration.ofMillis(timeUnit.toMillis(refreshBeforeExpiry) + 2000);
 		}
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
-		 * {@code timeout} before the {@link LoginToken} expires. Valid TTL threshold is
-		 * set to two seconds longer to compensate for timing issues during scheduling.
-		 * @param timeout timeout value.
+		 * {@code refreshBeforeExpiry} before the {@link LoginToken} expires. Valid TTL
+		 * threshold is set to two seconds longer to compensate for timing issues during
+		 * scheduling.
+		 * @param refreshBeforeExpiry timeout value for the trigger that schedules an
+		 * execution of {@code lease duration - refreshBeforeExpiry}.
 		 * @since 2.0
 		 */
-		public FixedTimeoutRefreshTrigger(Duration timeout) {
-			this(timeout, timeout.plus(Duration.ofSeconds(2)));
+		public FixedTimeoutRefreshTrigger(Duration refreshBeforeExpiry) {
+			this(refreshBeforeExpiry, refreshBeforeExpiry.plus(Duration.ofSeconds(2)));
 		}
 
 		/**
 		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
 		 * {@code timeout} before the {@link LoginToken} expires.
-		 * @param timeout timeout value.
-		 * @param validTtlThreshold minimum TTL duration to consider a Token as valid.
-		 * Tokens with a shorter TTL are not used anymore. Should be greater than
-		 * {@code timeout} to prevent token expiry.
+		 * @param refreshBeforeExpiry timeout value for the trigger that schedules an
+		 * execution of {@code lease duration - refreshBeforeExpiry}.
+		 * @param expiryThreshold minimum TTL duration to consider a Token as valid.
+		 * Tokens with a shorter TTL are considered expired and are not used anymore.
+		 * Should be greater than Tokens with a shorter TTL are not used anymore. Should
+		 * be greater than {@code timeout} to prevent token expiry.
 		 * @since 2.0
 		 */
-		public FixedTimeoutRefreshTrigger(Duration timeout, Duration validTtlThreshold) {
+		public FixedTimeoutRefreshTrigger(Duration refreshBeforeExpiry, Duration expiryThreshold) {
 
-			Assert.isTrue(timeout.toMillis() >= 0, "Timeout duration must be greater or equal to zero");
+			Assert.isTrue(refreshBeforeExpiry.toMillis() >= 0,
+					"Refresh before expiry timeout must be greater or equal to zero");
 
-			Assert.notNull(validTtlThreshold, "Valid TTL threshold must not be null");
+			Assert.notNull(expiryThreshold, "Expiry threshold must not be null");
 
-			this.duration = timeout;
-			this.validTtlThreshold = validTtlThreshold;
+			this.duration = refreshBeforeExpiry;
+			this.expiryThreshold = expiryThreshold;
 		}
 
 		@Override
@@ -293,7 +299,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 		@Override
 		public Duration getValidTtlThreshold(LoginToken loginToken) {
-			return this.validTtlThreshold;
+			return this.expiryThreshold;
 		}
 
 	}
