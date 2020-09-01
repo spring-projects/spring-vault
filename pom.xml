@@ -331,6 +331,9 @@
 					<excludes>
 						<exclude>**/Abstract*.java</exclude>
 					</excludes>
+					<systemPropertyVariables>
+						<jdk.tls.client.protocols>TLSv1.2</jdk.tls.client.protocols>
+					</systemPropertyVariables>
 				</configuration>
 			</plugin>
 
