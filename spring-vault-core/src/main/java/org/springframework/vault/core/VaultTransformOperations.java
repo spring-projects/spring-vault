@@ -52,7 +52,7 @@ public interface VaultTransformOperations {
 	 * {@link VaultTransformContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 */
-	String encode(String roleName, byte[] plaintext, VaultTransformContext transformRequest);
+	TransformCiphertext encode(String roleName, byte[] plaintext, VaultTransformContext transformRequest);
 
 	/**
 	 * Encode the provided batch of plaintext using the role given and transformation in

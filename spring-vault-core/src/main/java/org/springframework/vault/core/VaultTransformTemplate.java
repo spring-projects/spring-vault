@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -72,13 +73,13 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
-		String ciphertext = encode(roleName, plaintext.getPlaintext(), plaintext.getContext());
+		TransformCiphertext ciphertext = encode(roleName, plaintext.getPlaintext(), plaintext.getContext());
 
-		return toCiphertext(ciphertext, plaintext.getContext());
+		return ciphertext;
 	}
 
 	@Override
-	public String encode(String roleName, byte[] plaintext, VaultTransformContext transformContext) {
+	public TransformCiphertext encode(String roleName, byte[] plaintext, VaultTransformContext transformContext) {
 
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
@@ -90,9 +91,27 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		request.put("value", value);
 
 		applyTransformOptions(transformContext, request);
+		Map<String, Object> data = this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName), request)
+				.getRequiredData();
+		VaultTransformContext newTransformContext;
 
-		return (String) this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName), request)
-				.getRequiredData().get("encoded_value");
+		if (data.get("tweak") != null) {
+			String tweak = (String) data.get("tweak");
+			System.out.println(tweak);
+			newTransformContext = VaultTransformContext.builder()
+				.tweak(tweak.getBytes())
+				.transformation(transformContext.getTransformation())
+				.build();
+		} else {
+			newTransformContext = transformContext;
+		}
+
+		TransformCiphertext encoded = toCiphertext(
+			(String) data.get("encoded_value"),
+			newTransformContext
+		);
+
+		return encoded;
 	}
 
 	@Override
@@ -202,7 +221,12 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		}
 
 		if (!ObjectUtils.isEmpty(context.getTweak())) {
-			request.put("tweak", Base64Utils.encodeToString(context.getTweak()));
+			// If a plaintext string tweak of length 7 is provided, Base64 encode it, otherwise, leave it as is.
+			if (context.getTweak().length == 7) {
+				request.put("tweak", Base64Utils.encodeToString(context.getTweak()));
+			} else {
+				request.put("tweak", new String(context.getTweak(), StandardCharsets.UTF_8));
+			}
 		}
 	}
 
