@@ -16,9 +16,7 @@
 package org.springframework.vault.support;
 
 import org.springframework.util.Assert;
-
-import java.util.Arrays;
-import java.util.Objects;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Value object representing plaintext with an optional {@link VaultTransformContext}.
@@ -44,7 +42,6 @@ public class TransformPlaintext {
 	/**
 	 * Factory method to create an empty {@link TransformPlaintext}.
 	 * @return the empty {@link TransformPlaintext} object.
-	 * @since 1.1.2
 	 */
 	public static TransformPlaintext empty() {
 		return EMPTY;
@@ -93,12 +90,15 @@ public class TransformPlaintext {
 	}
 
 	/**
-	 * Create a new {@link TransformPlaintext} object from this plaintext associated with the given
-	 * {@link VaultTransformContext}.
+	 * Create a new {@link TransformPlaintext} object from this plaintext associated with
+	 * the given {@link VaultTransformContext}.
 	 * @param context transform context.
 	 * @return the new {@link TransformPlaintext} object.
 	 */
 	public TransformPlaintext with(VaultTransformContext context) {
+
+		Assert.notNull(context, "VaultTransformContext must not be null");
+
 		return new TransformPlaintext(getPlaintext(), context);
 	}
 
@@ -116,14 +116,17 @@ public class TransformPlaintext {
 			return true;
 		if (!(o instanceof TransformPlaintext))
 			return false;
-		TransformPlaintext plaintext1 = (TransformPlaintext) o;
-		return Arrays.equals(this.plaintext, plaintext1.plaintext) && this.context.equals(plaintext1.context);
+		TransformPlaintext that = (TransformPlaintext) o;
+		if (!ObjectUtils.nullSafeEquals(this.plaintext, that.plaintext)) {
+			return false;
+		}
+		return ObjectUtils.nullSafeEquals(this.context, that.context);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = Objects.hash(this.context);
-		result = 31 * result + Arrays.hashCode(this.plaintext);
+		int result = ObjectUtils.nullSafeHashCode(this.plaintext);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.context);
 		return result;
 	}
 

@@ -30,8 +30,8 @@ public class VaultTransformDecodeResult extends AbstractResult<TransformPlaintex
 	private final @Nullable TransformPlaintext plaintext;
 
 	/**
-	 * Create {@link VaultTransformDecodeResult} for a successfully decrypted {@link TransformPlaintext}
-	 * .
+	 * Create {@link VaultTransformDecodeResult} for a successfully decrypted
+	 * {@link TransformPlaintext} .
 	 * @param plaintext must not be {@literal null}.
 	 */
 	public VaultTransformDecodeResult(TransformPlaintext plaintext) {

@@ -34,6 +34,7 @@ import org.springframework.web.client.RestClientException;
  * the {@link #doWithVault(RestOperationsCallback) without a session}.
  *
  * @author Mark Paluch
+ * @author Lauren Voswinkel
  * @see #doWithSession(RestOperationsCallback)
  * @see #doWithVault(RestOperationsCallback)
  * @see org.springframework.web.client.RestOperations

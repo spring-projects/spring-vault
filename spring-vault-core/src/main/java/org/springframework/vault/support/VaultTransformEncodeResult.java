@@ -66,4 +66,5 @@ public class VaultTransformEncodeResult extends AbstractResult<TransformCipherte
 		TransformCiphertext ciphertext = get();
 		return ciphertext == null ? null : ciphertext.getCiphertext();
 	}
+
 }

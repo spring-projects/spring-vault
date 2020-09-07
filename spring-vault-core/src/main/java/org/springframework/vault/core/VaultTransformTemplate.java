@@ -15,20 +15,29 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.lang.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.*;
-
-import java.util.*;
+import org.springframework.vault.support.TransformCiphertext;
+import org.springframework.vault.support.TransformPlaintext;
+import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultTransformContext;
+import org.springframework.vault.support.VaultTransformDecodeResult;
+import org.springframework.vault.support.VaultTransformEncodeResult;
 
 /**
  * Default implementation of {@link VaultTransformOperations}.
  *
  * @author Lauren Voswinkel
+ * @author Mark Paluch
  * @since 2.3
  */
 public class VaultTransformTemplate implements VaultTransformOperations {
@@ -72,27 +81,16 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 
-		String ciphertext = encode(roleName, plaintext.getPlaintext(), plaintext.getContext());
-
-		return toCiphertext(ciphertext, plaintext.getContext());
-	}
-
-	@Override
-	public String encode(String roleName, byte[] plaintext, VaultTransformContext transformContext) {
-
-		Assert.hasText(roleName, "Role name must not be empty");
-		Assert.notNull(plaintext, "Plaintext must not be null");
-		Assert.notNull(transformContext, "VaultTransformContext must not be null");
-
 		Map<String, String> request = new LinkedHashMap<>();
 
-		String value = new String(plaintext);
-		request.put("value", value);
+		request.put("value", plaintext.asString());
 
-		applyTransformOptions(transformContext, request);
+		applyTransformOptions(plaintext.getContext(), request);
 
-		return (String) this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName), request)
-				.getRequiredData().get("encoded_value");
+		Map<String, Object> data = this.vaultOperations
+				.write(String.format("%s/encode/%s", this.path, roleName), request).getRequiredData();
+
+		return toCiphertext(data, plaintext.getContext());
 	}
 
 	@Override
@@ -109,9 +107,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 			vaultRequest.put("value", request.asString());
 
-			if (request.getContext() != null) {
-				applyTransformOptions(request.getContext(), vaultRequest);
-			}
+			applyTransformOptions(request.getContext(), vaultRequest);
 
 			batch.add(vaultRequest);
 		}
@@ -120,22 +116,6 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 				Collections.singletonMap("batch_input", batch));
 
 		return toEncodedResults(vaultResponse, batchRequest);
-	}
-
-	@Override
-	public String decode(String roleName, String ciphertext) {
-
-		Assert.hasText(roleName, "Key name must not be empty");
-		Assert.hasText(ciphertext, "Ciphertext must not be empty");
-
-		Map<String, String> request = new LinkedHashMap<>();
-
-		request.put("value", ciphertext);
-
-		String plaintext = (String) this.vaultOperations
-				.write(String.format("%s/decode/%s", this.path, roleName), request).getRequiredData().get("decoded_value");
-
-		return new String(plaintext);
 	}
 
 	@Override
@@ -162,10 +142,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		applyTransformOptions(transformContext, request);
 
-		String plaintext = (String) this.vaultOperations
-				.write(String.format("%s/decode/%s", this.path, roleName), request).getRequiredData().get("decoded_value");
-
-		return plaintext;
+		return (String) this.vaultOperations.write(String.format("%s/decode/%s", this.path, roleName), request)
+				.getRequiredData().get("decoded_value");
 	}
 
 	@Override
@@ -181,10 +159,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
 			vaultRequest.put("value", request.getCiphertext());
-
-			if (request.getContext() != null) {
-				applyTransformOptions(request.getContext(), vaultRequest);
-			}
+			applyTransformOptions(request.getContext(), vaultRequest);
 
 			batch.add(vaultRequest);
 		}
@@ -207,7 +182,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 	}
 
 	private static List<VaultTransformEncodeResult> toEncodedResults(VaultResponse vaultResponse,
-																List<TransformPlaintext> batchRequest) {
+			List<TransformPlaintext> batchRequest) {
 
 		List<VaultTransformEncodeResult> result = new ArrayList<>(batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
@@ -223,7 +198,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 					encoded = new VaultTransformEncodeResult(new VaultException(data.get("error")));
 				}
 				else {
-					encoded = new VaultTransformEncodeResult(toCiphertext(data.get("encoded_value"), plaintext.getContext()));
+					encoded = new VaultTransformEncodeResult(toCiphertext(data, plaintext.getContext()));
 				}
 			}
 			else {
@@ -260,7 +235,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		return result;
 	}
 
-	private static VaultTransformDecodeResult getDecryptionResult(Map<String, String> data, TransformCiphertext ciphertext) {
+	private static VaultTransformDecodeResult getDecryptionResult(Map<String, String> data,
+			TransformCiphertext ciphertext) {
 
 		if (StringUtils.hasText(data.get("error"))) {
 			return new VaultTransformDecodeResult(new VaultException(data.get("error")));
@@ -268,30 +244,31 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		if (StringUtils.hasText(data.get("decoded_value"))) {
 
-			byte[] plaintext = data.get("decoded_value").getBytes();
-			return new VaultTransformDecodeResult(TransformPlaintext.of(plaintext).with(ciphertext.getContext()));
+			return new VaultTransformDecodeResult(
+					TransformPlaintext.of(data.get("decoded_value")).with(ciphertext.getContext()));
 		}
 
 		return new VaultTransformDecodeResult(TransformPlaintext.empty().with(ciphertext.getContext()));
 	}
 
-	private static TransformCiphertext toCiphertext(String ciphertext, @Nullable VaultTransformContext context) {
-		return context != null ? TransformCiphertext.of(ciphertext).with(context) : TransformCiphertext.of(ciphertext);
+	private static TransformCiphertext toCiphertext(Map<String, ?> data, VaultTransformContext context) {
+
+		String ciphertext = (String) data.get("encoded_value");
+
+		VaultTransformContext contextToUse = context;
+		if (data.containsKey("tweak")) {
+			byte[] tweak = Base64Utils.decodeFromString((String) data.get("tweak"));
+			contextToUse = VaultTransformContext.builder().transformation(context.getTransformation()).tweak(tweak)
+					.build();
+		}
+
+		return contextToUse.isEmpty() ? TransformCiphertext.of(ciphertext)
+				: TransformCiphertext.of(ciphertext).with(contextToUse);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
-	}
-
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(getClass().getSimpleName());
-		sb.append(" [vaultOperations=").append(this.vaultOperations);
-		sb.append(", path='").append(this.path).append('\'');
-		sb.append(']');
-		return sb.toString();
 	}
 
 }

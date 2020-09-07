@@ -15,21 +15,29 @@
  */
 package org.springframework.vault.core;
 
-import org.springframework.vault.support.*;
-
 import java.util.List;
+
+import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Plaintext;
+import org.springframework.vault.support.TransformCiphertext;
+import org.springframework.vault.support.TransformPlaintext;
+import org.springframework.vault.support.VaultTransformContext;
+import org.springframework.vault.support.VaultTransformDecodeResult;
+import org.springframework.vault.support.VaultTransformEncodeResult;
 
 /**
  * Interface that specifies operations using the {@code transform} backend.
  *
  * @author Lauren Voswinkel
+ * @author Mark Paluch
+ * @since 2.3
  * @see <a href="https://www.vaultproject.io/docs/secrets/transform/index.html">Transform
  * Secrets Engine</a>
- * @since 2.3
  */
 public interface VaultTransformOperations {
+
 	/**
-	 * Encodes the provided plaintext using the named role.
+	 * Encode the provided plaintext using the named role.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return cipher text.
@@ -37,7 +45,7 @@ public interface VaultTransformOperations {
 	String encode(String roleName, String plaintext);
 
 	/**
-	 * Encodes the provided plaintext using the named role.
+	 * Encode the provided plaintext using the named role.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
 	 * @return cipher text.
@@ -45,14 +53,16 @@ public interface VaultTransformOperations {
 	TransformCiphertext encode(String roleName, TransformPlaintext plaintext);
 
 	/**
-	 * Encodes the provided plaintext using the named role.
+	 * Encode the provided plaintext using the named role.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @param transformRequest must not be {@literal null}. Use
 	 * {@link VaultTransformContext#empty()} if no request options provided.
 	 * @return cipher text.
 	 */
-	String encode(String roleName, byte[] plaintext, VaultTransformContext transformRequest);
+	default TransformCiphertext encode(String roleName, byte[] plaintext, VaultTransformContext transformRequest) {
+		return encode(roleName, TransformPlaintext.of(plaintext).with(transformRequest));
+	}
 
 	/**
 	 * Encode the provided batch of plaintext using the role given and transformation in
@@ -71,7 +81,9 @@ public interface VaultTransformOperations {
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return plain text.
 	 */
-	String decode(String roleName, String ciphertext);
+	default String decode(String roleName, String ciphertext) {
+		return decode(roleName, TransformCiphertext.of(ciphertext)).asString();
+	}
 
 	/**
 	 * Decode the provided ciphertext using the named role.
@@ -101,4 +113,5 @@ public interface VaultTransformOperations {
 	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
 	 */
 	List<VaultTransformDecodeResult> decode(String roleName, List<TransformCiphertext> batchRequest);
+
 }

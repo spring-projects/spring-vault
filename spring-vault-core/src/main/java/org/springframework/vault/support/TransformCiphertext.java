@@ -38,7 +38,8 @@ public class TransformCiphertext {
 	}
 
 	/**
-	 * Factory method to create {@link TransformCiphertext} from the given {@code ciphertext}.
+	 * Factory method to create {@link TransformCiphertext} from the given
+	 * {@code ciphertext}.
 	 * @param ciphertext the ciphertext to decrypt, must not be {@literal null} or empty.
 	 * @return the {@link TransformCiphertext} for {@code ciphertext}.
 	 */
@@ -58,8 +59,8 @@ public class TransformCiphertext {
 	}
 
 	/**
-	 * Create a new {@link TransformCiphertext} object from this ciphertext associated with the
-	 * given {@link VaultTransformContext}.
+	 * Create a new {@link TransformCiphertext} object from this ciphertext associated
+	 * with the given {@link VaultTransformContext}.
 	 * @param context transit context, must not be {@literal null}.
 	 * @return the new {@link TransformCiphertext} object.
 	 */

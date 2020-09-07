@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -49,7 +50,9 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-		Assumptions.assumeTrue(prepare().getVersion().isEnterprise(), "Transform Secrets Engine requires enterprise version");
+
+		Assumptions.assumeTrue(prepare().getVersion().isEnterprise(),
+				"Transform Secrets Engine requires enterprise version");
 
 		VaultSysOperations adminOperations = this.vaultOperations.opsForSys();
 
@@ -60,7 +63,8 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 		}
 
 		// Write a transformation/role
-		this.vaultOperations.write("transform/transformation/myssn", "{\"type\": \"fpe\", \"template\": \"builtin/socialsecuritynumber\", \"allowed_roles\": [\"myrole\"]}");
+		this.vaultOperations.write("transform/transformation/myssn",
+				"{\"type\": \"fpe\", \"template\": \"builtin/socialsecuritynumber\", \"allowed_roles\": [\"myrole\"]}");
 		this.vaultOperations.write("transform/role/myrole", "{\"transformations\": [\"myssn\"]}");
 	}
 
@@ -73,9 +77,8 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncode() {
 
-		VaultResponse response = this.vaultOperations.write("transform/encode/myrole",
-				String.format("{\"value\": \"123-45-6789\", \"tweak\": \"%s\"}",
-						Base64Utils.encodeToString("somenum".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transform/encode/myrole", String.format(
+				"{\"value\": \"123-45-6789\", \"tweak\": \"%s\"}", Base64Utils.encodeToString("somenum".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("encoded_value")).isNotEmpty();
 	}
@@ -84,19 +87,14 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 	void shouldEncodeAndDecode() {
 
 		String value = "123-45-6789";
-		VaultResponse response = this.vaultOperations.write("transform/encode/myrole",
-				String.format("{\"value\": \"%s\", \"tweak\": \"%s\"}",
-						value,
-						Base64Utils.encodeToString("somenum".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transform/encode/myrole", String.format(
+				"{\"value\": \"%s\", \"tweak\": \"%s\"}", value, Base64Utils.encodeToString("somenum".getBytes())));
 
 		String encoded = (String) response.getRequiredData().get("encoded_value");
-		VaultResponse decoded = this.vaultOperations.write("transform/decode/myrole",
-				String.format("{\"value\": \"%s\", \"tweak\": \"%s\"}",
-						encoded,
-						Base64Utils.encodeToString("somenum".getBytes())));
+		VaultResponse decoded = this.vaultOperations.write("transform/decode/myrole", String.format(
+				"{\"value\": \"%s\", \"tweak\": \"%s\"}", encoded, Base64Utils.encodeToString("somenum".getBytes())));
 
-		assertThat((String) decoded.getRequiredData().get("decoded_value"))
-				.isEqualTo(value);
+		assertThat((String) decoded.getRequiredData().get("decoded_value")).isEqualTo(value);
 	}
 
 }

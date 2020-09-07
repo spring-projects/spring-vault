@@ -15,9 +15,11 @@
  */
 package org.springframework.vault.support;
 
-import org.springframework.util.Assert;
-
 import java.util.Arrays;
+
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Transform backend encode/decode context object.
@@ -37,7 +39,7 @@ public class VaultTransformContext {
 
 	private final byte[] tweak;
 
-	VaultTransformContext(String transformation, byte[] tweak) {
+	private VaultTransformContext(String transformation, byte[] tweak) {
 		this.transformation = transformation;
 		this.tweak = tweak;
 	}
@@ -72,6 +74,15 @@ public class VaultTransformContext {
 	 */
 	public static VaultTransformContext fromTweak(byte[] tweak) {
 		return builder().tweak(tweak).build();
+	}
+
+	/**
+	 * Return whether this object is an empty one. That is, transformation and tweak are
+	 * both empty.
+	 * @return {@code true} if this object is empty.
+	 */
+	public boolean isEmpty() {
+		return StringUtils.isEmpty(this.transformation) && ObjectUtils.isEmpty(this.tweak);
 	}
 
 	/**
@@ -114,7 +125,7 @@ public class VaultTransformContext {
 
 		private byte[] tweak = new byte[0];
 
-		VaultTransformRequestBuilder() {
+		private VaultTransformRequestBuilder() {
 		}
 
 		/**
