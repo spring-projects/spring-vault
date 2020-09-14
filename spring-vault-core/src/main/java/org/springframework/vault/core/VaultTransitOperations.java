@@ -111,7 +111,12 @@ public interface VaultTransitOperations {
 	void rotate(String keyName);
 
 	/**
-	 * Encrypts the provided plaintext using the named key.
+	 * Encrypts the provided plaintext using the named key. The given {@code plaintext} is
+	 * encoded into bytes using the {@link java.nio.charset.Charset#defaultCharset()
+	 * default charset}. Use
+	 * {@link #encrypt(String, org.springframework.vault.support.Plaintext)} to construct
+	 * a {@link org.springframework.vault.support.Plaintext#of(byte[]) Plaintext} object
+	 * from bytes to avoid {@link java.nio.charset.Charset} mismatches.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return cipher text.
@@ -149,7 +154,12 @@ public interface VaultTransitOperations {
 	List<VaultEncryptionResult> encrypt(String keyName, List<Plaintext> batchRequest);
 
 	/**
-	 * Decrypts the provided plaintext using the named key.
+	 * Decrypts the provided plaintext using the named key. The decoded {@code plaintext}
+	 * is decoded into {@link String} the {@link java.nio.charset.Charset#defaultCharset()
+	 * default charset}. Use
+	 * {@link #decrypt(String, org.springframework.vault.support.Ciphertext)} to obtain a
+	 * {@link org.springframework.vault.support.Ciphertext} object that allows to control
+	 * the {@link java.nio.charset.Charset} for later consumption.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return plain text.
