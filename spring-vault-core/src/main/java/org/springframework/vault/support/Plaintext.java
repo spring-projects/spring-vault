@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.support;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -70,19 +71,32 @@ public class Plaintext {
 	/**
 	 * Factory method to create {@link Plaintext} using from {@link String}.
 	 * {@link String} is encoded to {@code byte} using the default
-	 * {@link java.nio.charset.Charset}.
+	 * {@link java.nio.charset.Charset}. Use {@link #of(String, java.nio.charset.Charset)}
+	 * to control the {@link java.nio.charset.Charset} to use.
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
 	public static Plaintext of(String plaintext) {
+		return of(plaintext, Charset.defaultCharset());
+	}
+
+	/**
+	 * Factory method to create {@link Plaintext} using from {@link String} using the
+	 * given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
+	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
+	 * @return the {@link Plaintext} for {@code plaintext}.
+	 * @since 2.3
+	 */
+	public static Plaintext of(String plaintext, Charset charset) {
 
 		Assert.notNull(plaintext, "Plaintext must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 
 		if (plaintext.length() == 0) {
 			return empty();
 		}
 
-		return of(plaintext.getBytes());
+		return of(plaintext.getBytes(charset));
 	}
 
 	public byte[] getPlaintext() {
@@ -108,7 +122,20 @@ public class Plaintext {
 	 * {@link java.nio.charset.Charset}.
 	 */
 	public String asString() {
-		return new String(getPlaintext());
+		return asString(Charset.defaultCharset());
+	}
+
+	/**
+	 * @param charset the charset to use for decoding.
+	 * @return the plaintext as {@link String} decoded using the default
+	 * {@link java.nio.charset.Charset}.
+	 * @since 2.3
+	 */
+	public String asString(Charset charset) {
+
+		Assert.notNull(charset, "Charset must not be null");
+
+		return new String(getPlaintext(), charset);
 	}
 
 	@Override
