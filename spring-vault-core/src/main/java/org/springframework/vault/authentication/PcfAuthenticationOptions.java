@@ -223,12 +223,12 @@ public class PcfAuthenticationOptions {
 			Supplier<String> instanceCertSupplier = this.instanceCertSupplier;
 
 			if (instanceCertSupplier == null) {
-				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT")).cached();
+				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT"));
 			}
 
 			Supplier<String> instanceKeySupplier = this.instanceKeySupplier;
 			if (instanceKeySupplier == null) {
-				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY")).cached();
+				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY"));
 			}
 
 			return new PcfAuthenticationOptions(this.path, this.role, this.clock, instanceCertSupplier,
