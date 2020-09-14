@@ -4,6 +4,7 @@ Mark Paluch;
 :revdate: {localdate}
 :spring-framework-docs: https://docs.spring.io/spring/docs/{springVersion}/spring-framework-reference/
 :self-docs-root: https://docs.spring.io/spring-vault/docs/{version}/
+:example-root: ../../../../spring-vault-core/src/test/java/org/springframework/vault/documentation
 
 (C) 2016-2020 The original authors.
 

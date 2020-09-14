@@ -21,6 +21,8 @@ include::getting-started.adoc[]
 
 include::imperative-template.adoc[]
 
+include::vault-secret-engines.adoc[]
+
 include::reactive-template.adoc[]
 
 include::propertysource.adoc[]
