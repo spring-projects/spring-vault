@@ -1,6 +1,56 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.3.0-M1
+-----------------------------------------
+* Add support for key-value metadata in Vault template #432
+* Release Spring Vault 2.2.0.RELEASE #497
+* write call is returning Mono.empty() when request failed with 404 Not Found #503
+* Use curl instead of wget in install_vault.sh #505
+* Correcting vault init/unseal in README #506
+* provide configurable custom mount path for vault auth backends #507
+* Incorrect environment property for aws ec2 role #508
+* Fix EnvironmentVaultConfiguration documentation #510
+* Allow SSL configuration using PEM certificates #514
+* Support for Vault Agent #515
+* Rename WebClientBuilder.requestFactory(…) to httpConnectorFactory(…) #517
+* Update copyright years to 2020 #518
+* Upgrade to Reactor Dysprosium SR3 #520
+* Upgrade to Spring Framework 5.2.3 #522
+* Upgrade to Spring Data Moore SR4 #524
+* Upgrade to Kotlin 1.3.61 #525
+* Upgrade dependencies #527
+* Update vault version to 1.3.2 #531
+* Mount path shouldn't be escaped #533
+* Bypass Namespace for health and initialized calls #534
+* Upgrade to Reactor Dysprosium SR5 #536
+* Upgrade dependencies #537
+* Upgrade to Spring Data Moore SR5 #539
+* Expanded EnvironmentVaultConfiguration options for AzureMSIAuthentication #542
+* Upgrade to Vault 1.4 #543
+* Upgrade Vault version to 1.3.4 #545
+* AbstractVaultConfiguration.restOperations does not consider RestTemplateBuilder #546
+* Upgrade to Spring Framework 5.2.5 #547
+* Upgrade to Spring Doc Resources 0.2.0 #549
+* Incorrect assert message in VaultTransitTemplate:decrypt #550
+* Upgrade to Spring Doc resources 0.2.2.RELEASE #553
+* Consider exposing state-safe access to WebClientBuilder/RestTemplateBuilder #554
+* Introduce reactive VaultEndpointProvider #555
+* VaultPkiOperations.getCrl(…) throws a NullPointerException when CRL is absent #556
+* ClientCertificateAuthentication path cannot be configured #557
+* Switch to new versioning scheme #558
+* Upgrade dependencies #559
+* add operations for interacting with kv metadata #561
+* Fix Vault download script for arm64 #562
+* Spring Cloud Vault picking up properties from wrong profile  #563
+* Integrate spring-javaformat #564
+* Use standard Spring code of conduct #565
+* Adding Transform Secrets Engine support #570
+* Remove all newlines in PKCS7 from EC2MetaData #571
+* Improve Spring Vault reference documentation to cover kv v1 and v2 usage #574
+* Deprecate  Policy.BuiltinCapabilities.WRITE #575
+* Upgrade dependencies #581
+
 Changes in version 2.2.0.RELEASE
 -----------------------------------------
 * Consider performance standby mode in health check #501
