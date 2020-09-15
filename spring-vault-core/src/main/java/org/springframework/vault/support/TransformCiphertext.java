@@ -20,7 +20,7 @@ import org.springframework.util.Assert;
 import java.util.Objects;
 
 /**
- * Value object representing ciphertext with an optional {@link VaultTransformContext}.
+ * Value object representing cipher text with an optional {@link VaultTransformContext}.
  *
  * @author Lauren Voswinkel
  * @since 2.3
@@ -40,7 +40,7 @@ public class TransformCiphertext {
 	/**
 	 * Factory method to create {@link TransformCiphertext} from the given
 	 * {@code ciphertext}.
-	 * @param ciphertext the ciphertext to decrypt, must not be {@literal null} or empty.
+	 * @param ciphertext the cipher text to decrypt, must not be {@literal null} or empty.
 	 * @return the {@link TransformCiphertext} for {@code ciphertext}.
 	 */
 	public static TransformCiphertext of(String ciphertext) {

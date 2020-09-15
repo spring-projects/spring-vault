@@ -102,7 +102,7 @@ public interface VaultTransitOperations {
 	void deleteKey(String keyName);
 
 	/**
-	 * Rotates the version of the named key. After rotation, new plaintext requests will
+	 * Rotates the version of the named key. After rotation, new plain text requests will
 	 * be encrypted with the new version of the key. To upgrade ciphertext to be encrypted
 	 * with the latest version of the key, use {@link #rewrap(String, String)}.
 	 * @param keyName must not be empty or {@literal null}.
@@ -111,8 +111,8 @@ public interface VaultTransitOperations {
 	void rotate(String keyName);
 
 	/**
-	 * Encrypts the provided plaintext using the named key. The given {@code plaintext} is
-	 * encoded into bytes using the {@link java.nio.charset.Charset#defaultCharset()
+	 * Encrypts the provided plain text using the named key. The given {@code plaintext}
+	 * is encoded into bytes using the {@link java.nio.charset.Charset#defaultCharset()
 	 * default charset}. Use
 	 * {@link #encrypt(String, org.springframework.vault.support.Plaintext)} to construct
 	 * a {@link org.springframework.vault.support.Plaintext#of(byte[]) Plaintext} object
@@ -124,7 +124,7 @@ public interface VaultTransitOperations {
 	String encrypt(String keyName, String plaintext);
 
 	/**
-	 * Encrypts the provided plaintext using the named key.
+	 * Encrypts the provided {@code plaintext} using the named key.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be {@literal null}.
 	 * @since 1.1
@@ -133,7 +133,7 @@ public interface VaultTransitOperations {
 	Ciphertext encrypt(String keyName, Plaintext plaintext);
 
 	/**
-	 * Encrypts the provided plaintext using the named key.
+	 * Encrypts the provided {@code plaintext} using the named key.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @param transitRequest must not be {@literal null}. Use
@@ -143,10 +143,10 @@ public interface VaultTransitOperations {
 	String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitRequest);
 
 	/**
-	 * Encrypts the provided batch of plaintext using the named key and context. The
-	 * encryption is done using transit backend's batch operation.
+	 * Encrypts the provided batch of {@code plaintext} using the named key and context.
+	 * The encryption is done using transit backend's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
+	 * @param batchRequest a list of {@link Plaintext} which includes plain text and an
 	 * optional context.
 	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
 	 * @since 1.1
@@ -154,7 +154,7 @@ public interface VaultTransitOperations {
 	List<VaultEncryptionResult> encrypt(String keyName, List<Plaintext> batchRequest);
 
 	/**
-	 * Decrypts the provided plaintext using the named key. The decoded {@code plaintext}
+	 * Decrypts the provided plain text using the named key. The decoded {@code plaintext}
 	 * is decoded into {@link String} the {@link java.nio.charset.Charset#defaultCharset()
 	 * default charset}. Use
 	 * {@link #decrypt(String, org.springframework.vault.support.Ciphertext)} to obtain a
@@ -167,7 +167,7 @@ public interface VaultTransitOperations {
 	String decrypt(String keyName, String ciphertext);
 
 	/**
-	 * Decrypts the provided plaintext using the named key.
+	 * Decrypts the provided cipher text using the named key.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be {@literal null}.
 	 * @return plain text.
@@ -176,7 +176,7 @@ public interface VaultTransitOperations {
 	Plaintext decrypt(String keyName, Ciphertext ciphertext);
 
 	/**
-	 * Decrypts the provided plaintext using the named key.
+	 * Decrypts the provided {@code ciphertext} using the named key.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @param transitContext must not be {@literal null}. Use
@@ -187,10 +187,10 @@ public interface VaultTransitOperations {
 	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitContext);
 
 	/**
-	 * Decrypts the provided barch of ciphertext using the named key and context. The*
+	 * Decrypts the provided barch of cipher text using the named key and context. The*
 	 * decryption is done using transit backend's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
+	 * @param batchRequest a list of {@link Ciphertext} which includes plain text and an
 	 * optional context.
 	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
 	 * @since 1.1
@@ -198,8 +198,8 @@ public interface VaultTransitOperations {
 	List<VaultDecryptionResult> decrypt(String keyName, List<Ciphertext> batchRequest);
 
 	/**
-	 * Rewrap the provided ciphertext using the latest version of the named key. Because
-	 * this never returns plaintext, it is possible to delegate this functionality to
+	 * Rewrap the provided cipher text using the latest version of the named key. Because
+	 * this never returns plain text, it is possible to delegate this functionality to
 	 * untrusted users or scripts.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
@@ -209,8 +209,8 @@ public interface VaultTransitOperations {
 	String rewrap(String keyName, String ciphertext);
 
 	/**
-	 * Rewrap the provided ciphertext using the latest version of the named key. Because
-	 * this never returns plaintext, it is possible to delegate this functionality to
+	 * Rewrap the provided cipher text using the latest version of the named key. Because
+	 * this never returns plain text, it is possible to delegate this functionality to
 	 * untrusted users or scripts.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
