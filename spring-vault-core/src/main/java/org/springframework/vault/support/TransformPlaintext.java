@@ -15,11 +15,13 @@
  */
 package org.springframework.vault.support;
 
+import java.nio.charset.Charset;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Value object representing plaintext with an optional {@link VaultTransformContext}.
+ * Value object representing plain text with an optional {@link VaultTransformContext}.
  * Plaintext is represented binary safe as {@code byte[]}.
  *
  * @author Lauren Voswinkel
@@ -49,7 +51,7 @@ public class TransformPlaintext {
 
 	/**
 	 * Factory method to create {@link TransformPlaintext} from a byte sequence.
-	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
+	 * @param plaintext the plain text to encrypt, must not be {@literal null}.
 	 * @return the {@link TransformPlaintext} for {@code plaintext}.
 	 */
 	public static TransformPlaintext of(byte[] plaintext) {
@@ -67,18 +69,29 @@ public class TransformPlaintext {
 	 * Factory method to create {@link TransformPlaintext} using from {@link String}.
 	 * {@link String} is encoded to {@code byte} using the default
 	 * {@link java.nio.charset.Charset}.
-	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
+	 * @param plaintext the plain text to encrypt, must not be {@literal null}.
 	 * @return the {@link TransformPlaintext} for {@code plaintext}.
 	 */
 	public static TransformPlaintext of(String plaintext) {
+		return of(plaintext, Charset.defaultCharset());
+	}
+
+	/**
+	 * Factory method to create {@link TransformPlaintext} using from a {@link String}
+	 * using the given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
+	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
+	 * @return the {@link Plaintext} for {@code plaintext}.
+	 */
+	public static TransformPlaintext of(String plaintext, Charset charset) {
 
 		Assert.notNull(plaintext, "Plaintext must not be null");
+		Assert.notNull(charset, "Charset must not be null");
 
 		if (plaintext.length() == 0) {
 			return empty();
 		}
 
-		return of(plaintext.getBytes());
+		return of(plaintext.getBytes(charset));
 	}
 
 	public byte[] getPlaintext() {
@@ -103,11 +116,23 @@ public class TransformPlaintext {
 	}
 
 	/**
-	 * @return the plaintext as {@link String} decoded using the default
+	 * @return the plain text as {@link String} decoded using the default
 	 * {@link java.nio.charset.Charset}.
 	 */
 	public String asString() {
-		return new String(getPlaintext());
+		return asString(Charset.defaultCharset());
+	}
+
+	/**
+	 * @param charset the charset to use for decoding.
+	 * @return the plain text as {@link String} decoded using the default
+	 * {@link java.nio.charset.Charset}.
+	 */
+	public String asString(Charset charset) {
+
+		Assert.notNull(charset, "Charset must not be null");
+
+		return new String(getPlaintext(), charset);
 	}
 
 	@Override

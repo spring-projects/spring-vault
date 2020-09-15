@@ -8,6 +8,7 @@
 * `ReactiveVaultEndpointProvider` for non-blocking lookup of `VaultEndpoint`.
 * `VaultKeyValueMetadataOperations` for Key-Value metadata interaction.
 * Support for `transform` backend (Enterprise Feature).
+* Documentation of <<vault.core.secret-engines,how to use Vault secret backends>>.
 
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2

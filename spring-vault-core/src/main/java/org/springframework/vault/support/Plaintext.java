@@ -22,7 +22,7 @@ import java.util.Objects;
 import org.springframework.util.Assert;
 
 /**
- * Value object representing plaintext with an optional {@link VaultTransitContext}.
+ * Value object representing plain text with an optional {@link VaultTransitContext}.
  * Plaintext is represented binary safe as {@code byte[]}.
  *
  * @author Praveendra Singh
@@ -69,7 +69,7 @@ public class Plaintext {
 	}
 
 	/**
-	 * Factory method to create {@link Plaintext} using from {@link String}.
+	 * Factory method to create {@link Plaintext} using from a {@link String}.
 	 * {@link String} is encoded to {@code byte} using the default
 	 * {@link java.nio.charset.Charset}. Use {@link #of(String, java.nio.charset.Charset)}
 	 * to control the {@link java.nio.charset.Charset} to use.
@@ -81,7 +81,7 @@ public class Plaintext {
 	}
 
 	/**
-	 * Factory method to create {@link Plaintext} using from {@link String} using the
+	 * Factory method to create {@link Plaintext} using from a {@link String} using the
 	 * given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
@@ -108,8 +108,8 @@ public class Plaintext {
 	}
 
 	/**
-	 * Create a new {@link Plaintext} object from this plaintext associated with the given
-	 * {@link VaultTransitContext}.
+	 * Create a new {@link Plaintext} object from this plain text associated with the
+	 * given {@link VaultTransitContext}.
 	 * @param context transit context.
 	 * @return the new {@link Plaintext} object.
 	 */
@@ -118,7 +118,7 @@ public class Plaintext {
 	}
 
 	/**
-	 * @return the plaintext as {@link String} decoded using the default
+	 * @return the plain text as {@link String} decoded using the default
 	 * {@link java.nio.charset.Charset}.
 	 */
 	public String asString() {
@@ -127,7 +127,7 @@ public class Plaintext {
 
 	/**
 	 * @param charset the charset to use for decoding.
-	 * @return the plaintext as {@link String} decoded using the default
+	 * @return the plain text as {@link String} decoded using the default
 	 * {@link java.nio.charset.Charset}.
 	 * @since 2.3
 	 */
