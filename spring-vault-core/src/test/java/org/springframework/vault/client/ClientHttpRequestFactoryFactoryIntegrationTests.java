@@ -96,20 +96,6 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 		((DisposableBean) factory).destroy();
 	}
 
-	@Test
-	void okHttp3ClientShouldWork() throws Exception {
-
-		ClientHttpRequestFactory factory = OkHttp3.usingOkHttp3(new ClientOptions(), Settings.createSslConfiguration());
-		RestTemplate template = new RestTemplate(factory);
-
-		String response = request(template);
-
-		assertThat(factory).isInstanceOf(OkHttp3ClientHttpRequestFactory.class);
-		assertThat(response).isNotNull().contains("initialized");
-
-		((DisposableBean) factory).destroy();
-	}
-
 	private String request(RestTemplate template) {
 
 		// Uninitialized and sealed can cause status 500
