@@ -330,7 +330,28 @@
 					</includes>
 					<excludes>
 						<exclude>**/Abstract*.java</exclude>
+						<exclude>**/*IntegrationTests*.java</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<runOrder>random</runOrder>
+					<redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<includes>
+						<include>**/*IntegrationTests.java</include>
+					</includes>
 					<systemPropertyVariables>
 						<jdk.tls.client.protocols>TLSv1.2</jdk.tls.client.protocols>
 					</systemPropertyVariables>
@@ -440,7 +461,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.0.0-M3</version>
+					<version>3.0.0-M5</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-failsafe-plugin</artifactId>
+					<version>3.0.0-M5</version>
 				</plugin>
 
 				<plugin>
