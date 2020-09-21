@@ -429,7 +429,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 
 		if (!this.initialized) {
 

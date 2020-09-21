@@ -97,7 +97,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 
 		if (this.leaseErrorListeners.isEmpty()) {
 			addErrorListener(LoggingErrorListener.INSTANCE);
