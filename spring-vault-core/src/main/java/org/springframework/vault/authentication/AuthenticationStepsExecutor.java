@@ -92,6 +92,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				String.format("Cannot retrieve VaultToken from authentication chain. Got instead %s", state));
 	}
 
+	@SuppressWarnings({ "unchecked", "ConstantConditions" })
 	private Object evaluate(Iterable<Node<?>> steps) {
 
 		Object state = null;
@@ -144,28 +145,6 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		return state;
 	}
 
-	private static Object doScalarValueStep(ScalarValueStep<Object> scalarValueStep) {
-		return scalarValueStep.get();
-	}
-
-	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
-		return supplierStep.get();
-	}
-
-	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
-		return o.apply(state);
-	}
-
-	private Object doZipStep(ZipStep<Object, Object> o, Object state) {
-
-		Object result = evaluate(o.getRight());
-		return Pair.of(state, result);
-	}
-
-	private static Object doOnNext(OnNextStep<Object> o, Object state) {
-		return o.apply(state);
-	}
-
 	@SuppressWarnings("ConstantConditions")
 	@Nullable
 	private Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
@@ -187,7 +166,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	}
 
-	private static HttpEntity<?> getEntity(HttpEntity<?> entity, @Nullable Object state) {
+	private static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
 
 		if (entity == null) {
 			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
@@ -198,6 +177,28 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		}
 
 		return entity;
+	}
+
+	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
+		return o.apply(state);
+	}
+
+	private Object doZipStep(ZipStep<Object, Object> o, Object state) {
+
+		Object result = evaluate(o.getRight());
+		return Pair.of(state, result);
+	}
+
+	private static Object doOnNext(OnNextStep<Object> o, Object state) {
+		return o.apply(state);
+	}
+
+	private static Object doScalarValueStep(ScalarValueStep<Object> scalarValueStep) {
+		return scalarValueStep.get();
+	}
+
+	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
+		return supplierStep.get();
 	}
 
 }

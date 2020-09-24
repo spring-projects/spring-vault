@@ -29,6 +29,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
@@ -117,7 +118,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	@SuppressWarnings("unchecked")
 	private Mono<Object> createMono(Iterable<Node<?>> steps) {
 
-		Mono<Object> state = Mono.just(Undefinded.INSTANCE);
+		Mono<Object> state = Mono.just(Undefinded.UNDEFINDED);
 
 		for (Node<?> o : steps) {
 
@@ -157,6 +158,57 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
+	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
+
+		HttpRequest<Object> definition = step.getDefinition();
+		HttpEntity<?> entity = getEntity(definition.getEntity(), state);
+
+		RequestBodySpec spec;
+		if (definition.getUri() == null) {
+
+			spec = this.webClient.method(definition.getMethod()).uri(definition.getUriTemplate(),
+					definition.getUrlVariables());
+		}
+		else {
+			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
+		}
+
+		for (Entry<String, List<String>> header : entity.getHeaders().entrySet()) {
+			spec = spec.header(header.getKey(), header.getValue().get(0));
+		}
+
+		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.UNDEFINDED)) {
+			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
+		}
+
+		return spec.retrieve().bodyToMono(definition.getResponseType());
+	}
+
+	private static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
+
+		if (entity == null) {
+			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
+		}
+
+		if (entity.getBody() == null && state != null) {
+			return new HttpEntity<>(state, entity.getHeaders());
+		}
+
+		return entity;
+	}
+
+	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
+		return o.apply(state);
+	}
+
+	private Mono<Object> doZipStep(ZipStep<Object, Object> o) {
+		return createMono(o.getRight());
+	}
+
+	private static void doOnNext(OnNextStep<Object> o, Object state) {
+		o.apply(state);
+	}
+
 	private static Object doScalarValueStep(ScalarValueStep<Object> scalarValueStep) {
 		return scalarValueStep.get();
 	}
@@ -182,63 +234,9 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 								e));
 	}
 
-	private static Object doMapStep(MapStep<Object, Object> o, Object state) {
-		return o.apply(state);
-	}
+	enum Undefinded {
 
-	private Mono<Object> doZipStep(ZipStep<Object, Object> o) {
-		return createMono(o.getRight());
-	}
-
-	private static Object doOnNext(OnNextStep<Object> o, Object state) {
-		return o.apply(state);
-	}
-
-	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
-
-		HttpRequest<Object> definition = step.getDefinition();
-		HttpEntity<?> entity = getEntity(definition.getEntity(), state);
-
-		RequestBodySpec spec;
-		if (definition.getUri() == null) {
-
-			spec = this.webClient.method(definition.getMethod()).uri(definition.getUriTemplate(),
-					definition.getUrlVariables());
-		}
-		else {
-			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
-		}
-
-		for (Entry<String, List<String>> header : entity.getHeaders().entrySet()) {
-			spec = spec.header(header.getKey(), header.getValue().get(0));
-		}
-
-		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.INSTANCE)) {
-			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
-		}
-
-		return spec.retrieve().bodyToMono(definition.getResponseType());
-	}
-
-	private static HttpEntity<?> getEntity(HttpEntity<?> entity, Object state) {
-
-		if (entity == null) {
-			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
-		}
-
-		if (entity.getBody() == null && state != null) {
-			return new HttpEntity<>(state, entity.getHeaders());
-		}
-
-		return entity;
-	}
-
-	static class Undefinded {
-
-		static final Undefinded INSTANCE = new Undefinded();
-
-		private Undefinded() {
-		}
+		UNDEFINDED;
 
 	}
 
