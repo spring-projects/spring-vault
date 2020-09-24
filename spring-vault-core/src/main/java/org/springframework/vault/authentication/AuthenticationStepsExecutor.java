@@ -29,6 +29,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.MapStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Pair;
+import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
 import org.springframework.vault.client.VaultResponses;
@@ -118,6 +119,10 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 					state = doOnNext((OnNextStep<Object>) o, state);
 				}
 
+				if (o instanceof ScalarValueStep<?>) {
+					state = doScalarValueStep((ScalarValueStep<Object>) o);
+				}
+
 				if (o instanceof SupplierStep<?>) {
 					state = doSupplierStep((SupplierStep<Object>) o);
 				}
@@ -137,6 +142,10 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 			}
 		}
 		return state;
+	}
+
+	private static Object doScalarValueStep(ScalarValueStep<Object> scalarValueStep) {
+		return scalarValueStep.get();
 	}
 
 	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {

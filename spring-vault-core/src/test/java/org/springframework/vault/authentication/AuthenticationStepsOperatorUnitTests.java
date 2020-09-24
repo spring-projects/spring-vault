@@ -15,11 +15,15 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.jupiter.api.BeforeEach;
+import java.io.IOException;
+import java.io.InputStream;
+
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -27,11 +31,13 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
 import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
@@ -40,10 +46,6 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * @author Mark Paluch
  */
 class AuthenticationStepsOperatorUnitTests {
-
-	@BeforeEach
-	void before() {
-	}
 
 	@Test
 	void justTokenShouldLogin() {
@@ -63,6 +65,58 @@ class AuthenticationStepsOperatorUnitTests {
 		login(steps).as(StepVerifier::create) //
 				.expectNext(VaultToken.of("my-token")) //
 				.verifyComplete();
+	}
+
+	@Test
+	void fileResourceCredentialSupplierShouldBeLoaded() {
+
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromSupplier(new ResourceCredentialSupplier(new ClassPathResource("kube-jwt-token")))
+				.login(VaultToken::of);
+
+		login(steps).as(StepVerifier::create) //
+				.consumeNextWith(actual -> {
+					assertThat(actual.getToken()).startsWith("eyJhbGciOiJSUz");
+				}).verifyComplete();
+	}
+
+	@Test
+	void absentFileResourceCredentialSupplierShouldFail() {
+
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes()) {
+					@Override
+					public InputStream getInputStream() throws IOException {
+						throw new IOException("Oops!");
+					}
+				})).login(VaultToken::of);
+
+		login(steps).as(StepVerifier::create) //
+				.verifyError(VaultException.class);
+	}
+
+	@Test
+	void inputStreamResourceCredentialSupplierShouldBeLoaded() {
+
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes())))
+				.login(VaultToken::of);
+
+		login(steps).as(StepVerifier::create) //
+				.consumeNextWith(actual -> {
+					assertThat(actual.getToken()).startsWith("eyJhbGciOiJSUz");
+				}).verifyComplete();
+	}
+
+	@Test
+	void anyCredentialSupplierShouldBeLoaded() {
+
+		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "eyJhbGciOiJSUz").login(VaultToken::of);
+
+		login(steps).as(StepVerifier::create) //
+				.consumeNextWith(actual -> {
+					assertThat(actual.getToken()).startsWith("eyJhbGciOiJSUz");
+				}).verifyComplete();
 	}
 
 	@Test

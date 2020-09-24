@@ -15,13 +15,19 @@
  */
 package org.springframework.vault.authentication;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -31,6 +37,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.MapStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.authentication.AuthenticationSteps.OnNextStep;
 import org.springframework.vault.authentication.AuthenticationSteps.Pair;
+import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
 import org.springframework.vault.support.VaultResponse;
@@ -45,6 +52,13 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodySpe
  * This class uses {@link WebClient} for non-blocking and reactive HTTP access. The
  * {@link AuthenticationSteps authentication flow} is materialized as reactive sequence
  * postponing execution until {@link Mono#subscribe() subscription}.
+ * <p>
+ * {@link Supplier Supplier} instances are inspected for their type.
+ * {@link ResourceCredentialSupplier} instances are loaded through
+ * {@link DataBufferUtils#read(org.springframework.core.io.Resource, org.springframework.core.io.buffer.DataBufferFactory, int)
+ * DataBufferUtils} to use non-blocking I/O for file access. {@link Supplier#get() Calls}
+ * to generic supplier types are offloaded to a {@link Schedulers#boundedElastic()
+ * scheduler} to avoid blocking calls on reactive worker/eventloop threads.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -57,6 +71,8 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	private final AuthenticationSteps chain;
 
 	private final WebClient webClient;
+
+	private final DataBufferFactory factory = new DefaultDataBufferFactory();
 
 	/**
 	 * Create a new {@link AuthenticationStepsOperator} given {@link AuthenticationSteps}
@@ -98,6 +114,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		}).onErrorMap(t -> new VaultLoginException("Cannot retrieve VaultToken from authentication chain", t));
 	}
 
+	@SuppressWarnings("unchecked")
 	private Mono<Object> createMono(Iterable<Node<?>> steps) {
 
 		Mono<Object> state = Mono.just(Undefinded.INSTANCE);
@@ -125,8 +142,12 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 				state = state.doOnNext(stateObject -> doOnNext((OnNextStep<Object>) o, stateObject));
 			}
 
+			if (o instanceof ScalarValueStep<?>) {
+				state = state.map(stateObject -> doScalarValueStep((ScalarValueStep<Object>) o));
+			}
+
 			if (o instanceof SupplierStep<?>) {
-				state = state.map(stateObject -> doSupplierStep((SupplierStep<Object>) o));
+				state = state.flatMap(stateObject -> doSupplierStepLater((SupplierStep<Object>) o));
 			}
 
 			if (logger.isDebugEnabled()) {
@@ -136,8 +157,29 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
-	private static Object doSupplierStep(SupplierStep<Object> supplierStep) {
-		return supplierStep.get();
+	private static Object doScalarValueStep(ScalarValueStep<Object> scalarValueStep) {
+		return scalarValueStep.get();
+	}
+
+	private Mono<Object> doSupplierStepLater(SupplierStep<Object> supplierStep) {
+
+		Supplier<?> supplier = supplierStep.getSupplier();
+
+		if (!(supplier instanceof ResourceCredentialSupplier)) {
+			return Mono.fromSupplier(supplierStep.getSupplier()).subscribeOn(Schedulers.boundedElastic());
+		}
+
+		ResourceCredentialSupplier resourceSupplier = (ResourceCredentialSupplier) supplier;
+
+		return DataBufferUtils.join(DataBufferUtils.read(resourceSupplier.getResource(), this.factory, 4096))
+				.map(dataBuffer -> {
+					String result = dataBuffer.toString(ResourceCredentialSupplier.CHARSET);
+					DataBufferUtils.release(dataBuffer);
+					return (Object) result;
+				}).onErrorMap(IOException.class,
+						e -> new VaultException(
+								String.format("Credential retrieval from %s failed", resourceSupplier.getResource()),
+								e));
 	}
 
 	private static Object doMapStep(MapStep<Object, Object> o, Object state) {

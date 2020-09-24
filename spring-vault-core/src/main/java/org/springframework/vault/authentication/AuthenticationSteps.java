@@ -90,7 +90,7 @@ public class AuthenticationSteps {
 
 		Assert.notNull(token, "Vault token must not be null");
 
-		return new AuthenticationSteps(new SupplierStep<>(() -> token, AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(new ScalarValueStep<>(token, AuthenticationSteps.HEAD));
 	}
 
 	/**
@@ -107,9 +107,25 @@ public class AuthenticationSteps {
 	}
 
 	/**
+	 * Start flow composition from a scalar {@code value}.
+	 * @param value the value to be used from this {@link Node}, must not be
+	 * {@literal null}.
+	 * @return the first {@link Node}.
+	 * @since 2.3
+	 */
+	public static <T> Node<T> fromValue(T value) {
+
+		Assert.notNull(value, "Value must not be null");
+
+		return new ScalarValueStep<>(value, AuthenticationSteps.HEAD);
+	}
+
+	/**
 	 * Start flow composition from a {@link Supplier}.
 	 * @param supplier supplier function that will produce the flow value, must not be
-	 * {@literal null}.
+	 * {@literal null}. Infrastructure components evaluating authentication steps may
+	 * inspect the given {@link java.util.function.Supplier} for an optimized approach to
+	 * obtain its value.
 	 * @return the first {@link Node}.
 	 */
 	public static <T> Node<T> fromSupplier(Supplier<T> supplier) {
@@ -638,6 +654,47 @@ public class AuthenticationSteps {
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.consumer, this.previous);
+		}
+
+	}
+
+	static final class ScalarValueStep<T> extends Node<T> implements PathAware {
+
+		private final T value;
+
+		private final Node<?> previous;
+
+		ScalarValueStep(T value, Node<?> previous) {
+			this.value = value;
+			this.previous = previous;
+		}
+
+		@Override
+		public String toString() {
+			return "Value: " + this.value.toString();
+		}
+
+		public T get() {
+			return this.value;
+		}
+
+		public Node<?> getPrevious() {
+			return this.previous;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof ScalarValueStep))
+				return false;
+			ScalarValueStep<?> that = (ScalarValueStep<?>) o;
+			return this.value.equals(that.value) && this.previous.equals(that.previous);
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(this.value, this.previous);
 		}
 
 	}

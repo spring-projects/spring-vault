@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.springframework.core.io.FileSystemResource;
@@ -34,6 +35,8 @@ import org.springframework.vault.VaultException;
  * @see CredentialSupplier
  */
 public class ResourceCredentialSupplier implements CredentialSupplier {
+
+	static final Charset CHARSET = StandardCharsets.US_ASCII;
 
 	private final Resource resource;
 
@@ -74,11 +77,15 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	public String get() {
 
 		try {
-			return new String(readToken(this.resource), StandardCharsets.US_ASCII);
+			return new String(readToken(this.resource), CHARSET);
 		}
 		catch (IOException e) {
 			throw new VaultException(String.format("Credential retrieval from %s failed", this.resource), e);
 		}
+	}
+
+	Resource getResource() {
+		return this.resource;
 	}
 
 	/**

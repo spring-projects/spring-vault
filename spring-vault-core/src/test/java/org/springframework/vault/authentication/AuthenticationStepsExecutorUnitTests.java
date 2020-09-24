@@ -20,6 +20,8 @@ import java.net.URI;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -78,6 +80,26 @@ class AuthenticationStepsExecutorUnitTests {
 		AuthenticationSteps steps = AuthenticationSteps.fromSupplier(() -> "my-token").login(VaultToken::of);
 
 		assertThat(login(steps)).isEqualTo(VaultToken.of("my-token"));
+	}
+
+	@Test
+	void fileResourceCredentialSupplierShouldBeLoaded() {
+
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromSupplier(new ResourceCredentialSupplier(new ClassPathResource("kube-jwt-token")))
+				.login(VaultToken::of);
+
+		assertThat(login(steps).getToken()).startsWith("eyJhbGciOiJSUz");
+	}
+
+	@Test
+	void inputStreamResourceCredentialSupplierShouldBeLoaded() {
+
+		AuthenticationSteps steps = AuthenticationSteps
+				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes())))
+				.login(VaultToken::of);
+
+		assertThat(login(steps).getToken()).startsWith("eyJhbGciOiJSUz");
 	}
 
 	@Test

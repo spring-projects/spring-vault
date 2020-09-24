@@ -38,8 +38,7 @@ public interface CredentialSupplier extends Supplier<String> {
 
 	/**
 	 * Retrieve a cached {@link CredentialSupplier} that obtains the credential early and
-	 * reuses the token for each {@link #get()} call. This is useful to prevent I/O
-	 * operations in e.g. reactive usage.
+	 * reuses the token for each {@link #get()} call.
 	 * <p>
 	 * Reusing a cached token can lead to authentication failures if the credential
 	 * expires.
