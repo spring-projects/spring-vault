@@ -15,11 +15,22 @@
  */
 package org.springframework.vault.core;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.support.VaultResponse;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for {@link VaultKeyValue2Template} using the versioned Key/Value (k/v
@@ -33,6 +44,29 @@ class VaultKeyValueTemplateVersionedIntegrationTests extends AbstractVaultKeyVal
 
 	VaultKeyValueTemplateVersionedIntegrationTests() {
 		super("versioned", KeyValueBackend.versioned());
+	}
+
+	@Test
+	void shouldPatchSecret() {
+		final String oldKey = "key";
+		final String newKey = "newKey";
+		Map<String, String> secret = Collections.singletonMap(oldKey, "value");
+
+		String key = UUID.randomUUID().toString();
+
+		this.kvOperations.put(key, secret);
+
+		Map<String, String> newSecret = Collections.singletonMap(newKey, "newValue");
+
+		assertTrue(this.kvOperations.patch(key, newSecret));
+
+		assertThat(this.kvOperations.list("/")).contains(key);
+		VaultResponse vaultResponse = this.kvOperations.get(key);
+		assertNotNull(vaultResponse);
+		Map<String, Object> data = vaultResponse.getData();
+		assertNotNull(data);
+		assertThat(data).containsKey(oldKey);
+		assertThat(data).containsKey(newKey);
 	}
 
 }

@@ -24,6 +24,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Default implementation of {@link VaultKeyValueOperations} for the Key/Value backend
@@ -104,6 +105,11 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 		Assert.hasText(path, "Path must not be empty");
 
 		doWrite(createDataPath(path), body);
+	}
+
+	@Override
+	public boolean patch(String path, Map<String, ?> kv) {
+		throw new IllegalStateException("Patch operation is available only in KV secret engine V2");
 	}
 
 	@Override

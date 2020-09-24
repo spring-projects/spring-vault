@@ -19,6 +19,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
+import java.util.Map;
+
 /**
  * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
  * backend. Paths used in this operations interface are relative and outgoing requests
@@ -58,5 +60,13 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 * @param body must not be {@literal null}.
 	 */
 	void put(String path, Object body);
+
+	/**
+	 * Updates the secret at {@code path} without removing the existing secrets.
+	 * @param path must not be {@literal null}.
+	 * @param kv must not be {@literal null}.
+	 * @return true if the patch operation is successful, false otherwise.
+	 */
+	boolean patch(String path, Map<String, ?> kv);
 
 }
