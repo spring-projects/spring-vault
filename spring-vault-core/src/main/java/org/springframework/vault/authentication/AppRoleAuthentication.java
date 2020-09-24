@@ -115,7 +115,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	private static Node<String> getRoleIdSteps(AppRoleAuthenticationOptions options, RoleId roleId) {
 
 		if (roleId instanceof Provided) {
-			return AuthenticationSteps.fromSupplier(((Provided) roleId)::getValue);
+			return AuthenticationSteps.fromValue(((Provided) roleId).getValue());
 		}
 
 		if (roleId instanceof Pull) {
@@ -138,7 +138,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	private static Node<String> getSecretIdSteps(AppRoleAuthenticationOptions options, SecretId secretId) {
 
 		if (secretId instanceof Provided) {
-			return AuthenticationSteps.fromSupplier(((Provided) secretId)::getValue);
+			return AuthenticationSteps.fromValue(((Provided) secretId).getValue());
 		}
 
 		if (secretId instanceof Pull) {

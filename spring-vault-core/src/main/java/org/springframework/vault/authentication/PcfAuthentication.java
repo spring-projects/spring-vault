@@ -90,10 +90,12 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
 
-		String instanceCert = options.getInstanceCertSupplier().get();
-		String instanceKey = options.getInstanceKeySupplier().get();
-		return AuthenticationSteps
-				.fromSupplier(() -> getPcfLogin(options.getRole(), options.getClock(), instanceCert, instanceKey)) //
+		AuthenticationSteps.Node<String> cert = AuthenticationSteps.fromSupplier(options.getInstanceCertSupplier());
+		AuthenticationSteps.Node<String> key = AuthenticationSteps.fromSupplier(options.getInstanceKeySupplier());
+
+		return cert
+				.zipWith(key).map(credentials -> getPcfLogin(options.getRole(), options.getClock(),
+						credentials.getLeft(), credentials.getRight()))
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 

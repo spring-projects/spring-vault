@@ -29,8 +29,8 @@ import org.springframework.util.StringUtils;
  * certificate {@link Supplier}s. {@link PcfAuthenticationOptions} can be constructed
  * using {@link #builder()}. Instances of this class are immutable once constructed.
  * <p>
- * Defaults to a cached instance certificate/key by resolving {@code CF_INSTANCE_CERT} and
- * {@code CF_INSTANCE_KEY} env variables.
+ * Defaults to platform-default instance certificate/key by resolving
+ * {@code CF_INSTANCE_CERT} and {@code CF_INSTANCE_KEY} env variables.
  *
  * @author Mark Paluch
  * @see CredentialSupplier
@@ -223,12 +223,12 @@ public class PcfAuthenticationOptions {
 			Supplier<String> instanceCertSupplier = this.instanceCertSupplier;
 
 			if (instanceCertSupplier == null) {
-				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT")).cached();
+				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT"));
 			}
 
 			Supplier<String> instanceKeySupplier = this.instanceKeySupplier;
 			if (instanceKeySupplier == null) {
-				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY")).cached();
+				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY"));
 			}
 
 			return new PcfAuthenticationOptions(this.path, this.role, this.clock, instanceCertSupplier,

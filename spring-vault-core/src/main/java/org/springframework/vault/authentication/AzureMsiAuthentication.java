@@ -131,7 +131,7 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 					.map(AzureMsiAuthentication::toAzureVmEnvironment);
 		}
 		else {
-			environmentSteps = AuthenticationSteps.fromSupplier(() -> environment);
+			environmentSteps = AuthenticationSteps.fromValue(environment);
 		}
 
 		return environmentSteps.zipWith(msiToken)

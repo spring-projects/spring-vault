@@ -27,8 +27,8 @@ import org.springframework.util.Assert;
  * {@link KubernetesAuthentication} can be constructed using {@link #builder()}. Instances
  * of this class are immutable once constructed.
  * <p>
- * Default to obtain a cached token from
- * {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
+ * Defaults to obtain the token from
+ * {@code /var/run/secrets/kubernetes.io/serviceaccount/token} on each login.
  *
  * @author Michal Budzyn
  * @author Mark Paluch
@@ -155,7 +155,7 @@ public class KubernetesAuthenticationOptions {
 			Assert.notNull(this.role, "Role must not be null");
 
 			return new KubernetesAuthenticationOptions(this.path, this.role,
-					this.jwtSupplier == null ? new KubernetesServiceAccountTokenFile().cached() : this.jwtSupplier);
+					this.jwtSupplier == null ? new KubernetesServiceAccountTokenFile() : this.jwtSupplier);
 		}
 
 	}

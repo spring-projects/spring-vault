@@ -75,8 +75,8 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 
-		String token = options.getJwtSupplier().get();
-		return AuthenticationSteps.fromSupplier(() -> getKubernetesLogin(options.getRole(), token))
+		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
+				.map(token -> getKubernetesLogin(options.getRole(), token))
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
