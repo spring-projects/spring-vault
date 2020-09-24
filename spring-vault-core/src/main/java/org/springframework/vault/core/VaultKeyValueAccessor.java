@@ -16,10 +16,12 @@
 package org.springframework.vault.core;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -107,6 +109,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		if (response != null) {
 
 			JsonNode jsonNode = getJsonNode(response);
+			JsonNode jsonMeta = response.getRequiredData().at("/metadata");
+			response.setMetadata(mapper.convertValue(jsonMeta, new TypeReference<Map<String, Object>>() {}));
 
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}

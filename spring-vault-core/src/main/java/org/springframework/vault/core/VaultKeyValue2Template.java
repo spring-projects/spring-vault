@@ -16,10 +16,12 @@
 package org.springframework.vault.core;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -87,6 +89,40 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		Assert.hasText(path, "Path must not be empty");
 
 		doWrite(createDataPath(path), Collections.singletonMap("data", body));
+	}
+
+	/**
+	 * Performs a KV Patch operation.
+	 * @param path must not be {@literal null} or empty.
+	 * @param kv New key value map to be updated
+	 * @since 2.3
+	 */
+	@Override
+	public boolean patch(String path, Map<String, ?> kv) {
+		Assert.hasText(path, "Path must not be empty");
+
+		// To do patch operation, we need to do a read operation first
+		VaultResponse readResponse = get(path);
+		if (null == readResponse) {
+			throw new VaultException("VaultResponse must not be null");
+		} else if (null == readResponse.getData()) {
+			throw new SecretNotFoundException("No data found at %s; patch only works on existing data");
+		} else if (null == readResponse.getMetadata()) {
+			throw new VaultException("Metadata must not be null");
+		}
+		Map<String, Object> data = readResponse.getData();
+		Map<String, Object> metadata = readResponse.getMetadata();
+		kv.forEach(data::put);
+		Map<String, Object> body = new HashMap<>();
+		body.put("data", data);
+		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+
+		VaultResponse writeResponse = doWrite(createDataPath(path), body);
+		if (null == writeResponse) {
+			return false;
+		}
+		Map<String, Object> writeResponseData = writeResponse.getData();
+		return null != writeResponseData;
 	}
 
 }
