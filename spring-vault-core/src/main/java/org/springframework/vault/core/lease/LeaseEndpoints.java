@@ -64,8 +64,10 @@ public enum LeaseEndpoints {
 	},
 
 	/**
-	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}).
+	 * Alias for {@link #Leases}.
+	 * @deprecated since 2.3, use {@link #Leases} instead.
 	 */
+	@Deprecated
 	SysLeases {
 
 		@Override
@@ -73,6 +75,62 @@ public enum LeaseEndpoints {
 
 			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease),
 					Map.class, lease.getLeaseId());
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Lease renew(Lease lease, RestOperations operations) {
+
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew",
+					HttpMethod.PUT, leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
+		}
+	},
+
+	/**
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
+	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
+	 */
+	Leases {
+
+		@Override
+		public void revoke(Lease lease, RestOperations operations) {
+
+			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease),
+					Map.class, lease.getLeaseId());
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public Lease renew(Lease lease, RestOperations operations) {
+
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew",
+					HttpMethod.PUT, leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
+		}
+	},
+
+	/**
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
+	 * the {@literal /sys/leases/revoke-prefix/…} endpoint when revoking leases.
+	 */
+	LeasesRevokedByPrefix {
+
+		@Override
+		public void revoke(Lease lease, RestOperations operations) {
+
+			String endpoint = "sys/leases/revoke-prefix/" + lease.getLeaseId();
+			operations.put(endpoint, null);
 		}
 
 		@Override
