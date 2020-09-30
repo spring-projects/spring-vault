@@ -63,6 +63,25 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
+			Leases.revoke(lease, operations);
+		}
+
+		@Override
+		public Lease renew(Lease lease, RestOperations operations) {
+
+			return Leases.renew(lease, operations);
+		}
+	},
+
+	/**
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
+	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
+	 */
+	Leases {
+
+		@Override
+		public void revoke(Lease lease, RestOperations operations) {
+
 			revokeUsing("sys/leases/revoke", lease, operations);
 		}
 
@@ -77,7 +96,7 @@ public enum LeaseEndpoints {
 	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
 	 * the {@literal /sys/leases/revoke-prefix/…} endpoint when revoking leases.
 	 */
-	SysLeasesUsingRevokePrefix {
+	LeasesRevokedByPrefix {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
