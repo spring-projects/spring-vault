@@ -55,9 +55,10 @@ public enum LeaseEndpoints {
 	},
 
 	/**
-	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
-	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
+	 * Alias for {@link #Leases}.
+	 * @deprecated since 2.3, use {@link #Leases} instead.
 	 */
+	@Deprecated
 	SysLeases {
 
 		@Override
