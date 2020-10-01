@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
@@ -30,6 +31,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  * version 2.
  *
  * @author Mark Paluch
+ * @author Younghwan Jang
  * @since 2.1
  */
 class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyValueOperations {
@@ -69,7 +71,7 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 
 	@Nullable
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> VaultResponseSupport<T> get(String path, Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -84,45 +86,52 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 	}
 
 	@Override
+	public boolean patch(String path, Map<String, ?> patch) {
+
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(patch, "Patch body must not be null");
+
+		// To do patch operation, we need to do a read operation first
+		VaultResponse readResponse = get(path);
+		if (readResponse == null || readResponse.getData() == null) {
+			throw new SecretNotFoundException(
+					String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
+					String.format("%s/%s", this.path, path));
+		}
+
+		if (readResponse.getMetadata() == null) {
+			throw new VaultException("Metadata must not be null");
+		}
+
+		Map<String, Object> metadata = readResponse.getMetadata();
+		Map<String, Object> data = new LinkedHashMap<>(readResponse.getRequiredData());
+		data.putAll(patch);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("data", data);
+		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+
+		try {
+			doWrite(createDataPath(path), body);
+			return true;
+		}
+		catch (VaultException e) {
+
+			if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
+					|| e.getMessage().contains("did not match the current version"))) {
+				return false;
+			}
+
+			throw e;
+		}
+	}
+
+	@Override
 	public void put(String path, Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
 		doWrite(createDataPath(path), Collections.singletonMap("data", body));
-	}
-
-	/**
-	 * Performs a KV Patch operation.
-	 * @param path must not be {@literal null} or empty.
-	 * @param kv New key value map to be updated
-	 * @since 2.3
-	 */
-	@Override
-	public boolean patch(String path, Map<String, ?> kv) {
-		Assert.hasText(path, "Path must not be empty");
-
-		// To do patch operation, we need to do a read operation first
-		VaultResponse readResponse = get(path);
-		if (null == readResponse) {
-			throw new VaultException("VaultResponse must not be null");
-		} else if (null == readResponse.getData()) {
-			throw new SecretNotFoundException("No data found at %s; patch only works on existing data");
-		} else if (null == readResponse.getMetadata()) {
-			throw new VaultException("Metadata must not be null");
-		}
-		Map<String, Object> data = readResponse.getData();
-		Map<String, Object> metadata = readResponse.getMetadata();
-		kv.forEach(data::put);
-		Map<String, Object> body = new HashMap<>();
-		body.put("data", data);
-		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
-
-		VaultResponse writeResponse = doWrite(createDataPath(path), body);
-		if (null == writeResponse) {
-			return false;
-		}
-		Map<String, Object> writeResponseData = writeResponse.getData();
-		return null != writeResponseData;
 	}
 
 }

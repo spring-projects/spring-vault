@@ -33,7 +33,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  */
 abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
-	private final String path;
+	final String path;
 
 	/**
 	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and the

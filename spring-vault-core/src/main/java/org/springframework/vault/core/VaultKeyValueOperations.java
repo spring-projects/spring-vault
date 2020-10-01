@@ -15,11 +15,11 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Map;
+
 import org.springframework.lang.Nullable;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-
-import java.util.Map;
 
 /**
  * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
@@ -31,6 +31,7 @@ import java.util.Map;
  * {@link VaultVersionedKeyValueOperations} in such cases instead.
  *
  * @author Mark Paluch
+ * @author Younghwan Jang
  * @since 2.1
  * @see VaultVersionedKeyValueOperations
  * @see VaultKeyValueOperationsSupport.KeyValueBackend
@@ -55,18 +56,20 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	<T> VaultResponseSupport<T> get(String path, Class<T> responseType);
 
 	/**
+	 * Update the secret at {@code path} without removing the existing secrets. Requires a
+	 * Key-Value version 2 mount to ensure an atomic update.
+	 * @param path must not be {@literal null}.
+	 * @param patch must not be {@literal null}.
+	 * @return {@code true} if the patch operation is successful, {@code false} otherwise.
+	 * @since 2.3
+	 */
+	boolean patch(String path, Map<String, ?> patch);
+
+	/**
 	 * Write the secret at {@code path}.
 	 * @param path must not be {@literal null}.
 	 * @param body must not be {@literal null}.
 	 */
 	void put(String path, Object body);
-
-	/**
-	 * Updates the secret at {@code path} without removing the existing secrets.
-	 * @param path must not be {@literal null}.
-	 * @param kv must not be {@literal null}.
-	 * @return true if the patch operation is successful, false otherwise.
-	 */
-	boolean patch(String path, Map<String, ?> kv);
 
 }

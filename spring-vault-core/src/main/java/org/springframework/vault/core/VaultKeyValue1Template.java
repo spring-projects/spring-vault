@@ -24,13 +24,13 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Default implementation of {@link VaultKeyValueOperations} for the Key/Value backend
  * version 1.
  *
  * @author Mark Paluch
+ * @author Younghwan Jang
  * @since 2.1
  * @see KeyValueBackend#KV_1
  */
@@ -100,16 +100,16 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 	}
 
 	@Override
+	public boolean patch(String path, Map<String, ?> patch) {
+		throw new IllegalStateException("K/V engine mount must be version 2 for patch support");
+	}
+
+	@Override
 	public void put(String path, Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
 		doWrite(createDataPath(path), body);
-	}
-
-	@Override
-	public boolean patch(String path, Map<String, ?> kv) {
-		throw new IllegalStateException("Patch operation is available only in KV secret engine V2");
 	}
 
 	@Override

@@ -110,7 +110,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 			JsonNode jsonNode = getJsonNode(response);
 			JsonNode jsonMeta = response.getRequiredData().at("/metadata");
-			response.setMetadata(mapper.convertValue(jsonMeta, new TypeReference<Map<String, Object>>() {}));
+			response.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<Map<String, Object>>() {
+			}));
 
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}
