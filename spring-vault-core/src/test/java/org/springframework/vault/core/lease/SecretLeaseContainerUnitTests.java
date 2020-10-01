@@ -58,8 +58,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -118,7 +118,7 @@ class SecretLeaseContainerUnitTests {
 
 		this.secretLeaseContainer.start();
 
-		verifyZeroInteractions(this.leaseListenerAdapter);
+		verifyNoInteractions(this.leaseListenerAdapter);
 	}
 
 	@Test
@@ -143,7 +143,7 @@ class SecretLeaseContainerUnitTests {
 		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
 		this.secretLeaseContainer.start();
 
-		verifyZeroInteractions(this.taskScheduler);
+		verifyNoInteractions(this.taskScheduler);
 		verify(this.leaseListenerAdapter).onLeaseEvent(this.captor.capture());
 
 		SecretLeaseCreatedEvent leaseCreatedEvent = (SecretLeaseCreatedEvent) this.captor.getValue();
@@ -166,7 +166,7 @@ class SecretLeaseContainerUnitTests {
 		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
 		this.secretLeaseContainer.start();
 
-		verifyZeroInteractions(this.taskScheduler);
+		verifyNoInteractions(this.taskScheduler);
 		verify(this.leaseListenerAdapter).onLeaseEvent(this.captor.capture());
 
 		SecretLeaseCreatedEvent leaseCreatedEvent = (SecretLeaseCreatedEvent) this.captor.getValue();
@@ -224,7 +224,7 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler).schedule(captor.capture(), any(Trigger.class));
 
 		captor.getValue().run();
-		verifyZeroInteractions(this.scheduledFuture);
+		verifyNoInteractions(this.scheduledFuture);
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 	}
 
@@ -352,7 +352,7 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler).schedule(captor.capture(), any(Trigger.class));
 
 		captor.getValue().run();
-		verifyZeroInteractions(this.scheduledFuture);
+		verifyNoInteractions(this.scheduledFuture);
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
 		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
@@ -406,7 +406,7 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler).schedule(captor.capture(), any(Trigger.class));
 
 		captor.getValue().run();
-		verifyZeroInteractions(this.scheduledFuture);
+		verifyNoInteractions(this.scheduledFuture);
 		verify(this.taskScheduler, times(1)).schedule(captor.capture(), any(Trigger.class));
 		verify(this.leaseListenerAdapter).onLeaseEvent(any(SecretLeaseCreatedEvent.class));
 		verify(this.leaseListenerAdapter).onLeaseEvent(any(SecretLeaseExpiredEvent.class));
@@ -598,7 +598,7 @@ class SecretLeaseContainerUnitTests {
 
 		this.secretLeaseContainer.destroy();
 
-		verifyZeroInteractions(this.taskScheduler);
+		verifyNoInteractions(this.taskScheduler);
 
 		verify(this.leaseListenerAdapter, never()).onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
 		verify(this.leaseListenerAdapter, never()).onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
