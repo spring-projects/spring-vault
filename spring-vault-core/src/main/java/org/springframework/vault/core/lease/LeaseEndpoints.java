@@ -44,13 +44,22 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
-			revokeUsing("sys/revoke", lease, operations);
+			operations.exchange("sys/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
+					lease.getLeaseId());
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
 
-			return renewUsing("sys/renew", lease, operations);
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/renew", HttpMethod.PUT,
+					leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
 		}
 	},
 
@@ -64,13 +73,22 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
-			Leases.revoke(lease, operations);
+			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
+					lease.getLeaseId());
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
 
-			return Leases.renew(lease, operations);
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew", HttpMethod.PUT,
+					leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
 		}
 	},
 
@@ -83,13 +101,22 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
-			revokeUsing("sys/leases/revoke", lease, operations);
+			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
+					lease.getLeaseId());
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
 
-			return renewUsing("sys/leases/renew", lease, operations);
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew", HttpMethod.PUT,
+					leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
 		}
 	},
 
@@ -102,13 +129,22 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
-			revokeUsingPrefixEndpoint(lease, operations);
+			String endpoint = "sys/leases/revoke-prefix/" + lease.getLeaseId();
+			operations.put(endpoint, null);
 		}
 
 		@Override
+		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
 
-			return renewUsing("sys/leases/renew", lease, operations);
+			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+
+			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew", HttpMethod.PUT,
+					leaseRenewalEntity, Map.class);
+
+			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+
+			return toLease(entity.getBody());
 		}
 	};
 
@@ -126,31 +162,6 @@ public enum LeaseEndpoints {
 	 * @return the renewed {@link Lease}.
 	 */
 	abstract Lease renew(Lease lease, RestOperations operations);
-
-	private static void revokeUsing(String endpoint, Lease lease, RestOperations operations) {
-
-		operations.exchange(endpoint, HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
-				lease.getLeaseId());
-	}
-
-	private static void revokeUsingPrefixEndpoint(Lease lease, RestOperations operations) {
-
-		String endpoint = "sys/leases/revoke-prefix/" + lease.getLeaseId();
-		operations.put(endpoint, null);
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Lease renewUsing(String endpoint, Lease lease, RestOperations operations) {
-
-		HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
-
-		ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange(endpoint, HttpMethod.PUT,
-				leaseRenewalEntity, Map.class);
-
-		Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
-
-		return toLease(entity.getBody());
-	}
 
 	private static Lease toLease(Map<String, Object> body) {
 
