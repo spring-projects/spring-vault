@@ -31,6 +31,25 @@ import org.springframework.util.Assert;
  */
 public class VaultCertificateRequest {
 
+	public static class Format {
+
+		public static final Format DER = new Format("der");
+		public static final Format PEM = new Format("pem");
+		public static final Format PEM_BUNDLE = new Format("pem_bundle");
+
+		private final String value;
+
+		public Format(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return value;
+		}
+
+	}
+
 	/**
 	 * The CN of the certificate. Should match the host name.
 	 */
@@ -57,6 +76,8 @@ public class VaultCertificateRequest {
 	@Nullable
 	private final Duration ttl;
 
+	private final Format format;
+
 	/**
 	 * If {@literal true}, the given common name will not be included in DNS or Email
 	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
@@ -65,13 +86,15 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
-			List<String> uriSubjectAltNames, @Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
+			List<String> uriSubjectAltNames, @Nullable Duration ttl, Format format,
+			boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
 		this.uriSubjectAltNames = uriSubjectAltNames;
 		this.ttl = ttl;
+		this.format = format;
 		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 	}
 
@@ -112,6 +135,10 @@ public class VaultCertificateRequest {
 		return this.ttl;
 	}
 
+	public Format getFormat() {
+		return format;
+	}
+
 	public boolean isExcludeCommonNameFromSubjectAltNames() {
 		return this.excludeCommonNameFromSubjectAltNames;
 	}
@@ -129,6 +156,10 @@ public class VaultCertificateRequest {
 
 		@Nullable
 		private Duration ttl;
+
+		// Vault default format is PEM.
+		// But we stick to DER for backwards compatibility with earlier versions of spring-vault
+		private Format format = Format.DER;
 
 		private boolean excludeCommonNameFromSubjectAltNames;
 
@@ -275,6 +306,13 @@ public class VaultCertificateRequest {
 			return this;
 		}
 
+		public VaultCertificateRequestBuilder format(Format format) {
+			Assert.notNull(format, "Format must not be null");
+
+			this.format = format;
+			return this;
+		}
+
 		/**
 		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
 		 * appropriate). Useful if the CN is not a hostname or email address, but is
@@ -334,7 +372,7 @@ public class VaultCertificateRequest {
 			}
 
 			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
-					this.ttl, this.excludeCommonNameFromSubjectAltNames);
+					this.ttl, this.format, this.excludeCommonNameFromSubjectAltNames);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

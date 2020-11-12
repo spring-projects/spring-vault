@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Files;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ import org.springframework.vault.core.VaultPkiOperations.Encoding;
 import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
+import org.springframework.vault.support.VaultCertificateRequest.Format;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -129,8 +131,45 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	void signShouldSignCsr() {
+		String csr = csr();
 
-		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
+		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
+
+		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
+				csr, request);
+
+		Certificate data = certificateResponse.getRequiredData();
+
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
+		assertThat(data.getSerialNumber()).isNotEmpty();
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=csr.example.com");
+		assertThat(data.createTrustStore()).isNotNull();
+	}
+
+	@Test
+	void formatsCertificate() {
+		String csr = csr();
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+				.commonName("hello.example.com")
+				.format(Format.PEM)
+				.build();
+
+
+		VaultSignCertificateRequestResponse response =
+				pkiOperations.signCertificateRequest("testrole", csr, request);
+
+		Certificate data = response.getRequiredData();
+
+		assertThat(data.getCertificate())
+				.startsWith("-----BEGIN CERTIFICATE-----\n")
+				.endsWith("\n-----END CERTIFICATE-----");
+	}
+
+	@NotNull
+	private String csr() {
+		return "-----BEGIN CERTIFICATE REQUEST-----\n"
 				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
 				+ "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
 				+ "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
@@ -145,21 +184,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
 				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
 				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
-				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n"
+				+ "cQ==\n"
 				+ "-----END CERTIFICATE REQUEST-----";
-
-		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
-
-		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
-				csr, request);
-
-		Certificate data = certificateResponse.getRequiredData();
-
-		assertThat(data.getCertificate()).isNotEmpty();
-		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
-		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=csr.example.com");
-		assertThat(data.createTrustStore()).isNotNull();
 	}
 
 	@Test
