@@ -177,7 +177,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			dispatch(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
-			this.logger.warn("Cannot revoke VaultToken: %s", e);
+			this.logger.warn("Cannot revoke VaultToken: %s", token, e);
 			dispatch(new LoginTokenRevocationFailedEvent(token, e));
 		}
 	}
