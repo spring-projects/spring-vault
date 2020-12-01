@@ -67,6 +67,7 @@ import static org.mockito.Mockito.when;
  *
  * @author Mark Paluch
  * @author Steven Swor
+ * @author Thomas Kåsene
  */
 @ExtendWith(MockitoExtension.class)
 class SecretLeaseContainerUnitTests {

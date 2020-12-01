@@ -1,3 +1,18 @@
+/*
+ * Copyright 2020 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.springframework.vault.core.lease;
 
 import java.time.Duration;
@@ -27,6 +42,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for {@link LeaseEndpoints}.
+ *
+ * @author Thomas Kåsene
+ */
 @ExtendWith(MockitoExtension.class)
 public class LeaseEndpointsUnitTests {
 
@@ -58,9 +78,7 @@ public class LeaseEndpointsUnitTests {
 		verify(restOperations).exchange(eq("sys/renew"), eq(HttpMethod.PUT), httpEntityCaptor.capture(), eq(Map.class));
 
 		Map<String, String> actualRequestBodyParams = httpEntityCaptor.getValue().getBody();
-		assertThat(actualRequestBodyParams).containsOnly(
-				entry("lease_id", "old_lease"),
-				entry("increment", "70"));
+		assertThat(actualRequestBodyParams).containsOnly(entry("lease_id", "old_lease"), entry("increment", "70"));
 
 		assertThat(renewedLease.getLeaseId()).isEqualTo("new_lease");
 		assertThat(renewedLease.getLeaseDuration()).isEqualTo(Duration.ofSeconds(90));
@@ -77,8 +95,8 @@ public class LeaseEndpointsUnitTests {
 
 		LeaseEndpoints.Legacy.revoke(oldLease, restOperations);
 
-		verify(restOperations).exchange(eq("sys/revoke"), eq(HttpMethod.PUT), httpEntityCaptor.capture(),
-				eq(Map.class), eq("old_lease"));
+		verify(restOperations).exchange(eq("sys/revoke"), eq(HttpMethod.PUT), httpEntityCaptor.capture(), eq(Map.class),
+				eq("old_lease"));
 
 		Map<String, String> actualRequestBodyParams = httpEntityCaptor.getValue().getBody();
 		assertThat(actualRequestBodyParams).containsOnly(entry("lease_id", "old_lease"));
@@ -107,9 +125,7 @@ public class LeaseEndpointsUnitTests {
 				eq(Map.class));
 
 		Map<String, String> actualRequestBodyParams = httpEntityCaptor.getValue().getBody();
-		assertThat(actualRequestBodyParams).containsOnly(
-				entry("lease_id", "old_lease"),
-				entry("increment", "70"));
+		assertThat(actualRequestBodyParams).containsOnly(entry("lease_id", "old_lease"), entry("increment", "70"));
 
 		assertThat(renewedLease.getLeaseId()).isEqualTo("new_lease");
 		assertThat(renewedLease.getLeaseDuration()).isEqualTo(Duration.ofSeconds(90));
@@ -156,9 +172,7 @@ public class LeaseEndpointsUnitTests {
 				eq(Map.class));
 
 		Map<String, String> actualRequestBodyParams = httpEntityCaptor.getValue().getBody();
-		assertThat(actualRequestBodyParams).containsOnly(
-				entry("lease_id", "old_lease"),
-				entry("increment", "70"));
+		assertThat(actualRequestBodyParams).containsOnly(entry("lease_id", "old_lease"), entry("increment", "70"));
 
 		assertThat(renewedLease.getLeaseId()).isEqualTo("new_lease");
 		assertThat(renewedLease.getLeaseDuration()).isEqualTo(Duration.ofSeconds(90));
@@ -204,9 +218,7 @@ public class LeaseEndpointsUnitTests {
 				eq(Map.class));
 
 		Map<String, String> actualRequestBodyParams = httpEntityCaptor.getValue().getBody();
-		assertThat(actualRequestBodyParams).containsOnly(
-				entry("lease_id", "old_lease"),
-				entry("increment", "70"));
+		assertThat(actualRequestBodyParams).containsOnly(entry("lease_id", "old_lease"), entry("increment", "70"));
 
 		assertThat(renewedLease.getLeaseId()).isEqualTo("new_lease");
 		assertThat(renewedLease.getLeaseDuration()).isEqualTo(Duration.ofSeconds(90));
@@ -227,4 +239,5 @@ public class LeaseEndpointsUnitTests {
 
 		verifyNoMoreInteractions(restOperations);
 	}
+
 }

@@ -31,6 +31,7 @@ import org.springframework.web.client.RestOperations;
  * endpoints.
  *
  * @author Mark Paluch
+ * @author Thomas Kåsene
  * @since 2.1
  * @see SecretLeaseContainer
  */
@@ -48,16 +49,13 @@ public enum LeaseEndpoints {
 					lease.getLeaseId());
 		}
 
-		@SuppressWarnings("unchecked")
 		@Override
 		public Lease renew(Lease lease, RestOperations operations) {
 
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/renew");
 
-			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/renew",
-					HttpMethod.PUT, leaseRenewalEntity, Map.class);
-
-			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+			Assert.state(entity.getBody() != null, "Renew response must not be null");
 
 			return toLease(entity.getBody());
 		}
@@ -72,29 +70,19 @@ public enum LeaseEndpoints {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
-
-			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease),
-					Map.class, lease.getLeaseId());
+			Leases.revoke(lease, operations);
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
-
-			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
-
-			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew",
-					HttpMethod.PUT, leaseRenewalEntity, Map.class);
-
-			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
-
-			return toLease(entity.getBody());
+			return Leases.renew(lease, operations);
 		}
 	},
 
 	/**
 	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
 	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
+	 * @since 2.3
 	 */
 	Leases {
 
@@ -106,15 +94,12 @@ public enum LeaseEndpoints {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
 		public Lease renew(Lease lease, RestOperations operations) {
 
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/leases/renew");
 
-			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew",
-					HttpMethod.PUT, leaseRenewalEntity, Map.class);
-
-			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+			Assert.state(entity.getBody() != null, "Renew response must not be null");
 
 			return toLease(entity.getBody());
 		}
@@ -123,6 +108,7 @@ public enum LeaseEndpoints {
 	/**
 	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
 	 * the {@literal /sys/leases/revoke-prefix/…} endpoint when revoking leases.
+	 * @since 2.3
 	 */
 	LeasesRevokedByPrefix {
 
@@ -134,15 +120,13 @@ public enum LeaseEndpoints {
 		}
 
 		@Override
-		@SuppressWarnings("unchecked")
+
 		public Lease renew(Lease lease, RestOperations operations) {
 
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
+			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/leases/renew");
 
-			ResponseEntity<Map<String, Object>> entity = (ResponseEntity) operations.exchange("sys/leases/renew",
-					HttpMethod.PUT, leaseRenewalEntity, Map.class);
-
-			Assert.state(entity != null && entity.getBody() != null, "Renew response must not be null");
+			Assert.state(entity.getBody() != null, "Renew response must not be null");
 
 			return toLease(entity.getBody());
 		}
@@ -187,6 +171,11 @@ public enum LeaseEndpoints {
 		leaseRenewalData.put("lease_id", lease.getLeaseId());
 
 		return new HttpEntity<>(leaseRenewalData);
+	}
+
+	@SuppressWarnings({"unchecked", "RedundantClassCall"})
+	private static ResponseEntity<Map<String, Object>> put(RestOperations operations, HttpEntity<Object> entity, String url) {
+		return ResponseEntity.class.cast(operations.exchange(url, HttpMethod.PUT, entity, Map.class));
 	}
 
 }
