@@ -72,6 +72,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @author Steven Swor
+ * @author Iouri Goussev
  * @see LoginToken
  * @see SessionManager
  * @see TaskScheduler
