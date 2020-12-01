@@ -238,7 +238,7 @@ public class AppConfig {
 
 ==== Build requirements for Vault
 
-Spring Vault requires SSL certificates and a running Vault instance listening on `localhost:8200`.Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
+Spring Vault requires SSL certificates and a running Vault instance listening on `localhost:8200`. Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
 
 The following scripts need to be run prior to building the project for the tests to pass.
 
@@ -259,11 +259,11 @@ Spring Vault uses Maven for most build-related activities, and you should be abl
 $ ./mvnw install
 ----
 
-NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command in place of `./mvnw` in the examples below.If you do that you also might need to add `-P spring` if your local Maven settings do not contain repository declarations for spring pre-release artifacts.
+NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command in place of `./mvnw` in the examples below. If you do that you also might need to add `-P spring` if your local Maven settings do not contain repository declarations for spring pre-release artifacts.
 
-NOTE: Be aware that you might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`.We try to cover this in the `.mvn` configuration, so if you find you have to do it to make a build succeed, please raise a ticket to get the settings added to source control.
+NOTE: Be aware that you might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`. We try to cover this in the `.mvn` configuration, so if you find you have to do it to make a build succeed, please raise a ticket to get the settings added to source control.
 
-For hints on how to build the project look in `.travis.yml` if there is one.There should be a "script" and maybe "install" command.Also look at the "services" section to see if any services need to be running locally (e.g. mongo or rabbit).Ignore the git-related bits that you might find in "before_install" since they're related to setting git credentials and you already have those.
+For hints on how to build the project look in `.travis.yml` if there is one. There should be a "script" and maybe "install" command. Also look at the "services" section to see if any services need to be running locally (e.g. mongo or rabbit). Ignore the git-related bits that you might find in "before_install" since they're related to setting git credentials and you already have those.
 
 NOTE: If all else fails, build with the command from `.travis.yml` (usually
 `./mvnw install`).
@@ -277,14 +277,14 @@ The module has a "distribute" profile, and if you switch that on it will try to 
 
 If you don't have an IDE preference we would recommend that you use
 https://www.springsource.com/developer/sts[Spring Tools Suite] or
-https://eclipse.org[Eclipse] when working with the code.We use the
-https://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support.Other IDEs and tools should also work without issue as long as they use Maven 3.3.3 or better.
+https://eclipse.org[Eclipse] when working with the code. We use the
+https://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support. Other IDEs and tools should also work without issue as long as they use Maven 3.3.3 or better.
 
 ==== Importing into eclipse with m2eclipse
 
-We recommend the https://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with eclipse.If you don't already have m2eclipse installed it is available from the "eclipse marketplace".
+We recommend the https://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with eclipse. If you don't already have m2eclipse installed it is available from the "eclipse marketplace".
 
-NOTE: Older versions of m2e do not support Maven 3.3, so once the projects are imported into Eclipse you will also need to tell m2eclipse to use the right profile for the projects.If you see many different errors related to the POMs in the projects, check that you have an up to date installation.If you can't upgrade m2e, add the "spring" profile to your `settings.xml`.Alternatively you can copy the repository settings from the "spring" profile of the parent pom into your `settings.xml`.
+NOTE: Older versions of m2e do not support Maven 3.3, so once the projects are imported into Eclipse you will also need to tell m2eclipse to use the right profile for the projects.If you see many different errors related to the POMs in the projects, check that you have an up to date installation. If you can't upgrade m2e, add the "spring" profile to your `settings.xml`. Alternatively you can copy the repository settings from the "spring" profile of the parent pom into your `settings.xml`.
 
 ==== Importing into eclipse without m2eclipse
 
@@ -300,13 +300,13 @@ from the `file` menu.
 
 == Contributing
 
-Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master.If you want to contribute even something trivial please do not hesitate, but follow the guidelines below.
+Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master. If you want to contribute even something trivial please do not hesitate, but follow the guidelines below.
 
 === Sign the Contributor License Agreement
 
 Before we accept a non-trivial patch or pull request we will need you to sign the
 https://cla.pivotal.io/sign/spring[Contributor License Agreement].
-Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do.Active contributors might be asked to join the core team, and given the ability to merge pull requests.
+Signing the contributor's agreement does not grant anyone commit rights to the main repository, but it does mean that we can accept your contributions, and you will get an author credit if we do. Active contributors might be asked to join the core team, and given the ability to merge pull requests.
 
 === Code of Conduct
 
