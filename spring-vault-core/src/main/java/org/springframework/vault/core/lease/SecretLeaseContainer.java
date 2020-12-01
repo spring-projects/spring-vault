@@ -141,7 +141,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 	private final KeyValueDelegate keyValueDelegate;
 
-	private LeaseEndpoints leaseEndpoints = LeaseEndpoints.Legacy;
+	private LeaseEndpoints leaseEndpoints = LeaseEndpoints.Leases;
 
 	private Duration minRenewal = Duration.ofSeconds(10);
 
