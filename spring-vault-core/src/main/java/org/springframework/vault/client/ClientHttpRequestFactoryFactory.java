@@ -387,6 +387,9 @@ public class ClientHttpRequestFactoryFactory {
 			requestFactory.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()));
 			requestFactory.setReadTimeout(Math.toIntExact(options.getReadTimeout().toMillis()));
 
+			// eagerly initialize to ensure SSL context
+			requestFactory.afterPropertiesSet();
+
 			return requestFactory;
 		}
 

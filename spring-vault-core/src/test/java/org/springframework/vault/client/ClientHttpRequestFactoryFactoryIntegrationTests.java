@@ -27,10 +27,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.HttpComponents;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.Netty;
-import org.springframework.vault.client.ClientHttpRequestFactoryFactory.OkHttp3;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
@@ -79,6 +78,14 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 		assertThat(response).isNotNull().contains("initialized");
 
 		((DisposableBean) factory).destroy();
+	}
+
+	@Test
+	void nettyClientWithoutSslConfigShouldWork() throws Exception {
+
+		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(), SslConfiguration.unconfigured());
+
+		assertThat(ReflectionTestUtils.getField(factory, "sslContext")).isNotNull();
 	}
 
 	@Test
