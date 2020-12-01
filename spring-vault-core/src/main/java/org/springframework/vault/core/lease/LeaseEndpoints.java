@@ -173,8 +173,9 @@ public enum LeaseEndpoints {
 		return new HttpEntity<>(leaseRenewalData);
 	}
 
-	@SuppressWarnings({"unchecked", "RedundantClassCall"})
-	private static ResponseEntity<Map<String, Object>> put(RestOperations operations, HttpEntity<Object> entity, String url) {
+	@SuppressWarnings({ "unchecked", "RedundantClassCall" })
+	private static ResponseEntity<Map<String, Object>> put(RestOperations operations, HttpEntity<Object> entity,
+			String url) {
 		return ResponseEntity.class.cast(operations.exchange(url, HttpMethod.PUT, entity, Map.class));
 	}
 
