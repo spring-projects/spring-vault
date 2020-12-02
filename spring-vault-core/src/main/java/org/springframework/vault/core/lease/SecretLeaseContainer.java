@@ -690,7 +690,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 					onLeaseExpired(requestedSecret, lease);
 				}
 
-				exceptionToUse = new VaultException(String.format("Cannot renew lease: Status %s %s%s",
+				exceptionToUse = new VaultException(String.format("Cannot renew lease: Status %s %s %s",
 						httpException.getRawStatusCode(), httpException.getStatusText(),
 						VaultResponses.getError(httpException.getResponseBodyAsString())), e);
 			}
