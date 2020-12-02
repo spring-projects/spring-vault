@@ -897,7 +897,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 				return true;
 			}
 
-			if (!lease.hasLeaseId() && requestedSecret.getMode() == Mode.ROTATE) {
+			if (!lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && requestedSecret.getMode() == Mode.ROTATE) {
 				return true;
 			}
 
@@ -915,7 +915,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 				return false;
 			}
 
-			return lease.hasLeaseId() && !lease.isRenewable() && requestedSecret.getMode() == Mode.ROTATE;
+			return lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && !lease.isRenewable()
+					&& requestedSecret.getMode() == Mode.ROTATE;
 		}
 
 	}
