@@ -31,14 +31,13 @@ import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseErrorEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.core.util.PropertyTransformers;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link LeaseAwareVaultPropertySource}.
@@ -72,6 +71,32 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(this.leaseContainer, secret);
 
 		assertThat(propertySource.getPropertyNames()).containsOnly("key");
+	}
+
+	@Test
+	void shouldRotateSecrets() {
+
+		RequestedSecret secret = RequestedSecret.renewable("my-path");
+
+		List<LeaseListener> listeners = new ArrayList<>();
+		doAnswer(invocation -> {
+			listeners.add(invocation.getArgument(0));
+			return null;
+		}).when(this.leaseContainer).addLeaseListener(any());
+		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
+
+			listeners.forEach(
+					leaseListener -> leaseListener.onLeaseEvent(new SecretLeaseCreatedEvent(invocation.getArgument(0),
+							Lease.none(), Collections.singletonMap("key", "value"))));
+			return invocation.getArgument(0);
+		});
+
+		LeaseAwareVaultPropertySource propertySource = new LeaseAwareVaultPropertySource(this.leaseContainer, secret);
+
+		listeners.forEach(it -> it.onLeaseEvent(new SecretLeaseRotatedEvent(secret, Lease.none(), Lease.none(),
+				Collections.singletonMap("new-key", "value"))));
+
+		assertThat(propertySource.getPropertyNames()).containsOnly("new-key");
 	}
 
 	@Test

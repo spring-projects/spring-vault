@@ -10,6 +10,7 @@
 * Support for `transform` backend (Enterprise Feature).
 * Documentation of <<vault.core.secret-engines,how to use Vault secret backends>>.
 * Login credentials for Kubernetes and PCF authentication are reloaded for each login attempt.
+* `SecretLeaseContainer` publishes `SecretLeaseRotatedEvent` instead of `SecretLeaseExpiredEvent` and `SecretLeaseCreatedEvent` on successful secret rotation.
 
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2

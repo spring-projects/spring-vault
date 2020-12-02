@@ -27,16 +27,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
-import org.springframework.vault.core.lease.event.AfterSecretLeaseRenewedEvent;
-import org.springframework.vault.core.lease.event.AfterSecretLeaseRevocationEvent;
-import org.springframework.vault.core.lease.event.BeforeSecretLeaseRevocationEvent;
-import org.springframework.vault.core.lease.event.LeaseErrorListener;
-import org.springframework.vault.core.lease.event.LeaseListener;
-import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
-import org.springframework.vault.core.lease.event.SecretLeaseErrorEvent;
-import org.springframework.vault.core.lease.event.SecretLeaseEvent;
-import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
-import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
+import org.springframework.vault.core.lease.event.*;
 
 /**
  * Publisher for {@link SecretLeaseEvent}s.
@@ -111,9 +102,25 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @param body must not be {@literal null}.
+	 * @see SecretLeaseCreatedEvent
 	 */
 	protected void onSecretsObtained(RequestedSecret requestedSecret, Lease lease, Map<String, Object> body) {
 		dispatch(new SecretLeaseCreatedEvent(requestedSecret, lease, body));
+	}
+
+	/**
+	 * Hook method called when secrets were rotated. The default implementation is to
+	 * notify {@link LeaseListener}. Implementations can override this method in
+	 * subclasses.
+	 * @param requestedSecret must not be {@literal null}.
+	 * @param lease must not be {@literal null}.
+	 * @param body must not be {@literal null}.
+	 * @since 2.3
+	 * @see SecretLeaseRotatedEvent
+	 */
+	protected void onSecretsRotated(RequestedSecret requestedSecret, Lease previousLease, Lease lease,
+			Map<String, Object> body) {
+		dispatch(new SecretLeaseRotatedEvent(requestedSecret, previousLease, lease, body));
 	}
 
 	/**
@@ -121,6 +128,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
+	 * @see SecretNotFoundEvent
 	 */
 	protected void onSecretsNotFound(RequestedSecret requestedSecret) {
 		dispatch(new SecretNotFoundEvent(requestedSecret, Lease.none()));
@@ -132,6 +140,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
+	 * @see AfterSecretLeaseRenewedEvent
 	 */
 	protected void onAfterLeaseRenewed(RequestedSecret requestedSecret, Lease lease) {
 		dispatch(new AfterSecretLeaseRenewedEvent(requestedSecret, lease));
@@ -143,6 +152,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * this method in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
+	 * @see BeforeSecretLeaseRevocationEvent
 	 */
 	protected void onBeforeLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
 		dispatch(new BeforeSecretLeaseRevocationEvent(requestedSecret, lease));
@@ -154,6 +164,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * this method in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
+	 * @see AfterSecretLeaseRevocationEvent
 	 */
 	protected void onAfterLeaseRevocation(RequestedSecret requestedSecret, Lease lease) {
 		dispatch(new AfterSecretLeaseRevocationEvent(requestedSecret, lease));
@@ -165,6 +176,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
+	 * @see SecretLeaseExpiredEvent
 	 */
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
 		dispatch(new SecretLeaseExpiredEvent(requestedSecret, lease));
@@ -177,6 +189,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease may be {@literal null}
 	 * @param e the causing exception.
+	 * @see SecretLeaseErrorEvent
 	 */
 	protected void onError(RequestedSecret requestedSecret, @Nullable Lease lease, Exception e) {
 		dispatch(new SecretLeaseErrorEvent(requestedSecret, lease, e));

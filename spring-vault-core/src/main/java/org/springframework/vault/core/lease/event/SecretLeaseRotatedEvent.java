@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2020 the original author or authors.
+ * Copyright 2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,39 +15,41 @@
  */
 package org.springframework.vault.core.lease.event;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published after obtaining secrets potentially associated with a {@link Lease}.
+ * Event published after rotating secrets.
  *
  * @author Mark Paluch
+ * @since 2.3
  */
-public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
+public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 
-	private static final long serialVersionUID = 1L;
-
-	private final Map<String, Object> secrets;
+	private final Lease previousLease;
 
 	/**
-	 * Create a new {@link SecretLeaseCreatedEvent} given {@link RequestedSecret},
+	 * Create a new {@link SecretLeaseRotatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
-	 * @param lease must not be {@literal null}.
-	 * @param secrets must not be {@literal null}.
+	 * @param previousLease must not be {@literal null}.
+	 * @param currentLease must not be {@literal null}.
 	 */
-	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease, Map<String, Object> secrets) {
+	public SecretLeaseRotatedEvent(RequestedSecret requestedSecret, Lease previousLease, Lease currentLease,
+			Map<String, Object> secrets) {
 
-		super(requestedSecret, lease);
-		this.secrets = Collections.unmodifiableMap(new LinkedHashMap<>(secrets));
+		super(requestedSecret, currentLease, secrets);
+		this.previousLease = previousLease;
 	}
 
-	public Map<String, Object> getSecrets() {
-		return this.secrets;
+	public Lease getPreviousLease() {
+		return this.previousLease;
+	}
+
+	public Lease getCurrentLease() {
+		return getLease();
 	}
 
 }

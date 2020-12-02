@@ -30,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -375,6 +376,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 	private void start(RequestedSecret requestedSecret, LeaseRenewalScheduler renewalScheduler) {
 
+		doStart(requestedSecret, renewalScheduler, (secrets, lease) -> {
+			onSecretsObtained(requestedSecret, lease, secrets.getRequiredData());
+		}, () -> {
+		});
+	}
+
+	private void doStart(RequestedSecret requestedSecret, LeaseRenewalScheduler renewalScheduler,
+			BiConsumer<VaultResponseSupport<Map<String, Object>>, Lease> callback,
+			Runnable cannotObtainSecretsCallback) {
+
 		VaultResponseSupport<Map<String, Object>> secrets = doGetSecrets(requestedSecret);
 
 		if (secrets != null) {
@@ -399,7 +410,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 				scheduleLeaseRotation(requestedSecret, lease, renewalScheduler);
 			}
 
-			onSecretsObtained(requestedSecret, lease, secrets.getRequiredData());
+			callback.accept(secrets, lease);
+		}
+		else {
+			cannotObtainSecretsCallback.run();
 		}
 	}
 
@@ -723,10 +737,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	 */
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
 
-		super.onLeaseExpired(requestedSecret, lease);
-
 		if (requestedSecret.getMode() == Mode.ROTATE) {
-			start(requestedSecret, this.renewals.get(requestedSecret));
+			doStart(requestedSecret, this.renewals.get(requestedSecret), (secrets, currentLease) -> {
+				onSecretsRotated(requestedSecret, lease, currentLease, secrets.getRequiredData());
+			}, () -> super.onLeaseExpired(requestedSecret, lease));
+		}
+		else {
+			super.onLeaseExpired(requestedSecret, lease);
 		}
 	}
 

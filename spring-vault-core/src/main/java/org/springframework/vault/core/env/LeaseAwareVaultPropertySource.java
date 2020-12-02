@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core.env;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +36,7 @@ import org.springframework.vault.core.lease.event.LeaseListenerAdapter;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
@@ -233,7 +236,18 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 		if (leaseEvent instanceof SecretLeaseCreatedEvent) {
 
 			SecretLeaseCreatedEvent created = (SecretLeaseCreatedEvent) leaseEvent;
-			properties.putAll(doTransformProperties(flattenMap(created.getSecrets())));
+
+			Map<String, Object> secrets = doTransformProperties(flattenMap(created.getSecrets()));
+
+			if (leaseEvent instanceof SecretLeaseRotatedEvent) {
+
+				List<String> removedKeys = new ArrayList<>(properties.keySet());
+
+				removedKeys.removeAll(secrets.keySet());
+				removedKeys.forEach(properties::remove);
+			}
+
+			properties.putAll(secrets);
 		}
 	}
 

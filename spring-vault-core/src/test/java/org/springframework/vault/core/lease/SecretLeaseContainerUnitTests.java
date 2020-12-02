@@ -45,22 +45,18 @@ import org.springframework.vault.core.lease.event.AfterSecretLeaseRevocationEven
 import org.springframework.vault.core.lease.event.BeforeSecretLeaseRevocationEvent;
 import org.springframework.vault.core.lease.event.LeaseListenerAdapter;
 import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseErrorEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link SecretLeaseContainer}.
@@ -327,12 +323,11 @@ class SecretLeaseContainerUnitTests {
 		captor.getValue().run();
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
-		assertThat(events).hasSize(3);
+		assertThat(events).hasSize(2);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
-		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
+		assertThat(events.get(1)).isInstanceOf(SecretLeaseRotatedEvent.class);
 
-		SecretLeaseCreatedEvent rotated = (SecretLeaseCreatedEvent) events.get(2);
+		SecretLeaseRotatedEvent rotated = (SecretLeaseRotatedEvent) events.get(1);
 		assertThat(rotated.getSecrets()).containsEntry("key", "value2");
 	}
 
@@ -357,18 +352,52 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
 		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
-		verify(this.leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(createdEvents.capture());
 
 		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
-		assertThat(events).hasSize(3);
+		assertThat(events).hasSize(2);
+		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
+		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets()).containsOnlyKeys("key");
+
+		assertThat(events.get(1)).isInstanceOf(SecretLeaseRotatedEvent.class);
+		assertThat(((SecretLeaseCreatedEvent) events.get(1)).getSecrets()).containsOnlyKeys("foo");
+	}
+
+	@Test
+	void failedRotateShouldEmitExpiredAndErrorEvents() {
+
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+
+		when(this.vaultOperations.read(this.rotatingGenericSecret.getPath()))
+				.thenReturn(createGenericSecrets(Collections.singletonMap("key", "value")))
+				.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
+
+		this.secretLeaseContainer.addRequestedSecret(this.rotatingGenericSecret);
+
+		this.secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		verify(this.taskScheduler).schedule(captor.capture(), any(Trigger.class));
+
+		captor.getValue().run();
+		verifyNoInteractions(this.scheduledFuture);
+
+		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(createdEvents.capture());
+
+		ArgumentCaptor<SecretLeaseErrorEvent> errorEvents = ArgumentCaptor.forClass(SecretLeaseErrorEvent.class);
+		verify(this.leaseListenerAdapter).onLeaseError(errorEvents.capture(), any());
+
+		List<SecretLeaseEvent> events = createdEvents.getAllValues();
+
+		assertThat(events).hasSize(2);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
 		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets()).containsOnlyKeys("key");
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
 
-		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets()).containsOnlyKeys("foo");
+		assertThat(errorEvents.getAllValues()).hasSize(1);
 	}
 
 	@Test
@@ -391,7 +420,7 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
 		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
-		verify(this.leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(createdEvents.capture());
 	}
 
 	@Test
@@ -437,18 +466,16 @@ class SecretLeaseContainerUnitTests {
 		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
 
 		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
-		verify(this.leaseListenerAdapter, times(3)).onLeaseEvent(createdEvents.capture());
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(createdEvents.capture());
 
 		List<SecretLeaseEvent> events = createdEvents.getAllValues();
 
-		assertThat(events).hasSize(3);
+		assertThat(events).hasSize(2);
 		assertThat(events.get(0)).isInstanceOf(SecretLeaseCreatedEvent.class);
 		assertThat(((SecretLeaseCreatedEvent) events.get(0)).getSecrets()).containsOnlyKeys("key");
 
-		assertThat(events.get(1)).isInstanceOf(SecretLeaseExpiredEvent.class);
-
-		assertThat(events.get(2)).isInstanceOf(SecretLeaseCreatedEvent.class);
-		assertThat(((SecretLeaseCreatedEvent) events.get(2)).getSecrets()).containsOnlyKeys("foo");
+		assertThat(events.get(1)).isInstanceOf(SecretLeaseRotatedEvent.class);
+		assertThat(((SecretLeaseCreatedEvent) events.get(1)).getSecrets()).containsOnlyKeys("foo");
 	}
 
 	@Test
