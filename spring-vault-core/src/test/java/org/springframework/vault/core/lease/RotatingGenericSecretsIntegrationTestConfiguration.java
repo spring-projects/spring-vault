@@ -32,14 +32,15 @@ import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
  * @author Steven Swor
  */
 @Configuration
+@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "versioned/rotating",
+		renewal = VaultPropertySource.Renewal.ROTATE)
 public class RotatingGenericSecretsIntegrationTestConfiguration {
 
 	/**
 	 * Utility class which will give our tests a reference to the
 	 * {@link LeaseAwareVaultPropertySource} which holds our secrets.
 	 */
-	@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "secret/rotating",
-			renewal = VaultPropertySource.Renewal.ROTATE)
+
 	public static class PropertySourceHolder implements InitializingBean {
 
 		@Autowired
@@ -60,7 +61,7 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 			Map<String, LeaseAwareVaultPropertySource> leaseAwareVaultPropertySources = this.appContext
 					.getBeansOfType(LeaseAwareVaultPropertySource.class);
 			for (LeaseAwareVaultPropertySource candidate : leaseAwareVaultPropertySources.values()) {
-				if (candidate.getRequestedSecret().getPath().equals("secret/rotating")) {
+				if (candidate.getRequestedSecret().getPath().equals("versioned/rotating")) {
 					this.propertySource = candidate;
 					break;
 				}
