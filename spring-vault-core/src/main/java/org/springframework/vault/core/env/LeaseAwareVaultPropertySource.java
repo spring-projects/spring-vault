@@ -231,6 +231,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 		if (leaseEvent instanceof SecretLeaseExpiredEvent || leaseEvent instanceof BeforeSecretLeaseRevocationEvent
 				|| leaseEvent instanceof SecretLeaseCreatedEvent) {
 			properties.clear();
+			logger.debug("Cleared properties on {} lease event", leaseEvent.getClass().getSimpleName());
 		}
 
 		if (leaseEvent instanceof SecretLeaseCreatedEvent) {
