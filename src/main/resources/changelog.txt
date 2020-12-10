@@ -1,6 +1,20 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.3.0-RC1
+-----------------------------------------
+* Release Spring Vault 2.3.0-M1 #582
+* Refine throws declaration for SecretLeaseContainer.afterPropertiesSet #584
+* Support for KV Patch in VaultTemplate #585
+* Extend AuthenticationStepsOperator for non-blocking resource access #586
+* Extend LeaseEndpoints to allow path-based lease revocation #588
+* Change default SecretLeaseContainer.leaseEndpoints from Legacy to Leases #589
+* Polishing the content. #591
+* Non-atomic updates to LeaseAwareVaultPropertySource cause leave property source empty until SecretLeaseCreatedEvent #594
+* Netty4ClientHttpRequestFactory left uninitialized causing IllegalArgumentException: SSLContext is null #597
+* Logger is not passed required parameter #599
+* Infinite loop when using rotating generic secrets without TTL #601
+
 Changes in version 2.3.0-M1
 -----------------------------------------
 * Add support for key-value metadata in Vault template #432
