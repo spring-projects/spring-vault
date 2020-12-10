@@ -360,7 +360,7 @@
 									<projectVersion>${project.version}</projectVersion>
 									<springVersion>${spring.version}</springVersion>
 									<springDataVersion>
-										${spring-data-releasetrain.version}
+										${spring-data-bom.version}
 									</springDataVersion>
 									<allow-uri-read>true</allow-uri-read>
 									<toclevels>4</toclevels>

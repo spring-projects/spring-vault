@@ -14,6 +14,7 @@ Changes in version 2.3.0-RC1
 * Netty4ClientHttpRequestFactory left uninitialized causing IllegalArgumentException: SSLContext is null #597
 * Logger is not passed required parameter #599
 * Infinite loop when using rotating generic secrets without TTL #601
+* Upgrade dependencies #607
 
 Changes in version 2.3.0-M1
 -----------------------------------------

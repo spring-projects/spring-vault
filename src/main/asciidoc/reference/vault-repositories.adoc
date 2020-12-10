@@ -62,7 +62,7 @@ Then add the following to `pom.xml` dependencies section.
   <dependencies>
     <dependency>
       <groupId>org.springframework.data</groupId>
-      <artifactId>spring-data-releasetrain</artifactId>
+      <artifactId>spring-data-bom</artifactId>
       <version>{springDataVersion}</version>
       <scope>import</scope>
       <type>pom</type>

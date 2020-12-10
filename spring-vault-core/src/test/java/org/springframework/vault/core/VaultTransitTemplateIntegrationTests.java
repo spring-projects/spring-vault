@@ -557,7 +557,8 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 			assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
 		}
 		catch (VaultException e) {
-			assertThat(e).hasMessageContaining("error"); // Vault 1.6 behavior is different
+			assertThat(e).hasMessageContaining("error"); // Vault 1.6 behavior is
+															// different
 		}
 	}
 
