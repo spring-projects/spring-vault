@@ -1,6 +1,27 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.2.3.RELEASE
+---------------------------------------------
+* Expanded EnvironmentVaultConfiguration options for AzureMSIAuthentication #542
+* AbstractVaultConfiguration.restOperations does not consider RestTemplateBuilder #546
+* Upgrade to Spring Framework 5.2.5 #547
+* Upgrade to Spring Doc Resources 0.2.0 #549
+* Incorrect assert message in VaultTransitTemplate:decrypt #550
+* Upgrade to Spring Doc resources 0.2.2.RELEASE #553
+* VaultPkiOperations.getCrl(…) throws a NullPointerException when CRL is absent #556
+* ClientCertificateAuthentication path cannot be configured #557
+* Upgrade dependencies #560
+* Fix Vault download script for arm64 #562
+* Spring Cloud Vault picking up properties from wrong profile #563
+* Integrate spring-javaformat #564
+* Remove all newlines in PKCS7 from EC2MetaData #571
+* Deprecate  Policy.BuiltinCapabilities.WRITE #575
+* Polishing the content. #591
+* Netty4ClientHttpRequestFactory left uninitialized causing IllegalArgumentException: SSLContext is null #597
+* Logger is not passed required parameter #599
+* Infinite loop when using rotating generic secrets without TTL #601
+
 Changes in version 2.2.2.RELEASE
 -----------------------------------------
 * Mount path shouldn't be escaped #533
