@@ -548,12 +548,17 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Ciphertext tampered = decryptedTwo.with(encryptedOne.getContext());
 
-		List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
-				Arrays.asList(encryptedOne, tampered));
+		try {
+			List<VaultDecryptionResult> decrypted = this.transitOperations.decrypt("mykey",
+					Arrays.asList(encryptedOne, tampered));
 
-		assertThat(decrypted.get(0).get()).isEqualTo(one);
-		assertThat(decrypted.get(1).isSuccessful()).isEqualTo(false);
-		assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
+			assertThat(decrypted.get(0).get()).isEqualTo(one);
+			assertThat(decrypted.get(1).isSuccessful()).isEqualTo(false);
+			assertThat(decrypted.get(1).getCause()).isInstanceOf(VaultException.class);
+		}
+		catch (VaultException e) {
+			assertThat(e).hasMessageContaining("error"); // Vault 1.6 behavior is different
+		}
 	}
 
 	@Test
