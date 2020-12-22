@@ -1,6 +1,11 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.3.0
+-----------------------------------------
+* Upgrade dependencies #609
+* Upgrade to Vault 1.6.1 #610
+
 Changes in version 2.3.0-RC1
 -----------------------------------------
 * Release Spring Vault 2.3.0-M1 #582
