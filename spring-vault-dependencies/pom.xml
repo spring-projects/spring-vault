@@ -228,6 +228,16 @@
 		</profile>
 
 		<profile>
+			<id>distribute</id>
+
+			<properties>
+				<maven.install.skip>true</maven.install.skip>
+				<maven.deploy.skip>true</maven.deploy.skip>
+				<skipTests>true</skipTests>
+			</properties>
+		</profile>
+
+		<profile>
 
 			<id>central</id>
 
