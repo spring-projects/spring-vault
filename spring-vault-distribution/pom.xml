@@ -39,6 +39,10 @@
 				<groupId>org.asciidoctor</groupId>
 				<artifactId>asciidoctor-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.jfrog.buildinfo</groupId>
+				<artifactId>artifactory-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -395,11 +399,58 @@
 								</execution>
 							</executions>
 						</plugin>
+
+						<!-- Deploy to Artifactory -->
+
+						<plugin>
+							<groupId>org.jfrog.buildinfo</groupId>
+							<artifactId>artifactory-maven-plugin</artifactId>
+							<version>2.7.0</version>
+							<executions>
+								<execution>
+									<id>deploy-docs</id>
+									<goals>
+										<goal>publish</goal>
+									</goals>
+									<phase>deploy</phase>
+									<configuration>
+										<artifactory>
+											<includeEnvVars>false</includeEnvVars>
+										</artifactory>
+										<deployProperties>
+											<zip.name>spring-vault</zip.name>
+											<zip.displayname>spring-vault</zip.displayname>
+											<zip.deployed>false</zip.deployed>
+											<zip.type>docs</zip.type>
+										</deployProperties>
+										<buildInfo>
+											<!-- Retain only a single build -->
+											<buildName>Spring Vault Docs ${project.version}</buildName>
+											<buildRetentionCount>1</buildRetentionCount>
+										</buildInfo>
+										<publisher>
+											<contextUrl>https://repo.spring.io</contextUrl>
+											<username>${artifactory.username}</username>
+											<password>${artifactory.password}</password>
+											<repoKey>temp-private-local</repoKey>
+											<snapshotRepoKey>temp-private-local</snapshotRepoKey>
+											<includePatterns>*.zip</includePatterns>
+										</publisher>
+									</configuration>
+								</execution>
+							</executions>
+						</plugin>
 					</plugins>
 				</pluginManagement>
 			</build>
 
 			<pluginRepositories>
+				<pluginRepository>
+					<id>bintray-plugins</id>
+					<name>bintray-plugins</name>
+					<url>https://jcenter.bintray.com</url>
+				</pluginRepository>
+
 				<pluginRepository>
 					<id>spring-plugins-release</id>
 					<url>https://repo.spring.io/plugins-release</url>
