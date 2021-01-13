@@ -28,6 +28,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
@@ -57,6 +58,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private final RestTemplate statelessTemplate;
 
 	private final RestTemplate sessionTemplate;
+
+	@Nullable
+	private RetryTemplate retryTemplate;
 
 	@Nullable
 	private SessionManager sessionManager;
@@ -267,6 +271,17 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.sessionManager = sessionManager;
 	}
 
+	/**
+	 * Set the {@link RetryTemplate}.
+	 * @param retryTemplate must not be {@literal null}.
+	 */
+	public void setRetryTemplate(RetryTemplate retryTemplate) {
+
+		Assert.notNull(retryTemplate, "RetryTemplate must not be null");
+
+		this.retryTemplate = retryTemplate;
+	}
+
 	@Override
 	public void afterPropertiesSet() {
 		Assert.notNull(this.sessionManager, "SessionManager must not be null");
@@ -445,7 +460,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
 		try {
-			return sessionCallback.doWithRestOperations(this.sessionTemplate);
+			return retryTemplate != null
+					? retryTemplate.execute(retryContext -> sessionCallback.doWithRestOperations(this.sessionTemplate))
+					: sessionCallback.doWithRestOperations(this.sessionTemplate);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
