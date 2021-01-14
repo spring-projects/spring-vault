@@ -37,6 +37,8 @@ public class AzureVmEnvironment {
 
 	private final String vmName;
 
+	private final String vmScaleSetName;
+
 	/**
 	 * Creates a new {@link AzureVmEnvironment}.
 	 * @param subscriptionId must not be {@literal null}.
@@ -44,14 +46,27 @@ public class AzureVmEnvironment {
 	 * @param vmName must not be {@literal null}.
 	 */
 	public AzureVmEnvironment(String subscriptionId, String resourceGroupName, String vmName) {
+		this(subscriptionId, resourceGroupName, vmName, "");
+	}
+
+	/**
+	 * Creates a new {@link AzureVmEnvironment}.
+	 * @param subscriptionId must not be {@literal null}.
+	 * @param resourceGroupName must not be {@literal null}.
+	 * @param vmName must not be {@literal null}.
+	 * @param vmScaleSetName must not be {@literal null}.
+	 */
+	public AzureVmEnvironment(String subscriptionId, String resourceGroupName, String vmName, String vmScaleSetName) {
 
 		Assert.notNull(subscriptionId, "SubscriptionId must not be null");
 		Assert.notNull(resourceGroupName, "Resource group name must not be null");
 		Assert.notNull(vmName, "VM name must not be null");
+		Assert.notNull(vmScaleSetName, "VMSS name must not be null");
 
 		this.subscriptionId = subscriptionId;
 		this.resourceGroupName = resourceGroupName;
 		this.vmName = vmName;
+		this.vmScaleSetName = vmScaleSetName;
 	}
 
 	public String getSubscriptionId() {
@@ -64,6 +79,10 @@ public class AzureVmEnvironment {
 
 	public String getVmName() {
 		return this.vmName;
+	}
+
+	public String getVmScaleSetName() {
+		return vmScaleSetName;
 	}
 
 }
