@@ -169,11 +169,12 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 	private static Map<String, String> getAzureLogin(String role, AzureVmEnvironment vmEnvironment, String jwt) {
 
 		Map<String, String> loginBody = new LinkedHashMap<>();
+		loginBody.put("role", role);
+		loginBody.put("jwt", jwt);
+		loginBody.put("subscription_id", vmEnvironment.getSubscriptionId());
 		loginBody.put("resource_group_name", vmEnvironment.getResourceGroupName());
 		loginBody.put("vm_name", vmEnvironment.getVmName());
-		loginBody.put("subscription_id", vmEnvironment.getSubscriptionId());
-		loginBody.put("jwt", jwt);
-		loginBody.put("role", role);
+		loginBody.put("vmss_name", vmEnvironment.getVmScaleSetName());
 
 		return loginBody;
 	}
@@ -207,10 +208,11 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 		Map<String, String> compute = (Map) instanceMetadata.get("compute");
 
 		String subscriptionId = compute.get("subscriptionId");
-		String vmName = compute.get("name");
 		String resourceGroupName = compute.get("resourceGroupName");
+		String vmName = compute.get("name");
+		String vmScaleSetName = compute.get("vmScaleSetName");
 
-		return new AzureVmEnvironment(subscriptionId, resourceGroupName, vmName);
+		return new AzureVmEnvironment(subscriptionId, resourceGroupName, vmName, vmScaleSetName);
 	}
 
 }
