@@ -60,9 +60,9 @@ class AzureMsiAuthenticationUnitTests {
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder().role("dev-role") //
 				.build();
 
-		expectMetadataRequest();
+		expectVmMetadataRequest();
 		expectIdentityTokenRequest();
-		expectLoginRequest();
+		expectVmLoginRequest();
 
 		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
 
@@ -78,7 +78,7 @@ class AzureMsiAuthenticationUnitTests {
 				.vmEnvironment(new AzureVmEnvironment("foobar-subscription", "vault", "vault-client")).build();
 
 		expectIdentityTokenRequest();
-		expectLoginRequest();
+		expectVmLoginRequest();
 
 		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
 
@@ -93,9 +93,9 @@ class AzureMsiAuthenticationUnitTests {
 		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder().role("dev-role") //
 				.build();
 
-		expectMetadataRequest();
+		expectVmMetadataRequest();
 		expectIdentityTokenRequest();
-		expectLoginRequest();
+		expectVmLoginRequest();
 
 		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
 				AzureMsiAuthentication.createAuthenticationSteps(options), this.restTemplate);
@@ -112,7 +112,7 @@ class AzureMsiAuthenticationUnitTests {
 				.vmEnvironment(new AzureVmEnvironment("foobar-subscription", "vault", "vault-client")).build();
 
 		expectIdentityTokenRequest();
-		expectLoginRequest();
+		expectVmLoginRequest();
 
 		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
 				AzureMsiAuthentication.createAuthenticationSteps(options), this.restTemplate);
@@ -122,14 +122,51 @@ class AzureMsiAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 	}
 
-	private void expectMetadataRequest() {
+	@Test
+	void loginFromScaleSetShouldObtainToken() {
+
+		AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder().role("dev-role") //
+				.build();
+
+		expectVmssMetadataRequest();
+		expectIdentityTokenRequest();
+		expectVmssLoginRequest();
+
+		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
+
+		VaultToken login = authentication.login();
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+	}
+
+	private void expectVmMetadataRequest() {
 
 		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\n" + "  \"compute\": {\n" + "   \"name\": \"vault-client\",\n"
+						.body("{\n"
+								+ "  \"compute\": {\n"
+								+ "   \"name\": \"vault-client\",\n"
+								+ "   \"vmScaleSetName\": \"\",\n"
 								+ "   \"resourceGroupName\": \"vault\",\n"
-								+ "   \"subscriptionId\": \"foobar-subscription\"\n" + "  }\n" + "}"));
+								+ "   \"subscriptionId\": \"foobar-subscription\"\n" +
+								"  }\n" +
+								"}"));
+	}
+
+	private void expectVmssMetadataRequest() {
+
+		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
+				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{\n"
+								+ "  \"compute\": {\n"
+								+ "   \"name\": \"vault-client-scale-set_0\",\n"
+								+ "   \"vmScaleSetName\": \"vault-client-scale-set\",\n"
+								+ "   \"resourceGroupName\": \"vault\",\n"
+								+ "   \"subscriptionId\": \"foobar-subscription\"\n" +
+								"  }\n" +
+								"}"));
 	}
 
 	private void expectIdentityTokenRequest() {
@@ -140,13 +177,26 @@ class AzureMsiAuthenticationUnitTests {
 
 	}
 
-	private void expectLoginRequest() {
+	private void expectVmLoginRequest() {
 
 		this.mockRest.expect(requestTo("/auth/azure/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-token"))
 				.andExpect(jsonPath("$.subscription_id").value("foobar-subscription"))
 				.andExpect(jsonPath("$.resource_group_name").value("vault"))
 				.andExpect(jsonPath("$.vm_name").value("vault-client"))
+				.andExpect(jsonPath("$.vmss_name").value(""))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+	}
+
+	private void expectVmssLoginRequest() {
+
+		this.mockRest.expect(requestTo("/auth/azure/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-token"))
+				.andExpect(jsonPath("$.subscription_id").value("foobar-subscription"))
+				.andExpect(jsonPath("$.resource_group_name").value("vault"))
+				.andExpect(jsonPath("$.vm_name").value("vault-client-scale-set_0"))
+				.andExpect(jsonPath("$.vmss_name").value("vault-client-scale-set"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 	}
