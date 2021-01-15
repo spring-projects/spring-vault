@@ -240,7 +240,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
-			return webClient.get().uri(path).exchange().flatMap(mapResponse(ref, path, HttpMethod.GET));
+			return webClient.get().uri(path).exchangeToMono(mapResponse(ref, path, HttpMethod.GET));
 		});
 	}
 
@@ -265,14 +265,12 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		return doWithSession(webClient -> {
 
 			RequestBodySpec uri = webClient.post().uri(path);
-			Mono<ClientResponse> exchange;
+
 			if (body != null) {
-				exchange = uri.bodyValue(body).exchange();
+				return uri.bodyValue(body).exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
 			}
-			else {
-				exchange = uri.exchange();
-			}
-			return exchange.flatMap(mapResponse(VaultResponse.class, path, HttpMethod.POST));
+
+			return uri.exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
 		});
 	}
 
@@ -281,8 +279,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doWithSession(webClient -> webClient.delete().uri(path).exchange()
-				.flatMap(mapResponse(String.class, path, HttpMethod.DELETE)).then());
+		return doWithSession(webClient -> webClient.delete().uri(path)
+				.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
 	}
 
 	@Override
@@ -316,16 +314,16 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	private <T> Mono<T> doRead(String path, Class<T> responseType) {
 
 		return doWithSession(client -> client.get() //
-				.uri(path).exchange().flatMap(mapResponse(responseType, path, HttpMethod.GET)));
+				.uri(path).exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
-	private static <T> Function<ClientResponse, Mono<? extends T>> mapResponse(Class<T> bodyType, String path,
+	private static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path,
 			HttpMethod method) {
 		return response -> isSuccess(response) ? response.bodyToMono(bodyType) : mapOtherwise(response, path, method);
 	}
 
-	private static <T> Function<ClientResponse, Mono<? extends T>> mapResponse(
-			ParameterizedTypeReference<T> typeReference, String path, HttpMethod method) {
+	private static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference,
+			String path, HttpMethod method) {
 
 		return response -> isSuccess(response) ? response.body(BodyExtractors.toMono(typeReference))
 				: mapOtherwise(response, path, method);
@@ -335,10 +333,10 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		return response.statusCode().is2xxSuccessful();
 	}
 
-	private static <T> Mono<? extends T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
+	private static <T> Mono<T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
 
 		if (response.statusCode() == HttpStatus.NOT_FOUND && method == HttpMethod.GET) {
-			return Mono.empty();
+			return response.releaseBody().then(Mono.empty());
 		}
 
 		return response.bodyToMono(String.class).flatMap(body -> {
