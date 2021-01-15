@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
  * resource group name and the VM name.
  *
  * @author Mark Paluch
+ * @author Willi Schönborn
  * @since 2.1
  * @see AzureMsiAuthentication
  * @see AzureMsiAuthenticationOptions
@@ -55,13 +56,14 @@ public class AzureVmEnvironment {
 	 * @param resourceGroupName must not be {@literal null}.
 	 * @param vmName must not be {@literal null}.
 	 * @param vmScaleSetName must not be {@literal null}.
+	 * @since 2.4
 	 */
 	public AzureVmEnvironment(String subscriptionId, String resourceGroupName, String vmName, String vmScaleSetName) {
 
 		Assert.notNull(subscriptionId, "SubscriptionId must not be null");
 		Assert.notNull(resourceGroupName, "Resource group name must not be null");
 		Assert.notNull(vmName, "VM name must not be null");
-		Assert.notNull(vmScaleSetName, "VMSS name must not be null");
+		Assert.notNull(vmScaleSetName, "VM Scale Set name must not be null");
 
 		this.subscriptionId = subscriptionId;
 		this.resourceGroupName = resourceGroupName;
@@ -81,8 +83,11 @@ public class AzureVmEnvironment {
 		return this.vmName;
 	}
 
+	/**
+	 * @since 2.4
+	 */
 	public String getVmScaleSetName() {
-		return vmScaleSetName;
+		return this.vmScaleSetName;
 	}
 
 }
