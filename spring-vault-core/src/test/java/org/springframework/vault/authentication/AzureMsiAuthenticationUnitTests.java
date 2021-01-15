@@ -37,6 +37,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Unit tests for {@link AzureMsiAuthentication}.
  *
  * @author Mark Paluch
+ * @author Willi Schönborn
  */
 class AzureMsiAuthenticationUnitTests {
 
@@ -144,14 +145,9 @@ class AzureMsiAuthenticationUnitTests {
 		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\n"
-								+ "  \"compute\": {\n"
-								+ "   \"name\": \"vault-client\",\n"
-								+ "   \"vmScaleSetName\": \"\",\n"
-								+ "   \"resourceGroupName\": \"vault\",\n"
-								+ "   \"subscriptionId\": \"foobar-subscription\"\n" +
-								"  }\n" +
-								"}"));
+						.body("{\n" + "  \"compute\": {\n" + "   \"name\": \"vault-client\",\n"
+								+ "   \"vmScaleSetName\": \"\",\n" + "   \"resourceGroupName\": \"vault\",\n"
+								+ "   \"subscriptionId\": \"foobar-subscription\"\n" + "  }\n" + "}"));
 	}
 
 	private void expectVmssMetadataRequest() {
@@ -159,14 +155,10 @@ class AzureMsiAuthenticationUnitTests {
 		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{\n"
-								+ "  \"compute\": {\n"
-								+ "   \"name\": \"vault-client-scale-set_0\",\n"
+						.body("{\n" + "  \"compute\": {\n" + "   \"name\": \"vault-client-scale-set_0\",\n"
 								+ "   \"vmScaleSetName\": \"vault-client-scale-set\",\n"
 								+ "   \"resourceGroupName\": \"vault\",\n"
-								+ "   \"subscriptionId\": \"foobar-subscription\"\n" +
-								"  }\n" +
-								"}"));
+								+ "   \"subscriptionId\": \"foobar-subscription\"\n" + "  }\n" + "}"));
 	}
 
 	private void expectIdentityTokenRequest() {
@@ -183,8 +175,7 @@ class AzureMsiAuthenticationUnitTests {
 				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-token"))
 				.andExpect(jsonPath("$.subscription_id").value("foobar-subscription"))
 				.andExpect(jsonPath("$.resource_group_name").value("vault"))
-				.andExpect(jsonPath("$.vm_name").value("vault-client"))
-				.andExpect(jsonPath("$.vmss_name").value(""))
+				.andExpect(jsonPath("$.vm_name").value("vault-client")).andExpect(jsonPath("$.vmss_name").value(""))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 	}
