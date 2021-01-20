@@ -139,8 +139,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmMetadataRequest() {
 
-		this.mockRest
-				.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
+		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{\n" + "  \"compute\": {\n" + "   \"name\": \"vault-client\",\n"
@@ -150,8 +149,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmssMetadataRequest() {
 
-		this.mockRest
-				.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
+		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET)).andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{\n" + "  \"compute\": {\n" + "   \"name\": \"vault-client-scale-set_0\",\n"
@@ -170,14 +168,11 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmLoginRequest() {
 
-		this.mockRest.expect(requestTo("/auth/azure/login"))
-				.andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("dev-role"))
-				.andExpect(jsonPath("$.jwt").value("my-token"))
+		this.mockRest.expect(requestTo("/auth/azure/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-token"))
 				.andExpect(jsonPath("$.subscription_id").value("foobar-subscription"))
 				.andExpect(jsonPath("$.resource_group_name").value("vault"))
-				.andExpect(jsonPath("$.vm_name").value("vault-client"))
-				.andExpect(jsonPath("$.vmss_name").value(""))
+				.andExpect(jsonPath("$.vm_name").value("vault-client")).andExpect(jsonPath("$.vmss_name").value(""))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 	}

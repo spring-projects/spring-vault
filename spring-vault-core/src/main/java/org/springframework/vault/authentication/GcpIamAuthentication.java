@@ -17,6 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -67,6 +68,8 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
 
+	private static final String SCOPE = "https://www.googleapis.com/auth/iam";
+
 	private final GcpIamAuthenticationOptions options;
 
 	private final HttpTransport httpTransport;
@@ -103,7 +106,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 		this.options = options;
 		this.httpTransport = httpTransport;
-		this.credential = options.getCredentialSupplier().get();
+		this.credential = options.getCredentialSupplier().get().createScoped(Collections.singletonList(SCOPE));
 	}
 
 	@Override
