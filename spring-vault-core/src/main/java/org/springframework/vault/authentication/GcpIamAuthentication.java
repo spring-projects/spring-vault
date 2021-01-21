@@ -62,7 +62,9 @@ import org.springframework.web.client.RestOperations;
  * @see <a href=
  * "https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
  * projects.serviceAccounts.signJwt</a>
+ * @deprecated Use {@link GcpIamCredentialsAuthentication} instead.
  */
+@Deprecated
 public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
 
 	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
