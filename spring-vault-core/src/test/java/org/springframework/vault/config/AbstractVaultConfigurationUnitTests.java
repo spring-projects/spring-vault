@@ -21,18 +21,21 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.RestTemplateCustomizer;
 import org.springframework.vault.client.RestTemplateFactory;
 import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.config.AbstractVaultConfiguration.TaskSchedulerWrapper;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Integration tests for {@link AbstractVaultConfiguration}.
@@ -62,6 +65,33 @@ class AbstractVaultConfigurationUnitTests {
 		VaultOperations operations = context.getBean(VaultOperations.class);
 
 		assertThatExceptionOfType(CustomizedSignal.class).isThrownBy(() -> operations.opsForSys().health());
+	}
+
+	@Test
+	void taskSchedulerWrapperShouldCallLifecycleMethods() {
+
+		ThreadPoolTaskScheduler mock = mock(ThreadPoolTaskScheduler.class);
+
+		TaskSchedulerWrapper wrapper = new TaskSchedulerWrapper(mock);
+
+		wrapper.afterPropertiesSet();
+		wrapper.destroy();
+
+		verify(mock).afterPropertiesSet();
+		verify(mock).destroy();
+	}
+
+	@Test
+	void taskSchedulerWrapperFromInstanceShouldNotCallLifecycleMethods() {
+
+		ThreadPoolTaskScheduler mock = mock(ThreadPoolTaskScheduler.class);
+
+		TaskSchedulerWrapper wrapper = TaskSchedulerWrapper.fromInstance(mock);
+
+		wrapper.afterPropertiesSet();
+		wrapper.destroy();
+
+		verifyNoInteractions(mock);
 	}
 
 	@Configuration(proxyBeanMethods = false)

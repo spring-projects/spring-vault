@@ -6,7 +6,7 @@ Mark Paluch;
 :self-docs-root: https://docs.spring.io/spring-vault/docs/{version}/
 :example-root: ../../../../spring-vault-core/src/test/java/org/springframework/vault/documentation
 
-(C) 2016-2020 The original authors.
+(C) 2016-2021 The original authors.
 
 NOTE: _Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically._
 

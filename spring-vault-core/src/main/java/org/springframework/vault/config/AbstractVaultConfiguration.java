@@ -175,24 +175,22 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * Create a {@link ThreadPoolTaskScheduler} used by
-	 * {@link LifecycleAwareSessionManager} and
-	 * {@link org.springframework.vault.core.lease.SecretLeaseContainer}. Annotate with
-	 * {@link Bean} in case you want to expose a {@link ThreadPoolTaskScheduler} instance
-	 * to the {@link org.springframework.context.ApplicationContext}. This might be useful
-	 * to supply managed executor instances or {@link ThreadPoolTaskScheduler}s using a
-	 * queue/pooled threads.
-	 * @return the {@link ThreadPoolTaskScheduler} to use. Must not be {@literal null}.
+	 * Create a {@link TaskSchedulerWrapper} used by {@link LifecycleAwareSessionManager}
+	 * and {@link org.springframework.vault.core.lease.SecretLeaseContainer} wrapping
+	 * {@link ThreadPoolTaskScheduler}. Subclasses may override this method to reuse a
+	 * different/existing scheduler.
+	 * @return the {@link TaskSchedulerWrapper} to use. Must not be {@literal null}.
+	 * @see TaskSchedulerWrapper#fromInstance(ThreadPoolTaskScheduler)
 	 */
 	@Bean("vaultThreadPoolTaskScheduler")
-	public ThreadPoolTaskScheduler threadPoolTaskScheduler() {
+	public TaskSchedulerWrapper threadPoolTaskScheduler() {
 
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
 
 		threadPoolTaskScheduler.setThreadNamePrefix("spring-vault-ThreadPoolTaskScheduler-");
 		threadPoolTaskScheduler.setDaemon(true);
 
-		return threadPoolTaskScheduler;
+		return new TaskSchedulerWrapper(threadPoolTaskScheduler);
 	}
 
 	/**
@@ -269,16 +267,16 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		return getBeanFactory().getBean(RestTemplateFactory.class);
 	}
 
-	BeanFactory getBeanFactory() {
+	protected ThreadPoolTaskScheduler getVaultThreadPoolTaskScheduler() {
+		return getBeanFactory().getBean("vaultThreadPoolTaskScheduler", TaskSchedulerWrapper.class).getTaskScheduler();
+	}
+
+	protected BeanFactory getBeanFactory() {
 
 		Assert.state(this.applicationContext != null,
 				"ApplicationContext must be set before accessing getBeanFactory()");
 
 		return this.applicationContext;
-	}
-
-	ThreadPoolTaskScheduler getVaultThreadPoolTaskScheduler() {
-		return getBeanFactory().getBean("vaultThreadPoolTaskScheduler", ThreadPoolTaskScheduler.class);
 	}
 
 	private ClientFactoryWrapper getClientFactoryWrapper() {
@@ -313,6 +311,67 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 		public ClientHttpRequestFactory getClientHttpRequestFactory() {
 			return this.clientHttpRequestFactory;
+		}
+
+	}
+
+	/**
+	 * Wrapper to keep {@link ThreadPoolTaskScheduler} local to Spring Vault and to not
+	 * expose the bean globally.
+	 *
+	 * @since 2.3.1
+	 */
+	public static class TaskSchedulerWrapper implements InitializingBean, DisposableBean {
+
+		private final ThreadPoolTaskScheduler taskScheduler;
+
+		private final boolean acceptAfterPropertiesSet;
+
+		private final boolean acceptDestroy;
+
+		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
+			this(taskScheduler, true, true);
+		}
+
+		protected TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler, boolean acceptAfterPropertiesSet,
+				boolean acceptDestroy) {
+
+			Assert.notNull(taskScheduler, "ThreadPoolTaskScheduler must not be null");
+
+			this.taskScheduler = taskScheduler;
+			this.acceptAfterPropertiesSet = acceptAfterPropertiesSet;
+			this.acceptDestroy = acceptDestroy;
+		}
+
+		/**
+		 * Factory method to adapt an existing {@link ThreadPoolTaskScheduler} bean
+		 * without calling lifecycle methods.
+		 * @param scheduler the actual {@code ThreadPoolTaskScheduler}.
+		 * @return the wrapper for the given {@link ThreadPoolTaskScheduler}.
+		 * @see #afterPropertiesSet()
+		 * @see #destroy()
+		 */
+		public static TaskSchedulerWrapper fromInstance(ThreadPoolTaskScheduler scheduler) {
+			return new TaskSchedulerWrapper(scheduler, false, false);
+		}
+
+		ThreadPoolTaskScheduler getTaskScheduler() {
+			return this.taskScheduler;
+		}
+
+		@Override
+		public void destroy() {
+			if (acceptDestroy) {
+				this.taskScheduler.destroy();
+			}
+		}
+
+		@Override
+		public void afterPropertiesSet() {
+
+			if (this.acceptAfterPropertiesSet) {
+				this.taskScheduler.afterPropertiesSet();
+			}
 		}
 
 	}
