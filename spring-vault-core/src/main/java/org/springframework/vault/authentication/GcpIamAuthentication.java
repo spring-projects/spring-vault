@@ -52,6 +52,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @author Magnus Jungsbluth
+ * @author Bruno Rodrigues
  * @since 2.1
  * @see GcpIamAuthenticationOptions
  * @see HttpTransport
