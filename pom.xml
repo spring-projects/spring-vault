@@ -30,7 +30,7 @@
 		<spring.version>5.2.13.RELEASE</spring.version>
 		<spring-data-releasetrain.version>Moore-SR12</spring-data-releasetrain.version>
 		<spring-security-bom.version>5.2.8.RELEASE</spring-security-bom.version>
-		<reactor.version>Dysprosium-SR15</reactor.version>
+		<reactor.version>Dysprosium-SR17</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
