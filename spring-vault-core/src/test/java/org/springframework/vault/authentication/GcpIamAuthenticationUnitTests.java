@@ -17,13 +17,19 @@ package org.springframework.vault.authentication;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.time.Duration;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential.Builder;
+import com.google.api.client.googleapis.testing.auth.oauth2.MockGoogleCredential;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import com.google.api.client.testing.json.MockJsonFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,12 +40,10 @@ import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandl
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link GcpIamAuthentication}.
@@ -52,8 +56,6 @@ class GcpIamAuthenticationUnitTests {
 
 	MockRestServiceServer mockRest;
 
-	MockHttpTransport mockHttpTransport;
-
 	@BeforeEach
 	void before() {
 
@@ -65,13 +67,7 @@ class GcpIamAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldLogin() {
-
-		MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
-		response.setStatusCode(200);
-		response.setContent("{\"keyId\":\"keyid\", \"signedJwt\":\"my-jwt\"}");
-
-		this.mockHttpTransport = new MockHttpTransport.Builder().setLowLevelHttpResponse(response).build();
+	void shouldLogin() throws NoSuchAlgorithmException {
 
 		this.mockRest.expect(requestTo("/auth/gcp/login")).andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.jwt").value("my-jwt"))
@@ -79,16 +75,21 @@ class GcpIamAuthenticationUnitTests {
 						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 								+ "}"));
 
-		PrivateKey privateKeyMock = mock(PrivateKey.class);
-		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")
-				.setServiceAccountProjectId("foobar").setServiceAccountPrivateKey(privateKeyMock)
-				.setServiceAccountPrivateKeyId("key-id").build();
+		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+		keyGen.initialize(1024);
+		KeyPair key = keyGen.generateKeyPair();
+
+		GoogleCredential credential = new MockGoogleCredential.Builder().setServiceAccountId("hello@world")
+				.setServiceAccountProjectId("foobar").setServiceAccountPrivateKey(key.getPrivate())
+				.setServiceAccountPrivateKeyId("key-id").setJsonFactory(new JacksonFactory())
+				.setTransport(new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build())
+				.build();
 		credential.setAccessToken("foobar");
 
 		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder().role("dev-role")
 				.credential(credential).build();
 		GcpIamAuthentication authentication = new GcpIamAuthentication(options, this.restTemplate,
-				this.mockHttpTransport);
+				new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build());
 
 		VaultToken login = authentication.login();
 
@@ -98,6 +99,13 @@ class GcpIamAuthenticationUnitTests {
 		LoginToken loginToken = (LoginToken) login;
 		assertThat(loginToken.isRenewable()).isTrue();
 		assertThat(loginToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
+	}
+
+	private MockLowLevelHttpResponse createMockHttpResponse() {
+		MockLowLevelHttpResponse response = new MockLowLevelHttpResponse();
+		response.setStatusCode(200);
+		response.setContent("{\"keyId\":\"keyid\", \"signedJwt\":\"my-jwt\"}");
+		return response;
 	}
 
 	@Test
