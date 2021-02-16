@@ -1,6 +1,18 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.3.1 (2021-02-16)
+-------------------------------------
+* Release Spring Vault 2.3.0 #608
+* Potentially unsafe usage of WebClient in ReactiveVaultTemplate #612
+* VMSS support for Azure MSI Authentication #614
+* Added VMSS support to Azure MSI Authentication #615
+* GCP-IAM authentication returning "invalid scope" error #617
+* 403's when a long @Async process runs: vault should not publish a ThreadPoolTaskScheduler bean on Spring's context #623
+* Update license headers for 2021 #624
+* Upgrade to Spring Framework 5.3.4 #625
+* Upgrade to Reactor 2020.0.4 #628
+
 Changes in version 2.3.0
 -----------------------------------------
 * Upgrade dependencies #609
