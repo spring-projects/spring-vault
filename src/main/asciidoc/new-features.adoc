@@ -12,6 +12,7 @@
 * Login credentials for Kubernetes and PCF authentication are reloaded for each login attempt.
 * `SecretLeaseContainer` publishes `SecretLeaseRotatedEvent` instead of `SecretLeaseExpiredEvent` and `SecretLeaseCreatedEvent` on successful secret rotation.
 * `AbstractVaultConfiguration.threadPoolTaskScheduler()` bean type changed to `TaskSchedulerWrapper` instead of `ThreadPoolTaskScheduler`.
+* Since 2.3.2: `GcpIamCredentialsAuthentication`
 
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2

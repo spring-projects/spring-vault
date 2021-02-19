@@ -41,7 +41,8 @@ import org.springframework.web.client.RestOperations;
 
 /**
  * GCP IAM login implementation using GCP IAM service accounts to legitimate its
- * authenticity via JSON Web Token.
+ * authenticity via JSON Web Token using the deprecated IAM
+ * {@code projects.serviceAccounts.signJwt} method.
  * <p/>
  * This authentication method uses Googles IAM API to obtain a signed token for a specific
  * {@link com.google.api.client.auth.oauth2.Credential}. Project and service account
@@ -64,7 +65,7 @@ import org.springframework.web.client.RestOperations;
  * @see <a href=
  * "https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
  * projects.serviceAccounts.signJwt</a>
- * @deprecated Use {@link GcpIamCredentialsAuthentication} instead.
+ * @deprecated since 2.3.2, use {@link GcpIamCredentialsAuthentication} instead.
  */
 @Deprecated
 public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
