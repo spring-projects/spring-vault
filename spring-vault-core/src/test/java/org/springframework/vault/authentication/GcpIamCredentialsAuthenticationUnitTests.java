@@ -67,11 +67,11 @@ class GcpIamCredentialsAuthenticationUnitTests {
 
 	MockRestServiceServer mockRest;
 
-	private Server server;
+	Server server;
 
-	private ManagedChannel managedChannel;
+	ManagedChannel managedChannel;
 
-	private ServerCalls.UnaryMethod<SignJwtRequest, SignJwtResponse> serverCall;
+	ServerCalls.UnaryMethod<SignJwtRequest, SignJwtResponse> serverCall;
 
 	@BeforeEach
 	void before() throws IOException {

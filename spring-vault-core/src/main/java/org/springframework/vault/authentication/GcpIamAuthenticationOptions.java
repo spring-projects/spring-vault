@@ -36,34 +36,14 @@ import org.springframework.util.Assert;
  * @see GcpIamAuthentication
  * @see #builder()
  * @since 2.1
+ * @deprecated since 2.3.2
  */
-public class GcpIamAuthenticationOptions {
+@Deprecated
+public class GcpIamAuthenticationOptions extends GcpIamAuthenticationSupport {
 
 	public static final String DEFAULT_GCP_AUTHENTICATION_PATH = "gcp";
 
-	/**
-	 * Path of the gcp authentication backend mount.
-	 */
-	private final String path;
-
 	private final GcpCredentialSupplier credentialSupplier;
-
-	/**
-	 * Name of the role against which the login is being attempted. If role is not
-	 * specified, the friendly name (i.e., role name or username) of the IAM principal
-	 * authenticated. If a matching role is not found, login fails.
-	 */
-	private final String role;
-
-	/**
-	 * JWT validity/expiration.
-	 */
-	private final Duration jwtValidity;
-
-	/**
-	 * {@link Clock} to calculate JWT expiration.
-	 */
-	private final Clock clock;
 
 	/**
 	 * Provide the service account id to use as sub/iss claims.
@@ -79,11 +59,9 @@ public class GcpIamAuthenticationOptions {
 			Duration jwtValidity, Clock clock, GcpServiceAccountIdAccessor serviceAccountIdSupplier,
 			GcpProjectIdAccessor projectIdAccessor) {
 
-		this.path = path;
+		super(path, role, jwtValidity, clock);
+
 		this.credentialSupplier = credentialSupplier;
-		this.role = role;
-		this.jwtValidity = jwtValidity;
-		this.clock = clock;
 		this.serviceAccountIdAccessor = serviceAccountIdSupplier;
 		this.projectIdAccessor = projectIdAccessor;
 	}
@@ -96,38 +74,10 @@ public class GcpIamAuthenticationOptions {
 	}
 
 	/**
-	 * @return the path of the gcp authentication backend mount.
-	 */
-	public String getPath() {
-		return this.path;
-	}
-
-	/**
 	 * @return the gcp {@link Credential} supplier.
 	 */
 	public GcpCredentialSupplier getCredentialSupplier() {
 		return this.credentialSupplier;
-	}
-
-	/**
-	 * @return name of the role against which the login is being attempted.
-	 */
-	public String getRole() {
-		return this.role;
-	}
-
-	/**
-	 * @return {@link Duration} of the JWT to generate.
-	 */
-	public Duration getJwtValidity() {
-		return this.jwtValidity;
-	}
-
-	/**
-	 * @return {@link Clock} used to calculate epoch seconds until the JWT expires.
-	 */
-	public Clock getClock() {
-		return this.clock;
 	}
 
 	/**

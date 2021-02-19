@@ -197,6 +197,7 @@
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-iamcredentials</artifactId>
+			<optional>true</optional>
 			<exclusions>
 				<exclusion>
 					<groupId>com.fasterxml.jackson.core</groupId>
@@ -211,7 +212,6 @@
 					<groupId>commons-logging</groupId>
 				</exclusion>
 			</exclusions>
-			<optional>true</optional>
 		</dependency>
 
 		<dependency>

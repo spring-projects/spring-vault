@@ -39,8 +39,9 @@ import com.google.cloud.iam.credentials.v1.SignJwtResponse;
 import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
 
 /**
- * GCP IAM credentials login implementation using GCP IAM service accounts to legitimate
- * its authenticity via JSON Web Token.
+ * Google Cloud IAM credentials login implementation using GCP IAM service accounts to
+ * legitimate its authenticity via JSON Web Token using the IAM Credentials
+ * {@code projects.serviceAccounts.signJwt} method.
  * <p/>
  * This authentication method uses Googles IAM Credentials API to obtain a signed token
  * for a specific {@link com.google.api.client.auth.oauth2.Credential}. Service account
@@ -50,7 +51,8 @@ import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
  * {@link GcpIamCredentialsAuthentication} uses Google Java API that uses synchronous API.
  *
  * @author Andreas Gebauer
- * @since 2.4
+ * @author Mark Paluch
+ * @since 2.3.2
  * @see GcpIamCredentialsAuthenticationOptions
  * @see HttpTransport
  * @see GoogleCredentials

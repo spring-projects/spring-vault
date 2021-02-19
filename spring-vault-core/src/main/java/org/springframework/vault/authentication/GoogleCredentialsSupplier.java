@@ -26,11 +26,11 @@ import com.google.auth.oauth2.ServiceAccountCredentials;
  * authentication. Implementations are used by {@link GcpIamCredentialsAuthentication}.
  *
  * @author Andreas Gebauer
- * @since 2.4
+ * @since 2.3.2
  * @see GcpIamCredentialsAuthentication
  */
 @FunctionalInterface
-public interface GcpCredentialsSupplier extends Supplier<GoogleCredentials> {
+public interface GoogleCredentialsSupplier extends Supplier<GoogleCredentials> {
 
 	/**
 	 * Exception-safe helper to get {@link ServiceAccountCredentials} from
@@ -44,7 +44,7 @@ public interface GcpCredentialsSupplier extends Supplier<GoogleCredentials> {
 			return getCredentials();
 		}
 		catch (IOException e) {
-			throw new IllegalStateException("Cannot obtain GoogleCredential", e);
+			throw new IllegalStateException("Cannot obtain GoogleCredentials", e);
 		}
 	}
 
