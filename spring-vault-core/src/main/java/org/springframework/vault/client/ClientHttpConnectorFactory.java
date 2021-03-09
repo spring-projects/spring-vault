@@ -105,6 +105,14 @@ public class ClientHttpConnectorFactory {
 				sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
 						sslConfiguration.getKeyConfiguration()));
 			}
+
+			if (sslConfiguration.getEnabledProtocols() != null) {
+				sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
+			}
+
+			if (sslConfiguration.getEnabledCipherSuites() != null) {
+				sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
+			}
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
@@ -187,6 +195,16 @@ public class ClientHttpConnectorFactory {
 
 				if (keyConfiguration.getKeyPassword() != null) {
 					sslContextFactory.setKeyManagerPassword(new String(keyConfiguration.getKeyPassword()));
+				}
+
+				if (sslConfiguration.getEnabledProtocols() != null) {
+					sslContextFactory
+							.setIncludeProtocols(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
+				}
+
+				if (sslConfiguration.getEnabledCipherSuites() != null) {
+					sslContextFactory
+							.setIncludeCipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}
 
 				return new org.eclipse.jetty.client.HttpClient(sslContextFactory);
