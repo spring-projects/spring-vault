@@ -43,9 +43,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509TrustManager;
 
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslProvider;
-import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.config.RequestConfig;
@@ -55,7 +52,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.DefaultSchemePortResolver;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
-
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
@@ -69,9 +65,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.PemObject;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.SslConfiguration.KeyConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
-import static org.springframework.vault.support.SslConfiguration.KeyConfiguration;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import okhttp3.ConnectionSpec;
+import okhttp3.OkHttpClient.Builder;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
@@ -298,7 +298,21 @@ public class ClientHttpRequestFactoryFactory {
 			if (hasSslConfiguration(sslConfiguration)) {
 
 				SSLContext sslContext = getSSLContext(sslConfiguration, getTrustManagers(sslConfiguration));
-				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+
+				String[] enabledProtocols = null;
+
+				if (sslConfiguration.getEnabledProtocols() != null) {
+					enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
+				}
+
+				String[] enabledCipherSuites = null;
+
+				if (sslConfiguration.getEnabledCipherSuites() != null) {
+					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
+				}
+
+				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
+						enabledProtocols, enabledCipherSuites, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
 				httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
 				httpClientBuilder.setSSLContext(sslContext);
 			}
@@ -332,6 +346,8 @@ public class ClientHttpRequestFactoryFactory {
 
 			Builder builder = new Builder();
 
+			ConnectionSpec sslConnectionSpec = ConnectionSpec.MODERN_TLS;
+
 			if (hasSslConfiguration(sslConfiguration)) {
 
 				TrustManager[] trustManagers = getTrustManagers(sslConfiguration);
@@ -344,8 +360,23 @@ public class ClientHttpRequestFactoryFactory {
 				X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
 				SSLContext sslContext = getSSLContext(sslConfiguration, trustManagers);
 
+				ConnectionSpec.Builder sslConnectionSpecBuilder = new ConnectionSpec.Builder(sslConnectionSpec);
+
+				if (sslConfiguration.getEnabledProtocols() != null) {
+					sslConnectionSpecBuilder.tlsVersions(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
+				}
+
+				if (sslConfiguration.getEnabledCipherSuites() != null) {
+					sslConnectionSpecBuilder
+							.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
+				}
+
+				sslConnectionSpec = sslConnectionSpecBuilder.build();
+
 				builder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
 			}
+
+			builder.connectionSpecs(Arrays.asList(sslConnectionSpec, ConnectionSpec.CLEARTEXT));
 
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
 					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
@@ -380,6 +411,14 @@ public class ClientHttpRequestFactoryFactory {
 				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
 					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
 							sslConfiguration.getKeyConfiguration()));
+				}
+
+				if (sslConfiguration.getEnabledProtocols() != null) {
+					sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
+				}
+
+				if (sslConfiguration.getEnabledCipherSuites() != null) {
+					sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
 				}
 
 				requestFactory.setSslContext(sslContextBuilder.sslProvider(SslProvider.JDK).build());

@@ -16,10 +16,11 @@
 package org.springframework.vault.config;
 
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -231,7 +232,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration("vault.ssl.trust-store",
 				"vault.ssl.trust-store-password", "vault.ssl.trust-store-type");
 
-		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration);
+		List<String> enabledProtocols = getList("vault.ssl.enabled-protocols");
+
+		List<String> enabledCipherSuites = getList("vault.ssl.enabled-cipher-suites");
+
+		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration, enabledProtocols,
+				enabledCipherSuites);
 	}
 
 	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty, String passwordProperty,
@@ -419,6 +425,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 				.jwtSupplier(jwtSupplier).path(path);
 
 		return new KubernetesAuthentication(builder.build(), restOperations());
+	}
+
+	private List<String> getList(String key) {
+		String val = getEnvironment().getProperty(key);
+
+		if (val == null) {
+			return null;
+		}
+
+		return Arrays.asList(val.split(","));
 	}
 
 	@Nullable

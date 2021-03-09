@@ -27,6 +27,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.vault.client.ClientHttpConnectorFactory.JettyClient;
 import static org.springframework.vault.client.ClientHttpConnectorFactory.ReactorNetty;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Integration tests for {@link ClientHttpConnectorFactory}.
  *
@@ -50,9 +53,75 @@ class ClientHttpConnectorFactoryIntegrationTests {
 	}
 
 	@Test
+	void reactorNettyClientWithExplicitEnabledCipherSuitesShouldWork() {
+
+		List<String> enabledCipherSuites = new ArrayList<String>();
+		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
+		enabledCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+
+		ClientHttpConnector factory = ReactorNetty.usingReactorNetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledCipherSuites(enabledCipherSuites));
+
+		WebClient webClient = WebClient.builder().clientConnector(factory).build();
+
+		String response = request(webClient);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void reactorNettyClientWithExplicitEnabledProtocolsShouldWork() {
+
+		List<String> enabledProtocols = new ArrayList<String>();
+		enabledProtocols.add("TLSv1.2");
+
+		ClientHttpConnector factory = ReactorNetty.usingReactorNetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledProtocols(enabledProtocols));
+
+		WebClient webClient = WebClient.builder().clientConnector(factory).build();
+
+		String response = request(webClient);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
 	void jettyClientShouldWork() {
 
 		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(), Settings.createSslConfiguration());
+
+		WebClient webClient = WebClient.builder().clientConnector(factory).build();
+
+		String response = request(webClient);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void jettyClientWithExplicitEnabledCipherSuitesShouldWork() {
+
+		List<String> enabledCipherSuites = new ArrayList<String>();
+		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
+		enabledCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+
+		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledCipherSuites(enabledCipherSuites));
+
+		WebClient webClient = WebClient.builder().clientConnector(factory).build();
+
+		String response = request(webClient);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void jettyClientWithExplicitEnabledProtocolsShouldWork() {
+
+		List<String> enabledProtocols = new ArrayList<String>();
+		enabledProtocols.add("TLSv1.2");
+
+		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledProtocols(enabledProtocols));
 
 		WebClient webClient = WebClient.builder().clientConnector(factory).build();
 
