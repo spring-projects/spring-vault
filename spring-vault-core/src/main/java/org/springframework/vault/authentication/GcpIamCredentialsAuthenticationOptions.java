@@ -61,10 +61,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 	}
 
 	/**
-	 * @return a new {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+	 * @return a new {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 	 */
-	public static GoogleCloudIamAuthenticationOptionsBuilder builder() {
-		return new GoogleCloudIamAuthenticationOptionsBuilder();
+	public static GcpIamCredentialsAuthenticationOptionsBuilder builder() {
+		return new GcpIamCredentialsAuthenticationOptionsBuilder();
 	}
 
 	/**
@@ -84,7 +84,7 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 	/**
 	 * Builder for {@link GcpIamCredentialsAuthenticationOptions}.
 	 */
-	public static class GoogleCloudIamAuthenticationOptionsBuilder {
+	public static class GcpIamCredentialsAuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_GCP_AUTHENTICATION_PATH;
 
@@ -100,15 +100,15 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 
 		private GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor = DefaultGoogleCredentialsAccessors.INSTANCE;
 
-		GoogleCloudIamAuthenticationOptionsBuilder() {
+		GcpIamCredentialsAuthenticationOptionsBuilder() {
 		}
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder path(String path) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder path(String path) {
 
 			Assert.hasText(path, "Path must not be empty");
 
@@ -121,10 +121,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * use static credentials or provide a
 		 * {@link #credentialsSupplier(GoogleCredentialsSupplier) credentials provider}.
 		 * @param credentials must not be {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 * @see #credentialsSupplier(GoogleCredentialsSupplier)
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder credentials(GoogleCredentials credentials) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder credentials(GoogleCredentials credentials) {
 
 			Assert.notNull(credentials, "ServiceAccountCredentials must not be null");
 
@@ -136,10 +136,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Alternatively, configure static {@link #credentials(GoogleCredentials)
 		 * credentials}.
 		 * @param credentialsSupplier must not be {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 * @see #credentials(GoogleCredentials)
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder credentialsSupplier(
+		public GcpIamCredentialsAuthenticationOptionsBuilder credentialsSupplier(
 				GoogleCredentialsSupplier credentialsSupplier) {
 
 			Assert.notNull(credentialsSupplier, "GcpServiceAccountCredentialsSupplier must not be null");
@@ -152,10 +152,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Configure an explicit service account id to use in GCP IAM calls. If none is
 		 * configured, falls back to using {@link ServiceAccountCredentials#getAccount()}.
 		 * @param serviceAccountId the service account id (email) to use
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 * @since 2.1
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder serviceAccountId(String serviceAccountId) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder serviceAccountId(String serviceAccountId) {
 
 			Assert.notNull(serviceAccountId, "Service account id may not be null");
 
@@ -167,10 +167,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * account id used in GCP IAM calls. If none is configured, falls back to using
 		 * {@link ServiceAccountCredentials#getAccount()}.
 		 * @param serviceAccountIdAccessor the service account id provider to use
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 * @see GoogleCredentialsAccountIdAccessor
 		 */
-		GoogleCloudIamAuthenticationOptionsBuilder serviceAccountIdAccessor(
+		GcpIamCredentialsAuthenticationOptionsBuilder serviceAccountIdAccessor(
 				GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor) {
 
 			Assert.notNull(serviceAccountIdAccessor, "GcpServiceAccountIdAccessor must not be null");
@@ -182,9 +182,9 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		/**
 		 * Configure the name of the role against which the login is being attempted.
 		 * @param role must not be empty or {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder role(String role) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder role(String role) {
 
 			Assert.hasText(role, "Role must not be null or empty");
 
@@ -196,9 +196,9 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Configure the {@link Duration} for the JWT expiration. This defaults to 15
 		 * minutes and cannot be more than a hour.
 		 * @param jwtValidity must not be {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder jwtValidity(Duration jwtValidity) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder jwtValidity(Duration jwtValidity) {
 
 			Assert.hasText(this.role, "JWT validity duration must not be null");
 
@@ -210,9 +210,9 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Configure the {@link Clock} used to calculate epoch seconds until the JWT
 		 * expiration.
 		 * @param clock must not be {@literal null}.
-		 * @return {@code this} {@link GoogleCloudIamAuthenticationOptionsBuilder}.
+		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
 		 */
-		public GoogleCloudIamAuthenticationOptionsBuilder clock(Clock clock) {
+		public GcpIamCredentialsAuthenticationOptionsBuilder clock(Clock clock) {
 
 			Assert.hasText(this.role, "Clock must not be null");
 
