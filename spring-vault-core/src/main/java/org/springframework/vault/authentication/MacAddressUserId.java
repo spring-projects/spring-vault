@@ -41,7 +41,7 @@ import org.springframework.util.StringUtils;
  */
 public class MacAddressUserId implements AppIdUserIdMechanism {
 
-	private final Log log = LogFactory.getLog(MacAddressUserId.class);
+	private final Log logger = LogFactory.getLog(MacAddressUserId.class);
 
 	private final String networkInterfaceHint;
 
@@ -100,7 +100,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			if (!networkInterface.isPresent()) {
 
 				if (StringUtils.hasText(this.networkInterfaceHint)) {
-					this.log.warn(String.format("Did not find a NetworkInterface applying hint %s",
+					this.logger.warn(String.format("Did not find a NetworkInterface applying hint %s",
 							this.networkInterfaceHint));
 				}
 

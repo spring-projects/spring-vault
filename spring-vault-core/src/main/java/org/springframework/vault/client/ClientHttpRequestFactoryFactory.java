@@ -83,7 +83,8 @@ import static org.springframework.vault.support.SslConfiguration.KeyConfiguratio
  */
 public class ClientHttpRequestFactoryFactory {
 
-	private static final Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
+	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+	private static Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
 	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
 
