@@ -132,7 +132,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 	private static final int STATUS_DESTROYED = 2;
 
-	private static final Log log = LogFactory.getLog(SecretLeaseContainer.class);
+	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+	private static Log logger = LogFactory.getLog(SecretLeaseContainer.class);
 
 	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
 
@@ -608,14 +609,14 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 	private static void logRenewalCandidate(RequestedSecret requestedSecret, Lease lease, String action) {
 
-		if (log.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 
 			if (lease.hasLeaseId()) {
-				log.debug(String.format("Secret %s with Lease %s qualified for %s", requestedSecret.getPath(),
+				logger.debug(String.format("Secret %s with Lease %s qualified for %s", requestedSecret.getPath(),
 						lease.getLeaseId(), action));
 			}
 			else {
-				log.debug(String.format("Secret %s with cache hint is qualified for %s", requestedSecret.getPath(),
+				logger.debug(String.format("Secret %s with cache hint is qualified for %s", requestedSecret.getPath(),
 						action));
 			}
 		}
@@ -784,7 +785,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	 */
 	static class LeaseRenewalScheduler {
 
-		private static final Log log = org.apache.commons.logging.LogFactory.getLog(LeaseRenewalScheduler.class);
+		@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+		private static Log logger = LogFactory.getLog(LeaseRenewalScheduler.class);
 
 		private final TaskScheduler taskScheduler;
 
@@ -812,13 +814,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 		void scheduleRenewal(RequestedSecret requestedSecret, RenewLease renewLease, Lease lease, Duration minRenewal,
 				Duration expiryThreshold) {
 
-			if (log.isDebugEnabled()) {
+			if (logger.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
-					log.debug(String.format("Scheduling renewal for secret %s with lease %s, lease duration %d",
+					logger.debug(String.format("Scheduling renewal for secret %s with lease %s, lease duration %d",
 							requestedSecret.getPath(), lease.getLeaseId(), lease.getLeaseDuration().getSeconds()));
 				}
 				else {
-					log.debug(String.format("Scheduling renewal for secret %s, with cache hint duration %d",
+					logger.debug(String.format("Scheduling renewal for secret %s, with cache hint duration %d",
 							requestedSecret.getPath(), lease.getLeaseDuration().getSeconds()));
 				}
 			}
@@ -838,17 +840,17 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 					LeaseRenewalScheduler.this.schedules.remove(lease);
 
 					if (LeaseRenewalScheduler.this.currentLeaseRef.get() != lease) {
-						log.debug("Current lease has changed. Skipping renewal");
+						logger.debug("Current lease has changed. Skipping renewal");
 						return;
 					}
 
-					if (log.isDebugEnabled()) {
+					if (logger.isDebugEnabled()) {
 						if (lease.hasLeaseId()) {
-							log.debug(String.format("Renewing lease %s for secret %s", lease.getLeaseId(),
+							logger.debug(String.format("Renewing lease %s for secret %s", lease.getLeaseId(),
 									requestedSecret.getPath()));
 						}
 						else {
-							log.debug(String.format("Renewing secret without lease %s", requestedSecret.getPath()));
+							logger.debug(String.format("Renewing secret without lease %s", requestedSecret.getPath()));
 						}
 					}
 
@@ -860,7 +862,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 						LeaseRenewalScheduler.this.currentLeaseRef.compareAndSet(lease, renewLease.renewLease(lease));
 					}
 					catch (Exception e) {
-						log.error(String.format("Cannot renew lease %s", lease.getLeaseId()), e);
+						logger.error(String.format("Cannot renew lease %s", lease.getLeaseId()), e);
 					}
 				}
 			};
@@ -876,8 +878,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 			ScheduledFuture<?> scheduledFuture = this.schedules.get(lease);
 			if (scheduledFuture != null) {
 
-				if (log.isDebugEnabled()) {
-					log.debug(
+				if (logger.isDebugEnabled()) {
+					logger.debug(
 							String.format("Canceling previously registered schedule for lease %s", lease.getLeaseId()));
 				}
 

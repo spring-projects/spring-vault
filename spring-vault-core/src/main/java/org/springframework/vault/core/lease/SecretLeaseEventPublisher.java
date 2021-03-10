@@ -224,11 +224,13 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 		INSTANCE;
 
-		private static final Log log = LogFactory.getLog(LoggingErrorListener.class);
+		@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+		private static Log logger = LogFactory.getLog(LoggingErrorListener.class);
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
-			log.warn(String.format("[%s] %s %s", leaseEvent.getSource(), leaseEvent.getLease(), exception.getMessage()),
+			logger.warn(
+					String.format("[%s] %s %s", leaseEvent.getSource(), leaseEvent.getLease(), exception.getMessage()),
 					exception);
 		}
 

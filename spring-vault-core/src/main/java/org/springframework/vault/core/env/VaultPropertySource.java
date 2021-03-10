@@ -47,7 +47,8 @@ import org.springframework.vault.support.VaultResponse;
  */
 public class VaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	private static final Log logger = LogFactory.getLog(VaultPropertySource.class);
+	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+	private static Log logger = LogFactory.getLog(VaultPropertySource.class);
 
 	private final String path;
 

@@ -56,7 +56,8 @@ import org.springframework.vault.support.JsonMapFlattener;
  */
 public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<VaultOperations> {
 
-	private static final Log logger = LogFactory.getLog(LeaseAwareVaultPropertySource.class);
+	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
+	private static Log logger = LogFactory.getLog(LeaseAwareVaultPropertySource.class);
 
 	private final SecretLeaseContainer secretLeaseContainer;
 
