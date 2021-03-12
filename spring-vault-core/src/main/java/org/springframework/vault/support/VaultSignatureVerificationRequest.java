@@ -15,16 +15,26 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.support.VaultSignatureVerificationRequest.VaultSignatureVerificationRequestSerializer;
+
+import java.io.IOException;
 
 /**
  * Request for a signature verification.
  *
  * @author Luander Ribeiro
  * @author Mark Paluch
+ * @author James Luke
  * @since 2.0
  */
+@JsonSerialize(using = VaultSignatureVerificationRequestSerializer.class)
 public class VaultSignatureVerificationRequest {
 
 	private final Plaintext plaintext;
@@ -107,6 +117,31 @@ public class VaultSignatureVerificationRequest {
 	@Nullable
 	public String getAlgorithm() {
 		return this.algorithm;
+	}
+
+	static class VaultSignatureVerificationRequestSerializer extends JsonSerializer<VaultSignatureVerificationRequest> {
+
+		static PlaintextToBase64StringConverter plaintextConverter = new PlaintextToBase64StringConverter();
+
+		@Override
+		public void serialize(VaultSignatureVerificationRequest request, JsonGenerator gen,
+				SerializerProvider serializers) throws IOException {
+			gen.writeStartObject();
+			gen.writeStringField("input", plaintextConverter.convert(request.plaintext));
+			if (request.getHmac() != null) {
+				gen.writeStringField("hmac", request.getHmac().getHmac());
+			}
+
+			if (request.getSignature() != null) {
+				gen.writeStringField("signature", request.getSignature().getSignature());
+			}
+
+			if (StringUtils.hasText(request.getAlgorithm())) {
+				gen.writeStringField("algorithm", request.getAlgorithm());
+			}
+			gen.writeEndObject();
+		}
+
 	}
 
 	/**

@@ -123,4 +123,17 @@ public interface ReactiveVaultOperations {
 	<V, T extends Publisher<V>> T doWithSession(Function<WebClient, ? extends T> sessionCallback)
 			throws VaultException, WebClientException;
 
+	/**
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	ReactiveVaultTransitOperations opsForTransit();
+
+	/**
+	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
+	 * a different path than {@code transit}.
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	ReactiveVaultTransitOperations opsForTransit(String path);
+
 }

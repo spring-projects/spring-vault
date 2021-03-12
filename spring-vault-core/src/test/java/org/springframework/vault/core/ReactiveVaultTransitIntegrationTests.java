@@ -1,0 +1,713 @@
+/*
+ * Copyright 2016-2021 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.vault.core;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.support.*;
+import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.Version;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.*;
+
+/**
+ * Integration tests for {@link ReactiveVaultTransitTemplate} using the {@code generic}
+ * backend.
+ *
+ * @author James Luke
+ */
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
+public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport {
+
+	@Autowired
+	VaultOperations vaultOperations;
+
+	@Autowired
+	ReactiveVaultOperations reactiveVaultOperations;
+
+	ReactiveVaultTransitOperations reactiveTransitOperations;
+
+	Version vaultVersion;
+
+	@BeforeEach
+	void before() {
+		this.reactiveTransitOperations = this.reactiveVaultOperations.opsForTransit();
+
+		if (!this.vaultOperations.opsForSys().getMounts().containsKey("transit/")) {
+			this.vaultOperations.opsForSys().mount("transit", VaultMount.create("transit"));
+		}
+
+		this.vaultVersion = prepare().getVersion();
+
+		removeKeys();
+	}
+
+	@AfterEach
+	void tearDown() {
+		removeKeys();
+	}
+
+	private Mono<Void> deleteKey(String keyName) {
+		return this.reactiveTransitOperations
+				.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build())
+				.and(this.reactiveTransitOperations.deleteKey(keyName)).onErrorResume(e -> Mono.empty());
+	}
+
+	private void removeKeys() {
+		reactiveTransitOperations.getKeys().flatMap(this::deleteKey).blockLast();
+	}
+
+	@Test
+	void createKeyShouldCreateKey() {
+		this.reactiveTransitOperations.createKey("myKey").then(this.reactiveTransitOperations.getKey("myKey"))
+				.as(StepVerifier::create).assertNext(myKey -> {
+					assertThat(myKey).isNotNull();
+					assertThat(myKey.getType()).startsWith("aes");
+					assertThat(myKey.getName()).isEqualTo("myKey");
+					assertThat(myKey.isDeletionAllowed()).isFalse();
+					assertThat(myKey.isDerived()).isFalse();
+					assertThat(myKey.getMinDecryptionVersion()).isEqualTo(1);
+					assertThat(myKey.getLatestVersion()).isEqualTo(1);
+
+					if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.7.0"))) {
+						assertThat(myKey.supportsDecryption()).isTrue();
+						assertThat(myKey.supportsEncryption()).isTrue();
+						assertThat(myKey.supportsDerivation()).isTrue();
+						assertThat(myKey.supportsSigning()).isFalse();
+					}
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion("0.6.4")
+	void createKeyShouldCreateEcDsaKey() {
+		createEcdsaP256Key("ecdsa").then(this.reactiveTransitOperations.getKey("ecdsa")).as(StepVerifier::create)
+				.assertNext(myKey -> {
+					assertThat(myKey).isNotNull();
+					assertThat(myKey.getType()).startsWith("ecdsa");
+					assertThat(myKey.getKeys()).isNotEmpty();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateEdKey() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
+
+		this.reactiveTransitOperations.createKey("ed-key", request)
+				.then(this.reactiveTransitOperations.getKey("ed-key")).as(StepVerifier::create).assertNext(myKey -> {
+					assertThat(myKey).isNotNull();
+					assertThat(myKey.getType()).startsWith("ed");
+					assertThat(myKey.getKeys()).isNotEmpty();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(ECDSA521_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateEcdsaKey() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p521");
+
+		this.reactiveTransitOperations.createKey("ecdsa-p521-key", request)
+				.then(this.reactiveTransitOperations.getKey("ecdsa-p521-key")).as(StepVerifier::create)
+				.assertNext(myKey -> {
+					assertThat(myKey.getType()).isEqualTo("ecdsa-p521");
+					assertThat(myKey.getKeys()).isNotEmpty();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(RSA3072_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateRsa3072Key() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("rsa-3072");
+
+		this.reactiveTransitOperations.createKey("rsa-3072-key", request)
+				.then(this.reactiveTransitOperations.getKey("rsa-3072-key")).as(StepVerifier::create)
+				.assertNext(myKey -> {
+					assertThat(myKey.getType()).isEqualTo("rsa-3072");
+					assertThat(myKey.getKeys()).isNotEmpty();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(AES256_GCM96_INTRODUCED_IN_VERSION)
+	void createKeyShouldCreateAes256Gcm96Key() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("aes256-gcm96");
+
+		this.reactiveTransitOperations.createKey("aes256-gcm96-key", request)
+				.then(this.reactiveTransitOperations.getKey("aes256-gcm96-key")).as(StepVerifier::create)
+				.assertNext(myKey -> {
+					assertThat(myKey.getType()).isEqualTo("aes256-gcm96");
+					assertThat(myKey.getKeys()).isNotEmpty();
+				}).verifyComplete();
+	}
+
+	@Test
+	void createKeyShouldCreateKeyWithOptions() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request).then(this.reactiveTransitOperations.getKey("myKey"))
+				.as(StepVerifier::create).assertNext(myKey -> {
+					assertThat(myKey.getName()).isEqualTo("myKey");
+					assertThat(myKey.isDeletionAllowed()).isFalse();
+					assertThat(myKey.isDerived()).isTrue();
+					assertThat(myKey.getMinDecryptionVersion()).isEqualTo(1);
+					assertThat(myKey.getLatestVersion()).isEqualTo(1);
+				}).verifyComplete();
+	}
+
+	@Test
+	void shouldConfigureKey() {
+		VaultTransitKeyConfiguration configuration = VaultTransitKeyConfiguration.builder().deletionAllowed(true)
+				.minDecryptionVersion(1).minEncryptionVersion(2).build();
+
+		this.reactiveTransitOperations.createKey("myKey").then(this.reactiveTransitOperations.rotate("myKey"))
+				.then(this.reactiveTransitOperations.rotate("myKey"))
+				.then(this.reactiveTransitOperations.configureKey("myKey", configuration))
+				.then(this.reactiveTransitOperations.getKey("myKey")).as(StepVerifier::create).assertNext(myKey -> {
+					assertThat(myKey.getMinDecryptionVersion()).isEqualTo(1);
+					if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.8.0"))) {
+						assertThat(myKey.getMinEncryptionVersion()).isEqualTo(2);
+					}
+					else {
+						assertThat(myKey.getMinEncryptionVersion()).isEqualTo(0);
+					}
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion("0.6.4")
+	void shouldEnumerateKey() {
+		this.reactiveTransitOperations.getKeys().as(StepVerifier::create).verifyComplete();
+		this.reactiveTransitOperations.createKey("myKey").thenMany(this.reactiveTransitOperations.getKeys())
+				.as(StepVerifier::create).assertNext(keys -> assertThat(keys).contains("myKey")).verifyComplete();
+	}
+
+	@Test
+	void getKeyShouldReturnEmptyIfKeyNotExists() {
+		this.reactiveTransitOperations.getKey("myKey").as(StepVerifier::create).verifyComplete();
+	}
+
+	@Test
+	void deleteKeyShouldFailIfKeyNotExists() {
+		this.reactiveTransitOperations.deleteKey("myKey").as(StepVerifier::create)
+				.consumeErrorWith(e -> assertThat(e).hasMessageContaining("Status 400")).verify();
+	}
+
+	@Test
+	void deleteKeyShouldDeleteKey() {
+		VaultTransitKeyConfiguration configuration = VaultTransitKeyConfiguration.builder().deletionAllowed(true)
+				.build();
+
+		this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.configureKey("myKey", configuration))
+				.then(this.reactiveTransitOperations.deleteKey("myKey"))
+				.then(this.reactiveTransitOperations.getKey("myKey")).as(StepVerifier::create).verifyComplete();
+	}
+
+	@Test
+	void encryptShouldCreateCiphertext() {
+		this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world")).as(StepVerifier::create)
+				.assertNext(ciphertext -> assertThat(ciphertext).startsWith("vault:v")).verifyComplete();
+	}
+
+	@Test
+	void encryptShouldCreateCiphertextWithNonceAndContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("mykey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), context))
+				.as(StepVerifier::create).assertNext(ciphertext -> assertThat(ciphertext).startsWith("vault:v1:"))
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void encryptShouldEncryptEmptyValues() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("").with(context)))
+				.as(StepVerifier::create).assertNext(ciphertext -> {
+					assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
+					assertThat(ciphertext.getContext()).isEqualTo(context);
+				}).verifyComplete();
+	}
+
+	@Test
+	void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("hello-world").with(context)))
+				.as(StepVerifier::create).assertNext(ciphertext -> {
+					assertThat(ciphertext.getCiphertext()).startsWith("vault:v1:");
+					assertThat(ciphertext.getContext()).isEqualTo(context);
+				}).verifyComplete();
+	}
+
+	@Test
+	void decryptShouldCreatePlaintext() {
+		this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world"))
+				.flatMap(ciphertext -> this.reactiveTransitOperations.decrypt("myKey", ciphertext))
+				.as(StepVerifier::create).assertNext(plaintext -> assertThat(plaintext).isEqualTo("hello-world"))
+				.verifyComplete();
+	}
+
+	@Test
+	void decryptShouldCreatePlaintextWithNonceAndContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), transitRequest))
+				.flatMap(ciphertext -> this.reactiveTransitOperations.decrypt("myKey", ciphertext, transitRequest))
+				.as(StepVerifier::create)
+				.assertNext(plaintext -> assertThat(new String(plaintext)).isEqualTo("hello-world")).verifyComplete();
+	}
+
+	@Test
+	void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("hello-world").with(context)))
+				.flatMap(ciphertext -> this.reactiveTransitOperations.decrypt("myKey", ciphertext))
+				.as(StepVerifier::create).assertNext(plaintext -> {
+					assertThat(plaintext.asString()).isEqualTo("hello-world");
+					assertThat(plaintext.getContext()).isEqualTo(context);
+				}).verifyComplete();
+	}
+
+	@Test
+	void encryptAndRewrapShouldCreateCiphertext() {
+		String ciphertext = this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world")).block();
+
+		assertThat(ciphertext).isNotNull();
+
+		this.reactiveTransitOperations.rotate("myKey").then(this.reactiveTransitOperations.rewrap("myKey", ciphertext))
+				.as(StepVerifier::create).assertNext(rewrapped -> assertThat(rewrapped).startsWith("vault:v2:"))
+				.verifyComplete();
+	}
+
+	@Test
+	void shouldEncryptBinaryPlaintext() {
+		this.reactiveTransitOperations.createKey("myKey");
+		byte[] plaintext = new byte[] { 1, 2, 3, 4, 5 };
+
+		this.reactiveTransitOperations.encrypt("myKey", plaintext, VaultTransitContext.empty())
+				.flatMap(ciphertext -> this.reactiveTransitOperations.decrypt("myKey", ciphertext,
+						VaultTransitContext.empty()))
+				.as(StepVerifier::create).assertNext(decrypted -> assertThat(decrypted).isEqualTo(plaintext))
+				.verifyComplete();
+	}
+
+	@Test
+	void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().convergentEncryption(true)
+				.derived(true).build();
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes())
+				.nonce("123456789012".getBytes()).build();
+
+		String ciphertext = this.reactiveTransitOperations.createKey("myKey", request)
+				.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), transitRequest))
+				.block();
+
+		assertThat(ciphertext).isNotNull();
+
+		this.reactiveTransitOperations.rotate("myKey")
+				.then(this.reactiveTransitOperations.rewrap("myKey", ciphertext, transitRequest))
+				.as(StepVerifier::create).assertNext(rewrapped -> assertThat(rewrapped).startsWith("vault:v2"))
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchEncrypt() {
+		this.reactiveTransitOperations.createKey("myKey")
+				.thenMany(this.reactiveTransitOperations.encrypt("myKey",
+						Arrays.asList(Plaintext.of("one"), Plaintext.of("two"))))
+				.as(StepVerifier::create).assertNext(encrypted -> {
+					assertThat(encrypted.get()).isNotNull();
+					assertThat(Objects.requireNonNull(encrypted.get()).getCiphertext()).startsWith("vault:");
+				}).assertNext(encrypted -> {
+					assertThat(encrypted.get()).isNotNull();
+					assertThat(Objects.requireNonNull(encrypted.get()).getCiphertext()).startsWith("vault:");
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecrypt() {
+		this.reactiveTransitOperations.createKey("myKey").block();
+		Ciphertext one = this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("one")).block();
+		Ciphertext two = this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("two")).block();
+
+		assertThat(one).isNotNull();
+		assertThat(two).isNotNull();
+
+		this.reactiveTransitOperations.decrypt("myKey", Arrays.asList(one, two))
+				.zipWith(Flux.merge(this.reactiveTransitOperations.decrypt("myKey", one),
+						this.reactiveTransitOperations.decrypt("myKey", two)))
+				.as(StepVerifier::create).assertNext(it -> {
+					assertThat(it.getT1().get()).isEqualTo(it.getT2());
+					assertThat(it.getT1().getAsString()).isEqualTo("one");
+				}).assertNext(it -> {
+					assertThat(it.getT1().get()).isEqualTo(it.getT2());
+					assertThat(it.getT1().getAsString()).isEqualTo("two");
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchEncryptWithContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
+
+		VaultTransitContext context1 = VaultTransitContext.builder().context("oneContext".getBytes()).build();
+
+		VaultTransitContext context2 = VaultTransitContext.builder().context("twoContext".getBytes()).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(this.reactiveTransitOperations.encrypt("myKey",
+						Arrays.asList(Plaintext.of("one").with(context1), Plaintext.of("two").with(context2))))
+				.as(StepVerifier::create)
+				.assertNext(it -> assertThat(Objects.requireNonNull(it.get()).getContext()).isEqualTo(context1))
+				.assertNext(it -> assertThat(Objects.requireNonNull(it.get()).getContext()).isEqualTo(context2))
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptWithContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
+
+		Plaintext one = Plaintext.of("one")
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+		Plaintext two = Plaintext.of("two")
+				.with(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(this.reactiveTransitOperations.encrypt("myKey", Arrays.asList(one, two)))
+				.flatMap(it -> Mono.justOrEmpty(it.get())).collectList()
+				.flatMapMany(it -> this.reactiveTransitOperations.decrypt("myKey", it)).as(StepVerifier::create)
+				.assertNext(it -> assertThat(it.get()).isEqualTo(one))
+				.assertNext(it -> assertThat(it.get()).isEqualTo(two)).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptWithWrongContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
+
+		Plaintext one = Plaintext.of("one")
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+		Plaintext two = Plaintext.of("two")
+				.with(VaultTransitContext.builder().context("twoContext".getBytes()).build());
+
+		List<Ciphertext> encrypted = this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(this.reactiveTransitOperations.encrypt("myKey", Arrays.asList(one, two)))
+				.flatMap(it -> Mono.justOrEmpty(it.get())).collectList().block();
+
+		assertThat(encrypted).isNotNull();
+
+		Ciphertext encryptedOne = encrypted.get(0);
+		Ciphertext decryptedTwo = encrypted.get(1);
+
+		Ciphertext tampered = decryptedTwo.with(encryptedOne.getContext());
+
+		StepVerifier.FirstStep<VaultDecryptionResult> stepVerifier = this.reactiveTransitOperations
+				.decrypt("myKey", Arrays.asList(encryptedOne, tampered)).as(StepVerifier::create);
+
+		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("1.6.0"))) {
+			stepVerifier.consumeErrorWith(e -> assertThat(e).hasMessageContaining("error")).verify();
+		}
+		else {
+			stepVerifier.assertNext(it -> assertThat(it.get()).isEqualTo(one)).assertNext(it -> {
+				assertThat(it.isSuccessful()).isEqualTo(false);
+				assertThat(it.getCause()).isInstanceOf(VaultException.class);
+			}).verifyComplete();
+		}
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptEmptyPlaintext() {
+		this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.empty()))
+				.flatMapMany(empty -> this.reactiveTransitOperations.decrypt("myKey", Collections.singletonList(empty)))
+				.as(StepVerifier::create).assertNext(it -> assertThat(it.getAsString()).isEmpty()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
+	void shouldBatchDecryptEmptyPlaintextWithContext() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
+
+		Plaintext empty = Plaintext.empty()
+				.with(VaultTransitContext.builder().context("oneContext".getBytes()).build());
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(this.reactiveTransitOperations.encrypt("myKey", Collections.singletonList(empty)))
+				.flatMap(it -> Mono.justOrEmpty(it.get())).collectList()
+				.flatMapMany(it -> this.reactiveTransitOperations.decrypt("myKey", it)).as(StepVerifier::create)
+				.assertNext(it -> assertThat(it.get()).isEqualTo(empty)).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacShouldCreateHmac() {
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.getHmac("myKey", Plaintext.of("hello-world")))
+				.as(StepVerifier::create).assertNext(hmac -> assertThat(hmac.getHmac()).isNotEmpty()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacShouldCreateHmacForRotatedKey() {
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world")).keyVersion(2)
+				.build();
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.rotate("myKey"))
+				.then(this.reactiveTransitOperations.getHmac("myKey", request)).as(StepVerifier::create)
+				.assertNext(hmac -> assertThat(hmac.getHmac()).isNotEmpty()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void generateHmacWithCustomAlgorithmShouldCreateHmac() {
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world"))
+				.algorithm("sha2-512").build();
+
+		try {
+			System.out.println((new ObjectMapper()).writeValueAsString(request));
+		}
+		catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.getHmac("myKey", request))
+				.as(StepVerifier::create).assertNext(hmac -> assertThat(hmac.getHmac()).isNotEmpty()).verifyComplete();
+	}
+
+	@Test
+	void generateHmacWithInvalidAlgorithmShouldFail() {
+		VaultHmacRequest request = VaultHmacRequest.builder().plaintext(Plaintext.of("hello-world"))
+				.algorithm("blah-512").build();
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.getHmac("myKey", request))
+				.as(StepVerifier::create).consumeErrorWith(e -> assertThat(e).isInstanceOf(VaultException.class))
+				.verify();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signShouldCreateSignature() {
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.sign("myKey", Plaintext.of("hello-world")))
+				.as(StepVerifier::create).assertNext(signature -> assertThat(signature.getSignature()).isNotEmpty())
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void signShouldCreateSignatureUsingEd25519() {
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
+
+		this.reactiveTransitOperations.createKey("ed-key", keyCreationRequest)
+				.then(this.reactiveTransitOperations.sign("ed-key", Plaintext.of("hello-world")))
+				.as(StepVerifier::create).assertNext(signature -> assertThat(signature.getSignature()).isNotEmpty())
+				.verifyComplete();
+	}
+
+	@Test
+	void signWithInvalidKeyFormatShouldFail() {
+		this.reactiveTransitOperations.createKey("myKey")
+				.then(this.reactiveTransitOperations.sign("myKey", Plaintext.of("hello-world")))
+				.as(StepVerifier::create).consumeErrorWith(e -> assertThat(e).isInstanceOf(VaultException.class))
+				.verify();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signWithCustomAlgorithmShouldCreateSignature() {
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(Plaintext.of("hello-world"))
+				.algorithm("sha2-512").build();
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.sign("myKey", request)).as(StepVerifier::create)
+				.assertNext(signature -> assertThat(signature.getSignature()).isNotEmpty()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidSignature() {
+		Plaintext plaintext = Plaintext.of("hello-world");
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.sign("myKey", plaintext))
+				.flatMap(signature -> this.reactiveTransitOperations.verify("myKey", plaintext, signature))
+				.as(StepVerifier::create).assertNext(valid -> assertThat(valid).isTrue()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidHmac() {
+		Plaintext plaintext = Plaintext.of("hello-world");
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.getHmac("myKey", plaintext))
+				.flatMap(hmac -> this.reactiveTransitOperations.verify("myKey",
+						VaultSignatureVerificationRequest.create(plaintext, hmac)))
+				.as(StepVerifier::create).assertNext(valid -> assertThat(valid).isEqualTo(SignatureValidation.valid()))
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void shouldVerifyValidSignatureWithCustomAlgorithm() {
+		Plaintext plaintext = Plaintext.of("hello-world");
+
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).algorithm("sha2-512").build();
+
+		createEcdsaP256Key("myKey").then(this.reactiveTransitOperations.sign("myKey", request))
+				.map(signature -> VaultSignatureVerificationRequest.builder().algorithm("sha2-512").plaintext(plaintext)
+						.signature(signature).build())
+				.flatMap(verificationRequest -> this.reactiveTransitOperations.verify("myKey", verificationRequest))
+				.as(StepVerifier::create).assertNext(valid -> assertThat(valid).isEqualTo(SignatureValidation.valid()))
+				.verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldCreateNewExportableKey() {
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
+				.exportable(true).derived(true).build();
+
+		reactiveTransitOperations.createKey("myKey", vaultTransitKeyCreationRequest)
+				.then(reactiveTransitOperations.getKey("myKey")).as(StepVerifier::create)
+				.assertNext(vaultTransitKey -> {
+					assertThat(vaultTransitKey.getName()).isEqualTo("myKey");
+					assertThat(vaultTransitKey.isExportable()).isTrue();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldCreateNotExportableKeyByDefault() {
+		reactiveTransitOperations.createKey("myKey").then(reactiveTransitOperations.getKey("myKey"))
+				.as(StepVerifier::create).assertNext(vaultTransitKey -> {
+					assertThat(vaultTransitKey.getName()).isEqualTo("myKey");
+					assertThat(vaultTransitKey.isExportable()).isFalse();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldExportEncryptionKey() {
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
+				.exportable(true).build();
+
+		reactiveTransitOperations.createKey("myKey", vaultTransitKeyCreationRequest)
+				.then(reactiveTransitOperations.exportKey("myKey", TransitKeyType.ENCRYPTION_KEY))
+				.as(StepVerifier::create).assertNext(rawTransitKey -> {
+					assertThat(rawTransitKey.getName()).isEqualTo("myKey");
+					assertThat(rawTransitKey.getKeys()).isNotEmpty();
+					assertThat(rawTransitKey.getKeys().get("1")).isNotBlank();
+				}).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldNotAllowExportSigningKey() {
+
+		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
+				.exportable(true).build();
+
+		reactiveTransitOperations.createKey("myKey", vaultTransitKeyCreationRequest)
+				.then(reactiveTransitOperations.exportKey("myKey", TransitKeyType.SIGNING_KEY)).as(StepVerifier::create)
+				.consumeErrorWith(e -> assertThat(e).isInstanceOf(VaultException.class)).verify();
+	}
+
+	@Test
+	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
+	void shouldExportEcDsaKey() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().type("ecdsa-p256")
+				.exportable(true).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(Flux.merge(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
+						this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.SIGNING_KEY)))
+				.as(StepVerifier::create).assertNext(hmacKey -> assertThat(hmacKey.getKeys()).isNotEmpty())
+				.assertNext(signingKey -> assertThat(signingKey.getKeys()).isNotEmpty()).verifyComplete();
+	}
+
+	@Test
+	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
+	void shouldExportEdKey() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().type("ed25519")
+				.exportable(true).build();
+
+		this.reactiveTransitOperations.createKey("myKey", request)
+				.thenMany(Flux.merge(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
+						this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.SIGNING_KEY)))
+				.as(StepVerifier::create).assertNext(hmacKey -> assertThat(hmacKey.getKeys()).isNotEmpty())
+				.assertNext(signingKey -> assertThat(signingKey.getKeys()).isNotEmpty()).verifyComplete();
+	}
+
+	private Mono<Void> createEcdsaP256Key(String keyName) {
+		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p256");
+		return this.reactiveTransitOperations.createKey(keyName, keyCreationRequest).thenEmpty(Mono.empty());
+	}
+
+}

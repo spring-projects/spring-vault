@@ -377,19 +377,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	@Override
 	public Signature sign(String keyName, VaultSignRequest signRequest) {
-
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(signRequest, "Sign request must not be null");
 
-		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(signRequest.getPlaintext().getPlaintext()));
-
-		if (StringUtils.hasText(signRequest.getAlgorithm())) {
-			request.put("algorithm", signRequest.getAlgorithm());
-		}
-
-		String signature = (String) this.vaultOperations.write(String.format("%s/sign/%s", this.path, keyName), request)
-				.getRequiredData().get("signature");
+		String signature = (String) this.vaultOperations
+				.write(String.format("%s/sign/%s", this.path, keyName), signRequest).getRequiredData().get("signature");
 
 		return Signature.of(signature);
 	}
@@ -411,23 +403,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(verificationRequest, "Signature verification request must not be null");
 
-		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(verificationRequest.getPlaintext().getPlaintext()));
-
-		if (verificationRequest.getHmac() != null) {
-			request.put("hmac", verificationRequest.getHmac().getHmac());
-		}
-
-		if (verificationRequest.getSignature() != null) {
-			request.put("signature", verificationRequest.getSignature().getSignature());
-		}
-
-		if (StringUtils.hasText(verificationRequest.getAlgorithm())) {
-			request.put("algorithm", verificationRequest.getAlgorithm());
-		}
-
 		Map<String, Object> response = this.vaultOperations
-				.write(String.format("%s/verify/%s", this.path, keyName), request).getRequiredData();
+				.write(String.format("%s/verify/%s", this.path, keyName), verificationRequest).getRequiredData();
 
 		if (response.containsKey("valid") && Boolean.valueOf("" + response.get("valid"))) {
 			return SignatureValidation.valid();
@@ -436,7 +413,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return SignatureValidation.invalid();
 	}
 
-	private static void applyTransitOptions(VaultTransitContext context, Map<String, String> request) {
+	public static void applyTransitOptions(VaultTransitContext context, Map<String, String> request) {
 
 		if (!ObjectUtils.isEmpty(context.getContext())) {
 			request.put("context", Base64Utils.encodeToString(context.getContext()));
@@ -447,7 +424,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 	}
 
-	private static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,
+	public static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,
 			List<Plaintext> batchRequest) {
 
 		List<VaultEncryptionResult> result = new ArrayList<>(batchRequest.size());
@@ -477,7 +454,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return result;
 	}
 
-	private static List<VaultDecryptionResult> toDecryptionResults(VaultResponse vaultResponse,
+	public static List<VaultDecryptionResult> toDecryptionResults(VaultResponse vaultResponse,
 			List<Ciphertext> batchRequest) {
 
 		List<VaultDecryptionResult> result = new ArrayList<>(batchRequest.size());
@@ -516,12 +493,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return new VaultDecryptionResult(Plaintext.empty().with(ciphertext.getContext()));
 	}
 
-	private static Ciphertext toCiphertext(String ciphertext, @Nullable VaultTransitContext context) {
+	public static Ciphertext toCiphertext(String ciphertext, @Nullable VaultTransitContext context) {
 		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext.of(ciphertext);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
+	public static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
 	}
 

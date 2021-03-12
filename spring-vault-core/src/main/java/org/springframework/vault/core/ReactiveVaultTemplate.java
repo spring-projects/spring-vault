@@ -362,4 +362,14 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	}
 
+	@Override
+	public ReactiveVaultTransitOperations opsForTransit() {
+		return opsForTransit("transit");
+	}
+
+	@Override
+	public ReactiveVaultTransitOperations opsForTransit(String path) {
+		return new ReactiveVaultTransitTemplate(this, path);
+	}
+
 }
