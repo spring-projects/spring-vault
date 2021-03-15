@@ -46,7 +46,7 @@ public interface ReactiveVaultTransitOperations {
 	Mono<Void> createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest);
 
 	/**
-	 * {@return stream of transit key names.}
+	 * @return stream of transit key names.
 	 */
 	Flux<String> getKeys();
 
