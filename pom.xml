@@ -20,17 +20,17 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<assertj-core.version>3.18.1</assertj-core.version>
+		<assertj-core.version>3.19.0</assertj-core.version>
 		<json-path.version>2.5.0</json-path.version>
-		<junit.version>5.7.0</junit.version>
-		<kotlin.version>1.4.21</kotlin.version>
-		<kotlin-coroutines.version>1.4.2</kotlin-coroutines.version>
+		<junit.version>5.7.1</junit.version>
+		<kotlin.version>1.4.31</kotlin.version>
+		<kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 		<mockk.version>1.10.3-jdk8</mockk.version>
-		<mockito-core.version>3.6.28</mockito-core.version>
-		<spring.version>5.3.4</spring.version>
-		<spring-data-bom.version>2020.0.2</spring-data-bom.version>
-		<spring-security-bom.version>5.4.2</spring-security-bom.version>
-		<reactor.version>2020.0.4</reactor.version>
+		<mockito-core.version>3.8.0</mockito-core.version>
+		<spring.version>5.3.5</spring.version>
+		<spring-data-bom.version>2020.0.5</spring-data-bom.version>
+		<spring-security-bom.version>5.4.5</spring-security-bom.version>
+		<reactor.version>2020.0.5</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>

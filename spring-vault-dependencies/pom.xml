@@ -59,13 +59,13 @@
 	<properties>
 		<httpclient.version>4.5.13</httpclient.version>
 		<httpcore.version>4.4.14</httpcore.version>
-		<jetty-reactive-httpclient.version>1.1.5</jetty-reactive-httpclient.version>
-		<netty.version>4.1.59.Final</netty.version>
+		<jetty-reactive-httpclient.version>1.1.6</jetty-reactive-httpclient.version>
+		<netty.version>4.1.56.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<jackson-databind.version>2.12.1</jackson-databind.version>
-		<aws-java-sdk.version>1.11.958</aws-java-sdk.version>
-		<google-api-services-iam.version>v1-rev20201112-1.31.0</google-api-services-iam.version>
-		<google-cloud-iamcredentials.version>1.1.9</google-cloud-iamcredentials.version>
+		<jackson-databind.version>2.12.2</jackson-databind.version>
+		<aws-java-sdk.version>1.11.975</aws-java-sdk.version>
+		<google-api-services-iam.version>v1-rev20210226-1.31.0</google-api-services-iam.version>
+		<google-cloud-iamcredentials.version>1.2.2</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>0.22.2</google-auth-library-oauth2-http.version>
 		<bcpkix-jdk15on.version>1.68</bcpkix-jdk15on.version>
 	</properties>
