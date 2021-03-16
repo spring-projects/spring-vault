@@ -43,6 +43,10 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509TrustManager;
 
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslProvider;
+import okhttp3.ConnectionSpec;
+import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.config.RequestConfig;
@@ -52,6 +56,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.conn.DefaultSchemePortResolver;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.Netty4ClientHttpRequestFactory;
@@ -68,17 +73,13 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslProvider;
-import okhttp3.ConnectionSpec;
-import okhttp3.OkHttpClient.Builder;
-
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
  * OkHttp, Netty and the JDK HTTP client (in that order). This factory configures a
  * {@link ClientHttpRequestFactory} depending on the available dependencies.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  * @since 2.2
  */
 public class ClientHttpRequestFactoryFactory {
@@ -301,13 +302,13 @@ public class ClientHttpRequestFactoryFactory {
 
 				String[] enabledProtocols = null;
 
-				if (sslConfiguration.getEnabledProtocols() != null) {
+				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
 				}
 
 				String[] enabledCipherSuites = null;
 
-				if (sslConfiguration.getEnabledCipherSuites() != null) {
+				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
 				}
 
@@ -362,11 +363,11 @@ public class ClientHttpRequestFactoryFactory {
 
 				ConnectionSpec.Builder sslConnectionSpecBuilder = new ConnectionSpec.Builder(sslConnectionSpec);
 
-				if (sslConfiguration.getEnabledProtocols() != null) {
+				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					sslConnectionSpecBuilder.tlsVersions(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
 				}
 
-				if (sslConfiguration.getEnabledCipherSuites() != null) {
+				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslConnectionSpecBuilder
 							.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}
@@ -413,11 +414,11 @@ public class ClientHttpRequestFactoryFactory {
 							sslConfiguration.getKeyConfiguration()));
 				}
 
-				if (sslConfiguration.getEnabledProtocols() != null) {
+				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
 				}
 
-				if (sslConfiguration.getEnabledCipherSuites() != null) {
+				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
 				}
 
