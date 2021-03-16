@@ -15,13 +15,12 @@
  */
 package org.springframework.vault.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -35,10 +34,13 @@ import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
+import static org.assertj.core.api.Assertions.*;
+
 /**
  * Unit tests for {@link EnvironmentVaultConfiguration}.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  */
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.token=my-token",
@@ -77,9 +79,9 @@ class EnvironmentVaultConfigurationUnitTests {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("vault.ssl.key-store", "classpath:certificate.json");
 		map.put("vault.ssl.trust-store", "classpath:certificate.json");
-		map.put("vault.ssl.enabled-protocols", "TLSv1.2,TLSv1.1");
+		map.put("vault.ssl.enabled-protocols", "TLSv1.2 , TLSv1.1 ");
 		map.put("vault.ssl.enabled-cipher-suites",
-				"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+				"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 , TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 
 		MapPropertySource propertySource = new MapPropertySource("shouldConfigureSsl", map);
 		this.configurableEnvironment.getPropertySources().addFirst(propertySource);

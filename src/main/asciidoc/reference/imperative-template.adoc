@@ -176,6 +176,8 @@ vault.token=00000000-0000-0000-0000-000000000000
 ** Truststore resource: `vault.ssl.trust-store` (optional)
 ** Truststore password: `vault.ssl.trust-store-password` (optional)
 ** Truststore type: `vault.ssl.trust-store-type` (optional, typically `jks`, supports also `pem`)
+** Enabled SSL/TLS protocols: `vault.ssl.enabled-protocols` (since 2.3.2, optional, protocols separated with comma)
+** Enabled SSL/TLS cipher suites: `vault.ssl.enabled-cipher-suites` (since 2.3.2, optional, cipher suites separated with comma)
 * Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
 
 **Authentication-specific property keys**

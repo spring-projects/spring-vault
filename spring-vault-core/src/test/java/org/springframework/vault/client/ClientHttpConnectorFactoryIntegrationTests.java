@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.client;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -23,17 +26,14 @@ import org.springframework.vault.util.Settings;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.springframework.vault.client.ClientHttpConnectorFactory.JettyClient;
-import static org.springframework.vault.client.ClientHttpConnectorFactory.ReactorNetty;
-
-import java.util.ArrayList;
-import java.util.List;
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.springframework.vault.client.ClientHttpConnectorFactory.*;
 
 /**
  * Integration tests for {@link ClientHttpConnectorFactory}.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  */
 class ClientHttpConnectorFactoryIntegrationTests {
 

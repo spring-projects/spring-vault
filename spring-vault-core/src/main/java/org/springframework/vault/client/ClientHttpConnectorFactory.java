@@ -32,9 +32,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 
-import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.createKeyManagerFactory;
-import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.createTrustManagerFactory;
-import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.hasSslConfiguration;
+import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.*;
 
 /**
  * Factory for {@link ClientHttpConnector} that supports
@@ -44,6 +42,7 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.h
  * dependencies.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  * @since 2.2
  */
 public class ClientHttpConnectorFactory {
@@ -106,11 +105,11 @@ public class ClientHttpConnectorFactory {
 						sslConfiguration.getKeyConfiguration()));
 			}
 
-			if (sslConfiguration.getEnabledProtocols() != null) {
+			if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 				sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
 			}
 
-			if (sslConfiguration.getEnabledCipherSuites() != null) {
+			if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 				sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
 			}
 		}
@@ -197,12 +196,12 @@ public class ClientHttpConnectorFactory {
 					sslContextFactory.setKeyManagerPassword(new String(keyConfiguration.getKeyPassword()));
 				}
 
-				if (sslConfiguration.getEnabledProtocols() != null) {
+				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					sslContextFactory
 							.setIncludeProtocols(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
 				}
 
-				if (sslConfiguration.getEnabledCipherSuites() != null) {
+				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslContextFactory
 							.setIncludeCipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}

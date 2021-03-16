@@ -15,13 +15,12 @@
  */
 package org.springframework.vault.client;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.FileSystemResource;
@@ -41,10 +40,13 @@ import org.springframework.vault.util.Settings;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
+import static org.assertj.core.api.AssertionsForClassTypes.*;
+
 /**
  * Integration tests for {@link ClientHttpRequestFactory}.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  */
 class ClientHttpRequestFactoryFactoryIntegrationTests {
 

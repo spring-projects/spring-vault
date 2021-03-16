@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
  * for Client Certificate authentication.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  * @see Resource
  * @see java.security.KeyStore
  * @see org.springframework.vault.authentication.ClientCertificateAuthentication
@@ -113,7 +114,7 @@ public class SslConfiguration {
 	 * cipher suite strings used by the enabled Java SSL provider. May be {@literal null}
 	 * to indicate the SSL socket factory should use a default list of enabled cipher
 	 * suites.
-	 * @since 2.4
+	 * @since 2.3.2
 	 * @see sun.security.ssl.ProtocolVersion
 	 * @see sun.security.ssl.CipherSuite
 	 */
@@ -128,10 +129,8 @@ public class SslConfiguration {
 		this.keyStoreConfiguration = keyStoreConfiguration;
 		this.keyConfiguration = keyConfiguration;
 		this.trustStoreConfiguration = trustStoreConfiguration;
-		this.enabledProtocols = enabledProtocols != null
-				? Collections.unmodifiableList(new ArrayList<>(enabledProtocols)) : null;
-		this.enabledCipherSuites = enabledCipherSuites != null
-				? Collections.unmodifiableList(new ArrayList<>(enabledCipherSuites)) : null;
+		this.enabledProtocols = Collections.unmodifiableList(new ArrayList<>(enabledProtocols));
+		this.enabledCipherSuites = Collections.unmodifiableList(new ArrayList<>(enabledCipherSuites));
 	}
 
 	/**
@@ -146,7 +145,8 @@ public class SslConfiguration {
 	 */
 	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration, KeyConfiguration keyConfiguration,
 			KeyStoreConfiguration trustStoreConfiguration) {
-		this(keyStoreConfiguration, keyConfiguration, trustStoreConfiguration, null, null);
+		this(keyStoreConfiguration, keyConfiguration, trustStoreConfiguration, Collections.emptyList(),
+				Collections.emptyList());
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class SslConfiguration {
 	 * cipher suite strings used by the enabled Java SSL provider. May be {@literal null}
 	 * to indicate the SSL socket factory should use a default list of enabled cipher
 	 * suites.
-	 * @since 2.4
+	 * @since 2.3.2
 	 * @see sun.security.ssl.ProtocolVersion
 	 * @see sun.security.ssl.CipherSuite
 	 */
@@ -364,7 +364,7 @@ public class SslConfiguration {
 	 * indicates that the SSL socket factory should use a default list of enabled protocol
 	 * versions.
 	 * @return the list of enabled SSL protocol versions.
-	 * @since 2.4
+	 * @since 2.3.2
 	 */
 	public List<String> getEnabledProtocols() {
 		return this.enabledProtocols;
@@ -373,12 +373,29 @@ public class SslConfiguration {
 	/**
 	 * Create a new {@link SslConfiguration} with the enabled protocol versions applied
 	 * retaining the other configuration from this instance.
-	 * @param enabledProtocols may be {@literal null}.
+	 * @param enabledProtocols must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled protocol versions applied.
-	 * @since 2.4
+	 * @since 2.3.2
+	 * @see sun.security.ssl.ProtocolVersion
+	 */
+	public SslConfiguration withEnabledProtocols(String... enabledProtocols) {
+
+		Assert.notNull(enabledProtocols, "Enabled protocols must not be null");
+
+		return withEnabledProtocols(Arrays.asList(enabledProtocols));
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} with the enabled protocol versions applied
+	 * retaining the other configuration from this instance.
+	 * @param enabledProtocols must not be {@literal null}.
+	 * @return a new {@link SslConfiguration} with the enabled protocol versions applied.
+	 * @since 2.3.2
 	 * @see sun.security.ssl.ProtocolVersion
 	 */
 	public SslConfiguration withEnabledProtocols(List<String> enabledProtocols) {
+
+		Assert.notNull(enabledProtocols, "Enabled protocols must not be null");
 		return new SslConfiguration(this.keyStoreConfiguration, this.keyConfiguration, this.trustStoreConfiguration,
 				enabledProtocols, this.enabledCipherSuites);
 	}
@@ -388,7 +405,7 @@ public class SslConfiguration {
 	 * indicates that the SSL socket factory should use a default list of enabled cipher
 	 * suites.
 	 * @return the list of enabled SSL cipher suites.
-	 * @since 2.4
+	 * @since 2.3.2
 	 */
 	public List<String> getEnabledCipherSuites() {
 		return this.enabledCipherSuites;
@@ -397,12 +414,30 @@ public class SslConfiguration {
 	/**
 	 * Create a new {@link SslConfiguration} with the enabled cipher suites applied
 	 * retaining the other configuration from this instance.
-	 * @param enabledCipherSuites may be {@literal null}.
+	 * @param enabledCipherSuites must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled cipher suites applied.
-	 * @since 2.4
+	 * @since 2.3.2
+	 * @see sun.security.ssl.CipherSuite
+	 */
+	public SslConfiguration withEnabledCipherSuites(String... enabledCipherSuites) {
+
+		Assert.notNull(enabledProtocols, "Enabled cipher suites must not be null");
+
+		return withEnabledCipherSuites(Arrays.asList(enabledCipherSuites));
+	}
+
+	/**
+	 * Create a new {@link SslConfiguration} with the enabled cipher suites applied
+	 * retaining the other configuration from this instance.
+	 * @param enabledCipherSuites must not be {@literal null}.
+	 * @return a new {@link SslConfiguration} with the enabled cipher suites applied.
+	 * @since 2.3.2
 	 * @see sun.security.ssl.CipherSuite
 	 */
 	public SslConfiguration withEnabledCipherSuites(List<String> enabledCipherSuites) {
+
+		Assert.notNull(enabledProtocols, "Enabled cipher suites must not be null");
+
 		return new SslConfiguration(this.keyStoreConfiguration, this.keyConfiguration, this.trustStoreConfiguration,
 				this.enabledProtocols, enabledCipherSuites);
 	}

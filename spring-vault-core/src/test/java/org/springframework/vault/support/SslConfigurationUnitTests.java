@@ -15,19 +15,19 @@
  */
 package org.springframework.vault.support;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Arrays;
-
 import org.junit.jupiter.api.Test;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.util.Settings;
+
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link SslConfiguration}.
  *
  * @author Mark Paluch
+ * @author Ryan Gow
  */
 class SslConfigurationUnitTests {
 
@@ -47,8 +47,8 @@ class SslConfigurationUnitTests {
 
 		assertThat(sslConfiguration.getKeyStoreConfiguration().isPresent()).isFalse();
 		assertThat(sslConfiguration.getTrustStoreConfiguration().isPresent()).isFalse();
-		assertThat(sslConfiguration.getEnabledCipherSuites()).isNull();
-		assertThat(sslConfiguration.getEnabledProtocols()).isNull();
+		assertThat(sslConfiguration.getEnabledCipherSuites()).isEmpty();
+		assertThat(sslConfiguration.getEnabledProtocols()).isEmpty();
 	}
 
 	@Test
@@ -70,13 +70,12 @@ class SslConfigurationUnitTests {
 	void shouldCreateConfigurationWithEnabledCipherSuites() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
-		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore)
-				.withEnabledCipherSuites(Arrays.asList(new String[] { "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-						"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256" }));
+		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore).withEnabledCipherSuites(
+				"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
-		assertThat(tsConfig.getEnabledCipherSuites().size()).isEqualTo(2);
+		assertThat(tsConfig.getEnabledCipherSuites()).hasSize(2);
 		assertThat(tsConfig.getEnabledCipherSuites().get(0)).isEqualTo("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
 		assertThat(tsConfig.getEnabledCipherSuites().get(1)).isEqualTo("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 	}
@@ -86,11 +85,11 @@ class SslConfigurationUnitTests {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
 		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore)
-				.withEnabledProtocols(Arrays.asList(new String[] { "TLSv1.2", "TLSv1.1" }));
+				.withEnabledProtocols("TLSv1.2", "TLSv1.1");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
-		assertThat(tsConfig.getEnabledProtocols().size()).isEqualTo(2);
+		assertThat(tsConfig.getEnabledProtocols()).hasSize(2);
 		assertThat(tsConfig.getEnabledProtocols().get(0)).isEqualTo("TLSv1.2");
 		assertThat(tsConfig.getEnabledProtocols().get(1)).isEqualTo("TLSv1.1");
 	}

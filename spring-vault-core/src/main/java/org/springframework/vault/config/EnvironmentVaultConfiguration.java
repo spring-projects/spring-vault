@@ -17,10 +17,13 @@ package org.springframework.vault.config;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -29,35 +32,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.AppIdAuthentication;
-import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.*;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions.AppIdAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.AppIdUserIdMechanism;
-import org.springframework.vault.authentication.AppRoleAuthentication;
-import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
-import org.springframework.vault.authentication.AwsEc2Authentication;
-import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.AzureMsiAuthentication;
-import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.ClientCertificateAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.IpAddressUserId;
-import org.springframework.vault.authentication.KubernetesAuthentication;
-import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.KubernetesJwtSupplier;
-import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
-import org.springframework.vault.authentication.MacAddressUserId;
-import org.springframework.vault.authentication.StaticUserId;
-import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
@@ -105,6 +88,10 @@ import org.springframework.web.client.RestOperations;
  * <li>Truststore resource: {@code vault.ssl.trust-store} (optional)</li>
  * <li>Truststore password: {@code vault.ssl.trust-store-password} (optional)</li>
  * <li>Truststore type: {@code vault.ssl.trust-store-password} (since 2.3, optional)</li>
+ * <li>Enabled SSL/TLS protocols: {@code vault.ssl.enabled-protocols} (since 2.3.2,
+ * optional, protocols separated with comma)</li>
+ * <li>Enabled SSL/TLS cipher suites: {@code vault.ssl.enabled-cipher-suites} (since
+ * 2.3.2, optional, cipher suites separated with comma)</li>
  * </ul>
  * </li>
  * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
@@ -174,6 +161,7 @@ import org.springframework.web.client.RestOperations;
  * @author Michal Budzyn
  * @author Raoof Mohammed
  * @author Justin Bertrand
+ * @author Ryan Gow
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see VaultEndpoint
@@ -232,9 +220,9 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration("vault.ssl.trust-store",
 				"vault.ssl.trust-store-password", "vault.ssl.trust-store-type");
 
-		List<String> enabledProtocols = getList("vault.ssl.enabled-protocols");
+		List<String> enabledProtocols = getPropertyAsList("vault.ssl.enabled-protocols");
 
-		List<String> enabledCipherSuites = getList("vault.ssl.enabled-cipher-suites");
+		List<String> enabledCipherSuites = getPropertyAsList("vault.ssl.enabled-cipher-suites");
 
 		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration, enabledProtocols,
 				enabledCipherSuites);
@@ -427,14 +415,15 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return new KubernetesAuthentication(builder.build(), restOperations());
 	}
 
-	private List<String> getList(String key) {
+	private List<String> getPropertyAsList(String key) {
+
 		String val = getEnvironment().getProperty(key);
 
 		if (val == null) {
-			return null;
+			return Collections.emptyList();
 		}
 
-		return Arrays.asList(val.split(","));
+		return Arrays.stream(val.split(",")).map(String::trim).collect(Collectors.toList());
 	}
 
 	@Nullable
