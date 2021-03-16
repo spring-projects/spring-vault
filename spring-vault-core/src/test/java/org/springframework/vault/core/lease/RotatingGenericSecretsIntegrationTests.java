@@ -32,6 +32,7 @@ import org.springframework.vault.util.PrepareVault;
 import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.*;
 
 /**
  * Integration tests for rotating generic secrets.
@@ -41,7 +42,7 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @SpringJUnitConfig(
 		classes = { VaultIntegrationTestConfiguration.class, RotatingGenericSecretsIntegrationTestConfiguration.class })
-public class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
+class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeAll
 	static void beforeAll() {
@@ -50,6 +51,8 @@ public class RotatingGenericSecretsIntegrationTests extends IntegrationTestSuppo
 
 		initializer.initialize();
 		PrepareVault prepare = initializer.prepare();
+
+		assumeThat(prepare.getVersion()).isGreaterThanOrEqualTo(VaultInitializer.VERSIONING_INTRODUCED_WITH);
 
 		VaultKeyValueOperations versioned = prepare.getVaultOperations().opsForKeyValue("versioned",
 				VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
