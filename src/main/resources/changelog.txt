@@ -1,6 +1,15 @@
 Spring Vault Changelog
 =============================
 
+Changes in version 2.3.2 (2021-03-16)
+-------------------------------------
+* Move off deprecated GoogleCredential IAM authentication method to IAM credentials #600
+* Upgrade dependencies #632
+* Add ability to configure client TLS enabled protocol versions and cipher suites via Spring properties #635
+* Allow external injection of Loggers into SecretLeaseContainer and PropertySources #636
+* Update Sonatype endpoint #641
+* Upgrade dependencies #64
+
 Changes in version 2.3.1 (2021-02-16)
 -------------------------------------
 * Release Spring Vault 2.3.0 #608
