@@ -29,6 +29,7 @@ import org.springframework.vault.core.VaultKeyValueOperations;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.PrepareVault;
+import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.VaultInitializer;
 
 import static org.assertj.core.api.Assertions.*;
@@ -38,9 +39,11 @@ import static org.assertj.core.api.Assertions.*;
  *
  * @author Mark Paluch
  */
+
 @ExtendWith(SpringExtension.class)
 @SpringJUnitConfig(
 		classes = { VaultIntegrationTestConfiguration.class, RotatingGenericSecretsIntegrationTestConfiguration.class })
+@RequiresVaultVersion("0.10.0")
 public class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeAll
