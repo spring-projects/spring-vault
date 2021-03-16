@@ -40,7 +40,7 @@ public class VaultInitializer {
 
 	public static final String VERSIONING_INTRODUCED_WITH_VALUE = "0.10.0";
 
-	private static final Version VERSIONING_INTRODUCED_WITH = Version.parse(VERSIONING_INTRODUCED_WITH_VALUE);
+	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse(VERSIONING_INTRODUCED_WITH_VALUE);
 
 	private final VaultEndpoint vaultEndpoint;
 
