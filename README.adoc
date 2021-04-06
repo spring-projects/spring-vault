@@ -308,7 +308,7 @@ from the `file` menu.
 
 == Contributing
 
-Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into master.
+Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into `main`.
 If you want to contribute even something trivial please do not hesitate, but follow the guidelines below.
 
 === Sign the Contributor License Agreement
@@ -320,7 +320,7 @@ Active contributors might be asked to join the core team, and given the ability 
 
 === Code of Conduct
 
-This project adheres to the Contributor Covenant https://github.com/spring-framework/spring-vault/blob/master/CODE_OF_CONDUCT.adoc[code of
+This project adheres to the Contributor Covenant https://github.com/spring-projects/.github/blob/3d965e94708a0014f0f9a2ab05bfc5eb6efef7e4/CODE_OF_CONDUCT.md[code of
 conduct].
 By participating, you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
@@ -338,5 +338,5 @@ IDE plugins are available from https://github.com/spring-io/spring-javaformat.
 * Add the ASF license header comment to all new `.java` files (copy from existing files in the project)
 * Add yourself as an `@author` to the .java files that you modify substantially (more than cosmetic changes).
 * Please include unit tests.
-* If no-one else is using your branch, please rebase it against the current master (or other target branch in the main project).
+* If no-one else is using your branch, please rebase it against the current `main` (or other target branch in the main project).
 * When writing a commit message please follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions], if you are fixing an existing issue please add `Fixes gh-XXXX` at the end of the commit message (where XXXX is the issue number).
