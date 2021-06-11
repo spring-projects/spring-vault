@@ -18,6 +18,8 @@ package org.springframework.vault.core;
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
@@ -78,10 +80,11 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
+		String caCert = Files.contentOf(new File(workDir, "ca/certs/ca.cert.pem"), "US-ASCII");
 		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
 		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
 
-		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key);
+		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key + caCert);
 
 		this.vaultOperations.write("pki/config/ca", pembundle);
 
@@ -96,7 +99,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	void issueCertificateShouldCreateCertificate() {
+	void issueCertificateShouldCreateCertificate() throws KeyStoreException {
 
 		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
 
@@ -109,6 +112,13 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
 		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509IssuerCertificates()).hasSize(2);
+
+		KeyStore keyStore = data.createKeyStore("vault");
+		assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
+
+		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
+		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
 	}
 
 	@Test
