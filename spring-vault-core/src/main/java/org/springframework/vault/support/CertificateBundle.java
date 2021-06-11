@@ -18,8 +18,12 @@ package org.springframework.vault.support;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -42,12 +46,15 @@ public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
 
+	private final List<String> caChain;
+
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
-			@JsonProperty("private_key") String privateKey) {
+			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey) {
 
 		super(serialNumber, certificate, issuingCaCertificate);
 		this.privateKey = privateKey;
+		this.caChain = caChain;
 	}
 
 	/**
@@ -67,7 +74,8 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 		Assert.hasText(privateKey, "Private key must not be empty");
 
-		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate, privateKey);
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
+				Collections.singletonList(issuingCaCertificate), privateKey);
 	}
 
 	/**
@@ -102,16 +110,64 @@ public class CertificateBundle extends Certificate {
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
 	public KeyStore createKeyStore(String keyAlias) {
+		return createKeyStore(keyAlias, false);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain. Only supported if certificate and private key
+	 * are DER-encoded.
+	 * @param keyAlias the key alias to use.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 2.3.3
+	 */
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain) {
 
 		Assert.hasText(keyAlias, "Key alias must not be empty");
 
 		try {
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), getX509Certificate(),
-					getX509IssuerCertificate());
+
+			List<X509Certificate> certificates = new ArrayList<>();
+			certificates.add(getX509Certificate());
+
+			if (includeCaChain) {
+				certificates.addAll(getX509IssuerCertificates());
+			}
+			else {
+				certificates.add(getX509IssuerCertificate());
+			}
+
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
+					certificates.toArray(new X509Certificate[0]));
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
+	}
+
+	/**
+	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}. Only
+	 * supported if certificates are DER-encoded.
+	 * @return the issuing CA {@link X509Certificate}.
+	 * @since 2.3.3
+	 */
+	public List<X509Certificate> getX509IssuerCertificates() {
+
+		List<X509Certificate> certificates = new ArrayList<>();
+
+		for (String data : caChain) {
+			try {
+				byte[] bytes = Base64Utils.decodeFromString(data);
+				certificates.add(KeystoreUtil.getCertificate(bytes));
+			}
+			catch (CertificateException e) {
+				throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
+			}
+		}
+
+		return certificates;
 	}
 
 }
