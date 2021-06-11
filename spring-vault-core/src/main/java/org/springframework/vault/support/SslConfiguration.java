@@ -269,7 +269,7 @@ public class SslConfiguration {
 			@Nullable char[] trustStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
-		Assert.isTrue(keyStore.exists(), () -> String.format("KeyStore %s does not exist", trustStore));
+		Assert.isTrue(keyStore.exists(), () -> String.format("KeyStore %s does not exist", keyStore));
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
 		Assert.isTrue(trustStore.exists(), String.format("TrustStore %s does not exist", trustStore));
