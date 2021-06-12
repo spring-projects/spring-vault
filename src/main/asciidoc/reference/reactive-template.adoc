@@ -3,6 +3,7 @@
 
 This section covers basic information on the reactive programming support using Spring Vault.
 
+[[vault.core.reactive.template.what-is-reactive]]
 == What is Reactive Programming?
 
 In plain terms reactive programming is about non-blocking applications that are
@@ -14,6 +15,7 @@ to ensure producers don’t overwhelm consumers. For example in a pipeline of re
 components extending from the database to the HTTP response when the HTTP connection is
 too slow the data repository can also slow down or stop completely until network capacity frees up.
 
+[[vault.core.reactive.template.client]]
 == Reactive Vault Client
 
 Spring Vault's reactive client support is built on top of <<vault.authentication.steps,composable authentication steps>> and Spring's functional `WebClient` via Reactor Netty or Jetty, which feature both a fully non-blocking, event-driven HTTP client.
