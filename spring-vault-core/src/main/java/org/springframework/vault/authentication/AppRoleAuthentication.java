@@ -43,10 +43,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.method;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
-import static org.springframework.vault.authentication.AuthenticationUtil.getLoginPath;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)
@@ -107,6 +105,11 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			SecretId secretId) {
 
 		Node<String> roleIdSteps = getRoleIdSteps(options, roleId);
+
+		if (!hasSecretId(options.getSecretId())) {
+			return roleIdSteps.map(it -> getAppRoleLoginBody(it, null));
+		}
+
 		Node<String> secretIdSteps = getSecretIdSteps(options, secretId);
 
 		return roleIdSteps.zipWith(secretIdSteps).map(it -> getAppRoleLoginBody(it.getLeft(), it.getRight()));
@@ -293,7 +296,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	}
 
 	private static HttpEntity<String> createHttpEntity(VaultToken token) {
-		return new HttpEntity<String>(null, createHttpHeaders(token));
+		return new HttpEntity<>(null, createHttpHeaders(token));
 	}
 
 	private Map<String, String> getAppRoleLoginBody(RoleId roleId, SecretId secretId) {
@@ -302,11 +305,15 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 		login.put("role_id", getRoleId(roleId));
 
-		if (!ClassUtils.isAssignableValue(AbsentSecretId.class, secretId)) {
+		if (hasSecretId(secretId)) {
 			login.put("secret_id", getSecretId(secretId));
 		}
 
 		return login;
+	}
+
+	private static boolean hasSecretId(SecretId secretId) {
+		return !ClassUtils.isAssignableValue(AbsentSecretId.class, secretId);
 	}
 
 	private static Map<String, String> getAppRoleLoginBody(String roleId, @Nullable String secretId) {
