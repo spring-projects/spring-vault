@@ -448,7 +448,7 @@ public class AppRoleAuthenticationOptions {
 		 * @return a {@link SecretId} that represents an absent secretId
 		 */
 		static SecretId absent() {
-			return AbsentSecretId.INSTANCE;
+			return AbsentSecretId.ABSENT_SECRET_ID;
 		}
 
 	}

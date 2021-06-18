@@ -39,6 +39,19 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIntegrationTestBase {
 
 	@Test
+	void shouldAuthenticateWithRoleIdOnly() {
+
+		String roleId = getRoleId("no-secret-id");
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().roleId(RoleId.provided(roleId))
+				.build();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+
+		assertThat(executor.login()).isNotNull();
+	}
+
+	@Test
 	void authenticationStepsShouldAuthenticateWithWrappedSecretId() {
 
 		String roleId = getRoleId("with-secret-id");
