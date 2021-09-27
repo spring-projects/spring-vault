@@ -52,7 +52,7 @@ import org.springframework.web.client.RestOperations;
  * "https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service"
  * >Azure Instance Metadata service</a>
  */
-public class AzureMsiAuthentication implements ClientAuthentication {
+public class AzureMsiAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AzureMsiAuthentication.class);
 
@@ -142,6 +142,11 @@ public class AzureMsiAuthentication implements ClientAuthentication {
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingAzureMsiCompute();
+	}
+
+	@Override
+	public AuthenticationSteps getAuthenticationSteps() {
+		return createAuthenticationSteps(this.options);
 	}
 
 	private VaultToken createTokenUsingAzureMsiCompute() {
