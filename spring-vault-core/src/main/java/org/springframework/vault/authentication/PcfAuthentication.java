@@ -158,7 +158,8 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 	private static String doSign(byte[] message, String instanceKeyPem) throws CryptoException {
 
-		RSAPrivateKeySpec privateKey = PemObject.fromKey(instanceKeyPem).getRSAKeySpec();
+		RSAPrivateKeySpec privateKey = PemObject.fromKey(instanceKeyPem)
+				.getRSAPrivateKeySpec();
 		PSSSigner signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
 
 		signer.init(true, new RSAKeyParameters(true, privateKey.getModulus(), privateKey.getPrivateExponent()));

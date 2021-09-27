@@ -48,20 +48,6 @@ public class ClientOptions {
 
 	/**
 	 * Create new {@link ClientOptions}.
-	 * @param connectionTimeout connection timeout in {@link TimeUnit#MILLISECONDS}, must
-	 * not be negative.
-	 * @param readTimeout read timeout in {@link TimeUnit#MILLISECONDS}, must not be
-	 * negative.
-	 * @deprecated since 2.0, use {@link #ClientOptions(Duration, Duration)} for time unit
-	 * safety.
-	 */
-	@Deprecated
-	public ClientOptions(int connectionTimeout, int readTimeout) {
-		this(Duration.ofMillis(connectionTimeout), Duration.ofMillis(readTimeout));
-	}
-
-	/**
-	 * Create new {@link ClientOptions}.
 	 * @param connectionTimeout connection timeout, must not be {@literal null}.
 	 * @param readTimeout read timeout in, must not be {@literal null}.
 	 * @since 2.0

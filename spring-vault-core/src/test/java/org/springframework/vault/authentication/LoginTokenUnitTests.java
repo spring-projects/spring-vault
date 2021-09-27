@@ -15,9 +15,11 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link LoginToken}.
@@ -30,16 +32,19 @@ class LoginTokenUnitTests {
 	void shouldConstructLoginToken() {
 
 		assertThat(LoginToken.of("token")).isInstanceOf(LoginToken.class);
-		assertThat(LoginToken.of("token", 1)).isInstanceOf(LoginToken.class);
-		assertThat(LoginToken.renewable("token", 1)).isInstanceOf(LoginToken.class);
+		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1))).isInstanceOf(LoginToken.class);
+		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1))).isInstanceOf(LoginToken.class);
 	}
 
 	@Test
 	void toStringShouldPrintFields() {
 
-		assertThat(LoginToken.of("token").toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT0S]");
-		assertThat(LoginToken.of("token", 1).toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT1S]");
-		assertThat(LoginToken.renewable("token", 1).toString())
+		assertThat(LoginToken.of("token")
+				.toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT0S]");
+		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1)).toString())
+				.isEqualTo("LoginToken [renewable=false, leaseDuration=PT1S]");
+		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1))
+				.toString())
 				.isEqualTo("LoginToken [renewable=true, leaseDuration=PT1S]");
 	}
 

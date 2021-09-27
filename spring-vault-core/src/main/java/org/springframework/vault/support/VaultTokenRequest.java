@@ -304,17 +304,6 @@ public class VaultTokenRequest {
 
 		/**
 		 * Configure a TTL (seconds) for the token.
-		 * @param ttl the time to live in seconds, must not be negative.
-		 * @return {@code this} {@link VaultTokenRequestBuilder}.
-		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
-		 */
-		@Deprecated
-		public VaultTokenRequestBuilder ttl(long ttl) {
-			return ttl(ttl, TimeUnit.SECONDS);
-		}
-
-		/**
-		 * Configure a TTL (seconds) for the token.
 		 * @param ttl the time to live, must not be negative.
 		 * @param timeUnit the time to live time unit, must not be {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
@@ -342,21 +331,6 @@ public class VaultTokenRequest {
 
 			this.ttl = String.format("%ss", ttl.getSeconds());
 			return this;
-		}
-
-		/**
-		 * Configure the explicit maximum TTL (seconds) for the token. This maximum token
-		 * TTL cannot be changed later, and unlike with normal tokens, updates to the
-		 * system/mount max TTL value will have no effect at renewal time - the token will
-		 * never be able to be renewed or used past the value set at issue time.
-		 * @param explicitMaxTtl the time to live in seconds, must not be negative.
-		 * @return {@code this} {@link VaultTokenRequestBuilder}.
-		 * @deprecated since 2.0, use {@link #explicitMaxTtl(Duration)} for time unit
-		 * safety.
-		 */
-		@Deprecated
-		public VaultTokenRequestBuilder explicitMaxTtl(long explicitMaxTtl) {
-			return explicitMaxTtl(explicitMaxTtl, TimeUnit.SECONDS);
 		}
 
 		/**

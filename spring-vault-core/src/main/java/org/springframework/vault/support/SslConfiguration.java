@@ -451,18 +451,6 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * @return the key store password or {@literal null} if not configured.
-	 * @deprecated Since 1.1, use {@link KeyStoreConfiguration#getStorePassword()} to
-	 * prevent {@link String} interning and retaining passwords represented as String
-	 * longer from GC than necessary.
-	 */
-	@Deprecated
-	@Nullable
-	public String getKeyStorePassword() {
-		return stringOrNull(this.keyStoreConfiguration.getStorePassword());
-	}
-
-	/**
 	 * @return the key store configuration.
 	 * @since 1.1
 	 */
@@ -510,18 +498,6 @@ public class SslConfiguration {
 	 */
 	public Resource getTrustStore() {
 		return this.trustStoreConfiguration.getResource();
-	}
-
-	/**
-	 * @return the trust store password or {@literal null} if not configured.
-	 * @deprecated Since 1.1, use {@link KeyStoreConfiguration#getStorePassword()} to
-	 * prevent {@link String} interning and retaining passwords represented as String
-	 * longer from GC than necessary.
-	 */
-	@Deprecated
-	@Nullable
-	public String getTrustStorePassword() {
-		return stringOrNull(this.trustStoreConfiguration.getStorePassword());
 	}
 
 	/**

@@ -196,17 +196,6 @@ public class PemObject {
 	}
 
 	/**
-	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
-	 * @return the {@link RSAPrivateCrtKeySpec}.
-	 * @deprecated since 2.3. Use {@link #getRSAPrivateKeySpec()} instead that uses an
-	 * improved name to indicate what the method is supposed to return.
-	 */
-	@Deprecated
-	public RSAPrivateCrtKeySpec getRSAKeySpec() {
-		return getRSAPrivateKeySpec();
-	}
-
-	/**
 	 * Retrieve a {@link X509Certificate}.
 	 * @return the {@link X509Certificate}.
 	 * @since 2.3

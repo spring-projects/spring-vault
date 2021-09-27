@@ -67,40 +67,6 @@ public class LoginToken extends VaultToken {
 	/**
 	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
 	 * @param token must not be {@literal null}.
-	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
-	 * @return the created {@link VaultToken}
-	 * @deprecated since 2.0, use {@link #of(char[], Duration)} for time unit safety.
-	 */
-	@Deprecated
-	public static LoginToken of(String token, long leaseDurationSeconds) {
-
-		Assert.hasText(token, "Token must not be empty");
-		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
-
-		return of(token.toCharArray(), Duration.ofSeconds(leaseDurationSeconds));
-	}
-
-	/**
-	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 * @param token must not be {@literal null}.
-	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
-	 * @return the created {@link VaultToken}
-	 * @since 1.1
-	 * @deprecated since 2.0, use {@link #of(char[], Duration)} for time unit safety.
-	 */
-	@Deprecated
-	public static LoginToken of(char[] token, long leaseDurationSeconds) {
-
-		Assert.notNull(token, "Token must not be null");
-		Assert.isTrue(token.length > 0, "Token must not be empty");
-		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
-
-		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), false);
-	}
-
-	/**
-	 * Create a new {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 * @param token must not be {@literal null}.
 	 * @param leaseDuration the lease duration, must not be negative and not be
 	 * {@literal null}.
 	 * @return the created {@link VaultToken}
@@ -114,42 +80,6 @@ public class LoginToken extends VaultToken {
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
 		return new LoginToken(token, leaseDuration, false);
-	}
-
-	/**
-	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 * @param token must not be {@literal null}.
-	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
-	 * @return the created {@link VaultToken}
-	 * @deprecated since 2.0, use {@link #renewable(char[], Duration)} for time unit
-	 * safety.
-	 */
-	@Deprecated
-	public static LoginToken renewable(String token, long leaseDurationSeconds) {
-
-		Assert.hasText(token, "Token must not be empty");
-		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
-
-		return renewable(token.toCharArray(), Duration.ofSeconds(leaseDurationSeconds));
-	}
-
-	/**
-	 * Create a new renewable {@link LoginToken} with a {@code leaseDurationSeconds}.
-	 * @param token must not be {@literal null}.
-	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
-	 * @return the created {@link VaultToken}
-	 * @since 2.0
-	 * @deprecated since 2.0, use {@link #renewable(char[], Duration)} for time unit
-	 * safety.
-	 */
-	@Deprecated
-	public static LoginToken renewable(char[] token, long leaseDurationSeconds) {
-
-		Assert.notNull(token, "Token must not be null");
-		Assert.isTrue(token.length > 0, "Token must not be empty");
-		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
-
-		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), true);
 	}
 
 	/**

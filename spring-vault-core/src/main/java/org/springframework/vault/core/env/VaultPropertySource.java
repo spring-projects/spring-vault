@@ -234,18 +234,6 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	/**
 	 * Utility method converting a {@code String/Object} map to a flat
-	 * {@code String/String} map.
-	 * @param data the map
-	 * @return the flattened map.
-	 * @deprecated since 2.0, use {@link #flattenMap(Map)} to retain JSON data types.
-	 */
-	@Deprecated
-	protected Map<String, String> toStringMap(Map<String, Object> data) {
-		return JsonMapFlattener.flattenToStringMap(data);
-	}
-
-	/**
-	 * Utility method converting a {@code String/Object} map to a flat
 	 * {@code String/Object} map. Nested objects are represented with property path keys.
 	 * @param data the map
 	 * @return the flattened map.

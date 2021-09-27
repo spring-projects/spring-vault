@@ -47,23 +47,6 @@ public class Lease {
 	/**
 	 * Create a new {@link Lease}.
 	 * @param leaseId must not be empty or {@literal null}.
-	 * @param leaseDurationSeconds the lease duration in seconds, must not be negative.
-	 * @param renewable {@literal true} if this lease is renewable.
-	 * @return the created {@link Lease}
-	 * @deprecated since 2.0, use {@link #of(String, Duration, boolean)} for time unit
-	 * safety.
-	 */
-	@Deprecated
-	public static Lease of(String leaseId, long leaseDurationSeconds, boolean renewable) {
-
-		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
-
-		return of(leaseId, Duration.ofSeconds(leaseDurationSeconds), renewable);
-	}
-
-	/**
-	 * Create a new {@link Lease}.
-	 * @param leaseId must not be empty or {@literal null}.
 	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
 	 * @param renewable {@literal true} if this lease is renewable.
 	 * @return the created {@link Lease}
@@ -76,22 +59,6 @@ public class Lease {
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
 		return new Lease(leaseId, leaseDuration, renewable);
-	}
-
-	/**
-	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
-	 * duration.
-	 * @param leaseDuration the lease duration in seconds, must not be negative.
-	 * @return the created {@link Lease}
-	 * @since 1.1
-	 * @deprecated since 2.0, use {@link #fromTimeToLive(Duration)} for time unit safety.
-	 */
-	@Deprecated
-	public static Lease fromTimeToLive(long leaseDuration) {
-
-		Assert.isTrue(leaseDuration >= 0, "Lease duration must not be negative");
-
-		return new Lease(null, Duration.ofSeconds(leaseDuration), false);
 	}
 
 	/**

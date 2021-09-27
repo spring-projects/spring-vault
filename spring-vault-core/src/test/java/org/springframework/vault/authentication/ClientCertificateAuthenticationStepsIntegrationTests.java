@@ -19,16 +19,15 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.config.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using

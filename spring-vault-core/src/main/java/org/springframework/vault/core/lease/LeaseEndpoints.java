@@ -62,24 +62,6 @@ public enum LeaseEndpoints {
 	},
 
 	/**
-	 * Alias for {@link #Leases}.
-	 * @deprecated since 2.3, use {@link #Leases} instead.
-	 */
-	@Deprecated
-	SysLeases {
-
-		@Override
-		public void revoke(Lease lease, RestOperations operations) {
-			Leases.revoke(lease, operations);
-		}
-
-		@Override
-		public Lease renew(Lease lease, RestOperations operations) {
-			return Leases.renew(lease, operations);
-		}
-	},
-
-	/**
 	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
 	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
 	 * @since 2.3

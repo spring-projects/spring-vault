@@ -34,13 +34,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.web.client.RestOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link LeaseEndpoints}.
@@ -119,7 +115,7 @@ public class LeaseEndpointsUnitTests {
 		when(oldLease.getLeaseId()).thenReturn("old_lease");
 		when(oldLease.getLeaseDuration()).thenReturn(Duration.ofSeconds(70));
 
-		Lease renewedLease = LeaseEndpoints.SysLeases.renew(oldLease, restOperations);
+		Lease renewedLease = LeaseEndpoints.Leases.renew(oldLease, restOperations);
 
 		verify(restOperations).exchange(eq("sys/leases/renew"), eq(HttpMethod.PUT), httpEntityCaptor.capture(),
 				eq(Map.class));
@@ -141,7 +137,7 @@ public class LeaseEndpointsUnitTests {
 
 		when(oldLease.getLeaseId()).thenReturn("old_lease");
 
-		LeaseEndpoints.SysLeases.revoke(oldLease, restOperations);
+		LeaseEndpoints.Leases.revoke(oldLease, restOperations);
 
 		verify(restOperations).exchange(eq("sys/leases/revoke"), eq(HttpMethod.PUT), httpEntityCaptor.capture(),
 				eq(Map.class), eq("old_lease"));

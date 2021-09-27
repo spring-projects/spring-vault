@@ -316,21 +316,6 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure a TTL.
-		 * @param ttl the time to live, in seconds, must not be negative.
-		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
-		 * @deprecated since 2.0, use {@link #ttl(Duration)} for time unit safety.
-		 */
-		@Deprecated
-		public VaultCertificateRequestBuilder ttl(int ttl) {
-
-			Assert.isTrue(ttl > 0, "TTL must not be negative");
-
-			this.ttl = Duration.ofSeconds(ttl);
-			return this;
-		}
-
-		/**
-		 * Configure a TTL.
 		 * @param ttl the time to live, must not be negative.
 		 * @param timeUnit must not be {@literal null}
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.

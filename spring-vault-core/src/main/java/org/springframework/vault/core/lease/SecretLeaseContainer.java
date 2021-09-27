@@ -204,18 +204,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	}
 
 	/**
-	 * Sets the amount of seconds that is at least required before renewing a lease.
-	 * {@code minRenewalSeconds} prevents renewals from happening too often.
-	 * @param minRenewalSeconds number of seconds that is at least required before
-	 * renewing a {@link Lease}, must not be negative.
-	 * @deprecated since 2.0, use {@link #setMinRenewal(Duration)} for time unit safety.
-	 */
-	@Deprecated
-	public void setMinRenewalSeconds(int minRenewalSeconds) {
-		setMinRenewal(Duration.ofSeconds(minRenewalSeconds));
-	}
-
-	/**
 	 * Sets the amount {@link Duration} that is at least required before renewing a lease.
 	 * {@code minRenewal} prevents renewals from happening too often.
 	 * @param minRenewal duration that is at least required before renewing a
@@ -228,19 +216,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 		Assert.isTrue(!minRenewal.isNegative(), "Minimal renewal time must not be negative");
 
 		this.minRenewal = minRenewal;
-	}
-
-	/**
-	 * Set the expiry threshold. A {@link Lease} is renewed the given seconds before it
-	 * expires.
-	 * @param expiryThresholdSeconds number of seconds before {@link Lease} expiry, must
-	 * not be negative.
-	 * @deprecated since 2.0, use {@link #setExpiryThreshold(Duration)} for time unit
-	 * safety.
-	 */
-	@Deprecated
-	public void setExpiryThresholdSeconds(int expiryThresholdSeconds) {
-		setExpiryThreshold(Duration.ofSeconds(expiryThresholdSeconds));
 	}
 
 	/**
