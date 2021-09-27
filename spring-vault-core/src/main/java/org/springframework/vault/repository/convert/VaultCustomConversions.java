@@ -25,7 +25,6 @@ import java.util.Set;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
-import org.springframework.data.convert.JodaTimeConverters;
 import org.springframework.data.convert.WritingConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.vault.repository.mapping.VaultSimpleTypes;
@@ -51,7 +50,6 @@ public class VaultCustomConversions extends org.springframework.data.convert.Cus
 		List<Object> converters = new ArrayList<>();
 
 		converters.add(CustomToStringConverter.INSTANCE);
-		converters.addAll(JodaTimeConverters.getConvertersToRegister());
 
 		STORE_CONVERTERS = Collections.unmodifiableList(converters);
 		STORE_CONVERSIONS = StoreConversions.of(VaultSimpleTypes.HOLDER, STORE_CONVERTERS);
