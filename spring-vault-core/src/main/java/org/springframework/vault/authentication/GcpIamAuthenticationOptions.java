@@ -249,7 +249,7 @@ public class GcpIamAuthenticationOptions extends GcpIamAuthenticationSupport {
 		 */
 		public GcpIamAuthenticationOptionsBuilder jwtValidity(Duration jwtValidity) {
 
-			Assert.hasText(this.role, "JWT validity duration must not be null");
+			Assert.notNull(jwtValidity, "JWT validity duration must not be null");
 
 			this.jwtValidity = jwtValidity;
 			return this;
@@ -263,7 +263,7 @@ public class GcpIamAuthenticationOptions extends GcpIamAuthenticationSupport {
 		 */
 		public GcpIamAuthenticationOptionsBuilder clock(Clock clock) {
 
-			Assert.hasText(this.role, "Clock must not be null");
+			Assert.notNull(clock, "Clock must not be null");
 
 			this.clock = clock;
 			return this;
