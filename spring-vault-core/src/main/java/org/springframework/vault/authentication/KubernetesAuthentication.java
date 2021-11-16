@@ -108,7 +108,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	private static Map<String, String> getKubernetesLogin(String role, String jwt) {
 
 		Assert.hasText(role, "Role must not be empty");
-		Assert.hasText(role, "JWT must not be empty");
+		Assert.hasText(jwt, "JWT must not be empty");
 
 		Map<String, String> login = new HashMap<>();
 
