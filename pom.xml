@@ -30,7 +30,7 @@
 		<spring.version>5.3.5</spring.version>
 		<spring-data-bom.version>2020.0.5</spring-data-bom.version>
 		<spring-security-bom.version>5.4.5</spring-security-bom.version>
-		<reactor.version>2020.0.5</reactor.version>
+		<reactor.version>2020.0.13</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
