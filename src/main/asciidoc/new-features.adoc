@@ -1,6 +1,11 @@
 [[new-features]]
 == New & Noteworthy
 
+[[new-features.2-4-0]]
+=== What's new in Spring Vault 2.4
+
+* Support for <<vault.authentication.userpass,Username/Password authentication>> for Username/Password, LDAP, Okta, and RADIUS authentication.
+
 [[new-features.2-3-0]]
 === What's new in Spring Vault 2.3
 

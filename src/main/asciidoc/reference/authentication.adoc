@@ -784,6 +784,50 @@ See also:
 * https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Using the Kubernetes auth backend]
 * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
+[[vault.authentication.userpass]]
+== Username/Password authentication
+
+Username/Password is typically a end-user authentication scheme.
+Using username and password is supported by multiple Vault authentication backends:
+
+* Username and Password (`userpass`)
+* LDAP (`ldap`)
+* Okta (`okta`, supports additionaly time-based one-time tokens)
+* RADIUS (`radius`)
+
+`UserPasswordAuthenticationOptions` can be used with all above mentioned authentication backends as the Login API is similar across all mechanisms.
+Please ensure to use the appropriate auth mount path when configuring `UserPasswordAuthenticationOptions`.
+
+.Configuring `UserPasswordAuthentication`
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        UserPasswordAuthenticationOptions options = UserPasswordAuthenticationOptions.builder()
+                .username(…).password(…).build();
+
+        return new UserPasswordAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+See also:
+
+* https://www.vaultproject.io/api-docs/auth/userpass[Vault Documentation: Using the Userpass auth backend]
+* https://www.vaultproject.io/api-docs/auth/ldap[Vault Documentation: Using the LDAP auth backend]
+* https://www.vaultproject.io/api-docs/auth/radius[Vault Documentation: Using the RADIUS auth backend]
+* https://www.vaultproject.io/api-docs/auth/okta[Vault Documentation: Using the Okta auth backend]
+
 [[vault.authentication.steps]]
 == Authentication Steps
 

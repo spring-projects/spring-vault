@@ -16,11 +16,13 @@
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.vault.client.VaultClients;
+
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.Settings;
+import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link UsernamePasswordAuthentication}.
@@ -29,18 +31,31 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAuthenticationIntegrationTestBase {
 
-    @Test
-    void shouldLoginSuccessfully() {
+	RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
-        RestTemplate restTemplate = VaultClients.createRestTemplate();
-        UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
-                .username(username)
-                .password(password)
-                .build();
+	@Test
+	void shouldLoginSuccessfully() {
 
-        UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, restTemplate);
-        VaultToken login = authentication.login();
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+				.username(username).password(password).build();
 
-        assertThat(login.getToken()).isNotEmpty();
-    }
+		UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, restTemplate);
+		VaultToken login = authentication.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+	}
+
+	@Test
+	void shouldLoginUsingAuthenticationSteps() {
+
+		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
+				.username(username).password(password).build();
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
+				UsernamePasswordAuthentication.createAuthenticationSteps(options), restTemplate);
+		VaultToken login = executor.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+	}
+
 }

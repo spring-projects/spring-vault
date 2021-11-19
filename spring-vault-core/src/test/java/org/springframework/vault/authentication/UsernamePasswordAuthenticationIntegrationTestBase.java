@@ -15,14 +15,15 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
+
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.util.IntegrationTestSupport;
 
-import java.util.Map;
-
-import static java.util.Collections.singletonMap;
-import static org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions.DEFAULT_USERPASS_AUTHENTICATION_PATH;
+import static java.util.Collections.*;
+import static org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions.*;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.*;
 
 /**
@@ -32,19 +33,24 @@ import static org.springframework.vault.support.Policy.BuiltinCapabilities.*;
  */
 public abstract class UsernamePasswordAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
-    static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*").capabilities(READ, CREATE, UPDATE).build());
+	static final Policy POLICY = Policy.of(Policy.Rule.builder().path("/*").capabilities(READ, CREATE, UPDATE).build());
 
-    protected final String username = "admin";
-    protected final String password = "qwerty";
+	protected final String username = "admin";
 
-    @BeforeEach
-    public void before() {
+	protected final String password = "qwerty";
 
-        if (!prepare().hasAuth(DEFAULT_USERPASS_AUTHENTICATION_PATH)) {
-            prepare().mountAuth(DEFAULT_USERPASS_AUTHENTICATION_PATH);
-        }
+	@BeforeEach
+	public void before() {
 
-        prepare().getVaultOperations().opsForSys().createOrUpdatePolicy(DEFAULT_USERPASS_AUTHENTICATION_PATH, POLICY);
-        prepare().getVaultOperations().doWithSession(restOperations -> restOperations.postForEntity(String.format("auth/%s/users/%s", DEFAULT_USERPASS_AUTHENTICATION_PATH, username), singletonMap("password", password), Map.class));
-    }
+		if (!prepare().hasAuth(DEFAULT_USERPASS_AUTHENTICATION_PATH)) {
+			prepare().mountAuth(DEFAULT_USERPASS_AUTHENTICATION_PATH);
+		}
+
+		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy(DEFAULT_USERPASS_AUTHENTICATION_PATH, POLICY);
+		prepare().getVaultOperations()
+				.doWithSession(restOperations -> restOperations.postForEntity(
+						String.format("auth/%s/users/%s", DEFAULT_USERPASS_AUTHENTICATION_PATH, username),
+						singletonMap("password", password), Map.class));
+	}
+
 }

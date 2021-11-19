@@ -15,87 +15,171 @@
  */
 package org.springframework.vault.authentication;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
-import javax.annotation.Nullable;
-
 /**
+ * Authentication options for {@link UsernamePasswordAuthentication}.
+ *
  * @author Mikhael Sokolov
+ * @author Mark Paluch
+ * @since 2.4
+ * @see UsernamePasswordAuthentication
+ * @see #builder()
  */
 public class UsernamePasswordAuthenticationOptions {
 
-    public static final String DEFAULT_USERPASS_AUTHENTICATION_PATH = "userpass";
+	public static final String DEFAULT_USERPASS_AUTHENTICATION_PATH = "userpass";
 
-    /**
-     * Path of the userpass authentication backend mount.
-     */
-    private final String path;
+	/**
+	 * Path of the userpass authentication backend mount.
+	 */
+	private final String path;
 
-    /**
-     * Username of the userpass authentication backend mount.
-     */
-    private final String username;
+	/**
+	 * Username of the userpass authentication backend mount.
+	 */
+	private final String username;
 
-    /**
-     * Password of the userpass authentication backend mount.
-     */
-    private final CharSequence password;
+	/**
+	 * Password of the userpass authentication backend mount.
+	 */
+	private final CharSequence password;
 
-    private UsernamePasswordAuthenticationOptions(String username, CharSequence password, String path) {
-        this.username = username;
-        this.password = password;
-        this.path = path;
-    }
+	/**
+	 * TOTP (one-time-token, optional).
+	 */
+	@Nullable
+	private final CharSequence totp;
 
-    public String getUsername() {
-        return username;
-    }
+	private UsernamePasswordAuthenticationOptions(String path, String username, CharSequence password,
+			@Nullable CharSequence totp) {
+		this.username = username;
+		this.password = password;
+		this.path = path;
+		this.totp = totp;
+	}
 
-    public CharSequence getPassword() {
-        return password;
-    }
+	/**
+	 * @return a new {@link UsernamePasswordAuthenticationBuilder}.
+	 */
+	public static UsernamePasswordAuthenticationBuilder builder() {
+		return new UsernamePasswordAuthenticationBuilder();
+	}
 
-    public String getPath() {
-        return path;
-    }
+	/**
+	 * @return the path of the userpass authentication backend mount.
+	 */
+	public String getPath() {
+		return this.path;
+	}
 
-    public static UsernamePasswordAuthenticationBuilder builder() {
-        return new UsernamePasswordAuthenticationBuilder();
-    }
+	/**
+	 * @return the username.
+	 */
+	public String getUsername() {
+		return this.username;
+	}
 
-    public static class UsernamePasswordAuthenticationBuilder {
+	/**
+	 * @return the password.
+	 */
+	public CharSequence getPassword() {
+		return this.password;
+	}
 
-        @Nullable
-        private String username;
+	/**
+	 * @return the totp (one-time-token). Can be {@code null}.
+	 */
+	@Nullable
+	public CharSequence getTotp() {
+		return this.totp;
+	}
 
-        @Nullable
-        private CharSequence password;
+	/**
+	 * Builder for {@link UsernamePasswordAuthenticationOptions}.
+	 */
+	public static class UsernamePasswordAuthenticationBuilder {
 
-        private String path = DEFAULT_USERPASS_AUTHENTICATION_PATH;
+		private String path = DEFAULT_USERPASS_AUTHENTICATION_PATH;
 
-        UsernamePasswordAuthenticationBuilder() {
-        }
+		@Nullable
+		private String username;
 
-        public UsernamePasswordAuthenticationBuilder username(String username) {
-            this.username = username;
-            return this;
-        }
+		@Nullable
+		private CharSequence password;
 
-        public UsernamePasswordAuthenticationBuilder password(CharSequence password) {
-            this.password = password;
-            return this;
-        }
+		@Nullable
+		private CharSequence totp;
 
-        public UsernamePasswordAuthenticationBuilder path(String path) {
-            this.path = path;
-            return this;
-        }
+		UsernamePasswordAuthenticationBuilder() {
+		}
 
-        public UsernamePasswordAuthenticationOptions build() {
-            Assert.notNull(this.username, "Username must not be null");
-            Assert.notNull(this.password, "Password must not be null");
+		/**
+		 * Configure a {@code username} for userpass authentication.
+		 * @param username must not be empty or {@literal null}.
+		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 */
+		public UsernamePasswordAuthenticationBuilder username(String username) {
 
-            return new UsernamePasswordAuthenticationOptions(username, password, path);
-        }
-    }
+			Assert.hasText(username, "Username must not be null and not be empty");
+
+			this.username = username;
+			return this;
+		}
+
+		/**
+		 * Configure a {@code password} for userpass authentication.
+		 * @param password must not be {@literal null}.
+		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 */
+		public UsernamePasswordAuthenticationBuilder password(CharSequence password) {
+
+			Assert.notNull(password, "Password must not be null");
+
+			this.password = password;
+			return this;
+		}
+
+		/**
+		 * Configure an optional {@code totp} (time-based one-time token) for
+		 * userpass/Okta authentication.
+		 * @param totp must not be {@literal null}.
+		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 */
+		public UsernamePasswordAuthenticationBuilder totp(CharSequence totp) {
+
+			Assert.notNull(password, "One-time token must not be null");
+
+			this.totp = totp;
+			return this;
+		}
+
+		/**
+		 * Configure the mount path.
+		 * @param path must not be {@literal null} or empty.
+		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 */
+		public UsernamePasswordAuthenticationBuilder path(String path) {
+
+			Assert.hasText(path, "Path must not be empty");
+
+			this.path = path;
+			return this;
+		}
+
+		/**
+		 * Build a new {@link UsernamePasswordAuthenticationOptions} instance.
+		 * @return a new {@link UsernamePasswordAuthenticationOptions}.
+		 */
+		public UsernamePasswordAuthenticationOptions build() {
+
+			Assert.hasText(this.username, "Username must not be null and not be empty");
+			Assert.notNull(this.password, "Password must not be null");
+
+			return new UsernamePasswordAuthenticationOptions(path, username, password, totp);
+		}
+
+	}
+
 }
