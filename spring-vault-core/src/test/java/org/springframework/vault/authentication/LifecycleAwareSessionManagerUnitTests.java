@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.net.ssl.SSLException;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,18 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.vault.authentication.event.AfterLoginEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorListener;
-import org.springframework.vault.authentication.event.AuthenticationEvent;
-import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.LoginFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
-import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
+import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
@@ -57,16 +48,9 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link LifecycleAwareSessionManager}.
@@ -430,6 +414,22 @@ class LifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.getSessionToken();
 
 		assertThat(this.sessionManager.renewToken()).isFalse();
+		verify(this.clientAuthentication, times(1)).login();
+	}
+
+	@Test
+	void renewShouldRetainTokenOnIoError() {
+
+		when(this.clientAuthentication.login())
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+		when(this.restOperations.postForObject(anyString(), ArgumentMatchers.any(), ArgumentMatchers.<Class>any()))
+				.thenThrow(new ResourceAccessException("err", new SSLException("foo")));
+
+		this.sessionManager.setLeaseStrategy(LeaseStrategy.retainOnIoError());
+		this.sessionManager.getSessionToken();
+
+		assertThat(this.sessionManager.renewToken()).isFalse();
+		assertThat(this.sessionManager.getToken()).isNotEmpty();
 		verify(this.clientAuthentication, times(1)).login();
 	}
 

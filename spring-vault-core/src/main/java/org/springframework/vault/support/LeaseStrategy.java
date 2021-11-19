@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import java.io.IOException;
+
 /**
  * Strategy interface to control whether to retain or drop a
  * {@link org.springframework.vault.core.lease.domain.Lease} after a failure.
@@ -48,6 +50,29 @@ public interface LeaseStrategy {
 	 */
 	static LeaseStrategy retainOnError() {
 		return error -> false;
+	}
+
+	/**
+	 * Predefined strategy to retain leases on I/O errors.
+	 * @return the retain on I/O error strategy.
+	 * @since 2.3.3
+	 */
+	static LeaseStrategy retainOnIoError() {
+		return error -> {
+
+			Throwable inspect = error;
+
+			do {
+				if (inspect instanceof IOException) {
+					return false;
+				}
+
+				inspect = inspect.getCause();
+			}
+			while (inspect != null);
+
+			return true;
+		};
 	}
 
 }

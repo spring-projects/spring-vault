@@ -25,18 +25,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.authentication.event.AfterLoginEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorListener;
-import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.LoginFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
-import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
+import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -192,13 +181,17 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * token was obtained or refresh failed.
 	 */
 	public boolean renewToken() {
+		return tryRenewToken().successful;
+	}
+
+	private RenewOutcome tryRenewToken() {
 
 		this.logger.info("Renewing token");
 
 		Optional<TokenWrapper> token = getToken();
 		if (!token.isPresent()) {
 			getSessionToken();
-			return false;
+			return RenewOutcome.TERMINAL_ERROR;
 		}
 
 		TokenWrapper tokenWrapper = token.get();
@@ -209,7 +202,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 			VaultTokenRenewalException exception = new VaultTokenRenewalException(format("Cannot renew token", e), e);
 
-			if (getLeaseStrategy().shouldDrop(exception)) {
+			boolean shouldDrop = getLeaseStrategy().shouldDrop(exception);
+			if (shouldDrop) {
 				setToken(Optional.empty());
 			}
 
@@ -221,11 +215,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 
 			dispatch(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
-			return false;
+			return shouldDrop ? RenewOutcome.TERMINAL_ERROR : RenewOutcome.RENEWABLE_ERROR;
 		}
 	}
 
-	private boolean doRenew(TokenWrapper wrapper) {
+	private RenewOutcome doRenew(TokenWrapper wrapper) {
 
 		dispatch(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
 		VaultResponse vaultResponse = this.restOperations.postForObject("auth/token/renew-self",
@@ -246,13 +240,13 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 			setToken(Optional.empty());
 			dispatch(new LoginTokenExpiredEvent(renewed));
-			return false;
+			return RenewOutcome.TERMINAL_ERROR;
 		}
 
 		setToken(Optional.of(new TokenWrapper(renewed, wrapper.revocable)));
 		dispatch(new AfterLoginTokenRenewedEvent(renewed));
 
-		return true;
+		return RenewOutcome.SUCCESS;
 	}
 
 	@Override
@@ -314,13 +308,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	protected boolean isTokenRenewable() {
 
-		return getToken().map(TokenWrapper::getToken).filter(LoginToken.class::isInstance)
-				//
-				.filter(it -> {
+		return getToken().map(TokenWrapper::getToken).filter(LoginToken.class::isInstance).filter(it -> {
 
-					LoginToken loginToken = (LoginToken) it;
-					return !loginToken.getLeaseDuration().isZero() && loginToken.isRenewable();
-				}).isPresent();
+			LoginToken loginToken = (LoginToken) it;
+			return !loginToken.getLeaseDuration().isZero() && loginToken.isRenewable();
+		}).isPresent();
 	}
 
 	private void scheduleRenewal() {
@@ -338,7 +330,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 			try {
 				if (isTokenRenewable()) {
-					if (renewToken()) {
+					RenewOutcome result = tryRenewToken();
+					if (result.shouldRenew()) {
 						scheduleRenewal();
 					}
 				}
@@ -394,6 +387,29 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		public boolean isRevocable() {
 			return this.revocable;
+		}
+
+	}
+
+	static class RenewOutcome {
+
+		private static final RenewOutcome SUCCESS = new RenewOutcome(false, true);
+
+		private static final RenewOutcome TERMINAL_ERROR = new RenewOutcome(true, false);
+
+		private static final RenewOutcome RENEWABLE_ERROR = new RenewOutcome(false, false);
+
+		private final boolean terminalError;
+
+		private final boolean successful;
+
+		private RenewOutcome(boolean terminalError, boolean successful) {
+			this.terminalError = terminalError;
+			this.successful = successful;
+		}
+
+		public boolean shouldRenew() {
+			return !terminalError;
 		}
 
 	}

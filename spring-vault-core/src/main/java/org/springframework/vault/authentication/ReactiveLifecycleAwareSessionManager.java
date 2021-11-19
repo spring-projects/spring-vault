@@ -27,18 +27,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.authentication.event.AfterLoginEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorListener;
-import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.LoginFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
-import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
+import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -226,7 +215,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 			VaultTokenRenewalException exception = new VaultTokenRenewalException(format("Cannot renew token", e), e);
 
-			if (getLeaseStrategy().shouldDrop(exception)) {
+			boolean shouldDrop = getLeaseStrategy().shouldDrop(exception);
+			if (shouldDrop) {
 				dropCurrentToken();
 			}
 
@@ -238,10 +228,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			}
 
 			dispatch(new LoginTokenRenewalFailedEvent(wrapper.getToken(), exception));
-			return EMPTY;
-		}
-
-		);
+			return shouldDrop ? EMPTY : Mono.just(wrapper);
+		});
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
