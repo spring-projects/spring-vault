@@ -22,6 +22,7 @@ import java.security.KeyStore;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -130,17 +131,14 @@ public class ClientHttpConnectorFactory {
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
-				SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
-				configureSsl(sslConfiguration, sslContextBuilder);
+				Http11SslContextSpec sslContextSpec = Http11SslContextSpec.forClient()
+						.configure(it -> configureSsl(sslConfiguration, it)).get();
 
-				client = client.secure(builder -> {
-					builder.sslContext(sslContextBuilder);
-				});
+				client = client.secure(builder -> builder.sslContext(sslContextSpec));
 			}
 
-			client = client.tcpConfiguration(it -> it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-							Math.toIntExact(options.getConnectionTimeout().toMillis())))
-					.proxyWithSystemProperties();
+			client = client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+					Math.toIntExact(options.getConnectionTimeout().toMillis())).proxyWithSystemProperties();
 
 			return new ReactorClientHttpConnector(client);
 		}
