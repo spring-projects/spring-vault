@@ -139,7 +139,8 @@ public class ClientHttpConnectorFactory {
 			}
 
 			client = client.tcpConfiguration(it -> it.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-					Math.toIntExact(options.getConnectionTimeout().toMillis())));
+							Math.toIntExact(options.getConnectionTimeout().toMillis())))
+					.proxyWithSystemProperties();
 
 			return new ReactorClientHttpConnector(client);
 		}
