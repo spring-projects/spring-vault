@@ -43,7 +43,7 @@ class CertificateBundleUnitTests {
 		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
 
 		this.certificateBundle = CertificateBundle.of(data.get("serial_number"), data.get("certificate"),
-				data.get("issuing_ca"), data.get("private_key"));
+				data.get("issuing_ca"), data.get("private_key"), data.get("private_key_type"));
 	}
 
 	@Test
