@@ -23,8 +23,8 @@
 		<assertj-core.version>3.19.0</assertj-core.version>
 		<json-path.version>2.5.0</json-path.version>
 		<junit.version>5.7.1</junit.version>
-		<kotlin.version>1.4.31</kotlin.version>
-		<kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
+		<kotlin.version>1.6.10</kotlin.version>
+		<kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
 		<mockk.version>1.10.3-jdk8</mockk.version>
 		<mockito-core.version>3.8.0</mockito-core.version>
 		<spring.version>5.3.5</spring.version>
