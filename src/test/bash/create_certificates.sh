@@ -4,6 +4,12 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CA_DIR=work/ca
 KEYSTORE_FILE=work/keystore.jks
 CLIENT_CERT_KEYSTORE=work/client-cert.jks
+RUNS_ON_WINDOWS_OS=false
+
+if [[ -n $WSL_DISTRO_NAME ]]; then
+    RUNS_ON_WINDOWS_OS=true
+    echo "[INFO] Script runs on Windows Subsystem for Linux"
+fi
 
 if [[ -d work/ca ]] ; then
     rm -Rf ${CA_DIR}
@@ -25,7 +31,11 @@ fi
 KEYTOOL=keytool
 
 if [  ! -x "${KEYTOOL}" ] ; then
-   KEYTOOL=${JAVA_HOME}/bin/keytool
+   if [ RUNS_ON_WINDOWS_OS ] ; then
+      KEYTOOL=${JAVA_HOME}/bin/keytool.exe
+   else
+      KEYTOOL=${JAVA_HOME}/bin/keytool
+   fi
 fi
 
 if [  ! -x "${KEYTOOL}" ] ; then
@@ -112,15 +122,15 @@ openssl ca -config ${DIR}/openssl.cnf \
       -in ${CA_DIR}/csr/client.csr.pem \
       -out ${CA_DIR}/certs/client.cert.pem
 
-echo "[INFO] Creating  PKCS12 file with client certificate"
+echo "[INFO] Creating PKCS12 file with client certificate"
 openssl pkcs12 -export -clcerts \
       -in ${CA_DIR}/certs/client.cert.pem \
       -inkey ${CA_DIR}/private/client.decrypted.key.pem \
       -passout pass:changeit \
       -out ${CA_DIR}/client.p12
 
-${KEYTOOL} -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
-${KEYTOOL} -importkeystore \
+"${KEYTOOL}" -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
+"${KEYTOOL}" -importkeystore \
                               -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit\
                               -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype JKS \
                               -noprompt -storepass changeit

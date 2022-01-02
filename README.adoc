@@ -80,6 +80,14 @@ To get started with Vault and this guide you need a *NIX-like operating systems 
 * `curl`, `openssl` and `unzip`
 * at least Java 8 and a properly configured `JAVA_HOME` environment variable
 
+[NOTE]
+--
+If you use Windows Subsystem for Linux (WSL) you have to share `JAVA_HOME` between WSL and Windows. Call following command in PowerShell:
+----
+$ setx WSLENV "JAVA_HOME/p"
+----
+--
+
 *Install Vault*
 
 ----
@@ -244,6 +252,12 @@ The following scripts need to be run prior to building the project for the tests
     $ ./src/test/bash/create_certificates.sh
     $ ./src/test/bash/env.sh
     $ ./src/test/bash/local_run_vault.sh
+
+Alternatively you can run
+
+----
+$ ./src/test/bash/start.sh
+----
 
 Changes to the documentation should be made to the adocs found under `src/main/asciidoc/`
 
