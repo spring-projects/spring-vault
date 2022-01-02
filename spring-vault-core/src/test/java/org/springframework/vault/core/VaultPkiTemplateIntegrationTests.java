@@ -108,6 +108,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		CertificateBundle data = certificateResponse.getRequiredData();
 
 		assertThat(data.getPrivateKey()).isNotEmpty();
+		assertThat(data.getPrivateKeyType()).isEqualTo("rsa");
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();

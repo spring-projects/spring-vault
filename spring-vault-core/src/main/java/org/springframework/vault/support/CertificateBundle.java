@@ -46,14 +46,43 @@ public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
 
+	private final String privateKeyType;
+
 	private final List<String> caChain;
 
+	/**
+	 * Create a new {@link CertificateBundle}.
+	 * @param serialNumber the serial number.
+	 * @param certificate the certificate.
+	 * @param issuingCaCertificate the issuing CA certificate.
+	 * @param caChain the CA chain.
+	 * @param privateKey the private key.
+	 * @deprecated since 2.3.3, use {@link #CertificateBundle(String, String, String, List, String, String)} instead.
+	 */
+	@Deprecated
+	CertificateBundle(String serialNumber, String certificate, String issuingCaCertificate,
+			List<String> caChain, String privateKey) {
+
+		this(serialNumber, certificate, issuingCaCertificate, caChain, privateKey, null);
+	}
+
+	/**
+	 * Create a new {@link CertificateBundle}.
+	 * @param serialNumber the serial number.
+	 * @param certificate the certificate.
+	 * @param issuingCaCertificate the issuing CA certificate.
+	 * @param caChain the CA chain.
+	 * @param privateKey the private key.
+	 * @param privateKeyType the private key type.
+	 */
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
-			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey) {
+			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey,
+			@JsonProperty("private_key_type") String privateKeyType) {
 
 		super(serialNumber, certificate, issuingCaCertificate);
 		this.privateKey = privateKey;
+		this.privateKeyType = privateKeyType;
 		this.caChain = caChain;
 	}
 
@@ -65,7 +94,10 @@ public class CertificateBundle extends Certificate {
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param privateKey must not be empty or {@literal null}.
 	 * @return the {@link CertificateBundle}
+	 * @deprecated since 2.3.3, use {@link #of(String, String, String, String, String)}
+	 * instead.
 	 */
+	@Deprecated
 	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
 			String privateKey) {
 
@@ -79,10 +111,40 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
+	 * Create a {@link CertificateBundle} given a private key with certificates and the
+	 * serial number.
+	 * @param serialNumber must not be empty or {@literal null}.
+	 * @param certificate must not be empty or {@literal null}.
+	 * @param issuingCaCertificate must not be empty or {@literal null}.
+	 * @param privateKey must not be empty or {@literal null}.
+	 * @param privateKeyType must not be empty or {@literal null}.
+	 * @return the {@link CertificateBundle}
+	 */
+	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
+			String privateKey, String privateKeyType) {
+
+		Assert.hasText(serialNumber, "Serial number must not be empty");
+		Assert.hasText(certificate, "Certificate must not be empty");
+		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+		Assert.hasText(privateKey, "Private key must not be empty");
+		Assert.hasText(privateKeyType, "Private key type must not be empty");
+
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
+				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType);
+	}
+
+	/**
 	 * @return the private key (decrypted form, PEM or DER-encoded)
 	 */
 	public String getPrivateKey() {
 		return this.privateKey;
+	}
+
+	/**
+	 * @return the private key type.
+	 */
+	public String getPrivateKeyType() {
+		return this.privateKeyType;
 	}
 
 	/**
