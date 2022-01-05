@@ -24,12 +24,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link CertificateBundle}.
  *
  * @author Mark Paluch
+ * @author Alex Bremora
  */
 class CertificateBundleUnitTests {
 

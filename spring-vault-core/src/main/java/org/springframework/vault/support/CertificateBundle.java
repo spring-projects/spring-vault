@@ -27,6 +27,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
@@ -38,6 +39,7 @@ import org.springframework.vault.VaultException;
  * {@link X509Certificate}.
  *
  * @author Mark Paluch
+ * @author Alex Bremora
  * @see #getPrivateKeySpec()
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
@@ -46,25 +48,10 @@ public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
 
+	@Nullable
 	private final String privateKeyType;
 
 	private final List<String> caChain;
-
-	/**
-	 * Create a new {@link CertificateBundle}.
-	 * @param serialNumber the serial number.
-	 * @param certificate the certificate.
-	 * @param issuingCaCertificate the issuing CA certificate.
-	 * @param caChain the CA chain.
-	 * @param privateKey the private key.
-	 * @deprecated since 2.3.3, use {@link #CertificateBundle(String, String, String, List, String, String)} instead.
-	 */
-	@Deprecated
-	CertificateBundle(String serialNumber, String certificate, String issuingCaCertificate,
-			List<String> caChain, String privateKey) {
-
-		this(serialNumber, certificate, issuingCaCertificate, caChain, privateKey, null);
-	}
 
 	/**
 	 * Create a new {@link CertificateBundle}.
@@ -78,7 +65,7 @@ public class CertificateBundle extends Certificate {
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey,
-			@JsonProperty("private_key_type") String privateKeyType) {
+			@Nullable @JsonProperty("private_key_type") String privateKeyType) {
 
 		super(serialNumber, certificate, issuingCaCertificate);
 		this.privateKey = privateKey;
@@ -93,11 +80,8 @@ public class CertificateBundle extends Certificate {
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param privateKey must not be empty or {@literal null}.
-	 * @return the {@link CertificateBundle}
-	 * @deprecated since 2.3.3, use {@link #of(String, String, String, String, String)}
-	 * instead.
+	 * @return the {@link CertificateBundle} instead.
 	 */
-	@Deprecated
 	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
 			String privateKey) {
 
@@ -107,7 +91,7 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(privateKey, "Private key must not be empty");
 
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), privateKey);
+				Collections.singletonList(issuingCaCertificate), privateKey, null);
 	}
 
 	/**
@@ -119,9 +103,10 @@ public class CertificateBundle extends Certificate {
 	 * @param privateKey must not be empty or {@literal null}.
 	 * @param privateKeyType must not be empty or {@literal null}.
 	 * @return the {@link CertificateBundle}
+	 * @since 2.4
 	 */
 	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
-			String privateKey, String privateKeyType) {
+			String privateKey, @Nullable String privateKeyType) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
@@ -141,8 +126,10 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
-	 * @return the private key type.
+	 * @return the private key type, can be {@literal null}.
+	 * @since 2.4
 	 */
+	@Nullable
 	public String getPrivateKeyType() {
 		return this.privateKeyType;
 	}

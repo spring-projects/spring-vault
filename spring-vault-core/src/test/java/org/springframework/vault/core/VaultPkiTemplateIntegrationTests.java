@@ -49,21 +49,23 @@ import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
+import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.vault.util.Settings.findWorkDir;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration tests for {@link VaultPkiTemplate} through {@link VaultPkiOperations}.
  *
  * @author Mark Paluch
+ * @author Alex Bremora
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
-	static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
+	private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
+	private static final Version PRIVATE_KEY_TYPE_FROM = Version.parse("0.7.0");
 
 	@Autowired
 	VaultOperations vaultOperations;
@@ -108,11 +110,16 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		CertificateBundle data = certificateResponse.getRequiredData();
 
 		assertThat(data.getPrivateKey()).isNotEmpty();
-		assertThat(data.getPrivateKeyType()).isEqualTo("rsa");
+
+		if (prepare().getVersion().isGreaterThanOrEqualTo(PRIVATE_KEY_TYPE_FROM)) {
+			assertThat(data.getPrivateKeyType()).isEqualTo("rsa");
+		}
+
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509Certificate().getSubjectX500Principal()
+				.getName()).isEqualTo("CN=hello.example.com");
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
 		KeyStore keyStore = data.createKeyStore("vault");
