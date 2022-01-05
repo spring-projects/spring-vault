@@ -19,9 +19,5 @@ release.properties
 
 # Folder for setup & test
 /vault/
-/download/
-/work/
-/spring-vault-core/work/
-/src/test/bash/work/
-/src/test/bash/download/
-/src/test/bash/vault/
+download/
+work/
