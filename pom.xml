@@ -465,6 +465,7 @@
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
 						<source>${java.version}</source>
+						<javadocVersion>1.8</javadocVersion>
 						<quiet>true</quiet>
 						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
 						<overview>${shared.resources}/javadoc/overview.html</overview>
