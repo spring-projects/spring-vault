@@ -28,11 +28,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.HttpComponents;
-import org.springframework.vault.client.ClientHttpRequestFactoryFactory.Netty;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory.OkHttp3;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
@@ -117,68 +115,6 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 		String response = request(template);
 
 		assertThat(factory).isInstanceOf(HttpComponentsClientHttpRequestFactory.class);
-		assertThat(response).isNotNull().contains("initialized");
-
-		((DisposableBean) factory).destroy();
-	}
-
-	@Test
-	void nettyClientWithoutSslConfigShouldWork() throws Exception {
-
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(), SslConfiguration.unconfigured());
-
-		assertThat(ReflectionTestUtils.getField(factory, "sslContext")).isNotNull();
-	}
-
-	@Test
-	void nettyClientShouldWork() throws Exception {
-
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(), Settings.createSslConfiguration());
-		((InitializingBean) factory).afterPropertiesSet();
-		RestTemplate template = new RestTemplate(factory);
-
-		String response = request(template);
-
-		assertThat(factory).isInstanceOf(Netty4ClientHttpRequestFactory.class);
-		assertThat(response).isNotNull().contains("initialized");
-
-		((DisposableBean) factory).destroy();
-	}
-
-	@Test
-	void nettyClientWithExplicitEnabledCipherSuitesShouldWork() throws Exception {
-
-		List<String> enabledCipherSuites = new ArrayList<String>();
-		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
-		enabledCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
-
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
-				Settings.createSslConfiguration().withEnabledCipherSuites(enabledCipherSuites));
-		((InitializingBean) factory).afterPropertiesSet();
-		RestTemplate template = new RestTemplate(factory);
-
-		String response = request(template);
-
-		assertThat(factory).isInstanceOf(Netty4ClientHttpRequestFactory.class);
-		assertThat(response).isNotNull().contains("initialized");
-
-		((DisposableBean) factory).destroy();
-	}
-
-	@Test
-	void nettyClientWithExplicitEnabledProtocolsShouldWork() throws Exception {
-
-		List<String> enabledProtocols = new ArrayList<String>();
-		enabledProtocols.add("TLSv1.2");
-
-		ClientHttpRequestFactory factory = Netty.usingNetty(new ClientOptions(),
-				Settings.createSslConfiguration().withEnabledProtocols(enabledProtocols));
-		((InitializingBean) factory).afterPropertiesSet();
-		RestTemplate template = new RestTemplate(factory);
-
-		String response = request(template);
-
-		assertThat(factory).isInstanceOf(Netty4ClientHttpRequestFactory.class);
 		assertThat(response).isNotNull().contains("initialized");
 
 		((DisposableBean) factory).destroy();

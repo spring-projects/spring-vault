@@ -43,8 +43,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedKeyManager;
 import javax.net.ssl.X509TrustManager;
 
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslProvider;
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
@@ -59,7 +57,6 @@ import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.Netty4ClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
@@ -90,9 +87,6 @@ public class ClientHttpRequestFactoryFactory {
 	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
 
 	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
-
-	private static final boolean NETTY_PRESENT = isPresent("io.netty.channel.nio.NioEventLoopGroup",
-			"io.netty.handler.ssl.SslContext", "io.netty.handler.codec.http.HttpClientCodec");
 
 	/**
 	 * Checks for presence of all {@code classNames} using this class' classloader.
@@ -132,10 +126,6 @@ public class ClientHttpRequestFactoryFactory {
 
 			if (OKHTTP3_PRESENT) {
 				return OkHttp3.usingOkHttp3(options, sslConfiguration);
-			}
-
-			if (NETTY_PRESENT) {
-				return Netty.usingNetty(options, sslConfiguration);
 			}
 		}
 		catch (GeneralSecurityException | IOException e) {
@@ -383,55 +373,6 @@ public class ClientHttpRequestFactoryFactory {
 					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
 
 			return new OkHttp3ClientHttpRequestFactory(builder.build());
-		}
-
-	}
-
-	/**
-	 * {@link ClientHttpRequestFactory} for Netty.
-	 *
-	 * @author Mark Paluch
-	 */
-	static class Netty {
-
-		static ClientHttpRequestFactory usingNetty(ClientOptions options, SslConfiguration sslConfiguration)
-				throws GeneralSecurityException, IOException {
-
-			Netty4ClientHttpRequestFactory requestFactory = new Netty4ClientHttpRequestFactory();
-
-			if (hasSslConfiguration(sslConfiguration)) {
-
-				SslContextBuilder sslContextBuilder = SslContextBuilder //
-						.forClient();
-
-				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-					sslContextBuilder
-							.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
-				}
-
-				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
-							sslConfiguration.getKeyConfiguration()));
-				}
-
-				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-					sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
-				}
-
-				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-					sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
-				}
-
-				requestFactory.setSslContext(sslContextBuilder.sslProvider(SslProvider.JDK).build());
-			}
-
-			requestFactory.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()));
-			requestFactory.setReadTimeout(Math.toIntExact(options.getReadTimeout().toMillis()));
-
-			// eagerly initialize to ensure SSL context
-			requestFactory.afterPropertiesSet();
-
-			return requestFactory;
 		}
 
 	}

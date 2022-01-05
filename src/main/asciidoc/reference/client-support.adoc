@@ -10,7 +10,6 @@ Spring Vault supports following HTTP imperative clients:
 
 * Java's builtin `HttpURLConnection` (default client)
 * Apache Http Components
-* Netty
 * OkHttp 3
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
@@ -49,17 +48,6 @@ dependencies to your project. You can omit the version number if using
 ====
 
 NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-4.5.x/logging.html[wire logging] can be enabled through logging configuration. Make sure to not accidentally enable wire logging as logs may expose traffic (tokens and secrets) between your application and Vault in plain text.
-
-.Netty Dependency
-====
-[source, xml]
-----
-<dependency>
-  <groupId>io.netty</groupId>
-  <artifactId>netty-all</artifactId>
-</dependency>
-----
-====
 
 .Square OkHttp 3
 ====

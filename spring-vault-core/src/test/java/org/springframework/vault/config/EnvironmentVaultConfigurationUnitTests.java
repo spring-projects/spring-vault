@@ -89,21 +89,18 @@ class EnvironmentVaultConfigurationUnitTests {
 		SslConfiguration sslConfiguration = this.configuration.sslConfiguration();
 
 		assertThat(sslConfiguration.getKeyStore()).isInstanceOf(ClassPathResource.class);
-		assertThat(new String(sslConfiguration.getKeyStoreConfiguration()
-				.getStorePassword()))
+		assertThat(new String(sslConfiguration.getKeyStoreConfiguration().getStorePassword()))
 				.isEqualTo("key store password");
 
 		assertThat(sslConfiguration.getTrustStore()).isInstanceOf(ClassPathResource.class);
-		assertThat(new String(sslConfiguration.getTrustStoreConfiguration()
-				.getStorePassword()))
+		assertThat(new String(sslConfiguration.getTrustStoreConfiguration().getStorePassword()))
 				.isEqualTo("trust store password");
 
 		assertThat(sslConfiguration.getEnabledProtocols()).containsExactly("TLSv1.2", "TLSv1.1");
 		assertThat(sslConfiguration.getEnabledCipherSuites()).containsExactly("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
 				"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 
-		this.configurableEnvironment.getPropertySources()
-				.remove(propertySource.getName());
+		this.configurableEnvironment.getPropertySources().remove(propertySource.getName());
 	}
 
 }
