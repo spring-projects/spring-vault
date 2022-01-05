@@ -10,6 +10,7 @@ BASEDIR=`dirname $0`/../../..
 pkill vault
 
 mkdir -p ${BASEDIR}/download
+mkdir -p ${BASEDIR}/work
 ${BASEDIR}/src/test/bash/install_vault.sh
 ${BASEDIR}/src/test/bash/create_certificates.sh
 ${BASEDIR}/src/test/bash/env.sh

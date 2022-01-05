@@ -6,7 +6,7 @@ KEYSTORE_FILE=work/keystore.jks
 CLIENT_CERT_KEYSTORE=work/client-cert.jks
 RUNS_ON_WINDOWS_OS=false
 
-if [[ -n $WSL_DISTRO_NAME ]]; then
+if [[ -n ${WSL_DISTRO_NAME} ]]; then
     RUNS_ON_WINDOWS_OS=true
     echo "[INFO] Script runs on Windows Subsystem for Linux"
 fi
@@ -31,7 +31,7 @@ fi
 KEYTOOL=keytool
 
 if [  ! -x "${KEYTOOL}" ] ; then
-   if [ RUNS_ON_WINDOWS_OS ] ; then
+   if ${RUNS_ON_WINDOWS_OS} ; then
       KEYTOOL=${JAVA_HOME}/bin/keytool.exe
    else
       KEYTOOL=${JAVA_HOME}/bin/keytool
@@ -39,7 +39,7 @@ if [  ! -x "${KEYTOOL}" ] ; then
 fi
 
 if [  ! -x "${KEYTOOL}" ] ; then
-   echo "[ERROR] No keytool in PATH/JAVA_HOME"
+   echo "[ERROR] No keytool in PATH/JAVA_HOME: ${KEYTOOL}"
    exit 1
 fi
 
