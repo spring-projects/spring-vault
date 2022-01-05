@@ -24,14 +24,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
-import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link org.springframework.vault.client.VaultClients}.
@@ -40,11 +37,12 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class VaultClientsUnitTests {
 
+	VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
+
 	@Test
 	void uriHandlerShouldPrefixRelativeUrl() {
 
-		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
 
 		URI uri = handler.expand("/path/{bar}", "bar");
 
@@ -55,7 +53,7 @@ class VaultClientsUnitTests {
 	void uriHandlerShouldNotPrefixAbsoluteUrl() {
 
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
 
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
 
@@ -89,7 +87,7 @@ class VaultClientsUnitTests {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
-		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriBuilderFactory());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
@@ -104,7 +102,7 @@ class VaultClientsUnitTests {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
-		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new PrefixAwareUriBuilderFactory());
 
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
@@ -115,18 +113,6 @@ class VaultClientsUnitTests {
 		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "baz");
 
 		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers), String.class);
-	}
-
-	@Test
-	void shouldApplyBasepath() {
-
-		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
-		localhost.setPath("foo/v1");
-		PrefixAwareUriTemplateHandler handler = new PrefixAwareUriTemplateHandler(() -> localhost);
-
-		URI uri = handler.expand("/path/{bar}", "bar");
-
-		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/foo/v1/path/bar");
 	}
 
 }

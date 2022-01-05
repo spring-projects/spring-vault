@@ -45,12 +45,13 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 	 * @param keyValueOperations must not be {@literal null}.
 	 * @param queryCreator must not be {@literal null}.
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "RedundantCast", "rawtypes" })
 	public VaultPartTreeQuery(QueryMethod queryMethod, QueryMethodEvaluationContextProvider evaluationContextProvider,
 			KeyValueOperations keyValueOperations, Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 
 		super(queryMethod, evaluationContextProvider, keyValueOperations,
-				new VaultQueryCreatorFactory((MappingContext) keyValueOperations.getMappingContext()));
+				(QueryCreatorFactory) new VaultQueryCreatorFactory(
+						(MappingContext) keyValueOperations.getMappingContext()));
 	}
 
 	static class VaultQueryCreatorFactory

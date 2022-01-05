@@ -39,12 +39,10 @@ class LoginTokenUnitTests {
 	@Test
 	void toStringShouldPrintFields() {
 
-		assertThat(LoginToken.of("token")
-				.toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT0S]");
+		assertThat(LoginToken.of("token").toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT0S]");
 		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1)).toString())
 				.isEqualTo("LoginToken [renewable=false, leaseDuration=PT1S]");
-		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1))
-				.toString())
+		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1)).toString())
 				.isEqualTo("LoginToken [renewable=true, leaseDuration=PT1S]");
 	}
 

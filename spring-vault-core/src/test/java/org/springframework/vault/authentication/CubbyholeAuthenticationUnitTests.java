@@ -25,7 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
@@ -55,7 +55,7 @@ class CubbyholeAuthenticationUnitTests {
 	void before() {
 
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;

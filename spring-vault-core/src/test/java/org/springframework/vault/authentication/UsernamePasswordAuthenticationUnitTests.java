@@ -46,7 +46,7 @@ class UsernamePasswordAuthenticationUnitTests {
 	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;

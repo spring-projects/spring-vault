@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
@@ -47,7 +47,7 @@ class LoginTokenAdapterUnitTests {
 	void before() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;

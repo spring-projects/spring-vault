@@ -28,7 +28,6 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.client.VaultClients.PrefixAwareUriTemplateHandler;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
@@ -62,7 +61,7 @@ class AppRoleAuthenticationUnitTests {
 	void before() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new PrefixAwareUriTemplateHandler());
+		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
 		this.restTemplate = restTemplate;

@@ -18,7 +18,6 @@ package org.springframework.vault.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -31,7 +30,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriBuilder;
 import org.springframework.web.util.UriBuilderFactory;
 import org.springframework.web.util.UriComponents;
@@ -153,49 +151,17 @@ public class VaultClients {
 		return new PrefixAwareUriBuilderFactory(endpointProvider);
 	}
 
-	public static class PrefixAwareUriTemplateHandler extends DefaultUriTemplateHandler {
-
-		@Nullable
-		private final VaultEndpointProvider endpointProvider;
-
-		public PrefixAwareUriTemplateHandler() {
-			this.endpointProvider = null;
-		}
-
-		public PrefixAwareUriTemplateHandler(VaultEndpointProvider endpointProvider) {
-			this.endpointProvider = endpointProvider;
-		}
-
-		@Override
-		protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
-			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate), uriVariables);
-		}
-
-		@Override
-		protected URI expandInternal(String uriTemplate, Object... uriVariables) {
-			return super.expandInternal(prepareUriTemplate(getBaseUrl(), uriTemplate), uriVariables);
-		}
-
-		@Override
-		public String getBaseUrl() {
-
-			if (this.endpointProvider != null) {
-
-				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
-				return toBaseUri(endpoint);
-			}
-
-			return super.getBaseUrl();
-		}
-
-	}
-
 	/**
 	 * @since 2.0
 	 */
 	public static class PrefixAwareUriBuilderFactory extends DefaultUriBuilderFactory {
 
+		@Nullable
 		private final VaultEndpointProvider endpointProvider;
+
+		public PrefixAwareUriBuilderFactory() {
+			this.endpointProvider = null;
+		}
 
 		public PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider) {
 			this.endpointProvider = endpointProvider;
@@ -208,13 +174,17 @@ public class VaultClients {
 				return UriComponentsBuilder.fromUriString(uriTemplate);
 			}
 
-			VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+			if (endpointProvider != null) {
+				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 
-			String baseUri = toBaseUri(endpoint);
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
-					.build();
+				String baseUri = toBaseUri(endpoint);
+				UriComponents uriComponents = UriComponentsBuilder
+						.fromUriString(prepareUriTemplate(baseUri, uriTemplate)).build();
 
-			return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+				return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+			}
+
+			return UriComponentsBuilder.fromUriString(uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate);
 		}
 
 	}
