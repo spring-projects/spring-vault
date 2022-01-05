@@ -254,6 +254,8 @@
 				<version>${kotlin.version}</version>
 				<configuration>
 					<jvmTarget>${java.version}</jvmTarget>
+					<apiVersion>1.4</apiVersion>
+					<languageVersion>1.4</languageVersion>
 				</configuration>
 				<executions>
 					<execution>
@@ -585,6 +587,12 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.1.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.jfrog.buildinfo</groupId>
+					<artifactId>artifactory-maven-plugin</artifactId>
+					<version>3.3.0</version>
 				</plugin>
 
 			</plugins>
