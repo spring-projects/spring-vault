@@ -44,7 +44,7 @@ public interface VaultPkiOperations {
 	 * Requests a certificate bundle (private key and certificate) from Vault's PKI
 	 * backend given a {@code roleName} and {@link VaultCertificateRequest}. The issuing
 	 * CA certificate is returned as well, so that only the root CA need be in a client's
-	 * trust store. Certificates use DER format and are base64 encoded.
+	 * trust store. Certificates use DER format as default and are base64 encoded.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param certificateRequest must not be {@literal null}.
 	 * @return the {@link VaultCertificateResponse} containing a {@link CertificateBundle}
@@ -60,7 +60,7 @@ public interface VaultPkiOperations {
 	 * Signs a CSR using Vault's PKI backend given a {@code roleName}, {@code csr} and
 	 * {@link VaultCertificateRequest}. The issuing CA certificate is returned as well, so
 	 * that only the root CA need be in a client's trust store. Certificates use DER
-	 * format and are base64 encoded.
+	 * format as default and are base64 encoded.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param csr must not be empty or {@literal null}.
 	 * @param certificateRequest must not be {@literal null}.

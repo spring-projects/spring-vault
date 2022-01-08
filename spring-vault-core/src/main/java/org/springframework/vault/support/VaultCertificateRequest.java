@@ -31,6 +31,8 @@ import org.springframework.util.Assert;
  */
 public class VaultCertificateRequest {
 
+	private static String DEFAULT_FORMAT = "der";
+
 	/**
 	 * The CN of the certificate. Should match the host name.
 	 */
@@ -52,10 +54,40 @@ public class VaultCertificateRequest {
 	private final List<String> uriSubjectAltNames;
 
 	/**
+	 * Specifies custom OID/UTF8-string Subject Alternative Names. These must match values
+	 * specified on the role in {@literal allowed_other_sans}. The format is the same as
+	 * OpenSSL: {@literal <oid>;<type>:<value>} where the only current valid type is UTF8.
+	 * @since 2.4
+	 */
+	private final List<String> otherSans;
+
+	/**
 	 * Requested Time to Live
 	 */
 	@Nullable
 	private final Duration ttl;
+
+	/**
+	 * Specifies the format for returned data. Can be {@literal pem}, {@literal der}, or
+	 * {@literal pem_bundle}; defaults to {@literal der} (in vault api the default is
+	 * {@literal pem}). If der, the output is base64 encoded. If {@literal pem_bundle},
+	 * the certificate field will contain the private key and certificate, concatenated;
+	 * if the issuing CA is not a Vault-derived self-signed root, this will be included as
+	 * well.
+	 * @since 2.4
+	 */
+	@Nullable
+	private final String format;
+
+	/**
+	 * Specifies the format for marshaling the private key. Defaults to {@literal der}
+	 * which will return either base64-encoded DER or PEM-encoded DER, depending on the
+	 * value of {@literal format}. The other option is {@literal pkcs8} which will return
+	 * the key marshalled as PEM-encoded PKCS8.
+	 * @since 2.4
+	 */
+	@Nullable
+	private final String privateKeyFormat;
 
 	/**
 	 * If {@literal true}, the given common name will not be included in DNS or Email
@@ -65,14 +97,18 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
-			List<String> uriSubjectAltNames, @Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
+			List<String> uriSubjectAltNames, List<String> otherSans, @Nullable Duration ttl,
+			boolean excludeCommonNameFromSubjectAltNames, @Nullable String format, @Nullable String privateKeyFormat) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
 		this.uriSubjectAltNames = uriSubjectAltNames;
+		this.otherSans = otherSans;
 		this.ttl = ttl;
 		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
+		this.format = format == null ? DEFAULT_FORMAT : format;
+		this.privateKeyFormat = privateKeyFormat;
 	}
 
 	/**
@@ -107,6 +143,10 @@ public class VaultCertificateRequest {
 		return this.uriSubjectAltNames;
 	}
 
+	public List<String> getOtherSans() {
+		return this.otherSans;
+	}
+
 	@Nullable
 	public Duration getTtl() {
 		return this.ttl;
@@ -114,6 +154,16 @@ public class VaultCertificateRequest {
 
 	public boolean isExcludeCommonNameFromSubjectAltNames() {
 		return this.excludeCommonNameFromSubjectAltNames;
+	}
+
+	@Nullable
+	public String getFormat() {
+		return this.format;
+	}
+
+	@Nullable
+	public String getPrivateKeyFormat() {
+		return this.privateKeyFormat;
 	}
 
 	public static class VaultCertificateRequestBuilder {
@@ -127,10 +177,18 @@ public class VaultCertificateRequest {
 
 		private List<String> uriSubjectAltNames = new ArrayList<>();
 
+		private List<String> otherSans = new ArrayList<>();
+
 		@Nullable
 		private Duration ttl;
 
 		private boolean excludeCommonNameFromSubjectAltNames;
+
+		@Nullable
+		private String format = DEFAULT_FORMAT;
+
+		@Nullable
+		private String privateKeyFormat;
 
 		VaultCertificateRequestBuilder() {
 		}
@@ -231,6 +289,35 @@ public class VaultCertificateRequest {
 		}
 
 		/**
+		 * Configure custom OID/UTF8-string subject alternative names. Replaces previously
+		 * configured other subject alt names.
+		 * @param otherSans must not be {@literal null}.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder otherSans(Iterable<String> otherSans) {
+
+			Assert.notNull(otherSans, "Other subject alt names must not be null");
+
+			this.otherSans = toList(uriSubjectAltNames);
+			return this;
+		}
+
+		/**
+		 * Add custom OID/UTF8-string subject alternative name.
+		 * @param otherSans must not be empty or {@literal null}.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder withOtherSans(String otherSans) {
+
+			Assert.hasText(otherSans, "Other subject alt name must not be empty");
+
+			this.otherSans.add(otherSans);
+			return this;
+		}
+
+		/**
 		 * Configure a TTL.
 		 * @param ttl the time to live, in seconds, must not be negative.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
@@ -288,6 +375,33 @@ public class VaultCertificateRequest {
 		}
 
 		/**
+		 * Configure the format for returned data.
+		 * @param format the format for returned data. Can be {@literal pem},
+		 * {@literal der}, or {@literal pem_bundle}; defaults to {@literal der} in
+		 * {@literal spring-vault} ({@literal pem} in vault).
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder format(String format) {
+
+			this.format = format;
+			return this;
+		}
+
+		/**
+		 * Configure a private key format.
+		 * @param privateKeyFormat the format for marshaling the private key. Defaults to
+		 * {@literal der}.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder privateKeyFormat(String privateKeyFormat) {
+
+			this.privateKeyFormat = privateKeyFormat;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link VaultCertificateRequest} instance. Requires
 		 * {@link #commonName(String)} to be configured.
 		 * @return a new {@link VaultCertificateRequest}.
@@ -333,8 +447,20 @@ public class VaultCertificateRequest {
 				uriSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
 			}
 
+			List<String> otherSans;
+			switch (this.otherSans.size()) {
+			case 0:
+				otherSans = java.util.Collections.emptyList();
+				break;
+			case 1:
+				otherSans = java.util.Collections.singletonList(this.otherSans.get(0));
+				break;
+			default:
+				otherSans = java.util.Collections.unmodifiableList(new ArrayList<>(this.otherSans));
+			}
+
 			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
-					this.ttl, this.excludeCommonNameFromSubjectAltNames);
+					otherSans, this.ttl, this.excludeCommonNameFromSubjectAltNames, this.format, this.privateKeyFormat);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

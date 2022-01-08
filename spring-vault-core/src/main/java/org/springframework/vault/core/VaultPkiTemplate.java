@@ -88,8 +88,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	private <T> T requestCertificate(String roleName, String requestPath, Map<String, Object> request,
 			Class<T> responseType) {
 
-		request.put("format", "der");
-
 		T response = this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
@@ -174,6 +172,10 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 					StringUtils.collectionToDelimitedString(certificateRequest.getUriSubjectAltNames(), ","));
 		}
 
+		if (!certificateRequest.getOtherSans().isEmpty()) {
+			request.put("other_sans", StringUtils.collectionToDelimitedString(certificateRequest.getOtherSans(), ","));
+		}
+
 		if (certificateRequest.getTtl() != null) {
 			request.put("ttl", certificateRequest.getTtl().get(ChronoUnit.SECONDS));
 		}
@@ -181,6 +183,15 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		if (certificateRequest.isExcludeCommonNameFromSubjectAltNames()) {
 			request.put("exclude_cn_from_sans", true);
 		}
+
+		if (certificateRequest.getFormat() != null) {
+			request.put("format", certificateRequest.getFormat());
+		}
+
+		if (certificateRequest.getPrivateKeyFormat() != null) {
+			request.put("private_key_format", certificateRequest.getPrivateKeyFormat());
+		}
+
 		return request;
 	}
 
