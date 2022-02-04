@@ -384,8 +384,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Map<String, Object> request = new LinkedHashMap<>();
 		request.put("input", Base64Utils.encodeToString(signRequest.getPlaintext().getPlaintext()));
 
-		if (StringUtils.hasText(signRequest.getAlgorithm())) {
-			request.put("algorithm", signRequest.getAlgorithm());
+		if (StringUtils.hasText(signRequest.getHashAlgorithm())) {
+			request.put("hash_algorithm", signRequest.getHashAlgorithm());
+		}
+
+		if (StringUtils.hasText(signRequest.getSignatureAlgorithm())) {
+			request.put("signature_algorithm", signRequest.getSignatureAlgorithm());
 		}
 
 		String signature = (String) this.vaultOperations.write(String.format("%s/sign/%s", this.path, keyName), request)
@@ -422,8 +426,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			request.put("signature", verificationRequest.getSignature().getSignature());
 		}
 
-		if (StringUtils.hasText(verificationRequest.getAlgorithm())) {
-			request.put("algorithm", verificationRequest.getAlgorithm());
+		if (StringUtils.hasText(verificationRequest.getHashAlgorithm())) {
+			request.put("hash_algorithm", verificationRequest.getHashAlgorithm());
+		}
+
+		if (StringUtils.hasText(verificationRequest.getSignatureAlgorithm())) {
+			request.put("signature_algorithm", verificationRequest.getSignatureAlgorithm());
 		}
 
 		Map<String, Object> response = this.vaultOperations
