@@ -683,7 +683,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).algorithm("sha2-512").build();
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).hashAlgorithm("sha2-512").build();
 
 		Signature signature = this.transitOperations.sign(keyName, request);
 		assertThat(signature.getSignature()).isNotEmpty();
@@ -723,12 +723,12 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String keyName = createEcdsaP256Key();
 
 		Plaintext plaintext = Plaintext.of("hello-world");
-		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).algorithm("sha2-512").build();
+		VaultSignRequest request = VaultSignRequest.builder().plaintext(plaintext).hashAlgorithm("sha2-512").build();
 
 		Signature signature = this.transitOperations.sign(keyName, request);
 
 		VaultSignatureVerificationRequest verificationRequest = VaultSignatureVerificationRequest.builder()
-				.algorithm("sha2-512").plaintext(plaintext).signature(signature).build();
+				.hashAlgorithm("sha2-512").plaintext(plaintext).signature(signature).build();
 
 		SignatureValidation valid = this.transitOperations.verify(keyName, verificationRequest);
 		assertThat(valid).isEqualTo(SignatureValidation.valid());

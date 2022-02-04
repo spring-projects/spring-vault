@@ -33,15 +33,18 @@ public class VaultSignatureVerificationRequest {
 
 	private final @Nullable Hmac hmac;
 
-	private final @Nullable String algorithm;
+	private final @Nullable String hashAlgorithm;
+
+	private final @Nullable String signatureAlgorithm;
 
 	private VaultSignatureVerificationRequest(Plaintext plaintext, @Nullable Signature signature, @Nullable Hmac hmac,
-			@Nullable String algorithm) {
+			@Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
 
 		this.plaintext = plaintext;
 		this.signature = signature;
 		this.hmac = hmac;
-		this.algorithm = algorithm;
+		this.hashAlgorithm = hashAlgorithm;
+		this.signatureAlgorithm = signatureAlgorithm;
 	}
 
 	/**
@@ -101,12 +104,21 @@ public class VaultSignatureVerificationRequest {
 	}
 
 	/**
-	 * @return algorithm used for verifying the signature or {@literal null} to use the
-	 * default algorithm.
+	 * @return hash algorithm used for verifying the signature or {@literal null} to use
+	 * the default algorithm.
 	 */
 	@Nullable
-	public String getAlgorithm() {
-		return this.algorithm;
+	public String getHashAlgorithm() {
+		return this.hashAlgorithm;
+	}
+
+	/**
+	 * @return signature algorithm used for verifying the signature when using a RSA key
+	 * or {@literal null} to use the default algorithm.
+	 */
+	@Nullable
+	public String getSignatureAlgorithm() {
+		return this.signatureAlgorithm;
 	}
 
 	/**
@@ -120,7 +132,9 @@ public class VaultSignatureVerificationRequest {
 
 		private @Nullable Hmac hmac;
 
-		private @Nullable String algorithm;
+		private @Nullable String hashAlgorithm;
+
+		private @Nullable String signatureAlgorithm;
 
 		/**
 		 * Configure the {@link Plaintext} input to be used to verify the signature.
@@ -168,17 +182,34 @@ public class VaultSignatureVerificationRequest {
 		}
 
 		/**
-		 * Configure the algorithm to be used for the operation.
-		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
-		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * Configure the hash algorithm to be used for the operation.
+		 * @param hashAlgorithm Specify the hash algorithm to be used for the operation.
+		 * Supported algorithms are: {@literal sha1}, {@literal sha2-224},
+		 * {@literal sha2-256}, {@literal sha2-384}, {@literal sha2-512}. Defaults to
+		 * {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 */
-		public VaultSignatureVerificationRequestBuilder algorithm(String algorithm) {
+		public VaultSignatureVerificationRequestBuilder hashAlgorithm(String hashAlgorithm) {
 
-			Assert.hasText(algorithm, "Algorithm must not be null or empty");
+			Assert.hasText(hashAlgorithm, "Hash algorithm must not be null or empty");
 
-			this.algorithm = algorithm;
+			this.hashAlgorithm = hashAlgorithm;
+			return this;
+		}
+
+		/**
+		 * Configure the signature algorithm to be used for the operation when using a RSA
+		 * key.
+		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
+		 * operation. Supported algorithms are: {@literal pss}, {@literal pkcs1v15}.
+		 * Defaults to {@literal pss} if not set.
+		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 */
+		public VaultSignatureVerificationRequestBuilder signatureAlgorithm(String signatureAlgorithm) {
+
+			Assert.hasText(signatureAlgorithm, "Signature algorithm must not be null or empty");
+
+			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
 		}
 
@@ -193,7 +224,8 @@ public class VaultSignatureVerificationRequest {
 			Assert.notNull(this.input, "Plaintext input must not be null");
 			Assert.isTrue(this.hmac != null || this.signature != null, "Either Signature or Hmac must not be null");
 
-			return new VaultSignatureVerificationRequest(this.input, this.signature, this.hmac, this.algorithm);
+			return new VaultSignatureVerificationRequest(this.input, this.signature, this.hmac, this.hashAlgorithm,
+					this.signatureAlgorithm);
 		}
 
 	}

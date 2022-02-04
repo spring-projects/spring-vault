@@ -29,12 +29,15 @@ public class VaultSignRequest {
 
 	private final Plaintext plaintext;
 
-	private final @Nullable String algorithm;
+	private final @Nullable String hashAlgorithm;
 
-	private VaultSignRequest(Plaintext plaintext, @Nullable String algorithm) {
+	private final @Nullable String signatureAlgorithm;
+
+	private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
 
 		this.plaintext = plaintext;
-		this.algorithm = algorithm;
+		this.hashAlgorithm = hashAlgorithm;
+		this.signatureAlgorithm = signatureAlgorithm;
 	}
 
 	/**
@@ -61,12 +64,21 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * @return algorithm used for creating the signature or {@literal null} to use the
-	 * default algorithm.
+	 * @return hashAlgorithm used for creating the signature or {@literal null} to use the
+	 * default hash algorithm.
 	 */
 	@Nullable
-	public String getAlgorithm() {
-		return this.algorithm;
+	public String getHashAlgorithm() {
+		return this.hashAlgorithm;
+	}
+
+	/**
+	 * @return signatureAlgorithm used for creating the signature when using a RSA key or
+	 * {@literal null} to use the default signature algorithm.
+	 */
+	@Nullable
+	public String getSignatureAlgorithm() {
+		return this.signatureAlgorithm;
 	}
 
 	/**
@@ -76,7 +88,9 @@ public class VaultSignRequest {
 
 		private @Nullable Plaintext plaintext;
 
-		private @Nullable String algorithm;
+		private @Nullable String hashAlgorithm;
+
+		private @Nullable String signatureAlgorithm;
 
 		/**
 		 * Configure the input to be used to create the signature.
@@ -92,17 +106,34 @@ public class VaultSignRequest {
 		}
 
 		/**
-		 * Configure the algorithm to be used for the operation.
-		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
-		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * Configure the hash algorithm to be used for the operation.
+		 * @param hashAlgorithm Specify the hash algorithm to be used for the operation.
+		 * Supported algorithms are: {@literal sha1}, {@literal sha2-224},
+		 * {@literal sha2-256}, {@literal sha2-384}, {@literal sha2-512}. Defaults to
+		 * {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultSignRequestBuilder}.
 		 */
-		public VaultSignRequestBuilder algorithm(String algorithm) {
+		public VaultSignRequestBuilder hashAlgorithm(String hashAlgorithm) {
 
-			Assert.hasText(algorithm, "Algorithm must not be null or empty");
+			Assert.hasText(hashAlgorithm, "Hash algorithm must not be null or empty");
 
-			this.algorithm = algorithm;
+			this.hashAlgorithm = hashAlgorithm;
+			return this;
+		}
+
+		/**
+		 * Configure the signature algorithm to be used for the operation when using a RSA
+		 * key.
+		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
+		 * operation. Supported algorithms are: {@literal pss}, {@literal pkcs1v15}.
+		 * Defaults to {@literal pss} if not set.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 */
+		public VaultSignRequestBuilder signatureAlgorithm(String signatureAlgorithm) {
+
+			Assert.hasText(signatureAlgorithm, "Hash algorithm must not be null or empty");
+
+			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
 		}
 
@@ -115,7 +146,7 @@ public class VaultSignRequest {
 
 			Assert.notNull(this.plaintext, "Plaintext input must not be null");
 
-			return new VaultSignRequest(this.plaintext, this.algorithm);
+			return new VaultSignRequest(this.plaintext, this.hashAlgorithm, this.signatureAlgorithm);
 		}
 
 	}
