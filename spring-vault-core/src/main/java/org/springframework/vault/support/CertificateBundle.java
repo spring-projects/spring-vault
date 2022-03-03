@@ -15,6 +15,11 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
@@ -24,13 +29,6 @@ import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
-import org.springframework.vault.VaultException;
 
 /**
  * Value object representing a certificate bundle consisting of a private key, the
@@ -135,16 +133,14 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
-	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is
-	 * DER-encoded.
+	 * Retrieve the private key as {@link KeySpec}.
 	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate
 	 * a {@link java.security.PrivateKey} from this {@link KeySpec}.
 	 */
 	public KeySpec getPrivateKeySpec() {
 
 		try {
-			byte[] bytes = Base64Utils.decodeFromString(getPrivateKey());
-			return KeystoreUtil.getRSAPrivateKeySpec(bytes);
+			return PrivateKeyBuilder.create(getPrivateKey(), getPrivateKeyType());
 		}
 		catch (IOException e) {
 			throw new VaultException("Cannot create KeySpec from private key", e);
@@ -153,8 +149,7 @@ public class CertificateBundle extends Certificate {
 
 	/**
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
-	 * private key and certificate chain. Only supported if certificate and private key
-	 * are DER-encoded.
+	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
@@ -164,8 +159,7 @@ public class CertificateBundle extends Certificate {
 
 	/**
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
-	 * private key and certificate chain. Only supported if certificate and private key
-	 * are DER-encoded.
+	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
 	 * @param includeCaChain whether to include the certificate authority chain instead of
 	 * just the issuer certificate.
@@ -188,7 +182,7 @@ public class CertificateBundle extends Certificate {
 				certificates.add(getX509IssuerCertificate());
 			}
 
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), getPrivateKeyType(),
 					certificates.toArray(new X509Certificate[0]));
 		}
 		catch (GeneralSecurityException | IOException e) {
@@ -197,8 +191,7 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
-	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}. Only
-	 * supported if certificates are DER-encoded.
+	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}.
 	 * @return the issuing CA {@link X509Certificate}.
 	 * @since 2.3.3
 	 */
@@ -208,8 +201,8 @@ public class CertificateBundle extends Certificate {
 
 		for (String data : caChain) {
 			try {
-				byte[] bytes = Base64Utils.decodeFromString(data);
-				certificates.add(KeystoreUtil.getCertificate(bytes));
+				X509Certificate certificate = CertificateBuilder.create(data);
+				certificates.add(certificate);
 			}
 			catch (CertificateException e) {
 				throw new VaultException("Cannot create Certificate from issuing CA certificate", e);

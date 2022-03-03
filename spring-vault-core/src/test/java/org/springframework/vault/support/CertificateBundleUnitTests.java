@@ -21,8 +21,9 @@ import java.security.PrivateKey;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -36,34 +37,133 @@ class CertificateBundleUnitTests {
 
 	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
-	CertificateBundle certificateBundle;
-
-	@SuppressWarnings("unchecked")
-	@BeforeEach
-	void before() throws Exception {
-		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
-
-		this.certificateBundle = CertificateBundle.of(data.get("serial_number"), data.get("certificate"),
-				data.get("issuing_ca"), data.get("private_key"), data.get("private_key_type"));
-	}
-
 	@Test
 	void getPrivateKeySpecShouldCreatePrivateKey() throws Exception {
-
+		CertificateBundle bundle = loadCertificateBundle("/certificate.json");
 		KeyFactory kf = KeyFactory.getInstance("RSA");
-		PrivateKey privateKey = kf.generatePrivate(this.certificateBundle.getPrivateKeySpec());
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
 
 		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
 		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
 	}
 
 	@Test
-	void getAsKeystore() throws Exception {
+	void getPrivateKeySpecShouldCreatePrivateKeyDerRsa() throws Exception {
+		CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-der.json");
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
 
-		KeyStore keyStore = this.certificateBundle.createKeyStore("mykey");
+		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyDerEc() throws Exception {
+		CertificateBundle bundle = loadCertificateBundle("/certificate-response-ec-der.json");
+		KeyFactory kf = KeyFactory.getInstance("ec");
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+		assertThat(privateKey.getAlgorithm()).isEqualTo("EC");
+		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyPemRsa() throws Exception {
+    CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem.json");
+    KeyFactory kf = KeyFactory.getInstance("RSA");
+    PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+    assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+    assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyPemRsaPkcs8ThrowsException() throws Exception {
+    assertThatThrownBy(() -> {
+      CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem-pkcs8.json");
+      KeyFactory kf = KeyFactory.getInstance("RSA");
+      PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+      assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+      assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+    }).isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyPemBundleRsa() throws Exception {
+		CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pembundle.json");
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyPemEc() throws Exception {
+		CertificateBundle bundle = loadCertificateBundle("/certificate-response-ec-pem.json");
+		KeyFactory kf = KeyFactory.getInstance("ec");
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+		assertThat(privateKey.getAlgorithm()).isEqualTo("EC");
+		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+	}
+
+	@Test
+	void getPrivateKeySpecShouldCreatePrivateKeyPemEcPkcs8ThrowsException() throws Exception {
+    assertThatThrownBy(() -> {
+      CertificateBundle bundle = loadCertificateBundle("/certificate-response-ec-pem-pkcs8.json");
+      KeyFactory kf = KeyFactory.getInstance("ec");
+      PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+
+      assertThat(privateKey.getAlgorithm()).isEqualTo("EC");
+      assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+    }).isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@Test
+	void getAsKeystore() throws Exception {
+		CertificateBundle bundle = loadCertificateBundle("/certificate.json");
+		KeyStore keyStore = bundle.createKeyStore("mykey");
 
 		assertThat(keyStore.size()).isEqualTo(1);
 		assertThat(keyStore.getCertificateChain("mykey")).hasSize(2);
+	}
+
+  @ParameterizedTest
+  @ValueSource(strings = {
+      "/certificate-response-rsa-pem.json",
+      "/certificate-response-rsa-der.json",
+        "/certificate-response-rsa-pembundle.json",
+      "/certificate-response-ec-pem.json",
+      "/certificate-response-ec-der.json",
+      "/certificate-response-ec-pembundle.json"})
+  void createKeystore(String path) throws Exception {
+    CertificateBundle bundle = loadCertificateBundle(path);
+    KeyStore keyStore = bundle.createKeyStore("localhost");
+
+    assertThat(keyStore).isNotNull();
+  }
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"/certificate-response-rsa-pem-pkcs8.json",
+			"/certificate-response-ec-pem-pkcs8.json"})
+	void createKeystoreNotSupportedThrowsException(String path) {
+		assertThatThrownBy(() -> {
+			CertificateBundle bundle = loadCertificateBundle(path);
+			KeyStore keyStore = bundle.createKeyStore("localhost");
+
+			assertThat(keyStore).isNotNull();
+		}).isInstanceOf(UnsupportedOperationException.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	CertificateBundle loadCertificateBundle(String path) throws Exception {
+		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource(path), Map.class);
+
+		return CertificateBundle.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"),
+				data.get("private_key"), data.get("private_key_type"));
 	}
 
 }
