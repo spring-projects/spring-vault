@@ -69,24 +69,24 @@ class CertificateBundleUnitTests {
 
 	@Test
 	void getPrivateKeySpecShouldCreatePrivateKeyPemRsa() throws Exception {
-    CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem.json");
-    KeyFactory kf = KeyFactory.getInstance("RSA");
-    PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+		CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem.json");
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
 
-    assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
-    assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+		assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
 	}
 
 	@Test
 	void getPrivateKeySpecShouldCreatePrivateKeyPemRsaPkcs8ThrowsException() throws Exception {
-    assertThatThrownBy(() -> {
-      CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem-pkcs8.json");
-      KeyFactory kf = KeyFactory.getInstance("RSA");
-      PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+		assertThatThrownBy(() -> {
+			CertificateBundle bundle = loadCertificateBundle("/certificate-response-rsa-pem-pkcs8.json");
+			KeyFactory kf = KeyFactory.getInstance("RSA");
+			PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
 
-      assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
-      assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
-    }).isInstanceOf(UnsupportedOperationException.class);
+			assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+			assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+		}).isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -111,14 +111,14 @@ class CertificateBundleUnitTests {
 
 	@Test
 	void getPrivateKeySpecShouldCreatePrivateKeyPemEcPkcs8ThrowsException() throws Exception {
-    assertThatThrownBy(() -> {
-      CertificateBundle bundle = loadCertificateBundle("/certificate-response-ec-pem-pkcs8.json");
-      KeyFactory kf = KeyFactory.getInstance("ec");
-      PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
+		assertThatThrownBy(() -> {
+			CertificateBundle bundle = loadCertificateBundle("/certificate-response-ec-pem-pkcs8.json");
+			KeyFactory kf = KeyFactory.getInstance("ec");
+			PrivateKey privateKey = kf.generatePrivate(bundle.getPrivateKeySpec());
 
-      assertThat(privateKey.getAlgorithm()).isEqualTo("EC");
-      assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
-    }).isInstanceOf(UnsupportedOperationException.class);
+			assertThat(privateKey.getAlgorithm()).isEqualTo("EC");
+			assertThat(privateKey.getFormat()).isEqualTo("PKCS#8");
+		}).isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -130,25 +130,19 @@ class CertificateBundleUnitTests {
 		assertThat(keyStore.getCertificateChain("mykey")).hasSize(2);
 	}
 
-  @ParameterizedTest
-  @ValueSource(strings = {
-      "/certificate-response-rsa-pem.json",
-      "/certificate-response-rsa-der.json",
-        "/certificate-response-rsa-pembundle.json",
-      "/certificate-response-ec-pem.json",
-      "/certificate-response-ec-der.json",
-      "/certificate-response-ec-pembundle.json"})
-  void createKeystore(String path) throws Exception {
-    CertificateBundle bundle = loadCertificateBundle(path);
-    KeyStore keyStore = bundle.createKeyStore("localhost");
+	@ParameterizedTest
+	@ValueSource(strings = { "/certificate-response-rsa-pem.json", "/certificate-response-rsa-der.json",
+			"/certificate-response-rsa-pembundle.json", "/certificate-response-ec-pem.json",
+			"/certificate-response-ec-der.json", "/certificate-response-ec-pembundle.json" })
+	void createKeystore(String path) throws Exception {
+		CertificateBundle bundle = loadCertificateBundle(path);
+		KeyStore keyStore = bundle.createKeyStore("localhost");
 
-    assertThat(keyStore).isNotNull();
-  }
+		assertThat(keyStore).isNotNull();
+	}
 
 	@ParameterizedTest
-	@ValueSource(strings = {
-			"/certificate-response-rsa-pem-pkcs8.json",
-			"/certificate-response-ec-pem-pkcs8.json"})
+	@ValueSource(strings = { "/certificate-response-rsa-pem-pkcs8.json", "/certificate-response-ec-pem-pkcs8.json" })
 	void createKeystoreNotSupportedThrowsException(String path) {
 		assertThatThrownBy(() -> {
 			CertificateBundle bundle = loadCertificateBundle(path);

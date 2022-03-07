@@ -21,23 +21,24 @@ import java.security.spec.KeySpec;
 /**
  * Implements a RSA strategy for private key support.
  *
- *  @author Alex Bremora
- *  @since 2.4
+ * @author Alex Bremora
+ * @since 2.4
  */
 class RsaPrivateKeyStrategy implements PrivateKeyStrategy {
 
-  @Override
-  public String getName() {
-    return "rsa";
-  }
+	@Override
+	public String getName() {
+		return "rsa";
+	}
 
-  @Override
-  public KeySpec getKeySpec(byte[] privateKey) {
-    try {
-      return KeystoreUtil.getRSAPrivateKeySpec(privateKey);
-    }
-    catch (IOException ex){
-      throw new IllegalStateException("Error create KeySpec for RSA private key", ex);
-    }
-  }
+	@Override
+	public KeySpec getKeySpec(byte[] privateKey) {
+		try {
+			return KeystoreUtil.getRSAPrivateKeySpec(privateKey);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Error create KeySpec for RSA private key", ex);
+		}
+	}
+
 }

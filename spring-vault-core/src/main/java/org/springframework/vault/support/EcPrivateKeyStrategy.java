@@ -34,28 +34,29 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
  */
 class EcPrivateKeyStrategy implements PrivateKeyStrategy {
 
-  @Override
-  public String getName() {
-    return "ec";
-  }
+	@Override
+	public String getName() {
+		return "ec";
+	}
 
-  @Override
-  public KeySpec getKeySpec(byte[] privateKey) {
-    ECPrivateKey ecPrivateKey = ECPrivateKey.getInstance(privateKey);
-    ASN1ObjectIdentifier parameters = (ASN1ObjectIdentifier) ecPrivateKey.getParameters();
+	@Override
+	public KeySpec getKeySpec(byte[] privateKey) {
+		ECPrivateKey ecPrivateKey = ECPrivateKey.getInstance(privateKey);
+		ASN1ObjectIdentifier parameters = (ASN1ObjectIdentifier) ecPrivateKey.getParameters();
 
-    X9ECParameters curveParameter = X962NamedCurves.getByOID(parameters);
+		X9ECParameters curveParameter = X962NamedCurves.getByOID(parameters);
 
-    EllipticCurve ellipticCurve = new EllipticCurve(
-        new ECFieldFp(curveParameter.getCurve().getField().getCharacteristic()),
-        curveParameter.getCurve().getA().toBigInteger(), curveParameter.getCurve().getB().toBigInteger());
+		EllipticCurve ellipticCurve = new EllipticCurve(
+				new ECFieldFp(curveParameter.getCurve().getField().getCharacteristic()),
+				curveParameter.getCurve().getA().toBigInteger(), curveParameter.getCurve().getB().toBigInteger());
 
-    ECPoint gPoint = new ECPoint(curveParameter.getG().getXCoord().toBigInteger(),
-        curveParameter.getG().getYCoord().toBigInteger());
+		ECPoint gPoint = new ECPoint(curveParameter.getG().getXCoord().toBigInteger(),
+				curveParameter.getG().getYCoord().toBigInteger());
 
-    ECParameterSpec paramSpec = new ECParameterSpec(ellipticCurve, gPoint, curveParameter.getN(),
-        curveParameter.getH().intValue());
+		ECParameterSpec paramSpec = new ECParameterSpec(ellipticCurve, gPoint, curveParameter.getN(),
+				curveParameter.getH().intValue());
 
-    return new ECPrivateKeySpec(ecPrivateKey.getKey(), paramSpec);
-  }
+		return new ECPrivateKeySpec(ecPrivateKey.getKey(), paramSpec);
+	}
+
 }

@@ -27,48 +27,49 @@ import org.junit.jupiter.api.Test;
  */
 public class PemReaderTests {
 
-  @Test
-  void parseNullReturnsEmptyList() {
-    String input = null;
+	@Test
+	void parseNullReturnsEmptyList() {
+		String input = null;
 
-    List<PemItem> items = PemReader.parse(input);
+		List<PemItem> items = PemReader.parse(input);
 
-    assertThat(items).hasSize(0);
-  }
+		assertThat(items).hasSize(0);
+	}
 
-  @Test
-  void parseEmptyStringReturnsEmptyList() {
-    String input = "";
+	@Test
+	void parseEmptyStringReturnsEmptyList() {
+		String input = "";
 
-    List<PemItem> items = PemReader.parse(input);
+		List<PemItem> items = PemReader.parse(input);
 
-    assertThat(items).hasSize(0);
-  }
+		assertThat(items).hasSize(0);
+	}
 
-  @Test
-  void parseValidPemReturnsOneItem() {
-    String input = "-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----";
+	@Test
+	void parseValidPemReturnsOneItem() {
+		String input = "-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----";
 
-    List<PemItem> items = PemReader.parse(input);
+		List<PemItem> items = PemReader.parse(input);
 
-    assertThat(items).hasSize(1);
-  }
+		assertThat(items).hasSize(1);
+	}
 
-  @Test
-  void parseValidPemBundleCertificatePrivateKeyReturnsTwoItems() {
-    String input = "-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----\n-----BEGIN RSA PRIVATE KEY-----\nF00\n-----END RSA PRIVATE KEY-----";
+	@Test
+	void parseValidPemBundleCertificatePrivateKeyReturnsTwoItems() {
+		String input = "-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----\n-----BEGIN RSA PRIVATE KEY-----\nF00\n-----END RSA PRIVATE KEY-----";
 
-    List<PemItem> items = PemReader.parse(input);
+		List<PemItem> items = PemReader.parse(input);
 
-    assertThat(items).hasSize(2);
-  }
+		assertThat(items).hasSize(2);
+	}
 
-  @Test
-  void parseValidPemBundlePrivateKeyCertificateReturnsTwoItems() {
-    String input = "-----BEGIN RSA PRIVATE KEY-----\nF00\n-----END RSA PRIVATE KEY-----\n-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----";
+	@Test
+	void parseValidPemBundlePrivateKeyCertificateReturnsTwoItems() {
+		String input = "-----BEGIN RSA PRIVATE KEY-----\nF00\n-----END RSA PRIVATE KEY-----\n-----BEGIN CERTIFICATE-----\nF00\n-----END CERTIFICATE-----";
 
-    List<PemItem> items = PemReader.parse(input);
+		List<PemItem> items = PemReader.parse(input);
 
-    assertThat(items).hasSize(2);
-  }
+		assertThat(items).hasSize(2);
+	}
+
 }

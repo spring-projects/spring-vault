@@ -65,169 +65,169 @@ import static org.springframework.vault.util.Settings.*;
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
-  private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
+	private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
 
-  private static final Version PRIVATE_KEY_TYPE_FROM = Version.parse("0.7.0");
+	private static final Version PRIVATE_KEY_TYPE_FROM = Version.parse("0.7.0");
 
-  @Autowired
-  VaultOperations vaultOperations;
+	@Autowired
+	VaultOperations vaultOperations;
 
-  VaultPkiOperations pkiOperations;
+	VaultPkiOperations pkiOperations;
 
-  @BeforeEach
-  void before() {
+	@BeforeEach
+	void before() {
 
-    this.pkiOperations = this.vaultOperations.opsForPki();
+		this.pkiOperations = this.vaultOperations.opsForPki();
 
-    if (!prepare().hasSecret("pki")) {
-      prepare().mountSecret("pki");
-    }
+		if (!prepare().hasSecret("pki")) {
+			prepare().mountSecret("pki");
+		}
 
-    File workDir = findWorkDir(new File(System.getProperty("user.dir")));
-    String caCert = Files.contentOf(new File(workDir, "ca/certs/ca.cert.pem"), "US-ASCII");
-    String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
-    String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
+		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
+		String caCert = Files.contentOf(new File(workDir, "ca/certs/ca.cert.pem"), "US-ASCII");
+		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
+		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
 
-    Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key + caCert);
+		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key + caCert);
 
-    this.vaultOperations.write("pki/config/ca", pembundle);
+		this.vaultOperations.write("pki/config/ca", pembundle);
 
-    Map<String, String> role = new HashMap<String, String>();
-    role.put("allowed_domains", "localhost,example.com");
-    role.put("allow_subdomains", "true");
-    role.put("allow_localhost", "true");
-    role.put("allow_ip_sans", "true");
-    role.put("max_ttl", "72h");
+		Map<String, String> role = new HashMap<String, String>();
+		role.put("allowed_domains", "localhost,example.com");
+		role.put("allow_subdomains", "true");
+		role.put("allow_localhost", "true");
+		role.put("allow_ip_sans", "true");
+		role.put("max_ttl", "72h");
 
-    this.vaultOperations.write("pki/roles/testrole", role);
-  }
+		this.vaultOperations.write("pki/roles/testrole", role);
+	}
 
-  @Test
-  void issueCertificateShouldCreateCertificate() throws KeyStoreException {
+	@Test
+	void issueCertificateShouldCreateCertificate() throws KeyStoreException {
 
-    VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
 
-    VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
-    CertificateBundle data = certificateResponse.getRequiredData();
+		CertificateBundle data = certificateResponse.getRequiredData();
 
-    assertThat(data.getPrivateKey()).isNotEmpty();
+		assertThat(data.getPrivateKey()).isNotEmpty();
 
-    if (prepare().getVersion().isGreaterThanOrEqualTo(PRIVATE_KEY_TYPE_FROM)) {
-      assertThat(data.getPrivateKeyType()).isEqualTo("rsa");
-      assertThat(data.getCertificateFormat()).isEqualTo(CertificateEncoding.DER);
-      assertThat(data.getIssuingCaCertificateFormat()).isEqualTo(CertificateEncoding.DER);
-    }
+		if (prepare().getVersion().isGreaterThanOrEqualTo(PRIVATE_KEY_TYPE_FROM)) {
+			assertThat(data.getPrivateKeyType()).isEqualTo("rsa");
+			assertThat(data.getCertificateFormat()).isEqualTo(CertificateEncoding.DER);
+			assertThat(data.getIssuingCaCertificateFormat()).isEqualTo(CertificateEncoding.DER);
+		}
 
-    assertThat(data.getCertificate()).isNotEmpty();
-    assertThat(data.getIssuingCaCertificate()).isNotEmpty();
-    assertThat(data.getSerialNumber()).isNotEmpty();
-    assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
-    assertThat(data.getX509IssuerCertificates()).hasSize(2);
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
+		assertThat(data.getSerialNumber()).isNotEmpty();
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
-    KeyStore keyStore = data.createKeyStore("vault");
-    assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
+		KeyStore keyStore = data.createKeyStore("vault");
+		assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
 
-    KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
-    assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
-  }
+		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
+		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
+	}
 
-  @Test
-  @RequiresVaultVersion(NO_TTL_UNIT_REQUIRED_FROM)
-  void issueCertificateWithTtlShouldCreateCertificate() {
+	@Test
+	@RequiresVaultVersion(NO_TTL_UNIT_REQUIRED_FROM)
+	void issueCertificateWithTtlShouldCreateCertificate() {
 
-    VaultCertificateRequest request = VaultCertificateRequest.builder().ttl(Duration.ofHours(48))
-                                                             .commonName("hello.example.com").build();
+		VaultCertificateRequest request = VaultCertificateRequest.builder().ttl(Duration.ofHours(48))
+				.commonName("hello.example.com").build();
 
-    VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
-    X509Certificate certificate = certificateResponse.getRequiredData().getX509Certificate();
+		X509Certificate certificate = certificateResponse.getRequiredData().getX509Certificate();
 
-    Instant now = Instant.now();
-    assertThat(certificate.getNotAfter()).isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
-                                         .isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
-  }
+		Instant now = Instant.now();
+		assertThat(certificate.getNotAfter()).isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
+				.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
+	}
 
-  @Test
-  void signShouldSignCsr() {
+	@Test
+	void signShouldSignCsr() {
 
-    String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
-        + "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
-        + "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
-        + "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
-        + "dmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVlDBT1gAONIp4\n"
-        + "GQQ7BWDeqNzlscWqu5oQyfvw6oNFZzYWGVTgX/n72biv8d1Wx30MWpVYhbL0mk9m\n"
-        + "Uu15elMZHPb4F4bk8VDSiB9527SwAd/QpkNC1RsPp2h6g2LvGPJ2eidHSlLtF2To\n"
-        + "A4i6z0K0++nvYKSf9Af0sod2Z51xc9uPj/oN5z/8BQuGoCBpxJqgl7N/csMICixY\n"
-        + "2fQcCUbdPPqE9INIInUHe3mPE/yvxko9aYGZ5jnrdZyiQaRRKBdWpvbRLKXQ78Fz\n"
-        + "vXR3G33yn9JAN6wl1A916DiXzy2xHT19vyAn1hBUj2M6KFXChQ30oxTyTOqHCMLP\n"
-        + "m/BSEOsPAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAYFssueiUh3YGxnXcQ4dp\n"
-        + "ZqVWeVyOuGGaFJ4BA0drwJ9Mt/iNmPUTGE2oBNnh2R7e7HwGcNysFHZZOZBEQ0Hh\n"
-        + "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
-        + "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
-        + "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
-        + "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
-        + "-----END CERTIFICATE REQUEST-----";
+		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
+				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
+				+ "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
+				+ "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
+				+ "dmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVlDBT1gAONIp4\n"
+				+ "GQQ7BWDeqNzlscWqu5oQyfvw6oNFZzYWGVTgX/n72biv8d1Wx30MWpVYhbL0mk9m\n"
+				+ "Uu15elMZHPb4F4bk8VDSiB9527SwAd/QpkNC1RsPp2h6g2LvGPJ2eidHSlLtF2To\n"
+				+ "A4i6z0K0++nvYKSf9Af0sod2Z51xc9uPj/oN5z/8BQuGoCBpxJqgl7N/csMICixY\n"
+				+ "2fQcCUbdPPqE9INIInUHe3mPE/yvxko9aYGZ5jnrdZyiQaRRKBdWpvbRLKXQ78Fz\n"
+				+ "vXR3G33yn9JAN6wl1A916DiXzy2xHT19vyAn1hBUj2M6KFXChQ30oxTyTOqHCMLP\n"
+				+ "m/BSEOsPAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAYFssueiUh3YGxnXcQ4dp\n"
+				+ "ZqVWeVyOuGGaFJ4BA0drwJ9Mt/iNmPUTGE2oBNnh2R7e7HwGcNysFHZZOZBEQ0Hh\n"
+				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
+				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
+				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "-----END CERTIFICATE REQUEST-----";
 
-    VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("hello.example.com");
 
-    VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
-        csr, request);
+		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
+				csr, request);
 
-    Certificate data = certificateResponse.getRequiredData();
+		Certificate data = certificateResponse.getRequiredData();
 
-    assertThat(data.getCertificate()).isNotEmpty();
-    assertThat(data.getIssuingCaCertificate()).isNotEmpty();
-    assertThat(data.getSerialNumber()).isNotEmpty();
-    assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=csr.example.com");
-    assertThat(data.createTrustStore()).isNotNull();
-  }
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
+		assertThat(data.getSerialNumber()).isNotEmpty();
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=csr.example.com");
+		assertThat(data.createTrustStore()).isNotNull();
+	}
 
-  @Test
-  void issueCertificateFail() {
+	@Test
+	void issueCertificateFail() {
 
-    VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
+		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
-    assertThatExceptionOfType(VaultException.class)
-        .isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
-  }
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
+	}
 
-  @Test
-  void shouldRevokeCertificate() throws Exception {
+	@Test
+	void shouldRevokeCertificate() throws Exception {
 
-    VaultCertificateRequest request = VaultCertificateRequest.create("foo.example.com");
+		VaultCertificateRequest request = VaultCertificateRequest.create("foo.example.com");
 
-    VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
-    BigInteger serial = new BigInteger(
-        certificateResponse.getRequiredData().getSerialNumber().replaceAll("\\:", ""), 16);
-    this.pkiOperations.revoke(certificateResponse.getRequiredData().getSerialNumber());
+		BigInteger serial = new BigInteger(
+				certificateResponse.getRequiredData().getSerialNumber().replaceAll("\\:", ""), 16);
+		this.pkiOperations.revoke(certificateResponse.getRequiredData().getSerialNumber());
 
-    try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
+		try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
 
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-      X509CRL crl = (X509CRL) cf.generateCRL(in);
+			X509CRL crl = (X509CRL) cf.generateCRL(in);
 
-      assertThat(crl.getRevokedCertificate(serial)).isNotNull();
-    }
-  }
+			assertThat(crl.getRevokedCertificate(serial)).isNotNull();
+		}
+	}
 
-  @Test
-  void shouldReturnCrl() throws Exception {
+	@Test
+	void shouldReturnCrl() throws Exception {
 
-    try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
+		try (InputStream in = this.pkiOperations.getCrl(Encoding.DER)) {
 
-      CertificateFactory cf = CertificateFactory.getInstance("X.509");
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
-      assertThat(cf.generateCRL(in)).isInstanceOf(X509CRL.class);
-    }
+			assertThat(cf.generateCRL(in)).isInstanceOf(X509CRL.class);
+		}
 
-    try (InputStream crl = this.pkiOperations.getCrl(Encoding.PEM)) {
+		try (InputStream crl = this.pkiOperations.getCrl(Encoding.PEM)) {
 
-      byte[] bytes = StreamUtils.copyToByteArray(crl);
-      assertThat(bytes).isNotEmpty();
-    }
-  }
+			byte[] bytes = StreamUtils.copyToByteArray(crl);
+			assertThat(bytes).isNotEmpty();
+		}
+	}
 
 }

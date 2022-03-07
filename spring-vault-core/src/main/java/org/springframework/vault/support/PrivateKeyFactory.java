@@ -20,22 +20,26 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Factory for {@link PrivateKeyStrategy}. Supports {@link RsaPrivateKeyStrategy} and {@link EcPrivateKeyStrategy}.
+ * Factory for {@link PrivateKeyStrategy}. Supports {@link RsaPrivateKeyStrategy} and
+ * {@link EcPrivateKeyStrategy}.
  *
  * @author Alex Bremora
  * @since 2.4
  */
 class PrivateKeyFactory {
-  private static final List<PrivateKeyStrategy> privateKeyStrategies = Arrays.asList(
-      new RsaPrivateKeyStrategy(),
-      new EcPrivateKeyStrategy());
 
-  public static PrivateKeyStrategy create(String privateKeyType) {
-    Optional<PrivateKeyStrategy> optionalPrivateKeyStrategy = privateKeyStrategies.stream().filter(f -> f.getName().equalsIgnoreCase(privateKeyType)).findFirst();
-    return optionalPrivateKeyStrategy.isPresent() ? optionalPrivateKeyStrategy.get() : null;
-  }
+	private static final List<PrivateKeyStrategy> privateKeyStrategies = Arrays.asList(new RsaPrivateKeyStrategy(),
+			new EcPrivateKeyStrategy());
 
-  public static boolean isTypeSupported(String privateKeyType){
-    return privateKeyStrategies.stream().filter(f -> f.getName().equalsIgnoreCase(privateKeyType)).findFirst().isPresent();
-  }
+	public static PrivateKeyStrategy create(String privateKeyType) {
+		Optional<PrivateKeyStrategy> optionalPrivateKeyStrategy = privateKeyStrategies.stream()
+				.filter(f -> f.getName().equalsIgnoreCase(privateKeyType)).findFirst();
+		return optionalPrivateKeyStrategy.isPresent() ? optionalPrivateKeyStrategy.get() : null;
+	}
+
+	public static boolean isTypeSupported(String privateKeyType) {
+		return privateKeyStrategies.stream().filter(f -> f.getName().equalsIgnoreCase(privateKeyType)).findFirst()
+				.isPresent();
+	}
+
 }

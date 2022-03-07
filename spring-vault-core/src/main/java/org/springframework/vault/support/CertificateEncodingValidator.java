@@ -16,8 +16,8 @@
 package org.springframework.vault.support;
 
 /**
- * Simple validator which analysis the encoding of the certificate. Checks encoding based on
- * prefixes. Does not verify the content.
+ * Simple validator which analysis the encoding of the certificate. Checks encoding based
+ * on prefixes. Does not verify the content.
  *
  * @author Alex Bremora
  * @since 2.4

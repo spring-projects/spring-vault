@@ -29,13 +29,13 @@ import java.util.Optional;
  */
 class CertificateBuilder {
 
-  /**
-   * Creates a {@link X509Certificate}. Supports the formats {@literal DER}, {@literal PEM} and {@literal PEM_BUNDLE}.
-   *
-   * @param certificate Base64 encoded certificate.
-   * @return {@link X509Certificate}
-   * @throws CertificateException
-   */
+	/**
+	 * Creates a {@link X509Certificate}. Supports the formats {@literal DER},
+	 * {@literal PEM} and {@literal PEM_BUNDLE}.
+	 * @param certificate Base64 encoded certificate.
+	 * @return {@link X509Certificate}
+	 * @throws CertificateException
+	 */
 	public static X509Certificate create(String certificate) throws CertificateException {
 		CertificateEncoding format = CertificateEncodingValidator.getFormat(certificate);
 
@@ -59,12 +59,13 @@ class CertificateBuilder {
 
 	private static X509Certificate createCertificateFromPemOrPemBundle(String certificateBundle)
 			throws CertificateException {
-    Optional<PemItem> pemItem = PemReader.parse(certificateBundle)
-			.stream().filter(p -> p.isCertificate()).findFirst();
-    if(!pemItem.isPresent()) {
-      throw new CertificateException("No certificate found");
-    }
+		Optional<PemItem> pemItem = PemReader.parse(certificateBundle).stream().filter(p -> p.isCertificate())
+				.findFirst();
+		if (!pemItem.isPresent()) {
+			throw new CertificateException("No certificate found");
+		}
 
-    return KeystoreUtil.getCertificate(pemItem.get().getContent());
+		return KeystoreUtil.getCertificate(pemItem.get().getContent());
 	}
+
 }

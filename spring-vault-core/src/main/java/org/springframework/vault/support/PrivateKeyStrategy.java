@@ -20,20 +20,21 @@ import java.security.spec.KeySpec;
 /**
  * Base type for private key support.
  *
- *  @author Alex Bremora
- *  @since 2.4
+ * @author Alex Bremora
+ * @since 2.4
  */
 interface PrivateKeyStrategy {
 
-  /**
-   * Get name of the implemented strategy.
-   * @return name of the strategy.
-   */
-  String getName();
+	/**
+	 * Get name of the implemented strategy.
+	 * @return name of the strategy.
+	 */
+	String getName();
 
-  /**
-   * Get {@link KeySpec} of the implemented strategy.
-   * @return {@link KeySpec} of the strategy.
-   */
-  KeySpec getKeySpec(byte[] privateKey);
+	/**
+	 * Get {@link KeySpec} of the implemented strategy.
+	 * @return {@link KeySpec} of the strategy.
+	 */
+	KeySpec getKeySpec(byte[] privateKey);
+
 }

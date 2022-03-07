@@ -21,9 +21,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Simple reader for {@literal PEM} files.
- * Unlike {@link PemObject} {@link PemReader} is responsible for reading {@literal PEM} content only. The {@link PemItem} is the representation of a single object within the {@literal PEM} structure.
- * Furthermore {@link PemReader} has no dependencies to cryptographical implementations.
+ * Simple reader for {@literal PEM} files. Unlike {@link PemObject} {@link PemReader} is
+ * responsible for reading {@literal PEM} content only. The {@link PemItem} is the
+ * representation of a single object within the {@literal PEM} structure. Furthermore
+ * {@link PemReader} has no dependencies to cryptographical implementations.
  *
  * @author Alex Bremora
  * @since 2.4
@@ -39,13 +40,14 @@ class PemReader {
 	private static final String REGEX_PEM_START = "(?=(-{5}BEGIN))";
 
 	public static List<PemItem> parse(String content) {
-    if(content == null) {
-      return new ArrayList<>(0);
-    }
+		if (content == null) {
+			return new ArrayList<>(0);
+		}
 
 		String[] pemContents = content.trim().split(REGEX_PEM_START);
 
 		return Arrays.stream(pemContents).filter(c -> c != null && !c.isEmpty()).map(c -> PemItem.parse(c))
 				.collect(Collectors.toList());
 	}
+
 }

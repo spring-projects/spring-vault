@@ -21,8 +21,8 @@ import org.springframework.util.Base64Utils;
 import org.springframework.vault.support.PemItem.PemItemType;
 
 /**
- * Private key builder. Reads {@literal DER} and {@literal PEM} encoded content
- * but {@literal pkcs8} is not supported.
+ * Private key builder. Reads {@literal DER} and {@literal PEM} encoded content but
+ * {@literal pkcs8} is not supported.
  *
  * @author Alex Bremora
  * @since 2.4
@@ -75,12 +75,12 @@ class PrivateKeyBuilder {
 	}
 
 	private static KeySpec createKeySpecFromDer(String privateKeyType, byte[] privateKey) throws IOException {
-    PrivateKeyStrategy privateKeyStrategy = PrivateKeyFactory.create(privateKeyType);
-    if(privateKeyStrategy == null) {
-      throw new UnsupportedOperationException("Private key type not supported: " + privateKeyType);
-    }
+		PrivateKeyStrategy privateKeyStrategy = PrivateKeyFactory.create(privateKeyType);
+		if (privateKeyStrategy == null) {
+			throw new UnsupportedOperationException("Private key type not supported: " + privateKeyType);
+		}
 
-    return privateKeyStrategy.getKeySpec(privateKey);
+		return privateKeyStrategy.getKeySpec(privateKey);
 	}
 
 	private static String getFormatForPrivateKey(PemItemType pemItemType) {
@@ -99,4 +99,5 @@ class PrivateKeyBuilder {
 			throw new IllegalStateException("Unexpected value: " + pemItemType);
 		}
 	}
+
 }

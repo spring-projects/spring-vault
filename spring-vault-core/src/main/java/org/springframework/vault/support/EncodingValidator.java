@@ -37,11 +37,11 @@ class EncodingValidator {
 
 	public static final Pattern REGEX_DER = Pattern.compile("^([0-9a-f]|\\s)+$");
 
-  /**
-   * Check if content is of type {@literal DER}.
-   * @param content the content to check.
-   * @return {@literal true} if content is of type {@literal DER}.
-   */
+	/**
+	 * Check if content is of type {@literal DER}.
+	 * @param content the content to check.
+	 * @return {@literal true} if content is of type {@literal DER}.
+	 */
 	public static boolean isDer(String content) {
 		try {
 			byte[] decodedCertificate = Base64.getDecoder().decode(content);
@@ -56,12 +56,11 @@ class EncodingValidator {
 		}
 	}
 
-  /**
-   * Check if content is of type {@literal PEM}.
-   *
-   * @param content the content to check.
-   * @return {@literal true} if content is of type {@literal PEM}.
-   */
+	/**
+	 * Check if content is of type {@literal PEM}.
+	 * @param content the content to check.
+	 * @return {@literal true} if content is of type {@literal PEM}.
+	 */
 	public static boolean isPem(String content) {
 		return content.startsWith(PEM_PREFIX_BEGIN);
 	}
