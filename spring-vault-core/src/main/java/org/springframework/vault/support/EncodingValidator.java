@@ -15,12 +15,11 @@
  */
 package org.springframework.vault.support;
 
-import java.security.spec.KeySpec;
 import java.util.Base64;
 import java.util.regex.Pattern;
 
 /**
- * Base encoding validator Builder for {@link KeySpec}.
+ * Base encoding validator.
  *
  * @author Alex Bremora
  * @since 2.4
