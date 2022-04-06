@@ -65,6 +65,7 @@ import static org.springframework.vault.util.Settings.*;
 class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
+
 	private static final Version PRIVATE_KEY_TYPE_FROM = Version.parse("0.7.0");
 
 	@Autowired
@@ -118,8 +119,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal()
-				.getName()).isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
 		KeyStore keyStore = data.createKeyStore("vault");
