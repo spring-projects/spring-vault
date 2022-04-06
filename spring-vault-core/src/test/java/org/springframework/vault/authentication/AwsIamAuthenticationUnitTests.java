@@ -17,7 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 
-import com.amazonaws.auth.BasicAWSCredentials;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -67,7 +68,7 @@ class AwsIamAuthenticationUnitTests {
 								+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
-				.credentials(new BasicAWSCredentials("foo", "bar")).build();
+				.credentials(AwsBasicCredentials.create("foo", "bar")).build();
 		AwsIamAuthentication sut = new AwsIamAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
@@ -90,7 +91,7 @@ class AwsIamAuthenticationUnitTests {
 								+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
-				.credentials(new BasicAWSCredentials("foo", "bar")).build();
+				.credentials(AwsBasicCredentials.create("foo", "bar")).build();
 
 		AuthenticationSteps steps = AwsIamAuthentication.createAuthenticationSteps(options);
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);

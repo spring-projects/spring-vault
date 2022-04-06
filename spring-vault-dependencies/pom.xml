@@ -63,7 +63,7 @@
 		<netty.version>4.1.72.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<jackson-databind.version>2.13.3</jackson-databind.version>
-		<aws-java-sdk.version>1.11.975</aws-java-sdk.version>
+		<aws-java-sdk.version>2.17.152</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev20210226-1.31.0</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>1.2.2</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>0.22.2</google-auth-library-oauth2-http.version>
@@ -131,8 +131,8 @@
 
 			<!-- AWS SDK -->
 			<dependency>
-				<groupId>com.amazonaws</groupId>
-				<artifactId>aws-java-sdk-core</artifactId>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>auth</artifactId>
 				<version>${aws-java-sdk.version}</version>
 				<optional>true</optional>
 			</dependency>
