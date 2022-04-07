@@ -28,6 +28,8 @@ import software.amazon.awssdk.auth.signer.Aws4Signer;
 import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -209,9 +211,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 				.method(SdkHttpMethod.POST).uri(options.getEndpointUri());
 		SdkHttpFullRequest request = builder.build();
 
+		Region region = DefaultAwsRegionProviderChain.builder().build().getRegion();
 		Aws4Signer signer = Aws4Signer.create();
 		Aws4SignerParams signerParams = Aws4SignerParams.builder().awsCredentials(credentials).signingName("sts")
-				.build();
+				.signingRegion(region).build();
 		signer.sign(request, signerParams);
 
 		Map<String, Object> map = new LinkedHashMap<>();
