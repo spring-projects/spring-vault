@@ -165,7 +165,7 @@
 
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>sdk-core</artifactId>
+			<artifactId>auth</artifactId>
 			<optional>true</optional>
 			<exclusions>
 				<exclusion>

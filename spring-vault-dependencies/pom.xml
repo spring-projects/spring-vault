@@ -132,7 +132,7 @@
 			<!-- AWS SDK -->
 			<dependency>
 				<groupId>software.amazon.awssdk</groupId>
-				<artifactId>sdk-core</artifactId>
+				<artifactId>auth</artifactId>
 				<version>${aws-java-sdk.version}</version>
 				<optional>true</optional>
 			</dependency>

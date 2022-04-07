@@ -17,9 +17,9 @@ package org.springframework.vault.authentication;
 
 import java.net.URI;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
 /**
  * Authentication options for {@link AwsIamAuthentication}.
  * <p>
- * Authentication options provide the path, a {@link AWSCredentialsProvider} optional role
+ * Authentication options provide the path, a {@link AwsCredentialsProvider} optional role
  * and server name ({@literal Vault-AWS-IAM-Server-ID} header).
  * {@link AwsIamAuthenticationOptions} can be constructed using {@link #builder()}.
  * Instances of this class are immutable once constructed.
@@ -49,7 +49,7 @@ public class AwsIamAuthenticationOptions {
 	/**
 	 * Credential provider.
 	 */
-	private final AWSCredentialsProvider credentialsProvider;
+	private final AwsCredentialsProvider credentialsProvider;
 
 	/**
 	 * Name of the role against which the login is being attempted. If role is not
@@ -71,7 +71,7 @@ public class AwsIamAuthenticationOptions {
 	 */
 	private final URI endpointUri;
 
-	private AwsIamAuthenticationOptions(String path, AWSCredentialsProvider credentialsProvider, @Nullable String role,
+	private AwsIamAuthenticationOptions(String path, AwsCredentialsProvider credentialsProvider, @Nullable String role,
 			@Nullable String serverId, URI endpointUri) {
 
 		this.path = path;
@@ -98,7 +98,7 @@ public class AwsIamAuthenticationOptions {
 	/**
 	 * @return the credentials provider to obtain AWS credentials.
 	 */
-	public AWSCredentialsProvider getCredentialsProvider() {
+	public AwsCredentialsProvider getCredentialsProvider() {
 		return this.credentialsProvider;
 	}
 
@@ -147,7 +147,7 @@ public class AwsIamAuthenticationOptions {
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;
 
 		@Nullable
-		private AWSCredentialsProvider credentialsProvider;
+		private AwsCredentialsProvider credentialsProvider;
 
 		@Nullable
 		private String role;
@@ -176,29 +176,29 @@ public class AwsIamAuthenticationOptions {
 		/**
 		 * Configure static AWS credentials, required to calculate the signature. Either
 		 * use static credentials or provide a
-		 * {@link #credentialsProvider(AWSCredentialsProvider) credentials provider}.
+		 * {@link #credentialsProvider(AwsCredentialsProvider) credentials provider}.
 		 * @param credentials must not be {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
-		 * @see #credentialsProvider(AWSCredentialsProvider)
+		 * @see #credentialsProvider(AwsCredentialsProvider)
 		 */
-		public AwsIamAuthenticationOptionsBuilder credentials(AWSCredentials credentials) {
+		public AwsIamAuthenticationOptionsBuilder credentials(AwsCredentials credentials) {
 
 			Assert.notNull(credentials, "Credentials must not be null");
 
-			return credentialsProvider(new AWSStaticCredentialsProvider(credentials));
+			return credentialsProvider(StaticCredentialsProvider.create(credentials));
 		}
 
 		/**
-		 * Configure an {@link AWSCredentialsProvider}, required to calculate the
-		 * signature. Alternatively, configure static {@link #credentials(AWSCredentials)
+		 * Configure an {@link AwsCredentialsProvider}, required to calculate the
+		 * signature. Alternatively, configure static {@link #credentials(AwsCredentials)
 		 * credentials}.
 		 * @param credentialsProvider must not be {@literal null}.
 		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
-		 * @see #credentials(AWSCredentials)
+		 * @see #credentials(AwsCredentials)
 		 */
-		public AwsIamAuthenticationOptionsBuilder credentialsProvider(AWSCredentialsProvider credentialsProvider) {
+		public AwsIamAuthenticationOptionsBuilder credentialsProvider(AwsCredentialsProvider credentialsProvider) {
 
-			Assert.notNull(credentialsProvider, "AWSCredentialsProvider must not be null");
+			Assert.notNull(credentialsProvider, "AwsCredentialsProvider must not be null");
 
 			this.credentialsProvider = credentialsProvider;
 			return this;
