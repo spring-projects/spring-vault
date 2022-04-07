@@ -215,11 +215,11 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Aws4Signer signer = Aws4Signer.create();
 		Aws4SignerParams signerParams = Aws4SignerParams.builder().awsCredentials(credentials).signingName("sts")
 				.signingRegion(region).build();
-		signer.sign(request, signerParams);
+		SdkHttpFullRequest signedRequest = signer.sign(request, signerParams);
 
 		Map<String, Object> map = new LinkedHashMap<>();
 
-		for (Entry<String, List<String>> entry : request.headers().entrySet()) {
+		for (Entry<String, List<String>> entry : signedRequest.headers().entrySet()) {
 			map.put(entry.getKey(), entry.getValue());
 		}
 
