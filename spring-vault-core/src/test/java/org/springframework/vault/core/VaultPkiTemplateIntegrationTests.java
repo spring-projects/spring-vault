@@ -159,7 +159,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	void issueCertificateUsingFormat(KeyFixture keyFixture) throws Exception {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com").format(keyFixture.format)
+				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
+				.privateKeyFormat(keyFixture.privateKeyFormat)
+				.format(keyFixture.format)
 				.build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations

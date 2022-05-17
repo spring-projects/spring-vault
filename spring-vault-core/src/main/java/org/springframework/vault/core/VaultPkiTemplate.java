@@ -181,6 +181,15 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		if (certificateRequest.isExcludeCommonNameFromSubjectAltNames()) {
 			request.put("exclude_cn_from_sans", true);
 		}
+
+		if (StringUtils.hasText(certificateRequest.getFormat())) {
+			request.put("format", certificateRequest.getFormat());
+		}
+
+		if (StringUtils.hasText(certificateRequest.getPrivateKeyFormat())) {
+			request.put("private_key_format", certificateRequest.getPrivateKeyFormat());
+		}
+
 		return request;
 	}
 
