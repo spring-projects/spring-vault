@@ -26,12 +26,12 @@ import java.util.Optional;
 
 import org.springframework.core.CollectionFactory;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.data.convert.EntityInstantiator;
 import org.springframework.data.mapping.MappingException;
+import org.springframework.data.mapping.Parameter;
 import org.springframework.data.mapping.PersistentPropertyAccessor;
-import org.springframework.data.mapping.PreferredConstructor.Parameter;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mapping.model.ConvertingPropertyAccessor;
+import org.springframework.data.mapping.model.EntityInstantiator;
 import org.springframework.data.mapping.model.ParameterValueProvider;
 import org.springframework.data.mapping.model.PersistentEntityParameterValueProvider;
 import org.springframework.data.mapping.model.PropertyValueProvider;
@@ -156,7 +156,6 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			@Nullable
 			@Override
 			public <T> T getParameterValue(Parameter<T, VaultPersistentProperty> parameter) {
-
 				Object value = parameterProvider.getParameterValue(parameter);
 				return value != null ? readValue(value, parameter.getType()) : null;
 			}

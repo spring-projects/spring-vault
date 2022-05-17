@@ -16,6 +16,7 @@
 package org.springframework.vault.repository.query;
 
 import org.springframework.data.keyvalue.core.KeyValueOperations;
+import org.springframework.data.keyvalue.core.query.KeyValueQuery;
 import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.ParameterAccessor;
@@ -44,7 +45,7 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 	 * @param keyValueOperations must not be {@literal null}.
 	 * @param queryCreator must not be {@literal null}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public VaultPartTreeQuery(QueryMethod queryMethod, QueryMethodEvaluationContextProvider evaluationContextProvider,
 			KeyValueOperations keyValueOperations, Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 
@@ -52,7 +53,8 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 				new VaultQueryCreatorFactory((MappingContext) keyValueOperations.getMappingContext()));
 	}
 
-	static class VaultQueryCreatorFactory implements QueryCreatorFactory<VaultQueryCreator> {
+	static class VaultQueryCreatorFactory
+			implements KeyValuePartTreeQuery.QueryCreatorFactory<AbstractQueryCreator<KeyValueQuery<?>, ?>> {
 
 		private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
@@ -62,8 +64,10 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 		}
 
 		@Override
-		public VaultQueryCreator queryCreatorFor(PartTree partTree, ParameterAccessor accessor) {
-			return new VaultQueryCreator(partTree, accessor, this.mappingContext);
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		public AbstractQueryCreator<KeyValueQuery<?>, ?> queryCreatorFor(PartTree partTree,
+				ParameterAccessor accessor) {
+			return (AbstractQueryCreator) new VaultQueryCreator(partTree, accessor, this.mappingContext);
 		}
 
 	}
