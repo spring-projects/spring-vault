@@ -31,8 +31,8 @@ import org.springframework.vault.VaultException;
 
 /**
  * Value object representing a certificate consisting of the certificate and the issuer
- * certificate. Certificate and keys can be either DER or PEM (including PEM bundle) encoded.
- * Certificates can be obtained as {@link X509Certificate}.
+ * certificate. Certificate and keys can be either DER or PEM (including PEM bundle)
+ * encoded. Certificates can be obtained as {@link X509Certificate}.
  *
  * @author Mark Paluch
  * @since 2.0
