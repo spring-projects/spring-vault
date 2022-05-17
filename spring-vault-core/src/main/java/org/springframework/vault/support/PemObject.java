@@ -15,20 +15,26 @@
  */
 package org.springframework.vault.support;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
+import java.security.GeneralSecurityException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 
 /**
- * Represents a PEM object that is internally decoded to a DER object. Typically used to
+ * Represents a PEM object that is internally decoded to a DER object. Typically, used to
  * obtain a {@link RSAPrivateCrtKeySpec}.
  * <p>
  * Mainly for use within the framework.
@@ -38,36 +44,28 @@ import org.springframework.util.Base64Utils;
  */
 public class PemObject {
 
-	private static final Pattern PRIVATE_KEY_PATTERN = Pattern
-			.compile("-+BEGIN\\s+.*PRIVATE\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+" + // Header
-					"([a-z0-9+/=\\r\\n]+)" + // Base64 text
-					"-+END\\s+.*PRIVATE\\s+KEY[^-]*-+", // Footer
-					Pattern.CASE_INSENSITIVE);
+	private static final Pattern BEGIN_PATTERN = Pattern.compile("-----BEGIN ([A-Z ]+)-----");
 
-	private static final Pattern PUBLIC_KEY_PATTERN = Pattern
-			.compile("-+BEGIN\\s+.*PUBLIC\\s+KEY[^-]*-+(?:\\s|\\r|\\n)+" + // Header
-					"([a-z0-9+/=\\r\\n]+)" + // Base64 text
-					"-+END\\s+.*PUBLIC\\s+KEY[^-]*-+", // Footer
-					Pattern.CASE_INSENSITIVE);
+	private static final Pattern END_PATTERN = Pattern.compile("-----END ([A-Z ]+)-----");
 
-	private static final Pattern CERTIFICATE_PATTERN = Pattern
-			.compile("-+BEGIN\\s+.*CERTIFICATE[^-]*-+(?:\\s|\\r|\\n)+" + // Header
-					"([a-z0-9+/=\\r\\n]+)" + // Base64 text
-					"-+END\\s+.*CERTIFICATE[^-]*-+", // Footer
-					Pattern.CASE_INSENSITIVE);
-
-	private static final Pattern[] PATTERNS = new Pattern[] { PRIVATE_KEY_PATTERN, PUBLIC_KEY_PATTERN,
-			CERTIFICATE_PATTERN };
+	private final PemObjectType objectType;
 
 	private final byte[] content;
 
-	private final Pattern matchingPattern;
+	private PemObject(PemObjectType objectType, String content) {
 
-	private PemObject(String content, Pattern matchingPattern) {
-		this.matchingPattern = matchingPattern;
-
+		this.objectType = objectType;
 		String sanitized = content.replaceAll("\r", "").replaceAll("\n", "");
 		this.content = Base64Utils.decodeFromString(sanitized);
+	}
+
+	/**
+	 * Check whether the content is PEM-encoded.
+	 * @param content the content to inspect
+	 * @return {@code true} if PEM-encoded.
+	 */
+	public static boolean isPemEncoded(String content) {
+		return BEGIN_PATTERN.matcher(content).find() && END_PATTERN.matcher(content).find();
 	}
 
 	/**
@@ -81,12 +79,8 @@ public class PemObject {
 	 */
 	public static PemObject fromKey(String content) {
 
-		Matcher m = PRIVATE_KEY_PATTERN.matcher(content);
-		if (!m.find()) {
-			throw new IllegalArgumentException("Could not find a PKCS #8 private key");
-		}
-
-		return new PemObject(m.group(1), PRIVATE_KEY_PATTERN);
+		return parse(content).stream().filter(PemObject::isPrivateKey).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Could not find a PKCS #8 private key"));
 	}
 
 	/**
@@ -120,42 +114,59 @@ public class PemObject {
 	public static List<PemObject> parse(String content) {
 
 		List<PemObject> objects = new ArrayList<>();
-		int index = 0;
 
-		boolean found;
+		try (BufferedReader reader = new BufferedReader(new StringReader(content))) {
 
-		do {
-			found = false;
+			PemObject object;
 
-			Matcher discoveredMatcher = null;
-			int indexDiscoveredIndex = 0;
-
-			for (Pattern pattern : PATTERNS) {
-
-				Matcher m = pattern.matcher(content);
-
-				if (!m.find(index)) {
-					continue;
-				}
-
-				// discover which pattern is the next applicable one.
-				if (indexDiscoveredIndex == 0 || indexDiscoveredIndex > m.start()) {
-					discoveredMatcher = m;
-					indexDiscoveredIndex = m.start();
-				}
+			while ((object = readNextSection(reader)) != null) {
+				objects.add(object);
 			}
-
-			// extract using the matching pattern.
-			if (discoveredMatcher != null) {
-				found = true;
-				index = discoveredMatcher.end();
-				objects.add(new PemObject(discoveredMatcher.group(1), discoveredMatcher.pattern()));
-			}
-
 		}
-		while (found);
+		catch (IOException e) {
+			throw new RuntimeException("No way this could happen with a StringReader underneath", e);
+		}
 
 		return objects;
+	}
+
+	/**
+	 * Reads the next object from the PEM content.
+	 * @return next object or {@code null} for end of file
+	 */
+	@Nullable
+	static PemObject readNextSection(BufferedReader reader) throws IOException {
+		String title = null;
+		StringBuilder keyBuilder = null;
+		while (true) {
+			String line = reader.readLine();
+			;
+			if (line == null) {
+				Assert.isTrue(title == null, "missing end tag " + title);
+				return null;
+			}
+			if (keyBuilder == null) {
+				Matcher m = BEGIN_PATTERN.matcher(line);
+				if (m.matches()) {
+					String curTitle = m.group(1);
+					keyBuilder = new StringBuilder();
+					title = curTitle;
+				}
+			}
+			else {
+				Matcher m = END_PATTERN.matcher(line);
+				if (m.matches()) {
+					String endTitle = m.group(1);
+
+					if (!endTitle.equals(title)) {
+						throw new IllegalArgumentException(
+								String.format("end tag (%s) doesn't match begin tag (%s)", endTitle, title));
+					}
+					return new PemObject(PemObjectType.of(title), keyBuilder.toString());
+				}
+				keyBuilder.append(line);
+			}
+		}
 	}
 
 	/**
@@ -163,7 +174,8 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public boolean isCertificate() {
-		return this.matchingPattern.equals(CERTIFICATE_PATTERN);
+		return PemObjectType.CERTIFICATE == this.objectType || PemObjectType.X509_CERTIFICATE == this.objectType
+				|| PemObjectType.TRUSTED_CERTIFICATE == this.objectType;
 	}
 
 	/**
@@ -171,7 +183,8 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public boolean isPrivateKey() {
-		return this.matchingPattern.equals(PRIVATE_KEY_PATTERN);
+		return PemObjectType.PRIVATE_KEY == this.objectType || PemObjectType.EC_PRIVATE_KEY == this.objectType
+				|| PemObjectType.RSA_PRIVATE_KEY == this.objectType;
 	}
 
 	/**
@@ -179,7 +192,7 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public boolean isPublicKey() {
-		return this.matchingPattern.equals(PUBLIC_KEY_PATTERN);
+		return PemObjectType.PUBLIC_KEY == this.objectType || PemObjectType.RSA_PUBLIC_KEY == this.objectType;
 	}
 
 	/**
@@ -213,6 +226,25 @@ public class PemObject {
 	}
 
 	/**
+	 * Retrieve one or more {@link X509Certificate}s.
+	 * @return the {@link X509Certificate}s.
+	 * @since 2.4
+	 */
+	public List<X509Certificate> getCertificates() {
+
+		if (!isCertificate()) {
+			throw new IllegalStateException("PEM object is not a certificate");
+		}
+
+		try {
+			return Collections.unmodifiableList(KeystoreUtil.getCertificates(this.content));
+		}
+		catch (CertificateException e) {
+			throw new IllegalStateException("Cannot obtain Certificates", e);
+		}
+	}
+
+	/**
 	 * Retrieve a {@link RSAPrivateCrtKeySpec}.
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 * @since 2.3
@@ -224,9 +256,9 @@ public class PemObject {
 		}
 
 		try {
-			return KeystoreUtil.getRSAPrivateKeySpec(this.content);
+			return KeyFactories.RSA_PRIVATE.getKey(this.content);
 		}
-		catch (IOException e) {
+		catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException("Cannot obtain PrivateKey", e);
 		}
 	}
@@ -242,11 +274,54 @@ public class PemObject {
 		}
 
 		try {
-			return KeystoreUtil.getRSAPublicKeySpec(this.content);
+			return KeyFactories.RSA_PUBLIC.getKey(this.content);
 		}
-		catch (IOException e) {
+		catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException("Cannot obtain PrivateKey", e);
 		}
+	}
+
+	byte[] getContent() {
+		return content;
+	}
+
+	enum PemObjectType {
+
+		CERTIFICATE_REQUEST("CERTIFICATE REQUEST"), NEW_CERTIFICATE_REQUEST("NEW CERTIFICATE REQUEST"), CERTIFICATE(
+				"CERTIFICATE"), TRUSTED_CERTIFICATE("TRUSTED CERTIFICATE"), X509_CERTIFICATE(
+						"X509 CERTIFICATE"), X509_CRL("X509 CRL"), PKCS7("PKCS7"), CMS("CMS"), ATTRIBUTE_CERTIFICATE(
+								"ATTRIBUTE CERTIFICATE"), EC_PARAMETERS(
+										"EC PARAMETERS"), PUBLIC_KEY("PUBLIC KEY"), RSA_PUBLIC_KEY(
+												"RSA PUBLIC KEY"), RSA_PRIVATE_KEY("RSA PRIVATE KEY"), EC_PRIVATE_KEY(
+														"EC PRIVATE KEY"), ENCRYPTED_PRIVATE_KEY(
+																"ENCRYPTED PRIVATE KEY"), PRIVATE_KEY("PRIVATE KEY");
+
+		// cache
+		private static final PemObjectType[] constants = values();
+
+		private final String name;
+
+		PemObjectType(String value) {
+			this.name = value;
+		}
+
+		public String toString() {
+			return name;
+		}
+
+		public static PemObjectType of(String identifier) {
+
+			Assert.hasText(identifier, "Identifier must not be empty");
+
+			for (PemObjectType constant : constants) {
+				if (constant.name.equalsIgnoreCase(identifier)) {
+					return constant;
+				}
+			}
+
+			throw new IllegalArgumentException(String.format("No enum constant %s", identifier));
+		}
+
 	}
 
 }

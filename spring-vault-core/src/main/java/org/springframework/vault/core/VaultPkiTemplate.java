@@ -88,7 +88,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	private <T> T requestCertificate(String roleName, String requestPath, Map<String, Object> request,
 			Class<T> responseType) {
 
-		request.put("format", "der");
+		request.putIfAbsent("format", "der");
 
 		T response = this.vaultOperations.doWithSession(restOperations -> {
 

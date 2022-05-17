@@ -58,6 +58,20 @@ public class VaultCertificateRequest {
 	private final Duration ttl;
 
 	/**
+	 * Specifies the format for returned data. Can be pem, der, or pem_bundle; defaults to
+	 * pem
+	 */
+	private final String format;
+
+	/**
+	 * Specifies the format for marshaling the private key. Defaults to der which will
+	 * return either base64-encoded DER or PEM-encoded DER, depending on the value of
+	 * format. The other option is pkcs8 which will return the key marshalled as
+	 * PEM-encoded PKCS8.
+	 */
+	private final String privateKeyFormat;
+
+	/**
 	 * If {@literal true}, the given common name will not be included in DNS or Email
 	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
 	 * email address, but is instead some human-readable identifier.
@@ -65,13 +79,16 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
-			List<String> uriSubjectAltNames, @Nullable Duration ttl, boolean excludeCommonNameFromSubjectAltNames) {
+			List<String> uriSubjectAltNames, @Nullable Duration ttl, String format, String privateKeyFormat,
+			boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
 		this.uriSubjectAltNames = uriSubjectAltNames;
 		this.ttl = ttl;
+		this.format = format;
+		this.privateKeyFormat = privateKeyFormat;
 		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 	}
 
@@ -112,6 +129,14 @@ public class VaultCertificateRequest {
 		return this.ttl;
 	}
 
+	public String getFormat() {
+		return format;
+	}
+
+	public String getPrivateKeyFormat() {
+		return privateKeyFormat;
+	}
+
 	public boolean isExcludeCommonNameFromSubjectAltNames() {
 		return this.excludeCommonNameFromSubjectAltNames;
 	}
@@ -129,6 +154,10 @@ public class VaultCertificateRequest {
 
 		@Nullable
 		private Duration ttl;
+
+		private String format;
+
+		private String privateKeyFormat;
 
 		private boolean excludeCommonNameFromSubjectAltNames;
 
@@ -276,6 +305,36 @@ public class VaultCertificateRequest {
 		}
 
 		/**
+		 * Configure the certificate format.
+		 * @param format the certificate format to use. Can be {@code pem}, {@code der},
+		 * or {@code pem_bundle}
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder format(String format) {
+
+			Assert.hasText(format, "Format must not be empty or null");
+
+			this.format = format;
+			return this;
+		}
+
+		/**
+		 * Configure the key format.
+		 * @param format the key format to use. Can be {@code pem}, {@code der}, or
+		 * {@code pkcs8}
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 2.4
+		 */
+		public VaultCertificateRequestBuilder privateKeyFormat(String privateKeyFormat) {
+
+			Assert.hasText(privateKeyFormat, "Private key format must not be empty or null");
+
+			this.privateKeyFormat = privateKeyFormat;
+			return this;
+		}
+
+		/**
 		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
 		 * appropriate). Useful if the CN is not a hostname or email address, but is
 		 * instead some human-readable identifier.
@@ -334,7 +393,7 @@ public class VaultCertificateRequest {
 			}
 
 			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
-					this.ttl, this.excludeCommonNameFromSubjectAltNames);
+					this.ttl, this.format, this.privateKeyFormat, this.excludeCommonNameFromSubjectAltNames);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

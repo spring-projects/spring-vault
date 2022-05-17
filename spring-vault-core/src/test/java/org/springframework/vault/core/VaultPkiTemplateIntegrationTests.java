@@ -26,15 +26,21 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -65,12 +71,25 @@ import static org.springframework.vault.util.Settings.*;
 class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
+
 	private static final Version PRIVATE_KEY_TYPE_FROM = Version.parse("0.7.0");
 
 	@Autowired
 	VaultOperations vaultOperations;
 
 	VaultPkiOperations pkiOperations;
+
+	enum KeyType {
+
+		rsa(2048), ec(256);
+
+		private final int bits;
+
+		KeyType(int bits) {
+			this.bits = bits;
+		}
+
+	}
 
 	@BeforeEach
 	void before() {
@@ -98,6 +117,13 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		role.put("max_ttl", "72h");
 
 		this.vaultOperations.write("pki/roles/testrole", role);
+
+		for (KeyType value : KeyType.values()) {
+			role.put("key_type", value.name());
+			role.put("key_bits", "" + value.bits);
+			this.vaultOperations.write("pki/roles/testrole-" + value.name(), role);
+		}
+
 	}
 
 	@Test
@@ -118,8 +144,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getIssuingCaCertificate()).isNotEmpty();
 		assertThat(data.getSerialNumber()).isNotEmpty();
-		assertThat(data.getX509Certificate().getSubjectX500Principal()
-				.getName()).isEqualTo("CN=hello.example.com");
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
 		KeyStore keyStore = data.createKeyStore("vault");
@@ -127,6 +152,70 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
 		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
+	}
+
+	@ParameterizedTest
+	@MethodSource("keyTypeFixtures")
+	void issueCertificateUsingFormat(KeyFixture keyFixture) throws Exception {
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com").format(keyFixture.format)
+				.build();
+
+		VaultCertificateResponse certificateResponse = this.pkiOperations
+				.issueCertificate("testrole-" + keyFixture.keyType.name(), request);
+
+		CertificateBundle data = certificateResponse.getRequiredData();
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
+				.isEqualTo("CN=" + request.getCommonName());
+		assertThat(data.getX509IssuerCertificates()).hasSize(2);
+
+		assertThat(data.getPrivateKeySpec()).isNotNull();
+
+		KeyStore keyStore = data.createKeyStore("vault");
+		assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
+
+		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
+		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
+	}
+
+	static Stream<KeyFixture> keyTypeFixtures() {
+
+		List<String> formats = Arrays.asList("pem", "pem_bundle", "der");
+		List<String> privateKeyFormats = Arrays.asList("der", "pkcs8");
+
+		List<KeyFixture> fixtures = new ArrayList<>();
+
+		for (KeyType keyType : KeyType.values()) {
+
+			for (String privateKeyFormat : privateKeyFormats) {
+				for (String format : formats) {
+					fixtures.add(new KeyFixture(format, privateKeyFormat, keyType));
+				}
+			}
+
+		}
+
+		return fixtures.stream();
+	}
+
+	static class KeyFixture {
+
+		private final String format, privateKeyFormat;
+
+		private final KeyType keyType;
+
+		KeyFixture(String format, String privateKeyFormat, KeyType keyType) {
+			this.format = format;
+			this.privateKeyFormat = privateKeyFormat;
+			this.keyType = keyType;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("[%s, %s, %s]", format, privateKeyFormat, keyType);
+		}
+
 	}
 
 	@Test

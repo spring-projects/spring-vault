@@ -20,6 +20,8 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -29,8 +31,8 @@ import org.springframework.vault.VaultException;
 
 /**
  * Value object representing a certificate consisting of the certificate and the issuer
- * certificate. Certificate and keys can be either DER or PEM encoded. DER-encoded
- * certificates can be converted to a {@link X509Certificate}.
+ * certificate. Certificate and keys can be either DER or PEM (including PEM bundle) encoded.
+ * Certificates can be obtained as {@link X509Certificate}.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -92,15 +94,30 @@ public class Certificate {
 	}
 
 	/**
-	 * Retrieve the certificate as {@link X509Certificate}. Only supported if certificate
-	 * is DER-encoded.
+	 * Retrieve the certificate as {@link X509Certificate}.
 	 * @return the {@link X509Certificate}.
+	 * @throws IllegalStateException if there is no X.509 certificate available.
 	 */
 	public X509Certificate getX509Certificate() {
+		return doGetCertificate(getCertificate());
+	}
+
+	/**
+	 * Retrieve the issuing CA certificate as {@link X509Certificate}.
+	 * @return the issuing CA {@link X509Certificate}.
+	 */
+	public X509Certificate getX509IssuerCertificate() {
+		return doGetCertificate(getIssuingCaCertificate());
+	}
+
+	private X509Certificate doGetCertificate(String cert) {
 
 		try {
-			byte[] bytes = Base64Utils.decodeFromString(getCertificate());
-			return KeystoreUtil.getCertificate(bytes);
+			List<X509Certificate> certificates = getCertificates(cert);
+			if (certificates.isEmpty()) {
+				throw new IllegalStateException("No certificate found");
+			}
+			return certificates.get(0);
 		}
 		catch (CertificateException e) {
 			throw new VaultException("Cannot create Certificate from certificate", e);
@@ -108,24 +125,8 @@ public class Certificate {
 	}
 
 	/**
-	 * Retrieve the issuing CA certificate as {@link X509Certificate}. Only supported if
-	 * certificate is DER-encoded.
-	 * @return the issuing CA {@link X509Certificate}.
-	 */
-	public X509Certificate getX509IssuerCertificate() {
-
-		try {
-			byte[] bytes = Base64Utils.decodeFromString(getIssuingCaCertificate());
-			return KeystoreUtil.getCertificate(bytes);
-		}
-		catch (CertificateException e) {
-			throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
-		}
-	}
-
-	/**
 	 * Create a trust store as {@link KeyStore} from this {@link Certificate} containing
-	 * the certificate chain. Only supported if certificate is DER-encoded.
+	 * the certificate chain.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
 	public KeyStore createTrustStore() {
@@ -136,6 +137,28 @@ public class Certificate {
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
+	}
+
+	static List<X509Certificate> getCertificates(String certificates) throws CertificateException {
+
+		Assert.hasText(certificates, "Certificates must not be empty");
+
+		List<X509Certificate> result = new ArrayList<>(1);
+		if (PemObject.isPemEncoded(certificates)) {
+
+			List<PemObject> pemObjects = PemObject.parse(certificates);
+
+			for (PemObject pemObject : pemObjects) {
+				if (pemObject.isCertificate()) {
+					result.add(pemObject.getCertificate());
+				}
+			}
+		}
+		else {
+			result.addAll(KeystoreUtil.getCertificates(Base64Utils.decodeFromString(certificates)));
+		}
+
+		return result;
 	}
 
 }

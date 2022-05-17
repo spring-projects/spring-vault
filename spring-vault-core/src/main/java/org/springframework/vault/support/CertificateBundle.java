@@ -24,7 +24,9 @@ import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.lang.Nullable;
@@ -35,15 +37,19 @@ import org.springframework.vault.VaultException;
 /**
  * Value object representing a certificate bundle consisting of a private key, the
  * certificate and the issuer certificate. Certificate and keys can be either DER or PEM
- * encoded. DER-encoded certificates can be converted to a {@link KeySpec} and
- * {@link X509Certificate}.
+ * encoded. RSA and Elliptic Curve keys and certificates can be converted to a
+ * {@link KeySpec} respective {@link X509Certificate} object. Supports creation of
+ * {@link #createKeyStore(String) key stores} that contain the key and the certificate
+ * chain.
  *
  * @author Mark Paluch
  * @author Alex Bremora
  * @see #getPrivateKeySpec()
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
+ * @see PemObject
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
@@ -135,26 +141,39 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
-	 * Retrieve the private key as {@link KeySpec}. Only supported if private key is
-	 * DER-encoded.
+	 * @return the required private key type, can be {@literal null}.
+	 * @since 2.4
+	 * @throws IllegalStateException if the private key type is {@literal null}
+	 */
+	public String getRequiredPrivateKeyType() {
+
+		String privateKeyType = getPrivateKeyType();
+
+		if (privateKeyType == null) {
+			throw new IllegalStateException("Private key type is not set");
+		}
+
+		return privateKeyType;
+	}
+
+	/**
+	 * Retrieve the private key as {@link KeySpec}.
 	 * @return the private {@link KeySpec}. {@link java.security.KeyFactory} can generate
 	 * a {@link java.security.PrivateKey} from this {@link KeySpec}.
 	 */
 	public KeySpec getPrivateKeySpec() {
 
 		try {
-			byte[] bytes = Base64Utils.decodeFromString(getPrivateKey());
-			return KeystoreUtil.getRSAPrivateKeySpec(bytes);
+			return getPrivateKey(getPrivateKey(), getRequiredPrivateKeyType());
 		}
-		catch (IOException e) {
+		catch (IOException | GeneralSecurityException e) {
 			throw new VaultException("Cannot create KeySpec from private key", e);
 		}
 	}
 
 	/**
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
-	 * private key and certificate chain. Only supported if certificate and private key
-	 * are DER-encoded.
+	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
@@ -164,8 +183,7 @@ public class CertificateBundle extends Certificate {
 
 	/**
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
-	 * private key and certificate chain. Only supported if certificate and private key
-	 * are DER-encoded.
+	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
 	 * @param includeCaChain whether to include the certificate authority chain instead of
 	 * just the issuer certificate.
@@ -197,8 +215,7 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
-	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}. Only
-	 * supported if certificates are DER-encoded.
+	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}.
 	 * @return the issuing CA {@link X509Certificate}.
 	 * @since 2.3.3
 	 */
@@ -208,8 +225,7 @@ public class CertificateBundle extends Certificate {
 
 		for (String data : caChain) {
 			try {
-				byte[] bytes = Base64Utils.decodeFromString(data);
-				certificates.add(KeystoreUtil.getCertificate(bytes));
+				certificates.addAll(getCertificates(data));
 			}
 			catch (CertificateException e) {
 				throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
@@ -217,6 +233,43 @@ public class CertificateBundle extends Certificate {
 		}
 
 		return certificates;
+	}
+
+	private static KeySpec getPrivateKey(String privateKey, String keyType)
+			throws GeneralSecurityException, IOException {
+
+		Assert.hasText(privateKey, "Private key must not be empty");
+		Assert.hasText(keyType, "Private key type must not be empty");
+
+		if (PemObject.isPemEncoded(privateKey)) {
+
+			List<PemObject> pemObjects = PemObject.parse(privateKey);
+
+			for (PemObject pemObject : pemObjects) {
+
+				if (pemObject.isPrivateKey()) {
+					return getPrivateKey(pemObject.getContent(), keyType);
+				}
+			}
+
+			throw new IllegalArgumentException("No private key found in PEM-encoded key spec");
+		}
+
+		return getPrivateKey(Base64Utils.decodeFromString(privateKey), keyType);
+	}
+
+	private static KeySpec getPrivateKey(byte[] privateKey, String keyType)
+			throws GeneralSecurityException, IOException {
+
+		switch (keyType.toLowerCase(Locale.ROOT)) {
+		case "rsa":
+			return KeyFactories.RSA_PRIVATE.getKey(privateKey);
+		case "ec":
+			return KeyFactories.EC.getKey(privateKey);
+		}
+
+		throw new IllegalArgumentException(
+				String.format("Key type %s not supported. Supported types are: rsa, ec.", keyType));
 	}
 
 }
