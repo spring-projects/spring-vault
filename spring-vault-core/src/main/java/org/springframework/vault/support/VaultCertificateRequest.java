@@ -96,9 +96,8 @@ public class VaultCertificateRequest {
 	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
-			List<String> uriSubjectAltNames, List<String> otherSans, @Nullable Duration ttl,
-			String format, @Nullable String privateKeyFormat,
-			boolean excludeCommonNameFromSubjectAltNames) {
+			List<String> uriSubjectAltNames, List<String> otherSans, @Nullable Duration ttl, String format,
+			@Nullable String privateKeyFormat, boolean excludeCommonNameFromSubjectAltNames) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;

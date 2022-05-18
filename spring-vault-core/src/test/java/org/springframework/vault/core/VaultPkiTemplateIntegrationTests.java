@@ -160,9 +160,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
 				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
-				.privateKeyFormat(keyFixture.privateKeyFormat)
-				.format(keyFixture.format)
-				.build();
+				.privateKeyFormat(keyFixture.privateKeyFormat).format(keyFixture.format).build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations
 				.issueCertificate("testrole-" + keyFixture.keyType.name(), request);

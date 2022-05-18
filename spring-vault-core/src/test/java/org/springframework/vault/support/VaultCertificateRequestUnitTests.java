@@ -64,4 +64,5 @@ class VaultCertificateRequestUnitTests {
 		assertThat(request.getFormat()).isEqualTo("pem");
 		assertThat(request.getPrivateKeyFormat()).isEqualTo("der");
 	}
+
 }
