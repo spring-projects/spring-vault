@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
  *
  * @author Luander Ribeiro
  * @author Mark Paluch
+ * @author My-Lan Aragon
  * @since 2.0
  */
 public class VaultSignRequest {
@@ -66,6 +67,7 @@ public class VaultSignRequest {
 	/**
 	 * @return hashAlgorithm used for creating the signature or {@literal null} to use the
 	 * default hash algorithm.
+	 * @since 2.4
 	 */
 	@Nullable
 	public String getHashAlgorithm() {
@@ -73,12 +75,24 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * @return signatureAlgorithm used for creating the signature when using a RSA key or
+	 * @return signatureAlgorithm used for creating the signature when using an RSA key or
 	 * {@literal null} to use the default signature algorithm.
+	 * @since 2.4
 	 */
 	@Nullable
 	public String getSignatureAlgorithm() {
 		return this.signatureAlgorithm;
+	}
+
+	/**
+	 * @return algorithm used for creating the signature or {@literal null} to use the
+	 * default algorithm.
+	 * @deprecated since 2.4, use {@link #getSignatureAlgorithm()} instead.
+	 */
+	@Deprecated
+	@Nullable
+	public String getAlgorithm() {
+		return getSignatureAlgorithm();
 	}
 
 	/**
@@ -122,8 +136,8 @@ public class VaultSignRequest {
 		}
 
 		/**
-		 * Configure the signature algorithm to be used for the operation when using a RSA
-		 * key.
+		 * Configure the signature algorithm to be used for the operation when using an
+		 * RSA key.
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
 		 * operation. Supported algorithms are: {@literal pss}, {@literal pkcs1v15}.
 		 * Defaults to {@literal pss} if not set.
@@ -131,10 +145,23 @@ public class VaultSignRequest {
 		 */
 		public VaultSignRequestBuilder signatureAlgorithm(String signatureAlgorithm) {
 
-			Assert.hasText(signatureAlgorithm, "Hash algorithm must not be null or empty");
+			Assert.hasText(signatureAlgorithm, "Signature algorithm must not be null or empty");
 
 			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
+		}
+
+		/**
+		 * Configure the algorithm to be used for the operation.
+		 * @param algorithm Specify the algorithm to be used for the operation. Supported
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @deprecated since 2.4, use {@link #signatureAlgorithm(String)} instead.
+		 */
+		@Deprecated
+		public VaultSignRequestBuilder algorithm(String algorithm) {
+			return signatureAlgorithm(algorithm);
 		}
 
 		/**

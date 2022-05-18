@@ -23,6 +23,7 @@ import org.springframework.util.Assert;
  *
  * @author Luander Ribeiro
  * @author Mark Paluch
+ * @author My-Lan Aragon
  * @since 2.0
  */
 public class VaultSignatureVerificationRequest {
@@ -106,6 +107,7 @@ public class VaultSignatureVerificationRequest {
 	/**
 	 * @return hash algorithm used for verifying the signature or {@literal null} to use
 	 * the default algorithm.
+	 * @since 2.4
 	 */
 	@Nullable
 	public String getHashAlgorithm() {
@@ -113,12 +115,24 @@ public class VaultSignatureVerificationRequest {
 	}
 
 	/**
-	 * @return signature algorithm used for verifying the signature when using a RSA key
+	 * @return signature algorithm used for verifying the signature when using an RSA key
 	 * or {@literal null} to use the default algorithm.
+	 * @since 2.4
 	 */
 	@Nullable
 	public String getSignatureAlgorithm() {
 		return this.signatureAlgorithm;
+	}
+
+	/**
+	 * @return algorithm used for verifying the signature or {@literal null} to use the
+	 * default algorithm.
+	 * @deprecated since 2.4, use {@link #getSignatureAlgorithm()} instead.
+	 */
+	@Nullable
+	@Deprecated
+	public String getAlgorithm() {
+		return getSignatureAlgorithm();
 	}
 
 	/**
@@ -188,6 +202,7 @@ public class VaultSignatureVerificationRequest {
 		 * {@literal sha2-256}, {@literal sha2-384}, {@literal sha2-512}. Defaults to
 		 * {@literal sha2-256} if not set.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 * @since 2.4
 		 */
 		public VaultSignatureVerificationRequestBuilder hashAlgorithm(String hashAlgorithm) {
 
@@ -198,12 +213,13 @@ public class VaultSignatureVerificationRequest {
 		}
 
 		/**
-		 * Configure the signature algorithm to be used for the operation when using a RSA
-		 * key.
+		 * Configure the signature algorithm to be used for the operation when using an
+		 * RSA key.
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
 		 * operation. Supported algorithms are: {@literal pss}, {@literal pkcs1v15}.
 		 * Defaults to {@literal pss} if not set.
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 * @since 2.4
 		 */
 		public VaultSignatureVerificationRequestBuilder signatureAlgorithm(String signatureAlgorithm) {
 
@@ -211,6 +227,19 @@ public class VaultSignatureVerificationRequest {
 
 			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
+		}
+
+		/**
+		 * Configure the algorithm to be used for the operation.
+		 * @param algorithm Specify the algorithm to be used for the operation. Supported
+		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
+		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 * @deprecated since 2.4, use {@link #signatureAlgorithm(String)} instead.
+		 */
+		@Deprecated
+		public VaultSignatureVerificationRequestBuilder algorithm(String algorithm) {
+			return signatureAlgorithm(algorithm);
 		}
 
 		/**

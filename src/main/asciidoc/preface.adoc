@@ -39,9 +39,9 @@ The jumping off ground for learning about Vault is https://www.vaultproject.io[w
 
 * The online shell provides a convenient way to interact with a Vault instance in combination with the online tutorial.
 
-* https://www.vaultproject.io/intro/index.html[HashiCorp Vault Introduction]
+* https://learn.hashicorp.com/collections/vault/getting-started[Getting Started with Vault]
 
-* https://www.vaultproject.io/docs/index.html[HashiCorp Vault Documentation]
+* https://www.vaultproject.io/docs[HashiCorp Vault Documentation]
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
 With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to
@@ -55,7 +55,7 @@ for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS a
 
 Spring Vault 2.x binaries requires JDK level 8.0 and above, and https://spring.io/docs[Spring Framework] {springVersion} and above.
 
-In terms of Vault, https://www.vaultproject.io/[Vault] at least 0.6.
+In terms of Vault, https://www.vaultproject.io/[Vault] at least v0.9.6.
 
 [[get-started:additional-help]]
 == Additional Help Resources
@@ -75,7 +75,7 @@ Post questions questions regarding Spring Vault on https://stackoverflow.com/que
 [[get-started:help:professional]]
 ==== Professional Support
 
-Professional, from-the-source support, with guaranteed response time, is available from https://pivotal.io/[Pivotal Sofware, Inc.], the company behind Spring Vault and Spring.
+Professional, from-the-source support, with guaranteed response time, is available from https://pivotal.io/[Pivotal Software, Inc.], the company behind Spring Vault and Spring.
 
 [[get-started:up-to-date]]
 === Following Development

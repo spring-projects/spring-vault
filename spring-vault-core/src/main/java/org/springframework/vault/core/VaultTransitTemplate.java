@@ -57,6 +57,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Praveendra Singh
  * @author Luander Ribeiro
  * @author Mikko Koli
+ * @author My-Lan Aragon
  */
 public class VaultTransitTemplate implements VaultTransitOperations {
 
