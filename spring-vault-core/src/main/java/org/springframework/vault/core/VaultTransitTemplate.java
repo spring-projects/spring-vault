@@ -348,16 +348,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(hmacRequest, "HMAC request must not be null");
 
-		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(hmacRequest.getPlaintext().getPlaintext()));
+		Map<String, Object> request = new LinkedHashMap<>(3);
+		PropertyMapper mapper = PropertyMapper.get();
 
-		if (StringUtils.hasText(hmacRequest.getAlgorithm())) {
-			request.put("algorithm", hmacRequest.getAlgorithm());
-		}
-
-		if (hmacRequest.getKeyVersion() != null) {
-			request.put("key_version ", hmacRequest.getKeyVersion());
-		}
+		mapper.from(hmacRequest.getPlaintext()::getPlaintext).as(Base64Utils::encodeToString).to("input", request);
+		mapper.from(hmacRequest::getAlgorithm).whenHasText().to("algorithm", request);
+		mapper.from(hmacRequest::getKeyVersion).whenNonNull().to("key_version", request);
 
 		String hmac = (String) this.vaultOperations.write(String.format("%s/hmac/%s", this.path, keyName), request)
 				.getRequiredData().get("hmac");
@@ -382,16 +378,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(signRequest, "Sign request must not be null");
 
-		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(signRequest.getPlaintext().getPlaintext()));
+		Map<String, Object> request = new LinkedHashMap<>(3);
+		PropertyMapper mapper = PropertyMapper.get();
 
-		if (StringUtils.hasText(signRequest.getHashAlgorithm())) {
-			request.put("hash_algorithm", signRequest.getHashAlgorithm());
-		}
-
-		if (StringUtils.hasText(signRequest.getSignatureAlgorithm())) {
-			request.put("signature_algorithm", signRequest.getSignatureAlgorithm());
-		}
+		mapper.from(signRequest.getPlaintext()::getPlaintext).as(Base64Utils::encodeToString).to("input", request);
+		mapper.from(signRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
+		mapper.from(signRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
 
 		String signature = (String) this.vaultOperations.write(String.format("%s/sign/%s", this.path, keyName), request)
 				.getRequiredData().get("signature");
@@ -416,24 +408,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(verificationRequest, "Signature verification request must not be null");
 
-		Map<String, Object> request = new LinkedHashMap<>();
-		request.put("input", Base64Utils.encodeToString(verificationRequest.getPlaintext().getPlaintext()));
+		Map<String, Object> request = new LinkedHashMap<>(5);
+		PropertyMapper mapper = PropertyMapper.get();
 
-		if (verificationRequest.getHmac() != null) {
-			request.put("hmac", verificationRequest.getHmac().getHmac());
-		}
-
-		if (verificationRequest.getSignature() != null) {
-			request.put("signature", verificationRequest.getSignature().getSignature());
-		}
-
-		if (StringUtils.hasText(verificationRequest.getHashAlgorithm())) {
-			request.put("hash_algorithm", verificationRequest.getHashAlgorithm());
-		}
-
-		if (StringUtils.hasText(verificationRequest.getSignatureAlgorithm())) {
-			request.put("signature_algorithm", verificationRequest.getSignatureAlgorithm());
-		}
+		mapper.from(verificationRequest.getPlaintext()::getPlaintext).as(Base64Utils::encodeToString).to("input",
+				request);
+		mapper.from(verificationRequest::getHmac).whenNonNull().as(Hmac::getHmac).to("hmac", request);
+		mapper.from(verificationRequest::getSignature).whenNonNull().as(Signature::getSignature).to("signature",
+				request);
+		mapper.from(verificationRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
+		mapper.from(verificationRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
 
 		Map<String, Object> response = this.vaultOperations
 				.write(String.format("%s/verify/%s", this.path, keyName), request).getRequiredData();

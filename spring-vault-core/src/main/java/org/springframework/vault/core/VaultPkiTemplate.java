@@ -158,41 +158,23 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
 
 		Map<String, Object> request = new HashMap<>();
-		request.put("common_name", certificateRequest.getCommonName());
 
-		if (!certificateRequest.getAltNames().isEmpty()) {
-			request.put("alt_names", StringUtils.collectionToDelimitedString(certificateRequest.getAltNames(), ","));
-		}
+		PropertyMapper mapper = PropertyMapper.get();
 
-		if (!certificateRequest.getIpSubjectAltNames().isEmpty()) {
-			request.put("ip_sans",
-					StringUtils.collectionToDelimitedString(certificateRequest.getIpSubjectAltNames(), ","));
-		}
-
-		if (!certificateRequest.getUriSubjectAltNames().isEmpty()) {
-			request.put("uri_sans",
-					StringUtils.collectionToDelimitedString(certificateRequest.getUriSubjectAltNames(), ","));
-		}
-
-		if (!certificateRequest.getOtherSans().isEmpty()) {
-			request.put("other_sans", StringUtils.collectionToDelimitedString(certificateRequest.getOtherSans(), ","));
-		}
-
-		if (certificateRequest.getTtl() != null) {
-			request.put("ttl", certificateRequest.getTtl().get(ChronoUnit.SECONDS));
-		}
-
-		if (certificateRequest.isExcludeCommonNameFromSubjectAltNames()) {
-			request.put("exclude_cn_from_sans", true);
-		}
-
-		if (StringUtils.hasText(certificateRequest.getFormat())) {
-			request.put("format", certificateRequest.getFormat());
-		}
-
-		if (StringUtils.hasText(certificateRequest.getPrivateKeyFormat())) {
-			request.put("private_key_format", certificateRequest.getPrivateKeyFormat());
-		}
+		mapper.from(certificateRequest::getCommonName).to("common_name", request);
+		mapper.from(certificateRequest::getAltNames).whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("alt_names", request);
+		mapper.from(certificateRequest::getIpSubjectAltNames).whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("ip_sans", request);
+		mapper.from(certificateRequest::getUriSubjectAltNames).whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("uri_sans", request);
+		mapper.from(certificateRequest::getOtherSans).whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("other_sans", request);
+		mapper.from(certificateRequest::getTtl).whenNonNull().as(i -> i.get(ChronoUnit.SECONDS)).to("ttl", request);
+		mapper.from(certificateRequest::isExcludeCommonNameFromSubjectAltNames).whenTrue().to("exclude_cn_from_sans",
+				request);
+		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
+		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
 
 		return request;
 	}
