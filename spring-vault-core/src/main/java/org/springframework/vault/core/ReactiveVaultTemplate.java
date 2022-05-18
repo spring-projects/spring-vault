@@ -335,7 +335,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private static <T> Mono<T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
 
-		if (response.statusCode() == HttpStatus.NOT_FOUND && method == HttpMethod.GET) {
+		if (HttpStatusUtil.isNotFound(response.statusCode()) && method == HttpMethod.GET) {
 			return response.releaseBody().then(Mono.empty());
 		}
 

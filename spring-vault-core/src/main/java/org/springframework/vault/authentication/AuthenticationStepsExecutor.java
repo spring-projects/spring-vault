@@ -135,7 +135,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 			catch (HttpStatusCodeException e) {
 				throw new VaultLoginException(
 						String.format("HTTP request %s in state %s failed with Status %s and body %s", o, state,
-								e.getRawStatusCode(), VaultResponses.getError(e.getResponseBodyAsString())),
+								e.getStatusCode().value(), VaultResponses.getError(e.getResponseBodyAsString())),
 						e);
 			}
 			catch (RuntimeException e) {

@@ -661,13 +661,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 			Exception exceptionToUse;
 			if (httpException != null) {
 
-				if (httpException.getStatusCode() == HttpStatus.BAD_REQUEST) {
+				if (httpException.getStatusCode().value() == HttpStatus.BAD_REQUEST.value()) {
 					expired = true;
 					onLeaseExpired(requestedSecret, lease);
 				}
 
 				exceptionToUse = new VaultException(String.format("Cannot renew lease: Status %s %s %s",
-						httpException.getRawStatusCode(), httpException.getStatusText(),
+						httpException.getStatusCode().value(), httpException.getStatusText(),
 						VaultResponses.getError(httpException.getResponseBodyAsString())), e);
 			}
 			else {

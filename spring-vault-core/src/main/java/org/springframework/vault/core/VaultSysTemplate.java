@@ -228,7 +228,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
 

@@ -357,7 +357,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		if (e instanceof HttpStatusCodeException) {
 
 			HttpStatusCodeException hsce = (HttpStatusCodeException) e;
-			return String.format("%s: Status %s %s %s", message, hsce.getRawStatusCode(), hsce.getStatusText(),
+			return String.format("%s: Status %s %s %s", message, hsce.getStatusCode().value(), hsce.getStatusText(),
 					VaultResponses.getError(hsce.getResponseBodyAsString()));
 		}
 

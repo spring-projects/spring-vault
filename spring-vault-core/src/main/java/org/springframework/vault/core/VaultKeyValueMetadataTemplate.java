@@ -84,6 +84,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 		return this.basePath + "/metadata/" + path;
 	}
 
+	@SuppressWarnings({ "ConstantConditions", "unchecked", "rawtypes" })
 	private static VaultMetadataResponse fromMap(Map<String, Object> metadataResponse) {
 
 		Duration duration = DurationParser.parseDuration((String) metadataResponse.get("delete_version_after"));
@@ -118,7 +119,6 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 
 	@Nullable
 	private static Instant toInstant(String date) {
-
 		return StringUtils.hasText(date) ? Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)) : null;
 	}
 

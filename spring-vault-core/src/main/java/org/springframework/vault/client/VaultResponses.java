@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -61,10 +61,10 @@ public abstract class VaultResponses {
 
 		if (StringUtils.hasText(message)) {
 			return new VaultException(
-					String.format("Status %s %s: %s", e.getRawStatusCode(), e.getStatusText(), message), e);
+					String.format("Status %s %s: %s", renderStatus(e.getStatusCode()), e.getStatusText(), message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s", e.getRawStatusCode(), e.getStatusText()), e);
+		return new VaultException(String.format("Status %s %s", renderStatus(e.getStatusCode()), e.getStatusText()), e);
 	}
 
 	/**
@@ -81,20 +81,21 @@ public abstract class VaultResponses {
 		String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(
-					String.format("Status %s %s [%s]: %s", e.getRawStatusCode(), e.getStatusText(), path, message), e);
+			return new VaultException(String.format("Status %s %s [%s]: %s", renderStatus(e.getStatusCode()),
+					e.getStatusText(), path, message), e);
 		}
 
-		return new VaultException(String.format("Status %s %s [%s]", e.getRawStatusCode(), e.getStatusText(), path), e);
+		return new VaultException(
+				String.format("Status %s %s [%s]", renderStatus(e.getStatusCode()), e.getStatusText(), path), e);
 	}
 
-	public static VaultException buildException(HttpStatus statusCode, String path, String message) {
+	public static VaultException buildException(HttpStatusCode statusCode, String path, String message) {
 
 		if (StringUtils.hasText(message)) {
-			return new VaultException(String.format("Status %s [%s]: %s", statusCode, path, message));
+			return new VaultException(String.format("Status %s [%s]: %s", renderStatus(statusCode), path, message));
 		}
 
-		return new VaultException(String.format("Status %s [%s]", statusCode, path));
+		return new VaultException(String.format("Status %s [%s]", renderStatus(statusCode), path));
 	}
 
 	/**
@@ -191,6 +192,10 @@ public abstract class VaultResponses {
 		catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+
+	private static int renderStatus(HttpStatusCode s) {
+		return s.value();
 	}
 
 }

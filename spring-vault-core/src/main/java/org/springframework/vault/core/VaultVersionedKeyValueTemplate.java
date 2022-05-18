@@ -103,7 +103,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					if (e.getResponseBodyAsString().contains("deletion_time")) {
 
 						return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);

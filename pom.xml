@@ -27,7 +27,7 @@
 		<kotlin-coroutines.version>1.6.0</kotlin-coroutines.version>
 		<mockk.version>1.10.3-jdk8</mockk.version>
 		<mockito-core.version>3.8.0</mockito-core.version>
-		<spring.version>6.0.0-SNAPSHOT</spring.version>
+		<spring.version>6.0.0-M4</spring.version>
 		<spring-data-bom.version>2022.0.0-SNAPSHOT</spring-data-bom.version>
 		<spring-security-bom.version>5.4.5</spring-security-bom.version>
 		<reactor.version>2020.0.13</reactor.version>
@@ -537,7 +537,7 @@
 				<plugin>
 					<groupId>org.jfrog.buildinfo</groupId>
 					<artifactId>artifactory-maven-plugin</artifactId>
-					<version>3.2.3</version>
+					<version>3.3.0</version>
 				</plugin>
 
 				<plugin>
@@ -568,12 +568,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.2.7</version>
-				</plugin>
-
-				<plugin>
-					<groupId>org.jfrog.buildinfo</groupId>
-					<artifactId>artifactory-maven-plugin</artifactId>
-					<version>3.3.0</version>
 				</plugin>
 
 			</plugins>
@@ -753,7 +747,7 @@
 		<profile>
 
 			<!--
-					Profile to be activated when building the distribution atrifacts.
+					Profile to be activated when building the distribution artifacts.
 
 					Generates reference documentation, aggregates JavaDoc etc. Has to be combined with
 					profiles "release" or "milestone" to deploy artifacts into the appropriate places.
@@ -807,6 +801,10 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-libs-milestone</id>
+			<url>https://repo.spring.io/libs-milestone</url>
 		</repository>
 	</repositories>
 </project>

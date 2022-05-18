@@ -118,11 +118,11 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
 
-				if (e.getStatusCode() == HttpStatus.BAD_REQUEST
+				if (HttpStatusUtil.isBadRequest(e.getStatusCode())
 						&& e.getResponseBodyAsString().contains("does not exist")) {
 					return null;
 				}

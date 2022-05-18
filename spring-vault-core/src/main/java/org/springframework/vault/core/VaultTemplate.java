@@ -369,7 +369,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
 
@@ -415,7 +415,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
 
@@ -462,7 +462,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			}
 			catch (HttpStatusCodeException e) {
 
-				if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
 

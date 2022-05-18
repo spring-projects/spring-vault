@@ -402,7 +402,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		if (e instanceof WebClientResponseException) {
 
 			WebClientResponseException wce = (WebClientResponseException) e;
-			return String.format("%s: Status %s %s %s", message, wce.getRawStatusCode(), wce.getStatusText(),
+			return String.format("%s: Status %s %s %s", message, wce.getStatusCode().value(), wce.getStatusText(),
 					VaultResponses.getError(wce.getResponseBodyAsString()));
 		}
 

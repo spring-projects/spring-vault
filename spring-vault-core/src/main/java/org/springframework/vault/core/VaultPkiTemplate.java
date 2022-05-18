@@ -135,7 +135,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			try {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path);
 
-				if (response.getStatusCode() == HttpStatus.OK) {
+				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());
 				}
 
