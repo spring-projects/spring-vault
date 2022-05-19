@@ -19,21 +19,27 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.keyvalue.core.AbstractKeyValueAdapter;
-import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.core.VaultKeyValueOperations;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultVersionedKeyValueOperations;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.repository.convert.MappingVaultConverter;
 import org.springframework.vault.repository.convert.SecretDocument;
 import org.springframework.vault.repository.convert.VaultConverter;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
-import org.springframework.vault.repository.mapping.VaultPersistentEntity;
-import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.Versioned;
 
 /**
  * Vault-specific {@link org.springframework.data.keyvalue.core.KeyValueAdapter}.
@@ -46,6 +52,10 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	private final VaultOperations vaultOperations;
 
 	private final VaultConverter vaultConverter;
+
+	private final KeyValueDelegate keyValueDelegate;
+
+	private final Map<String, VaultKeyValueKeyspaceAccessor> accessors = new ConcurrentHashMap<>();
 
 	/**
 	 * Create a new {@link VaultKeyValueAdapter} given {@link VaultOperations}.
@@ -70,6 +80,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 		this.vaultOperations = vaultOperations;
 		this.vaultConverter = vaultConverter;
+		this.keyValueDelegate = new KeyValueDelegate(vaultOperations);
 	}
 
 	@Override
@@ -78,9 +89,9 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		SecretDocument secretDocument = new SecretDocument(id.toString());
 		this.vaultConverter.write(item, secretDocument);
 
-		this.vaultOperations.write(createKey(id, keyspace), secretDocument.getBody());
+		SecretDocument saved = getAccessor(keyspace).put(secretDocument);
 
-		return secretDocument;
+		return this.vaultConverter.read(item.getClass(), saved);
 	}
 
 	@Override
@@ -98,13 +109,13 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	@Override
 	public <T> T get(Object id, String keyspace, Class<T> type) {
 
-		VaultResponse response = this.vaultOperations.read(createKey(id, keyspace));
+		VaultKeyValueKeyspaceAccessor accessor = getAccessor(keyspace);
 
-		if (response == null) {
+		SecretDocument document = accessor.get(id.toString());
+
+		if (document == null) {
 			return null;
 		}
-
-		SecretDocument document = SecretDocument.from(id.toString(), response);
 
 		return this.vaultConverter.read(type, document);
 	}
@@ -125,7 +136,15 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			return null;
 		}
 
-		this.vaultOperations.delete(createKey(id, keyspace));
+		return deleteEntity(entity, keyspace);
+	}
+
+	public <T> T deleteEntity(T entity, String keyspace) {
+
+		SecretDocument document = new SecretDocument();
+		this.vaultConverter.write(entity, document);
+
+		getAccessor(keyspace).delete(document);
 
 		return entity;
 	}
@@ -137,7 +156,11 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		List<Object> items = new ArrayList<>(list.size());
 
 		for (String id : list) {
-			items.add(get(id, keyspace));
+
+			Object object = get(id, keyspace);
+			if (object != null) {
+				items.add(object);
+			}
 		}
 
 		return items;
@@ -196,8 +219,9 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 		List<String> ids = doList(keyspace);
 
+		VaultKeyValueKeyspaceAccessor accessor = getAccessor(keyspace);
 		for (String id : ids) {
-			this.vaultOperations.delete(createKey(id, keyspace));
+			accessor.delete(id);
 		}
 	}
 
@@ -220,17 +244,194 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	List<String> doList(String keyspace) {
 
-		List<String> list = this.vaultOperations.list(keyspace);
+		VaultKeyValueKeyspaceAccessor accessor = getAccessor(keyspace);
+
+		List<String> list = accessor.list(keyspace);
 
 		return list == null ? Collections.emptyList() : list;
 	}
 
-	private String createKey(Object id, String keyspace) {
-		return String.format("%s/%s", keyspace, id);
+	private VaultKeyValueKeyspaceAccessor getAccessor(String keyspace) {
+
+		KeyValueDelegate.MountInfo mountInfo = keyValueDelegate.getMountInfo(keyspace);
+
+		return accessors.computeIfAbsent(keyspace, it -> {
+
+			if (keyValueDelegate.isVersioned(it)) {
+				return new VaultKeyValue2KeyspaceAccessor(mountInfo, it,
+						this.vaultOperations.opsForVersionedKeyValue(mountInfo.getPath()));
+			}
+
+			return new VaultKeyValue1KeyspaceAccessor(mountInfo, it, this.vaultOperations
+					.opsForKeyValue(mountInfo.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1));
+		});
+
 	}
 
-	MappingContext<? extends VaultPersistentEntity<?>, VaultPersistentProperty> getMappingContext() {
-		return this.vaultConverter.getMappingContext();
+	static abstract class VaultKeyValueKeyspaceAccessor {
+
+		private final KeyValueDelegate.MountInfo mountInfo;
+
+		private final String keyspace;
+
+		private final String pathPrefix;
+
+		protected VaultKeyValueKeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace) {
+			this.mountInfo = mountInfo;
+			this.keyspace = keyspace;
+			this.pathPrefix = getPathInMount(keyspace);
+		}
+
+		@Nullable
+		abstract List<String> list(String pattern);
+
+		String getPathInMount(String keyspace) {
+
+			if (!keyspace.startsWith(this.mountInfo.getPath())) {
+				return keyspace;
+			}
+
+			return keyspace.substring(this.mountInfo.getPath().length());
+		}
+
+		String createPath(String id) {
+			return this.pathPrefix + "/" + id;
+		}
+
+		@Nullable
+		abstract SecretDocument get(String id);
+
+		abstract SecretDocument put(SecretDocument secretDocument);
+
+		abstract void delete(String id);
+
+		abstract void delete(SecretDocument document);
+
+	}
+
+	static class VaultKeyValue1KeyspaceAccessor extends VaultKeyValueKeyspaceAccessor {
+
+		private final VaultKeyValueOperations operations;
+
+		public VaultKeyValue1KeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace,
+				VaultKeyValueOperations operations) {
+			super(mountInfo, keyspace);
+			this.operations = operations;
+		}
+
+		@Nullable
+		@Override
+		public List<String> list(String pattern) {
+			return operations.list(getPathInMount(pattern));
+		}
+
+		@Nullable
+		@Override
+		SecretDocument get(String id) {
+
+			VaultResponse vaultResponse = operations.get(createPath(id));
+
+			if (vaultResponse == null) {
+				return null;
+			}
+
+			return new SecretDocument(id, vaultResponse.getRequiredData());
+		}
+
+		@Override
+		SecretDocument put(SecretDocument secretDocument) {
+
+			operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());
+
+			return secretDocument;
+		}
+
+		@Override
+		void delete(String id) {
+			operations.delete(createPath(id));
+		}
+
+		@Override
+		void delete(SecretDocument document) {
+			delete(document.getRequiredId());
+		}
+
+	}
+
+	static class VaultKeyValue2KeyspaceAccessor extends VaultKeyValueKeyspaceAccessor {
+
+		private final VaultVersionedKeyValueOperations operations;
+
+		public VaultKeyValue2KeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace,
+				VaultVersionedKeyValueOperations operations) {
+			super(mountInfo, keyspace);
+			this.operations = operations;
+		}
+
+		@Nullable
+		@Override
+		public List<String> list(String pattern) {
+			return operations.list(getPathInMount(pattern));
+		}
+
+		@Nullable
+		@Override
+		SecretDocument get(String id) {
+
+			Versioned<Map<String, Object>> versioned = operations.get(createPath(id));
+
+			if (versioned == null || !versioned.hasData()) {
+				return null;
+			}
+
+			return new SecretDocument(id, versioned.getVersion()
+					.getVersion(), versioned.getRequiredData());
+		}
+
+		@Override
+		SecretDocument put(SecretDocument secretDocument) {
+
+			try {
+				Versioned.Metadata metadata;
+				if (secretDocument.getVersion() != null) {
+					metadata = operations.put(createPath(secretDocument.getRequiredId()), Versioned
+							.create(secretDocument.getBody(), Versioned.Version.from(secretDocument.getVersion())));
+				}
+				else {
+					metadata = operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());
+				}
+
+				return new SecretDocument(secretDocument.getRequiredId(), metadata.getVersion()
+						.getVersion(),
+						secretDocument.getBody());
+			}
+			catch (VaultException e) {
+				if (e.getMessage() != null
+						&& e.getMessage()
+						.contains("check-and-set parameter did not match the current version")) {
+					throw new OptimisticLockingFailureException(e.getMessage(), e);
+				}
+
+				throw e;
+			}
+		}
+
+		@Override
+		void delete(String id) {
+			operations.delete(createPath(id));
+		}
+
+		@Override
+		void delete(SecretDocument document) {
+
+			if (document.getVersion() != null) {
+				operations.delete(createPath(document.getRequiredId()), Versioned.Version.from(document.getVersion()));
+			}
+			else {
+				delete(document.getRequiredId());
+			}
+		}
+
 	}
 
 }

@@ -5,6 +5,8 @@
 === What's new in Spring Vault 2.4
 
 * Support for <<vault.authentication.userpass,Username/Password authentication>> for Username/Password, LDAP, Okta, and RADIUS authentication.
+* Support of versioned Key/Value secrets engines for Vault repositories.
+* <<vault.repositories.optimistic-locking,Optimistic locking support through Vault repositories using versioned Key/Value secrets engines>>.
 
 [[new-features.2-3-0]]
 === What's new in Spring Vault 2.3
@@ -12,7 +14,7 @@
 * Support for PEM-encoded certificates for keystore and truststore usage.
 * `ReactiveVaultEndpointProvider` for non-blocking lookup of `VaultEndpoint`.
 * `VaultKeyValueMetadataOperations` for Key-Value metadata interaction.
-* Support for `transform` backend (Enterprise Feature).
+* Support for `transform` secrets engine (Enterprise Feature).
 * Documentation of <<vault.core.secret-engines,how to use Vault secret backends>>.
 * Login credentials for Kubernetes and PCF authentication are reloaded for each login attempt.
 * `SecretLeaseContainer` publishes `SecretLeaseRotatedEvent` instead of `SecretLeaseExpiredEvent` and `SecretLeaseCreatedEvent` on successful secret rotation.
@@ -22,7 +24,7 @@
 [[new-features.2-2-0]]
 === What's new in Spring Vault 2.2
 
-* Support for Key-Value v2 (versioned backend) secrets through `@VaultPropertySource`.
+* Support for Key-Value v2 (versioned secrets engine) secrets through `@VaultPropertySource`.
 * SpEL support in `@Secret`.
 * Add support for Jetty as reactive HttpClient.
 * `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
@@ -36,7 +38,7 @@ Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 === What's new in Spring Vault 2.1
 
 * <<vault.authentication.gcpgce,GCP Compute>>, <<vault.authentication.gcpiam,GCP IAM>>, and <<vault.authentication.azuremsi, Azure>> authentication.
-* Template API support for versioned and unversioned Key/Value backends and for Vault wrapping operations.
+* Template API support for versioned and unversioned Key/Value secrets engines and for Vault wrapping operations.
 * Support full pull mode in reactive AppRole authentication.
 * Improved Exception hierarchy for Vault login failures.
 
@@ -51,7 +53,7 @@ Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 * Support CSR signing, certificate revocation and CRL retrieval.
 * <<vault.authentication.kubernetes,Kubernetes authentication>>.
 * RoleId/SecretId unwrapping for <<vault.authentication.approle,AppRole authentication>>.
-* <<vault.misc.spring-security,Spring Security integration>> with transit backend-based `BytesKeyGenerator` and `BytesEncryptor`.
+* <<vault.misc.spring-security,Spring Security integration>> with transit secrets engine-based `BytesKeyGenerator` and `BytesEncryptor`.
 
 [[new-features.1-1-0]]
 === What's new in Spring Vault 1.1.0

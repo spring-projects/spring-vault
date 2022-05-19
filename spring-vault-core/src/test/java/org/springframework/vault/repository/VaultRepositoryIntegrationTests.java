@@ -22,7 +22,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
@@ -35,9 +37,8 @@ import org.springframework.vault.repository.VaultRepositoryIntegrationTests.Vaul
 import org.springframework.vault.repository.configuration.EnableVaultRepositories;
 import org.springframework.vault.util.IntegrationTestSupport;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.data.domain.Sort.Order.asc;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.data.domain.Sort.Order.*;
 
 /**
  * Integration tests for Vault repositories.
@@ -49,7 +50,9 @@ import static org.springframework.data.domain.Sort.Order.asc;
 class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
-	@EnableVaultRepositories(considerNestedRepositories = true)
+	@EnableVaultRepositories(considerNestedRepositories = true,
+			includeFilters = @ComponentScan.Filter(classes = VaultRepositoryIntegrationTests.VaultRepository.class,
+					type = FilterType.ASSIGNABLE_TYPE))
 	static class VaultRepositoryTestConfiguration extends VaultIntegrationTestConfiguration {
 
 	}

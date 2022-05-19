@@ -118,7 +118,7 @@ public class KeyValueDelegate {
 		return MountInfo.from((String) data.get("path"), (Map) data.get("options"));
 	}
 
-	private MountInfo getMountInfo(String path) {
+	public MountInfo getMountInfo(String path) {
 
 		MountInfo mountInfo = this.mountInfo.get(path);
 
@@ -136,15 +136,15 @@ public class KeyValueDelegate {
 		return mountInfo;
 	}
 
-	static class MountInfo {
+	public static class MountInfo {
 
 		static final MountInfo UNAVAILABLE = new MountInfo("", Collections.emptyMap(), false);
 
-		final String path;
+		private final String path;
 
-		final @Nullable Map<String, Object> options;
+		private final @Nullable Map<String, Object> options;
 
-		final boolean available;
+		private final boolean available;
 
 		private MountInfo(String path, @Nullable Map<String, Object> options, boolean available) {
 			this.path = path;

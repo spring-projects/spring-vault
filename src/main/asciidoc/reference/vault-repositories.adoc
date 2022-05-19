@@ -1,12 +1,16 @@
 [[vault.repositories]]
 = Vault Repositories
 
-Working with `VaultTemplate` and responses mapped to Java classes allows basic data operations like read, write
-and delete. Vault repositories apply Spring Data's repository concept on top of Vault.
-A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining
-the Id property, paging and sorting.
+Working with `VaultTemplate` and responses mapped to Java classes allows basic data operations like read, write and delete.
+Vault repositories apply Spring Data's repository concept on top of Vault.
+A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining the identifier property, paging and sorting.
+Vault repositories use the key/value secrets engine functionality to persist and query data.
+As of version 2.4, Spring Vault can use additionally key/value version 2 secrets engine, the actual secrets engine version is discovered during runtime.
 
-NOTE: Read more about Spring Data Repositories in the https://docs.spring.io/spring-data/commons/docs/current/reference/html/#repositories[Spring Data Commons reference documentation]. The reference documentation will give you an introduction to Spring Data repositories.
+NOTE: Deletes within versioned key/value secrets engine use the `DELETE` operation. Secrets are not destroyed through `CrudRepository.delete(…)`.
+
+NOTE: Read more about Spring Data Repositories in the https://docs.spring.io/spring-data/commons/docs/current/reference/html/#repositories[Spring Data Commons reference documentation].
+The reference documentation will give you an introduction to Spring Data repositories.
 
 [[vault.repositories.usage]]
 == Usage
@@ -18,7 +22,7 @@ To access domain entities stored in Vault you can leverage repository support th
 [source,java]
 ----
 @Secret
-public class Credentials {
+class Credentials {
 
   @Id String id;
   String password;
@@ -28,7 +32,8 @@ public class Credentials {
 ----
 ====
 
-We have a pretty simple domain object here. Note that it has a property named `id` annotated with
+We have a pretty simple domain object here.
+Note that it has a property named `id` annotated with
 `org.springframework.data.annotation.Id` and a `@Secret` annotation on its type.
 Those two are responsible for creating the actual key used to persist the object as JSON inside Vault.
 
@@ -41,22 +46,23 @@ The next step is to declare a repository interface that uses the domain object.
 ====
 [source,java]
 ----
-public interface CredentialsRepository extends CrudRepository<Credentials, String> {
+interface CredentialsRepository extends CrudRepository<Credentials, String> {
 
 }
 ----
 ====
 
-As our repository extends `CrudRepository` it provides basic CRUD and query methods. Vault repositories
-require Spring Data components. Make sure to include `spring-data-commons` and `spring-data-keyvalue` artifacts in your class path.
+As our repository extends `CrudRepository` it provides basic CRUD and query methods.
+Vault repositories require Spring Data components.
+Make sure to include `spring-data-commons` and `spring-data-keyvalue` artifacts in your class path.
 
-The easiest way to achive this, is by setting up dependency management and adding the artifacts to your `pom.xml`:
+The easiest way to achieve this, is by setting up dependency management and adding the artifacts to your `pom.xml`:
 
 Then add the following to `pom.xml` dependencies section.
 
 .Using the Spring Data BOM
 ====
-[source, xml, subs="verbatim,attributes"]
+[source,xml,subs="verbatim,attributes"]
 ----
 <dependencyManagement>
   <dependencies>
@@ -90,7 +96,6 @@ Then add the following to `pom.xml` dependencies section.
 ----
 ====
 
-
 The thing we need in between to glue things together is the according Spring configuration.
 
 .JavaConfig for Vault Repositories
@@ -99,10 +104,10 @@ The thing we need in between to glue things together is the according Spring con
 ----
 @Configuration
 @EnableVaultRepositories
-public class ApplicationConfig {
+class ApplicationConfig {
 
   @Bean
-  public VaultTemplate vaultTemplate() {
+  VaultTemplate vaultTemplate() {
     return new VaultTemplate(…);
   }
 }
@@ -117,7 +122,7 @@ Given the setup above we can go on and inject `CredentialsRepository` into our c
 ----
 @Autowired CredentialsRepository repo;
 
-public void basicCrudOperations() {
+void basicCrudOperations() {
 
   Credentials creds = new Credentials("heisenberg", "327215", "AAA-GG-SSSS");
   rand.setAddress(new Address("308 Negra Arroyo Lane", "Albuquerque", "New Mexico", "87104"));
@@ -131,8 +136,8 @@ public void basicCrudOperations() {
   repo.delete(creds);                                      <4>
 }
 ----
-<1> Stores properties of `Credentials` inside Vault Hash with a key pattern `keyspace/id`,
-in this case `credentials/heisenberg`, in the generic secret backend.
+
+<1> Stores properties of `Credentials` inside Vault Hash with a key pattern `keyspace/id`, in this case `credentials/heisenberg`, in the key-value secret secrets engine.
 <2> Uses the provided id to retrieve the object stored at `keyspace/id`.
 <3> Counts the total number of entities available within the keyspace _credentials_ defined by `@Secret` on `Credentials`.
 <4> Removes the key for the given object from Vault.
@@ -141,12 +146,10 @@ in this case `credentials/heisenberg`, in the generic secret backend.
 [[vault.repositories.mapping]]
 == Object to Vault JSON Mapping
 
-Vault repositories store objects in Vault using JSON as interchange format. Object mapping between JSON and
-the entity is done by `VaultConverter`. The converter reads and writes `SecretDocument` that contains the body
-from a `VaultResponse`. ``VaultResponse``s are read from Vault and the body is deserialized by
-Jackson into a `Map` of `String` and `Object`.
-The default `VaultConverter` implementation reads the `Map` with nested values, `List` and `Map` objects and
-converts these to entities and vice versa.
+Vault repositories store objects in Vault using JSON as interchange format.
+Object mapping between JSON and the entity is done by `VaultConverter`.
+The converter reads and writes `SecretDocument` that contains the body from a `VaultResponse`. ``VaultResponse``s are read from Vault and the body is deserialized by Jackson into a `Map` of `String` and `Object`.
+The default `VaultConverter` implementation reads the `Map` with nested values, `List` and `Map` objects and converts these to entities and vice versa.
 
 Given the `Credentials` type from the previous sections the default mapping is as follows:
 
@@ -165,6 +168,7 @@ Given the `Credentials` type from the previous sections the default mapping is a
   }
 }
 ----
+
 <1> The `_class` attribute is included on root level as well as on any nested interface or abstract types.
 <2> Simple property values are mapped by path.
 <3> Properties of complex types are mapped as nested objects.
@@ -172,7 +176,7 @@ Given the `Credentials` type from the previous sections the default mapping is a
 
 NOTE: The `@Id` property must be mapped to `String`.
 
-[cols="1,2,3", options="header"]
+[cols="1,2,3",options="header"]
 .Default Mapping Rules
 |===
 | Type
@@ -208,23 +212,24 @@ of Complex Type
 
 You can customize the mapping behavior by registering a `Converter` in `VaultCustomConversions`.
 Those converters can take care of converting from/to a type such as `LocalDate` as well as `SecretDocument`
-whereas the first one is suitable for converting simple properties and the last one complex types to their JSON
-representation. The second option offers full control over the resulting `SecretDocument`. Writing objects to `Vault`
+whereas the first one is suitable for converting simple properties and the last one complex types to their JSON representation.
+The second option offers full control over the resulting `SecretDocument`.
+Writing objects to `Vault`
 will delete the content and re-create the whole entry, so not mapped data will be lost.
 
 [[vault.repositories.queries]]
 == Queries and Query Methods
 
-Query methods allow automatic derivation of simple queries from the method name. Vault has no query engine but
-requires direct access of HTTP context paths. Vault query methods translate Vault's API possibilities to queries.
-A query method execution lists children under a context path, applies filtering to the Id, optionally limits the
-Id stream with offset/limit and applies sorting after fetching the results.
+Query methods allow automatic derivation of simple queries from the method name.
+Vault has no query engine but requires direct access of HTTP context paths.
+Vault query methods translate Vault's API possibilities to queries.
+A query method execution lists children under a context path, applies filtering to the Id, optionally limits the Id stream with offset/limit and applies sorting after fetching the results.
 
 .Sample Repository Query Method
 ====
 [source,java]
 ----
-public interface CredentialsRepository extends CrudRepository<Credentials, String> {
+interface CredentialsRepository extends CrudRepository<Credentials, String> {
 
   List<Credentials> findByIdStartsWith(String prefix);
 }
@@ -296,12 +301,13 @@ Here's an overview of the keywords supported for Vault.
 | `findFirst10ByFirstname`,`findTop5ByFirstname`
 |===
 
+[[vault.repositories.sorting.paging]]
 === Sorting and Paging
 
-Query methods support sorting and paging by selecting in memory a sublist (offset/limit) Id's retrieved from
-a Vault context path. Sorting has is not limited to a particular field, unlike query method predicates.
-Unpaged sorting is applied after Id filtering and all resulting secrets are fetched from Vault. This way
-a query method fetches only results that are also returned as part of the result.
+Query methods support sorting and paging by selecting in memory a sublist (offset/limit) Id's retrieved from a Vault context path.
+Sorting has is not limited to a particular field, unlike query method predicates.
+Unpaged sorting is applied after Id filtering and all resulting secrets are fetched from Vault.
+This way a query method fetches only results that are also returned as part of the result.
 
 Using paging and sorting requires secret fetching before filtering the Id's which impacts performance.
 Sorting and paging guarantees to return the same result even if the natural order of Id returned by Vault changes.
@@ -311,7 +317,7 @@ Therefore, all Id's are fetched from Vault first, then sorting is applied and af
 ====
 [source,java]
 ----
-public interface CredentialsRepository extends PagingAndSortingRepository<Credentials, String> {
+interface CredentialsRepository extends PagingAndSortingRepository<Credentials, String> {
 
   List<Credentials> findTop10ByIdStartsWithOrderBySocialSecurityNumberDesc(String prefix);
 
@@ -319,3 +325,62 @@ public interface CredentialsRepository extends PagingAndSortingRepository<Creden
 }
 ----
 ====
+
+[[vault.repositories.optimistic-locking]]
+== Optimistic Locking
+
+Vaults key/value secrets engine version 2 can maintain versioned secrets.
+Spring Vault supports versioning through a version property in the domain model that are annotated with `@Version`.
+Using optimistic locking makes sure updates are only applied to secrets with a matching version.
+Therefore, the actual value of the version property is added to the update request through the `cas` property.
+If another operation altered the secret in the meantime, then an OptimisticLockingFailureException is thrown and the secret isn't updated.
+
+Version properties must be numeric properties such as `int` or `long` and map to the `cas` property when updating secrets.
+
+.Sample Versioned Entity
+====
+[source,java]
+----
+@Secret
+class VersionedCredentials {
+
+  @Id String id;
+  @Version int version;
+  String password;
+  String socialSecurityNumber;
+  Address address;
+}
+----
+====
+
+The following example shows these features:
+
+.Sample Versioned Entity
+====
+[source,java]
+----
+VersionedCredentialsRepository repo = …;
+
+VersionedCredentials credentials = repo.findById("sample-credentials").get();    <1>
+
+VersionedCredentials concurrent = repo.findById("sample-credentials").get();     <2>
+
+credentials.setPassword("something-else");
+
+repos.save(credentials);                                                         <3>
+
+
+concurrent.setPassword("concurrent change");
+
+repos.save(concurrent); // throws OptimisticLockingFailureException              <4>
+
+----
+
+<1> Obtain a secret by its Id `sample-credentials`.
+<2> Obtain a second instance of the secret by its Id `sample-credentials`.
+<3> Update the secret and let Vault increment the version.
+<4> Update the second instance that uses the previous version.
+The operation fails with an `OptimisticLockingFailureException` as the version was incremented in Vault in the meantime.
+====
+
+NOTE: When deleting versioned secrets, delete by Id deletes the most recent secret. Delete by entity deletes the secret at the provided version.

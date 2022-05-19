@@ -17,10 +17,10 @@ package org.springframework.vault.repository.convert;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.vault.support.VaultResponse;
 
 /**
@@ -41,6 +41,8 @@ public class SecretDocument {
 	private @Nullable String id;
 
 	private final Map<String, Object> body;
+
+	private @Nullable Integer version;
 
 	/**
 	 * Create a new, empty {@link SecretDocument}.
@@ -70,6 +72,22 @@ public class SecretDocument {
 		this.body = body;
 	}
 
+	/**
+	 * Create a new {@link SecretDocument} given an {@code id} and {@link Map body map}.
+	 * @param id may be {@literal null}.
+	 * @param version for versioned secrets, may be {@literal null} if not available.
+	 * @param body must not be {@literal null}.
+	 * @since 2.4
+	 */
+	public SecretDocument(@Nullable String id, @Nullable Integer version, Map<String, Object> body) {
+
+		Assert.notNull(body, "Body must not be null");
+
+		this.id = id;
+		this.version = version;
+		this.body = body;
+	}
+
 	public SecretDocument(String id) {
 		this(id, new LinkedHashMap<>());
 	}
@@ -87,7 +105,7 @@ public class SecretDocument {
 	}
 
 	/**
-	 * @return the Id or {@literal null} if the Id is not set.
+	 * @return the identifier or {@literal null} if the identifier is not set.
 	 */
 	@Nullable
 	public String getId() {
@@ -95,11 +113,45 @@ public class SecretDocument {
 	}
 
 	/**
-	 * Set the Id.
+	 * Return the required Id or throw {@link IllegalStateException} if the Id is not set.
+	 * @return the required Id.
+	 * @throws IllegalStateException if the Id is not set.
+	 * @since 2.4
+	 */
+	public String getRequiredId() {
+
+		String id = getId();
+
+		if (id == null) {
+			throw new IllegalStateException("Id is not set");
+		}
+
+		return id;
+	}
+
+	/**
+	 * Set the identifier value.
 	 * @param id may be {@literal null}.
 	 */
 	public void setId(@Nullable String id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return the version number, may be {@code null} if absent.
+	 * @since 2.4
+	 */
+	@Nullable
+	public Integer getVersion() {
+		return version;
+	}
+
+	/**
+	 * @param version
+	 * @since 2.4
+	 */
+	public void setVersion(@Nullable Integer version) {
+		this.version = version;
 	}
 
 	/**
@@ -130,17 +182,28 @@ public class SecretDocument {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
-		if (!(o instanceof SecretDocument))
+		}
+		if (!(o instanceof SecretDocument)) {
 			return false;
+		}
 		SecretDocument that = (SecretDocument) o;
-		return Objects.equals(this.id, that.id) && Objects.equals(this.body, that.body);
+		if (!ObjectUtils.nullSafeEquals(this.id, that.id)) {
+			return false;
+		}
+		if (!ObjectUtils.nullSafeEquals(this.body, that.body)) {
+			return false;
+		}
+		return ObjectUtils.nullSafeEquals(this.version, that.version);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.id, this.body);
+		int result = ObjectUtils.nullSafeHashCode(this.id);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.body);
+		result = 31 * result + ObjectUtils.nullSafeHashCode(this.version);
+		return result;
 	}
 
 	@Override
@@ -149,6 +212,7 @@ public class SecretDocument {
 		sb.append(getClass().getSimpleName());
 		sb.append(" [id='").append(this.id).append('\'');
 		sb.append(", body=").append(this.body);
+		sb.append(", version=").append(this.version);
 		sb.append(']');
 		return sb.toString();
 	}
