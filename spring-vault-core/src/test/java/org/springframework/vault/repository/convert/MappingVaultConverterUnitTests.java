@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.annotation.Version;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -198,6 +199,40 @@ class MappingVaultConverterUnitTests {
 	}
 
 	@Test
+	void shouldWriteVersionedEntity() {
+
+		VersionedEntity entity = new VersionedEntity();
+		entity.setId("heisenberg");
+		entity.setUsername("walter");
+		entity.setVersion(0);
+
+		SecretDocument expected = new SecretDocument("heisenberg");
+		expected.put("username", "walter");
+		expected.setVersion(0);
+		expected.put("_class", entity.getClass().getName());
+
+		SecretDocument sink = new SecretDocument();
+
+		this.converter.write(entity, sink);
+
+		assertThat(sink).isEqualTo(expected);
+	}
+
+	@Test
+	void shouldReadVersionedEntity() {
+
+		SecretDocument document = new SecretDocument("heisenberg");
+		document.put("username", "walter");
+		document.setVersion(11);
+
+		VersionedEntity read = this.converter.read(VersionedEntity.class, document);
+
+		assertThat(read.getId()).isEqualTo("heisenberg");
+		assertThat(read.getUsername()).isEqualTo("walter");
+		assertThat(read.getVersion()).isEqualTo(11);
+	}
+
+	@Test
 	void shouldWriteConvertedEntity() {
 
 		SecretDocument expected = new SecretDocument();
@@ -305,6 +340,41 @@ class MappingVaultConverterUnitTests {
 
 		public void setPassword(String password) {
 			this.password = password;
+		}
+
+	}
+
+	static class VersionedEntity {
+
+		String id;
+
+		String username;
+
+		@Version
+		long version;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public long getVersion() {
+			return version;
+		}
+
+		public void setVersion(long version) {
+			this.version = version;
 		}
 
 	}

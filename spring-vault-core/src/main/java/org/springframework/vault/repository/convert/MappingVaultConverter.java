@@ -443,8 +443,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 				writePropertyInternal(value, sink, prop);
 			}
 			else {
-
-				sink.put(prop, getPotentiallyConvertedSimpleWrite(value));
+				sink.put(prop, getPotentiallyConvertedSimpleWrite(value, prop.getTypeInformation().getType()));
 			}
 		}
 	}
@@ -529,7 +528,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			Class<?> elementType = element == null ? null : element.getClass();
 
 			if (elementType == null || this.conversions.isSimpleType(elementType)) {
-				sink.add(getPotentiallyConvertedSimpleWrite(element));
+				sink.add(getPotentiallyConvertedSimpleWrite(element, elementType == null ? Object.class : elementType));
 			}
 			else if (element instanceof Collection || elementType.isArray()) {
 				sink.add(writeCollectionInternal(asCollection(element), componentType, new ArrayList<>()));
@@ -627,10 +626,11 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * arbitrary simple Vault type. Returns the converted value if so. If not, we perform
 	 * special enum handling or simply return the value as is.
 	 * @param value the value to write.
+	 * @param targetType
 	 * @return the converted value. Can be {@literal null}.
 	 */
 	@Nullable
-	private Object getPotentiallyConvertedSimpleWrite(@Nullable Object value) {
+	private Object getPotentiallyConvertedSimpleWrite(@Nullable Object value, Class<?> targetType) {
 
 		if (value == null) {
 			return null;
@@ -650,7 +650,15 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			return asCollection(value);
 		}
 
-		return Enum.class.isAssignableFrom(value.getClass()) ? ((Enum<?>) value).name() : value;
+		if (Enum.class.isAssignableFrom(value.getClass())) {
+			return ((Enum<?>) value).name();
+		}
+
+		if (!ClassUtils.isAssignableValue(targetType, value)) {
+			return this.conversionService.convert(value, targetType);
+		}
+
+		return value;
 	}
 
 	/**

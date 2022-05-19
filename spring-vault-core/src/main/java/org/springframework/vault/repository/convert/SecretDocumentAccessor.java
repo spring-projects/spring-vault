@@ -87,6 +87,11 @@ class SecretDocumentAccessor {
 			return;
 		}
 
+		if (prop.isVersionProperty()) {
+			this.document.setVersion(value == null ? null : ((Number) value).intValue());
+			return;
+		}
+
 		if (!fieldName.contains(".")) {
 			this.body.put(fieldName, value);
 			return;
@@ -125,6 +130,10 @@ class SecretDocumentAccessor {
 			return this.document.getId();
 		}
 
+		if (property.isVersionProperty()) {
+			return this.document.getVersion();
+		}
+
 		if (!fieldName.contains(".")) {
 			return this.body.get(fieldName);
 		}
@@ -157,6 +166,10 @@ class SecretDocumentAccessor {
 
 		if (property.isIdProperty()) {
 			return StringUtils.hasText(this.document.getId());
+		}
+
+		if (property.isVersionProperty()) {
+			return this.document.getVersion() != null;
 		}
 
 		String fieldName = property.getName();

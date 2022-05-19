@@ -77,7 +77,15 @@ class VaultQueryEngine extends QueryEngine<VaultKeyValueAdapter, VaultQuery, Com
 			}
 		}
 
-		Stream<T> typed = stream.map(it -> getRequiredAdapter().get(it, keyspace, type));
+		Stream<T> typed = stream.flatMap(it -> {
+			T result = getRequiredAdapter().get(it, keyspace, type);
+
+			if (result == null) {
+				return Stream.empty();
+			}
+
+			return Stream.of(result);
+		});
 
 		if (comparator != null) {
 

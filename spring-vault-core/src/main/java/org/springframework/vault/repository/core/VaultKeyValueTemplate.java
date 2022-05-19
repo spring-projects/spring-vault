@@ -15,8 +15,19 @@
  */
 package org.springframework.vault.repository.core;
 
+import java.util.Collections;
+import java.util.Set;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.keyvalue.core.KeyValueAdapter;
 import org.springframework.data.keyvalue.core.KeyValueTemplate;
+import org.springframework.data.keyvalue.core.event.KeyValueEvent;
+import org.springframework.data.keyvalue.core.mapping.KeyValuePersistentEntity;
+import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
 
 /**
@@ -27,12 +38,20 @@ import org.springframework.vault.repository.mapping.VaultMappingContext;
  */
 public class VaultKeyValueTemplate extends KeyValueTemplate {
 
+	@Nullable
+	private ApplicationEventPublisher eventPublisher;
+
+	private boolean publishEvents = true;
+
+	@SuppressWarnings("rawtypes")
+	private Set<Class<? extends KeyValueEvent>> eventTypesToPublish = Collections.emptySet();
+
 	/**
 	 * Create a new {@link VaultKeyValueTemplate} given {@link KeyValueAdapter} and
 	 * {@link VaultMappingContext}.
 	 * @param adapter must not be {@literal null}.
 	 */
-	public VaultKeyValueTemplate(KeyValueAdapter adapter) {
+	public VaultKeyValueTemplate(VaultKeyValueAdapter adapter) {
 		this(adapter, new VaultMappingContext());
 	}
 
@@ -42,13 +61,120 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	 * @param adapter must not be {@literal null}.
 	 * @param mappingContext must not be {@literal null}.
 	 */
-	public VaultKeyValueTemplate(KeyValueAdapter adapter, VaultMappingContext mappingContext) {
+	public VaultKeyValueTemplate(VaultKeyValueAdapter adapter, VaultMappingContext mappingContext) {
 		super(adapter, mappingContext);
+	}
+
+	/**
+	 * Define the event types to publish via {@link ApplicationEventPublisher}.
+	 * @param eventTypesToPublish use {@literal null} or {@link Collections#emptySet()} to
+	 * stop publishing.
+	 */
+	public void setEventTypesToPublish(Set<Class<? extends KeyValueEvent>> eventTypesToPublish) {
+
+		if (CollectionUtils.isEmpty(eventTypesToPublish)) {
+			this.publishEvents = false;
+		}
+		else {
+			this.publishEvents = true;
+			this.eventTypesToPublish = Collections.unmodifiableSet(eventTypesToPublish);
+		}
+	}
+
+	@Override
+	public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+		this.eventPublisher = applicationEventPublisher;
+	}
+
+	@Override
+	public <T> T insert(Object id, T objectToInsert) {
+		Assert.notNull(id, "Id for object to be inserted must not be null!");
+		Assert.notNull(objectToInsert, "Object to be inserted must not be null!");
+
+		String keyspace = resolveKeySpace(objectToInsert.getClass());
+
+		potentiallyPublishEvent(KeyValueEvent.beforeInsert(id, keyspace, objectToInsert.getClass(), objectToInsert));
+
+		T saved = execute(adapter -> {
+
+			if (adapter.contains(id, keyspace)) {
+				throw new DuplicateKeyException(
+						String.format("Cannot insert existing object with id %s!. Please use update.", id));
+			}
+
+			return (T) adapter.put(id, objectToInsert, keyspace);
+		});
+
+		potentiallyPublishEvent(KeyValueEvent.afterInsert(id, keyspace, objectToInsert.getClass(), objectToInsert));
+
+		return saved;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T update(Object id, T objectToUpdate) {
+
+		Assert.notNull(id, "Id for object to be inserted must not be null!");
+		Assert.notNull(objectToUpdate, "Object to be updated must not be null!");
+
+		String keyspace = resolveKeySpace(objectToUpdate.getClass());
+
+		potentiallyPublishEvent(KeyValueEvent.beforeUpdate(id, keyspace, objectToUpdate.getClass(), objectToUpdate));
+
+		T updated = execute(adapter -> (T) adapter.put(id, objectToUpdate, keyspace));
+
+		potentiallyPublishEvent(
+				KeyValueEvent.afterUpdate(id, keyspace, objectToUpdate.getClass(), objectToUpdate, updated));
+
+		return updated;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T delete(T objectToDelete) {
+
+		Class<T> type = (Class<T>) ClassUtils.getUserClass(objectToDelete);
+		KeyValuePersistentEntity<?, ?> entity = getEntity(type);
+
+		Object id = entity.getIdentifierAccessor(objectToDelete).getIdentifier();
+
+		String keyspace = resolveKeySpace(type);
+
+		potentiallyPublishEvent(KeyValueEvent.beforeDelete(id, keyspace, type));
+
+		T result = execute(adapter -> ((VaultKeyValueAdapter) adapter).deleteEntity(objectToDelete, keyspace));
+
+		potentiallyPublishEvent(KeyValueEvent.afterDelete(id, keyspace, type, result));
+
+		return result;
 	}
 
 	@Override
 	public void destroy() throws Exception {
 		// no-op to prevent clear() call.
+	}
+
+	private String resolveKeySpace(Class<?> type) {
+
+		KeyValuePersistentEntity<?, ?> entity = getEntity(type);
+		return entity.getKeySpace();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private KeyValuePersistentEntity<?, ?> getEntity(Class<?> type) {
+		return (KeyValuePersistentEntity) getMappingContext().getRequiredPersistentEntity(type);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void potentiallyPublishEvent(KeyValueEvent event) {
+
+		if (eventPublisher == null) {
+			return;
+		}
+
+		if (publishEvents && (eventTypesToPublish.isEmpty() || eventTypesToPublish.contains(event.getClass()))) {
+			eventPublisher.publishEvent(event);
+		}
 	}
 
 }
