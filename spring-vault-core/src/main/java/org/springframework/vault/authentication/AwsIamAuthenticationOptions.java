@@ -20,6 +20,8 @@ import java.net.URI;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.providers.AwsRegionProvider;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -52,6 +54,11 @@ public class AwsIamAuthenticationOptions {
 	private final AwsCredentialsProvider credentialsProvider;
 
 	/**
+	 * Region provider.
+	 */
+	private final AwsRegionProvider regionProvider;
+
+	/**
 	 * Name of the role against which the login is being attempted. If role is not
 	 * specified, the friendly name (i.e., role name or username) of the IAM principal
 	 * authenticated. If a matching role is not found, login fails.
@@ -71,11 +78,12 @@ public class AwsIamAuthenticationOptions {
 	 */
 	private final URI endpointUri;
 
-	private AwsIamAuthenticationOptions(String path, AwsCredentialsProvider credentialsProvider, @Nullable String role,
-			@Nullable String serverId, URI endpointUri) {
+	private AwsIamAuthenticationOptions(String path, AwsCredentialsProvider credentialsProvider,
+			AwsRegionProvider regionProvider, @Nullable String role, @Nullable String serverId, URI endpointUri) {
 
 		this.path = path;
 		this.credentialsProvider = credentialsProvider;
+		this.regionProvider = regionProvider;
 		this.role = role;
 		this.serverId = serverId;
 		this.endpointUri = endpointUri;
@@ -100,6 +108,15 @@ public class AwsIamAuthenticationOptions {
 	 */
 	public AwsCredentialsProvider getCredentialsProvider() {
 		return this.credentialsProvider;
+	}
+
+	/**
+	 * @return the region provider to obtain the AWS region to be used for computing the
+	 * signature.
+	 * @since 3.0
+	 */
+	public AwsRegionProvider getRegionProvider() {
+		return this.regionProvider;
 	}
 
 	/**
@@ -148,6 +165,8 @@ public class AwsIamAuthenticationOptions {
 
 		@Nullable
 		private AwsCredentialsProvider credentialsProvider;
+
+		private AwsRegionProvider regionProvider = DefaultAwsRegionProviderChain.builder().build();
 
 		@Nullable
 		private String role;
@@ -201,6 +220,21 @@ public class AwsIamAuthenticationOptions {
 			Assert.notNull(credentialsProvider, "AwsCredentialsProvider must not be null");
 
 			this.credentialsProvider = credentialsProvider;
+			return this;
+		}
+
+		/**
+		 * Configure an {@link AwsRegionProvider}, required to calculate the region to be
+		 * used for computing the signature.
+		 * @param regionProvider must not be {@literal null}.
+		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @since 3.0
+		 */
+		public AwsIamAuthenticationOptionsBuilder regionProvider(AwsRegionProvider regionProvider) {
+
+			Assert.notNull(regionProvider, "AwsRegionProvider must not be null");
+
+			this.regionProvider = regionProvider;
 			return this;
 		}
 
@@ -267,8 +301,8 @@ public class AwsIamAuthenticationOptions {
 
 			Assert.state(this.credentialsProvider != null, "Credentials or CredentialProvider must not be null");
 
-			return new AwsIamAuthenticationOptions(this.path, this.credentialsProvider, this.role, this.serverId,
-					this.endpointUri);
+			return new AwsIamAuthenticationOptions(this.path, this.credentialsProvider, this.regionProvider, this.role,
+					this.serverId, this.endpointUri);
 		}
 
 	}

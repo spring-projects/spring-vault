@@ -1,7 +1,12 @@
 [[new-features]]
 == New & Noteworthy
 
-[[new-features.2-4-0]]
+[[new-features.3-0-0]]
+=== What's new in Spring Vault 3.0
+
+* Upgrade to Spring Framework 6 and Java 17 baseline
+* Upgrade to AWS SDK 2.
+
 === What's new in Spring Vault 2.4
 
 * Support for <<vault.authentication.userpass,Username/Password authentication>> for Username/Password, LDAP, Okta, and RADIUS authentication.

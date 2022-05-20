@@ -19,27 +19,26 @@ import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.List;
-
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.auth.signer.Aws4Signer;
-import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.signer.Aws4Signer;
+import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.regions.Region;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
@@ -53,17 +52,19 @@ import org.springframework.web.client.RestOperations;
  * AWS IAM authentication creates a {@link Aws4Signer signed} HTTP request that is
  * executed by Vault to get the identity of the signer using AWS STS
  * {@literal GetCallerIdentity}. A signature requires
- * {@link com.amazonaws.auth.AwsCredentials} to calculate the signature.
+ * {@link software.amazon.awssdk.auth.credentials.AwsCredentials} to calculate the
+ * signature.
  * <p>
  * This authentication requires AWS' Java SDK to sign request parameters and calculate the
- * signature key. Using an appropriate {@link com.amazonaws.auth.AwsCredentialsProvider}
- * allows authentication within AWS-EC2 instances with an assigned profile, within ECS and
- * Lambda instances.
+ * signature key. Using an appropriate
+ * {@link software.amazon.awssdk.auth.credentials.AwsCredentialsProvider} allows
+ * authentication within AWS-EC2 instances with an assigned profile, within ECS and Lambda
+ * instances.
  *
  * @author Mark Paluch
  * @since 1.1
  * @see AwsIamAuthenticationOptions
- * @see com.amazonaws.auth.AwsCredentialsProvider
+ * @see software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Backend: aws
  * (IAM)</a>
@@ -115,14 +116,15 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(options, "AwsIamAuthenticationOptions must not be null");
 
 		AwsCredentials credentials = options.getCredentialsProvider().resolveCredentials();
+		Region region = options.getRegionProvider().getRegion();
 
-		return createAuthenticationSteps(options, credentials);
+		return createAuthenticationSteps(options, credentials, region);
 	}
 
 	protected static AuthenticationSteps createAuthenticationSteps(AwsIamAuthenticationOptions options,
-			AwsCredentials credentials) {
+			AwsCredentials credentials, Region region) {
 
-		return AuthenticationSteps.fromSupplier(() -> createRequestBody(options, credentials)) //
+		return AuthenticationSteps.fromSupplier(() -> createRequestBody(options, credentials, region)) //
 				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
@@ -133,7 +135,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return createAuthenticationSteps(this.options, this.options.getCredentialsProvider().resolveCredentials());
+		return createAuthenticationSteps(this.options, this.options.getCredentialsProvider().resolveCredentials(),
+				this.options.getRegionProvider().getRegion());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -174,17 +177,20 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * @return the map containing body key-value pairs.
 	 */
 	protected static Map<String, String> createRequestBody(AwsIamAuthenticationOptions options) {
-		return createRequestBody(options, options.getCredentialsProvider().resolveCredentials());
+		return createRequestBody(options, options.getCredentialsProvider().resolveCredentials(),
+				options.getRegionProvider().getRegion());
 	}
 
 	/**
 	 * Create the request body to perform a Vault login using the AWS-IAM authentication
 	 * method.
 	 * @param options must not be {@literal null}.
+	 * @param credentials must not be {@literal null}.
+	 * @param region must not be {@literal null}.
 	 * @return the map containing body key-value pairs.
 	 */
 	private static Map<String, String> createRequestBody(AwsIamAuthenticationOptions options,
-			AwsCredentials credentials) {
+			AwsCredentials credentials, Region region) {
 
 		Map<String, String> login = new HashMap<>();
 
@@ -192,17 +198,18 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		login.put("iam_request_url", Base64Utils.encodeToString(options.getEndpointUri().toString().getBytes()));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 
-		String headerJson = getSignedHeaders(options, credentials);
+		String headerJson = getSignedHeaders(options, credentials, region);
 
 		login.put("iam_request_headers", Base64Utils.encodeToString(headerJson.getBytes()));
 
-		if (!StringUtils.isEmpty(options.getRole())) {
+		if (!ObjectUtils.isEmpty(options.getRole())) {
 			login.put("role", options.getRole());
 		}
 		return login;
 	}
 
-	private static String getSignedHeaders(AwsIamAuthenticationOptions options, AwsCredentials credentials) {
+	private static String getSignedHeaders(AwsIamAuthenticationOptions options, AwsCredentials credentials,
+			Region region) {
 
 		Map<String, List<String>> headers = createIamRequestHeaders(options);
 
@@ -211,7 +218,6 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 				.method(SdkHttpMethod.POST).uri(options.getEndpointUri());
 		SdkHttpFullRequest request = builder.build();
 
-		Region region = DefaultAwsRegionProviderChain.builder().build().getRegion();
 		Aws4Signer signer = Aws4Signer.create();
 		Aws4SignerParams signerParams = Aws4SignerParams.builder().awsCredentials(credentials).signingName("sts")
 				.signingRegion(region).build();
