@@ -268,6 +268,14 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	}
 
+	public VaultConverter getConverter() {
+		return this.vaultConverter;
+	}
+
+	public VaultOperations getVaultOperations() {
+		return this.vaultOperations;
+	}
+
 	static abstract class VaultKeyValueKeyspaceAccessor {
 
 		private final KeyValueDelegate.MountInfo mountInfo;

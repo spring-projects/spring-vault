@@ -30,7 +30,9 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ObjectUtils;
@@ -103,6 +105,23 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 		assertThat(all).contains(saved);
 		assertThat(this.versionedRepository.findById("foo-key")).contains(saved);
+	}
+
+	@Test
+	void shouldReportRevisions() {
+
+		VersionedPerson person = new VersionedPerson();
+		person.setId("foo-key");
+		person.setFirstname("bar");
+
+		VersionedPerson saved = this.versionedRepository.save(person);
+
+		saved.setFirstname("baz");
+		this.versionedRepository.save(saved);
+
+		Revisions<Integer, VersionedPerson> revisions = this.versionedRepository.findRevisions(person.getId());
+
+		assertThat(revisions).hasSize(2);
 	}
 
 	@Test
@@ -228,7 +247,8 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		this.simpleRepository.save(versionedPerson);
 	}
 
-	interface VersionedRepository extends CrudRepository<VersionedPerson, String> {
+	interface VersionedRepository
+			extends CrudRepository<VersionedPerson, String>, RevisionRepository<VersionedPerson, String, Integer> {
 
 		List<VersionedPerson> findByIdStartsWith(String prefix);
 

@@ -384,3 +384,43 @@ The operation fails with an `OptimisticLockingFailureException` as the version w
 ====
 
 NOTE: When deleting versioned secrets, delete by Id deletes the most recent secret. Delete by entity deletes the secret at the provided version.
+
+
+[[vault.repositories.revision-repository]]
+== Accessing versioned secrets
+
+Key/Value version 2 secrets engine maintains versions of secrets that can be accessed by implementing https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/history/RevisionRepository.html[`RevisionRepository`] in your Vault repository interface declaration.
+Revision repositories define lookup methods to obtain revisions for a particular identifier.
+Identifiers must be `String`.
+
+
+.Implementing `RevisionRepository`
+====
+[source,java]
+----
+interface RevisionCredentialsRepository extends CrudRepository<Credentials, String>,
+                                        RevisionRepository<Credentials, String, Integer> <1>
+{
+
+}
+----
+<1> The first type parameter (`Credentials`) denotes the entity type, the second (`String`) denotes the type of the id property, and the last one (`Integer`) is the type of the revision number. Vault supports only `String` identifiers and `Integer` revision numbers.
+====
+
+=== Usage
+
+You can now use the methods from `RevisionRepository` to query the revisions of the entity, as the following example shows:
+
+.Using `RevisionRepository`
+====
+[source,java]
+----
+RevisionCredentialsRepository repo = …;
+
+Revisions<Integer, Credentials> revisions = repo.findRevisions("my-secret-id");
+
+Page<Revision<Integer, Credentials>> firstPageOfRevisions = repo.findRevisions("my-secret-id", Pageable.ofSize(4));
+----
+====
+
+
