@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.repository.convert.VaultConverter;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
 
 /**
@@ -44,8 +46,7 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	private boolean publishEvents = true;
 
 	@SuppressWarnings("rawtypes")
-	private Set<Class<? extends KeyValueEvent>> eventTypesToPublish = Collections
-			.emptySet();
+	private Set<Class<? extends KeyValueEvent>> eventTypesToPublish = Collections.emptySet();
 
 	/**
 	 * Create a new {@link VaultKeyValueTemplate} given {@link KeyValueAdapter} and
@@ -163,8 +164,7 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 
 	@SuppressWarnings("rawtypes")
 	private KeyValuePersistentEntity<?, ?> getEntity(Class<?> type) {
-		return (KeyValuePersistentEntity) getMappingContext()
-				.getRequiredPersistentEntity(type);
+		return (KeyValuePersistentEntity) getMappingContext().getRequiredPersistentEntity(type);
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -177,6 +177,14 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 		if (publishEvents && (eventTypesToPublish.isEmpty() || eventTypesToPublish.contains(event.getClass()))) {
 			eventPublisher.publishEvent(event);
 		}
+	}
+
+	public VaultConverter getConverter() {
+		return execute(adapter -> ((VaultKeyValueAdapter) adapter).getConverter());
+	}
+
+	public VaultOperations getVaultOperations() {
+		return execute(adapter -> ((VaultKeyValueAdapter) adapter).getVaultOperations());
 	}
 
 }

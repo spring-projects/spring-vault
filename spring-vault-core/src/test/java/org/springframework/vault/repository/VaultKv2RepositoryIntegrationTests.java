@@ -29,7 +29,9 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
+import org.springframework.data.history.Revisions;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ObjectUtils;
@@ -57,7 +59,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
 	@EnableVaultRepositories(considerNestedRepositories = true,
-			includeFilters = @ComponentScan.Filter(classes = {VersionedRepository.class, SimpleRepository.class},
+			includeFilters = @ComponentScan.Filter(classes = { VersionedRepository.class, SimpleRepository.class },
 					type = FilterType.ASSIGNABLE_TYPE))
 	static class VaultRepositoryTestConfiguration extends VaultIntegrationTestConfiguration {
 
@@ -84,8 +86,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		}
 
 		vaultSysOperations.mount("versioned",
-				VaultMount.builder().type("kv")
-						.options(Collections.singletonMap("version", "2")).build());
+				VaultMount.builder().type("kv").options(Collections.singletonMap("version", "2")).build());
 	}
 
 	@Test
@@ -106,6 +107,23 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void shouldReportRevisions() {
+
+		VersionedPerson person = new VersionedPerson();
+		person.setId("foo-key");
+		person.setFirstname("bar");
+
+		VersionedPerson saved = this.versionedRepository.save(person);
+
+		saved.setFirstname("baz");
+		this.versionedRepository.save(saved);
+
+		Revisions<Integer, VersionedPerson> revisions = this.versionedRepository.findRevisions(person.getId());
+
+		assertThat(revisions).hasSize(2);
+	}
+
+	@Test
 	void loadAndUpdateVersioned() {
 
 		VersionedPerson person = new VersionedPerson();
@@ -114,8 +132,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 		this.versionedRepository.save(person);
 
-		VersionedPerson versionedPerson = this.versionedRepository.findById("foo-key")
-				.get();
+		VersionedPerson versionedPerson = this.versionedRepository.findById("foo-key").get();
 		versionedPerson.setFirstname("baz");
 
 		VersionedPerson updated = this.versionedRepository.save(versionedPerson);
@@ -132,8 +149,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 		this.versionedRepository.save(person);
 
-		VersionedPerson versionedPerson = this.versionedRepository.findById("foo-key")
-				.get();
+		VersionedPerson versionedPerson = this.versionedRepository.findById("foo-key").get();
 		versionedPerson.setFirstname("baz");
 
 		this.versionedRepository.save(versionedPerson);
@@ -148,7 +164,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		Versioned<Object> v1 = versioned.get("versionedPerson/foo-key", Versioned.Version.from(1));
 		assertThat(v1.hasData()).isFalse();
 
-		Versioned<Object> v2  = versioned.get("versionedPerson/foo-key", Versioned.Version.from(2));
+		Versioned<Object> v2 = versioned.get("versionedPerson/foo-key", Versioned.Version.from(2));
 		assertThat(v2.hasData()).isTrue();
 	}
 
@@ -229,7 +245,8 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		this.simpleRepository.save(versionedPerson);
 	}
 
-	interface VersionedRepository extends CrudRepository<VersionedPerson, String> {
+	interface VersionedRepository
+			extends CrudRepository<VersionedPerson, String>, RevisionRepository<VersionedPerson, String, Integer> {
 
 		List<VersionedPerson> findByIdStartsWith(String prefix);
 

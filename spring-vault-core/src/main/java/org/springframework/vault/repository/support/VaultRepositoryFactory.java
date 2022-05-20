@@ -19,10 +19,15 @@ import org.springframework.data.keyvalue.core.KeyValueOperations;
 import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.keyvalue.repository.support.KeyValueRepositoryFactory;
 import org.springframework.data.repository.core.EntityInformation;
+import org.springframework.data.repository.core.RepositoryMetadata;
+import org.springframework.data.repository.core.support.RepositoryComposition;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
+import org.springframework.data.repository.core.support.RepositoryFragment;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.RepositoryQuery;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.vault.repository.core.MappingVaultEntityInformation;
+import org.springframework.vault.repository.core.VaultKeyValueTemplate;
 import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.query.VaultQueryCreator;
 
@@ -55,11 +60,34 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 	}
 
 	@Override
+	protected RepositoryComposition.RepositoryFragments getRepositoryFragments(RepositoryMetadata metadata,
+			KeyValueOperations operations) {
+
+		RepositoryComposition.RepositoryFragments fragments = super.getRepositoryFragments(metadata, operations);
+
+		if (RevisionRepository.class.isAssignableFrom(metadata.getRepositoryInterface())
+				&& operations instanceof VaultKeyValueTemplate) {
+
+			VaultKeyValueTemplate template = (VaultKeyValueTemplate) operations;
+
+			VaultPersistentEntity<?> entity = (VaultPersistentEntity<?>) this.operations.getMappingContext()
+					.getRequiredPersistentEntity(metadata.getDomainType());
+			EntityInformation<?, String> entityInformation = getEntityInformation(metadata.getDomainType());
+			VaultRevisionRepository<?> repository = new VaultRevisionRepository<>(entityInformation,
+					entity.getKeySpace(), template);
+
+			return fragments.append(RepositoryFragment.implemented(repository));
+		}
+
+		return fragments;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 
 		VaultPersistentEntity<T> entity = (VaultPersistentEntity<T>) this.operations.getMappingContext()
-				.getPersistentEntity(domainClass);
+				.getRequiredPersistentEntity(domainClass);
 
 		return new MappingVaultEntityInformation<>(entity);
 	}

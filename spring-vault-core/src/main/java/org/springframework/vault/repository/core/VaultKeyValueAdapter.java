@@ -268,6 +268,14 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	}
 
+	public VaultConverter getConverter() {
+		return this.vaultConverter;
+	}
+
+	public VaultOperations getVaultOperations() {
+		return this.vaultOperations;
+	}
+
 	static abstract class VaultKeyValueKeyspaceAccessor {
 
 		private final KeyValueDelegate.MountInfo mountInfo;
@@ -384,8 +392,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 				return null;
 			}
 
-			return new SecretDocument(id, versioned.getVersion()
-					.getVersion(), versioned.getRequiredData());
+			return new SecretDocument(id, versioned.getVersion().getVersion(), versioned.getRequiredData());
 		}
 
 		@Override
@@ -401,14 +408,12 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 					metadata = operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());
 				}
 
-				return new SecretDocument(secretDocument.getRequiredId(), metadata.getVersion()
-						.getVersion(),
+				return new SecretDocument(secretDocument.getRequiredId(), metadata.getVersion().getVersion(),
 						secretDocument.getBody());
 			}
 			catch (VaultException e) {
 				if (e.getMessage() != null
-						&& e.getMessage()
-						.contains("check-and-set parameter did not match the current version")) {
+						&& e.getMessage().contains("check-and-set parameter did not match the current version")) {
 					throw new OptimisticLockingFailureException(e.getMessage(), e);
 				}
 

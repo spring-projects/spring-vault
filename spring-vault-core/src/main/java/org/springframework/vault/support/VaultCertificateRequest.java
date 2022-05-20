@@ -376,8 +376,8 @@ public class VaultCertificateRequest {
 
 		/**
 		 * Configure the key format.
-		 * @param format the key format to use. Can be {@code pem}, {@code der}, or
-		 * {@code pkcs8}
+		 * @param privateKeyFormat the key format to use. Can be {@code pem}, {@code der},
+		 * or {@code pkcs8}
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
 		 * @since 2.4
 		 */
