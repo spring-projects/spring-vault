@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpEntity;
@@ -81,7 +82,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	private final RestOperations restOperations;
 
-	private final Object lock = new Object();
+	private final ReentrantLock lock = new ReentrantLock();
 
 	/**
 	 * The token state: Contains the currently valid token that identifies the Vault
@@ -254,11 +255,14 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		if (!getToken().isPresent()) {
 
-			synchronized (this.lock) {
-
+			this.lock.lock();
+			try {
 				if (!getToken().isPresent()) {
 					doGetSessionToken();
 				}
+			}
+			finally {
+				this.lock.unlock();
 			}
 		}
 

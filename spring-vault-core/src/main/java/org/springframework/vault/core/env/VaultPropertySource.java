@@ -18,6 +18,7 @@ package org.springframework.vault.core.env;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +61,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 	private final boolean ignoreSecretNotFound;
 
-	private final Object lock = new Object();
+	private final ReentrantLock lock = new ReentrantLock();
 
 	/**
 	 * Create a new {@link VaultPropertySource} given a {@link VaultTemplate} and
@@ -141,7 +142,9 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 */
 	protected void loadProperties() {
 
-		synchronized (this.lock) {
+		this.lock.lock();
+
+		try {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Fetching properties from Vault at %s", this.path));
 			}
@@ -175,6 +178,9 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 			else {
 				this.properties.putAll(doTransformProperties(properties));
 			}
+		}
+		finally {
+			this.lock.unlock();
 		}
 	}
 
