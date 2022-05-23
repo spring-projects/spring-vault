@@ -44,9 +44,9 @@ import org.springframework.util.Base64Utils;
  */
 public class PemObject {
 
-	private static final Pattern BEGIN_PATTERN = Pattern.compile("-----BEGIN ([A-Z ]+)-----");
+	private static final Pattern BEGIN_PATTERN = Pattern.compile("-+BEGIN ([A-Z ]+)-+");
 
-	private static final Pattern END_PATTERN = Pattern.compile("-----END ([A-Z ]+)-----");
+	private static final Pattern END_PATTERN = Pattern.compile("-+END ([A-Z ]+)-+");
 
 	private final PemObjectType objectType;
 
