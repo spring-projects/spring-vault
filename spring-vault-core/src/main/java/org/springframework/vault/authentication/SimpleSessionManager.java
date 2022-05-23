@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.util.Optional;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
@@ -34,7 +35,7 @@ public class SimpleSessionManager implements SessionManager {
 
 	private final ClientAuthentication clientAuthentication;
 
-	private final Object lock = new Object();
+	private final ReentrantLock lock = new ReentrantLock();
 
 	private volatile Optional<VaultToken> token = Optional.empty();
 
@@ -53,10 +54,15 @@ public class SimpleSessionManager implements SessionManager {
 	public VaultToken getSessionToken() {
 
 		if (!this.token.isPresent()) {
-			synchronized (this.lock) {
+
+			this.lock.lock();
+			try {
 				if (!this.token.isPresent()) {
 					this.token = Optional.of(this.clientAuthentication.login());
 				}
+			}
+			finally {
+				this.lock.unlock();
 			}
 		}
 
