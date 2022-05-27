@@ -28,7 +28,7 @@
 		<mockk.version>1.10.3-jdk8</mockk.version>
 		<mockito-core.version>3.8.0</mockito-core.version>
 		<spring.version>6.0.0-M4</spring.version>
-		<spring-data-bom.version>2022.0.0-SNAPSHOT</spring-data-bom.version>
+		<spring-data-bom.version>2022.0.0-M4</spring-data-bom.version>
 		<spring-security-bom.version>5.4.5</spring-security-bom.version>
 		<reactor.version>2020.0.13</reactor.version>
 		<java.version>17</java.version>
@@ -580,7 +580,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>5.3.0-SNAPSHOT</spring.version>
+				<spring.version>6.0.0-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
