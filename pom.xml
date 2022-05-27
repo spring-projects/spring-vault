@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>3.0.0-M1</version>
+	<version>3.0.0-SNAPSHOT</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -55,7 +55,7 @@
 		<developerConnection>
 			scm:git:ssh://git@github.com/spring-projects/spring-vault.git
 		</developerConnection>
-		<tag>3.0.0-M1</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<issueManagement>
@@ -108,7 +108,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-dependencies</artifactId>
-				<version>3.0.0-M1</version>
+				<version>3.0.0-SNAPSHOT</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
