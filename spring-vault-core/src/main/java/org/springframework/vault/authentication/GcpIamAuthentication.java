@@ -26,7 +26,6 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Builder;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.SignJwt;
@@ -34,7 +33,9 @@ import com.google.api.services.iam.v1.model.SignJwtRequest;
 import com.google.api.services.iam.v1.model.SignJwtResponse;
 import com.google.auth.oauth2.GoogleCredentials;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
@@ -70,8 +71,6 @@ import org.springframework.web.client.RestOperations;
 @Deprecated
 public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
 
-	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
-
 	private static final String SCOPE = "https://www.googleapis.com/auth/iam";
 
 	private final GcpIamAuthenticationOptions options;
@@ -85,7 +84,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	 * {@link GcpIamAuthenticationOptions} and {@link RestOperations}. This constructor
 	 * initializes {@link GoogleApacheHttpTransport} for Google API usage.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations) {
 		this(options, restOperations, new NetHttpTransport());
@@ -96,7 +95,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	 * {@link GcpIamAuthenticationOptions}, {@link RestOperations} and
 	 * {@link HttpTransport}.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
 	 * @param httpTransport HTTP client for Google API use, must not be {@literal null}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations,
@@ -127,12 +126,12 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 		String serviceAccount = getServiceAccountId();
 		Map<String, Object> jwtPayload = getJwtPayload(this.options, serviceAccount);
 
-		Iam iam = new Builder(this.httpTransport, JSON_FACTORY, this.credential)
+		Iam iam = new Builder(this.httpTransport, GoogleJsonUtil.JSON_FACTORY, this.credential)
 				.setApplicationName("Spring Vault/" + getClass().getName()).build();
 
 		try {
 
-			String payload = JSON_FACTORY.toString(jwtPayload);
+			String payload = GoogleJsonUtil.JSON_FACTORY.toString(jwtPayload);
 			SignJwtRequest request = new SignJwtRequest();
 			request.setPayload(payload);
 

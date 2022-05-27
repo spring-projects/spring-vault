@@ -21,14 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
-import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestOperations;
-
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -37,6 +30,11 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsSettings;
 import com.google.cloud.iam.credentials.v1.ServiceAccountName;
 import com.google.cloud.iam.credentials.v1.SignJwtResponse;
 import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
+
+import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Google Cloud IAM credentials login implementation using GCP IAM service accounts to
@@ -66,8 +64,6 @@ import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
  */
 public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
 
-	private static final JsonFactory JSON_FACTORY = new JacksonFactory();
-
 	private final GcpIamCredentialsAuthenticationOptions options;
 
 	private final TransportChannelProvider transportChannelProvider;
@@ -80,7 +76,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	 * constructor initializes {@link InstantiatingGrpcChannelProvider} for Google API
 	 * usage.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
 	 */
 	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options,
 			RestOperations restOperations) {
@@ -92,7 +88,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	 * {@link GcpIamCredentialsAuthenticationOptions}, {@link RestOperations} and
 	 * {@link TransportChannelProvider}.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for for Vault login, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
 	 * @param transportChannelProvider Provider for transport channel Google API use, must
 	 * not be {@literal null}.
 	 */
@@ -128,7 +124,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 					.setCredentialsProvider(() -> this.credentials)
 					.setTransportChannelProvider(this.transportChannelProvider).build();
 			try (IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create(credentialsSettings)) {
-				String payload = JSON_FACTORY.toString(jwtPayload);
+				String payload = GoogleJsonUtil.JSON_FACTORY.toString(jwtPayload);
 				ServiceAccountName serviceAccountName = ServiceAccountName.of("-", serviceAccount);
 				SignJwtResponse response = iamCredentialsClient.signJwt(serviceAccountName, Collections.emptyList(),
 						payload);

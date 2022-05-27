@@ -26,10 +26,9 @@ import java.time.Duration;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential.Builder;
 import com.google.api.client.googleapis.testing.auth.oauth2.MockGoogleCredential;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
-import com.google.api.client.testing.json.MockJsonFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -81,7 +80,7 @@ class GcpIamAuthenticationUnitTests {
 
 		GoogleCredential credential = new MockGoogleCredential.Builder().setServiceAccountId("hello@world")
 				.setServiceAccountProjectId("foobar").setServiceAccountPrivateKey(key.getPrivate())
-				.setServiceAccountPrivateKeyId("key-id").setJsonFactory(new JacksonFactory())
+				.setServiceAccountPrivateKeyId("key-id").setJsonFactory(new GsonFactory())
 				.setTransport(new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build())
 				.build();
 		credential.setAccessToken("foobar");
