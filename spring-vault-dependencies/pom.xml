@@ -60,7 +60,7 @@
 		<httpclient.version>4.5.13</httpclient.version>
 		<httpcore.version>4.4.14</httpcore.version>
 		<jetty-reactive-httpclient.version>1.1.6</jetty-reactive-httpclient.version>
-		<netty.version>4.1.70.Final</netty.version>
+		<netty.version>4.1.77.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<jackson-databind.version>2.13.3</jackson-databind.version>
 		<aws-java-sdk.version>1.11.975</aws-java-sdk.version>
