@@ -266,12 +266,12 @@
 								<dependency>
 									<groupId>org.asciidoctor</groupId>
 									<artifactId>asciidoctorj-pdf</artifactId>
-									<version>1.5.0-alpha.16</version>
+									<version>2.0.3</version>
 								</dependency>
 								<dependency>
 									<groupId>org.asciidoctor</groupId>
 									<artifactId>asciidoctorj-epub3</artifactId>
-									<version>1.5.0-alpha.8.1</version>
+									<version>1.5.1</version>
 								</dependency>
 							</dependencies>
 							<executions>
@@ -405,7 +405,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>2.7.0</version>
+							<version>3.4.0</version>
 							<executions>
 								<execution>
 									<id>deploy-docs</id>

@@ -7,17 +7,6 @@
 	</formats>
 	<includeBaseDirectory>false</includeBaseDirectory>
 	<fileSets>
-        <fileSet>
-			<!--
-				Adds readme and other textfiles to the root of the distribution archive.
-			-->
-			<directory>${project.root}/src/main/resources</directory>
-			<includes>
-				<include>changelog.txt</include>
-			</includes>
-			<outputDirectory />
-			<lineEnding>dos</lineEnding>
-		</fileSet>
 		<fileSet>
 			<!--
 				Adds reference manual (html and pdf) to the distribution archive
