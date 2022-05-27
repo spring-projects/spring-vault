@@ -59,7 +59,6 @@ public class VaultClients {
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
-	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
 	 * @see MappingJackson2HttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
@@ -80,7 +79,6 @@ public class VaultClients {
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
-	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
 	 * @see MappingJackson2HttpMessageConverter
 	 * @since 1.1
 	 */
@@ -105,7 +103,6 @@ public class VaultClients {
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
-	 * @see org.springframework.http.client.Netty4ClientHttpRequestFactory
 	 * @see MappingJackson2HttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate() {
