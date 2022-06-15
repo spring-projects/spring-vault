@@ -44,6 +44,7 @@ import org.springframework.vault.VaultException;
  *
  * @author Mark Paluch
  * @author Alex Bremora
+ * @author Bogdan Cardos
  * @see #getPrivateKeySpec()
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
@@ -147,13 +148,13 @@ public class CertificateBundle extends Certificate {
 	 */
 	public String getRequiredPrivateKeyType() {
 
-		String privateKeyType = getPrivateKeyType();
+		String requiredPrivateKeyType = getPrivateKeyType();
 
-		if (privateKeyType == null) {
+		if (requiredPrivateKeyType == null) {
 			throw new IllegalStateException("Private key type is not set");
 		}
 
-		return privateKeyType;
+		return requiredPrivateKeyType;
 	}
 
 	/**
@@ -185,14 +186,68 @@ public class CertificateBundle extends Certificate {
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
 	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, String password) {
+		return createKeyStore(keyAlias, false, password);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, char[] password) {
+		return createKeyStore(keyAlias, false, password);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
 	 * @param includeCaChain whether to include the certificate authority chain instead of
 	 * just the issuer certificate.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 * @since 2.3.3
 	 */
 	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain) {
+		return createKeyStore(keyAlias, includeCaChain, new char[0]);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, String password) {
+		Assert.hasText(password, "Password must not be empty");
+		return createKeyStore(keyAlias, includeCaChain, password.toCharArray());
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, char[] password) {
 
 		Assert.hasText(keyAlias, "Key alias must not be empty");
+		Assert.notNull(password, "Password must not be null");
 
 		try {
 
@@ -206,7 +261,7 @@ public class CertificateBundle extends Certificate {
 				certificates.add(getX509IssuerCertificate());
 			}
 
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), password,
 					certificates.toArray(new X509Certificate[0]));
 		}
 		catch (GeneralSecurityException | IOException e) {
@@ -223,7 +278,7 @@ public class CertificateBundle extends Certificate {
 
 		List<X509Certificate> certificates = new ArrayList<>();
 
-		for (String data : caChain) {
+		for (String data : this.caChain) {
 			try {
 				certificates.addAll(getCertificates(data));
 			}
