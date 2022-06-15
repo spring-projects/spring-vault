@@ -108,6 +108,10 @@ class CertificateBundleUnitTests {
 		KeyStore keyStoreWithPassword = bundle.createKeyStore("mykey", "mypassword");
 		assertThat(keyStoreWithPassword.size()).isEqualTo(1);
 		assertThat(keyStoreWithPassword.getCertificateChain("mykey")).hasSize(2);
+
+		KeyStore keyStoreWithPasswordChar = bundle.createKeyStore("mykey", new char[0]);
+		assertThat(keyStoreWithPasswordChar.size()).isEqualTo(1);
+		assertThat(keyStoreWithPasswordChar.getCertificateChain("mykey")).hasSize(2);
 	}
 
 	@ParameterizedTest
@@ -122,6 +126,9 @@ class CertificateBundleUnitTests {
 
 		KeyStore keyStoreWithPassword = bundle.createKeyStore("localhost", "mypassword");
 		assertThat(keyStoreWithPassword).isNotNull();
+
+		KeyStore keyStoreWithPasswordChar = bundle.createKeyStore("localhost", new char[0]);
+		assertThat(keyStoreWithPasswordChar).isNotNull();
 	}
 
 	@ParameterizedTest
@@ -134,6 +141,9 @@ class CertificateBundleUnitTests {
 
 		KeyStore keyStoreWithPassword = bundle.createKeyStore("localhost", "mypassword");
 		assertThat(keyStoreWithPassword).isNotNull();
+
+		KeyStore keyStoreWithPasswordChar = bundle.createKeyStore("localhost", new char[0]);
+		assertThat(keyStoreWithPasswordChar).isNotNull();
 	}
 
 	CertificateBundle loadCertificateBundle(String path) {

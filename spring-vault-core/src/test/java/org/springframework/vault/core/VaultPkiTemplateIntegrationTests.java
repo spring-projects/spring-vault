@@ -153,11 +153,17 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		KeyStore keyStoreWithPassword = data.createKeyStore("vault", "mypassword");
 		assertThat(keyStoreWithPassword.getCertificateChain("vault")).hasSize(2);
 
+		KeyStore keyStoreWithPasswordChar = data.createKeyStore("vault", new char[0]);
+		assertThat(keyStoreWithPasswordChar.getCertificateChain("vault")).hasSize(2);
+
 		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
 		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
 
 		KeyStore keyStoreWithCaChainAndPassword = data.createKeyStore("vault", true, "mypassword");
 		assertThat(keyStoreWithCaChainAndPassword.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPasswordChar = data.createKeyStore("vault", true, new char[0]);
+		assertThat(keyStoreWithCaChainAndPasswordChar.getCertificateChain("vault")).hasSize(3);
 	}
 
 	@ParameterizedTest
@@ -184,11 +190,17 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		KeyStore keyStoreWithPassword = data.createKeyStore("vault", "mypassword");
 		assertThat(keyStoreWithPassword.getCertificateChain("vault")).hasSize(2);
 
+		KeyStore keyStoreWithPasswordChar = data.createKeyStore("vault", new char[0]);
+		assertThat(keyStoreWithPasswordChar.getCertificateChain("vault")).hasSize(2);
+
 		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
 		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
 
 		KeyStore keyStoreWithCaChainAndPassword = data.createKeyStore("vault", true, "mypassword");
 		assertThat(keyStoreWithCaChainAndPassword.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPasswordChar = data.createKeyStore("vault", true, new char[0]);
+		assertThat(keyStoreWithCaChainAndPasswordChar.getCertificateChain("vault")).hasSize(3);
 
 	}
 

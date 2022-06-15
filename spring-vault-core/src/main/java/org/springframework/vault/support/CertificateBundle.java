@@ -198,33 +198,25 @@ public class CertificateBundle extends Certificate {
 	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
 	 * private key and certificate chain.
 	 * @param keyAlias the key alias to use.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, char[] password) {
+		return createKeyStore(keyAlias, false, password);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
 	 * @param includeCaChain whether to include the certificate authority chain instead of
 	 * just the issuer certificate.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 * @since 2.3.3
 	 */
 	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain) {
-
-		Assert.hasText(keyAlias, "Key alias must not be empty");
-
-		try {
-
-			List<X509Certificate> certificates = new ArrayList<>();
-			certificates.add(getX509Certificate());
-
-			if (includeCaChain) {
-				certificates.addAll(getX509IssuerCertificates());
-			}
-			else {
-				certificates.add(getX509IssuerCertificate());
-			}
-
-			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(),
-					certificates.toArray(new X509Certificate[0]));
-		}
-		catch (GeneralSecurityException | IOException e) {
-			throw new VaultException("Cannot create KeyStore", e);
-		}
+		return createKeyStore(keyAlias, includeCaChain, new char[0]);
 	}
 
 	/**
@@ -238,9 +230,24 @@ public class CertificateBundle extends Certificate {
 	 * @since 3.0.0
 	 */
 	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, String password) {
+		return createKeyStore(keyAlias, includeCaChain,
+				(password == null || password.isBlank() ? new char[0] : password.toCharArray()));
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, char[] password) {
 
 		Assert.hasText(keyAlias, "Key alias must not be empty");
-		Assert.hasText(password, "Password must not be empty");
+		Assert.notNull(password, "Password must not be null");
 
 		try {
 
