@@ -41,10 +41,9 @@ class CertificateBundleUnitTests {
 
 	CertificateBundle certificateBundle;
 
-	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() {
-		certificateBundle = loadCertificateBundle("certificate.json");
+		this.certificateBundle = loadCertificateBundle("certificate.json");
 	}
 
 	@Test
@@ -103,9 +102,12 @@ class CertificateBundleUnitTests {
 
 		CertificateBundle bundle = loadCertificateBundle("certificate.json");
 		KeyStore keyStore = bundle.createKeyStore("mykey");
-
 		assertThat(keyStore.size()).isEqualTo(1);
 		assertThat(keyStore.getCertificateChain("mykey")).hasSize(2);
+
+		KeyStore keyStoreWithPassword = bundle.createKeyStore("mykey", "mypassword");
+		assertThat(keyStoreWithPassword.size()).isEqualTo(1);
+		assertThat(keyStoreWithPassword.getCertificateChain("mykey")).hasSize(2);
 	}
 
 	@ParameterizedTest
@@ -116,8 +118,10 @@ class CertificateBundleUnitTests {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
 		KeyStore keyStore = bundle.createKeyStore("localhost");
-
 		assertThat(keyStore).isNotNull();
+
+		KeyStore keyStoreWithPassword = bundle.createKeyStore("localhost", "mypassword");
+		assertThat(keyStoreWithPassword).isNotNull();
 	}
 
 	@ParameterizedTest
@@ -126,11 +130,12 @@ class CertificateBundleUnitTests {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
 		KeyStore keyStore = bundle.createKeyStore("localhost");
-
 		assertThat(keyStore).isNotNull();
+
+		KeyStore keyStoreWithPassword = bundle.createKeyStore("localhost", "mypassword");
+		assertThat(keyStoreWithPassword).isNotNull();
 	}
 
-	@SuppressWarnings("unchecked")
 	CertificateBundle loadCertificateBundle(String path) {
 
 		try {

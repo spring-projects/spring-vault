@@ -44,6 +44,7 @@ import org.springframework.vault.VaultException;
  *
  * @author Mark Paluch
  * @author Alex Bremora
+ * @author Bogdan Cardos
  * @see #getPrivateKeySpec()
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
@@ -147,13 +148,13 @@ public class CertificateBundle extends Certificate {
 	 */
 	public String getRequiredPrivateKeyType() {
 
-		String privateKeyType = getPrivateKeyType();
+		String requiredPrivateKeyType = getPrivateKeyType();
 
-		if (privateKeyType == null) {
+		if (requiredPrivateKeyType == null) {
 			throw new IllegalStateException("Private key type is not set");
 		}
 
-		return privateKeyType;
+		return requiredPrivateKeyType;
 	}
 
 	/**
@@ -179,6 +180,18 @@ public class CertificateBundle extends Certificate {
 	 */
 	public KeyStore createKeyStore(String keyAlias) {
 		return createKeyStore(keyAlias, false);
+	}
+
+	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, String password) {
+		return createKeyStore(keyAlias, false, password);
 	}
 
 	/**
@@ -215,6 +228,41 @@ public class CertificateBundle extends Certificate {
 	}
 
 	/**
+	 * Create a {@link KeyStore} from this {@link CertificateBundle} containing the
+	 * private key and certificate chain.
+	 * @param keyAlias the key alias to use.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @param password the password to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @since 3.0.0
+	 */
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, String password) {
+
+		Assert.hasText(keyAlias, "Key alias must not be empty");
+		Assert.hasText(password, "Password must not be empty");
+
+		try {
+
+			List<X509Certificate> certificates = new ArrayList<>();
+			certificates.add(getX509Certificate());
+
+			if (includeCaChain) {
+				certificates.addAll(getX509IssuerCertificates());
+			}
+			else {
+				certificates.add(getX509IssuerCertificate());
+			}
+
+			return KeystoreUtil.createKeyStore(keyAlias, getPrivateKeySpec(), password,
+					certificates.toArray(new X509Certificate[0]));
+		}
+		catch (GeneralSecurityException | IOException e) {
+			throw new VaultException("Cannot create KeyStore", e);
+		}
+	}
+
+	/**
 	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}.
 	 * @return the issuing CA {@link X509Certificate}.
 	 * @since 2.3.3
@@ -223,7 +271,7 @@ public class CertificateBundle extends Certificate {
 
 		List<X509Certificate> certificates = new ArrayList<>();
 
-		for (String data : caChain) {
+		for (String data : this.caChain) {
 			try {
 				certificates.addAll(getCertificates(data));
 			}

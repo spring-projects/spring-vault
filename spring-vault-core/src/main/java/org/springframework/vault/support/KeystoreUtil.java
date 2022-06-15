@@ -37,6 +37,7 @@ import java.util.List;
  * with the certificate chain and its private key.
  *
  * @author Mark Paluch
+ * @author Bogdan Cardos
  */
 class KeystoreUtil {
 
@@ -73,11 +74,16 @@ class KeystoreUtil {
 	/**
 	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
 	 * certificates} using the given {@code keyAlias}.
-	 * @param keyAlias
-	 * @param certificates
-	 * @return
-	 * @throws GeneralSecurityException
-	 * @throws IOException
+	 * @param keyAlias the key alias to use.
+	 * @param privateKeySpec the private key to use.
+	 * @param certificates the certificate chain to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @throws GeneralSecurityException if exception occur when creating the instance of
+	 * the {@link KeyStore}
+	 * @throws IOException if there is an I/O or format problem with the keystore data, if
+	 * a password is required but not given, or if the given password was incorrect. If
+	 * the error is due to a wrong password, the {@link Throwable#getCause cause} of the
+	 * {@code IOException} should be an {@code UnrecoverableKeyException}
 	 */
 	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, X509Certificate... certificates)
 			throws GeneralSecurityException, IOException {
@@ -98,12 +104,51 @@ class KeystoreUtil {
 	}
 
 	/**
+	 * Create a {@link KeyStore} containing the {@link KeySpec} and {@link X509Certificate
+	 * certificates} using the given {@code keyAlias} and {@code keyPassword}.
+	 * @param keyAlias the key alias to use.
+	 * @param privateKeySpec the private key to use.
+	 * @param keyPassword the password to use.
+	 * @param certificates the certificate chain to use.
+	 * @return the {@link KeyStore} containing the private key and certificate chain.
+	 * @throws GeneralSecurityException if exception occur when creating the instance of
+	 * the {@link KeyStore}
+	 * @throws IOException if there is an I/O or format problem with the keystore data, if
+	 * a password is required but not given, or if the given password was incorrect. If
+	 * the error is due to a wrong password, the {@link Throwable#getCause cause} of the
+	 * {@code IOException} should be an {@code UnrecoverableKeyException}
+	 */
+	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, String keyPassword,
+			X509Certificate... certificates) throws GeneralSecurityException, IOException {
+
+		PrivateKey privateKey = (privateKeySpec instanceof RSAPrivateKeySpec
+				|| privateKeySpec instanceof PKCS8EncodedKeySpec) ? RSA_KEY_FACTORY.generatePrivate(privateKeySpec)
+						: EC_KEY_FACTORY.generatePrivate(privateKeySpec);
+
+		char[] password = (keyPassword == null || keyPassword.isBlank()) ? new char[0] : keyPassword.toCharArray();
+
+		KeyStore keyStore = createKeyStore();
+
+		List<X509Certificate> certChain = new ArrayList<>();
+		Collections.addAll(certChain, certificates);
+
+		keyStore.setKeyEntry(keyAlias, privateKey, password,
+				certChain.toArray(new java.security.cert.Certificate[certChain.size()]));
+
+		return keyStore;
+	}
+
+	/**
 	 * Create a {@link KeyStore} containing the {@link X509Certificate certificates}
 	 * stored with as {@code cert_0, cert_1...cert_N}.
-	 * @param certificates
-	 * @return
-	 * @throws GeneralSecurityException
-	 * @throws IOException
+	 * @param certificates the certificate chain to use.
+	 * @return the {@link KeyStore} containing the certificate chain.
+	 * @throws GeneralSecurityException if exception occur when creating the instance of
+	 * the {@link KeyStore}
+	 * @throws IOException if there is an I/O or format problem with the keystore data, if
+	 * a password is required but not given, or if the given password was incorrect. If
+	 * the error is due to a wrong password, the {@link Throwable#getCause cause} of the
+	 * {@code IOException} should be an {@code UnrecoverableKeyException}
 	 * @since 2.0
 	 */
 	static KeyStore createKeyStore(X509Certificate... certificates) throws GeneralSecurityException, IOException {
@@ -133,8 +178,12 @@ class KeystoreUtil {
 	/**
 	 * Create an empty {@link KeyStore}.
 	 * @return the {@link KeyStore}.
-	 * @throws GeneralSecurityException
-	 * @throws IOException
+	 * @throws GeneralSecurityException if exception occur when creating the instance of
+	 * the {@link KeyStore}
+	 * @throws IOException if there is an I/O or format problem with the keystore data, if
+	 * a password is required but not given, or if the given password was incorrect. If
+	 * the error is due to a wrong password, the {@link Throwable#getCause cause} of the
+	 * {@code IOException} should be an {@code UnrecoverableKeyException}
 	 */
 	private static KeyStore createKeyStore() throws GeneralSecurityException, IOException {
 
