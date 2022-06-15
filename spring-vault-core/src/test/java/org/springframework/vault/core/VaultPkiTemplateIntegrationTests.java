@@ -109,7 +109,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		this.vaultOperations.write("pki/config/ca", pembundle);
 
-		Map<String, String> role = new HashMap<String, String>();
+		Map<String, String> role = new HashMap<>();
 		role.put("allowed_domains", "localhost,example.com");
 		role.put("allow_subdomains", "true");
 		role.put("allow_localhost", "true");
@@ -150,8 +150,20 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		KeyStore keyStore = data.createKeyStore("vault");
 		assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
 
+		KeyStore keyStoreWithPassword = data.createKeyStore("vault", "mypassword");
+		assertThat(keyStoreWithPassword.getCertificateChain("vault")).hasSize(2);
+
+		KeyStore keyStoreWithPasswordChar = data.createKeyStore("vault", new char[0]);
+		assertThat(keyStoreWithPasswordChar.getCertificateChain("vault")).hasSize(2);
+
 		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
 		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPassword = data.createKeyStore("vault", true, "mypassword");
+		assertThat(keyStoreWithCaChainAndPassword.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPasswordChar = data.createKeyStore("vault", true, new char[0]);
+		assertThat(keyStoreWithCaChainAndPasswordChar.getCertificateChain("vault")).hasSize(3);
 	}
 
 	@ParameterizedTest
@@ -175,8 +187,21 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		KeyStore keyStore = data.createKeyStore("vault");
 		assertThat(keyStore.getCertificateChain("vault")).hasSize(2);
 
+		KeyStore keyStoreWithPassword = data.createKeyStore("vault", "mypassword");
+		assertThat(keyStoreWithPassword.getCertificateChain("vault")).hasSize(2);
+
+		KeyStore keyStoreWithPasswordChar = data.createKeyStore("vault", new char[0]);
+		assertThat(keyStoreWithPasswordChar.getCertificateChain("vault")).hasSize(2);
+
 		KeyStore keyStoreWithCaChain = data.createKeyStore("vault", true);
 		assertThat(keyStoreWithCaChain.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPassword = data.createKeyStore("vault", true, "mypassword");
+		assertThat(keyStoreWithCaChainAndPassword.getCertificateChain("vault")).hasSize(3);
+
+		KeyStore keyStoreWithCaChainAndPasswordChar = data.createKeyStore("vault", true, new char[0]);
+		assertThat(keyStoreWithCaChainAndPasswordChar.getCertificateChain("vault")).hasSize(3);
+
 	}
 
 	static Stream<KeyFixture> keyTypeFixtures() {
@@ -213,7 +238,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		@Override
 		public String toString() {
-			return String.format("[%s, %s, %s]", format, privateKeyFormat, keyType);
+			return String.format("[%s, %s, %s]", this.format, this.privateKeyFormat, this.keyType);
 		}
 
 	}
