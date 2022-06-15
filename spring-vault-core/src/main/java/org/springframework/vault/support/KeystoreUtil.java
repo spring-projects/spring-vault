@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 /**
  * Keystore utility to create a {@link KeyStore} containing a {@link CertificateBundle}
  * with the certificate chain and its private key.
@@ -87,20 +89,7 @@ class KeystoreUtil {
 	 */
 	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, X509Certificate... certificates)
 			throws GeneralSecurityException, IOException {
-
-		PrivateKey privateKey = (privateKeySpec instanceof RSAPrivateKeySpec
-				|| privateKeySpec instanceof PKCS8EncodedKeySpec) ? RSA_KEY_FACTORY.generatePrivate(privateKeySpec)
-						: EC_KEY_FACTORY.generatePrivate(privateKeySpec);
-
-		KeyStore keyStore = createKeyStore();
-
-		List<X509Certificate> certChain = new ArrayList<>();
-		Collections.addAll(certChain, certificates);
-
-		keyStore.setKeyEntry(keyAlias, privateKey, new char[0],
-				certChain.toArray(new java.security.cert.Certificate[certChain.size()]));
-
-		return keyStore;
+		return createKeyStore(keyAlias, privateKeySpec, new char[0], certificates);
 	}
 
 	/**
@@ -120,8 +109,8 @@ class KeystoreUtil {
 	 */
 	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, String keyPassword,
 			X509Certificate... certificates) throws GeneralSecurityException, IOException {
-		return createKeyStore(keyAlias, privateKeySpec,
-				(keyPassword == null || keyPassword.isBlank() ? new char[0] : keyPassword.toCharArray()), certificates);
+		Assert.hasText(keyPassword, "keyPassword must not be empty");
+		return createKeyStore(keyAlias, privateKeySpec, keyPassword.toCharArray(), certificates);
 	}
 
 	/**
@@ -142,6 +131,8 @@ class KeystoreUtil {
 	static KeyStore createKeyStore(String keyAlias, KeySpec privateKeySpec, char[] keyPassword,
 			X509Certificate... certificates) throws GeneralSecurityException, IOException {
 
+		Assert.notNull(keyPassword, "keyPassword must not be null");
+
 		PrivateKey privateKey = (privateKeySpec instanceof RSAPrivateKeySpec
 				|| privateKeySpec instanceof PKCS8EncodedKeySpec) ? RSA_KEY_FACTORY.generatePrivate(privateKeySpec)
 						: EC_KEY_FACTORY.generatePrivate(privateKeySpec);
@@ -151,7 +142,7 @@ class KeystoreUtil {
 		List<X509Certificate> certChain = new ArrayList<>();
 		Collections.addAll(certChain, certificates);
 
-		keyStore.setKeyEntry(keyAlias, privateKey, (keyPassword == null ? new char[0] : keyPassword),
+		keyStore.setKeyEntry(keyAlias, privateKey, keyPassword,
 				certChain.toArray(new java.security.cert.Certificate[certChain.size()]));
 
 		return keyStore;

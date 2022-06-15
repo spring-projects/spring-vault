@@ -230,8 +230,8 @@ public class CertificateBundle extends Certificate {
 	 * @since 3.0.0
 	 */
 	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, String password) {
-		return createKeyStore(keyAlias, includeCaChain,
-				(password == null || password.isBlank() ? new char[0] : password.toCharArray()));
+		Assert.hasText(password, "Password must not be empty");
+		return createKeyStore(keyAlias, includeCaChain, password.toCharArray());
 	}
 
 	/**
