@@ -65,6 +65,7 @@ import static org.springframework.vault.util.Settings.*;
  *
  * @author Mark Paluch
  * @author Alex Bremora
+ * @author Bogdan Cardos
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
