@@ -148,13 +148,13 @@ public class CertificateBundle extends Certificate {
 	 */
 	public String getRequiredPrivateKeyType() {
 
-		String requiredPrivateKeyType = getPrivateKeyType();
+		String type = getPrivateKeyType();
 
-		if (requiredPrivateKeyType == null) {
+		if (type == null) {
 			throw new IllegalStateException("Private key type is not set");
 		}
 
-		return requiredPrivateKeyType;
+		return type;
 	}
 
 	/**
@@ -188,9 +188,9 @@ public class CertificateBundle extends Certificate {
 	 * @param keyAlias the key alias to use.
 	 * @param password the password to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
-	 * @since 3.0.0
+	 * @since 2.4
 	 */
-	public KeyStore createKeyStore(String keyAlias, String password) {
+	public KeyStore createKeyStore(String keyAlias, CharSequence password) {
 		return createKeyStore(keyAlias, false, password);
 	}
 
@@ -200,7 +200,7 @@ public class CertificateBundle extends Certificate {
 	 * @param keyAlias the key alias to use.
 	 * @param password the password to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
-	 * @since 3.0.0
+	 * @since 2.4
 	 */
 	public KeyStore createKeyStore(String keyAlias, char[] password) {
 		return createKeyStore(keyAlias, false, password);
@@ -227,11 +227,18 @@ public class CertificateBundle extends Certificate {
 	 * just the issuer certificate.
 	 * @param password the password to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
-	 * @since 3.0.0
+	 * @since 2.4
 	 */
-	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, String password) {
-		Assert.hasText(password, "Password must not be empty");
-		return createKeyStore(keyAlias, includeCaChain, password.toCharArray());
+	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, CharSequence password) {
+
+		Assert.notNull(password, "Password must not be null");
+
+		char[] passwordChars = new char[password.length()];
+		for (int i = 0; i < passwordChars.length; i++) {
+			passwordChars[i] = password.charAt(i);
+		}
+
+		return createKeyStore(keyAlias, includeCaChain, passwordChars);
 	}
 
 	/**
@@ -242,7 +249,7 @@ public class CertificateBundle extends Certificate {
 	 * just the issuer certificate.
 	 * @param password the password to use.
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
-	 * @since 3.0.0
+	 * @since 2.4
 	 */
 	public KeyStore createKeyStore(String keyAlias, boolean includeCaChain, char[] password) {
 
