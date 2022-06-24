@@ -28,7 +28,7 @@
 		<mockk.version>1.10.3-jdk8</mockk.version>
 		<mockito-core.version>3.8.0</mockito-core.version>
 		<spring.version>5.3.20</spring.version>
-		<spring-data-bom.version>2021.2.0</spring-data-bom.version>
+		<spring-data-bom.version>2021.2.1</spring-data-bom.version>
 		<spring-security-bom.version>5.4.5</spring-security-bom.version>
 		<reactor.version>2020.0.13</reactor.version>
 		<java.version>1.8</java.version>

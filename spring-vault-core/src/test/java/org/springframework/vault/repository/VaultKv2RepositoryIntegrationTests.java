@@ -142,7 +142,6 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	@Disabled("Until https://github.com/spring-projects/spring-vault/issues/701 is resolved")
 	void deleteVersioned() {
 
 		VersionedPerson person = new VersionedPerson();
