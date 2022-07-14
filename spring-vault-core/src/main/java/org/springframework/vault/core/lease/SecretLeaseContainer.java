@@ -16,6 +16,7 @@
 package org.springframework.vault.core.lease;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -943,6 +944,15 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {
 				return new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.seconds));
+			}
+
+			return null;
+		}
+
+		@Override
+		public Instant nextExecution(TriggerContext triggerContext) {
+			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {
+				return Instant.ofEpochMilli(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.seconds));
 			}
 
 			return null;

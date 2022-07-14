@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -195,6 +196,14 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 			return null;
 		}
 
+		@Override
+		public Instant nextExecution(TriggerContext triggerContext) {
+			if (this.fired.compareAndSet(false, true)) {
+				return this.nextExecutionTime.toInstant();
+			}
+
+			return null;
+		}
 	}
 
 	/**
