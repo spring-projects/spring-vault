@@ -64,7 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -152,7 +152,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.getSessionToken() //
 				.as(StepVerifier::create) //
 				.verifyError();
-		verifyZeroInteractions(this.listener);
+		verifyNoInteractions(this.listener);
 		verify(this.errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
 
