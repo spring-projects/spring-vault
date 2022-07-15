@@ -39,7 +39,7 @@ class VaultResponsesUnitTests {
 		HttpStatusCodeException cause = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request");
 
 		VaultException vaultException = VaultResponses.buildException(cause);
-		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request;").hasCause(cause);
+		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request").hasCause(cause);
 	}
 
 	@Test
@@ -49,7 +49,7 @@ class VaultResponsesUnitTests {
 				"{\"errors\":[\"some-error\"]}".getBytes(), StandardCharsets.US_ASCII);
 
 		VaultException vaultException = VaultResponses.buildException(cause);
-		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request: some-error;").hasCause(cause);
+		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request: some-error").hasCause(cause);
 	}
 
 	@Test
@@ -58,7 +58,7 @@ class VaultResponsesUnitTests {
 		HttpStatusCodeException cause = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request");
 
 		VaultException vaultException = VaultResponses.buildException(cause, "sys/path");
-		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path];").hasCause(cause);
+		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]").hasCause(cause);
 	}
 
 	@Test
@@ -68,7 +68,7 @@ class VaultResponsesUnitTests {
 				"{\"errors\":[\"some-error\"]}".getBytes(), StandardCharsets.US_ASCII);
 
 		VaultException vaultException = VaultResponses.buildException(cause, "sys/path");
-		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]: some-error;")
+		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]: some-error")
 				.hasCause(cause);
 	}
 
