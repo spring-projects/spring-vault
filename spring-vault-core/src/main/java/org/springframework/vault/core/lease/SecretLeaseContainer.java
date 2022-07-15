@@ -938,17 +938,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 			this.seconds = seconds;
 		}
 
-		@Override
 		@Nullable
-		public Date nextExecutionTime(TriggerContext triggerContext) {
-
-			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {
-				return new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.seconds));
-			}
-
-			return null;
-		}
-
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
 			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {

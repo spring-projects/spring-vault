@@ -186,16 +186,6 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 			this.nextExecutionTime = nextExecutionTime;
 		}
 
-		@Nullable
-		public Date nextExecutionTime(TriggerContext triggerContext) {
-
-			if (this.fired.compareAndSet(false, true)) {
-				return this.nextExecutionTime;
-			}
-
-			return null;
-		}
-
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
 			if (this.fired.compareAndSet(false, true)) {
@@ -204,6 +194,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 			return null;
 		}
+
 	}
 
 	/**
