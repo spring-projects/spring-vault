@@ -126,13 +126,13 @@ echo "[INFO] Creating PKCS12 file with client certificate"
 openssl pkcs12 -export -clcerts \
       -in ${CA_DIR}/certs/client.cert.pem \
       -inkey ${CA_DIR}/private/client.decrypted.key.pem \
-      -passout pass:changeit \
+      -passout pass:changeit -certpbe pbeWithSHA1And3-KeyTripleDES-CBC -keypbe pbeWithSHA1And3-KeyTripleDES-CBC -macalg sha1 \
       -out ${CA_DIR}/client.p12
 
 "${KEYTOOL}" -importcert -keystore ${KEYSTORE_FILE} -file ${CA_DIR}/certs/ca.cert.pem -noprompt -storepass changeit
 "${KEYTOOL}" -importkeystore \
-                              -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit\
-                              -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype JKS \
+                              -srckeystore ${CA_DIR}/client.p12 -srcstoretype PKCS12 -srcstorepass changeit \
+                              -destkeystore ${CLIENT_CERT_KEYSTORE} -deststoretype PKCS12 \
                               -noprompt -storepass changeit
 
 echo "[INFO] Generating intermediate CA private key"
