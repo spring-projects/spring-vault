@@ -427,13 +427,14 @@
 											<!-- Retain only a single build -->
 											<buildName>Spring Vault Docs ${project.version}</buildName>
 											<buildRetentionCount>1</buildRetentionCount>
+											<buildUrl>{{BUILD_URL}}</buildUrl>
 										</buildInfo>
 										<publisher>
-											<contextUrl>https://repo.spring.io</contextUrl>
-											<username>${artifactory.username}</username>
-											<password>${artifactory.password}</password>
-											<repoKey>temp-private-local</repoKey>
-											<snapshotRepoKey>temp-private-local</snapshotRepoKey>
+											<contextUrl>{{artifactory.server}}</contextUrl>
+											<username>{{artifactory.username}}</username>
+											<password>{{artifactory.password}}</password>
+											<repoKey>{{artifactory.staging-repository}}</repoKey>
+											<snapshotRepoKey>{{artifactory.staging-repository}}</snapshotRepoKey>
 											<includePatterns>*.zip</includePatterns>
 										</publisher>
 									</configuration>
