@@ -32,7 +32,7 @@ pipeline {
 
 					steps {
 						script {
-							def image = docker.build("${p['docker.image']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk8-vault/Dockerfile .")
+							def image = docker.build("${p['docker.build.image.name']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk8-vault/Dockerfile .")
 							docker.withRegistry(p['docker.registry'], p['docker.credentials']) {
 								image.push()
 							}
