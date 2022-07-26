@@ -32,7 +32,7 @@ pipeline {
 
 					steps {
 						script {
-							def image = docker.build("springci/spring-vault-openjdk8-vault:${p['java.main.tag']}-${p['docker.vault.version']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk8-vault/Dockerfile .")
+							def image = docker.build("${p['docker.image']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk8-vault/Dockerfile .")
 							docker.withRegistry(p['docker.registry'], p['docker.credentials']) {
 								image.push()
 							}
@@ -59,7 +59,7 @@ pipeline {
 			}
 			steps {
 				script {
-					docker.image("harbor-repo.vmware.com/dockerhub-proxy-cache/springci/spring-vault-openjdk8-vault:${p['java.main.tag']}-${p['docker.vault.version']}").inside(p['docker.java.inside.basic']) {
+					docker.image("${p['docker.image']}").inside(p['docker.java.inside.basic']) {
 						sh 'src/test/bash/create_certificates.sh'
 						sh '/opt/vault/vault server -config=$(pwd)/src/test/bash/vault.conf &'
 						sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
@@ -78,7 +78,7 @@ pipeline {
 			}
 			agent {
 				docker {
-					image "harbor-repo.vmware.com/dockerhub-proxy-cache/springci/spring-vault-openjdk17-vault:${p['java.main.tag']}-${p['docker.vault.version']}"
+					image "${p['docker.image']}"
 					args "${p['docker.java.inside.basic']}"
 				}
 			}
