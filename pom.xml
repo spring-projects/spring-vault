@@ -595,6 +595,20 @@
 
 		<profile>
 
+			<id>snapshot</id>
+
+			<distributionManagement>
+				<repository>
+					<id>spring-libs-snapshot</id>
+					<name>Spring Snapshot Repository</name>
+					<url>https://repo.spring.io/libs-snapshot-local</url>
+				</repository>
+			</distributionManagement>
+
+		</profile>
+
+		<profile>
+
 			<id>milestone</id>
 
 			<distributionManagement>
@@ -652,6 +666,35 @@
 						<configuration>
 							<skip>true</skip>
 						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-enforcer-plugin</artifactId>
+						<version>3.1.0</version>
+						<executions>
+							<execution>
+								<id>enforce-no-third-party-snapshots</id>
+								<goals>
+									<goal>enforce</goal>
+								</goals>
+								<configuration>
+									<rules>
+										<requireReleaseDeps />
+										<NoSnapshotDependenciesInDependencyManagementRule implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
+											<onlyWhenRelease>true</onlyWhenRelease>
+										</NoSnapshotDependenciesInDependencyManagementRule>
+									</rules>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>de.smartics.rules</groupId>
+								<artifactId>smartics-enforcer-rules</artifactId>
+								<version>1.0.2</version>
+							</dependency>
+						</dependencies>
 					</plugin>
 				</plugins>
 			</build>
@@ -788,14 +831,6 @@
 		<profile>
 
 			<id>artifactory</id>
-
-			<distributionManagement>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<name>Spring Snapshot Repository</name>
-					<url>https://repo.spring.io/libs-snapshot-local</url>
-				</repository>
-			</distributionManagement>
 
 			<build>
 

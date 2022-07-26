@@ -68,35 +68,47 @@ pipeline {
 			}
 		}
 
-		stage('Release to artifactory') {
+		stage('Deploy') {
 			when {
 				beforeAgent(true)
 				anyOf {
-					branch(pattern: "main|(\\d\\.\\d\\.x)", comparator: "REGEXP")
+					branch(pattern: "main|(\\d\\.\\d\\.x)|v(\\d\\.\\d\\.d)|", comparator: "REGEXP")
 					not { triggeredBy 'UpstreamCause' }
 				}
 			}
 			agent {
-				label 'data'
+				docker {
+					image "harbor-repo.vmware.com/dockerhub-proxy-cache/springci/spring-vault-openjdk17-vault:${p['java.main.tag']}-${p['docker.vault.version']}"
+					args "${p['docker.java.inside.basic']}"
+				}
 			}
 			options { timeout(time: 20, unit: 'MINUTES') }
 
 			environment {
 				ARTIFACTORY = credentials("${p['artifactory.credentials']}")
+				SONATYPE = credentials('oss-login')
+				KEYRING = credentials('spring-signing-secring.gpg')
+				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
 
 			steps {
 				script {
-					docker.image("harbor-repo.vmware.com/dockerhub-proxy-cache/springci/spring-vault-openjdk17-vault:${p['java.main.tag']}-${p['docker.vault.version']}").inside(p['docker.java.inside.basic']) {
-						sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml -Pci,artifactory ' +
-								'-Dartifactory.server=https://repo.spring.io ' +
-								"-Dartifactory.username=${ARTIFACTORY_USR} " +
-								"-Dartifactory.password=${ARTIFACTORY_PSW} " +
-								"-Dartifactory.staging-repository=libs-snapshot-local " +
-								"-Dartifactory.build-name=spring-vault " +
-								"-Dartifactory.build-number=${BUILD_NUMBER} " +
-								'-Dmaven.test.skip=true clean deploy -U -B'
+					PROJECT_VERSION = sh(
+							script: "ci/version.sh",
+							returnStdout: true
+					).trim()
+
+					RELEASE_TYPE = 'snapshot'
+
+					if (PROJECT_VERSION.matches(/.*-RC[0-9]+$/) || PROJECT_VERSION.matches(/.*-M[0-9]+$/)) {
+						RELEASE_TYPE = "milestone"
+					} else if (PROJECT_VERSION.endsWith('SNAPSHOT')) {
+						RELEASE_TYPE = 'snapshot'
+					} else if (PROJECT_VERSION.matches(/.*\.[0-9]+$/)) {
+						RELEASE_TYPE = 'release'
 					}
+
+					sh "ci/deploy-${RELEASE_TYPE}.sh"
 				}
 			}
 		}
