@@ -8,8 +8,8 @@
 set -o errexit
 
 EDITION="${EDITION:-oss}"
-VAULT_OSS="${VAULT_OSS:-1.6.1}"
-VAULT_ENT="${VAULT_ENT:-1.6.1}"
+VAULT_OSS="${VAULT_OSS:-1.8.1}"
+VAULT_ENT="${VAULT_ENT:-1.8.1}"
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
 VAULT_DIRECTORY=vault
@@ -147,6 +147,9 @@ function main() {
 
   initialize
   parse_options "$@"
+  if [ "$(uname -m)" == arm64 ]; then
+    PLATFORM=arm64
+  fi
   if [ "$(uname -m)" == aarch64 ]; then
     PLATFORM=arm64
   fi
