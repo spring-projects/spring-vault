@@ -47,13 +47,16 @@ import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
-import org.apache.http.impl.conn.DefaultSchemePortResolver;
-import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
+import org.apache.hc.client5.http.ssl.HttpsSupport;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
+import org.apache.hc.core5.http.io.SocketConfig;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -303,22 +306,29 @@ public class ClientHttpRequestFactoryFactory {
 				}
 
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
-						enabledProtocols, enabledCipherSuites, SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-				httpClientBuilder.setSSLSocketFactory(sslSocketFactory);
-				httpClientBuilder.setSSLContext(sslContext);
+						enabledProtocols, enabledCipherSuites, HttpsSupport.getDefaultHostnameVerifier());
+				PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder //
+						.create().setSSLSocketFactory(sslSocketFactory) //
+						.setDefaultSocketConfig(SocketConfig.custom() //
+								.setSoTimeout(Math.toIntExact(options.getReadTimeout().toMillis()),
+										TimeUnit.MILLISECONDS)
+								.build()) //
+						.build(); //
+				httpClientBuilder.setConnectionManager(connectionManager);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
 					//
-					.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis())) //
-					.setSocketTimeout(Math.toIntExact(options.getReadTimeout().toMillis())) //
+					.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()),
+							TimeUnit.MILLISECONDS) //
 					.setAuthenticationEnabled(true) //
 					.build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 
 			// Support redirects
-			httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
+			// TODO: DefaultRedirectStrategy doesn't take method into account
+			// httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
