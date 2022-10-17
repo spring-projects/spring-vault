@@ -69,25 +69,6 @@ public class SslConfiguration {
 	private final List<String> enabledCipherSuites;
 
 	/**
-	 * Create a new {@link SslConfiguration} with the default {@link KeyStore} type.
-	 * @param keyStore the key store resource, must not be {@literal null}.
-	 * @param keyStorePassword the key store password.
-	 * @param trustStore the trust store resource, must not be {@literal null}.
-	 * @param trustStorePassword the trust store password.
-	 * @deprecated Since 1.1, use
-	 * {@link #SslConfiguration(KeyStoreConfiguration, KeyStoreConfiguration)} to prevent
-	 * {@link String} interning and retaining passwords represented as String longer from
-	 * GC than necessary.
-	 */
-	@Deprecated
-	public SslConfiguration(Resource keyStore, @Nullable String keyStorePassword, Resource trustStore,
-			@Nullable String trustStorePassword) {
-
-		this(new KeyStoreConfiguration(keyStore, charsOrNull(keyStorePassword), DEFAULT_KEYSTORE_TYPE),
-				new KeyStoreConfiguration(trustStore, charsOrNull(trustStorePassword), DEFAULT_KEYSTORE_TYPE));
-	}
-
-	/**
 	 * Create a new {@link SslConfiguration}.
 	 * @param keyStoreConfiguration the key store configuration, must not be
 	 * {@literal null}.
@@ -182,23 +163,6 @@ public class SslConfiguration {
 	 * @param trustStorePassword may be {@literal null}.
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
-	 * @deprecated Since 1.1, use {@link #forTrustStore(Resource, char[])} to prevent
-	 * {@link String} interning and retaining passwords represented as String longer from
-	 * GC than necessary.
-	 */
-	@Deprecated
-	public static SslConfiguration forTrustStore(Resource trustStore, @Nullable String trustStorePassword) {
-		return forTrustStore(trustStore, charsOrNull(trustStorePassword));
-	}
-
-	/**
-	 * Create a new {@link SslConfiguration} for the given trust store with the default
-	 * {@link KeyStore} type.
-	 * @param trustStore resource pointing to an existing trust store, must not be
-	 * {@literal null}.
-	 * @param trustStorePassword may be {@literal null}.
-	 * @return the created {@link SslConfiguration}.
-	 * @see java.security.KeyStore
 	 */
 	public static SslConfiguration forTrustStore(Resource trustStore, @Nullable char[] trustStorePassword) {
 
@@ -220,23 +184,6 @@ public class SslConfiguration {
 	 */
 	public static SslConfiguration forTrustStore(KeyStoreConfiguration trustStore) {
 		return unconfigured().withTrustStore(trustStore);
-	}
-
-	/**
-	 * Create a new {@link SslConfiguration} for the given key store with the default
-	 * {@link KeyStore} type.
-	 * @param keyStore resource pointing to an existing key store, must not be
-	 * {@literal null}.
-	 * @param keyStorePassword may be {@literal null}.
-	 * @return the created {@link SslConfiguration}.
-	 * @see java.security.KeyStore
-	 * @deprecated Since 1.1, use {@link #forKeyStore(Resource, char[])} to prevent
-	 * {@link String} interning and retaining passwords represented as String longer from
-	 * GC than necessary.
-	 */
-	@Deprecated
-	public static SslConfiguration forKeyStore(Resource keyStore, @Nullable String keyStorePassword) {
-		return forKeyStore(keyStore, charsOrNull(keyStorePassword));
 	}
 
 	/**
@@ -302,27 +249,6 @@ public class SslConfiguration {
 
 		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword, DEFAULT_KEYSTORE_TYPE),
 				keyConfiguration, KeyStoreConfiguration.unconfigured());
-	}
-
-	/**
-	 * Create a new {@link SslConfiguration} for the given truststore with the default
-	 * {@link KeyStore} type.
-	 * @param keyStore resource pointing to an existing keystore, must not be
-	 * {@literal null}.
-	 * @param keyStorePassword may be {@literal null}.
-	 * @param trustStore resource pointing to an existing trust store, must not be
-	 * {@literal null}.
-	 * @param trustStorePassword may be {@literal null}.
-	 * @return the created {@link SslConfiguration}.
-	 * @see java.security.KeyStore
-	 * @deprecated Since 1.1, use {@link #create(Resource, char[], Resource, char[])} to
-	 * prevent {@link String} interning and retaining passwords represented as String
-	 * longer from GC than necessary.
-	 */
-	@Deprecated
-	public SslConfiguration create(Resource keyStore, @Nullable String keyStorePassword, Resource trustStore,
-			@Nullable String trustStorePassword) {
-		return create(keyStore, charsOrNull(keyStorePassword), trustStore, charsOrNull(trustStorePassword));
 	}
 
 	/**

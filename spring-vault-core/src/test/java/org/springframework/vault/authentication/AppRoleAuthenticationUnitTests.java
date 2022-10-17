@@ -91,7 +91,8 @@ class AppRoleAuthenticationUnitTests {
 	void loginShouldPullRoleIdAndSecretId() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder().appRole("app_role")
-				.initialToken(VaultToken.of("initial_token")).build();
+				.roleId(RoleId.pull(VaultToken.of("initial_token")))
+				.secretId(SecretId.pull(VaultToken.of("initial_token"))).build();
 
 		this.mockRest.expect(requestTo("/auth/approle/role/app_role/role-id")).andExpect(method(HttpMethod.GET))
 				.andExpect(header("X-Vault-token", "initial_token")).andRespond(withSuccess()
@@ -117,12 +118,6 @@ class AppRoleAuthenticationUnitTests {
 	@Test
 	void optionsShouldRequireTokenOrRoleIdIfNothingIsSet() {
 		assertThatIllegalArgumentException().isThrownBy(() -> AppRoleAuthenticationOptions.builder().build());
-	}
-
-	@Test
-	void optionsShouldRequireTokenOrRoleIdIfTokenIsSet() {
-		assertThatIllegalArgumentException()
-				.isThrownBy(() -> AppRoleAuthenticationOptions.builder().initialToken(VaultToken.of("foo")).build());
 	}
 
 	@Test

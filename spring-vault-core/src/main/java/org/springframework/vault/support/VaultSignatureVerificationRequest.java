@@ -130,7 +130,7 @@ public class VaultSignatureVerificationRequest {
 	 * @deprecated since 2.4, use {@link #getSignatureAlgorithm()} instead.
 	 */
 	@Nullable
-	@Deprecated
+	@Deprecated(since = "2.4")
 	public String getAlgorithm() {
 		return getSignatureAlgorithm();
 	}
@@ -237,7 +237,7 @@ public class VaultSignatureVerificationRequest {
 		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
 		 * @deprecated since 2.4, use {@link #signatureAlgorithm(String)} instead.
 		 */
-		@Deprecated
+		@Deprecated(since = "2.4")
 		public VaultSignatureVerificationRequestBuilder algorithm(String algorithm) {
 			return signatureAlgorithm(algorithm);
 		}

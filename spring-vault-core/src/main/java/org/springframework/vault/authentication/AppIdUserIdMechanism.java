@@ -24,7 +24,7 @@ package org.springframework.vault.authentication;
  * @see AppIdAuthentication
  * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
-@Deprecated
+@Deprecated(since = "2.2", forRemoval = true)
 @FunctionalInterface
 public interface AppIdUserIdMechanism {
 

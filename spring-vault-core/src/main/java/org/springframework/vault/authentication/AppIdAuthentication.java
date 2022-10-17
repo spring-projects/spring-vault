@@ -39,7 +39,7 @@ import org.springframework.web.client.RestOperations;
  * ID</a>
  * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
-@Deprecated
+@Deprecated(since = "2.2", forRemoval = true)
 public class AppIdAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);

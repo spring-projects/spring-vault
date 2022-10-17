@@ -89,7 +89,7 @@ public class VaultSignRequest {
 	 * default algorithm.
 	 * @deprecated since 2.4, use {@link #getSignatureAlgorithm()} instead.
 	 */
-	@Deprecated
+	@Deprecated(since = "2.4")
 	@Nullable
 	public String getAlgorithm() {
 		return getSignatureAlgorithm();
@@ -159,7 +159,7 @@ public class VaultSignRequest {
 		 * @return {@code this} {@link VaultSignRequestBuilder}.
 		 * @deprecated since 2.4, use {@link #signatureAlgorithm(String)} instead.
 		 */
-		@Deprecated
+		@Deprecated(since = "2.4")
 		public VaultSignRequestBuilder algorithm(String algorithm) {
 			return signatureAlgorithm(algorithm);
 		}

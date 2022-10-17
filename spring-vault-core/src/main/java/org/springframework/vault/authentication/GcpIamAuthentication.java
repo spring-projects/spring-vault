@@ -68,7 +68,7 @@ import org.springframework.web.client.RestOperations;
  * projects.serviceAccounts.signJwt</a>
  * @deprecated since 2.3.2, use {@link GcpIamCredentialsAuthentication} instead.
  */
-@Deprecated
+@Deprecated(since = "2.3.2", forRemoval = true)
 public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements ClientAuthentication {
 
 	private static final String SCOPE = "https://www.googleapis.com/auth/iam";

@@ -548,7 +548,7 @@ public class Policy {
 		 * {@link #CREATE} and {@link #UPDATE}.
 		 * @deprecated since 2.3 and Vault 0.5.
 		 */
-		@Deprecated
+		@Deprecated(since = "2.3")
 		WRITE,
 
 		/**

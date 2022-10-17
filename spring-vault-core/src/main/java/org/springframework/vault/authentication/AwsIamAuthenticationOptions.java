@@ -139,17 +139,6 @@ public class AwsIamAuthenticationOptions {
 	}
 
 	/**
-	 * @return Server name to mitigate risk of replay attacks, preferably set to Vault
-	 * server's DNS name, may be {@literal null}.
-	 * @deprecated since 2.0, renamed to {@link #getServerId()}.
-	 */
-	@Nullable
-	@Deprecated
-	public String getServerName() {
-		return this.serverId;
-	}
-
-	/**
 	 * @return STS server URI.
 	 */
 	public URI getEndpointUri() {

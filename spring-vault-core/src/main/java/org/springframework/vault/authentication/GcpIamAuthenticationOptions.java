@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
  * @since 2.1
  * @deprecated since 2.3.2
  */
-@Deprecated
+@Deprecated(since = "2.3.2", forRemoval = true)
 public class GcpIamAuthenticationOptions extends GcpIamAuthenticationSupport {
 
 	public static final String DEFAULT_GCP_AUTHENTICATION_PATH = "gcp";
