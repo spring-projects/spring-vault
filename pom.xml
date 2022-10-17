@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -27,10 +29,10 @@
 		<kotlin-coroutines.version>1.6.2</kotlin-coroutines.version>
 		<mockk.version>1.12.4</mockk.version>
 		<mockito-core.version>4.6.1</mockito-core.version>
-		<spring.version>6.0.0-SNAPSHOT</spring.version>
-		<spring-data-bom.version>2022.0.0-M5</spring-data-bom.version>
+		<spring.version>6.0.0-RC1</spring.version>
+		<spring-data-bom.version>2022.0.0-RC1</spring-data-bom.version>
 		<spring-security-bom.version>6.0.0-M6</spring-security-bom.version>
-		<reactor.version>2022.0.0-M4</reactor.version>
+		<reactor.version>2022.0.0-RC1</reactor.version>
 		<java.version>17</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
@@ -39,7 +41,7 @@
 		<doc.resources>${project.build.directory}/doc-resources</doc.resources>
 
 		<!-- To be overridden by individual modules -->
-		<java-module-name />
+		<java-module-name/>
 	</properties>
 
 	<inceptionYear>2016</inceptionYear>
@@ -321,6 +323,26 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-java-version</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireJavaVersion>
+									<version>17</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<redirectTestOutputToFile>true</redirectTestOutputToFile>
@@ -439,6 +461,12 @@
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.1.0</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>3.0.0-M7</version>
 				</plugin>
@@ -492,7 +520,8 @@
 							<link>
 								https://projectreactor.io/docs/core/release/api/
 							</link>
-							<link>https://docs.oracle.com/en/java/javase/17/docs/api/</link>
+							<link>https://docs.oracle.com/en/java/javase/17/docs/api/
+							</link>
 						</links>
 					</configuration>
 				</plugin>
@@ -671,7 +700,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-enforcer-plugin</artifactId>
-						<version>3.1.0</version>
 						<executions>
 							<execution>
 								<id>enforce-no-third-party-snapshots</id>
@@ -680,8 +708,9 @@
 								</goals>
 								<configuration>
 									<rules>
-										<requireReleaseDeps />
-										<NoSnapshotDependenciesInDependencyManagementRule implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
+										<requireReleaseDeps/>
+										<NoSnapshotDependenciesInDependencyManagementRule
+												implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
 											<onlyWhenRelease>true</onlyWhenRelease>
 										</NoSnapshotDependenciesInDependencyManagementRule>
 									</rules>
@@ -741,7 +770,8 @@
 				<snapshotRepository>
 					<id>sonatype-nexus-snapshots</id>
 					<name>Sonatype Nexus Snapshots</name>
-					<url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+					<url>https://s01.oss.sonatype.org/content/repositories/snapshots/
+					</url>
 				</snapshotRepository>
 				<repository>
 					<id>sonatype-nexus-staging</id>
@@ -854,15 +884,21 @@
 											<includeEnvVars>false</includeEnvVars>
 										</artifactory>
 										<publisher>
-											<contextUrl>{{artifactory.server}}</contextUrl>
+											<contextUrl>{{artifactory.server}}
+											</contextUrl>
 											<username>{{artifactory.username}}</username>
 											<password>{{artifactory.password}}</password>
-											<repoKey>{{artifactory.staging-repository}}</repoKey>
-											<snapshotRepoKey>{{artifactory.staging-repository}}</snapshotRepoKey>
+											<repoKey>{{artifactory.staging-repository}}
+											</repoKey>
+											<snapshotRepoKey>
+												{{artifactory.staging-repository}}
+											</snapshotRepoKey>
 										</publisher>
 										<buildInfo>
-											<buildName>{{artifactory.build-name}}</buildName>
-											<buildNumber>{{artifactory.build-number}}</buildNumber>
+											<buildName>{{artifactory.build-name}}
+											</buildName>
+											<buildNumber>{{artifactory.build-number}}
+											</buildNumber>
 											<buildUrl>{{BUILD_URL}}</buildUrl>
 										</buildInfo>
 									</configuration>

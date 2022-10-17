@@ -57,6 +57,7 @@ import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.client5.http.ssl.HttpsSupport;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -80,6 +81,7 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
  *
  * @author Mark Paluch
  * @author Ryan Gow
+ * @author Spencer Gibb
  * @since 2.2
  */
 public class ClientHttpRequestFactoryFactory {
@@ -310,25 +312,17 @@ public class ClientHttpRequestFactoryFactory {
 				PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder //
 						.create().setSSLSocketFactory(sslSocketFactory) //
 						.setDefaultSocketConfig(SocketConfig.custom() //
-								.setSoTimeout(Math.toIntExact(options.getReadTimeout().toMillis()),
-										TimeUnit.MILLISECONDS)
-								.build()) //
+								.setSoTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis())).build()) //
 						.build(); //
 				httpClientBuilder.setConnectionManager(connectionManager);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
-					//
-					.setConnectTimeout(Math.toIntExact(options.getConnectionTimeout().toMillis()),
-							TimeUnit.MILLISECONDS) //
+					.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
 					.setAuthenticationEnabled(true) //
-					.build();
+					.setRedirectsEnabled(true).build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
-
-			// Support redirects
-			// TODO: DefaultRedirectStrategy doesn't take method into account
-			// httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
