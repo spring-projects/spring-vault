@@ -96,8 +96,6 @@ public class SslConfiguration {
 	 * to indicate the SSL socket factory should use a default list of enabled cipher
 	 * suites.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.ProtocolVersion
-	 * @see sun.security.ssl.CipherSuite
 	 */
 	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration, KeyConfiguration keyConfiguration,
 			KeyStoreConfiguration trustStoreConfiguration, List<String> enabledProtocols,
@@ -145,8 +143,6 @@ public class SslConfiguration {
 	 * to indicate the SSL socket factory should use a default list of enabled cipher
 	 * suites.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.ProtocolVersion
-	 * @see sun.security.ssl.CipherSuite
 	 */
 	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration, KeyStoreConfiguration trustStoreConfiguration,
 			List<String> enabledProtocols, List<String> enabledCipherSuites) {
@@ -302,7 +298,6 @@ public class SslConfiguration {
 	 * @param enabledProtocols must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled protocol versions applied.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.ProtocolVersion
 	 */
 	public SslConfiguration withEnabledProtocols(String... enabledProtocols) {
 
@@ -317,7 +312,6 @@ public class SslConfiguration {
 	 * @param enabledProtocols must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled protocol versions applied.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.ProtocolVersion
 	 */
 	public SslConfiguration withEnabledProtocols(List<String> enabledProtocols) {
 
@@ -343,7 +337,6 @@ public class SslConfiguration {
 	 * @param enabledCipherSuites must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled cipher suites applied.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.CipherSuite
 	 */
 	public SslConfiguration withEnabledCipherSuites(String... enabledCipherSuites) {
 
@@ -358,7 +351,6 @@ public class SslConfiguration {
 	 * @param enabledCipherSuites must not be {@literal null}.
 	 * @return a new {@link SslConfiguration} with the enabled cipher suites applied.
 	 * @since 2.3.2
-	 * @see sun.security.ssl.CipherSuite
 	 */
 	public SslConfiguration withEnabledCipherSuites(List<String> enabledCipherSuites) {
 
