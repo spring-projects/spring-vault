@@ -89,7 +89,8 @@ public class ClientHttpRequestFactoryFactory {
 	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 	private static Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.http.client.HttpClient");
+	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent(
+			"org.apache.hc.client5.http.impl.classic.HttpClientBuilder");
 
 	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
 
