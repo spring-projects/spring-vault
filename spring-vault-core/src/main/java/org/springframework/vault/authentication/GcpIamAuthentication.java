@@ -21,11 +21,9 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.google.api.client.googleapis.apache.GoogleApacheHttpTransport;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.Iam.Builder;
 import com.google.api.services.iam.v1.Iam.Projects.ServiceAccounts.SignJwt;
@@ -33,9 +31,7 @@ import com.google.api.services.iam.v1.model.SignJwtRequest;
 import com.google.api.services.iam.v1.model.SignJwtResponse;
 import com.google.auth.oauth2.GoogleCredentials;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
@@ -82,7 +78,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	/**
 	 * Create a new instance of {@link GcpIamAuthentication} given
 	 * {@link GcpIamAuthenticationOptions} and {@link RestOperations}. This constructor
-	 * initializes {@link GoogleApacheHttpTransport} for Google API usage.
+	 * initializes {@link NetHttpTransport} for Google API usage.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
 	 */
