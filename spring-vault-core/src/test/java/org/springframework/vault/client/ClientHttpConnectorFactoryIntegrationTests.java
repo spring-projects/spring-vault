@@ -160,6 +160,19 @@ class ClientHttpConnectorFactoryIntegrationTests {
 		assertThat(response).isNotNull().contains("initialized");
 	}
 
+	@Test
+	void jdkHttpClientShouldWork() throws Exception {
+
+		ClientHttpConnector factory = JdkHttpClient.usingJdkHttpClient(new ClientOptions(),
+				Settings.createSslConfiguration());
+
+		WebClient webClient = WebClient.builder().clientConnector(factory).build();
+
+		String response = request(webClient);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
 	private String request(WebClient webClient) {
 
 		// Uninitialized and sealed can cause status 500

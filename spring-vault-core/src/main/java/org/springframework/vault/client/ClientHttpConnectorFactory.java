@@ -21,6 +21,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -41,6 +42,7 @@ import reactor.netty.http.client.HttpClient;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.util.Assert;
@@ -98,24 +100,25 @@ public class ClientHttpConnectorFactory {
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 
-		if (REACTOR_NETTY_PRESENT) {
-			return ReactorNetty.usingReactorNetty(options, sslConfiguration);
-		}
+		try {
+			if (REACTOR_NETTY_PRESENT) {
+				return ReactorNetty.usingReactorNetty(options, sslConfiguration);
+			}
 
-		if (HTTP_COMPONENTS_PRESENT) {
-			try {
+			if (HTTP_COMPONENTS_PRESENT) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
-			}
-			catch (GeneralSecurityException | IOException e) {
-				throw new IllegalStateException(e);
-			}
-		}
 
-		if (JETTY_PRESENT) {
-			return JettyClient.usingJetty(options, sslConfiguration);
-		}
+			}
 
-		throw new IllegalStateException("No supported Reactive Http Client library available (Reactor Netty, Jetty)");
+			if (JETTY_PRESENT) {
+				return JettyClient.usingJetty(options, sslConfiguration);
+			}
+
+			return JdkHttpClient.usingJdkHttpClient(options, sslConfiguration);
+		}
+		catch (GeneralSecurityException | IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 
 	private static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
@@ -293,6 +296,54 @@ public class ClientHttpConnectorFactory {
 			}
 
 			return new org.eclipse.jetty.client.HttpClient();
+		}
+
+	}
+
+	/**
+	 * {@link ClientHttpRequestFactory} using the JDK's HttpClient.
+	 *
+	 * @author Mark Paluch
+	 */
+	static class JdkHttpClient {
+
+		static ClientHttpConnector usingJdkHttpClient(ClientOptions options, SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+
+			java.net.http.HttpClient.Builder builder = java.net.http.HttpClient.newBuilder();
+
+			if (hasSslConfiguration(sslConfiguration)) {
+
+				SSLContext sslContext = getSSLContext(sslConfiguration, getTrustManagers(sslConfiguration));
+
+				String[] enabledProtocols = !sslConfiguration.getEnabledProtocols().isEmpty()
+						? sslConfiguration.getEnabledProtocols().toArray(new String[0]) : null;
+
+				String[] enabledCipherSuites = !sslConfiguration.getEnabledCipherSuites().isEmpty()
+						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0]) : null;
+
+				BasicClientTlsStrategy tlsStrategy = new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
+
+					if (enabledProtocols != null) {
+						sslEngine.setEnabledProtocols(enabledProtocols);
+					}
+
+					if (enabledCipherSuites != null) {
+						sslEngine.setEnabledCipherSuites(enabledCipherSuites);
+					}
+				}, null);
+
+				SSLParameters parameters = new SSLParameters();
+				parameters.setProtocols(enabledProtocols);
+				parameters.setCipherSuites(enabledCipherSuites);
+
+				builder.sslContext(sslContext).sslParameters(parameters);
+			}
+
+			builder.proxy(ProxySelector.getDefault()).followRedirects(java.net.http.HttpClient.Redirect.ALWAYS)
+					.connectTimeout(options.getConnectionTimeout());
+
+			return new JdkClientHttpConnector(builder.build());
 		}
 
 	}

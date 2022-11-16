@@ -8,12 +8,13 @@ that is scoped only to Spring Vault's client components.
 
 Spring Vault supports following HTTP imperative clients:
 
-* Java's builtin `HttpURLConnection` (default client)
+* Java's builtin `HttpURLConnection` (default client if no other is available)
 * Apache Http Components
 * OkHttp 3
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
+* Java's builtin reactive `HttpClient` (default client if no other is available)
 * Reactor Netty
 * Apache Http Components
 * Jetty
