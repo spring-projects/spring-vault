@@ -15,6 +15,7 @@ Spring Vault supports following HTTP imperative clients:
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
 * Reactor Netty
+* Apache Http Components
 * Jetty
 
 Using a specific client requires the according dependency to be available on the classpath
@@ -41,13 +42,13 @@ dependencies to your project. You can omit the version number if using
 [source, xml]
 ----
 <dependency>
-  <groupId>org.apache.httpcomponents</groupId>
-  <artifactId>httpclient</artifactId>
+  <groupId>org.apache.httpcomponents.client5</groupId>
+  <artifactId>httpclient5</artifactId>
 </dependency>
 ----
 ====
 
-NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-4.5.x/logging.html[wire logging] can be enabled through logging configuration. Make sure to not accidentally enable wire logging as logs may expose traffic (tokens and secrets) between your application and Vault in plain text.
+NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-5.2.x/logging.html[wire logging] can be enabled through logging configuration. Make sure to not accidentally enable wire logging as logs may expose traffic (tokens and secrets) between your application and Vault in plain text.
 
 .Square OkHttp 3
 ====
@@ -67,6 +68,17 @@ NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-4.5.x/logg
 <dependency>
   <groupId>io.projectreactor.netty</groupId>
   <artifactId>reactor-netty</artifactId>
+</dependency>
+----
+====
+
+.Apache Http Components Reactive Dependency
+====
+[source, xml]
+----
+<dependency>
+  <groupId>org.apache.httpcomponents.core5</groupId>
+  <artifactId>httpcore5-reactive</artifactId>
 </dependency>
 ----
 ====

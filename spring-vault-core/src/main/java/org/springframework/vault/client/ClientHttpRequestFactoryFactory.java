@@ -146,7 +146,7 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	private static SSLContext getSSLContext(SslConfiguration sslConfiguration, TrustManager[] trustManagers)
+	static SSLContext getSSLContext(SslConfiguration sslConfiguration, TrustManager[] trustManagers)
 			throws GeneralSecurityException, IOException {
 
 		KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
@@ -162,7 +162,7 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	@Nullable
-	private static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
+	static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()

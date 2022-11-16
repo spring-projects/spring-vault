@@ -109,6 +109,13 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.apache.httpcomponents.core5</groupId>
+				<artifactId>httpcore5-reactive</artifactId>
+				<version>${httpcore.version}</version>
+				<optional>true</optional>
+			</dependency>
+
+			<dependency>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-reactive-httpclient</artifactId>
 				<version>${jetty-reactive-httpclient.version}</version>

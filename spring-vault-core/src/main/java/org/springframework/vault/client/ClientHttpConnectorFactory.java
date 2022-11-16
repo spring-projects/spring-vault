@@ -16,18 +16,31 @@
 package org.springframework.vault.client;
 
 import java.io.IOException;
+import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 
+import javax.net.ssl.SSLContext;
+
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
+import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
+import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
+import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
+import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
 
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.util.Assert;
@@ -51,6 +64,8 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.*
 public class ClientHttpConnectorFactory {
 
 	private static final boolean REACTOR_NETTY_PRESENT = isPresent("reactor.netty.http.client.HttpClient");
+
+	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.hc.client5.http.impl.async");
 
 	private static final boolean JETTY_PRESENT = isPresent("org.eclipse.jetty.client.HttpClient");
 
@@ -85,6 +100,15 @@ public class ClientHttpConnectorFactory {
 
 		if (REACTOR_NETTY_PRESENT) {
 			return ReactorNetty.usingReactorNetty(options, sslConfiguration);
+		}
+
+		if (HTTP_COMPONENTS_PRESENT) {
+			try {
+				return HttpComponents.usingHttpComponents(options, sslConfiguration);
+			}
+			catch (GeneralSecurityException | IOException e) {
+				throw new IllegalStateException(e);
+			}
 		}
 
 		if (JETTY_PRESENT) {
@@ -143,6 +167,61 @@ public class ClientHttpConnectorFactory {
 					Math.toIntExact(options.getConnectionTimeout().toMillis())).proxyWithSystemProperties();
 
 			return new ReactorClientHttpConnector(client);
+		}
+
+	}
+
+	/**
+	 * {@link ClientHttpRequestFactory} for Apache Http Components.
+	 *
+	 * @author Mark Paluch
+	 */
+	static class HttpComponents {
+
+		static ClientHttpConnector usingHttpComponents(ClientOptions options, SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+
+			HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClientBuilder.create();
+
+			httpClientBuilder.setRoutePlanner(
+					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
+
+			if (hasSslConfiguration(sslConfiguration)) {
+
+				SSLContext sslContext = getSSLContext(sslConfiguration, getTrustManagers(sslConfiguration));
+
+				String[] enabledProtocols = !sslConfiguration.getEnabledProtocols().isEmpty()
+						? sslConfiguration.getEnabledProtocols().toArray(new String[0]) : null;
+
+				String[] enabledCipherSuites = !sslConfiguration.getEnabledCipherSuites().isEmpty()
+						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0]) : null;
+
+				BasicClientTlsStrategy tlsStrategy = new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
+
+					if (enabledProtocols != null) {
+						sslEngine.setEnabledProtocols(enabledProtocols);
+					}
+
+					if (enabledCipherSuites != null) {
+						sslEngine.setEnabledCipherSuites(enabledCipherSuites);
+					}
+				}, null);
+
+				PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder //
+						.create().setTlsStrategy(tlsStrategy) //
+						.build(); //
+				httpClientBuilder.setConnectionManager(connectionManager);
+			}
+
+			RequestConfig requestConfig = RequestConfig.custom()
+					.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
+					.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
+					.setAuthenticationEnabled(true) //
+					.setRedirectsEnabled(true).build();
+
+			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+
+			return new HttpComponentsClientHttpConnector(httpClientBuilder.build());
 		}
 
 	}

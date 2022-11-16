@@ -146,6 +146,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.httpcomponents.core5</groupId>
+			<artifactId>httpcore5-reactive</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-reactive-httpclient</artifactId>
 			<optional>true</optional>
@@ -308,7 +314,7 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.2</version>
+			<version>1.4.4</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
