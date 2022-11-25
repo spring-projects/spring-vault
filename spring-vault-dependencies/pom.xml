@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-dependencies</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.0</version>
 	<packaging>pom</packaging>
 
 	<name>spring-vault-dependencies</name>
@@ -78,7 +78,7 @@
 			<dependency>
 				<groupId>org.springframework.vault</groupId>
 				<artifactId>spring-vault-core</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>3.0.0</version>
 			</dependency>
 
 			<dependency>
