@@ -68,17 +68,6 @@
 				</generated-docs.directory>
 			</properties>
 
-			<dependencies>
-				<dependency>
-					<groupId>io.spring.docresources</groupId>
-					<artifactId>spring-doc-resources</artifactId>
-					<version>0.2.5</version>
-					<scope>provided</scope>
-					<type>zip</type>
-					<optional>true</optional>
-				</dependency>
-			</dependencies>
-
 			<repositories>
 				<repository>
 					<id>spring-libs-milestone</id>
@@ -116,24 +105,6 @@
 								</configuration>
 							</execution>
 
-							<execution>
-								<id>unpack-doc-resources</id>
-								<goals>
-									<goal>unpack-dependencies</goal>
-								</goals>
-								<phase>generate-resources</phase>
-								<configuration>
-									<includeGroupIds>io.spring.docresources
-									</includeGroupIds>
-									<includeArtifactIds>spring-doc-resources
-									</includeArtifactIds>
-									<includeTypes>zip</includeTypes>
-									<excludeTransitive>true</excludeTransitive>
-									<outputDirectory>
-										${generated-asciidoc-sources.directory}
-									</outputDirectory>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 
@@ -227,8 +198,14 @@
 										<target>
 
 											<!-- Copy files for the single-file HTML version -->
-											<copy failonerror="false" todir="${project.root}/target/site/reference/html/images">
-												<fileset dir="${generated-docs.directory}/images" />
+											<copy failonerror="false" todir="${project.root}/target/site/reference/html">
+												<fileset dir="${generated-docs.directory}">
+													<include name="img/**"/>
+													<include name="images/**"/>
+													<include name="css/**"/>
+													<include name="js/**"/>
+													<include name="**/*.html"/>
+												</fileset>
 											</copy>
 
 											<copy todir="${project.root}/target/site/reference/html/">
@@ -273,6 +250,11 @@
 									<artifactId>asciidoctorj-epub3</artifactId>
 									<version>1.5.1</version>
 								</dependency>
+								<dependency>
+									<groupId>io.spring.asciidoctor.backends</groupId>
+									<artifactId>spring-asciidoctor-backends</artifactId>
+									<version>${spring-asciidoctor-backends.version}</version>
+								</dependency>
 							</dependencies>
 							<executions>
 
@@ -288,7 +270,7 @@
 										</sourceDirectory>
 										<sourceDocumentName>index.adoc
 										</sourceDocumentName>
-										<backend>html5</backend>
+										<backend>spring-html</backend>
 										<outputDirectory>${generated-docs.directory}
 										</outputDirectory>
 										<sourceHighlighter>highlight.js

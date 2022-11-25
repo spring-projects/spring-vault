@@ -30,6 +30,7 @@
 		<mockk.version>1.13.2</mockk.version>
 		<mockito-core.version>4.9.0</mockito-core.version>
 		<spring.version>6.0.2</spring.version>
+		<spring-asciidoctor-backends.version>0.0.3</spring-asciidoctor-backends.version>
 		<spring-data-bom.version>2022.0.0</spring-data-bom.version>
 		<spring-security-bom.version>6.0.0</spring-security-bom.version>
 		<reactor.version>2022.0.0</reactor.version>
@@ -497,9 +498,6 @@
 						<quiet>true</quiet>
 						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
 						<overview>${shared.resources}/javadoc/overview.html</overview>
-						<stylesheetfile>
-							${shared.resources}/javadoc/spring-javadoc.css
-						</stylesheetfile>
 						<!-- copies doc-files subdirectory which contains image resources -->
 						<docfilessubdirs>true</docfilessubdirs>
 						<doclint>none</doclint>
