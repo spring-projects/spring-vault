@@ -29,7 +29,7 @@
 		<kotlin-coroutines.version>1.6.4</kotlin-coroutines.version>
 		<mockk.version>1.13.2</mockk.version>
 		<mockito-core.version>4.9.0</mockito-core.version>
-		<spring.version>6.0.0</spring.version>
+		<spring.version>6.0.2</spring.version>
 		<spring-data-bom.version>2022.0.0-RC2</spring-data-bom.version>
 		<spring-security-bom.version>6.0.0-RC2</spring-security-bom.version>
 		<reactor.version>2022.0.0</reactor.version>
