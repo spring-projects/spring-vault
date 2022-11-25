@@ -62,8 +62,8 @@
 		<jetty-reactive-httpclient.version>3.0.7</jetty-reactive-httpclient.version>
 		<netty.version>4.1.85.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<jackson-databind.version>2.14.0</jackson-databind.version>
-		<aws-java-sdk.version>2.18.18</aws-java-sdk.version>
+		<jackson-databind.version>2.14.1</jackson-databind.version>
+		<aws-java-sdk.version>2.18.24</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev20221013-2.0.0</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>2.6.0</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>1.13.0</google-auth-library-oauth2-http.version>
