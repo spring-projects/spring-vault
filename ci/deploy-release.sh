@@ -11,7 +11,7 @@ cp $KEYRING $GNUPGHOME
 MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml -Pci,central,release \
       -Dgpg.passphrase=${PASSPHRASE} \
       -Dgpg.secretKeyring=${GNUPGHOME}/secring.gpg \
-      -DstagingDescription="Releasing Spring Vault ${VERSION}" \
+      -DstagingDescription="Releasing Spring Vault" \
       clean deploy -U -B
 
 MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml -Pdistribute \
