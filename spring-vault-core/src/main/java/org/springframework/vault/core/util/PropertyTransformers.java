@@ -57,7 +57,7 @@ public abstract class PropertyTransformers {
 	 * {@link PropertyTransformer} that passes the given properties through without
 	 * returning changed properties.
 	 */
-	static class NoOpPropertyTransformer implements PropertyTransformer {
+	public static class NoOpPropertyTransformer implements PropertyTransformer {
 
 		static NoOpPropertyTransformer INSTANCE = new NoOpPropertyTransformer();
 
@@ -118,7 +118,7 @@ public abstract class PropertyTransformers {
 	/**
 	 * {@link PropertyTransformer} that adds a prefix to each key name.
 	 */
-	static class KeyPrefixPropertyTransformer implements PropertyTransformer {
+	public static class KeyPrefixPropertyTransformer implements PropertyTransformer {
 
 		private final String propertyNamePrefix;
 
@@ -127,6 +127,10 @@ public abstract class PropertyTransformers {
 			Assert.notNull(propertyNamePrefix, "Property name prefix must not be null");
 
 			this.propertyNamePrefix = propertyNamePrefix;
+		}
+
+		public String getPropertyNamePrefix() {
+			return propertyNamePrefix;
 		}
 
 		/**
