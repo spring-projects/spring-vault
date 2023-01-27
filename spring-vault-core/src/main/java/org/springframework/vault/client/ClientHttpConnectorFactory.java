@@ -65,28 +65,14 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.*
  */
 public class ClientHttpConnectorFactory {
 
-	private static final boolean REACTOR_NETTY_PRESENT = isPresent("reactor.netty.http.client.HttpClient");
+	private static final boolean REACTOR_NETTY_PRESENT = ClassUtils.isPresent("reactor.netty.http.client.HttpClient",
+			ClientHttpConnectorFactory.class.getClassLoader());
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent("org.apache.hc.client5.http.impl.async");
+	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent("org.apache.hc.client5.http.impl.async",
+			ClientHttpConnectorFactory.class.getClassLoader());
 
-	private static final boolean JETTY_PRESENT = isPresent("org.eclipse.jetty.client.HttpClient");
-
-	/**
-	 * Checks for presence of all {@code classNames} using this class' classloader.
-	 * @param classNames
-	 * @return {@literal true} if all classes are present; {@literal false} if at least
-	 * one class cannot be found.
-	 */
-	private static boolean isPresent(String... classNames) {
-
-		for (String className : classNames) {
-			if (!ClassUtils.isPresent(className, ClientHttpConnectorFactory.class.getClassLoader())) {
-				return false;
-			}
-		}
-
-		return true;
-	}
+	private static final boolean JETTY_PRESENT = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient",
+			ClientHttpConnectorFactory.class.getClassLoader());
 
 	/**
 	 * Create a {@link ClientHttpConnector} for the given {@link ClientOptions} and

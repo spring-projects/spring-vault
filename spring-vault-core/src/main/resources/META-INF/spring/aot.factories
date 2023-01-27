@@ -1,0 +1,3 @@
+org.springframework.aot.hint.RuntimeHintsRegistrar=org.springframework.vault.aot.VaultRuntimeHints
+
+org.springframework.beans.factory.aot.BeanRegistrationAotProcessor=org.springframework.vault.annotation.PropertySourceAotProcessor

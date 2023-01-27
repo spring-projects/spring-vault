@@ -89,27 +89,12 @@ public class ClientHttpRequestFactoryFactory {
 	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 	private static Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = isPresent(
-			"org.apache.hc.client5.http.impl.classic.HttpClientBuilder");
+	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
+			"org.apache.hc.client5.http.impl.classic.HttpClientBuilder",
+			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
-	private static final boolean OKHTTP3_PRESENT = isPresent("okhttp3.OkHttpClient");
-
-	/**
-	 * Checks for presence of all {@code classNames} using this class' classloader.
-	 * @param classNames
-	 * @return {@literal true} if all classes are present; {@literal false} if at least
-	 * one class cannot be found.
-	 */
-	private static boolean isPresent(String... classNames) {
-
-		for (String className : classNames) {
-			if (!ClassUtils.isPresent(className, ClientHttpRequestFactoryFactory.class.getClassLoader())) {
-				return false;
-			}
-		}
-
-		return true;
-	}
+	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent("okhttp3.OkHttpClient",
+			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	/**
 	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and

@@ -135,6 +135,7 @@ class VaultPropertySourceRegistrar
 
 				AbstractBeanDefinition beanDefinition = createBeanDefinition(ref, renewal, propertyTransformer,
 						ignoreSecretNotFound, potentiallyResolveRequiredPlaceholders(propertyPath));
+				beanDefinition.setSource(annotationMetadata.getClassName());
 
 				do {
 					String beanName = "vaultPropertySource#" + counter;
