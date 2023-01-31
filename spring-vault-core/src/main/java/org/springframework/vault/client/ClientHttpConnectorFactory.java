@@ -65,13 +65,13 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.*
  */
 public class ClientHttpConnectorFactory {
 
-	private static final boolean REACTOR_NETTY_PRESENT = ClassUtils.isPresent("reactor.netty.http.client.HttpClient",
+	private static final boolean reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient",
 			ClientHttpConnectorFactory.class.getClassLoader());
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent("org.apache.hc.client5.http.impl.async",
+	private static final boolean httpComponentsPresent = ClassUtils.isPresent("org.apache.hc.client5.http.impl.async",
 			ClientHttpConnectorFactory.class.getClassLoader());
 
-	private static final boolean JETTY_PRESENT = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient",
+	private static final boolean jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient",
 			ClientHttpConnectorFactory.class.getClassLoader());
 
 	/**
@@ -87,16 +87,16 @@ public class ClientHttpConnectorFactory {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 
 		try {
-			if (REACTOR_NETTY_PRESENT) {
+			if (reactorNettyPresent) {
 				return ReactorNetty.usingReactorNetty(options, sslConfiguration);
 			}
 
-			if (HTTP_COMPONENTS_PRESENT) {
+			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
 
 			}
 
-			if (JETTY_PRESENT) {
+			if (jettyPresent) {
 				return JettyClient.usingJetty(options, sslConfiguration);
 			}
 

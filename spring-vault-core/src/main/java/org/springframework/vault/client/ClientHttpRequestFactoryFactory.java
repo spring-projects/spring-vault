@@ -89,11 +89,11 @@ public class ClientHttpRequestFactoryFactory {
 	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 	private static Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
-	private static final boolean HTTP_COMPONENTS_PRESENT = ClassUtils.isPresent(
+	private static final boolean httpComponentsPresent = ClassUtils.isPresent(
 			"org.apache.hc.client5.http.impl.classic.HttpClientBuilder",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
-	private static final boolean OKHTTP3_PRESENT = ClassUtils.isPresent("okhttp3.OkHttpClient",
+	private static final boolean okHttp3Present = ClassUtils.isPresent("okhttp3.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	/**
@@ -111,11 +111,11 @@ public class ClientHttpRequestFactoryFactory {
 
 		try {
 
-			if (HTTP_COMPONENTS_PRESENT) {
+			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
 			}
 
-			if (OKHTTP3_PRESENT) {
+			if (okHttp3Present) {
 				return OkHttp3.usingOkHttp3(options, sslConfiguration);
 			}
 		}
