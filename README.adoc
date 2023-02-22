@@ -339,6 +339,10 @@ conduct].
 By participating, you are expected to uphold this code.
 Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
 
+=== Getting Support
+Check out the https://stackoverflow.com/questions/tagged/spring-vault[Spring Vault tags on Stack Overflow].
+https://spring.io/support[Commercial support] is available too.
+
 === Code Conventions and Housekeeping
 
 None of these is essential for a pull request, but they will all help.
