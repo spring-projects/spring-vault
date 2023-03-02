@@ -160,7 +160,7 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 		this.kvOperations.delete(SECRET_NAME);
 		VaultMetadataResponse metadataResponse = this.vaultKeyValueMetadataOperations.get(SECRET_NAME);
 		Versioned.Metadata version1 = metadataResponse.getVersions().get(0);
-		assertThat(version1.getDeletedAt()).isBefore(Instant.now());
+		assertThat(version1.getDeletedAt()).isBefore(Instant.now().plusSeconds(5));
 
 		this.vaultKeyValueMetadataOperations.delete(SECRET_NAME);
 

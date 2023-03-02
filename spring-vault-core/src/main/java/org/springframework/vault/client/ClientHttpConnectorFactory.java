@@ -25,6 +25,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
 
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -81,42 +82,20 @@ public class ClientHttpConnectorFactory {
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 
-		if (REACTOR_NETTY_PRESENT) {
-			return ReactorNetty.usingReactorNetty(options, sslConfiguration);
-		}
-
-		if (JETTY_PRESENT) {
-			return JettyClient.usingJetty(options, sslConfiguration);
-		}
-
-		throw new IllegalStateException("No supported Reactive Http Client library available (Reactor Netty, Jetty)");
-	}
-
-	private static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
-
 		try {
-
-			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-				sslContextBuilder
-						.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
+			if (REACTOR_NETTY_PRESENT) {
+				return ReactorNetty.usingReactorNetty(options, sslConfiguration);
 			}
 
-			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-				sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
-						sslConfiguration.getKeyConfiguration()));
-			}
-
-			if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-				sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
-			}
-
-			if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-				sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
+			if (JETTY_PRESENT) {
+				return JettyClient.usingJetty(options, sslConfiguration);
 			}
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
 		}
+
+		throw new IllegalStateException("No supported Reactive Http Client library available (Reactor Netty, Jetty)");
 	}
 
 	/**
@@ -124,9 +103,21 @@ public class ClientHttpConnectorFactory {
 	 *
 	 * @author Mark Paluch
 	 */
-	static class ReactorNetty {
+	public static class ReactorNetty {
 
-		static ClientHttpConnector usingReactorNetty(ClientOptions options, SslConfiguration sslConfiguration) {
+		/**
+		 * Create a {@link ClientHttpConnector} using Reactor Netty.
+		 * @param options must not be {@literal null}
+		 * @param sslConfiguration must not be {@literal null}
+		 * @return a new and configured {@link ReactorClientHttpConnector} instance.
+		 */
+		public static ReactorClientHttpConnector usingReactorNetty(ClientOptions options,
+				SslConfiguration sslConfiguration) {
+			return new ReactorClientHttpConnector(createClient(options, sslConfiguration));
+		}
+
+		public static HttpClient createClient(ClientOptions options, SslConfiguration sslConfiguration) {
+
 			HttpClient client = HttpClient.create();
 
 			if (hasSslConfiguration(sslConfiguration)) {
@@ -140,24 +131,59 @@ public class ClientHttpConnectorFactory {
 			client = client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
 					Math.toIntExact(options.getConnectionTimeout().toMillis())).proxyWithSystemProperties();
 
-			return new ReactorClientHttpConnector(client);
+			return client;
 		}
 
-	}
-
-	static class JettyClient {
-
-		static ClientHttpConnector usingJetty(ClientOptions options, SslConfiguration sslConfiguration) {
+		private static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
 
 			try {
-				return new JettyClientHttpConnector(configureClient(getHttpClient(sslConfiguration), options));
+
+				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
+					sslContextBuilder
+							.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
+				}
+
+				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
+					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
+							sslConfiguration.getKeyConfiguration()));
+				}
+
+				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
+					sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
+				}
+
+				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
+					sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
+				}
 			}
 			catch (GeneralSecurityException | IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
 
-		private static org.eclipse.jetty.client.HttpClient configureClient(
+	}
+
+	/**
+	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty Client.
+	 *
+	 * @author Mark Paluch
+	 */
+	static class JettyClient {
+
+		/**
+		 * Create a {@link ClientHttpConnector} using Jetty.
+		 * @param options must not be {@literal null}
+		 * @param sslConfiguration must not be {@literal null}
+		 * @return a new and configured {@link JettyClientHttpConnector} instance.
+		 * @throws GeneralSecurityException
+		 * @throws IOException
+		 */
+		public static JettyClientHttpConnector usingJetty(ClientOptions options, SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+			return new JettyClientHttpConnector(configureClient(getHttpClient(sslConfiguration), options));
+		}
+
+		public static org.eclipse.jetty.client.HttpClient configureClient(
 				org.eclipse.jetty.client.HttpClient httpClient, ClientOptions options) {
 
 			httpClient.setConnectTimeout(options.getConnectionTimeout().toMillis());
@@ -166,7 +192,7 @@ public class ClientHttpConnectorFactory {
 			return httpClient;
 		}
 
-		private static org.eclipse.jetty.client.HttpClient getHttpClient(SslConfiguration sslConfiguration)
+		public static org.eclipse.jetty.client.HttpClient getHttpClient(SslConfiguration sslConfiguration)
 				throws IOException, GeneralSecurityException {
 
 			if (hasSslConfiguration(sslConfiguration)) {
