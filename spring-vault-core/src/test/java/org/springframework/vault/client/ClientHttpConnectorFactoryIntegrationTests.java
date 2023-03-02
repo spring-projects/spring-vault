@@ -86,7 +86,7 @@ class ClientHttpConnectorFactoryIntegrationTests {
 	}
 
 	@Test
-	void jettyClientShouldWork() {
+	void jettyClientShouldWork() throws Exception {
 
 		ClientHttpConnector factory = JettyClient.usingJetty(new ClientOptions(), Settings.createSslConfiguration());
 
@@ -98,7 +98,7 @@ class ClientHttpConnectorFactoryIntegrationTests {
 	}
 
 	@Test
-	void jettyClientWithExplicitEnabledCipherSuitesShouldWork() {
+	void jettyClientWithExplicitEnabledCipherSuitesShouldWork() throws Exception {
 
 		List<String> enabledCipherSuites = new ArrayList<String>();
 		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
@@ -115,7 +115,7 @@ class ClientHttpConnectorFactoryIntegrationTests {
 	}
 
 	@Test
-	void jettyClientWithExplicitEnabledProtocolsShouldWork() {
+	void jettyClientWithExplicitEnabledProtocolsShouldWork() throws Exception {
 
 		List<String> enabledProtocols = new ArrayList<String>();
 		enabledProtocols.add("TLSv1.2");

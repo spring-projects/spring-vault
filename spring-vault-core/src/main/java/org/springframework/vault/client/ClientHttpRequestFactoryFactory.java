@@ -150,14 +150,18 @@ public class ClientHttpRequestFactoryFactory {
 		return new SimpleClientHttpRequestFactory();
 	}
 
-	private static SSLContext getSSLContext(SslConfiguration sslConfiguration, TrustManager[] trustManagers)
+	private static SSLContext getSSLContext(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
-		KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
-		KeyManager[] keyManagers = sslConfiguration.getKeyStoreConfiguration().isPresent()
-				? createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(), keyConfiguration)
-						.getKeyManagers()
-				: null;
+		return getSSLContext(sslConfiguration.getKeyStoreConfiguration(), sslConfiguration.getKeyConfiguration(),
+				getTrustManagers(sslConfiguration));
+	}
+
+	static SSLContext getSSLContext(KeyStoreConfiguration keyStoreConfiguration, KeyConfiguration keyConfiguration,
+			@Nullable TrustManager[] trustManagers) throws GeneralSecurityException, IOException {
+
+		KeyManager[] keyManagers = keyStoreConfiguration.isPresent()
+				? createKeyManagerFactory(keyStoreConfiguration, keyConfiguration).getKeyManagers() : null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(keyManagers, trustManagers, null);
@@ -166,7 +170,7 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	@Nullable
-	private static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
+	static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
 			throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()
@@ -282,13 +286,30 @@ public class ClientHttpRequestFactoryFactory {
 	}
 
 	/**
-	 * {@link ClientHttpRequestFactory} for Apache Http Components.
+	 * Utilities to create a {@link ClientHttpRequestFactory} for Apache Http Components.
 	 *
 	 * @author Mark Paluch
 	 */
-	static class HttpComponents {
+	public static class HttpComponents {
 
-		static ClientHttpRequestFactory usingHttpComponents(ClientOptions options, SslConfiguration sslConfiguration)
+		/**
+		 * Create a {@link ClientHttpRequestFactory} using Apache Http Components.
+		 * @param options must not be {@literal null}
+		 * @param sslConfiguration must not be {@literal null}
+		 * @return a new and configured {@link HttpComponentsClientHttpRequestFactory}
+		 * instance.
+		 * @throws GeneralSecurityException
+		 * @throws IOException
+		 */
+		public static HttpComponentsClientHttpRequestFactory usingHttpComponents(ClientOptions options,
+				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
+
+			HttpClientBuilder httpClientBuilder = getHttpClientBuilder(options, sslConfiguration);
+
+			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
+		}
+
+		public static HttpClientBuilder getHttpClientBuilder(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
@@ -298,7 +319,7 @@ public class ClientHttpRequestFactoryFactory {
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
-				SSLContext sslContext = getSSLContext(sslConfiguration, getTrustManagers(sslConfiguration));
+				SSLContext sslContext = getSSLContext(sslConfiguration);
 
 				String[] enabledProtocols = null;
 
@@ -330,19 +351,36 @@ public class ClientHttpRequestFactoryFactory {
 			// Support redirects
 			httpClientBuilder.setRedirectStrategy(new LaxRedirectStrategy());
 
-			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
+			return httpClientBuilder;
 		}
 
 	}
 
 	/**
-	 * {@link ClientHttpRequestFactory} for the {@link okhttp3.OkHttpClient}.
+	 * Utilities to create a {@link ClientHttpRequestFactory} for the
+	 * {@link okhttp3.OkHttpClient}.
 	 *
 	 * @author Mark Paluch
 	 */
-	static class OkHttp3 {
+	public static class OkHttp3 {
 
-		static ClientHttpRequestFactory usingOkHttp3(ClientOptions options, SslConfiguration sslConfiguration)
+		/**
+		 * Create a {@link ClientHttpRequestFactory} using {@link okhttp3.OkHttpClient}.
+		 * @param options must not be {@literal null}
+		 * @param sslConfiguration must not be {@literal null}
+		 * @return a new and configured {@link OkHttp3ClientHttpRequestFactory} instance.
+		 * @throws GeneralSecurityException
+		 * @throws IOException
+		 */
+		public static OkHttp3ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
+				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
+
+			Builder builder = getBuilder(options, sslConfiguration);
+
+			return new OkHttp3ClientHttpRequestFactory(builder.build());
+		}
+
+		public static Builder getBuilder(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 
 			Builder builder = new Builder();
@@ -353,13 +391,14 @@ public class ClientHttpRequestFactoryFactory {
 
 				TrustManager[] trustManagers = getTrustManagers(sslConfiguration);
 
-				if (trustManagers.length != 1 || !(trustManagers[0] instanceof X509TrustManager)) {
+				if (trustManagers == null || trustManagers.length != 1
+						|| !(trustManagers[0] instanceof X509TrustManager)) {
 					throw new IllegalStateException(
 							"Unexpected default trust managers:" + Arrays.toString(trustManagers));
 				}
 
-				X509TrustManager trustManager = (X509TrustManager) trustManagers[0];
-				SSLContext sslContext = getSSLContext(sslConfiguration, trustManagers);
+				SSLContext sslContext = getSSLContext(sslConfiguration.getKeyStoreConfiguration(),
+						sslConfiguration.getKeyConfiguration(), trustManagers);
 
 				ConnectionSpec.Builder sslConnectionSpecBuilder = new ConnectionSpec.Builder(sslConnectionSpec);
 
@@ -374,15 +413,14 @@ public class ClientHttpRequestFactoryFactory {
 
 				sslConnectionSpec = sslConnectionSpecBuilder.build();
 
-				builder.sslSocketFactory(sslContext.getSocketFactory(), trustManager);
+				builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagers[0]);
 			}
 
 			builder.connectionSpecs(Arrays.asList(sslConnectionSpec, ConnectionSpec.CLEARTEXT));
 
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
 					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
-
-			return new OkHttp3ClientHttpRequestFactory(builder.build());
+			return builder;
 		}
 
 	}
