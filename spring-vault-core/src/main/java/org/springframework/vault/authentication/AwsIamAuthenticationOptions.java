@@ -20,6 +20,7 @@ import java.net.URI;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
@@ -78,8 +79,16 @@ public class AwsIamAuthenticationOptions {
 	 */
 	private final URI endpointUri;
 
+	/**
+	 * This parameter enables to sign the AWS request with the global region (us-east-1)
+	 * in case the Vault server making the proxy request is configured to use STS global
+	 * endpoint, and your application is deployed in another region.
+	 */
+	private final boolean useGlobalEndpoint;
+
 	private AwsIamAuthenticationOptions(String path, AwsCredentialsProvider credentialsProvider,
-			AwsRegionProvider regionProvider, @Nullable String role, @Nullable String serverId, URI endpointUri) {
+			AwsRegionProvider regionProvider, @Nullable String role, @Nullable String serverId, URI endpointUri,
+			boolean useGlobalEndpoint) {
 
 		this.path = path;
 		this.credentialsProvider = credentialsProvider;
@@ -87,6 +96,7 @@ public class AwsIamAuthenticationOptions {
 		this.role = role;
 		this.serverId = serverId;
 		this.endpointUri = endpointUri;
+		this.useGlobalEndpoint = useGlobalEndpoint;
 	}
 
 	/**
@@ -162,6 +172,8 @@ public class AwsIamAuthenticationOptions {
 
 		@Nullable
 		private String serverId;
+
+		private boolean useGlobalEndpoint;
 
 		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
 
@@ -282,6 +294,14 @@ public class AwsIamAuthenticationOptions {
 			return this;
 		}
 
+		public AwsIamAuthenticationOptionsBuilder useGlobalEndpoint(Boolean useGlobalEndpoint) {
+
+			Assert.notNull(useGlobalEndpoint, "Flag useGlobalEndpoint must not be null");
+
+			this.useGlobalEndpoint = useGlobalEndpoint;
+			return this;
+		}
+
 		/**
 		 * Build a new {@link AwsIamAuthenticationOptions} instance.
 		 * @return a new {@link AwsIamAuthenticationOptions}.
@@ -289,9 +309,12 @@ public class AwsIamAuthenticationOptions {
 		public AwsIamAuthenticationOptions build() {
 
 			Assert.state(this.credentialsProvider != null, "Credentials or CredentialProvider must not be null");
+			if (useGlobalEndpoint) {
+				regionProvider(() -> Region.US_EAST_1);
+			}
 
 			return new AwsIamAuthenticationOptions(this.path, this.credentialsProvider, this.regionProvider, this.role,
-					this.serverId, this.endpointUri);
+					this.serverId, this.endpointUri, this.useGlobalEndpoint);
 		}
 
 	}

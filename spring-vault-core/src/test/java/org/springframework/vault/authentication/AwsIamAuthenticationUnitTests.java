@@ -16,8 +16,15 @@
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
+import java.util.Base64;
 
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.regions.Region;
@@ -100,6 +107,27 @@ class AwsIamAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
+	}
+
+	@Nested
+	@DisplayName("Unit Tests AwsIamAuthenticationOptions")
+	class AwsIamAuthenticationOptionsUnitTests {
+
+		@Test
+		void shouldSignRequestOnGlobalRegion() {
+			AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
+					.regionProvider(() -> Region.US_WEST_1).credentials(AwsBasicCredentials.create("foo", "bar"))
+					.useGlobalEndpoint(true).build();
+
+			assertThat(options.getRegionProvider().getRegion()).isEqualTo(Region.US_EAST_1);
+		}
+
+		@Test
+		void shouldThrowExceptionWhenUseGlobalRegionIsNull() {
+			assertThatThrownBy(() -> AwsIamAuthenticationOptions.builder().useGlobalEndpoint(null))
+					.isInstanceOf(IllegalArgumentException.class).hasMessageContaining("useGlobalEndpoint");
+		}
+
 	}
 
 }
