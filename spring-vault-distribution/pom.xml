@@ -406,7 +406,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>2.7.0</version>
+							<version>3.4.0</version>
 							<executions>
 								<execution>
 									<id>deploy-docs</id>
@@ -428,13 +428,14 @@
 											<!-- Retain only a single build -->
 											<buildName>Spring Vault Docs ${project.version}</buildName>
 											<buildRetentionCount>1</buildRetentionCount>
+											<buildUrl>{{BUILD_URL}}</buildUrl>
 										</buildInfo>
 										<publisher>
-											<contextUrl>https://repo.spring.io</contextUrl>
-											<username>${artifactory.username}</username>
-											<password>${artifactory.password}</password>
-											<repoKey>temp-private-local</repoKey>
-											<snapshotRepoKey>temp-private-local</snapshotRepoKey>
+											<contextUrl>{{artifactory.server}}</contextUrl>
+											<username>{{artifactory.username}}</username>
+											<password>{{artifactory.password}}</password>
+											<repoKey>{{artifactory.staging-repository}}</repoKey>
+											<snapshotRepoKey>{{artifactory.staging-repository}}</snapshotRepoKey>
 											<includePatterns>*.zip</includePatterns>
 										</publisher>
 									</configuration>
@@ -444,20 +445,20 @@
 					</plugins>
 				</pluginManagement>
 			</build>
+
+			<pluginRepositories>
+				<pluginRepository>
+					<id>bintray-plugins</id>
+					<name>bintray-plugins</name>
+					<url>https://jcenter.bintray.com</url>
+				</pluginRepository>
+
+				<pluginRepository>
+					<id>spring-plugins-release</id>
+					<url>https://repo.spring.io/plugins-release</url>
+				</pluginRepository>
+			</pluginRepositories>
 		</profile>
 	</profiles>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>bintray-plugins</id>
-			<name>bintray-plugins</name>
-			<url>https://jcenter.bintray.com</url>
-		</pluginRepository>
-
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
 
 </project>
