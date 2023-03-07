@@ -198,6 +198,22 @@ class LifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	void shouldNotRevokeBatchToken() {
+
+		LoginToken batchToken = LoginToken.builder().token("login").type("batch").build();
+
+		when(this.clientAuthentication.login()).thenReturn(batchToken);
+
+		this.sessionManager.setTokenSelfLookupEnabled(false);
+		this.sessionManager.renewToken();
+		this.sessionManager.destroy();
+
+		verifyNoInteractions(this.restOperations);
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(this.listener);
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void shouldNotThrowExceptionsOnRevokeErrors() {
 

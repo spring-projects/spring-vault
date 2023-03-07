@@ -15,13 +15,11 @@
  */
 package org.springframework.vault.authentication;
 
-import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -35,7 +33,7 @@ import org.springframework.web.client.RestOperations;
 /**
  * Adapts tokens created by a {@link ClientAuthentication} to a {@link LoginToken}. Allows
  * decoration of a {@link ClientAuthentication} object to perform a self-lookup after
- * token retrieval to obtain the remaining TTL and renewability.
+ * token retrieval to obtain the remaining TTL, renewability, accessor and token type.
  * <p>
  * Using this adapter decrements the usage counter for the created token.
  *
@@ -77,14 +75,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 		Map<String, Object> data = lookupSelf(restOperations, token);
 
-		Boolean renewable = (Boolean) data.get("renewable");
-		Number ttl = (Number) data.get("ttl");
-
-		if (renewable != null && renewable) {
-			return LoginToken.renewable(token.toCharArray(), getLeaseDuration(ttl));
-		}
-
-		return LoginToken.of(token.toCharArray(), getLeaseDuration(ttl));
+		return LoginTokenUtil.from(token.toCharArray(), data);
 	}
 
 	private static Map<String, Object> lookupSelf(RestOperations restOperations, VaultToken token) {
@@ -104,10 +95,6 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		catch (RestClientException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed", e);
 		}
-	}
-
-	static Duration getLeaseDuration(@Nullable Number ttl) {
-		return ttl == null ? Duration.ZERO : Duration.ofSeconds(ttl.longValue());
 	}
 
 }
