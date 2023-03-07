@@ -39,11 +39,41 @@ class LoginTokenUnitTests {
 	@Test
 	void toStringShouldPrintFields() {
 
-		assertThat(LoginToken.of("token").toString()).isEqualTo("LoginToken [renewable=false, leaseDuration=PT0S]");
-		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1)).toString())
-				.isEqualTo("LoginToken [renewable=false, leaseDuration=PT1S]");
-		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1)).toString())
-				.isEqualTo("LoginToken [renewable=true, leaseDuration=PT1S]");
+		assertThat(LoginToken.of("token")).hasToString("LoginToken [renewable=false, leaseDuration=PT0S, type=null]");
+		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1)))
+				.hasToString("LoginToken [renewable=false, leaseDuration=PT1S, type=null]");
+		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1)))
+				.hasToString("LoginToken [renewable=true, leaseDuration=PT1S, type=null]");
+		assertThat(LoginToken.builder().token("foo").type("service").build())
+				.hasToString("LoginToken [renewable=false, leaseDuration=PT0S, type=service]");
+	}
+
+	@Test
+	void shouldConstructTokenWithAccessor() {
+
+		assertThat(LoginToken.of("token").getAccessor()).isNull();
+
+		LoginToken loginToken = LoginToken.builder().token("token").accessor("acc").build();
+		assertThat(loginToken.getToken()).isEqualTo("token");
+		assertThat(loginToken.getAccessor()).isEqualTo("acc");
+	}
+
+	@Test
+	void shouldConstructServiceToken() {
+
+		assertThat(LoginToken.of("token").isServiceToken()).isTrue();
+
+		LoginToken loginToken = LoginToken.builder().token("token").type("service").build();
+		assertThat(loginToken.isServiceToken()).isTrue();
+	}
+
+	@Test
+	void shouldConstructBatchToken() {
+
+		assertThat(LoginToken.of("token").isBatchToken()).isFalse();
+
+		LoginToken loginToken = LoginToken.builder().token("token").type("batch").build();
+		assertThat(loginToken.isBatchToken()).isTrue();
 	}
 
 }

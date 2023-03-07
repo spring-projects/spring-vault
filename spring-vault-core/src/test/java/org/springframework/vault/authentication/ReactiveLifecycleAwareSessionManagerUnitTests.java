@@ -259,6 +259,26 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	void shouldNotRevokeBatchTokenOnDestroy() {
+
+		LoginToken batchToken = LoginToken.builder().token("login").type("batch").build();
+
+		mockToken(batchToken);
+
+		this.sessionManager.setTokenSelfLookupEnabled(false);
+		this.sessionManager.renewToken() //
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
+		this.sessionManager.destroy();
+
+		verify(this.webClient, never()).post();
+		verify(this.webClient.post(), never()).uri("auth/token/revoke-self");
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+		verifyNoMoreInteractions(this.listener);
+	}
+
+	@Test
 	void shouldNotThrowExceptionsOnRevokeErrors() {
 
 		mockToken(LoginToken.of("login"));

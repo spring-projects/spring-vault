@@ -44,15 +44,15 @@ import org.springframework.web.client.RestOperations;
  * <p>
  * This {@link SessionManager} also implements {@link DisposableBean} to revoke the
  * {@link LoginToken} once it's not required anymore. Token revocation will stop regular
- * token refresh. Tokens are only revoked only if the associated
- * {@link ClientAuthentication} returns a {@link LoginToken}.
+ * token refresh. Tokens are only revoked if the associated {@link ClientAuthentication}
+ * returns a {@link LoginToken#isServiceToken() service token}.
  * <p>
  * If Token renewal runs into a client-side error, it assumes the token was
  * revoked/expired. It discards the token state so the next attempt will lead to another
  * login attempt.
  * <p>
- * By default, {@link VaultToken} are looked up in Vault to determine renewability and the
- * remaining TTL, see {@link #setTokenSelfLookupEnabled(boolean)}.
+ * By default, {@link VaultToken} are looked up in Vault to determine renewability,
+ * remaining TTL, accessor and type, see {@link #setTokenSelfLookupEnabled(boolean)}.
  * <p>
  * The session manager dispatches authentication events to {@link AuthenticationListener}
  * and {@link AuthenticationErrorListener}. Event notifications are dispatched either on
@@ -390,7 +390,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 
 		public boolean isRevocable() {
-			return this.revocable;
+
+			if (token instanceof LoginToken login && login.isServiceToken()) {
+				return this.revocable;
+			}
+
+			return false;
 		}
 
 	}

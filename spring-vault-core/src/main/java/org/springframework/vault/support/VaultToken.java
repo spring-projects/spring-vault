@@ -71,7 +71,7 @@ public class VaultToken {
 	 * @since 1.1
 	 */
 	public char[] toCharArray() {
-		return this.token;
+		return Arrays.copyOf(this.token, this.token.length);
 	}
 
 	@Override
@@ -89,6 +89,7 @@ public class VaultToken {
 		return Arrays.hashCode(this.token);
 	}
 
+	@Override
 	public String toString() {
 		return getClass().getSimpleName();
 	}
