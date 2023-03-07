@@ -16,7 +16,9 @@
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
+import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
 
@@ -34,12 +36,29 @@ public class LoginToken extends VaultToken {
 	 */
 	private final Duration leaseDuration;
 
-	private LoginToken(char[] token, Duration duration, boolean renewable) {
+	@Nullable
+	private final String accessor;
+
+	@Nullable
+	private final String type;
+
+	private LoginToken(char[] token, Duration duration, boolean renewable, @Nullable String accessor,
+			@Nullable String type) {
 
 		super(token);
 
 		this.leaseDuration = duration;
 		this.renewable = renewable;
+		this.accessor = accessor;
+		this.type = type;
+	}
+
+	/**
+	 * @return a new {@link LoginTokenBuilder}.
+	 * @since 2.3.3
+	 */
+	public static LoginTokenBuilder builder() {
+		return new LoginTokenBuilder();
 	}
 
 	/**
@@ -95,7 +114,7 @@ public class LoginToken extends VaultToken {
 		Assert.isTrue(token.length > 0, "Token must not be empty");
 		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
 
-		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), false);
+		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), false, null, null);
 	}
 
 	/**
@@ -113,7 +132,7 @@ public class LoginToken extends VaultToken {
 		Assert.notNull(leaseDuration, "Lease duration must not be null");
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
-		return new LoginToken(token, leaseDuration, false);
+		return new LoginToken(token, leaseDuration, false, null, null);
 	}
 
 	/**
@@ -149,7 +168,7 @@ public class LoginToken extends VaultToken {
 		Assert.isTrue(token.length > 0, "Token must not be empty");
 		Assert.isTrue(leaseDurationSeconds >= 0, "Lease duration must not be negative");
 
-		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), true);
+		return new LoginToken(token, Duration.ofSeconds(leaseDurationSeconds), true, null, null);
 	}
 
 	/**
@@ -180,7 +199,7 @@ public class LoginToken extends VaultToken {
 		Assert.notNull(leaseDuration, "Lease duration must not be null");
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
-		return new LoginToken(token, leaseDuration, true);
+		return new LoginToken(token, leaseDuration, true, null, null);
 	}
 
 	/**
@@ -197,14 +216,169 @@ public class LoginToken extends VaultToken {
 		return this.renewable;
 	}
 
+	/**
+	 * @return the token accessor.
+	 * @since 2.3.3
+	 */
+	@Nullable
+	public String getAccessor() {
+		return accessor;
+	}
+
+	/**
+	 * @return the token type.
+	 * @since 2.3.3
+	 * @see #isBatchToken()
+	 * @see #isServiceToken())
+	 */
+	@Nullable
+	public String getType() {
+		return type;
+	}
+
+	/**
+	 * @return {@literal true} if the token is a batch token.
+	 * @since 2.3.3
+	 */
+	public boolean isBatchToken() {
+		return "batch".equals(this.type);
+	}
+
+	/**
+	 * @return {@literal true} if the token is a service token.
+	 * @since 2.3.3
+	 */
+	public boolean isServiceToken() {
+		return this.type == null || "service".equals(this.type);
+	}
+
 	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
 		sb.append(" [renewable=").append(this.renewable);
 		sb.append(", leaseDuration=").append(this.leaseDuration);
+		sb.append(", type=").append(this.type);
 		sb.append(']');
 		return sb.toString();
+	}
+
+	/**
+	 * Builder for {@link LoginToken}.
+	 *
+	 * @since 2.3.3
+	 */
+	public static class LoginTokenBuilder {
+
+		@Nullable
+		private char[] token;
+
+		private boolean renewable;
+
+		/**
+		 * Duration in seconds.
+		 */
+		private Duration leaseDuration = Duration.ZERO;
+
+		@Nullable
+		private String accessor;
+
+		@Nullable
+		private String type;
+
+		private LoginTokenBuilder() {
+		}
+
+		/**
+		 * Configure the token value. This is a required builder property. Without this
+		 * property, you cannot {@link #build()} a {@link LoginToken}.
+		 * @param token must not be empty or {@literal null}.
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder token(String token) {
+
+			Assert.hasText(token, "Token must not be empty");
+
+			return token(token.toCharArray());
+		}
+
+		/**
+		 * Configure the token value. This is a required builder property. Without this
+		 * property, you cannot {@link #build()} a {@link LoginToken}.
+		 * @param token must not be empty or {@literal null}.
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder token(char[] token) {
+
+			Assert.notNull(token, "Token must not be null");
+			Assert.isTrue(token.length > 0, "Token must not be empty");
+
+			this.token = token;
+			return this;
+		}
+
+		/**
+		 * Configure whether the token is renewable.
+		 * @param renewable
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder renewable(boolean renewable) {
+
+			this.renewable = renewable;
+			return this;
+		}
+
+		/**
+		 * Configure the lease duration.
+		 * @param leaseDuration must not be {@literal null}.
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder leaseDuration(Duration leaseDuration) {
+
+			Assert.notNull(leaseDuration, "Lease duration must not be empty");
+
+			this.leaseDuration = leaseDuration;
+			return this;
+		}
+
+		/**
+		 * Configure the token accessor.
+		 * @param accessor must not be empty or {@literal null}.
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder accessor(String accessor) {
+
+			Assert.hasText(accessor, "Token accessor must not be empty");
+
+			this.accessor = accessor;
+			return this;
+		}
+
+		/**
+		 * Configure the token type.
+		 * @param type must not be empty or {@literal null}.
+		 * @return {@code this} {@link LoginTokenBuilder}.
+		 */
+		public LoginTokenBuilder type(String type) {
+
+			Assert.hasText(type, "Token type must not be empty");
+
+			this.type = type;
+			return this;
+		}
+
+		/**
+		 * Build a new {@link LoginToken} instance. {@link #token} must be configured.
+		 * @return a new {@link LoginToken} instance.
+		 */
+		public LoginToken build() {
+
+			Assert.notNull(token, "Token must not be null");
+
+			return new LoginToken(Arrays.copyOf(this.token, this.token.length), this.leaseDuration, this.renewable,
+					this.accessor, this.type);
+		}
+
 	}
 
 }
