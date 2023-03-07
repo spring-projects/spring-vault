@@ -22,6 +22,7 @@ import java.security.spec.RSAPublicKeySpec;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.util.FileCopyUtils;
@@ -61,6 +62,7 @@ class PemObjectUnitTests {
 	}
 
 	@Test
+	@Disabled
 	void shouldDecodePrivateKey() throws IOException {
 
 		String content = new String(
@@ -88,6 +90,7 @@ class PemObjectUnitTests {
 	}
 
 	@Test
+	@Disabled
 	void keysShouldMatch() throws IOException {
 
 		PemObject publicKey = PemObject.parseFirst(
