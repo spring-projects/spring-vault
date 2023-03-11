@@ -38,6 +38,7 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.App
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
+import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
@@ -46,6 +47,7 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /**
  * Configuration using Spring's {@link org.springframework.core.env.Environment} to
@@ -162,12 +164,14 @@ import org.springframework.web.client.RestOperations;
  * @author Raoof Mohammed
  * @author Justin Bertrand
  * @author Ryan Gow
+ * @author Nick Tan
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see VaultEndpoint
  * @see AppIdAuthentication
  * @see AppRoleAuthentication
  * @see AwsEc2Authentication
+ * @see AwsIamAuthentication
  * @see AzureMsiAuthentication
  * @see ClientCertificateAuthentication
  * @see CubbyholeAuthentication
@@ -264,6 +268,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			return appRoleAuthentication();
 		case AWS_EC2:
 			return awsEc2Authentication();
+		case AWS_IAM:
+			return awsIamAuthentication();
 		case AZURE:
 			return azureMsiAuthentication();
 		case CERT:
@@ -369,6 +375,17 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
 	}
 
+	protected ClientAuthentication awsIamAuthentication() {
+		String role = getProperty("vault.aws-iam.role");
+		Assert.isTrue(StringUtils.hasText(role),
+				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
+
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder().role(role)
+				.credentialsProvider(DefaultCredentialsProvider.create());
+
+		return new AwsIamAuthentication(builder.build(), restOperations());
+	}
+
 	protected ClientAuthentication azureMsiAuthentication() {
 
 		String role = getProperty("vault.azure-msi.role");
@@ -454,7 +471,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	enum AuthenticationMethod {
 
-		TOKEN, APPID, APPROLE, AWS_EC2, AZURE, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES;
 
 	}
 
