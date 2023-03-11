@@ -234,6 +234,12 @@
 				<version>${aws-java-sdk.version}</version>
 				<optional>true</optional>
 			</dependency>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>sts</artifactId>
+				<version>${aws-java-sdk.version}</version>
+				<optional>true</optional>
+			</dependency>
 
 			<!-- GCP SDK -->
 			<dependency>
