@@ -89,7 +89,7 @@ class AwsIamAuthenticationUnitTests {
 								+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder().role("foo-role")
-				.regionProvider(() -> Region.US_WEST_1).credentials(AwsBasicCredentials.create("foo", "bar")).build();
+				.region(Region.US_WEST_1).credentials(AwsBasicCredentials.create("foo", "bar")).build();
 
 		AuthenticationSteps steps = AwsIamAuthentication.createAuthenticationSteps(options);
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);

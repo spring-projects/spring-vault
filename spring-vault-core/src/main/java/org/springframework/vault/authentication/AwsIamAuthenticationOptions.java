@@ -20,6 +20,7 @@ import java.net.URI;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
@@ -210,6 +211,19 @@ public class AwsIamAuthenticationOptions {
 
 			this.credentialsProvider = credentialsProvider;
 			return this;
+		}
+
+		/**
+		 * Configure a {@link Region}, used for computing the signature.
+		 * @param region must not be {@literal null}.
+		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @since 3.0.2
+		 */
+		public AwsIamAuthenticationOptionsBuilder region(Region region) {
+
+			Assert.notNull(region, "Region must not be null");
+
+			return regionProvider(() -> region);
 		}
 
 		/**
