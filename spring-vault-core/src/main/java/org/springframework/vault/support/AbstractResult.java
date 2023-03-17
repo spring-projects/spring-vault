@@ -82,7 +82,7 @@ public abstract class AbstractResult<V> {
 			return get0();
 		}
 
-		throw new VaultException(this.exception.getMessage());
+		throw new VaultException(this.exception.getMessage(), this.exception);
 	}
 
 	/**
