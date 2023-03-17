@@ -189,21 +189,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>sts</artifactId>
-			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>software.amazon.ion</groupId>
-					<artifactId>ion-java</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.fasterxml.jackson.dataformat</groupId>
-					<artifactId>jackson-dataformat-cbor</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<dependency>
 			<groupId>com.google.apis</groupId>

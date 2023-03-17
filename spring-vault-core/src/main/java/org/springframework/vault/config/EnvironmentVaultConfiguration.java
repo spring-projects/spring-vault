@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -47,7 +48,6 @@ import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
-import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 
 /**
  * Configuration using Spring's {@link org.springframework.core.env.Environment} to
@@ -98,8 +98,8 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
  * </li>
  * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
  * supported authentication methods are:
- * {@literal TOKEN, APPID, APPROLE, AWS_EC2, AZURE, CERT, CUBBYHOLE, KUBERNETES}, see
- * {@link AuthenticationMethod})</li>
+ * {@literal TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES},
+ * see {@link AuthenticationMethod})</li>
  * <li>Token authentication
  * <ul>
  * <li>Vault Token: {@code vault.token}</li>
@@ -129,6 +129,10 @@ import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
  * {@code vault.aws-ec2.role} instead)</li>
  * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI})</li>
+ * </ul>
+ * <li>AWS IAM authentication
+ * <ul>
+ * <li>Role: {@code vault.aws-iam.role} (since 3.0.2)</li>
  * </ul>
  * <li>Azure MSI authentication
  * <ul>
@@ -376,6 +380,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	}
 
 	protected ClientAuthentication awsIamAuthentication() {
+
 		String role = getProperty("vault.aws-iam.role");
 		Assert.isTrue(StringUtils.hasText(role),
 				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
