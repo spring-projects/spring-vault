@@ -29,7 +29,7 @@ import org.springframework.vault.authentication.AwsIamAuthentication;
 import org.springframework.vault.authentication.ClientAuthentication;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with AppRole authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with AWS IAM authentication.
  *
  * @author Nick Tan
  */

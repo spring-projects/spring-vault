@@ -178,7 +178,7 @@ vault.token=00000000-0000-0000-0000-000000000000
 ** Truststore type: `vault.ssl.trust-store-type` (optional, typically `jks`, supports also `pem`)
 ** Enabled SSL/TLS protocols: `vault.ssl.enabled-protocols` (since 2.3.2, optional, protocols separated with comma)
 ** Enabled SSL/TLS cipher suites: `vault.ssl.enabled-cipher-suites` (since 2.3.2, optional, cipher suites separated with comma)
-* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
+* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AWS_IAM`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
 
 **Authentication-specific property keys**
 
@@ -205,6 +205,10 @@ Any other value is used with `StaticUserId`.
 * Role: `vault.aws-ec2.role`
 * RoleId: `vault.aws-ec2.role-id` (*deprecated:* use `vault.aws-ec2.role` instead)
 * Identity Document URL: `vault.aws-ec2.identity-document` (defaults to `http://169.254.169.254/latest/dynamic/instance-identity/pkcs7`)
+
+**<<vault.authentication.awsiam>>**
+
+* Role: `vault.aws-iam.role`
 
 **<<vault.authentication.azuremsi>>**
 
