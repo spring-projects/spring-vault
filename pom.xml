@@ -42,7 +42,7 @@
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>6.0.7</spring.version>
 		<spring-asciidoctor-backends.version>0.0.4</spring-asciidoctor-backends.version>
-		<spring-data-bom.version>2022.0.2</spring-data-bom.version>
+		<spring-data-bom.version>2022.0.4</spring-data-bom.version>
 		<spring-security-bom.version>6.0.2</spring-security-bom.version>
 		<reactor.version>2022.0.5</reactor.version>
 
