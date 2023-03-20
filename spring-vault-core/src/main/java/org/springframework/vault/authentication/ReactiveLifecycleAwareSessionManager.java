@@ -26,6 +26,7 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -168,19 +169,23 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		}).retrieve().bodyToMono(String.class)
 				.doOnSubscribe(ignore -> dispatch(new BeforeLoginTokenRevocationEvent(token)))
 				.doOnNext(ignore -> dispatch(new AfterLoginTokenRevocationEvent(token)))
-				.onErrorResume(WebClientResponseException.class, e -> {
+				.onErrorResume(WebClientResponseException.class, e -> onRevokeFailed(token, e))
+				.onErrorResume(Exception.class, e -> onRevokeFailed(token, e)).then();
+	}
 
-					this.logger.warn(format("Could not revoke token", e));
-					dispatch(new LoginTokenRevocationFailedEvent(token, e));
+	private Mono<String> onRevokeFailed(VaultToken token, Throwable e) {
 
-					return Mono.empty();
-				}).onErrorResume(Exception.class, e -> {
+		if (LoginToken.hasAccessor(token)) {
+			this.logger.warn(
+					String.format("Cannot revoke VaultToken with accessor: %s", ((LoginToken) token).getAccessor()), e);
+		}
+		else {
+			this.logger.warn("Cannot revoke VaultToken", e);
+		}
 
-					this.logger.warn("Could not revoke token", e);
-					dispatch(new LoginTokenRevocationFailedEvent(token, e));
+		dispatch(new LoginTokenRevocationFailedEvent(token, e));
 
-					return Mono.empty();
-				}).then();
+		return Mono.empty();
 	}
 
 	/**

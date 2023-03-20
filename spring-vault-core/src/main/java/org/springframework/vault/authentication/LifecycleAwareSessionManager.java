@@ -24,6 +24,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -167,7 +168,14 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			dispatch(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
-			this.logger.warn(String.format("Cannot revoke VaultToken: %s", token.getToken()), e);
+			if (LoginToken.hasAccessor(token)) {
+				this.logger.warn(
+						String.format("Cannot revoke VaultToken with accessor: %s", ((LoginToken) token).getAccessor()),
+						e);
+			}
+			else {
+				this.logger.warn("Cannot revoke VaultToken", e);
+			}
 			dispatch(new LoginTokenRevocationFailedEvent(token, e));
 		}
 	}

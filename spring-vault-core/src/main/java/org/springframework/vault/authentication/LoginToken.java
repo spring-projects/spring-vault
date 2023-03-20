@@ -18,8 +18,11 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 import java.util.Arrays;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.support.VaultToken;
 
 /**
@@ -200,6 +203,10 @@ public class LoginToken extends VaultToken {
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 
 		return new LoginToken(token, leaseDuration, true, null, null);
+	}
+
+	static boolean hasAccessor(VaultToken token) {
+		return token instanceof LoginToken && StringUtils.hasText(((LoginToken) token).getAccessor());
 	}
 
 	/**
