@@ -590,7 +590,7 @@
 				<plugin>
 					<groupId>org.jfrog.buildinfo</groupId>
 					<artifactId>artifactory-maven-plugin</artifactId>
-					<version>3.4.0</version>
+					<version>3.5.2</version>
 				</plugin>
 
 			</plugins>
@@ -837,7 +837,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>3.4.0</version>
+							<version>3.5.2</version>
 							<executions>
 								<execution>
 									<id>build-info</id>
