@@ -44,7 +44,7 @@
 		<spring-asciidoctor-backends.version>0.0.4</spring-asciidoctor-backends.version>
 		<spring-data-bom.version>2022.0.2</spring-data-bom.version>
 		<spring-security-bom.version>6.0.2</spring-security-bom.version>
-		<reactor.version>2022.0.3</reactor.version>
+		<reactor.version>2022.0.5</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
