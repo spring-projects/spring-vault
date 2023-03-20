@@ -100,6 +100,33 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 	}
 
 	@Test
+	void shouldRevokeToken() {
+
+		final LoginToken loginToken = createLoginToken();
+		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
+
+		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
+				this.taskScheduler, prepare().getRestTemplate());
+
+		sessionManager.getSessionToken();
+		sessionManager.revoke();
+
+		prepare().getVaultOperations().doWithSession(restOperations -> {
+
+			try {
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
+				fail("Missing HttpStatusCodeException");
+			}
+			catch (HttpStatusCodeException e) {
+				// Compatibility across Vault versions.
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+			}
+
+			return null;
+		});
+	}
+
+	@Test
 	void shouldRevokeOnDisposal() {
 
 		final LoginToken loginToken = createLoginToken();

@@ -25,7 +25,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -149,11 +148,18 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 	@Override
 	public void destroy() {
+		revoke();
+	}
+
+	/**
+	 * Revoke and drop the current {@link VaultToken}.
+	 * @since 3.0.2
+	 */
+	public void revoke() {
 
 		Optional<TokenWrapper> token = getToken();
-		setToken(Optional.empty());
-
 		token.filter(TokenWrapper::isRevocable).map(TokenWrapper::getToken).ifPresent(this::revoke);
+		setToken(Optional.empty());
 	}
 
 	/**
