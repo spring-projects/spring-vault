@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import org.assertj.core.util.Files;
@@ -155,6 +156,36 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 				.expectNext(loginToken) //
 				.verifyComplete();
 		sessionManager.destroy();
+
+		prepare().getVaultOperations().doWithSession(restOperations -> {
+
+			try {
+				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
+				fail("Missing HttpStatusCodeException");
+			}
+			catch (HttpStatusCodeException e) {
+				// Compatibility across Vault versions.
+				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+			}
+
+			return null;
+		});
+	}
+
+	@Test
+	void shouldRevokeToken() {
+
+		LoginToken loginToken = createLoginToken();
+
+		ReactiveLifecycleAwareSessionManager sessionManager = new ReactiveLifecycleAwareSessionManager(
+				() -> Flux.fromStream(Stream.of((VaultToken) loginToken)).next(), this.taskScheduler,
+				prepare().getWebClient());
+
+		sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
+		sessionManager.revokeNow();
 
 		prepare().getVaultOperations().doWithSession(restOperations -> {
 

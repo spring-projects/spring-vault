@@ -26,7 +26,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -143,6 +142,23 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		this.token.set(TERMINATED);
 
 		revokeNow(tokenMono);
+	}
+
+	/**
+	 * Revoke and drop the current {@link VaultToken}.
+	 * @return a mono emitting completion upon successful revocation.
+	 * @since 3.0.2
+	 */
+	public Mono<Void> revoke() {
+		return doRevoke(this.token.get()).doOnSuccess(unused -> this.token.set(EMPTY));
+	}
+
+	/**
+	 * Revoke and drop the current {@link VaultToken} now.
+	 * @since 3.0.2
+	 */
+	public void revokeNow() {
+		revoke().block(Duration.ofSeconds(5));
 	}
 
 	/**
