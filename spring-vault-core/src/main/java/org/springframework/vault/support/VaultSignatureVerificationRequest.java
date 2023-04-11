@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,16 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+import org.springframework.vault.support.VaultSignatureVerificationRequest.VaultSignatureVerificationRequestSerializer;
+
+import java.io.IOException;
 
 /**
  * Request for a signature verification.
@@ -24,8 +32,10 @@ import org.springframework.util.Assert;
  * @author Luander Ribeiro
  * @author Mark Paluch
  * @author My-Lan Aragon
+ * @author James Luke
  * @since 2.0
  */
+@JsonSerialize(using = VaultSignatureVerificationRequestSerializer.class)
 public class VaultSignatureVerificationRequest {
 
 	private final Plaintext plaintext;
@@ -133,6 +143,31 @@ public class VaultSignatureVerificationRequest {
 	@Deprecated(since = "2.4")
 	public String getAlgorithm() {
 		return getSignatureAlgorithm();
+	}
+
+	static class VaultSignatureVerificationRequestSerializer extends JsonSerializer<VaultSignatureVerificationRequest> {
+
+		static PlaintextToBase64StringConverter plaintextConverter = new PlaintextToBase64StringConverter();
+
+		@Override
+		public void serialize(VaultSignatureVerificationRequest request, JsonGenerator gen,
+							  SerializerProvider serializers) throws IOException {
+			gen.writeStartObject();
+			gen.writeStringField("input", plaintextConverter.convert(request.plaintext));
+			if (request.getHmac() != null) {
+				gen.writeStringField("hmac", request.getHmac().getHmac());
+			}
+
+			if (request.getSignature() != null) {
+				gen.writeStringField("signature", request.getSignature().getSignature());
+			}
+
+			if (StringUtils.hasText(request.getAlgorithm())) {
+				gen.writeStringField("algorithm", request.getAlgorithm());
+			}
+			gen.writeEndObject();
+		}
+
 	}
 
 	/**

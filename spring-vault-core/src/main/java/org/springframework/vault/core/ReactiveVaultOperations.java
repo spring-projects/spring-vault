@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  */
 package org.springframework.vault.core;
 
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Interface that specifies a basic set of Vault operations executed on a reactive
@@ -122,5 +121,19 @@ public interface ReactiveVaultOperations {
 	 */
 	<V, T extends Publisher<V>> T doWithSession(Function<WebClient, ? extends T> sessionCallback)
 			throws VaultException, WebClientException;
+
+	/**
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	ReactiveVaultTransitOperations opsForTransit();
+
+	/**
+	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
+	 * a different path than {@code transit}.
+	 *
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault transit backend.
+	 */
+	ReactiveVaultTransitOperations opsForTransit(String path);
 
 }
