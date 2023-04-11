@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -25,12 +28,17 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @since 2.0
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultHmacRequest {
 
+	@JsonProperty("input")
+	@JsonSerialize(converter = PlaintextToBase64StringConverter.class)
 	private final Plaintext plaintext;
 
+	@JsonProperty("algorithm")
 	private final @Nullable String algorithm;
 
+	@JsonProperty("key_version")
 	private final @Nullable Integer keyVersion;
 
 	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {

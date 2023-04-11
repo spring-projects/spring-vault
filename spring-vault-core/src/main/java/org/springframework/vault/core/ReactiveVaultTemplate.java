@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,9 @@
  */
 package org.springframework.vault.core;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -49,6 +41,12 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import org.springframework.web.reactive.function.client.WebClientException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
 
@@ -365,6 +363,16 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			return Mono.error(new UnsupportedOperationException("Token retrieval disabled"));
 		}
 
+	}
+
+	@Override
+	public ReactiveVaultTransitOperations opsForTransit() {
+		return opsForTransit("transit");
+	}
+
+	@Override
+	public ReactiveVaultTransitOperations opsForTransit(String path) {
+		return new ReactiveVaultTransitTemplate(this, path);
 	}
 
 }

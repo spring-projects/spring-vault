@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,7 @@
  */
 package org.springframework.vault.core;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
@@ -48,6 +40,13 @@ import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKey;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.
@@ -383,7 +382,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	@Override
 	public Signature sign(String keyName, VaultSignRequest signRequest) {
-
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(signRequest, "Sign request must not be null");
 
@@ -443,7 +441,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return SignatureValidation.invalid();
 	}
 
-	private static void applyTransitOptions(VaultTransitContext context, Map<String, String> request) {
+	public static void applyTransitOptions(VaultTransitContext context, Map<String, String> request) {
 
 		if (!ObjectUtils.isEmpty(context.getContext())) {
 			request.put("context", Base64Utils.encodeToString(context.getContext()));
@@ -454,7 +452,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 	}
 
-	private static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,
+	public static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,
 			List<Plaintext> batchRequest) {
 
 		List<VaultEncryptionResult> result = new ArrayList<>(batchRequest.size());
@@ -484,7 +482,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return result;
 	}
 
-	private static List<VaultDecryptionResult> toDecryptionResults(VaultResponse vaultResponse,
+	public static List<VaultDecryptionResult> toDecryptionResults(VaultResponse vaultResponse,
 			List<Ciphertext> batchRequest) {
 
 		List<VaultDecryptionResult> result = new ArrayList<>(batchRequest.size());
@@ -523,12 +521,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return new VaultDecryptionResult(Plaintext.empty().with(ciphertext.getContext()));
 	}
 
-	private static Ciphertext toCiphertext(String ciphertext, @Nullable VaultTransitContext context) {
+	public static Ciphertext toCiphertext(String ciphertext, @Nullable VaultTransitContext context) {
 		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext.of(ciphertext);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
+	public static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
 	}
 
