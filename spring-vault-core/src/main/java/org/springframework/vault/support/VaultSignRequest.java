@@ -30,18 +30,18 @@ import org.springframework.util.Assert;
  */
 public class VaultSignRequest {
 
-    @JsonProperty("input")
-    @JsonSerialize(converter = PlaintextToBase64StringConverter.class)
-    private final Plaintext plaintext;
+	@JsonProperty("input")
+	@JsonSerialize(converter = PlaintextToBase64StringConverter.class)
+	private final Plaintext plaintext;
 
-    private final @Nullable String hashAlgorithm;
+	private final @Nullable String hashAlgorithm;
 
-    private final @Nullable String signatureAlgorithm;
+	private final @Nullable String signatureAlgorithm;
 
-    private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
+	private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
 
-        this.plaintext = plaintext;
-        this.hashAlgorithm = hashAlgorithm;
+		this.plaintext = plaintext;
+		this.hashAlgorithm = hashAlgorithm;
 		this.signatureAlgorithm = signatureAlgorithm;
 	}
 

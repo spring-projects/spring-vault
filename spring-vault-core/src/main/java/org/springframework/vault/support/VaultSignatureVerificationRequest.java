@@ -151,7 +151,7 @@ public class VaultSignatureVerificationRequest {
 
 		@Override
 		public void serialize(VaultSignatureVerificationRequest request, JsonGenerator gen,
-							  SerializerProvider serializers) throws IOException {
+				SerializerProvider serializers) throws IOException {
 			gen.writeStartObject();
 			gen.writeStringField("input", plaintextConverter.convert(request.plaintext));
 			if (request.getHmac() != null) {

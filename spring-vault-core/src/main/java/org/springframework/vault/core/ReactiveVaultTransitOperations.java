@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-
 import org.springframework.vault.support.Ciphertext;
 import org.springframework.vault.support.Hmac;
 import org.springframework.vault.support.Plaintext;
@@ -36,7 +35,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
-
 
 /**
  * Interface that specifies a set of {@code transit} operations executed on a reactive

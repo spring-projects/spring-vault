@@ -31,19 +31,19 @@ import org.springframework.util.Assert;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class VaultHmacRequest {
 
-    @JsonProperty("input")
-    @JsonSerialize(converter = PlaintextToBase64StringConverter.class)
-    private final Plaintext plaintext;
+	@JsonProperty("input")
+	@JsonSerialize(converter = PlaintextToBase64StringConverter.class)
+	private final Plaintext plaintext;
 
-    @JsonProperty("algorithm")
-    private final @Nullable String algorithm;
+	@JsonProperty("algorithm")
+	private final @Nullable String algorithm;
 
-    @JsonProperty("key_version")
-    private final @Nullable Integer keyVersion;
+	@JsonProperty("key_version")
+	private final @Nullable Integer keyVersion;
 
-    private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {
+	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {
 
-        this.algorithm = algorithm;
+		this.algorithm = algorithm;
 		this.plaintext = plaintext;
 		this.keyVersion = keyVersion;
 	}

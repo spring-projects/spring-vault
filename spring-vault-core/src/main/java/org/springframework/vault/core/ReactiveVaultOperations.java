@@ -130,7 +130,6 @@ public interface ReactiveVaultOperations {
 	/**
 	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
 	 * a different path than {@code transit}.
-	 *
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transit backend.
 	 */

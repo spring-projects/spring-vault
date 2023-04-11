@@ -439,7 +439,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	public static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,
-																  List<Plaintext> batchRequest) {
+			List<Plaintext> batchRequest) {
 
 		List<VaultEncryptionResult> result = new ArrayList<>(batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
@@ -469,7 +469,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	public static List<VaultDecryptionResult> toDecryptionResults(VaultResponse vaultResponse,
-																  List<Ciphertext> batchRequest) {
+			List<Ciphertext> batchRequest) {
 
 		List<VaultDecryptionResult> result = new ArrayList<>(batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
