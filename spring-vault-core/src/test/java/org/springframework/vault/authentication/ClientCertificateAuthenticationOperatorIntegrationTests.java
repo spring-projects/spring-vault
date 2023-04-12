@@ -15,14 +15,14 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.TestWebClientFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import reactor.test.StepVerifier;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using
@@ -74,6 +74,40 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 		operator.getVaultToken() //
 				.as(StepVerifier::create) //
 				.verifyError(VaultLoginException.class);
+	}
+
+	@Test
+	void shouldSelectRoleOne() {
+
+		WebClient webClient = TestWebClientFactory.create(prepareCertAuthenticationMethod());
+
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
+				ClientCertificateAuthentication.createAuthenticationSteps(
+						ClientCertificateAuthenticationOptions.builder().name("my-default-role").build()),
+				webClient);
+
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.assertNext(token -> assertThatPolicies(token).contains("cert-auth1") //
+						.doesNotContain("cert-auth2")) //
+				.verifyComplete();
+	}
+
+	@Test
+	void shouldSelectRoleTwo() {
+
+		WebClient webClient = TestWebClientFactory.create(prepareCertAuthenticationMethod());
+
+		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
+				ClientCertificateAuthentication.createAuthenticationSteps(
+						ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build()),
+				webClient);
+
+		operator.getVaultToken() //
+				.as(StepVerifier::create) //
+				.assertNext(token -> assertThatPolicies(token).contains("cert-auth2") //
+						.doesNotContain("cert-auth1")) //
+				.verifyComplete();
 	}
 
 	@Test
