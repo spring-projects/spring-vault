@@ -15,18 +15,18 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
+
 import java.util.Collections;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
  * TLS Client Certificate {@link ClientAuthentication}.
@@ -81,11 +81,13 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 * @since 2.3
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(ClientCertificateAuthenticationOptions options) {
-
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 
-		return AuthenticationSteps
-			.just(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
+		String name = options.getName();
+		Map<String, String> body = name != null ? Collections.singletonMap("name", name) : Collections.emptyMap();
+
+		return AuthenticationSteps.fromSupplier(() -> body)
+			.login(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
 	}
 
 	@Override
@@ -101,8 +103,11 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	private VaultToken createTokenUsingTlsCertAuthentication() {
 
 		try {
+			String name = this.options.getName();
+
 			VaultResponse response = this.restOperations.postForObject(
-					AuthenticationUtil.getLoginPath(this.options.getPath()), Collections.emptyMap(),
+					AuthenticationUtil.getLoginPath(this.options.getPath()),
+					name != null ? Collections.singletonMap("name", name) : Collections.emptyMap(),
 					VaultResponse.class);
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
