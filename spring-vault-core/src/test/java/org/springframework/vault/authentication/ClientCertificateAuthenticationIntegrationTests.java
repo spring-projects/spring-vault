@@ -15,22 +15,17 @@
  */
 package org.springframework.vault.authentication;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.support.ClientOptions;
-import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.support.*;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication}.
@@ -85,6 +80,38 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 
 		assertThatIllegalStateException().isThrownBy(() -> ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("wrong".toCharArray(), "1"))));
+	}
+
+	@Test
+	void shouldSelectRoleOne() {
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+				prepareCertAuthenticationMethod());
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
+				clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				ClientCertificateAuthenticationOptions.builder().name("my-default-role").build(), restTemplate);
+		VaultToken login = authentication.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+		assertThatPolicies(login).contains("cert-auth1") //
+				.doesNotContain("cert-auth2");
+	}
+
+	@Test
+	void shouldSelectRoleTwo() {
+		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+				prepareCertAuthenticationMethod());
+
+		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
+				clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build(), restTemplate);
+		VaultToken login = authentication.login();
+
+		assertThat(login.getToken()).isNotEmpty();
+		assertThatPolicies(login).contains("cert-auth2") //
+				.doesNotContain("cert-auth1");
 	}
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we

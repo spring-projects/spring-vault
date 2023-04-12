@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,8 +39,15 @@ public class ClientCertificateAuthenticationOptions {
 	 */
 	private final String path;
 
-	private ClientCertificateAuthenticationOptions(String path) {
+	/**
+	 * Optional named certificate role to authenticate against.
+	 */
+	@Nullable
+	private final String name;
+
+	private ClientCertificateAuthenticationOptions(String path, String name) {
 		this.path = path;
+		this.name = name;
 	}
 
 	/**
@@ -57,11 +65,22 @@ public class ClientCertificateAuthenticationOptions {
 	}
 
 	/**
+	 * @return the optional named certificate role to authenticate against.
+	 */
+	@Nullable
+	public String getName() {
+		return this.name;
+	}
+
+	/**
 	 * Builder for {@link ClientCertificateAuthenticationOptions}.
 	 */
 	public static class ClientCertificateAuthenticationOptionsBuilder {
 
 		private String path = DEFAULT_CERT_PATH;
+
+		@Nullable
+		private String name;
 
 		ClientCertificateAuthenticationOptionsBuilder() {
 		}
@@ -80,11 +99,24 @@ public class ClientCertificateAuthenticationOptions {
 		}
 
 		/**
+		 * Configure the named certificate role to authenticate against.
+		 * @param name must not be empty or {@literal null}.
+		 * @return {@code this} {@link ClientCertificateAuthenticationOptionsBuilder}.
+		 */
+		public ClientCertificateAuthenticationOptionsBuilder name(String name) {
+
+			Assert.hasText(name, "Name must not be empty");
+
+			this.name = name;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link ClientCertificateAuthenticationOptions} instance.
 		 * @return a new {@link ClientCertificateAuthenticationOptions}.
 		 */
 		public ClientCertificateAuthenticationOptions build() {
-			return new ClientCertificateAuthenticationOptions(this.path);
+			return new ClientCertificateAuthenticationOptions(this.path, this.name);
 		}
 
 	}

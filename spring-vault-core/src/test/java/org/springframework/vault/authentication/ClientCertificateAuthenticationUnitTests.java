@@ -15,11 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
 import java.time.Duration;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -27,13 +32,6 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
  * Unit tests for {@link ClientCertificateAuthentication}.
@@ -60,11 +58,13 @@ class ClientCertificateAuthenticationUnitTests {
 	void loginShouldObtainToken() {
 
 		this.mockRest.expect(requestTo("/auth/my/path/login")).andExpect(method(HttpMethod.POST))
+				.andExpect(content().json("{\"name\": \"my-default-role\"}"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
 						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 								+ "}"));
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
+				.name("my-default-role") //
 				.path("my/path").build();
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);
