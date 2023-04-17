@@ -16,27 +16,24 @@
 package org.springframework.vault.core;
 
 import java.util.Map;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
-import org.springframework.vault.support.VaultResponseSupport;
+import reactor.core.publisher.Mono;
 
 /**
- * Default implementation of {@link VaultKeyValueMetadataOperations}.
+ * Default implementation of {@link ReactiveVaultKeyValueMetadataOperations}.
  *
- * @author Zakaria Amine
- * @author Mark Paluch
- * @author Jeroen Willemsen
- * @since 2.3
+ * @author Timothy R. Weiand
+ * @since 3.1
  */
-class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
+class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMetadataOperations {
 
-	private final VaultOperations vaultOperations;
+	private final ReactiveVaultOperations vaultOperations;
 
 	private final String basePath;
 
-	VaultKeyValueMetadataTemplate(VaultOperations vaultOperations, String basePath) {
+	ReactiveVaultKeyValueMetadataTemplate(ReactiveVaultOperations vaultOperations, String basePath) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
@@ -45,35 +42,33 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public VaultMetadataResponse get(String path) {
+	public Mono<VaultMetadataResponse> get(String path) {
 
-		VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
+		return vaultOperations.read(getMetadataPath(path), Map.class).flatMap(response -> {
+			Map data = response.getData();
+			if (null == data) {
+				return Mono.empty();
+			}
 
-		return response != null ? VaultKeyValueUtilities.fromMap(response.getRequiredData()) : null;
+			return Mono.just(data);
+		}).map(VaultKeyValueUtilities::fromMap);
 	}
 
 	@Override
-	public void put(String path, VaultMetadataRequest body) {
-
-		Assert.hasText(path, "Path must not be empty");
+	public Mono<Void> put(String path, VaultMetadataRequest body) {
 		Assert.notNull(body, "Body must not be null");
 
-		this.vaultOperations.write(getPath(path), body);
+		return vaultOperations.write(getMetadataPath(path), body).then();
 	}
 
 	@Override
-	public void delete(String path) {
-
-		Assert.hasText(path, "Path must not be empty");
-
-		this.vaultOperations.delete(getPath(path));
+	public Mono<Void> delete(String path) {
+		return vaultOperations.delete(getMetadataPath(path));
 	}
 
-	private String getPath(String path) {
-
+	private String getMetadataPath(String path) {
 		Assert.hasText(path, "Path must not be empty");
-		return this.basePath + "/metadata/" + path;
+		return basePath + "/metadata/" + path;
 	}
 
 }

@@ -63,6 +63,17 @@ public class VaultResponseSupport<T> {
 	@Nullable
 	private List<String> warnings;
 
+	public static void updateWithoutData(final VaultResponseSupport<?> dst, final VaultResponseSupport<?> src) {
+		dst.auth = src.auth;
+		dst.metadata = src.metadata;
+		dst.wrapInfo = src.wrapInfo;
+		dst.leaseDuration = src.leaseDuration;
+		dst.leaseId = src.leaseId;
+		dst.requestId = src.requestId;
+		dst.renewable = src.renewable;
+		dst.warnings = src.warnings;
+	}
+
 	/**
 	 * @return authentication payload.
 	 */

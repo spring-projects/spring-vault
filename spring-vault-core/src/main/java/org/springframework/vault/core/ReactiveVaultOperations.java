@@ -39,6 +39,7 @@ import java.util.function.Function;
  *
  * @author Mark Paluch
  * @author James Luke
+ * @author Timothy R. Weiand
  * @since 2.0
  * @see #doWithSession(Function)
  * @see #doWithVault(Function)
@@ -69,6 +70,29 @@ public interface ReactiveVaultOperations {
 	 * @since 3.1
 	 */
 	ReactiveVaultSysOperations opsForSys();
+
+	/*
+	 * Return {@link VaultKeyValueOperations}.
+	 *
+	 * @param path the mount path, must not be empty or {@literal null}.
+	 *
+	 * @param apiVersion API version to use, must not be {@literal null}.
+	 *
+	 * @return the operations interface to interact with the Vault Key/Value backend.
+	 *
+	 * @since 3.1
+	 */
+	ReactiveVaultKeyValueOperations opsForKeyValue(String path,
+			VaultKeyValueOperationsSupport.KeyValueBackend apiVersion);
+
+	/**
+	 * Return {@link ReactiveVaultVersionedKeyValueOperations}.
+	 * @param path the mount path
+	 * @return the operations interface to interact with the versioned Vault Key/Value
+	 * (version 2) backend.
+	 * @since 3.1
+	 */
+	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API

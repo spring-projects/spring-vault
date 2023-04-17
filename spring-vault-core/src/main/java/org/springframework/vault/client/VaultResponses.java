@@ -33,6 +33,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.support.VaultResponseDataVersion2;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -127,6 +128,68 @@ public abstract class VaultResponses {
 		};
 
 		return new ParameterizedTypeReference<VaultResponseSupport<T>>() {
+			@Override
+			public Type getType() {
+				return supportType;
+			}
+		};
+	}
+
+	public static <T> ParameterizedTypeReference<VaultResponseSupport<T>> getTypeReference(
+			final ParameterizedTypeReference<T> responseType) {
+
+		Assert.notNull(responseType, "Response type must not be null");
+
+		final Type supportType = new ParameterizedType() {
+
+			@Override
+			public Type[] getActualTypeArguments() {
+				return new Type[] { responseType.getType() };
+			}
+
+			@Override
+			public Type getRawType() {
+				return VaultResponseSupport.class;
+			}
+
+			@Override
+			public Type getOwnerType() {
+				return VaultResponseSupport.class;
+			}
+		};
+
+		return new ParameterizedTypeReference<VaultResponseSupport<T>>() {
+			@Override
+			public Type getType() {
+				return supportType;
+			}
+		};
+	}
+
+	public static <T> ParameterizedTypeReference<VaultResponseDataVersion2<T>> getDataTypeReference(
+			final Class<T> responseType) {
+
+		Assert.notNull(responseType, "Response type must not be null");
+
+		final Type supportType = new ParameterizedType() {
+
+			@Override
+			public Type[] getActualTypeArguments() {
+				return new Type[] { responseType };
+			}
+
+			@Override
+			public Type getRawType() {
+				return VaultResponseDataVersion2.class;
+			}
+
+			@Override
+			public Type getOwnerType() {
+				return VaultResponseDataVersion2.class;
+			}
+		};
+
+		return new ParameterizedTypeReference<VaultResponseDataVersion2<T>>() {
 			@Override
 			public Type getType() {
 				return supportType;

@@ -67,16 +67,8 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 		Assert.hasText(path, "Path must not be empty");
 
 		return doRead(path, Map.class, (response, data) -> {
-
 			VaultResponse vaultResponse = new VaultResponse();
-			vaultResponse.setRenewable(response.isRenewable());
-			vaultResponse.setAuth(response.getAuth());
-			vaultResponse.setLeaseDuration(response.getLeaseDuration());
-			vaultResponse.setLeaseId(response.getLeaseId());
-			vaultResponse.setMetadata(response.getMetadata());
-			vaultResponse.setRequestId(response.getRequestId());
-			vaultResponse.setWarnings(response.getWarnings());
-			vaultResponse.setWrapInfo(response.getWrapInfo());
+			VaultResponse.updateWithoutData(vaultResponse, response);
 			vaultResponse.setData(data);
 
 			return vaultResponse;
