@@ -16,6 +16,12 @@
 package org.springframework.vault.core;
 
 import org.reactivestreams.Publisher;
+import org.springframework.beans.factory.DisposableBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -57,6 +63,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
  * @author Mark Paluch
  * @author Raoof Mohammed
  * @author James Luke
+ * @author Timothy R. Weiand
  * @see SessionManager
  * @since 2.0
  */
@@ -243,6 +250,25 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
+	public ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
+		switch (apiVersion) {
+		case KV_1:
+			return new ReactiveVaultKeyValue1Template(this, path);
+		// case KV_2:
+		// return new ReactiveVaultKeyValue2Template(this, path);
+		}
+
+		throw new UnsupportedOperationException(
+				String.format("Key/Value backend version %s not supported", apiVersion));
+	}
+
+	// @Override
+	// public ReactiveVaultVersionedKeyValueOperations opsFormVersionedKeyValue(String
+	// path) {
+	// return new ReactiveVaultVersionedKeyValueTemplate(this, path);
+	// }
+
+	@Override
 	public Mono<VaultResponse> read(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -336,12 +362,11 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
-	private static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path,
-			HttpMethod method) {
+	public static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path, HttpMethod method) {
 		return response -> isSuccess(response) ? response.bodyToMono(bodyType) : mapOtherwise(response, path, method);
 	}
 
-	private static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference,
+	public static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference,
 			String path, HttpMethod method) {
 
 		return response -> isSuccess(response) ? response.body(BodyExtractors.toMono(typeReference))
