@@ -83,14 +83,14 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(
-						ClientCertificateAuthenticationOptions.builder().name("my-default-role").build()),
+						ClientCertificateAuthenticationOptions.builder().role("my-default-role").build()),
 				webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create) //
-				.assertNext(token -> assertThatPolicies(token).contains("cert-auth1") //
-						.doesNotContain("cert-auth2")) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.assertNext(token -> assertThatPolicies(token).contains("cert-auth1") //
+				.doesNotContain("cert-auth2")) //
+			.verifyComplete();
 	}
 
 	@Test
@@ -100,14 +100,14 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(
-						ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build()),
+						ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build()),
 				webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create) //
-				.assertNext(token -> assertThatPolicies(token).contains("cert-auth2") //
-						.doesNotContain("cert-auth1")) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.assertNext(token -> assertThatPolicies(token).contains("cert-auth2") //
+				.doesNotContain("cert-auth1")) //
+			.verifyComplete();
 	}
 
 	@Test

@@ -15,13 +15,23 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
-
 import java.util.Collections;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.util.Assert;
+import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -32,6 +42,7 @@ import org.springframework.web.client.RestOperations;
  * TLS Client Certificate {@link ClientAuthentication}.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 public class ClientCertificateAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
@@ -83,8 +94,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	public static AuthenticationSteps createAuthenticationSteps(ClientCertificateAuthenticationOptions options) {
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 
-		String name = options.getName();
-		Map<String, String> body = name != null ? Collections.singletonMap("name", name) : Collections.emptyMap();
+		Map<String, Object> body = getRequestBody(options);
 
 		return AuthenticationSteps.fromSupplier(() -> body)
 			.login(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
@@ -103,12 +113,9 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	private VaultToken createTokenUsingTlsCertAuthentication() {
 
 		try {
-			String name = this.options.getName();
-
-			VaultResponse response = this.restOperations.postForObject(
-					AuthenticationUtil.getLoginPath(this.options.getPath()),
-					name != null ? Collections.singletonMap("name", name) : Collections.emptyMap(),
-					VaultResponse.class);
+			Map<String, Object> request = getRequestBody(this.options);
+			VaultResponse response = this.restOperations
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), request, VaultResponse.class);
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 
@@ -119,6 +126,12 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		catch (RestClientException e) {
 			throw VaultLoginException.create("TLS Certificates", e);
 		}
+	}
+
+	private static Map<String, Object> getRequestBody(ClientCertificateAuthenticationOptions options) {
+		String name = options.getRole();
+
+		return name != null ? Collections.singletonMap("name", name) : Collections.emptyMap();
 	}
 
 }

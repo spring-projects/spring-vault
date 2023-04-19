@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.*;
  * {@link AuthenticationStepsExecutor}.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertificateAuthenticationIntegrationTestBase {
 
