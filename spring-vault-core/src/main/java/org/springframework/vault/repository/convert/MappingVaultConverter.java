@@ -35,7 +35,6 @@ import org.springframework.data.mapping.model.EntityInstantiator;
 import org.springframework.data.mapping.model.ParameterValueProvider;
 import org.springframework.data.mapping.model.PersistentEntityParameterValueProvider;
 import org.springframework.data.mapping.model.PropertyValueProvider;
-import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -92,7 +91,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 	@Override
 	public <S> S read(Class<S> type, SecretDocument source) {
-		return read(ClassTypeInformation.from(type), source);
+		return read(TypeInformation.of(type), source);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -101,8 +100,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		SecretDocument secretDocument = getSecretDocument(source);
 
 		TypeInformation<? extends S> typeToUse = secretDocument != null
-				? this.typeMapper.readType(secretDocument.getBody(), type)
-				: (TypeInformation) ClassTypeInformation.OBJECT;
+				? this.typeMapper.readType(secretDocument.getBody(), type) : (TypeInformation) TypeInformation.OBJECT;
 		Class<? extends S> rawType = typeToUse.getType();
 
 		if (this.conversions.hasCustomReadTarget(source.getClass(), rawType)) {
@@ -121,7 +119,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			return (S) readMap(typeToUse, secretDocument.getBody());
 		}
 
-		if (typeToUse.equals(ClassTypeInformation.OBJECT)) {
+		if (typeToUse.equals(TypeInformation.OBJECT)) {
 			return (S) source;
 		}
 
@@ -256,7 +254,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Class<?> collectionType = targetType.getType();
 
 		TypeInformation<?> componentType = targetType.getComponentType() != null ? targetType.getComponentType()
-				: ClassTypeInformation.OBJECT;
+				: TypeInformation.OBJECT;
 		Class<?> rawComponentType = componentType.getType();
 
 		collectionType = Collection.class.isAssignableFrom(collectionType) ? collectionType : List.class;
@@ -270,10 +268,10 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		for (Object obj : sourceValue) {
 
 			if (obj instanceof Map) {
-				items.add(read(componentType, (Map) obj));
+				items.add(read(componentType, obj));
 			}
 			else if (obj instanceof List) {
-				items.add(readCollectionOrArray(ClassTypeInformation.OBJECT, (List) obj));
+				items.add(readCollectionOrArray(TypeInformation.OBJECT, (List) obj));
 			}
 			else {
 				items.add(getPotentiallyConvertedSimpleRead(obj, rawComponentType));
@@ -318,14 +316,13 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			}
 
 			Object value = entry.getValue();
-			TypeInformation<?> defaultedValueType = valueType != null ? valueType : ClassTypeInformation.OBJECT;
+			TypeInformation<?> defaultedValueType = valueType != null ? valueType : TypeInformation.OBJECT;
 
 			if (value instanceof Map) {
 				map.put(key, read(defaultedValueType, (Map) value));
 			}
 			else if (value instanceof List) {
-				map.put(key,
-						readCollectionOrArray(valueType != null ? valueType : ClassTypeInformation.LIST, (List) value));
+				map.put(key, readCollectionOrArray(valueType != null ? valueType : TypeInformation.LIST, (List) value));
 			}
 			else {
 				map.put(key, getPotentiallyConvertedSimpleRead(value, rawValueType));
@@ -361,7 +358,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	public void write(Object source, SecretDocument sink) {
 
 		Class<?> entityType = ClassUtils.getUserClass(source.getClass());
-		TypeInformation<? extends Object> type = ClassTypeInformation.from(entityType);
+		TypeInformation<? extends Object> type = TypeInformation.of(entityType);
 
 		SecretDocumentAccessor documentAccessor = new SecretDocumentAccessor(sink);
 
@@ -398,7 +395,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		}
 
 		if (Map.class.isAssignableFrom(entityType)) {
-			writeMapInternal((Map<Object, Object>) obj, sink.getBody(), ClassTypeInformation.MAP);
+			writeMapInternal((Map<Object, Object>) obj, sink.getBody(), TypeInformation.MAP);
 			return;
 		}
 
@@ -456,7 +453,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			return;
 		}
 
-		TypeInformation<?> valueType = ClassTypeInformation.from(obj.getClass());
+		TypeInformation<?> valueType = TypeInformation.of(obj.getClass());
 		TypeInformation<?> type = prop.getTypeInformation();
 
 		if (valueType.isCollectionLike()) {
@@ -487,7 +484,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		SecretDocumentAccessor nested = accessor.writeNested(prop);
 
 		writeInternal(obj, nested, entity);
-		addCustomTypeKeyIfNecessary(ClassTypeInformation.from(prop.getRawType()), obj, nested);
+		addCustomTypeKeyIfNecessary(TypeInformation.of(prop.getRawType()), obj, nested);
 	}
 
 	private static boolean isSubtype(Class<?> left, Class<?> right) {
@@ -588,7 +585,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 				else {
 					SecretDocumentAccessor nested = new SecretDocumentAccessor(new SecretDocument());
 					TypeInformation<?> valueTypeInfo = propertyType.isMap() ? propertyType.getMapValueType()
-							: ClassTypeInformation.OBJECT;
+							: TypeInformation.OBJECT;
 					writeInternal(val, nested, valueTypeInfo);
 					bson.put(simpleKey, nested.getBody());
 				}
