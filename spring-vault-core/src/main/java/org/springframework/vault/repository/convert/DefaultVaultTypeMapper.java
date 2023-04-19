@@ -26,7 +26,6 @@ import org.springframework.data.convert.TypeInformationMapper;
 import org.springframework.data.mapping.Alias;
 import org.springframework.data.mapping.PersistentEntity;
 import org.springframework.data.mapping.context.MappingContext;
-import org.springframework.data.util.ClassTypeInformation;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 
@@ -44,7 +43,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	public static final String DEFAULT_TYPE_KEY = "_class";
 
 	@SuppressWarnings("rawtypes")
-	private static final TypeInformation<Map> MAP_TYPE_INFO = ClassTypeInformation.from(Map.class);
+	private static final TypeInformation<Map> MAP_TYPE_INFO = TypeInformation.MAP;
 
 	private final @Nullable String typeKey;
 
