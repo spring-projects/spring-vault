@@ -409,7 +409,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 	protected void writeInternal(Object obj, SecretDocumentAccessor sink, VaultPersistentEntity<?> entity) {
 
-		PersistentPropertyAccessor accessor = entity.getPropertyAccessor(obj);
+		PersistentPropertyAccessor<?> accessor = entity.getPropertyAccessor(obj);
 
 		VaultPersistentProperty idProperty = entity.getIdProperty();
 		if (idProperty != null && !sink.hasValue(idProperty)) {
@@ -417,13 +417,13 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			Object value = accessor.getProperty(idProperty);
 
 			if (value != null) {
-				sink.put(idProperty, value);
+				sink.put(idProperty, value instanceof String ? value : conversionService.convert(value, String.class));
 			}
 		}
 		writeProperties(entity, accessor, sink, idProperty);
 	}
 
-	private void writeProperties(VaultPersistentEntity<?> entity, PersistentPropertyAccessor accessor,
+	private void writeProperties(VaultPersistentEntity<?> entity, PersistentPropertyAccessor<?> accessor,
 			SecretDocumentAccessor sink, @Nullable VaultPersistentProperty idProperty) {
 
 		// Write the properties

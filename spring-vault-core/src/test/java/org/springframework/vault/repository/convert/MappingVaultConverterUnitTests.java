@@ -21,11 +21,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
 
@@ -310,6 +312,19 @@ class MappingVaultConverterUnitTests {
 		assertThat((List<Map<String, Object>>) sink.get("nested")).contains(walter, skyler);
 	}
 
+	@Test
+	void shouldConvertIdentifier() {
+
+		WithUuidId entity = new WithUuidId(UUID.randomUUID(), "foo");
+
+		SecretDocument sink = new SecretDocument();
+
+		this.converter.write(entity, sink);
+
+		assertThat(sink.getId()).isEqualTo(entity.id.toString());
+		assertThat(sink.getBody()).containsEntry("name", "foo");
+	}
+
 	static class SimpleEntity {
 
 		String id;
@@ -557,6 +572,20 @@ class MappingVaultConverterUnitTests {
 
 		public String getName() {
 			return this.name;
+		}
+
+	}
+
+	static class WithUuidId {
+
+		@Id
+		private final UUID id;
+
+		private final String name;
+
+		public WithUuidId(UUID id, String name) {
+			this.id = id;
+			this.name = name;
 		}
 
 	}
