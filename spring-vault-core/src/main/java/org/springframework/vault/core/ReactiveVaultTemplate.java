@@ -56,6 +56,7 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
  *
  * @author Mark Paluch
  * @author Raoof Mohammed
+ * @author James Luke
  * @see SessionManager
  * @since 2.0
  */
@@ -227,6 +228,16 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
+	public ReactiveVaultTransitOperations opsForTransit() {
+		return opsForTransit("transit");
+	}
+
+	@Override
+	public ReactiveVaultTransitOperations opsForTransit(String path) {
+		return new ReactiveVaultTransitTemplate(this, path);
+	}
+
+	@Override
 	public Mono<VaultResponse> read(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -363,16 +374,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			return Mono.error(new UnsupportedOperationException("Token retrieval disabled"));
 		}
 
-	}
-
-	@Override
-	public ReactiveVaultTransitOperations opsForTransit() {
-		return opsForTransit("transit");
-	}
-
-	@Override
-	public ReactiveVaultTransitOperations opsForTransit(String path) {
-		return new ReactiveVaultTransitTemplate(this, path);
 	}
 
 }

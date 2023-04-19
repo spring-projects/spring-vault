@@ -187,7 +187,7 @@ public interface VaultTransitOperations {
 	byte[] decrypt(String keyName, String ciphertext, VaultTransitContext transitContext);
 
 	/**
-	 * Decrypts the provided barch of cipher text using the named key and context. The*
+	 * Decrypts the provided batch of cipher text using the named key and context. The*
 	 * decryption is done using transit backend's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plain text and an

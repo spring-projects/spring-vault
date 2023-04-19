@@ -37,17 +37,18 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 /**
- * Interface that specifies a set of {@code transit} operations executed on a reactive
- * infrastructure, implemented by
- * {@link org.springframework.vault.core.ReactiveVaultTransitTemplate}.
+ * * Interface that specifies operations using the {@code transit} backend.
  *
  * @author James Luke
+ * @since 3.1
+ * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
+ * Secret Backend</a>
  */
 public interface ReactiveVaultTransitOperations {
 
 	/**
-	 * Create a new named encryption key given a {@code name}
-	 * @param keyName must not be empty or {@literal null}
+	 * Create a new named encryption key given a {@code name}.
+	 * @param keyName must not be empty or {@literal null}.
 	 */
 	Mono<Void> createKey(String keyName);
 
@@ -61,7 +62,8 @@ public interface ReactiveVaultTransitOperations {
 	Mono<Void> createKey(String keyName, VaultTransitKeyCreationRequest createKeyRequest);
 
 	/**
-	 * @return stream of transit key names.
+	 * Get a {@link Flux} of transit key names.
+	 * @return {@link Flux} of transit key names.
 	 */
 	Flux<String> getKeys();
 
@@ -78,14 +80,14 @@ public interface ReactiveVaultTransitOperations {
 	 * operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param type must not be {@literal null}.
-	 * @return the {@link RawTransitKey}. May be empty if key does not exist
+	 * @return the {@link RawTransitKey}. Empty if key does not exist
 	 */
 	Mono<RawTransitKey> exportKey(String keyName, TransitKeyType type);
 
 	/**
 	 * Return information about a named encryption key.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @return the {@link VaultTransitKey}. May be empty if key does not exist
+	 * @return the {@link VaultTransitKey}. Empty if key does not exist.
 	 */
 	Mono<VaultTransitKey> getKey(String keyName);
 
@@ -230,10 +232,10 @@ public interface ReactiveVaultTransitOperations {
 	 * a type that supports rotation, configured {@link VaultHmacRequest#getKeyVersion()}
 	 * will be used.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param hmacRequest the {@link VaultHmacRequest}, must not be {@literal null}.
+	 * @param request the {@link VaultHmacRequest}, must not be {@literal null}.
 	 * @return the digest of given data the default hash algorithm and the named key.
 	 */
-	Mono<Hmac> getHmac(String keyName, VaultHmacRequest hmacRequest);
+	Mono<Hmac> getHmac(String keyName, VaultHmacRequest request);
 
 	/**
 	 * Create a cryptographic signature using {@code keyName} of the given
@@ -250,10 +252,10 @@ public interface ReactiveVaultTransitOperations {
 	 * {@link VaultSignRequest} and the specified hash algorithm. The key must be of a
 	 * type that supports signing.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param signRequest {@link VaultSignRequest} must not be empty or {@literal null}.
+	 * @param request {@link VaultSignRequest} must not be empty or {@literal null}.
 	 * @return Signature for {@link VaultSignRequest}.
 	 */
-	Mono<Signature> sign(String keyName, VaultSignRequest signRequest);
+	Mono<Signature> sign(String keyName, VaultSignRequest request);
 
 	/**
 	 * Verify the cryptographic signature using {@code keyName} of the given
@@ -269,10 +271,10 @@ public interface ReactiveVaultTransitOperations {
 	 * Verify the cryptographic signature using {@code keyName} of the given
 	 * {@link VaultSignRequest}.
 	 * @param keyName must not be empty or {@literal null}.
-	 * @param verificationRequest {@link VaultSignatureVerificationRequest} must not be
+	 * @param request {@link VaultSignatureVerificationRequest} must not be
 	 * {@literal null}.
 	 * @return the resulting {@link SignatureValidation}.
 	 */
-	Mono<SignatureValidation> verify(String keyName, VaultSignatureVerificationRequest verificationRequest);
+	Mono<SignatureValidation> verify(String keyName, VaultSignatureVerificationRequest request);
 
 }

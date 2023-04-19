@@ -38,6 +38,7 @@ import java.util.function.Function;
  * {@link #doWithVault(Function) without a session}.
  *
  * @author Mark Paluch
+ * @author James Luke
  * @since 2.0
  * @see #doWithSession(Function)
  * @see #doWithVault(Function)
@@ -47,6 +48,21 @@ import java.util.function.Function;
  * @see org.springframework.vault.authentication.VaultTokenSupplier
  */
 public interface ReactiveVaultOperations {
+
+	/**
+	 * @return the operations interface to interact with the Vault transit backend.
+	 * @since 3.1
+	 */
+	ReactiveVaultTransitOperations opsForTransit();
+
+	/**
+	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
+	 * a different path than {@code transit}.
+	 * @param path the mount path
+	 * @return the operations interface to interact with the Vault transit backend.
+	 * @since 3.1
+	 */
+	ReactiveVaultTransitOperations opsForTransit(String path);
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
@@ -121,18 +137,5 @@ public interface ReactiveVaultOperations {
 	 */
 	<V, T extends Publisher<V>> T doWithSession(Function<WebClient, ? extends T> sessionCallback)
 			throws VaultException, WebClientException;
-
-	/**
-	 * @return the operations interface to interact with the Vault transit backend.
-	 */
-	ReactiveVaultTransitOperations opsForTransit();
-
-	/**
-	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
-	 * a different path than {@code transit}.
-	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault transit backend.
-	 */
-	ReactiveVaultTransitOperations opsForTransit(String path);
 
 }
