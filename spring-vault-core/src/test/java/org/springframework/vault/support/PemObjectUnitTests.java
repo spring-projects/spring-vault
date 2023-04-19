@@ -43,9 +43,9 @@ class PemObjectUnitTests {
 	@BeforeEach
 	void setUp() {
 		assertThat(this.privateDir).exists()
-				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
+			.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
 		assertThat(this.privateDir).exists()
-				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
+			.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
 	}
 
 	@Test

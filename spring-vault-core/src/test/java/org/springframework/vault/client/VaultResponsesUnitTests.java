@@ -69,7 +69,7 @@ class VaultResponsesUnitTests {
 
 		VaultException vaultException = VaultResponses.buildException(cause, "sys/path");
 		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]: some-error")
-				.hasCause(cause);
+			.hasCause(cause);
 	}
 
 }

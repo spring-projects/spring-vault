@@ -172,15 +172,17 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	void issueCertificateUsingFormat(KeyFixture keyFixture) throws Exception {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
-				.privateKeyFormat(keyFixture.privateKeyFormat).format(keyFixture.format).build();
+			.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
+			.privateKeyFormat(keyFixture.privateKeyFormat)
+			.format(keyFixture.format)
+			.build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations
-				.issueCertificate("testrole-" + keyFixture.keyType.name(), request);
+			.issueCertificate("testrole-" + keyFixture.keyType.name(), request);
 
 		CertificateBundle data = certificateResponse.getRequiredData();
 		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
-				.isEqualTo("CN=" + request.getCommonName());
+			.isEqualTo("CN=" + request.getCommonName());
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
 		assertThat(data.getPrivateKeySpec()).isNotNull();
@@ -248,8 +250,10 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	@RequiresVaultVersion(NO_TTL_UNIT_REQUIRED_FROM)
 	void issueCertificateWithTtlShouldCreateCertificate() {
 
-		VaultCertificateRequest request = VaultCertificateRequest.builder().ttl(Duration.ofHours(48))
-				.commonName("hello.example.com").build();
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+			.ttl(Duration.ofHours(48))
+			.commonName("hello.example.com")
+			.build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
@@ -257,7 +261,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Instant now = Instant.now();
 		assertThat(certificate.getNotAfter()).isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
-				.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
+			.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
 	}
 
 	@Test
@@ -301,7 +305,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
+			.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
 	}
 
 	@Test

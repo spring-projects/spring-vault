@@ -75,7 +75,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 	private Predicate<String> createPredicate(Part part, Iterator<Object> parameters) {
 
 		PersistentPropertyPath<VaultPersistentProperty> propertyPath = this.mappingContext
-				.getPersistentPropertyPath(part.getProperty());
+			.getPersistentPropertyPath(part.getProperty());
 
 		if (propertyPath.getLeafProperty() != null && !propertyPath.getLeafProperty().isIdProperty()) {
 			throw new InvalidDataAccessApiUsageException(
@@ -100,47 +100,49 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 		Type type = part.getType();
 
 		switch (type) {
-		case AFTER:
-		case GREATER_THAN:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) > 0);
-		case GREATER_THAN_EQUAL:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) >= 0);
-		case BEFORE:
-		case LESS_THAN:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) < 0);
-		case LESS_THAN_EQUAL:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) <= 0);
-		case BETWEEN:
+			case AFTER:
+			case GREATER_THAN:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) > 0);
+			case GREATER_THAN_EQUAL:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) >= 0);
+			case BEFORE:
+			case LESS_THAN:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) < 0);
+			case LESS_THAN_EQUAL:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) <= 0);
+			case BETWEEN:
 
-			String from = accessor.nextString(parameters);
-			String to = accessor.nextString(parameters);
+				String from = accessor.nextString(parameters);
+				String to = accessor.nextString(parameters);
 
-			return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
-		case NOT_IN:
-			return new Criteria<>(accessor.nextAsArray(parameters), (value, it) -> Arrays.binarySearch(value, it) < 0);
-		case IN:
-			return new Criteria<>(accessor.nextAsArray(parameters), (value, it) -> Arrays.binarySearch(value, it) >= 0);
-		case STARTING_WITH:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
-		case ENDING_WITH:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.endsWith(value));
-		case CONTAINING:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.contains(value));
-		case NOT_CONTAINING:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
-		case REGEX:
-			return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
+				return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
+			case NOT_IN:
+				return new Criteria<>(accessor.nextAsArray(parameters),
+						(value, it) -> Arrays.binarySearch(value, it) < 0);
+			case IN:
+				return new Criteria<>(accessor.nextAsArray(parameters),
+						(value, it) -> Arrays.binarySearch(value, it) >= 0);
+			case STARTING_WITH:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
+			case ENDING_WITH:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.endsWith(value));
+			case CONTAINING:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.contains(value));
+			case NOT_CONTAINING:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
+			case REGEX:
+				return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
 					.asPredicate();
-		case TRUE:
-			return it -> it.equalsIgnoreCase("true");
-		case FALSE:
-			return it -> it.equalsIgnoreCase("false");
-		case SIMPLE_PROPERTY:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.equals(value));
-		case NEGATING_SIMPLE_PROPERTY:
-			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.equals(value));
-		default:
-			throw new IllegalArgumentException("Unsupported keyword!");
+			case TRUE:
+				return it -> it.equalsIgnoreCase("true");
+			case FALSE:
+				return it -> it.equalsIgnoreCase("false");
+			case SIMPLE_PROPERTY:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.equals(value));
+			case NEGATING_SIMPLE_PROPERTY:
+				return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.equals(value));
+			default:
+				throw new IllegalArgumentException("Unsupported keyword!");
 		}
 	}
 

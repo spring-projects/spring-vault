@@ -213,7 +213,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 
@@ -232,7 +232,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 
@@ -283,7 +283,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenThrow(new VaultException("Renewal failure"));
+			.thenThrow(new VaultException("Renewal failure"));
 
 		this.secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
 		this.secretLeaseContainer.start();
@@ -428,7 +428,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
+			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
 
 		this.secretLeaseContainer.start();
 
@@ -498,7 +498,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
+			.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
 
 		this.secretLeaseContainer.start();
 
@@ -524,7 +524,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 

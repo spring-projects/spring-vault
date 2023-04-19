@@ -76,8 +76,9 @@ class VaultPropertySourceRegistrar
 				beanFactory.getBeansOfType(org.springframework.vault.core.env.VaultPropertySource.class).values(),
 				propertySources);
 
-		registerPropertySources(beanFactory
-				.getBeansOfType(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class).values(),
+		registerPropertySources(
+				beanFactory.getBeansOfType(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class)
+					.values(),
 				propertySources);
 	}
 
@@ -102,9 +103,9 @@ class VaultPropertySourceRegistrar
 
 		if (!registry.isBeanNameInUse("VaultPropertySourceRegistrar")) {
 			registry.registerBeanDefinition("VaultPropertySourceRegistrar", BeanDefinitionBuilder //
-					.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
-					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
-					.getBeanDefinition());
+				.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
+				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
+				.getBeanDefinition());
 		}
 
 		Set<AnnotationAttributes> propertySources = attributesForRepeatable(annotationMetadata,
@@ -163,7 +164,7 @@ class VaultPropertySourceRegistrar
 
 		if (isRenewable(renewal)) {
 			builder = BeanDefinitionBuilder
-					.rootBeanDefinition(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
+				.rootBeanDefinition(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
 
 			RequestedSecret requestedSecret = renewal == Renewal.ROTATE ? RequestedSecret.rotating(propertyPath)
 					: RequestedSecret.renewable(propertyPath);
@@ -174,7 +175,7 @@ class VaultPropertySourceRegistrar
 		}
 		else {
 			builder = BeanDefinitionBuilder
-					.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
+				.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
 
 			builder.addConstructorArgValue(propertyPath);
 			builder.addConstructorArgReference(ref);

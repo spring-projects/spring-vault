@@ -105,8 +105,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 
 		ObjectProvider<WebClientCustomizer> customizers = getBeanFactory().getBeanProvider(WebClientCustomizer.class);
 
-		WebClientBuilder builder = WebClientBuilder.builder().endpointProvider(endpointProvider)
-				.httpConnector(httpConnector);
+		WebClientBuilder builder = WebClientBuilder.builder()
+			.endpointProvider(endpointProvider)
+			.httpConnector(httpConnector);
 
 		builder.customizers(customizers.stream().toArray(WebClientCustomizer[]::new));
 

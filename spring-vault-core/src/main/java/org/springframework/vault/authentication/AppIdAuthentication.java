@@ -75,8 +75,8 @@ public class AppIdAuthentication implements ClientAuthentication, Authentication
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 
 		return AuthenticationSteps
-				.fromSupplier(() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId())) //
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+			.fromSupplier(() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId())) //
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public class AppIdAuthentication implements ClientAuthentication, Authentication
 
 		try {
 			VaultResponse response = this.restOperations
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

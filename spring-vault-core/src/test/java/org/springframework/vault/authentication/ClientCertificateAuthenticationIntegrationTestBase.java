@@ -40,9 +40,11 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  */
 public abstract class ClientCertificateAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
-	static final Policy POLICY = Policy
-			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
+	static final Policy POLICY = Policy.of(Policy.Rule.builder()
+		.path("/*")
+		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+				Policy.BuiltinCapabilities.UPDATE)
+		.build());
 
 	@BeforeEach
 	public void before() {
@@ -76,7 +78,7 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 		SslConfiguration original = createSslConfiguration();
 
 		return new SslConfiguration(KeyStoreConfiguration
-				.of(new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
+			.of(new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
 				keyConfiguration, original.getTrustStoreConfiguration());
 	}
 

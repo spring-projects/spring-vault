@@ -398,50 +398,51 @@ public class VaultCertificateRequest {
 
 			List<String> altNames;
 			switch (this.altNames.size()) {
-			case 0:
-				altNames = java.util.Collections.emptyList();
-				break;
-			case 1:
-				altNames = java.util.Collections.singletonList(this.altNames.get(0));
-				break;
-			default:
-				altNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.altNames));
+				case 0:
+					altNames = java.util.Collections.emptyList();
+					break;
+				case 1:
+					altNames = java.util.Collections.singletonList(this.altNames.get(0));
+					break;
+				default:
+					altNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.altNames));
 			}
 
 			List<String> ipSubjectAltNames;
 			switch (this.ipSubjectAltNames.size()) {
-			case 0:
-				ipSubjectAltNames = java.util.Collections.emptyList();
-				break;
-			case 1:
-				ipSubjectAltNames = java.util.Collections.singletonList(this.ipSubjectAltNames.get(0));
-				break;
-			default:
-				ipSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
+				case 0:
+					ipSubjectAltNames = java.util.Collections.emptyList();
+					break;
+				case 1:
+					ipSubjectAltNames = java.util.Collections.singletonList(this.ipSubjectAltNames.get(0));
+					break;
+				default:
+					ipSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.ipSubjectAltNames));
 			}
 
 			List<String> uriSubjectAltNames;
 			switch (this.uriSubjectAltNames.size()) {
-			case 0:
-				uriSubjectAltNames = java.util.Collections.emptyList();
-				break;
-			case 1:
-				uriSubjectAltNames = java.util.Collections.singletonList(this.uriSubjectAltNames.get(0));
-				break;
-			default:
-				uriSubjectAltNames = java.util.Collections.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
+				case 0:
+					uriSubjectAltNames = java.util.Collections.emptyList();
+					break;
+				case 1:
+					uriSubjectAltNames = java.util.Collections.singletonList(this.uriSubjectAltNames.get(0));
+					break;
+				default:
+					uriSubjectAltNames = java.util.Collections
+						.unmodifiableList(new ArrayList<>(this.uriSubjectAltNames));
 			}
 
 			List<String> otherSans;
 			switch (this.otherSans.size()) {
-			case 0:
-				otherSans = java.util.Collections.emptyList();
-				break;
-			case 1:
-				otherSans = java.util.Collections.singletonList(this.otherSans.get(0));
-				break;
-			default:
-				otherSans = java.util.Collections.unmodifiableList(new ArrayList<>(this.otherSans));
+				case 0:
+					otherSans = java.util.Collections.emptyList();
+					break;
+				case 1:
+					otherSans = java.util.Collections.singletonList(this.otherSans.get(0));
+					break;
+				default:
+					otherSans = java.util.Collections.unmodifiableList(new ArrayList<>(this.otherSans));
 			}
 
 			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,

@@ -104,13 +104,13 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 		String audience = getAudience(options.getRole());
 
 		HttpRequest<String> jwtRequest = get(COMPUTE_METADATA_URL_TEMPLATE, serviceAccount, audience, "full") //
-				.with(getMetadataHttpHeaders()) //
-				.as(String.class);
+			.with(getMetadataHttpHeaders()) //
+			.as(String.class);
 
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
-				//
-				.map(jwt -> createRequestBody(options.getRole(), jwt))
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+			//
+			.map(jwt -> createRequestBody(options.getRole(), jwt))
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override

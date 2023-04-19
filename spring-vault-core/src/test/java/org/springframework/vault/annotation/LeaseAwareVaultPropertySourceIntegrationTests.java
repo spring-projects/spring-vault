@@ -89,7 +89,7 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 		}
 		catch (Exception e) {
 			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
-					.hasRootCauseMessage("Vault location [unknown] not resolvable");
+				.hasRootCauseMessage("Vault location [unknown] not resolvable");
 		}
 	}
 
@@ -103,7 +103,7 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 		}
 		catch (Exception e) {
 			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
-					.hasRootCauseMessage("Vault location [unknown] not resolvable");
+				.hasRootCauseMessage("Vault location [unknown] not resolvable");
 		}
 	}
 

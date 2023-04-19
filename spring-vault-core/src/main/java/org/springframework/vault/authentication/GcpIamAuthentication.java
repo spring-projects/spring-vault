@@ -123,7 +123,8 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 		Map<String, Object> jwtPayload = getJwtPayload(this.options, serviceAccount);
 
 		Iam iam = new Builder(this.httpTransport, GoogleJsonUtil.JSON_FACTORY, this.credential)
-				.setApplicationName("Spring Vault/" + getClass().getName()).build();
+			.setApplicationName("Spring Vault/" + getClass().getName())
+			.build();
 
 		try {
 
@@ -131,8 +132,9 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 			SignJwtRequest request = new SignJwtRequest();
 			request.setPayload(payload);
 
-			SignJwt signJwt = iam.projects().serviceAccounts()
-					.signJwt(String.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount), request);
+			SignJwt signJwt = iam.projects()
+				.serviceAccounts()
+				.signJwt(String.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount), request);
 
 			SignJwtResponse response = signJwt.execute();
 

@@ -318,32 +318,33 @@ class DerParser {
 
 			switch (this.type) {
 
-			// Not all are ISO-8859-1 but it's the closest thing
-			case NUMERIC_STRING:
-			case PRINTABLE_STRING:
-			case VIDEOTEX_STRING:
-			case IA5_STRING:
-			case GRAPHIC_STRING:
-			case ISO646_STRING:
-			case GENERAL_STRING:
-				encoding = "ISO-8859-1";
-				break;
+				// Not all are ISO-8859-1 but it's the closest thing
+				case NUMERIC_STRING:
+				case PRINTABLE_STRING:
+				case VIDEOTEX_STRING:
+				case IA5_STRING:
+				case GRAPHIC_STRING:
+				case ISO646_STRING:
+				case GENERAL_STRING:
+					encoding = "ISO-8859-1";
+					break;
 
-			case BMP_STRING:
-				encoding = "UTF-16BE";
-				break;
+				case BMP_STRING:
+					encoding = "UTF-16BE";
+					break;
 
-			case UTF8_STRING:
-				encoding = "UTF-8";
-				break;
+				case UTF8_STRING:
+					encoding = "UTF-8";
+					break;
 
-			case UNIVERSAL_STRING:
-				throw new IllegalStateException("Invalid DER: can't handle UCS-4 string");
+				case UNIVERSAL_STRING:
+					throw new IllegalStateException("Invalid DER: can't handle UCS-4 string");
 
-			case OID:
-				return getObjectIdentifier(this.value);
-			default:
-				throw new IllegalStateException(String.format("Invalid DER: object (%d) is not a string", this.type));
+				case OID:
+					return getObjectIdentifier(this.value);
+				default:
+					throw new IllegalStateException(
+							String.format("Invalid DER: object (%d) is not a string", this.type));
 			}
 
 			return new String(this.value, encoding);

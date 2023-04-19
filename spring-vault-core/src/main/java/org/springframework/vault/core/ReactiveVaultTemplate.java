@@ -211,8 +211,11 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		ExchangeFilterFunction filter = getSessionFilter();
 
-		return WebClientBuilder.builder().httpConnector(connector).endpointProvider(endpointProvider).filter(filter)
-				.build();
+		return WebClientBuilder.builder()
+			.httpConnector(connector)
+			.endpointProvider(endpointProvider)
+			.filter(filter)
+			.build();
 	}
 
 	private ExchangeFilterFunction getSessionFilter() {
@@ -254,7 +257,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 				VaultListResponse.class);
 
 		return read.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
-				.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
+			.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
 	}
 
 	@Override
@@ -279,8 +282,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doWithSession(webClient -> webClient.delete().uri(path)
-				.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
+		return doWithSession(webClient -> webClient.delete()
+			.uri(path)
+			.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
 	}
 
 	@Override
@@ -314,7 +318,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	private <T> Mono<T> doRead(String path, Class<T> responseType) {
 
 		return doWithSession(client -> client.get() //
-				.uri(path).exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
+			.uri(path)
+			.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
 	private static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path,

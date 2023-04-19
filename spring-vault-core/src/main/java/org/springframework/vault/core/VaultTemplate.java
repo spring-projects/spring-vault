@@ -240,8 +240,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	protected RestTemplate doCreateSessionTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
-		return RestTemplateBuilder.builder().endpointProvider(endpointProvider).requestFactory(requestFactory)
-				.customizers(restTemplate -> restTemplate.getInterceptors().add(getSessionInterceptor())).build();
+		return RestTemplateBuilder.builder()
+			.endpointProvider(endpointProvider)
+			.requestFactory(requestFactory)
+			.customizers(restTemplate -> restTemplate.getInterceptors().add(getSessionInterceptor()))
+			.build();
 	}
 
 	private ClientHttpRequestInterceptor getSessionInterceptor() {
@@ -284,10 +287,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
 
 		switch (apiVersion) {
-		case KV_1:
-			return new VaultKeyValue1Template(this, path);
-		case KV_2:
-			return new VaultKeyValue2Template(this, path);
+			case KV_1:
+				return new VaultKeyValue1Template(this, path);
+			case KV_2:
+				return new VaultKeyValue2Template(this, path);
 		}
 
 		throw new UnsupportedOperationException(

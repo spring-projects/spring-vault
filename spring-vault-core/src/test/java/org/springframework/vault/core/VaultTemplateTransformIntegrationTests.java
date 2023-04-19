@@ -87,8 +87,8 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 	void shouldEncodeAndDecode() {
 
 		String value = "123-45-6789";
-		VaultResponse response = this.vaultOperations.write("transform/encode/myrole", String.format(
-				"{\"value\": \"%s\", \"tweak\": \"%s\"}", value, Base64Utils.encodeToString("somenum".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transform/encode/myrole", String
+			.format("{\"value\": \"%s\", \"tweak\": \"%s\"}", value, Base64Utils.encodeToString("somenum".getBytes())));
 
 		String encoded = (String) response.getRequiredData().get("encoded_value");
 		VaultResponse decoded = this.vaultOperations.write("transform/decode/myrole", String.format(

@@ -85,7 +85,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 
 		return AuthenticationSteps
-				.just(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
+			.just(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
 	}
 
 	@Override

@@ -42,8 +42,10 @@ class CubbyholeAuthenticationStepsIntegrationTests extends CubbyholeAuthenticati
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of(initialToken)).wrapped()
-				.build();
+			.unwrappingEndpoints(getUnwrappingEndpoints())
+			.initialToken(VaultToken.of(initialToken))
+			.wrapped()
+			.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(

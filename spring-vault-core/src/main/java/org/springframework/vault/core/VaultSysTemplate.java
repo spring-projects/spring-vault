@@ -362,8 +362,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 				if (map.containsKey("type")) {
 
 					VaultMountBuilder builder = VaultMount.builder() //
-							.type((String) map.get("type")) //
-							.description((String) map.get("description"));// ;
+						.type((String) map.get("type")) //
+						.description((String) map.get("description"));// ;
 
 					if (map.containsKey("config")) {
 						builder.config((Map) map.get("config"));

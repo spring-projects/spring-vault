@@ -481,14 +481,14 @@ public class Policy {
 
 				List<Capability> capabilities;
 				switch (this.capabilities.size()) {
-				case 0:
-					capabilities = Collections.emptyList();
-					break;
-				case 1:
-					capabilities = Collections.singletonList(this.capabilities.iterator().next());
-					break;
-				default:
-					capabilities = Collections.unmodifiableList(new ArrayList<>(this.capabilities));
+					case 0:
+						capabilities = Collections.emptyList();
+						break;
+					case 1:
+						capabilities = Collections.singletonList(this.capabilities.iterator().next());
+						break;
+					default:
+						capabilities = Collections.unmodifiableList(new ArrayList<>(this.capabilities));
 				}
 
 				return new Rule(this.path, capabilities, this.minWrappingTtl, this.maxWrappingTtl,

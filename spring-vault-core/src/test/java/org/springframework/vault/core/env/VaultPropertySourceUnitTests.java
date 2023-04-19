@@ -47,8 +47,8 @@ class VaultPropertySourceUnitTests {
 
 	@Test
 	void shouldRejectEmptyPath() {
-		assertThatIllegalArgumentException().isThrownBy(
-				() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
 
 	}
 
@@ -62,8 +62,9 @@ class VaultPropertySourceUnitTests {
 	void propertiesNotFoundShouldFailOnIgnoreSecretNotFoundDisabled() {
 
 		assertThatThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
-				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
-						.hasNoCause();
+				PropertyTransformers.noop(), false))
+			.isInstanceOf(VaultPropertySourceNotFoundException.class)
+			.hasNoCause();
 	}
 
 	@Test

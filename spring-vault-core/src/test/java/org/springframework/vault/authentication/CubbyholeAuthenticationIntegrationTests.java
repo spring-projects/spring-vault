@@ -43,8 +43,10 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of(initialToken)).wrapped()
-				.build();
+			.unwrappingEndpoints(getUnwrappingEndpoints())
+			.initialToken(VaultToken.of(initialToken))
+			.wrapped()
+			.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
@@ -56,7 +58,10 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 	void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of("Hello")).wrapped().build();
+			.unwrappingEndpoints(getUnwrappingEndpoints())
+			.initialToken(VaultToken.of("Hello"))
+			.wrapped()
+			.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);

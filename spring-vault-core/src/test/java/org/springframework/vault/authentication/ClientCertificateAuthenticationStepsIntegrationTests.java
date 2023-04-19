@@ -66,7 +66,8 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 
 		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
 				() -> new AuthenticationStepsExecutor(ClientCertificateAuthentication.createAuthenticationSteps(),
-						restTemplate).login());
+						restTemplate)
+					.login());
 	}
 
 }

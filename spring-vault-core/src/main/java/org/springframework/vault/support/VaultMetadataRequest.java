@@ -45,7 +45,7 @@ public class VaultMetadataRequest {
 		this.maxVersions = maxVersions;
 		this.casRequired = casRequired;
 		this.deleteVersionAfter = DurationParser
-				.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
+			.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
 	}
 
 	public static VaultMetadataRequestBuilder builder() {

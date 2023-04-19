@@ -74,8 +74,8 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	private void deleteKey(String keyName) {
 
 		try {
-			this.vaultOperations.opsForTransit().configureKey(keyName,
-					VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
+			this.vaultOperations.opsForTransit()
+				.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
 		}
 		catch (Exception e) {
 		}
@@ -117,7 +117,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 				Collections.singletonMap("ciphertext", response.getRequiredData().get("ciphertext")));
 
 		assertThat((String) decrypted.getRequiredData().get("plaintext"))
-				.isEqualTo(Base64Utils.encodeToString("that message is secret".getBytes()));
+			.isEqualTo(Base64Utils.encodeToString("that message is secret".getBytes()));
 	}
 
 }

@@ -107,8 +107,10 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encodeCreatesCiphertextWithTransformationAndProvidedTweak() {
 
-		VaultTransformContext transformRequest = VaultTransformContext.builder().transformation("myssn")
-				.tweak("somenum".getBytes()).build();
+		VaultTransformContext transformRequest = VaultTransformContext.builder()
+			.transformation("myssn")
+			.tweak("somenum".getBytes())
+			.build();
 
 		TransformCiphertext ciphertext = this.transformOperations.encode("myrole", "123-45-6789".getBytes(),
 				transformRequest);
@@ -139,8 +141,10 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encodeAndDecodeYieldsStartingResultWithSameTweakValueProvided() {
 
-		VaultTransformContext transformRequest = VaultTransformContext.builder().transformation("myssn")
-				.tweak("somenum".getBytes()).build();
+		VaultTransformContext transformRequest = VaultTransformContext.builder()
+			.transformation("myssn")
+			.tweak("somenum".getBytes())
+			.build();
 		String targetValue = "123-45-6789";
 
 		TransformCiphertext ciphertext = this.transformOperations.encode("myrole", targetValue.getBytes(),
@@ -154,16 +158,20 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void encodeAndDecodeDoesNotYieldStartingResultWithDifferentTweakValueProvided() {
 
-		VaultTransformContext transformRequest = VaultTransformContext.builder().transformation("myssn")
-				.tweak("somenum".getBytes()).build();
+		VaultTransformContext transformRequest = VaultTransformContext.builder()
+			.transformation("myssn")
+			.tweak("somenum".getBytes())
+			.build();
 		String targetValue = "123-45-6789";
 
 		TransformCiphertext ciphertext = this.transformOperations.encode("myrole", targetValue.getBytes(),
 				transformRequest);
 		assertThat(ciphertext.getCiphertext()).matches("[0-9]{3}-[0-9]{2}-[0-9]{4}").isNotEqualTo(targetValue);
 
-		VaultTransformContext otherDecodeRequest = VaultTransformContext.builder().transformation("myssn")
-				.tweak("numsome".getBytes()).build();
+		VaultTransformContext otherDecodeRequest = VaultTransformContext.builder()
+			.transformation("myssn")
+			.tweak("numsome".getBytes())
+			.build();
 
 		String decodeResponse = this.transformOperations.decode("myrole", ciphertext.getCiphertext(),
 				otherDecodeRequest);
@@ -197,18 +205,25 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void batchEncodeAndDecodeYieldsStartingResults() {
 
-		VaultTransformContext transformRequest = VaultTransformContext.builder().transformation("myssn")
-				.tweak("somenum".getBytes()).build();
+		VaultTransformContext transformRequest = VaultTransformContext.builder()
+			.transformation("myssn")
+			.tweak("somenum".getBytes())
+			.build();
 
 		List<String> ssns = Arrays.asList("123-01-4567", "123-02-4567", "123-03-4567", "123-04-4567", "123-05-4567");
 
 		List<VaultTransformEncodeResult> encoded = this.transformOperations.encode("myrole",
-				ssns.stream().map(TransformPlaintext::of).map(plaintext -> plaintext.with(transformRequest))
-						.collect(Collectors.toList()));
+				ssns.stream()
+					.map(TransformPlaintext::of)
+					.map(plaintext -> plaintext.with(transformRequest))
+					.collect(Collectors.toList()));
 
 		List<VaultTransformDecodeResult> decoded = this.transformOperations.decode("myrole",
-				encoded.stream().map(VaultTransformEncodeResult::getAsString).map(TransformCiphertext::of)
-						.map(ciphertext -> ciphertext.with(transformRequest)).collect(Collectors.toList()));
+				encoded.stream()
+					.map(VaultTransformEncodeResult::getAsString)
+					.map(TransformCiphertext::of)
+					.map(ciphertext -> ciphertext.with(transformRequest))
+					.collect(Collectors.toList()));
 
 		for (int i = 0; i < decoded.size(); i++) {
 			assertThat(decoded.get(i).getAsString()).isEqualTo(ssns.get(i));
@@ -224,8 +239,10 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 				ssns.stream().map(TransformPlaintext::of).collect(Collectors.toList()));
 
 		List<VaultTransformDecodeResult> decoded = this.transformOperations.decode("internalrole",
-				encoded.stream().map(VaultTransformEncodeResult::getAsString).map(TransformCiphertext::of)
-						.collect(Collectors.toList()));
+				encoded.stream()
+					.map(VaultTransformEncodeResult::getAsString)
+					.map(TransformCiphertext::of)
+					.collect(Collectors.toList()));
 
 		for (int i = 0; i < decoded.size(); i++) {
 			assertThat(decoded.get(i).getAsString()).isEqualTo(ssns.get(i));

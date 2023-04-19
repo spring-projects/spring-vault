@@ -40,8 +40,10 @@ class KubernetesAuthenticationStepsIntegrationTests extends KubernetesAuthentica
 
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
-		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder().role("my-role")
-				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile)).build();
+		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
+			.role("my-role")
+			.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
+			.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 

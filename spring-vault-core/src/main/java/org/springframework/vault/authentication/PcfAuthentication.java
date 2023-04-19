@@ -93,10 +93,10 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 		AuthenticationSteps.Node<String> cert = AuthenticationSteps.fromSupplier(options.getInstanceCertSupplier());
 		AuthenticationSteps.Node<String> key = AuthenticationSteps.fromSupplier(options.getInstanceKeySupplier());
 
-		return cert
-				.zipWith(key).map(credentials -> getPcfLogin(options.getRole(), options.getClock(),
-						credentials.getLeft(), credentials.getRight()))
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+		return cert.zipWith(key)
+			.map(credentials -> getPcfLogin(options.getRole(), options.getClock(), credentials.getLeft(),
+					credentials.getRight()))
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 		try {
 			VaultResponse response = this.restOperations
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

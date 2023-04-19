@@ -69,16 +69,17 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void createTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().displayName("display") //
-				.explicitMaxTtl(Duration.ofHours(5)) //
-				.ttl(Duration.ofMinutes(30 * 60)) //
-				.policies(Collections.singleton("root")) //
-				.numUses(2) //
-				.renewable() //
-				.noDefaultPolicy() //
-				.noParent() //
-				.id(UUID.randomUUID().toString()) //
-				.build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+			.displayName("display") //
+			.explicitMaxTtl(Duration.ofHours(5)) //
+			.ttl(Duration.ofMinutes(30 * 60)) //
+			.policies(Collections.singleton("root")) //
+			.numUses(2) //
+			.renewable() //
+			.noDefaultPolicy() //
+			.noParent() //
+			.id(UUID.randomUUID().toString()) //
+			.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
@@ -94,16 +95,17 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void createOrphanTokenShouldCreateACustomizedToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().displayName("display") //
-				.explicitMaxTtl(Duration.ofHours(5)) //
-				.ttl(Duration.ofMinutes(30 * 60)) //
-				.policies(Collections.singleton("root")) //
-				.numUses(2) //
-				.renewable() //
-				.noDefaultPolicy() //
-				.noParent() //
-				.id(UUID.randomUUID().toString()) //
-				.build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+			.displayName("display") //
+			.explicitMaxTtl(Duration.ofHours(5)) //
+			.ttl(Duration.ofMinutes(30 * 60)) //
+			.policies(Collections.singleton("root")) //
+			.numUses(2) //
+			.renewable() //
+			.noDefaultPolicy() //
+			.noParent() //
+			.id(UUID.randomUUID().toString()) //
+			.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.createOrphan(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
@@ -112,10 +114,11 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void renewShouldRenewToken() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().explicitMaxTtl(Duration.ofHours(5)) //
-				.ttl(Duration.ofMinutes(30 * 60)) //
-				.renewable() //
-				.build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+			.explicitMaxTtl(Duration.ofHours(5)) //
+			.ttl(Duration.ofMinutes(30 * 60)) //
+			.renewable() //
+			.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
 		VaultTokenResponse renew = this.tokenOperations.renew(tokenResponse.getToken());
@@ -129,7 +132,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultTokenResponse tokenResponse = this.tokenOperations.create();
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> this.tokenOperations.renew(tokenResponse.getToken()));
+			.isThrownBy(() -> this.tokenOperations.renew(tokenResponse.getToken()));
 	}
 
 	@Test

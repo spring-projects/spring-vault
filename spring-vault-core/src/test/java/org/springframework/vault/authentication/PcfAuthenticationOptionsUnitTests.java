@@ -30,8 +30,8 @@ class PcfAuthenticationOptionsUnitTests {
 	void emptyEnvVariableShouldFailWithMeaningfulMessage() {
 
 		assertThatThrownBy(() -> PcfAuthenticationOptions.builder().role("my-role").build())
-				.isInstanceOf(IllegalStateException.class) //
-				.hasMessageContaining("Environment variable CF_INSTANCE_CERT not set");
+			.isInstanceOf(IllegalStateException.class) //
+			.hasMessageContaining("Environment variable CF_INSTANCE_CERT not set");
 	}
 
 }

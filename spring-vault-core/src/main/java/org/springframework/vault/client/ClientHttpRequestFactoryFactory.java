@@ -206,7 +206,7 @@ public class ClientHttpRequestFactoryFactory {
 		KeyStore trustStore = getKeyStore(keyStoreConfiguration);
 
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
-				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+			.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 		trustManagerFactory.init(trustStore);
 
 		return trustManagerFactory;
@@ -317,17 +317,20 @@ public class ClientHttpRequestFactoryFactory {
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
 						enabledProtocols, enabledCipherSuites, HttpsSupport.getDefaultHostnameVerifier());
 				PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder //
-						.create().setSSLSocketFactory(sslSocketFactory) //
-						.setDefaultSocketConfig(SocketConfig.custom() //
-								.setSoTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis())).build()) //
-						.build(); //
+					.create()
+					.setSSLSocketFactory(sslSocketFactory) //
+					.setDefaultSocketConfig(SocketConfig.custom() //
+						.setSoTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
+						.build()) //
+					.build(); //
 				httpClientBuilder.setConnectionManager(connectionManager);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
-					.setAuthenticationEnabled(true) //
-					.setRedirectsEnabled(true).build();
+				.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
+				.setAuthenticationEnabled(true) //
+				.setRedirectsEnabled(true)
+				.build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 			return httpClientBuilder;
@@ -387,7 +390,7 @@ public class ClientHttpRequestFactoryFactory {
 
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslConnectionSpecBuilder
-							.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
+						.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}
 
 				sslConnectionSpec = sslConnectionSpecBuilder.build();
@@ -398,7 +401,7 @@ public class ClientHttpRequestFactoryFactory {
 			builder.connectionSpecs(Arrays.asList(sslConnectionSpec, ConnectionSpec.CLEARTEXT));
 
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
-					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
+				.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
 			return builder;
 		}
 

@@ -79,7 +79,8 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	String getRoleId(String roleName) {
 		return (String) getVaultOperations().read(String.format("auth/approle/role/%s/role-id", roleName))
-				.getRequiredData().get("role_id");
+			.getRequiredData()
+			.get("role_id");
 	}
 
 	VaultToken generateWrappedSecretIdResponse() {
@@ -88,8 +89,9 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-			VaultResponse response = restOperations.exchange("auth/approle/role/with-secret-id/secret-id",
-					HttpMethod.PUT, httpEntity, VaultResponse.class).getBody();
+			VaultResponse response = restOperations
+				.exchange("auth/approle/role/with-secret-id/secret-id", HttpMethod.PUT, httpEntity, VaultResponse.class)
+				.getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
@@ -101,8 +103,9 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
-			VaultResponse response = restOperations.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET,
-					httpEntity, VaultResponse.class).getBody();
+			VaultResponse response = restOperations
+				.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET, httpEntity, VaultResponse.class)
+				.getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
