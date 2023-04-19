@@ -65,6 +65,12 @@ public interface ReactiveVaultOperations {
 	ReactiveVaultTransitOperations opsForTransit(String path);
 
 	/**
+	 * @return the operations interface administrative Vault access.
+	 * @since 3.1
+	 */
+	ReactiveVaultSysOperations opsForSys();
+
+	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
 	 * calls/secret backends that do not require a request body.
 	 * @param path must not be {@literal null}.

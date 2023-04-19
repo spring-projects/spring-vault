@@ -398,8 +398,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			catch (RestClientResponseException responseError) {
 
 				try {
-					ObjectMapper mapper = new ObjectMapper();
-					return mapper.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
+					return OBJECT_MAPPER.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
 				}
 				catch (Exception jsonError) {
 					throw responseError;

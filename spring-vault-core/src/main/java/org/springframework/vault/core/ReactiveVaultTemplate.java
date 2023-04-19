@@ -228,6 +228,11 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	@Override
+	public ReactiveVaultSysOperations opsForSys() {
+		return new ReactiveVaultSysTemplate(this);
+	}
+
+	@Override
 	public ReactiveVaultTransitOperations opsForTransit() {
 		return opsForTransit("transit");
 	}
