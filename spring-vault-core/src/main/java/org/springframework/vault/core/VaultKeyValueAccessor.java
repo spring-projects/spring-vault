@@ -102,7 +102,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	<I, T> T doRead(String path, Class<I> deserializeAs, BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
 
 		ParameterizedTypeReference<VaultResponseSupport<JsonNode>> ref = VaultResponses
-				.getTypeReference(JsonNode.class);
+			.getTypeReference(JsonNode.class);
 
 		VaultResponseSupport<JsonNode> response = doRead(createDataPath(path), ref);
 
@@ -191,7 +191,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 			return this.vaultOperations.doWithSession((restOperations) -> {
 				return restOperations.exchange(path, HttpMethod.POST, new HttpEntity<>(body), VaultResponse.class)
-						.getBody();
+					.getBody();
 			});
 		}
 		catch (HttpStatusCodeException e) {
@@ -221,9 +221,10 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 				RestTemplate template = (RestTemplate) operations;
 
 				Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template.getMessageConverters()
-						.stream().filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
-						.map(AbstractJackson2HttpMessageConverter.class::cast) //
-						.findFirst();
+					.stream()
+					.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
+					.map(AbstractJackson2HttpMessageConverter.class::cast) //
+					.findFirst();
 
 				return jackson2Converter.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
 			}

@@ -89,11 +89,12 @@ class PcfAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder().instanceCertificate(() -> "foo") //
-				.instanceKey(() -> this.instanceKey) //
-				.role("dev-role") //
-				.clock(this.clock) //
-				.build();
+		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder()
+			.instanceCertificate(() -> "foo") //
+			.instanceKey(() -> this.instanceKey) //
+			.role("dev-role") //
+			.clock(this.clock) //
+			.build();
 
 		PcfAuthentication authentication = new PcfAuthentication(options, this.restTemplate);
 
@@ -107,11 +108,12 @@ class PcfAuthenticationUnitTests {
 	@Test
 	void loginWithStepsShouldObtainToken() {
 
-		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder().instanceCertificate(() -> "foo") //
-				.instanceKey(() -> this.instanceKey) //
-				.role("dev-role") //
-				.clock(this.clock) //
-				.build();
+		PcfAuthenticationOptions options = PcfAuthenticationOptions.builder()
+			.instanceCertificate(() -> "foo") //
+			.instanceKey(() -> this.instanceKey) //
+			.role("dev-role") //
+			.clock(this.clock) //
+			.build();
 
 		expectLoginRequest();
 
@@ -125,12 +127,14 @@ class PcfAuthenticationUnitTests {
 
 	private void expectLoginRequest() {
 
-		this.mockRest.expect(requestTo("/auth/pcf/login")).andExpect(method(HttpMethod.POST))
-				.andExpect(jsonPath("$.role").value("dev-role")).andExpect(jsonPath("$.signature").exists())
-				.andExpect(jsonPath("$.cf_instance_cert").value("foo"))
-				.andExpect(jsonPath("$.signing_time").value("2007-12-03T10:15:30Z"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+		this.mockRest.expect(requestTo("/auth/pcf/login"))
+			.andExpect(method(HttpMethod.POST))
+			.andExpect(jsonPath("$.role").value("dev-role"))
+			.andExpect(jsonPath("$.signature").exists())
+			.andExpect(jsonPath("$.cf_instance_cert").value("foo"))
+			.andExpect(jsonPath("$.signing_time").value("2007-12-03T10:15:30Z"))
+			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 	}
 
 }

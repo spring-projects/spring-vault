@@ -136,7 +136,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 			if (o instanceof ZipStep) {
 				state = state.zipWith(doZipStep((ZipStep<Object, Object>) o))
-						.map(it -> Pair.of(it.getT1(), it.getT2()));
+					.map(it -> Pair.of(it.getT1(), it.getT2()));
 			}
 
 			if (o instanceof OnNextStep) {
@@ -166,8 +166,8 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		RequestBodySpec spec;
 		if (definition.getUri() == null) {
 
-			spec = this.webClient.method(definition.getMethod()).uri(definition.getUriTemplate(),
-					definition.getUrlVariables());
+			spec = this.webClient.method(definition.getMethod())
+				.uri(definition.getUriTemplate(), definition.getUrlVariables());
 		}
 		else {
 			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
@@ -224,14 +224,13 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		ResourceCredentialSupplier resourceSupplier = (ResourceCredentialSupplier) supplier;
 
 		return DataBufferUtils.join(DataBufferUtils.read(resourceSupplier.getResource(), this.factory, 4096))
-				.map(dataBuffer -> {
-					String result = dataBuffer.toString(ResourceCredentialSupplier.CHARSET);
-					DataBufferUtils.release(dataBuffer);
-					return (Object) result;
-				}).onErrorMap(IOException.class,
-						e -> new VaultException(
-								String.format("Credential retrieval from %s failed", resourceSupplier.getResource()),
-								e));
+			.map(dataBuffer -> {
+				String result = dataBuffer.toString(ResourceCredentialSupplier.CHARSET);
+				DataBufferUtils.release(dataBuffer);
+				return (Object) result;
+			})
+			.onErrorMap(IOException.class, e -> new VaultException(
+					String.format("Credential retrieval from %s failed", resourceSupplier.getResource()), e));
 	}
 
 	enum Undefinded {

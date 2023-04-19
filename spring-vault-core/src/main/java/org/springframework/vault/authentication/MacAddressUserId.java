@@ -113,9 +113,9 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			}
 
 			return networkInterface.map(MacAddressUserId::getRequiredNetworkAddress) //
-					.map(Sha256::toHexString) //
-					.map(Sha256::toSha256) //
-					.orElseThrow(() -> new IllegalStateException("Cannot determine NetworkInterface"));
+				.map(Sha256::toHexString) //
+				.map(Sha256::toSha256) //
+				.orElseThrow(() -> new IllegalStateException("Cannot determine NetworkInterface"));
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -135,8 +135,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private static Optional<NetworkInterface> getNetworkInterface(String hint, List<NetworkInterface> interfaces) {
 
 		return interfaces.stream() //
-				.filter(anInterface -> matchesHint(hint, anInterface)) //
-				.findFirst();
+			.filter(anInterface -> matchesHint(hint, anInterface)) //
+			.findFirst();
 	}
 
 	private static boolean matchesHint(String hint, NetworkInterface networkInterface) {
@@ -148,9 +148,9 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			List<NetworkInterface> interfaces) {
 
 		return interfaces.stream() //
-				.filter(MacAddressUserId::hasNetworkAddress) //
-				.sorted(Comparator.comparingInt(NetworkInterface::getIndex)) //
-				.findFirst();
+			.filter(MacAddressUserId::hasNetworkAddress) //
+			.sorted(Comparator.comparingInt(NetworkInterface::getIndex)) //
+			.findFirst();
 	}
 
 	private static Optional<byte[]> getNetworkAddress(NetworkInterface it) {
@@ -166,8 +166,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private static byte[] getRequiredNetworkAddress(NetworkInterface it) {
 
 		return getNetworkAddress(it) //
-				.orElseThrow(() -> new IllegalStateException(
-						String.format("Network interface %s has no hardware address", it.getName())));
+			.orElseThrow(() -> new IllegalStateException(
+					String.format("Network interface %s has no hardware address", it.getName())));
 	}
 
 	private static boolean hasNetworkAddress(NetworkInterface it) {

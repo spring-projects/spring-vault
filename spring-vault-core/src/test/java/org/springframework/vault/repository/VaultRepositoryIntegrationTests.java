@@ -143,7 +143,7 @@ class VaultRepositoryIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldFailForNonIdCriteria() {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-				.isThrownBy(() -> this.vaultRepository.findInvalidByFirstname("foo"));
+			.isThrownBy(() -> this.vaultRepository.findInvalidByFirstname("foo"));
 	}
 
 	interface VaultRepository extends CrudRepository<Person, String> {

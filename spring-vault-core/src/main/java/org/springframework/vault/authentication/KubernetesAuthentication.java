@@ -76,8 +76,8 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
-				.map(token -> getKubernetesLogin(options.getRole(), token))
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+			.map(token -> getKubernetesLogin(options.getRole(), token))
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 
 		try {
 			VaultResponse response = this.restOperations
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

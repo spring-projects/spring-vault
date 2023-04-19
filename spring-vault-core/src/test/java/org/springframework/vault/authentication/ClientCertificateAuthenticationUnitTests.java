@@ -59,13 +59,15 @@ class ClientCertificateAuthenticationUnitTests {
 	@Test
 	void loginShouldObtainToken() {
 
-		this.mockRest.expect(requestTo("/auth/my/path/login")).andExpect(method(HttpMethod.POST))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(
-						"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-								+ "}"));
+		this.mockRest.expect(requestTo("/auth/my/path/login"))
+			.andExpect(method(HttpMethod.POST))
+			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+						+ "}"));
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-				.path("my/path").build();
+			.path("my/path")
+			.build();
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);
 
@@ -81,10 +83,10 @@ class ClientCertificateAuthenticationUnitTests {
 	void loginShouldFail() {
 
 		this.mockRest.expect(requestTo("/auth/cert/login")) //
-				.andRespond(withServerError());
+			.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
+			.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
 	}
 
 }

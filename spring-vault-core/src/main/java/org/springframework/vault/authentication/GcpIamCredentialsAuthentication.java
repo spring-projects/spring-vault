@@ -121,8 +121,9 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 
 		try {
 			IamCredentialsSettings credentialsSettings = IamCredentialsSettings.newBuilder()
-					.setCredentialsProvider(() -> this.credentials)
-					.setTransportChannelProvider(this.transportChannelProvider).build();
+				.setCredentialsProvider(() -> this.credentials)
+				.setTransportChannelProvider(this.transportChannelProvider)
+				.build();
 			try (IamCredentialsClient iamCredentialsClient = IamCredentialsClient.create(credentialsSettings)) {
 				String payload = GoogleJsonUtil.JSON_FACTORY.toString(jwtPayload);
 				ServiceAccountName serviceAccountName = ServiceAccountName.of("-", serviceAccount);

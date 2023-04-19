@@ -67,30 +67,30 @@ public class DurationParser {
 			String typ = matcher.group(2);
 
 			switch (typ) {
-			case "ns":
-				result = result.plus(Duration.ofNanos(num));
-				break;
-			case "us":
-				result = result.plus(Duration.ofNanos(num * 1000));
-				break;
-			case "ms":
-				result = result.plus(Duration.ofMillis(num));
-				break;
-			case "s":
-				result = result.plus(Duration.ofSeconds(num));
-				break;
-			case "m":
-				result = result.plus(Duration.ofMinutes(num));
-				break;
-			case "h":
-				result = result.plus(Duration.ofHours(num));
-				break;
-			case "d":
-				result = result.plus(Duration.ofDays(num));
-				break;
-			case "w":
-				result = result.plus(Duration.ofDays(num * 7));
-				break;
+				case "ns":
+					result = result.plus(Duration.ofNanos(num));
+					break;
+				case "us":
+					result = result.plus(Duration.ofNanos(num * 1000));
+					break;
+				case "ms":
+					result = result.plus(Duration.ofMillis(num));
+					break;
+				case "s":
+					result = result.plus(Duration.ofSeconds(num));
+					break;
+				case "m":
+					result = result.plus(Duration.ofMinutes(num));
+					break;
+				case "h":
+					result = result.plus(Duration.ofHours(num));
+					break;
+				case "d":
+					result = result.plus(Duration.ofDays(num));
+					break;
+				case "w":
+					result = result.plus(Duration.ofDays(num * 7));
+					break;
 			}
 		}
 

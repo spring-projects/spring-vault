@@ -86,7 +86,7 @@ public class TestRestTemplateFactory {
 		}
 
 		final ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-				.create(new ClientOptions(), sslConfiguration);
+			.create(new ClientOptions(), sslConfiguration);
 
 		if (factoryCache.compareAndSet(null, clientHttpRequestFactory)) {
 

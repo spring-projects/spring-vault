@@ -61,18 +61,20 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 
-	static final Policy POLICY = Policy
-			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
+	static final Policy POLICY = Policy.of(Policy.Rule.builder()
+		.path("/*")
+		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+				Policy.BuiltinCapabilities.UPDATE)
+		.build());
 
 	RestTemplateBuilder devRestTemplate;
 
 	RestTemplateBuilder marketingRestTemplate;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
-			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+		.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+		.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+		.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
 	String devToken;
 
@@ -92,32 +94,37 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		}
 
 		this.devRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).customizers(restTemplate -> restTemplate
-						.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
+			.requestFactory(
+					ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.customizers(
+					restTemplate -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
 
 		this.marketingRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+			.requestFactory(
+					ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
 		VaultTemplate dev = new VaultTemplate(this.devRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(dev, "dev-secrets");
 		dev.opsForSys().createOrUpdatePolicy("relaxed", POLICY);
-		this.devToken = dev.opsForToken().create(VaultTokenRequest.builder().withPolicy("relaxed").build()).getToken()
-				.getToken();
+		this.devToken = dev.opsForToken()
+			.create(VaultTokenRequest.builder().withPolicy("relaxed").build())
+			.getToken()
+			.getToken();
 
 		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(marketing, "marketing-secrets");
 		marketing.opsForSys().createOrUpdatePolicy("relaxed", POLICY);
-		this.marketingToken = marketing.opsForToken().create(VaultTokenRequest.builder().withPolicy("relaxed").build())
-				.getToken().getToken();
+		this.marketingToken = marketing.opsForToken()
+			.create(VaultTokenRequest.builder().withPolicy("relaxed").build())
+			.getToken()
+			.getToken();
 	}
 
 	private void mountKv(VaultTemplate template, String path) {
@@ -203,10 +210,15 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 				() -> Mono.just(VaultToken.of(this.marketingToken)));
 
 		reactiveMarketing.doWithSession(webClient -> {
-			return webClient.get().uri("sys/init").header(VaultHttpHeaders.VAULT_NAMESPACE, "").exchange()
-					.flatMap(it -> it.bodyToMono(Map.class));
-		}).as(StepVerifier::create).assertNext(actual -> assertThat(actual).containsEntry("initialized", true))
-				.verifyComplete();
+			return webClient.get()
+				.uri("sys/init")
+				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
+				.exchange()
+				.flatMap(it -> it.bodyToMono(Map.class));
+		})
+			.as(StepVerifier::create)
+			.assertNext(actual -> assertThat(actual).containsEntry("initialized", true))
+			.verifyComplete();
 	}
 
 	@Configuration
@@ -231,7 +243,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		protected RestTemplateBuilder restTemplateBuilder(VaultEndpointProvider endpointProvider,
 				ClientHttpRequestFactory requestFactory) {
 			return super.restTemplateBuilder(endpointProvider, requestFactory)
-					.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 		}
 
 	}

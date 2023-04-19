@@ -281,7 +281,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		}
 
 		return getToken().map(TokenWrapper::getToken)
-				.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
+			.orElseThrow(() -> new IllegalStateException("Cannot obtain VaultToken"));
 	}
 
 	private void doGetSessionToken() {

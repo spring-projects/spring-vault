@@ -45,20 +45,22 @@ class CubbyholeAuthenticationOperatorIntegrationTests extends CubbyholeAuthentic
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-				.unwrappingEndpoints(getUnwrappingEndpoints()).initialToken(VaultToken.of(initialToken)).wrapped()
-				.build();
+			.unwrappingEndpoints(getUnwrappingEndpoints())
+			.initialToken(VaultToken.of(initialToken))
+			.wrapped()
+			.build();
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				CubbyholeAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create)
-				//
-				.consumeNextWith(actual -> {
+			.as(StepVerifier::create)
+			//
+			.consumeNextWith(actual -> {
 
-					assertThat(actual).isNotEqualTo(Settings.token().getToken()).isNotNull();
-				}) //
-				.verifyComplete();
+				assertThat(actual).isNotEqualTo(Settings.token().getToken()).isNotNull();
+			}) //
+			.verifyComplete();
 	}
 
 }

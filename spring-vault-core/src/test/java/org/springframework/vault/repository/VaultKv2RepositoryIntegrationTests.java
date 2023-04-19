@@ -179,7 +179,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		person.setVersion(2);
 
 		assertThatExceptionOfType(OptimisticLockingFailureException.class)
-				.isThrownBy(() -> this.versionedRepository.save(person));
+			.isThrownBy(() -> this.versionedRepository.save(person));
 	}
 
 	@Test
@@ -194,7 +194,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		saved.setFirstname("baz");
 
 		assertThatExceptionOfType(OptimisticLockingFailureException.class)
-				.isThrownBy(() -> this.versionedRepository.save(saved));
+			.isThrownBy(() -> this.versionedRepository.save(saved));
 	}
 
 	@Test

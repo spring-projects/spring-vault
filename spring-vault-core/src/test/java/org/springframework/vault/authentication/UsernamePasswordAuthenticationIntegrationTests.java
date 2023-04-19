@@ -37,7 +37,9 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 	void shouldLoginSuccessfully() {
 
 		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
-				.username(username).password(password).build();
+			.username(username)
+			.password(password)
+			.build();
 
 		UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, restTemplate);
 		VaultToken login = authentication.login();
@@ -49,7 +51,9 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 	void shouldLoginUsingAuthenticationSteps() {
 
 		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
-				.username(username).password(password).build();
+			.username(username)
+			.password(password)
+			.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				UsernamePasswordAuthentication.createAuthenticationSteps(options), restTemplate);

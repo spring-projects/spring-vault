@@ -138,9 +138,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(LoginToken.of("login"));
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNext(LoginToken.of("login")) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNext(LoginToken.of("login")) //
+			.verifyComplete();
 		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 	}
 
@@ -188,14 +188,15 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(VaultToken.of("login"));
 
-		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(
-				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any()))
+			.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.assertNext(it -> {
-					assertThat(it).isExactlyInstanceOf(VaultToken.class);
-				}).verifyComplete();
+			.as(StepVerifier::create) //
+			.assertNext(it -> {
+				assertThat(it).isExactlyInstanceOf(VaultToken.class);
+			})
+			.verifyComplete();
 		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 		verify(this.errorListener).onAuthenticationError(any());
 	}
@@ -205,8 +206,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
 
-		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(Mono.error(
-				new WebClientResponseException("Some server error", 500, "Some server error", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(Mono
+			.error(new WebClientResponseException("Some server error", 500, "Some server error", null, null, null)));
 
 		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
 		this.sessionManager.addErrorListener(listener::set);
@@ -214,8 +215,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1).verifyComplete();
 		this.sessionManager.renewToken().as(StepVerifier::create).verifyComplete();
 		assertThat(listener.get().getException()).isInstanceOf(VaultTokenRenewalException.class)
-				.hasCauseInstanceOf(WebClientResponseException.class)
-				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
+			.hasCauseInstanceOf(WebClientResponseException.class)
+			.hasMessageContaining("Cannot renew token: Status 500 Some server error");
 
 	}
 
@@ -229,9 +230,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		when(this.responseSpec.bodyToMono(String.class)).thenReturn(Mono.just("OK"));
 
 		this.sessionManager.getVaultToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 
 		this.sessionManager.destroy();
 
@@ -247,9 +248,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		this.sessionManager.setTokenSelfLookupEnabled(false);
 		this.sessionManager.renewToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		this.sessionManager.destroy();
 
 		verify(this.webClient, never()).post();
@@ -267,9 +268,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		this.sessionManager.setTokenSelfLookupEnabled(false);
 		this.sessionManager.renewToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		this.sessionManager.destroy();
 
 		verify(this.webClient, never()).post();
@@ -283,13 +284,13 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.of("login"));
 
-		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(
-				Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
+		when(this.responseSpec.bodyToMono((Class) any()))
+			.thenReturn(Mono.error(new WebClientResponseException("forbidden", 403, "Forbidden", null, null, null)));
 
 		this.sessionManager.renewToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		this.sessionManager.destroy();
 
 		verify(this.requestBodyUriSpec).uri("auth/token/revoke-self");
@@ -301,9 +302,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 
 		verify(this.taskScheduler).schedule(any(Runnable.class), any(Trigger.class));
 	}
@@ -323,9 +324,9 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		when(this.responseSpec.bodyToMono(VaultResponse.class)).thenReturn(Mono.just(vaultResponse));
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 
 		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
@@ -345,14 +346,14 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		when(this.responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10)))));
+			.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(10)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 
 		runnableCaptor.getValue().run();
@@ -365,7 +366,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		mockToken(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 		when(this.responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
+			.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 

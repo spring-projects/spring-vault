@@ -108,26 +108,27 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 			AtomicReference<char[]> nonce, Supplier<char[]> nonceSupplier) {
 
 		return AuthenticationSteps
-				.fromHttpRequest(HttpRequestBuilder.get(options.getIdentityDocumentUri().toString()).as(String.class)) //
-				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
-				.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
-				.map(pkcs7 -> {
+			.fromHttpRequest(HttpRequestBuilder.get(options.getIdentityDocumentUri().toString()).as(String.class)) //
+			.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
+			.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
+			.map(pkcs7 -> {
 
-					Map<String, String> login = new HashMap<>();
+				Map<String, String> login = new HashMap<>();
 
-					if (StringUtils.hasText(options.getRole())) {
-						login.put("role", options.getRole());
-					}
+				if (StringUtils.hasText(options.getRole())) {
+					login.put("role", options.getRole());
+				}
 
-					if (Objects.equals(nonce.get(), EMPTY)) {
-						nonce.compareAndSet(EMPTY, nonceSupplier.get());
-					}
+				if (Objects.equals(nonce.get(), EMPTY)) {
+					nonce.compareAndSet(EMPTY, nonceSupplier.get());
+				}
 
-					login.put("nonce", new String(nonce.get()));
-					login.put("pkcs7", pkcs7);
+				login.put("nonce", new String(nonce.get()));
+				login.put("pkcs7", pkcs7);
 
-					return login;
-				}).login(AuthenticationUtil.getLoginPath(options.getPath()));
+				return login;
+			})
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -148,7 +149,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		try {
 
 			VaultResponse response = this.vaultRestOperations
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

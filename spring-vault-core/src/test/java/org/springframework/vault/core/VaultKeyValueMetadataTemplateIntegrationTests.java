@@ -70,7 +70,7 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 	void setup() {
 
 		this.vaultKeyValueMetadataOperations = this.vaultOperations.opsForVersionedKeyValue("versioned")
-				.opsForKeyValueMetadata();
+			.opsForKeyValueMetadata();
 
 		try {
 			this.vaultKeyValueMetadataOperations.delete(SECRET_NAME);
@@ -139,8 +139,11 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 		this.kvOperations.put(CAS_SECRET_NAME, secret);
 
 		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30);
-		VaultMetadataRequest request = VaultMetadataRequest.builder().casRequired(true).deleteVersionAfter(duration)
-				.maxVersions(20).build();
+		VaultMetadataRequest request = VaultMetadataRequest.builder()
+			.casRequired(true)
+			.deleteVersionAfter(duration)
+			.maxVersions(20)
+			.build();
 
 		this.vaultKeyValueMetadataOperations.put(CAS_SECRET_NAME, request);
 

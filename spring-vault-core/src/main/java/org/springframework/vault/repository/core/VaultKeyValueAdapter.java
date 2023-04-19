@@ -263,7 +263,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			}
 
 			return new VaultKeyValue1KeyspaceAccessor(mountInfo, it, this.vaultOperations
-					.opsForKeyValue(mountInfo.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1));
+				.opsForKeyValue(mountInfo.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1));
 		});
 
 	}
@@ -402,7 +402,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 				Versioned.Metadata metadata;
 				if (secretDocument.getVersion() != null) {
 					metadata = operations.put(createPath(secretDocument.getRequiredId()), Versioned
-							.create(secretDocument.getBody(), Versioned.Version.from(secretDocument.getVersion())));
+						.create(secretDocument.getBody(), Versioned.Version.from(secretDocument.getVersion())));
 				}
 				else {
 					metadata = operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());

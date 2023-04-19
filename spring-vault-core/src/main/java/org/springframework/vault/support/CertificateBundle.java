@@ -324,10 +324,10 @@ public class CertificateBundle extends Certificate {
 			throws GeneralSecurityException, IOException {
 
 		switch (keyType.toLowerCase(Locale.ROOT)) {
-		case "rsa":
-			return KeyFactories.RSA_PRIVATE.getKey(privateKey);
-		case "ec":
-			return KeyFactories.EC.getKey(privateKey);
+			case "rsa":
+				return KeyFactories.RSA_PRIVATE.getKey(privateKey);
+			case "ec":
+				return KeyFactories.EC.getKey(privateKey);
 		}
 
 		throw new IllegalArgumentException(

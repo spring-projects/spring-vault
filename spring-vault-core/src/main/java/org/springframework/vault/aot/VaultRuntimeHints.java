@@ -69,24 +69,25 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 			throw new RuntimeException(e);
 		}
 
-		Stream.of("org.springframework.vault.core.VaultSysTemplate$GetMounts$VaultMountsResponse",
-				"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse",
-				"org.springframework.vault.core.ReactiveVaultTemplate$VaultListResponse",
-				"org.springframework.vault.core.VaultListResponse",
+		Stream
+			.of("org.springframework.vault.core.VaultSysTemplate$GetMounts$VaultMountsResponse",
+					"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse",
+					"org.springframework.vault.core.ReactiveVaultTemplate$VaultListResponse",
+					"org.springframework.vault.core.VaultListResponse",
 
-				"org.springframework.vault.core.VaultTransitTemplate$RawTransitKeyImpl",
-				"org.springframework.vault.core.VaultTransitTemplate$VaultTransitKeyImpl",
+					"org.springframework.vault.core.VaultTransitTemplate$RawTransitKeyImpl",
+					"org.springframework.vault.core.VaultTransitTemplate$VaultTransitKeyImpl",
 
-				"org.springframework.vault.core.VaultSysTemplate$GetMounts",
-				"org.springframework.vault.core.VaultSysTemplate$GetUnsealStatus",
-				"org.springframework.vault.core.VaultSysTemplate$Health",
-				"org.springframework.vault.core.VaultSysTemplate$Seal",
-				"org.springframework.vault.core.VaultSysTemplate$VaultHealthImpl",
-				"org.springframework.vault.core.VaultSysTemplate$VaultInitializationResponseImpl",
-				"org.springframework.vault.core.VaultSysTemplate$VaultUnsealStatusImpl",
+					"org.springframework.vault.core.VaultSysTemplate$GetMounts",
+					"org.springframework.vault.core.VaultSysTemplate$GetUnsealStatus",
+					"org.springframework.vault.core.VaultSysTemplate$Health",
+					"org.springframework.vault.core.VaultSysTemplate$Seal",
+					"org.springframework.vault.core.VaultSysTemplate$VaultHealthImpl",
+					"org.springframework.vault.core.VaultSysTemplate$VaultInitializationResponseImpl",
+					"org.springframework.vault.core.VaultSysTemplate$VaultUnsealStatusImpl",
 
-				"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse")
-				.forEach(cls -> reflection.registerType(TypeReference.of(cls), dataObjectCategories));
+					"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse")
+			.forEach(cls -> reflection.registerType(TypeReference.of(cls), dataObjectCategories));
 
 		reflection.registerTypeIfPresent(classLoader, "com.google.api.client.json.jackson2.JacksonFactory",
 				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);

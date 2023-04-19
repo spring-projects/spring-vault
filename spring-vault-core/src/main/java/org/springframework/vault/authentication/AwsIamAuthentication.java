@@ -125,7 +125,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			AwsCredentials credentials, Region region) {
 
 		return AuthenticationSteps.fromSupplier(() -> createRequestBody(options, credentials, region)) //
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		try {
 
 			VaultResponse response = this.vaultRestOperations
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
@@ -214,13 +214,18 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Map<String, List<String>> headers = createIamRequestHeaders(options);
 
 		SdkHttpFullRequest.Builder builder = SdkHttpFullRequest.builder()
-				.contentStreamProvider(() -> new ByteArrayInputStream(REQUEST_BODY.getBytes())).headers(headers)
-				.method(SdkHttpMethod.POST).uri(options.getEndpointUri());
+			.contentStreamProvider(() -> new ByteArrayInputStream(REQUEST_BODY.getBytes()))
+			.headers(headers)
+			.method(SdkHttpMethod.POST)
+			.uri(options.getEndpointUri());
 		SdkHttpFullRequest request = builder.build();
 
 		Aws4Signer signer = Aws4Signer.create();
-		Aws4SignerParams signerParams = Aws4SignerParams.builder().awsCredentials(credentials).signingName("sts")
-				.signingRegion(region).build();
+		Aws4SignerParams signerParams = Aws4SignerParams.builder()
+			.awsCredentials(credentials)
+			.signingName("sts")
+			.signingRegion(region)
+			.build();
 		SdkHttpFullRequest signedRequest = signer.sign(request, signerParams);
 
 		Map<String, Object> map = new LinkedHashMap<>();

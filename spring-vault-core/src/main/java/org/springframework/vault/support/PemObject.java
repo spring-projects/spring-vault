@@ -79,8 +79,10 @@ public class PemObject {
 	 */
 	public static PemObject fromKey(String content) {
 
-		return parse(content).stream().filter(PemObject::isPrivateKey).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Could not find a PKCS #8 private key"));
+		return parse(content).stream()
+			.filter(PemObject::isPrivateKey)
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("Could not find a PKCS #8 private key"));
 	}
 
 	/**
@@ -276,14 +278,12 @@ public class PemObject {
 
 	enum PemObjectType {
 
-		CERTIFICATE_REQUEST("CERTIFICATE REQUEST"), NEW_CERTIFICATE_REQUEST("NEW CERTIFICATE REQUEST"), CERTIFICATE(
-				"CERTIFICATE"), TRUSTED_CERTIFICATE("TRUSTED CERTIFICATE"), X509_CERTIFICATE(
-						"X509 CERTIFICATE"), X509_CRL("X509 CRL"), PKCS7("PKCS7"), CMS("CMS"), ATTRIBUTE_CERTIFICATE(
-								"ATTRIBUTE CERTIFICATE"), EC_PARAMETERS(
-										"EC PARAMETERS"), PUBLIC_KEY("PUBLIC KEY"), RSA_PUBLIC_KEY(
-												"RSA PUBLIC KEY"), RSA_PRIVATE_KEY("RSA PRIVATE KEY"), EC_PRIVATE_KEY(
-														"EC PRIVATE KEY"), ENCRYPTED_PRIVATE_KEY(
-																"ENCRYPTED PRIVATE KEY"), PRIVATE_KEY("PRIVATE KEY");
+		CERTIFICATE_REQUEST("CERTIFICATE REQUEST"), NEW_CERTIFICATE_REQUEST("NEW CERTIFICATE REQUEST"),
+		CERTIFICATE("CERTIFICATE"), TRUSTED_CERTIFICATE("TRUSTED CERTIFICATE"), X509_CERTIFICATE("X509 CERTIFICATE"),
+		X509_CRL("X509 CRL"), PKCS7("PKCS7"), CMS("CMS"), ATTRIBUTE_CERTIFICATE("ATTRIBUTE CERTIFICATE"),
+		EC_PARAMETERS("EC PARAMETERS"), PUBLIC_KEY("PUBLIC KEY"), RSA_PUBLIC_KEY("RSA PUBLIC KEY"),
+		RSA_PRIVATE_KEY("RSA PRIVATE KEY"), EC_PRIVATE_KEY("EC PRIVATE KEY"),
+		ENCRYPTED_PRIVATE_KEY("ENCRYPTED PRIVATE KEY"), PRIVATE_KEY("PRIVATE KEY");
 
 		// cache
 		private static final PemObjectType[] constants = values();

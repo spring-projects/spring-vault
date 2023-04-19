@@ -63,8 +63,9 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(this.endpoint, this.connector);
 
-		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value")).as(StepVerifier::create)
-				.verifyComplete();
+		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
+			.as(StepVerifier::create)
+			.verifyComplete();
 	}
 
 	@Test
@@ -74,8 +75,9 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(builder);
 
-		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value")).as(StepVerifier::create)
-				.verifyComplete();
+		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
+			.as(StepVerifier::create)
+			.verifyComplete();
 	}
 
 }

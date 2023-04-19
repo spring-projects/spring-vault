@@ -192,8 +192,9 @@ class VaultRevisionRepositoryIntegrationTests extends IntegrationTestSupport {
 	@SuppressWarnings("rawtypes")
 	private VaultRevisionRepository<VersionedPerson> getRepository() {
 
-		VaultPersistentEntity<?> entity = keyValueTemplate.getConverter().getMappingContext()
-				.getRequiredPersistentEntity(VersionedPerson.class);
+		VaultPersistentEntity<?> entity = keyValueTemplate.getConverter()
+			.getMappingContext()
+			.getRequiredPersistentEntity(VersionedPerson.class);
 
 		return new VaultRevisionRepository<>(new MappingVaultEntityInformation(entity), "versioned/versionedPerson",
 				keyValueTemplate);

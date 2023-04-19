@@ -81,8 +81,11 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			this.adminOperations.unmount("other");
 		}
 
-		VaultMount mount = VaultMount.builder().type("generic")
-				.config(Collections.singletonMap("default_lease_ttl", "1h")).description("hello, world").build();
+		VaultMount mount = VaultMount.builder()
+			.type("generic")
+			.config(Collections.singletonMap("default_lease_ttl", "1h"))
+			.description("hello, world")
+			.build();
 
 		this.adminOperations.mount("other", mount);
 
@@ -104,8 +107,11 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			this.adminOperations.unmount("kVv1");
 		}
 
-		VaultMount mount = VaultMount.builder().type("kv").config(Collections.singletonMap("default_lease_ttl", "1h"))
-				.description("hello, world").build();
+		VaultMount mount = VaultMount.builder()
+			.type("kv")
+			.config(Collections.singletonMap("default_lease_ttl", "1h"))
+			.description("hello, world")
+			.build();
 
 		this.adminOperations.mount("kVv1", mount);
 
@@ -133,8 +139,12 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 			this.adminOperations.unmount("kVv2");
 		}
 
-		VaultMount mount = VaultMount.builder().type("kv").config(Collections.singletonMap("default_lease_ttl", "1h"))
-				.options(Collections.singletonMap("version", "2")).description("hello, world").build();
+		VaultMount mount = VaultMount.builder()
+			.type("kv")
+			.config(Collections.singletonMap("default_lease_ttl", "1h"))
+			.options(Collections.singletonMap("version", "2"))
+			.description("hello, world")
+			.build();
 
 		this.adminOperations.mount("kVv2", mount);
 
@@ -218,15 +228,19 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	void shouldReadDefaultPolicy() {
 
 		assertThatExceptionOfType(UnsupportedOperationException.class)
-				.isThrownBy(() -> this.adminOperations.getPolicy("default"));
+			.isThrownBy(() -> this.adminOperations.getPolicy("default"));
 	}
 
 	@Test
 	@RequiresVaultVersion("0.7.0")
 	void shouldCreatePolicy() {
 
-		Rule rule = Rule.builder().path("foo").capabilities(READ, UPDATE).minWrappingTtl(Duration.ofSeconds(100))
-				.maxWrappingTtl(Duration.ofHours(2)).build();
+		Rule rule = Rule.builder()
+			.path("foo")
+			.capabilities(READ, UPDATE)
+			.minWrappingTtl(Duration.ofSeconds(100))
+			.maxWrappingTtl(Duration.ofHours(2))
+			.build();
 
 		this.adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
 

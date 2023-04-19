@@ -406,23 +406,23 @@ public class VaultTokenRequest {
 
 			List<String> policies;
 			switch (this.policies.size()) {
-			case 0:
-				policies = Collections.emptyList();
-				break;
-			case 1:
-				policies = Collections.singletonList(this.policies.get(0));
-				break;
-			default:
-				policies = Collections.unmodifiableList(new ArrayList<>(this.policies));
+				case 0:
+					policies = Collections.emptyList();
+					break;
+				case 1:
+					policies = Collections.singletonList(this.policies.get(0));
+					break;
+				default:
+					policies = Collections.unmodifiableList(new ArrayList<>(this.policies));
 
 			}
 			Map<String, String> meta;
 			switch (this.meta.size()) {
-			case 0:
-				meta = Collections.emptyMap();
-				break;
-			default:
-				meta = Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
+				case 0:
+					meta = Collections.emptyMap();
+					break;
+				default:
+					meta = Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
 			}
 
 			return new VaultTokenRequest(this.id, policies, meta, this.noParent, this.noDefaultPolicy, this.renewable,

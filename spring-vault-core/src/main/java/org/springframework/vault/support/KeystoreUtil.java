@@ -137,8 +137,9 @@ class KeystoreUtil {
 
 		List<X509Certificate> certificates = getCertificates(CERTIFICATE_FACTORY, source);
 
-		return certificates.stream().findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("No X509Certificate found"));
+		return certificates.stream()
+			.findFirst()
+			.orElseThrow(() -> new IllegalArgumentException("No X509Certificate found"));
 	}
 
 	static List<X509Certificate> getCertificates(byte[] source) throws CertificateException {

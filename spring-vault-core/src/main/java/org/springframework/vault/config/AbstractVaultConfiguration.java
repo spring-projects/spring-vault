@@ -92,10 +92,11 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 			ClientHttpRequestFactory requestFactory) {
 
 		ObjectProvider<RestTemplateCustomizer> customizers = getBeanFactory()
-				.getBeanProvider(RestTemplateCustomizer.class);
+			.getBeanProvider(RestTemplateCustomizer.class);
 
-		RestTemplateBuilder builder = RestTemplateBuilder.builder().endpointProvider(endpointProvider)
-				.requestFactory(requestFactory);
+		RestTemplateBuilder builder = RestTemplateBuilder.builder()
+			.endpointProvider(endpointProvider)
+			.requestFactory(requestFactory);
 
 		builder.customizers(customizers.stream().toArray(RestTemplateCustomizer[]::new));
 

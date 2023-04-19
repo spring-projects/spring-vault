@@ -117,7 +117,7 @@ class LifecycleAwareSessionManagerUnitTests {
 		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
 		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
-				.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
+			.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
 
 		LoginToken sessionToken = (LoginToken) this.sessionManager.getSessionToken();
 		assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
@@ -140,7 +140,7 @@ class LifecycleAwareSessionManagerUnitTests {
 		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
 		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
-				.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+			.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
 
 		VaultToken sessionToken = this.sessionManager.getSessionToken();
 		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
@@ -375,7 +375,7 @@ class LifecycleAwareSessionManagerUnitTests {
 				this.restOperations);
 
 		when(this.clientAuthentication.login())
-				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+			.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 

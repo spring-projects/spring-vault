@@ -176,7 +176,8 @@ public class VaultClients {
 
 				String baseUri = toBaseUri(endpoint);
 				UriComponents uriComponents = UriComponentsBuilder
-						.fromUriString(prepareUriTemplate(baseUri, uriTemplate)).build();
+					.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+					.build();
 
 				return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
 			}

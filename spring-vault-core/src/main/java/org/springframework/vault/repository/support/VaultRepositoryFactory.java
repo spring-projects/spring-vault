@@ -71,7 +71,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 			VaultKeyValueTemplate template = (VaultKeyValueTemplate) operations;
 
 			VaultPersistentEntity<?> entity = (VaultPersistentEntity<?>) this.operations.getMappingContext()
-					.getRequiredPersistentEntity(metadata.getDomainType());
+				.getRequiredPersistentEntity(metadata.getDomainType());
 			EntityInformation<?, String> entityInformation = getEntityInformation(metadata.getDomainType());
 			VaultRevisionRepository<?> repository = new VaultRevisionRepository<>(entityInformation,
 					entity.getKeySpace(), template);
@@ -87,7 +87,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 
 		VaultPersistentEntity<T> entity = (VaultPersistentEntity<T>) this.operations.getMappingContext()
-				.getRequiredPersistentEntity(domainClass);
+			.getRequiredPersistentEntity(domainClass);
 
 		return new MappingVaultEntityInformation<>(entity);
 	}

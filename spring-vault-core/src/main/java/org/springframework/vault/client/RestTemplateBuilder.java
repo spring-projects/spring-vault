@@ -58,7 +58,7 @@ public class RestTemplateBuilder {
 	private @Nullable VaultEndpointProvider endpointProvider;
 
 	private Supplier<ClientHttpRequestFactory> requestFactory = () -> ClientHttpRequestFactoryFactory
-			.create(new ClientOptions(), SslConfiguration.unconfigured());
+		.create(new ClientOptions(), SslConfiguration.unconfigured());
 
 	private @Nullable ResponseErrorHandler errorHandler;
 

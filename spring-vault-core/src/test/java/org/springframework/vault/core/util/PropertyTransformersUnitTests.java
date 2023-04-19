@@ -34,34 +34,35 @@ class PropertyTransformersUnitTests {
 
 		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("my-prefix.");
 
-		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1).containsEntry("my-prefix.key",
-				"value");
+		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1)
+			.containsEntry("my-prefix.key", "value");
 	}
 
 	@Test
 	void propertyNamePrefixChaining() {
 
 		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("my-prefix.")
-				.andThen(PropertyTransformers.propertyNamePrefix("foo-bar."));
+			.andThen(PropertyTransformers.propertyNamePrefix("foo-bar."));
 
 		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1)
-				.containsEntry("foo-bar.my-prefix.key", "value");
+			.containsEntry("foo-bar.my-prefix.key", "value");
 	}
 
 	@Test
 	void longChaining() {
 
 		PropertyTransformer last = PropertyTransformers.propertyNamePrefix("last.")
-				.andThen(PropertyTransformers.noop());
+			.andThen(PropertyTransformers.noop());
 
 		PropertyTransformer middle = PropertyTransformers.propertyNamePrefix("middle.")
-				.andThen(PropertyTransformers.propertyNamePrefix("after-middle."));
+			.andThen(PropertyTransformers.propertyNamePrefix("after-middle."));
 
 		PropertyTransformer propertyTransformer = PropertyTransformers.propertyNamePrefix("inner.")
-				.andThen(PropertyTransformers.noop().andThen(middle)).andThen(last);
+			.andThen(PropertyTransformers.noop().andThen(middle))
+			.andThen(last);
 
 		assertThat(propertyTransformer.transformProperties(this.properties)).hasSize(1)
-				.containsEntry("last.after-middle.middle.inner.key", "value");
+			.containsEntry("last.after-middle.middle.inner.key", "value");
 	}
 
 }

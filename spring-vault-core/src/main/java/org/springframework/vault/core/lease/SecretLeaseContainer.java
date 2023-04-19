@@ -123,7 +123,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 public class SecretLeaseContainer extends SecretLeaseEventPublisher implements InitializingBean, DisposableBean {
 
 	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
-			.newUpdater(SecretLeaseContainer.class, "status");
+		.newUpdater(SecretLeaseContainer.class, "status");
 
 	private static final AtomicInteger poolId = new AtomicInteger();
 
@@ -432,8 +432,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 				ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 				scheduler.setDaemon(true);
-				scheduler.setThreadNamePrefix(
-						String.format("%s-%d-", getClass().getSimpleName(), poolId.incrementAndGet()));
+				scheduler
+					.setThreadNamePrefix(String.format("%s-%d-", getClass().getSimpleName(), poolId.incrementAndGet()));
 				scheduler.afterPropertiesSet();
 
 				this.taskScheduler = scheduler;
@@ -923,7 +923,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	static class OneShotTrigger implements Trigger {
 
 		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
-				.newUpdater(OneShotTrigger.class, "status");
+			.newUpdater(OneShotTrigger.class, "status");
 
 		private static final int STATUS_ARMED = 0;
 

@@ -73,7 +73,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(metadata.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(metadata.getToken()).isNotNull();
 		assertThat(metadata.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-				.isAfter(Instant.now().minusSeconds(60));
+			.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
@@ -88,7 +88,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(lookup.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(lookup.getToken()).isNotNull();
 		assertThat(lookup.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-				.isAfter(Instant.now().minusSeconds(60));
+			.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
@@ -140,13 +140,13 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(rewrap.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(rewrap.getToken()).isNotEqualTo(metadata.getToken());
 		assertThat(rewrap.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-				.isAfter(Instant.now().minusSeconds(60));
+			.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
 	void shouldRewrapAbsentSecret() {
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
+			.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
 	static final class Secret {

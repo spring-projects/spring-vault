@@ -42,8 +42,11 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 	@Test
 	void shouldSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
-				.build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+			.ttl(Duration.ofSeconds(60))
+			.renewable()
+			.numUses(1)
+			.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
@@ -62,8 +65,11 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 	@Test
 	void shouldFailDuringSelfLookup() {
 
-		VaultTokenRequest tokenRequest = VaultTokenRequest.builder().ttl(Duration.ofSeconds(60)).renewable().numUses(1)
-				.build();
+		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
+			.ttl(Duration.ofSeconds(60))
+			.renewable()
+			.numUses(1)
+			.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 

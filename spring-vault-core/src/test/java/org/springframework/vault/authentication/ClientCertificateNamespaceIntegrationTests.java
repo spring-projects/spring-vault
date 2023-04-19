@@ -62,9 +62,11 @@ import static org.springframework.vault.util.Settings.findWorkDir;
  */
 class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport {
 
-	static final Policy POLICY = Policy
-			.of(Policy.Rule.builder().path("/*").capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
+	static final Policy POLICY = Policy.of(Policy.Rule.builder()
+		.path("/*")
+		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+				Policy.BuiltinCapabilities.UPDATE)
+		.build());
 
 	@BeforeEach
 	void before() {
@@ -80,10 +82,11 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 		}
 
 		RestTemplateBuilder devRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).customizers(restTemplate -> restTemplate
-						.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
+			.requestFactory(
+					ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.customizers(
+					restTemplate -> restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("dev")));
 
 		VaultTemplate dev = new VaultTemplate(devRestTemplate,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
@@ -130,8 +133,9 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 				ClientCertificateAuthenticationIntegrationTestBase.prepareCertAuthenticationMethod());
 
 		RestTemplateBuilder builder = RestTemplateBuilder.builder()
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT).requestFactory(clientHttpRequestFactory)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.requestFactory(clientHttpRequestFactory)
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
 
 		RestTemplate forAuthentication = builder.build();
 
@@ -150,8 +154,10 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 		ClientHttpConnector connector = ClientHttpConnectorFactory.create(new ClientOptions(),
 				ClientCertificateAuthenticationIntegrationTestBase.prepareCertAuthenticationMethod());
 
-		WebClientBuilder builder = WebClientBuilder.builder().endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.httpConnector(connector).defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
+		WebClientBuilder builder = WebClientBuilder.builder()
+			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.httpConnector(connector)
+			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "dev");
 
 		WebClient forAuthentication = builder.build();
 
@@ -161,8 +167,9 @@ class ClientCertificateNamespaceIntegrationTests extends IntegrationTestSupport 
 
 		ReactiveVaultTemplate dev = new ReactiveVaultTemplate(builder, operator);
 
-		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev")).as(StepVerifier::create)
-				.verifyComplete();
+		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev"))
+			.as(StepVerifier::create)
+			.verifyComplete();
 
 		dev.read("dev-secrets/my-secret").as(StepVerifier::create).consumeNextWith(actual -> {
 

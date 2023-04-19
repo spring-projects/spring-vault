@@ -69,8 +69,9 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	void httpComponentsClientUsingPemShouldWork() throws Exception {
 
 		File caCertificate = new File(Settings.findWorkDir(), "ca/certs/ca.cert.pem");
-		SslConfiguration sslConfiguration = SslConfiguration.forTrustStore(SslConfiguration.KeyStoreConfiguration
-				.of(new FileSystemResource(caCertificate)).withStoreType(SslConfiguration.PEM_KEYSTORE_TYPE));
+		SslConfiguration sslConfiguration = SslConfiguration
+			.forTrustStore(SslConfiguration.KeyStoreConfiguration.of(new FileSystemResource(caCertificate))
+				.withStoreType(SslConfiguration.PEM_KEYSTORE_TYPE));
 
 		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(new ClientOptions(), sslConfiguration);
 		RestTemplate template = new RestTemplate(factory);

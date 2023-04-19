@@ -129,7 +129,7 @@ public class ReactiveVaultClients {
 				simpleSource = true;
 
 				UriBuilderFactory uriBuilderFactory = VaultClients
-						.createUriBuilderFactory(((VaultEndpointProviderAdapter) endpointProvider).source);
+					.createUriBuilderFactory(((VaultEndpointProviderAdapter) endpointProvider).source);
 				builder.uriBuilderFactory(uriBuilderFactory);
 			}
 		}
@@ -143,9 +143,13 @@ public class ReactiveVaultClients {
 
 					return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
 
-						UriComponents uriComponents = UriComponentsBuilder.fromUri(uri).scheme(endpoint.getScheme())
-								.host(endpoint.getHost()).port(endpoint.getPort()).replacePath(endpoint.getPath())
-								.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath())).build();
+						UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
+							.scheme(endpoint.getScheme())
+							.host(endpoint.getHost())
+							.port(endpoint.getPort())
+							.replacePath(endpoint.getPath())
+							.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
+							.build();
 
 						ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
 

@@ -162,17 +162,26 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(certificateRequest::getCommonName).to("common_name", request);
-		mapper.from(certificateRequest::getAltNames).whenNotEmpty()
-				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("alt_names", request);
-		mapper.from(certificateRequest::getIpSubjectAltNames).whenNotEmpty()
-				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("ip_sans", request);
-		mapper.from(certificateRequest::getUriSubjectAltNames).whenNotEmpty()
-				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("uri_sans", request);
-		mapper.from(certificateRequest::getOtherSans).whenNotEmpty()
-				.as(i -> StringUtils.collectionToDelimitedString(i, ",")).to("other_sans", request);
+		mapper.from(certificateRequest::getAltNames)
+			.whenNotEmpty()
+			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+			.to("alt_names", request);
+		mapper.from(certificateRequest::getIpSubjectAltNames)
+			.whenNotEmpty()
+			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+			.to("ip_sans", request);
+		mapper.from(certificateRequest::getUriSubjectAltNames)
+			.whenNotEmpty()
+			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+			.to("uri_sans", request);
+		mapper.from(certificateRequest::getOtherSans)
+			.whenNotEmpty()
+			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+			.to("other_sans", request);
 		mapper.from(certificateRequest::getTtl).whenNonNull().as(i -> i.get(ChronoUnit.SECONDS)).to("ttl", request);
-		mapper.from(certificateRequest::isExcludeCommonNameFromSubjectAltNames).whenTrue().to("exclude_cn_from_sans",
-				request);
+		mapper.from(certificateRequest::isExcludeCommonNameFromSubjectAltNames)
+			.whenTrue()
+			.to("exclude_cn_from_sans", request);
 		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
 		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
 

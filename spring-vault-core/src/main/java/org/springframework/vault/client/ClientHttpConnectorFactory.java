@@ -132,13 +132,16 @@ public class ClientHttpConnectorFactory {
 			if (hasSslConfiguration(sslConfiguration)) {
 
 				Http11SslContextSpec sslContextSpec = Http11SslContextSpec.forClient()
-						.configure(it -> configureSsl(sslConfiguration, it)).get();
+					.configure(it -> configureSsl(sslConfiguration, it))
+					.get();
 
 				client = client.secure(builder -> builder.sslContext(sslContextSpec));
 			}
 
-			client = client.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
-					Math.toIntExact(options.getConnectionTimeout().toMillis())).proxyWithSystemProperties();
+			client = client
+				.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
+						Math.toIntExact(options.getConnectionTimeout().toMillis()))
+				.proxyWithSystemProperties();
 
 			return client;
 		}
@@ -149,7 +152,7 @@ public class ClientHttpConnectorFactory {
 
 				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
 					sslContextBuilder
-							.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
+						.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
 				}
 
 				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
@@ -227,16 +230,18 @@ public class ClientHttpConnectorFactory {
 				}, null);
 
 				PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder //
-						.create().setTlsStrategy(tlsStrategy) //
-						.build(); //
+					.create()
+					.setTlsStrategy(tlsStrategy) //
+					.build(); //
 				httpClientBuilder.setConnectionManager(connectionManager);
 			}
 
 			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
-					.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-					.setAuthenticationEnabled(true) //
-					.setRedirectsEnabled(true).build();
+				.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
+				.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
+				.setAuthenticationEnabled(true) //
+				.setRedirectsEnabled(true)
+				.build();
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 
@@ -283,13 +288,13 @@ public class ClientHttpConnectorFactory {
 
 				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
 					KeyStore keyStore = ClientHttpRequestFactoryFactory
-							.getKeyStore(sslConfiguration.getKeyStoreConfiguration());
+						.getKeyStore(sslConfiguration.getKeyStoreConfiguration());
 					sslContextFactory.setKeyStore(keyStore);
 				}
 
 				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
 					KeyStore keyStore = ClientHttpRequestFactoryFactory
-							.getKeyStore(sslConfiguration.getTrustStoreConfiguration());
+						.getKeyStore(sslConfiguration.getTrustStoreConfiguration());
 					sslContextFactory.setTrustStore(keyStore);
 				}
 
@@ -305,12 +310,12 @@ public class ClientHttpConnectorFactory {
 
 				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					sslContextFactory
-							.setIncludeProtocols(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
+						.setIncludeProtocols(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
 				}
 
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslContextFactory
-							.setIncludeCipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
+						.setIncludeCipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}
 
 				ClientConnector connector = new ClientConnector();
@@ -369,8 +374,9 @@ public class ClientHttpConnectorFactory {
 				builder.sslContext(sslContext).sslParameters(parameters);
 			}
 
-			builder.proxy(ProxySelector.getDefault()).followRedirects(java.net.http.HttpClient.Redirect.ALWAYS)
-					.connectTimeout(options.getConnectionTimeout());
+			builder.proxy(ProxySelector.getDefault())
+				.followRedirects(java.net.http.HttpClient.Redirect.ALWAYS)
+				.connectTimeout(options.getConnectionTimeout());
 			return builder;
 		}
 

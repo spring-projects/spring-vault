@@ -68,8 +68,9 @@ class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldUseAgentAuthenticationWithBuilder() {
 
-		RestTemplateBuilder builder = RestTemplateBuilder.builder().endpoint(this.endpoint)
-				.requestFactory(this.requestFactory);
+		RestTemplateBuilder builder = RestTemplateBuilder.builder()
+			.endpoint(this.endpoint)
+			.requestFactory(this.requestFactory);
 
 		VaultTemplate vaultTemplate = new VaultTemplate(builder);
 

@@ -70,8 +70,10 @@ class SslConfigurationUnitTests {
 	void shouldCreateConfigurationWithEnabledCipherSuites() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
-		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore).withEnabledCipherSuites(
-				"TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384", "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+		SslConfiguration tsConfig = SslConfiguration.unconfigured()
+			.withTrustStore(keystore)
+			.withEnabledCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+					"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
@@ -84,8 +86,9 @@ class SslConfigurationUnitTests {
 	void shouldCreateConfigurationWithEnabledProtocols() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
-		SslConfiguration tsConfig = SslConfiguration.unconfigured().withTrustStore(keystore)
-				.withEnabledProtocols("TLSv1.2", "TLSv1.1");
+		SslConfiguration tsConfig = SslConfiguration.unconfigured()
+			.withTrustStore(keystore)
+			.withEnabledProtocols("TLSv1.2", "TLSv1.1");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
@@ -98,7 +101,7 @@ class SslConfigurationUnitTests {
 	void shouldCreatePemConfiguration() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"))
-				.withStoreType("PEM");
+			.withStoreType("PEM");
 		SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
 
 		assertThat(configuration.getTrustStoreConfiguration().getStoreType()).isEqualTo("PEM");

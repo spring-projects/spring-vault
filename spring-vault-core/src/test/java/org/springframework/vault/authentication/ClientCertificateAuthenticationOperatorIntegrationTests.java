@@ -42,9 +42,9 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 	}
 
 	@Test
@@ -57,9 +57,9 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 	}
 
 	@Test
@@ -72,14 +72,14 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-				.as(StepVerifier::create) //
-				.verifyError(VaultLoginException.class);
+			.as(StepVerifier::create) //
+			.verifyError(VaultLoginException.class);
 	}
 
 	@Test
 	void shouldProvideInvalidKeyPassword() {
-		assertThatIllegalStateException().isThrownBy(() -> TestWebClientFactory.create(
-				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("wrong".toCharArray(), "1"))));
+		assertThatIllegalStateException().isThrownBy(() -> TestWebClientFactory
+			.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("wrong".toCharArray(), "1"))));
 	}
 
 }

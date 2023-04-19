@@ -72,7 +72,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		request.put("value", plaintext);
 
 		return (String) this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName), request)
-				.getRequiredData().get("encoded_value");
+			.getRequiredData()
+			.get("encoded_value");
 	}
 
 	@Override
@@ -88,7 +89,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		applyTransformOptions(plaintext.getContext(), request);
 
 		Map<String, Object> data = this.vaultOperations
-				.write(String.format("%s/encode/%s", this.path, roleName), request).getRequiredData();
+			.write(String.format("%s/encode/%s", this.path, roleName), request)
+			.getRequiredData();
 
 		return toCiphertext(data, plaintext.getContext());
 	}
@@ -143,7 +145,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		applyTransformOptions(transformContext, request);
 
 		return (String) this.vaultOperations.write(String.format("%s/decode/%s", this.path, roleName), request)
-				.getRequiredData().get("decoded_value");
+			.getRequiredData()
+			.get("decoded_value");
 	}
 
 	@Override
@@ -258,8 +261,10 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		VaultTransformContext contextToUse = context;
 		if (data.containsKey("tweak")) {
 			byte[] tweak = Base64Utils.decodeFromString((String) data.get("tweak"));
-			contextToUse = VaultTransformContext.builder().transformation(context.getTransformation()).tweak(tweak)
-					.build();
+			contextToUse = VaultTransformContext.builder()
+				.transformation(context.getTransformation())
+				.tweak(tweak)
+				.build();
 		}
 
 		return contextToUse.isEmpty() ? TransformCiphertext.of(ciphertext)

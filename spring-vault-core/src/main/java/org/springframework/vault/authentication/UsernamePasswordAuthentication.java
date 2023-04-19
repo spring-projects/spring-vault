@@ -77,7 +77,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Map<String, Object> body = createLoginBody(options);
 
 		return AuthenticationSteps.fromSupplier(() -> body)
-				.login(String.format("%s/%s", getLoginPath(options.getPath()), options.getUsername()));
+			.login(String.format("%s/%s", getLoginPath(options.getPath()), options.getUsername()));
 	}
 
 	@Override

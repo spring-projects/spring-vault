@@ -194,12 +194,12 @@ public class WebClientBuilder {
 			Map<String, String> defaultHeaders = this.defaultHeaders;
 			builder.filter((request, next) -> {
 
-				return next.exchange(
-						ClientRequest.from(request).headers(headers -> defaultHeaders.forEach((key, value) -> {
-							if (!headers.containsKey(key)) {
-								headers.add(key, value);
-							}
-						})).build());
+				return next
+					.exchange(ClientRequest.from(request).headers(headers -> defaultHeaders.forEach((key, value) -> {
+						if (!headers.containsKey(key)) {
+							headers.add(key, value);
+						}
+					})).build());
 			});
 		}
 

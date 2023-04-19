@@ -186,7 +186,7 @@ class VaultQueryCreatorUnitTests {
 	@Test
 	void failsForNonIdProperties() {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-				.isThrownBy(() -> createQuery("findByName", ""));
+			.isThrownBy(() -> createQuery("findByName", ""));
 	}
 
 	VaultQuery createQuery(String methodName, String value) {

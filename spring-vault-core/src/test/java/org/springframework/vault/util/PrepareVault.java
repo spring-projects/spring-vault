@@ -74,7 +74,7 @@ public class PrepareVault {
 		int requiredKeys = 2;
 
 		VaultInitializationResponse initialized = this.vaultOperations.opsForSys()
-				.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
+			.initialize(VaultInitializationRequest.create(createKeys, requiredKeys));
 
 		for (int i = 0; i < requiredKeys; i++) {
 

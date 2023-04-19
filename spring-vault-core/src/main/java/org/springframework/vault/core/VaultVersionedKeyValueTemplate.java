@@ -208,8 +208,10 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
-		return Arrays.stream(versionsToDelete).filter(Version::isVersioned).map(Version::getVersion)
-				.collect(Collectors.toList());
+		return Arrays.stream(versionsToDelete)
+			.filter(Version::isVersioned)
+			.map(Version::getVersion)
+			.collect(Collectors.toList());
 	}
 
 	@Override

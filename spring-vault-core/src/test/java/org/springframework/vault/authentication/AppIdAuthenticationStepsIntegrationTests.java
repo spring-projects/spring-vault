@@ -37,9 +37,10 @@ class AppIdAuthenticationStepsIntegrationTests extends AppIdAuthenticationIntegr
 	@Test
 	void authenticationStepsShouldLoginSuccessfully() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("myapp") //
-				.userIdMechanism(new StaticUserId("static-userid-value")) //
-				.build();
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+			.appId("myapp") //
+			.userIdMechanism(new StaticUserId("static-userid-value")) //
+			.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
@@ -54,9 +55,10 @@ class AppIdAuthenticationStepsIntegrationTests extends AppIdAuthenticationIntegr
 	@Test
 	void authenticationStepsLoginShouldFail() {
 
-		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder().appId("wrong") //
-				.userIdMechanism(new StaticUserId("wrong")) //
-				.build();
+		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
+			.appId("wrong") //
+			.userIdMechanism(new StaticUserId("wrong")) //
+			.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 

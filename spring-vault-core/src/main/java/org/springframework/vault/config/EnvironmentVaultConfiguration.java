@@ -258,33 +258,33 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	public ClientAuthentication clientAuthentication() {
 
 		String authentication = getProperty("vault.authentication", AuthenticationMethod.TOKEN.name()).toUpperCase()
-				.replace('-', '_');
+			.replace('-', '_');
 
 		AuthenticationMethod authenticationMethod = AuthenticationMethod.valueOf(authentication);
 
 		switch (authenticationMethod) {
 
-		case TOKEN:
-			return tokenAuthentication();
-		case APPID:
-			return appIdAuthentication();
-		case APPROLE:
-			return appRoleAuthentication();
-		case AWS_EC2:
-			return awsEc2Authentication();
-		case AWS_IAM:
-			return awsIamAuthentication();
-		case AZURE:
-			return azureMsiAuthentication();
-		case CERT:
-			return new ClientCertificateAuthentication(restOperations());
-		case CUBBYHOLE:
-			return cubbyholeAuthentication();
-		case KUBERNETES:
-			return kubeAuthentication();
-		default:
-			throw new IllegalStateException(String.format("Vault authentication method %s is not supported with %s",
-					authenticationMethod, getClass().getSimpleName()));
+			case TOKEN:
+				return tokenAuthentication();
+			case APPID:
+				return appIdAuthentication();
+			case APPROLE:
+				return appRoleAuthentication();
+			case AWS_EC2:
+				return awsEc2Authentication();
+			case AWS_IAM:
+				return awsIamAuthentication();
+			case AZURE:
+				return azureMsiAuthentication();
+			case CERT:
+				return new ClientCertificateAuthentication(restOperations());
+			case CUBBYHOLE:
+				return cubbyholeAuthentication();
+			case KUBERNETES:
+				return kubeAuthentication();
+			default:
+				throw new IllegalStateException(String.format("Vault authentication method %s is not supported with %s",
+						authenticationMethod, getClass().getSimpleName()));
 		}
 	}
 
@@ -310,8 +310,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.hasText(appId, "Vault AppId authentication: AppId (vault.app-id.app-id) must not be empty");
 		Assert.hasText(userId, "Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
 
-		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder().appId(appId)
-				.userIdMechanism(getAppIdUserIdMechanism(userId)).path(path);
+		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder()
+			.appId(appId)
+			.userIdMechanism(getAppIdUserIdMechanism(userId))
+			.path(path);
 
 		return new AppIdAuthentication(builder.build(), restOperations());
 	}
@@ -326,7 +328,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.hasText(roleId, "Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
 
 		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
-				.roleId(RoleId.provided(roleId)).path(path);
+			.roleId(RoleId.provided(roleId))
+			.path(path);
 
 		if (StringUtils.hasText(secretId)) {
 			builder = builder.secretId(SecretId.provided(secretId));
@@ -370,7 +373,8 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		}
 
 		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
-				.role(StringUtils.hasText(role) ? role : roleId).path(path);
+			.role(StringUtils.hasText(role) ? role : roleId)
+			.path(path);
 
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));
@@ -385,8 +389,9 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.isTrue(StringUtils.hasText(role),
 				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
 
-		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder().role(role)
-				.credentialsProvider(DefaultCredentialsProvider.create());
+		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder()
+			.role(role)
+			.credentialsProvider(DefaultCredentialsProvider.create());
 
 		return new AwsIamAuthentication(builder.build(), restOperations());
 	}
@@ -402,8 +407,11 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
 		Assert.hasText(role, "Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
 
-		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions.builder().role(role).path(path)
-				.instanceMetadataUri(metadataServiceUri).identityTokenServiceUri(identityTokenServiceUri);
+		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions.builder()
+			.role(role)
+			.path(path)
+			.instanceMetadataUri(metadataServiceUri)
+			.identityTokenServiceUri(identityTokenServiceUri);
 
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
@@ -413,8 +421,9 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		String token = getProperty("vault.token");
 		Assert.hasText(token, "Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
 
-		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions.builder().wrapped()
-				.initialToken(VaultToken.of(token));
+		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions.builder()
+			.wrapped()
+			.initialToken(VaultToken.of(token));
 
 		return new CubbyholeAuthentication(builder.build(), restOperations());
 	}
@@ -431,8 +440,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(tokenFile);
 
-		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions.builder().role(role)
-				.jwtSupplier(jwtSupplier).path(path);
+		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions.builder()
+			.role(role)
+			.jwtSupplier(jwtSupplier)
+			.path(path);
 
 		return new KubernetesAuthentication(builder.build(), restOperations());
 	}

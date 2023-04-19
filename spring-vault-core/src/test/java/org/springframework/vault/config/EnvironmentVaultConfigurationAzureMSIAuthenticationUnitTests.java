@@ -60,7 +60,7 @@ class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 		AzureMsiAuthenticationOptions options = (AzureMsiAuthenticationOptions) accessor.getPropertyValue("options");
 
 		assertThat(options.getIdentityTokenServiceUri())
-				.isEqualTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
+			.isEqualTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
 		assertThat(options.getInstanceMetadataServiceUri()).isEqualTo(URI.create("http://foo"));
 	}
 

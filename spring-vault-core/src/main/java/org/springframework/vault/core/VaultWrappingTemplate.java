@@ -92,7 +92,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 		return doUnwrap(token, (restOperations, entity) -> {
 			return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST, entity, VaultResponse.class)
-					.getBody();
+				.getBody();
 		});
 	}
 
@@ -156,8 +156,9 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("X-Vault-Wrap-TTL", Long.toString(duration.getSeconds()));
 
-			return restOperations.exchange("sys/wrapping/wrap", HttpMethod.POST, new HttpEntity<>(body, headers),
-					VaultResponse.class).getBody();
+			return restOperations
+				.exchange("sys/wrapping/wrap", HttpMethod.POST, new HttpEntity<>(body, headers), VaultResponse.class)
+				.getBody();
 		});
 
 		Map<String, String> wrapInfo = response.getWrapInfo();

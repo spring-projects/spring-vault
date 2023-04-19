@@ -43,12 +43,21 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldSerialize() throws Exception {
 
-		Rule rule = Rule.builder().path("secret/*").capabilities("create", "read", "update")
-				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
+		Rule rule = Rule.builder()
+			.path("secret/*")
+			.capabilities("create", "read", "update")
+			.allowedParameter("ttl", "1h", "2h")
+			.deniedParameter("password")
+			.build();
 
-		Rule another = Rule.builder().path("secret/foo").capabilities("create", "read", "update", "delete", "list")
-				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
-				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
+		Rule another = Rule.builder()
+			.path("secret/foo")
+			.capabilities("create", "read", "update", "delete", "list")
+			.minWrappingTtl(Duration.ofMinutes(1))
+			.maxWrappingTtl(Duration.ofHours(1))
+			.allowedParameter("ttl", "1h", "2h")
+			.deniedParameter("password")
+			.build();
 
 		Policy policy = Policy.of(rule, another);
 
@@ -62,13 +71,22 @@ class PolicySerializationUnitTests {
 	@Test
 	void shouldDeserialize() throws Exception {
 
-		Rule rule = Rule.builder().path("secret/*").capabilities("create", "read", "update", "update")
-				.allowedParameter("ttl", "1h", "2h").deniedParameter("password").build();
+		Rule rule = Rule.builder()
+			.path("secret/*")
+			.capabilities("create", "read", "update", "update")
+			.allowedParameter("ttl", "1h", "2h")
+			.deniedParameter("password")
+			.build();
 
-		Rule another = Rule.builder().path("secret/foo").capabilities("create", "read", "update", "delete", "list")
-				.minWrappingTtl(Duration.ofMinutes(1)).maxWrappingTtl(Duration.ofHours(1))
-				.allowedParameter("ttl", "1h", "2h").allowedParameter("ttl", "1h", "2h").deniedParameter("password")
-				.build();
+		Rule another = Rule.builder()
+			.path("secret/foo")
+			.capabilities("create", "read", "update", "delete", "list")
+			.minWrappingTtl(Duration.ofMinutes(1))
+			.maxWrappingTtl(Duration.ofHours(1))
+			.allowedParameter("ttl", "1h", "2h")
+			.allowedParameter("ttl", "1h", "2h")
+			.deniedParameter("password")
+			.build();
 
 		Policy expected = Policy.of(rule, another);
 
@@ -106,9 +124,9 @@ class PolicySerializationUnitTests {
 	void shouldRejectUnknownFieldNames() throws Exception {
 
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":1, \"path\": {} }", Policy.class));
+			.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":1, \"path\": {} }", Policy.class));
 		assertThatIllegalArgumentException()
-				.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
+			.isThrownBy(() -> this.OBJECT_MAPPER.readValue("{\"foo\":\"bar\"}", Policy.class));
 	}
 
 	@Test
@@ -132,15 +150,17 @@ class PolicySerializationUnitTests {
 	@Test
 	void crudShouldReturnCrudCapabilities() {
 
-		assertThat(Policy.BuiltinCapabilities.crud()).hasSize(5).contains(Policy.BuiltinCapabilities.CREATE)
-				.doesNotContain(Policy.BuiltinCapabilities.SUDO);
+		assertThat(Policy.BuiltinCapabilities.crud()).hasSize(5)
+			.contains(Policy.BuiltinCapabilities.CREATE)
+			.doesNotContain(Policy.BuiltinCapabilities.SUDO);
 	}
 
 	@Test
 	void sudoShouldReturnCrudAndSudoCapabilities() {
 
-		assertThat(Policy.BuiltinCapabilities.crudAndSudo()).hasSize(6).contains(Policy.BuiltinCapabilities.CREATE)
-				.contains(Policy.BuiltinCapabilities.SUDO);
+		assertThat(Policy.BuiltinCapabilities.crudAndSudo()).hasSize(6)
+			.contains(Policy.BuiltinCapabilities.CREATE)
+			.contains(Policy.BuiltinCapabilities.SUDO);
 	}
 
 }

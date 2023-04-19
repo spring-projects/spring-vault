@@ -73,9 +73,10 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
-				.renewable().ttl(1, TimeUnit.HOURS) //
-				.explicitMaxTtl(10, TimeUnit.HOURS) //
-				.build();
+			.renewable()
+			.ttl(1, TimeUnit.HOURS) //
+			.explicitMaxTtl(10, TimeUnit.HOURS) //
+			.build();
 
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 

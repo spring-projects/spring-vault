@@ -112,7 +112,7 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
 			listeners.forEach(leaseListener -> leaseListener
-					.onLeaseEvent(new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
+				.onLeaseEvent(new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
 			return invocation.getArgument(0);
 		});
 
@@ -165,8 +165,9 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		});
 
 		assertThatThrownBy(() -> new LeaseAwareVaultPropertySource("name", this.leaseContainer, secret,
-				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
-						.hasRootCauseExactlyInstanceOf(RuntimeException.class);
+				PropertyTransformers.noop(), false))
+			.isInstanceOf(VaultPropertySourceNotFoundException.class)
+			.hasRootCauseExactlyInstanceOf(RuntimeException.class);
 	}
 
 }

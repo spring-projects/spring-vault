@@ -54,8 +54,8 @@ class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 
 		assumeThat(prepare.getVersion()).isGreaterThanOrEqualTo(VaultInitializer.VERSIONING_INTRODUCED_WITH);
 
-		VaultKeyValueOperations versioned = prepare.getVaultOperations().opsForKeyValue("versioned",
-				VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
+		VaultKeyValueOperations versioned = prepare.getVaultOperations()
+			.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
 
 		versioned.put("rotating", Collections.singletonMap("key", "value"));
 	}
