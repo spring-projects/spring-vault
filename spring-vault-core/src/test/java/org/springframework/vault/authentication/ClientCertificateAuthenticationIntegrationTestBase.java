@@ -43,6 +43,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
  * Integration test base class for {@link ClientCertificateAuthentication} tests.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 public abstract class ClientCertificateAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
@@ -52,9 +53,11 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 				Policy.BuiltinCapabilities.UPDATE)
 		.build());
 
-	static final Policy ALTERNATE_POLICY = Policy
-			.of(Policy.Rule.builder().path("/alternate/*").capabilities(Policy.BuiltinCapabilities.READ,
-					Policy.BuiltinCapabilities.CREATE, Policy.BuiltinCapabilities.UPDATE).build());
+	static final Policy ALTERNATE_POLICY = Policy.of(Policy.Rule.builder()
+		.path("/alternate/*")
+		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+				Policy.BuiltinCapabilities.UPDATE)
+		.build());
 
 	VaultOperations vaultOperations;
 
@@ -88,13 +91,15 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 		});
 	}
 
-	ListAssert<String> assertThatPolicies(final VaultToken token) {
+	ListAssert<String> assertThatPolicies(VaultToken token) {
 		return assertThat(lookupSelf(token).getBody()).isNotNull()
-				.extracting("data", as(InstanceOfAssertFactories.map(String.class, Object.class))).isNotNull()
-				.extracting("policies", as(InstanceOfAssertFactories.list(String.class))).isNotNull();
+			.extracting("data", as(InstanceOfAssertFactories.map(String.class, Object.class)))
+			.isNotNull()
+			.extracting("policies", as(InstanceOfAssertFactories.list(String.class)))
+			.isNotNull();
 	}
 
-	ResponseEntity<Map<String, Object>> lookupSelf(final VaultToken token) {
+	ResponseEntity<Map<String, Object>> lookupSelf(VaultToken token) {
 
 		return vaultOperations.doWithVault(restOperations -> {
 			HttpHeaders headers = new HttpHeaders();

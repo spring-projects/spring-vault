@@ -26,6 +26,7 @@ import org.springframework.util.Assert;
  * constructed.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  * @since 2.3
  * @see ClientCertificateAuthenticationOptions
  * @see #builder()
@@ -40,14 +41,14 @@ public class ClientCertificateAuthenticationOptions {
 	private final String path;
 
 	/**
-	 * Optional named certificate role to authenticate against.
+	 * Named certificate role to authenticate against. Can be {@literal null}.
 	 */
 	@Nullable
-	private final String name;
+	private final String role;
 
-	private ClientCertificateAuthenticationOptions(String path, String name) {
+	private ClientCertificateAuthenticationOptions(String path, @Nullable String role) {
 		this.path = path;
-		this.name = name;
+		this.role = role;
 	}
 
 	/**
@@ -66,10 +67,11 @@ public class ClientCertificateAuthenticationOptions {
 
 	/**
 	 * @return the optional named certificate role to authenticate against.
+	 * @since 2.3.4
 	 */
 	@Nullable
-	public String getName() {
-		return this.name;
+	public String getRole() {
+		return this.role;
 	}
 
 	/**
@@ -80,7 +82,7 @@ public class ClientCertificateAuthenticationOptions {
 		private String path = DEFAULT_CERT_PATH;
 
 		@Nullable
-		private String name;
+		private String role;
 
 		ClientCertificateAuthenticationOptionsBuilder() {
 		}
@@ -102,12 +104,13 @@ public class ClientCertificateAuthenticationOptions {
 		 * Configure the named certificate role to authenticate against.
 		 * @param name must not be empty or {@literal null}.
 		 * @return {@code this} {@link ClientCertificateAuthenticationOptionsBuilder}.
+		 * @since 2.3.4
 		 */
-		public ClientCertificateAuthenticationOptionsBuilder name(String name) {
+		public ClientCertificateAuthenticationOptionsBuilder role(String name) {
 
-			Assert.hasText(name, "Name must not be empty");
+			Assert.hasText(name, "Role must not be empty");
 
-			this.name = name;
+			this.role = name;
 			return this;
 		}
 
@@ -116,7 +119,7 @@ public class ClientCertificateAuthenticationOptions {
 		 * @return a new {@link ClientCertificateAuthenticationOptions}.
 		 */
 		public ClientCertificateAuthenticationOptions build() {
-			return new ClientCertificateAuthenticationOptions(this.path, this.name);
+			return new ClientCertificateAuthenticationOptions(this.path, this.role);
 		}
 
 	}

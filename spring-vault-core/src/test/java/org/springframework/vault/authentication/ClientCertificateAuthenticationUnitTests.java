@@ -60,13 +60,13 @@ class ClientCertificateAuthenticationUnitTests {
 		this.mockRest.expect(requestTo("/auth/my/path/login"))
 			.andExpect(method(HttpMethod.POST))
 			.andExpect(content().json("{\"name\": \"my-default-role\"}"))
-				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 						+ "}"));
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-			.name("my-default-role") //
-				.path("my/path")
+			.role("my-default-role") //
+			.path("my/path")
 			.build();
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);

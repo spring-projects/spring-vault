@@ -31,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
  * Integration tests for {@link ClientCertificateAuthentication}.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateAuthenticationIntegrationTestBase {
 
@@ -90,12 +91,12 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().name("my-default-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-default-role").build(), restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
 		assertThatPolicies(login).contains("cert-auth1") //
-				.doesNotContain("cert-auth2");
+			.doesNotContain("cert-auth2");
 	}
 
 	@Test
@@ -106,12 +107,12 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build(), restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
 		assertThatPolicies(login).contains("cert-auth2") //
-				.doesNotContain("cert-auth1");
+			.doesNotContain("cert-auth1");
 	}
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
