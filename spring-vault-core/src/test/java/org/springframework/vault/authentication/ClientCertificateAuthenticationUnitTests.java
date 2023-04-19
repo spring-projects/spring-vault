@@ -65,7 +65,7 @@ class ClientCertificateAuthenticationUnitTests {
 								+ "}"));
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-				.name("my-default-role") //
+				.role("my-default-role") //
 				.path("my/path").build();
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);

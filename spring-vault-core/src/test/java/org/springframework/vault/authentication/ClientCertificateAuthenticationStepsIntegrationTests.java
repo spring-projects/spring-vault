@@ -27,14 +27,14 @@ import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ClientCertificateAuthentication} using
  * {@link AuthenticationStepsExecutor}.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertificateAuthenticationIntegrationTestBase {
 

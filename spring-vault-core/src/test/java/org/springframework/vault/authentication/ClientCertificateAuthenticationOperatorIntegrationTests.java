@@ -83,7 +83,7 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(
-						ClientCertificateAuthenticationOptions.builder().name("my-default-role").build()),
+						ClientCertificateAuthenticationOptions.builder().role("my-default-role").build()),
 				webClient);
 
 		operator.getVaultToken() //
@@ -100,7 +100,7 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 
 		AuthenticationStepsOperator operator = new AuthenticationStepsOperator(
 				ClientCertificateAuthentication.createAuthenticationSteps(
-						ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build()),
+						ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build()),
 				webClient);
 
 		operator.getVaultToken() //

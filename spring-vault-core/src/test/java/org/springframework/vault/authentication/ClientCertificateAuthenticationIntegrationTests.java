@@ -31,6 +31,7 @@ import org.springframework.web.client.RestTemplate;
  * Integration tests for {@link ClientCertificateAuthentication}.
  *
  * @author Mark Paluch
+ * @author Andy Lintner
  */
 class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateAuthenticationIntegrationTestBase {
 
@@ -90,7 +91,7 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().name("my-default-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-default-role").build(), restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -106,7 +107,7 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().name("my-alternate-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build(), restTemplate);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
