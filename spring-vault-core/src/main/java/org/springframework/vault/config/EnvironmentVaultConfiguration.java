@@ -39,7 +39,6 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.App
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
@@ -389,11 +388,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.isTrue(StringUtils.hasText(role),
 				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
 
-		AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions.builder()
-			.role(role)
-			.credentialsProvider(DefaultCredentialsProvider.create());
-
-		return new AwsIamAuthentication(builder.build(), restOperations());
+		return AwsIam.doCreateIamAuthentication(role, restOperations());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
@@ -488,6 +483,20 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	enum AuthenticationMethod {
 
 		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES;
+
+	}
+
+	static class AwsIam {
+
+		static ClientAuthentication doCreateIamAuthentication(String role, RestOperations restOperations) {
+
+			AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
+				.builder()
+				.role(role)
+				.credentialsProvider(DefaultCredentialsProvider.create());
+
+			return new AwsIamAuthentication(builder.build(), restOperations);
+		}
 
 	}
 
