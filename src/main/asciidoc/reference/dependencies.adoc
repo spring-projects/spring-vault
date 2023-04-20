@@ -1,35 +1,7 @@
 [[dependencies]]
 == Dependencies
 
-The easiest way to find compatible versions of Spring Vault dependencies is by relying on the Spring Vault BOM we ship with the compatible versions defined.
-In a Maven project you would declare this dependency in the
-`<dependencyManagement />` section of your `pom.xml`:
-
-.Using the Spring Vault BOM
-====
-[source,xml,subs="verbatim,attributes"]
-----
-<dependencyManagement>
-  <dependencies>
-    <dependency>
-      <groupId>org.springframework.vault</groupId>
-      <artifactId>spring-vault-dependencies</artifactId>
-      <version>{version}</version>
-      <scope>import</scope>
-      <type>pom</type>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
-----
-====
-
-[[dependencies.names]]
-The current version is `{version}`.
-The version name follows the following patterns: `$\{version\}` for GA and service releases and `$\{version\}-$\{release\}` for snapshots and milestones. `release` can be one of the following:
-
-* `SNAPSHOT` - current snapshots
-* `M1`, `M2` etc. - milestones
-* `RC1`, `RC2` etc. - release candidates
+If you want to use Spring Vault in your project, declare a dependency to the `spring-vault-core` artifact.
 
 .Declaring a dependency to Spring Vault
 ====
@@ -44,10 +16,13 @@ The version name follows the following patterns: `$\{version\}` for GA and servi
 ----
 ====
 
+The easiest way to find compatible versions of Spring Vault dependencies is by inspecting the properties section of link:https://github.com/spring-projects/spring-vault/blob/main/pom.xml[`spring-vault-parent`].
+We generally recommend upgrading to the latest dependency of Jackson, your HTTP clients and your Cloud provider SDK.
+
 [[dependencies.spring-framework]]
 == Spring Framework
 
 The current version of Spring Vault requires Spring Framework in version
-{springVersion} or better.
+{springVersion} or newer.
 The modules might also work with an older bugfix version of that minor version.
 However, using the most recent version within that generation is highly recommended.
