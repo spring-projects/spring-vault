@@ -86,7 +86,7 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get(key).flatMap(ReactiveKeyValueHelper::getRequiredData).as(StepVerifier::create)
-				.consumeNextWith(n -> assertThat(n).containsEntry("key", "value")).verifyComplete();
+				.assertNext(n -> assertThat(n).containsEntry("key", "value")).verifyComplete();
 	}
 
 	@Test
@@ -107,14 +107,14 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put("my-secret", person).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get("my-secret").flatMap(ReactiveKeyValueHelper::getRequiredData).as(StepVerifier::create)
-				.consumeNextWith(m -> {
+				.assertNext(m -> {
 					assertThat(m).containsAllEntriesOf(
 							Map.of("firstname", "Walter", "lastname", "Heisenberg", "password", "some-password"));
 					assertThat(m).containsEntry("id", null);
 				}).verifyComplete();
 
 		kvOperations.get("my-secret", Person.class).flatMap(ReactiveKeyValueHelper::getRequiredData)
-				.as(StepVerifier::create).consumeNextWith(p -> assertThat(p).isEqualTo(person)).verifyComplete();
+				.as(StepVerifier::create).assertNext(p -> assertThat(p).isEqualTo(person)).verifyComplete();
 	}
 
 	@Test

@@ -46,7 +46,7 @@ public interface ReactiveVaultKeyValueOperations extends ReactiveVaultKeyValueOp
 	 * @param patch must not be {@literal null}.
 	 * @return {@code true} if the patch operation is successful, {@code false} otherwise.
 	 */
-	Mono<Void> patch(String path, Map<String, ?> patch);
+	Mono<Boolean> patch(String path, Map<String, ?> patch);
 
 	/**
 	 * Write the secret at {@code path}.

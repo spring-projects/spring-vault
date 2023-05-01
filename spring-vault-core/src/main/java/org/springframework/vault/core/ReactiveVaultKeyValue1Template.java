@@ -16,17 +16,18 @@
 package org.springframework.vault.core;
 
 import java.util.Map;
-import org.springframework.lang.Nullable;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
- * Default implementation of {@link ReactiveVaultKeyValueOperations} for the Key/Value backend
- * version 1.
+ * Default implementation of {@link ReactiveVaultKeyValueOperations} for the Key/Value
+ * backend version 1.
  *
  * @author Timothy R. Weiand
  * @since TBD
@@ -34,8 +35,8 @@ import reactor.core.publisher.Mono;
 class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOperations {
 
 	/**
-	 * Create a new {@link ReactiveVaultKeyValue1Template} given {@link ReactiveVaultOperations}
-	 * and the mount {@code path}.
+	 * Create a new {@link ReactiveVaultKeyValue1Template} given
+	 * {@link ReactiveVaultOperations} and the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -46,49 +47,39 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 
 	@Override
 	public Flux<String> list(String path) {
-		return vaultOperations.list(createDataPath(path));
+		return reactiveVaultOperations.list(createDataPath(path));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
+		var ref = new ParameterizedTypeReference<Map<String, Object>>() {
+		};
 
-		Assert.hasText(path, "Path must not be empty");
-
-		return doRead(path, Map.class, (response, data) -> {
-
-			VaultResponse vaultResponse = new VaultResponse();
-			vaultResponse.setRenewable(response.isRenewable());
-			vaultResponse.setAuth(response.getAuth());
-			vaultResponse.setLeaseDuration(response.getLeaseDuration());
-			vaultResponse.setLeaseId(response.getLeaseId());
-			vaultResponse.setMetadata(response.getMetadata());
-			vaultResponse.setRequestId(response.getRequestId());
-			vaultResponse.setWarnings(response.getWarnings());
-			vaultResponse.setWrapInfo(response.getWrapInfo());
-			vaultResponse.setData(data);
-
-			return Mono.just(vaultResponse);
-		});
+		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
+				.map(response -> {
+					VaultResponse vaultResponse = new VaultResponse();
+					vaultResponse.setRenewable(response.isRenewable());
+					vaultResponse.setAuth(response.getAuth());
+					vaultResponse.setLeaseDuration(response.getLeaseDuration());
+					vaultResponse.setLeaseId(response.getLeaseId());
+					vaultResponse.setMetadata(response.getMetadata());
+					vaultResponse.setRequestId(response.getRequestId());
+					vaultResponse.setWarnings(response.getWarnings());
+					vaultResponse.setWrapInfo(response.getWrapInfo());
+					vaultResponse.setData(response.getData());
+					return vaultResponse;
+				});
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.notNull(responseType, "Response type must not be null");
-
-		return doRead(path, responseType, (response, data) -> {
-
-			VaultResponseSupport result = response;
-			result.setData(data);
-			return Mono.just(result);
-		});
+		return doRead(path, responseType).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
 	}
 
 	@Override
-	public Mono<Void> patch(String path, Map<String, ?> patch) {
+	public Mono<Boolean> patch(String path, Map<String, ?> patch) {
 		throw new IllegalStateException("K/V engine mount must be version 2 for patch support");
 	}
 
