@@ -127,7 +127,7 @@ public class ClientHttpConnectorFactory {
 
 		public static HttpClient createClient(ClientOptions options, SslConfiguration sslConfiguration) {
 
-			HttpClient client = HttpClient.create();
+			HttpClient client = HttpClient.create().wiretap(true);
 
 			if (hasSslConfiguration(sslConfiguration)) {
 
