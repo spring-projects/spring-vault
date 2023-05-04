@@ -103,7 +103,6 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	@Override
 	public Mono<Boolean> patch(String path, Map<String, ?> patch) {
 		Assert.notNull(patch, "Patch body must not be null");
-		// TODO: Easier to retry with exception?
 		return get(path)
 			.onErrorResume(WebClientResponseException.NotFound.class,
 					e -> Mono.error(new SecretNotFoundException(String

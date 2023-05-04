@@ -13,6 +13,7 @@
 	<description>Spring Vault Core Components</description>
 	<packaging>jar</packaging>
 
+
 	<build>
 		<resources>
 			<resource>
@@ -310,12 +311,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.jacoco</groupId>
-			<artifactId>jacoco-maven-plugin</artifactId>
-			<version>${jacoco.version}</version>
-		</dependency>
-
 		<!-- Logging -->
 
 		<dependency>
@@ -341,6 +336,14 @@
 				<sonar.sources>${project.build.sourceDirectory}</sonar.sources>
 				<sonar.tests>${project.build.testSourceDirectory}</sonar.tests>
 			</properties>
+			<dependencies>
+				<dependency>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco.version}</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
 			<build>
 				<plugins>
 					<plugin>
@@ -348,7 +351,6 @@
 						<artifactId>jacoco-maven-plugin</artifactId>
 						<version>${jacoco.version}</version>
 						<executions>
-
 							<execution>
 								<id>prepare-agent</id>
 								<goals>
@@ -358,7 +360,6 @@
 									<destFile>${project.build.directory}/jacoco-unit.exec</destFile>
 								</configuration>
 							</execution>
-
 							<execution>
 								<id>prepare-agent-integration</id>
 								<goals>
@@ -369,7 +370,6 @@
 									<append>true</append>
 								</configuration>
 							</execution>
-
 							<execution>
 								<id>report</id>
 								<phase>post-integration-test</phase>
