@@ -60,14 +60,15 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 		});
 
 		return doReadRaw(String.format("%s?list=true", createBackendPath("metadata", pathToUse)), type)
-				.flatMap(ReactiveKeyValueHelper::getRequiredData).flatMapMany(response -> {
-					final var list = (List<String>) response.get("keys");
-					if (null == list) {
-						return Flux.empty();
-					}
-					return Flux.fromIterable(list);
+			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.flatMapMany(response -> {
+				final var list = (List<String>) response.get("keys");
+				if (null == list) {
+					return Flux.empty();
+				}
+				return Flux.fromIterable(list);
 
-				});
+			});
 	}
 
 	@Override

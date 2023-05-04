@@ -57,19 +57,19 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 		};
 
 		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-				.map(response -> {
-					VaultResponse vaultResponse = new VaultResponse();
-					vaultResponse.setRenewable(response.isRenewable());
-					vaultResponse.setAuth(response.getAuth());
-					vaultResponse.setLeaseDuration(response.getLeaseDuration());
-					vaultResponse.setLeaseId(response.getLeaseId());
-					vaultResponse.setMetadata(response.getMetadata());
-					vaultResponse.setRequestId(response.getRequestId());
-					vaultResponse.setWarnings(response.getWarnings());
-					vaultResponse.setWrapInfo(response.getWrapInfo());
-					vaultResponse.setData(response.getData());
-					return vaultResponse;
-				});
+			.map(response -> {
+				VaultResponse vaultResponse = new VaultResponse();
+				vaultResponse.setRenewable(response.isRenewable());
+				vaultResponse.setAuth(response.getAuth());
+				vaultResponse.setLeaseDuration(response.getLeaseDuration());
+				vaultResponse.setLeaseId(response.getLeaseId());
+				vaultResponse.setMetadata(response.getMetadata());
+				vaultResponse.setRequestId(response.getRequestId());
+				vaultResponse.setWarnings(response.getWarnings());
+				vaultResponse.setWrapInfo(response.getWrapInfo());
+				vaultResponse.setData(response.getData());
+				return vaultResponse;
+			});
 	}
 
 	@Override

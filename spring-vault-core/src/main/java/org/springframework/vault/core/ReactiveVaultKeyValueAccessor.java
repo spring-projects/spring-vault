@@ -64,8 +64,11 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 		Assert.hasText(path, "Path must not be empty");
 		var dataPath = createDataPath(path);
 
-		return reactiveVaultOperations.doWithSession(webClient -> webClient.delete().uri(dataPath)
-				.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
+		return reactiveVaultOperations
+			.doWithSession(webClient -> webClient.delete()
+				.uri(dataPath)
+				.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE)))
+			.then();
 	}
 
 	<I> Mono<VaultResponseSupport<I>> doRead(String path, Class<I> deserializeAs) {

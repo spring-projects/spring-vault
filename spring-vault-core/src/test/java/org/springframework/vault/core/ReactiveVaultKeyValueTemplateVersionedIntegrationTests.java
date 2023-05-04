@@ -56,10 +56,15 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 
 		var newSecret = Collections.singletonMap(newKey, "newValue");
 
-		kvOperations.patch(key, newSecret).as(StepVerifier::create).assertNext(b -> assertThat(b).isTrue())
-				.verifyComplete();
-		kvOperations.list("/").collectList().as(StepVerifier::create).assertNext(list -> assertThat(list).contains(key))
-				.verifyComplete();
+		kvOperations.patch(key, newSecret)
+			.as(StepVerifier::create)
+			.assertNext(b -> assertThat(b).isTrue())
+			.verifyComplete();
+		kvOperations.list("/")
+			.collectList()
+			.as(StepVerifier::create)
+			.assertNext(list -> assertThat(list).contains(key))
+			.verifyComplete();
 
 		kvOperations.get(key).as(StepVerifier::create).assertNext(vaultResponse -> {
 			var data = vaultResponse.getRequiredData();
@@ -70,16 +75,18 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 	@Test
 	void patchShouldFailWithSecretNotFoundException() {
 
-		kvOperations.patch("unknown", Collections.singletonMap("foo", "newValue")).as(StepVerifier::create)
-				.expectErrorSatisfies(t -> {
-					if (t instanceof SecretNotFoundException e) {
-						assertThat(e).hasMessageContaining("versioned/data/unknown");
-						assertThat(e.getPath()).isEqualTo("versioned/unknown");
-					}
-					else {
-						fail("missing SecretNotFoundException");
-					}
-				}).verify();
+		kvOperations.patch("unknown", Collections.singletonMap("foo", "newValue"))
+			.as(StepVerifier::create)
+			.expectErrorSatisfies(t -> {
+				if (t instanceof SecretNotFoundException e) {
+					assertThat(e).hasMessageContaining("versioned/data/unknown");
+					assertThat(e.getPath()).isEqualTo("versioned/unknown");
+				}
+				else {
+					fail("missing SecretNotFoundException");
+				}
+			})
+			.verify();
 	}
 
 }

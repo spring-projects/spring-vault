@@ -28,7 +28,6 @@ import org.springframework.vault.support.DurationParser;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
 import org.springframework.vault.support.Versioned;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 /**
@@ -58,20 +57,23 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 		Duration duration = DurationParser.parseDuration((String) metadataResponse.get("delete_version_after"));
 
 		return VaultMetadataResponse.builder()
-				.casRequired(Boolean.parseBoolean(String.valueOf(metadataResponse.get("cas_required"))))
-				.createdTime(toInstant((String) metadataResponse.get("created_time")))
-				.currentVersion(Integer.parseInt(String.valueOf(metadataResponse.get("current_version"))))
-				.deleteVersionAfter(duration)
-				.maxVersions(Integer.parseInt(String.valueOf(metadataResponse.get("max_versions"))))
-				.oldestVersion(Integer.parseInt(String.valueOf(metadataResponse.get("oldest_version"))))
-				.updatedTime(toInstant((String) metadataResponse.get("updated_time")))
-				.versions(buildVersions((Map) metadataResponse.get("versions"))).build();
+			.casRequired(Boolean.parseBoolean(String.valueOf(metadataResponse.get("cas_required"))))
+			.createdTime(toInstant((String) metadataResponse.get("created_time")))
+			.currentVersion(Integer.parseInt(String.valueOf(metadataResponse.get("current_version"))))
+			.deleteVersionAfter(duration)
+			.maxVersions(Integer.parseInt(String.valueOf(metadataResponse.get("max_versions"))))
+			.oldestVersion(Integer.parseInt(String.valueOf(metadataResponse.get("oldest_version"))))
+			.updatedTime(toInstant((String) metadataResponse.get("updated_time")))
+			.versions(buildVersions((Map) metadataResponse.get("versions")))
+			.build();
 	}
 
 	private static List<Versioned.Metadata> buildVersions(Map<String, Map<String, Object>> versions) {
 
-		return versions.entrySet().stream().map(entry -> buildVersion(entry.getKey(), entry.getValue()))
-				.collect(Collectors.toList());
+		return versions.entrySet()
+			.stream()
+			.map(entry -> buildVersion(entry.getKey(), entry.getValue()))
+			.collect(Collectors.toList());
 	}
 
 	private static Versioned.Metadata buildVersion(String version, Map<String, Object> versionData) {
@@ -81,8 +83,12 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 		boolean destroyed = (Boolean) versionData.get("destroyed");
 		Versioned.Version kvVersion = Versioned.Version.from(Integer.parseInt(version));
 
-		return Versioned.Metadata.builder().createdAt(createdTime).deletedAt(deletionTime).destroyed(destroyed)
-				.version(kvVersion).build();
+		return Versioned.Metadata.builder()
+			.createdAt(createdTime)
+			.deletedAt(deletionTime)
+			.destroyed(destroyed)
+			.version(kvVersion)
+			.build();
 	}
 
 	@Nullable
@@ -93,15 +99,14 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	@Override
 	public Mono<VaultMetadataResponse> get(String path) {
 
-		return vaultOperations.read(getMetadataPath(path), Map.class)
-				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty()).flatMap(response -> {
-					var data = response.getData();
-					if (null == data) {
-						return Mono.empty();
-					}
+		return vaultOperations.read(getMetadataPath(path), Map.class).flatMap(response -> {
+			var data = response.getData();
+			if (null == data) {
+				return Mono.empty();
+			}
 
-					return Mono.just(data);
-				}).map(ReactiveVaultKeyValueMetadataTemplate::fromMap);
+			return Mono.just(data);
+		}).map(ReactiveVaultKeyValueMetadataTemplate::fromMap);
 	}
 
 	@Override

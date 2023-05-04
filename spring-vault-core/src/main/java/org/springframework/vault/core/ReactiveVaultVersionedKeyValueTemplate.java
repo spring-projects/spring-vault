@@ -89,8 +89,10 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
-		return Arrays.stream(versionsToDelete).filter(Version::isVersioned).map(Version::getVersion)
-				.collect(Collectors.toList());
+		return Arrays.stream(versionsToDelete)
+			.filter(Version::isVersioned)
+			.map(Version::getVersion)
+			.collect(Collectors.toList());
 	}
 
 	@Override
@@ -101,7 +103,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.notNull(version, "Version must not be null");
 
 		return doRead(path, version, Map.class)
-				.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getMetadata()));
+			.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getMetadata()));
 	}
 
 	@Override
@@ -143,7 +145,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		var data = new LinkedHashMap<>();
 		var requestOptions = new LinkedHashMap<>();
 
-		if (body instanceof Versioned<?>versioned) {
+		if (body instanceof Versioned<?> versioned) {
 
 			data.put("data", versioned.getData());
 			data.put("options", requestOptions);
@@ -155,9 +157,9 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		}
 
 		return doWrite(createDataPath(path), data).flatMap(ReactiveKeyValueHelper::getRequiredData)
-				.map(ReactiveVaultVersionedKeyValueTemplate::getMetadata)
-				.switchIfEmpty(Mono.error(new IllegalStateException(
-						"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
+			.map(ReactiveVaultVersionedKeyValueTemplate::getMetadata)
+			.switchIfEmpty(Mono.error(new IllegalStateException(
+					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
 	}
 
 	@Override

@@ -71,11 +71,16 @@ public interface ReactiveVaultOperations {
 	 * @since 3.1
 	 */
 	ReactiveVaultSysOperations opsForSys();
+
 	/*
 	 * Return {@link VaultKeyValueOperations}.
+	 *
 	 * @param path the mount path, must not be empty or {@literal null}.
+	 *
 	 * @param apiVersion API version to use, must not be {@literal null}.
+	 *
 	 * @return the operations interface to interact with the Vault Key/Value backend.
+	 *
 	 * @since xxx
 	 */
 	ReactiveVaultKeyValueOperations opsForKeyValue(String path,

@@ -57,87 +57,88 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 		};
 
 		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-				.map(response -> {
-					VaultResponse vaultResponse = new VaultResponse();
-					vaultResponse.setRenewable(response.isRenewable());
-					vaultResponse.setAuth(response.getAuth());
-					vaultResponse.setLeaseDuration(response.getLeaseDuration());
-					vaultResponse.setLeaseId(response.getLeaseId());
-					vaultResponse.setRequestId(response.getRequestId());
-					vaultResponse.setWarnings(response.getWarnings());
-					vaultResponse.setWrapInfo(response.getWrapInfo());
+			.map(response -> {
+				VaultResponse vaultResponse = new VaultResponse();
+				vaultResponse.setRenewable(response.isRenewable());
+				vaultResponse.setAuth(response.getAuth());
+				vaultResponse.setLeaseDuration(response.getLeaseDuration());
+				vaultResponse.setLeaseId(response.getLeaseId());
+				vaultResponse.setRequestId(response.getRequestId());
+				vaultResponse.setWarnings(response.getWarnings());
+				vaultResponse.setWrapInfo(response.getWrapInfo());
 
-					var data = response.getData();
-					if (null != data) {
-						vaultResponse.setData(data.getData());
-						vaultResponse.setMetadata(data.getMetadata());
-					}
-					return vaultResponse;
-				});
+				var data = response.getData();
+				if (null != data) {
+					vaultResponse.setData(data.getData());
+					vaultResponse.setMetadata(data.getMetadata());
+				}
+				return vaultResponse;
+			});
 	}
 
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
 		var ref = VaultResponses.getTypeReference(VaultResponses.getDataTypeReference(responseType));
 		return doReadRaw(createDataPath(path), ref)
-				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty()).map(response -> {
-					VaultResponseSupport<T> vaultResponse = new VaultResponseSupport<>();
-					vaultResponse.setRenewable(response.isRenewable());
-					vaultResponse.setAuth(response.getAuth());
-					vaultResponse.setLeaseDuration(response.getLeaseDuration());
-					vaultResponse.setLeaseId(response.getLeaseId());
-					vaultResponse.setRequestId(response.getRequestId());
-					vaultResponse.setWarnings(response.getWarnings());
-					vaultResponse.setWrapInfo(response.getWrapInfo());
+			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
+			.map(response -> {
+				VaultResponseSupport<T> vaultResponse = new VaultResponseSupport<>();
+				vaultResponse.setRenewable(response.isRenewable());
+				vaultResponse.setAuth(response.getAuth());
+				vaultResponse.setLeaseDuration(response.getLeaseDuration());
+				vaultResponse.setLeaseId(response.getLeaseId());
+				vaultResponse.setRequestId(response.getRequestId());
+				vaultResponse.setWarnings(response.getWarnings());
+				vaultResponse.setWrapInfo(response.getWrapInfo());
 
-					var data = response.getData();
-					if (null != data) {
-						vaultResponse.setData(data.getData());
-						vaultResponse.setMetadata(data.getMetadata());
-					}
-					return vaultResponse;
-				});
+				var data = response.getData();
+				if (null != data) {
+					vaultResponse.setData(data.getData());
+					vaultResponse.setMetadata(data.getMetadata());
+				}
+				return vaultResponse;
+			});
 	}
 
 	@Override
 	public Mono<Boolean> patch(String path, Map<String, ?> patch) {
 		Assert.notNull(patch, "Patch body must not be null");
 		// TODO: Easier to retry with exception?
-		return get(path).onErrorResume(WebClientResponseException.NotFound.class,
-				e -> Mono.error(new SecretNotFoundException(
-						String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-						String.format("%s/%s", this.path, path))))
-				.switchIfEmpty(Mono.error(new SecretNotFoundException(
-						String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-						String.format("%s/%s", this.path, path))))
-				.flatMap(readResponse -> {
-					if (null == readResponse.getData()) {
-						return Mono.error(new SecretNotFoundException(String
-								.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-								String.format("%s/%s", this.path, path)));
+		return get(path)
+			.onErrorResume(WebClientResponseException.NotFound.class,
+					e -> Mono.error(new SecretNotFoundException(String
+						.format("No data found at %s; patch only works on existing data", createDataPath(path)),
+							String.format("%s/%s", this.path, path))))
+			.switchIfEmpty(Mono.error(new SecretNotFoundException(
+					String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
+					String.format("%s/%s", this.path, path))))
+			.flatMap(readResponse -> {
+				if (null == readResponse.getData()) {
+					return Mono.error(new SecretNotFoundException(String
+						.format("No data found at %s; patch only works on existing data", createDataPath(path)),
+							String.format("%s/%s", this.path, path)));
+				}
+
+				if (readResponse.getMetadata() == null) {
+					return Mono.error(new VaultException("Metadata must not be null"));
+				}
+
+				Map<String, Object> metadata = readResponse.getMetadata();
+				Map<String, Object> data = new LinkedHashMap<>(readResponse.getRequiredData());
+				data.putAll(patch);
+
+				Map<String, Object> body = new HashMap<>();
+				body.put("data", data);
+				body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+
+				return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class, e -> {
+					if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
+							|| e.getMessage().contains("did not match the current version"))) {
+						return Mono.just(Boolean.FALSE);
 					}
-
-					if (readResponse.getMetadata() == null) {
-						return Mono.error(new VaultException("Metadata must not be null"));
-					}
-
-					Map<String, Object> metadata = readResponse.getMetadata();
-					Map<String, Object> data = new LinkedHashMap<>(readResponse.getRequiredData());
-					data.putAll(patch);
-
-					Map<String, Object> body = new HashMap<>();
-					body.put("data", data);
-					body.put("options", Collections.singletonMap("cas", metadata.get("version")));
-
-					return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class,
-							e -> {
-								if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
-										|| e.getMessage().contains("did not match the current version"))) {
-									return Mono.just(Boolean.FALSE);
-								}
-								return Mono.error(e);
-							});
+					return Mono.error(e);
 				});
+			});
 	}
 
 	@Override

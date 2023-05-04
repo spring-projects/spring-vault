@@ -73,11 +73,14 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		person.setLastname("White");
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Versioned.create(person)).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
+		reactiveVersionedOperations.put(key, Versioned.create(person))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
 
-		reactiveVersionedOperations.get(key, Person.class).as(StepVerifier::create)
-				.assertNext(versioned -> assertThat(versioned.getRequiredData()).isEqualTo(person));
+		reactiveVersionedOperations.get(key, Person.class)
+			.as(StepVerifier::create)
+			.assertNext(versioned -> assertThat(versioned.getRequiredData()).isEqualTo(person));
 	}
 
 	@Test
@@ -85,13 +88,16 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Versioned.create(secret, Version.unversioned())).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
+		reactiveVersionedOperations.put(key, Versioned.create(secret, Version.unversioned()))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
 
 		// this should fail
-		reactiveVersionedOperations.put(key, Versioned.create(secret, Version.unversioned())).as(StepVerifier::create)
-				.verifyErrorSatisfies(throwable -> assertThat(throwable).isExactlyInstanceOf(VaultException.class)
-						.hasMessageContaining("check-and-set parameter did not match the current version"));
+		reactiveVersionedOperations.put(key, Versioned.create(secret, Version.unversioned()))
+			.as(StepVerifier::create)
+			.verifyErrorSatisfies(throwable -> assertThat(throwable).isExactlyInstanceOf(VaultException.class)
+				.hasMessageContaining("check-and-set parameter did not match the current version"));
 	}
 
 	@Test
@@ -99,8 +105,10 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Versioned.create(secret)).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
+		reactiveVersionedOperations.put(key, Versioned.create(secret))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
 
 		reactiveVersionedOperations.get(key).as(StepVerifier::create).assertNext(loaded -> {
 			assertThat(loaded.getRequiredData()).isEqualTo(secret);
@@ -114,36 +122,50 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, secret).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
+		reactiveVersionedOperations.put(key, secret)
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
 
-		reactiveVersionedOperations.list("").collectList().as(StepVerifier::create)
-				.assertNext(list -> assertThat(list).contains(key));
+		reactiveVersionedOperations.list("")
+			.collectList()
+			.as(StepVerifier::create)
+			.assertNext(list -> assertThat(list).contains(key));
 	}
 
 	@Test
 	void shouldReadDifferentVersions() {
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2)).verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))
+			.verifyComplete();
 
-		reactiveVersionedOperations.get(key, Version.from(1)).as(StepVerifier::create).assertNext(
-				versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v1")));
-		reactiveVersionedOperations.get(key, Version.from(2)).as(StepVerifier::create).assertNext(
-				versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v2")));
+		reactiveVersionedOperations.get(key, Version.from(1))
+			.as(StepVerifier::create)
+			.assertNext(versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v1")));
+		reactiveVersionedOperations.get(key, Version.from(2))
+			.as(StepVerifier::create)
+			.assertNext(versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v2")));
 	}
 
 	@Test
 	void shouldDeleteMostRecentVersion() {
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2)).verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))
+			.verifyComplete();
 
 		reactiveVersionedOperations.delete(key).as(StepVerifier::create).verifyComplete();
 
@@ -160,10 +182,14 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 	void shouldUndeleteVersion() {
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2)).verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))
+			.verifyComplete();
 
 		reactiveVersionedOperations.delete(key, Version.from(2)).as(StepVerifier::create).verifyComplete();
 		reactiveVersionedOperations.undelete(key, Version.from(2)).as(StepVerifier::create).verifyComplete();
@@ -180,10 +206,14 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 	void shouldDeleteIntermediateRecentVersion() {
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2)).verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))
+			.verifyComplete();
 
 		reactiveVersionedOperations.delete(key, Version.from(1)).as(StepVerifier::create).verifyComplete();
 
@@ -200,10 +230,14 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 	void shouldDestroyVersion() {
 		var key = UUID.randomUUID().toString();
 
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1)).verifyComplete();
-		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2")).as(StepVerifier::create)
-				.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2)).verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
+			.verifyComplete();
+		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
+			.as(StepVerifier::create)
+			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))
+			.verifyComplete();
 
 		reactiveVersionedOperations.destroy(key, Version.from(2)).as(StepVerifier::create).verifyComplete();
 

@@ -72,8 +72,12 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
-		kvOperations.list("/").as(StepVerifier::create).recordWith(ArrayList::new).thenConsumeWhile(x -> true)
-				.expectRecordedMatches(elements -> elements.contains(key)).verifyComplete();
+		kvOperations.list("/")
+			.as(StepVerifier::create)
+			.recordWith(ArrayList::new)
+			.thenConsumeWhile(x -> true)
+			.expectRecordedMatches(elements -> elements.contains(key))
+			.verifyComplete();
 	}
 
 	@Test
@@ -85,8 +89,11 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
-		kvOperations.get(key).flatMap(ReactiveKeyValueHelper::getRequiredData).as(StepVerifier::create)
-				.assertNext(n -> assertThat(n).containsEntry("key", "value")).verifyComplete();
+		kvOperations.get(key)
+			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.as(StepVerifier::create)
+			.assertNext(n -> assertThat(n).containsEntry("key", "value"))
+			.verifyComplete();
 	}
 
 	@Test
@@ -106,15 +113,21 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 
 		kvOperations.put("my-secret", person).as(StepVerifier::create).verifyComplete();
 
-		kvOperations.get("my-secret").flatMap(ReactiveKeyValueHelper::getRequiredData).as(StepVerifier::create)
-				.assertNext(m -> {
-					assertThat(m).containsAllEntriesOf(
-							Map.of("firstname", "Walter", "lastname", "Heisenberg", "password", "some-password"));
-					assertThat(m).containsEntry("id", null);
-				}).verifyComplete();
+		kvOperations.get("my-secret")
+			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.as(StepVerifier::create)
+			.assertNext(m -> {
+				assertThat(m).containsAllEntriesOf(
+						Map.of("firstname", "Walter", "lastname", "Heisenberg", "password", "some-password"));
+				assertThat(m).containsEntry("id", null);
+			})
+			.verifyComplete();
 
-		kvOperations.get("my-secret", Person.class).flatMap(ReactiveKeyValueHelper::getRequiredData)
-				.as(StepVerifier::create).assertNext(p -> assertThat(p).isEqualTo(person)).verifyComplete();
+		kvOperations.get("my-secret", Person.class)
+			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.as(StepVerifier::create)
+			.assertNext(p -> assertThat(p).isEqualTo(person))
+			.verifyComplete();
 	}
 
 	@Test

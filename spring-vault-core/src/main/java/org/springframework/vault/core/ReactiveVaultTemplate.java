@@ -47,10 +47,9 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import org.springframework.web.reactive.function.client.WebClientException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
@@ -277,8 +276,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	public ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
 		return switch (apiVersion) {
-		case KV_1 -> new ReactiveVaultKeyValue1Template(this, path);
-		case KV_2 -> new ReactiveVaultKeyValue2Template(this, path);
+			case KV_1 -> new ReactiveVaultKeyValue1Template(this, path);
+			case KV_2 -> new ReactiveVaultKeyValue2Template(this, path);
 		};
 	}
 
@@ -303,7 +302,10 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 			var ref = VaultResponses.getTypeReference(responseType);
 
-			return webClient.get().uri(path).exchangeToMono(mapResponse(ref, path, HttpMethod.GET));
+			return webClient.get()
+				.uri(path)
+				.exchangeToMono(mapResponse(ref, path, HttpMethod.GET))
+				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
 		});
 	}
 
@@ -314,9 +316,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.hasText(path, "Path must not be empty");
 
 		return doRead(String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")), VaultListResponse.class)
-				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-				.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
-				.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
+			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
+			.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
+			.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
 	}
 
 	@Override
