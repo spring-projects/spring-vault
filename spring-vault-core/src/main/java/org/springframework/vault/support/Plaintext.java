@@ -17,8 +17,8 @@ package org.springframework.vault.support;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Objects;
-
 import org.springframework.util.Assert;
 
 /**

@@ -15,12 +15,15 @@
  */
 package org.springframework.vault.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,7 +32,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -805,6 +807,54 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Signature signature = this.transitOperations.sign(keyName, request);
 		assertThat(signature.getSignature()).isNotEmpty();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signAndVerifyWithPrehashedInput() {
+		String keyName = createEcdsaP256Key();
+		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
+		VaultSignRequest signRequest = VaultSignRequest.builder()
+			.plaintext(plaintext)
+			.signatureAlgorithm("pkcs1v15")
+			.prehashed(true)
+			.build();
+
+		Signature signature = this.transitOperations.sign(keyName, signRequest);
+		assertThat(signature.getSignature()).isNotEmpty();
+
+		VaultSignatureVerificationRequest verifyRequest = VaultSignatureVerificationRequest.builder()
+			.prehashed(true)
+			.plaintext(plaintext)
+			.signature(signature)
+			.signatureAlgorithm("pkcs1v15")
+			.build();
+		SignatureValidation validation = this.transitOperations.verify(keyName, verifyRequest);
+		assertThat(validation.isValid()).isTrue();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signWithPrehashedAndVerifyWithoutShouldFail() {
+		String keyName = createEcdsaP256Key();
+		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
+		VaultSignRequest signRequest = VaultSignRequest.builder()
+			.plaintext(plaintext)
+			.signatureAlgorithm("pkcs1v15")
+			.prehashed(true)
+			.build();
+
+		Signature signature = this.transitOperations.sign(keyName, signRequest);
+		assertThat(signature.getSignature()).isNotEmpty();
+
+		VaultSignatureVerificationRequest verifyRequest = VaultSignatureVerificationRequest.builder()
+			.prehashed(false)
+			.plaintext(plaintext)
+			.signature(signature)
+			.signatureAlgorithm("pkcs1v15")
+			.build();
+		SignatureValidation validation = this.transitOperations.verify(keyName, verifyRequest);
+		assertThat(validation.isValid()).isFalse();
 	}
 
 	@Test

@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.support;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -39,14 +40,17 @@ public class VaultSignatureVerificationRequest {
 
 	private final @Nullable String signatureAlgorithm;
 
+	private final boolean prehashed;
+
 	private VaultSignatureVerificationRequest(Plaintext plaintext, @Nullable Signature signature, @Nullable Hmac hmac,
-			@Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
+			@Nullable String hashAlgorithm, @Nullable String signatureAlgorithm, boolean prehashed) {
 
 		this.plaintext = plaintext;
 		this.signature = signature;
 		this.hmac = hmac;
 		this.hashAlgorithm = hashAlgorithm;
 		this.signatureAlgorithm = signatureAlgorithm;
+		this.prehashed = prehashed;
 	}
 
 	/**
@@ -137,6 +141,13 @@ public class VaultSignatureVerificationRequest {
 	}
 
 	/**
+	 * @return true if the input is already hashed.
+	 */
+	public boolean isPrehashed() {
+		return this.prehashed;
+	}
+
+	/**
 	 * Builder to build a {@link VaultSignatureVerificationRequest}.
 	 */
 	public static class VaultSignatureVerificationRequestBuilder {
@@ -150,6 +161,8 @@ public class VaultSignatureVerificationRequest {
 		private @Nullable String hashAlgorithm;
 
 		private @Nullable String signatureAlgorithm;
+
+		private boolean prehashed;
 
 		/**
 		 * Configure the {@link Plaintext} input to be used to verify the signature.
@@ -230,6 +243,11 @@ public class VaultSignatureVerificationRequest {
 			return this;
 		}
 
+		public VaultSignatureVerificationRequestBuilder prehashed(boolean prehashed) {
+			this.prehashed = prehashed;
+			return this;
+		}
+
 		/**
 		 * Configure the algorithm to be used for the operation.
 		 * @param algorithm Specify the algorithm to be used for the operation. Supported
@@ -255,7 +273,7 @@ public class VaultSignatureVerificationRequest {
 			Assert.isTrue(this.hmac != null || this.signature != null, "Either Signature or Hmac must not be null");
 
 			return new VaultSignatureVerificationRequest(this.input, this.signature, this.hmac, this.hashAlgorithm,
-					this.signatureAlgorithm);
+					this.signatureAlgorithm, this.prehashed);
 		}
 
 	}
