@@ -407,7 +407,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	static Map<String, Object> toRequestBody(VaultSignRequest signRequest) {
 
-		Map<String, Object> request = new LinkedHashMap<>(3);
+		Map<String, Object> request = new LinkedHashMap<>(4);
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(signRequest.getPlaintext()::getPlaintext)
@@ -415,6 +415,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.to("input", request);
 		mapper.from(signRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(signRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
+		mapper.from(signRequest::isPrehashed).to("prehashed", request);
 
 		return request;
 	}
@@ -464,6 +465,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.to("signature", request);
 		mapper.from(verificationRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(verificationRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
+		mapper.from(verificationRequest::isPrehashed).to("prehashed", request);
 
 		return request;
 	}
