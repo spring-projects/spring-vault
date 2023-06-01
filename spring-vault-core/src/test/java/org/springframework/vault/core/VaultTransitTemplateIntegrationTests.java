@@ -232,6 +232,22 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(mykey.isDerived()).isTrue();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 		assertThat(mykey.getLatestVersion()).isEqualTo(1);
+		assertThat(mykey.supportsConvergentEncryption()).isTrue();
+		assertThat(mykey.getConvergentVersion()).isEqualTo(-1);
+	}
+
+	@Test
+	void createKeyWithPlaintextBackupOption() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+			.allowPlaintextBackup(true) //
+			.build();
+
+		this.transitOperations.createKey("mykey", request);
+
+		VaultTransitKey mykey = this.transitOperations.getKey("mykey");
+
+		assertThat(mykey.getName()).isEqualTo("mykey");
+		assertThat(mykey.allowPlaintextBackup()).isTrue();
 	}
 
 	@Test

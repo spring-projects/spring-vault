@@ -96,4 +96,23 @@ public interface VaultTransitKey {
 	 */
 	boolean supportsSigning();
 
+	/**
+	 * @return if set, enables taking backup of named key in the plaintext format. Once
+	 * set, this cannot be disabled.
+	 */
+	boolean allowPlaintextBackup();
+
+	/**
+	 * @return If enabled, the key will support convergent encryption, where the same
+	 * plaintext creates the same ciphertext. This requires 'derived' to be set to true.
+	 */
+	boolean supportsConvergentEncryption();
+
+	/**
+	 * @return the version of the convergent nonce to use. Note: since version 3 the
+	 * algorithm used in `transit`'s convergent encryption returns -1 since the version is
+	 * stored with the key. For backwards compatability this field might be interesting.
+	 */
+	int getConvergentVersion();
+
 }

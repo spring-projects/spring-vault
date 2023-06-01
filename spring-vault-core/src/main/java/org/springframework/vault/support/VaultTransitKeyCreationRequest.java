@@ -37,12 +37,16 @@ public class VaultTransitKeyCreationRequest {
 
 	private final boolean exportable;
 
+	@JsonProperty("allow_plaintext_backup")
+	private final boolean allowPlaintextBackup;
+
 	private VaultTransitKeyCreationRequest(boolean derived, String type, boolean convergentEncryption,
-			boolean exportable) {
+			boolean exportable, boolean allowPlaintextBackup) {
 		this.derived = derived;
 		this.type = type;
 		this.convergentEncryption = convergentEncryption;
 		this.exportable = exportable;
+		this.allowPlaintextBackup = allowPlaintextBackup;
 	}
 
 	/**
@@ -106,6 +110,8 @@ public class VaultTransitKeyCreationRequest {
 
 		private boolean exportable;
 
+		private boolean allowPlaintextBackup;
+
 		VaultTransitKeyCreationRequestBuilder() {
 		}
 
@@ -160,6 +166,12 @@ public class VaultTransitKeyCreationRequest {
 			return this;
 		}
 
+		public VaultTransitKeyCreationRequestBuilder allowPlaintextBackup(boolean allowPlaintextBackup) {
+
+			this.allowPlaintextBackup = allowPlaintextBackup;
+			return this;
+		}
+
 		/**
 		 * Build a new {@link VaultTransitKeyCreationRequest} instance. Requires
 		 * {@link #type(String)} to be configured.
@@ -170,7 +182,7 @@ public class VaultTransitKeyCreationRequest {
 			Assert.hasText(this.type, "Type must not be empty");
 
 			return new VaultTransitKeyCreationRequest(this.derived, this.type, this.convergentEncryption,
-					this.exportable);
+					this.exportable, this.allowPlaintextBackup);
 		}
 
 	}
