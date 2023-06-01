@@ -320,6 +320,17 @@ If you prefer not to use m2eclipse you can generate eclipse project metadata usi
 The generated eclipse projects can be imported by selecting `import existing projects`
 from the `file` menu.
 
+==== Importing into IntelliJ
+
+In IntelliJ, choose `File --> Open` and select the `pom.xml` it will automatically detect it is a Maven project and starts downloading all necessary dependencies.
+
+==== Formatting code (Spring Java Format)
+
+The project uses https://github.com/spring-io/spring-javaformat[Spring Java Format] through the `spring-javaformat-maven-plugin`.
+You can run `./mvnw spring-javaformat:apply` to reformat code.
+Follow the instructions for https://github.com/spring-io/spring-javaformat#eclipse[Eclipse] or https://github.com/spring-io/spring-javaformat#intellij-idea[IntelliJ] to install a plugin to enable formatting in your favorite IDE.
+
+
 == Contributing
 
 Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard Github development process, using Github tracker for issues and merging pull requests into `main`.
