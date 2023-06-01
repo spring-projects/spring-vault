@@ -232,6 +232,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(mykey.isDerived()).isTrue();
 		assertThat(mykey.getMinDecryptionVersion()).isEqualTo(1);
 		assertThat(mykey.getLatestVersion()).isEqualTo(1);
+		assertThat(mykey.supportsConvergentEncryption()).isTrue();
 	}
 
 	@Test

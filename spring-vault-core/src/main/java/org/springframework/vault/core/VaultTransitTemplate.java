@@ -599,6 +599,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("allow_plaintext_backup")
 		private boolean allowPlaintextBackup;
 
+		@JsonProperty("convergent_encryption")
+		private boolean supportsConvergentEncryption;
+
 		public VaultTransitKeyImpl() {
 		}
 
@@ -635,6 +638,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@Override
 		public boolean allowPlaintextBackup() {
 			return isAllowPlaintextBackup();
+		}
+
+		@Override
+		public boolean supportsConvergentEncryption() {
+			return isSupportsConvergentEncryption();
 		}
 
 		@Nullable
@@ -692,6 +700,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		public boolean isSupportsSigning() {
 			return this.supportsSigning;
+		}
+
+		public boolean isSupportsConvergentEncryption() {
+			return this.supportsConvergentEncryption;
 		}
 
 		public void setName(@Nullable String name) {
@@ -766,7 +778,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 					&& this.supportsDerivation == that.supportsDerivation
 					&& this.supportsSigning == that.supportsSigning && Objects.equals(this.name, that.name)
 					&& this.cipherMode.equals(that.cipherMode) && Objects.equals(this.type, that.type)
-					&& this.allowPlaintextBackup == that.allowPlaintextBackup;
+					&& this.allowPlaintextBackup == that.allowPlaintextBackup
+					&& this.supportsConvergentEncryption == that.supportsConvergentEncryption;
 		}
 
 		@Override
@@ -774,7 +787,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			return Objects.hash(this.name, this.cipherMode, this.type, this.deletionAllowed, this.derived,
 					this.exportable, this.keys, this.latestVersion, this.minDecryptionVersion,
 					this.minEncryptionVersion, this.supportsDecryption, this.supportsEncryption,
-					this.supportsDerivation, this.supportsSigning, this.allowPlaintextBackup);
+					this.supportsDerivation, this.supportsSigning, this.allowPlaintextBackup,
+					this.supportsConvergentEncryption);
 		}
 
 	}

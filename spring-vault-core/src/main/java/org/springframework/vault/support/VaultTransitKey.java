@@ -102,4 +102,10 @@ public interface VaultTransitKey {
 	 */
 	boolean allowPlaintextBackup();
 
+	/**
+	 * @return If enabled, the key will support convergent encryption, where the same
+	 * plaintext creates the same ciphertext. This requires 'derived' to be set to true.
+	 */
+	boolean supportsConvergentEncryption();
+
 }
