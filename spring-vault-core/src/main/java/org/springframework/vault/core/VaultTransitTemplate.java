@@ -457,6 +457,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		if (!ObjectUtils.isEmpty(context.getNonce())) {
 			request.put("nonce", Base64.getEncoder().encodeToString(context.getNonce()));
 		}
+
+		if (context.getKeyVersion() != 0) {
+			request.put("key_version", "" + context.getKeyVersion());
+		}
 	}
 
 	private static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse,

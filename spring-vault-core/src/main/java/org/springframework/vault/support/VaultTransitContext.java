@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.support;
 
-import java.util.Arrays;
-
 import org.springframework.util.Assert;
+
+import java.util.Arrays;
 
 /**
  * Transit backend encryption/decryption/rewrapping context.
@@ -30,15 +30,18 @@ public class VaultTransitContext {
 	 * Empty (default) {@link VaultTransitContext} without a {@literal context} and
 	 * {@literal nonce}.
 	 */
-	private static final VaultTransitContext EMPTY = new VaultTransitContext(new byte[0], new byte[0]);
+	private static final VaultTransitContext EMPTY = new VaultTransitContext(new byte[0], new byte[0], 0);
 
 	private final byte[] context;
 
 	private final byte[] nonce;
 
-	VaultTransitContext(byte[] context, byte[] nonce) {
+	private final int keyVersion;
+
+	VaultTransitContext(byte[] context, byte[] nonce, int keyVersion) {
 		this.context = context;
 		this.nonce = nonce;
+		this.keyVersion = keyVersion;
 	}
 
 	/**
@@ -89,6 +92,15 @@ public class VaultTransitContext {
 		return this.nonce;
 	}
 
+	/**
+	 * @return the version of the key to use for the operation. If not set, uses the
+	 * latest version. Must be greater than or equal to the key's min_encryption_version,
+	 * if set.
+	 */
+	public int getKeyVersion() {
+		return this.keyVersion;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -96,13 +108,14 @@ public class VaultTransitContext {
 		if (!(o instanceof VaultTransitContext))
 			return false;
 		VaultTransitContext that = (VaultTransitContext) o;
-		return Arrays.equals(this.context, that.context) && Arrays.equals(this.nonce, that.nonce);
+		return Arrays.equals(this.context, that.context) && Arrays.equals(this.nonce, that.nonce)
+				&& this.keyVersion == that.keyVersion;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = Arrays.hashCode(this.context);
-		result = 31 * result + Arrays.hashCode(this.nonce);
+		result = 31 * result + Arrays.hashCode(this.nonce) + this.keyVersion;
 		return result;
 	}
 
@@ -114,6 +127,8 @@ public class VaultTransitContext {
 		private byte[] context = new byte[0];
 
 		private byte[] nonce = new byte[0];
+
+		private int keyVersion;
 
 		VaultTransitRequestBuilder() {
 		}
@@ -149,12 +164,19 @@ public class VaultTransitContext {
 			return this;
 		}
 
+		public VaultTransitRequestBuilder keyVersion(int keyVersion) {
+			Assert.isTrue(keyVersion >= 0, "Key version must have a positive value");
+
+			this.keyVersion = keyVersion;
+			return this;
+		}
+
 		/**
 		 * Build a new {@link VaultTransitContext} instance.
 		 * @return a new {@link VaultTransitContext}.
 		 */
 		public VaultTransitContext build() {
-			return new VaultTransitContext(this.context, this.nonce);
+			return new VaultTransitContext(this.context, this.nonce, this.keyVersion);
 		}
 
 	}
