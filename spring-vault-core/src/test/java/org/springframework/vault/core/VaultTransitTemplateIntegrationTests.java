@@ -15,25 +15,48 @@
  */
 package org.springframework.vault.core;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.*;
+import org.springframework.vault.support.Ciphertext;
+import org.springframework.vault.support.Hmac;
+import org.springframework.vault.support.Plaintext;
+import org.springframework.vault.support.RawTransitKey;
+import org.springframework.vault.support.Signature;
+import org.springframework.vault.support.SignatureValidation;
+import org.springframework.vault.support.TransitKeyType;
+import org.springframework.vault.support.VaultDecryptionResult;
+import org.springframework.vault.support.VaultEncryptionResult;
+import org.springframework.vault.support.VaultHmacRequest;
+import org.springframework.vault.support.VaultMount;
+import org.springframework.vault.support.VaultSignRequest;
+import org.springframework.vault.support.VaultSignatureVerificationRequest;
+import org.springframework.vault.support.VaultTransitContext;
+import org.springframework.vault.support.VaultTransitKey;
+import org.springframework.vault.support.VaultTransitKeyConfiguration;
+import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration tests for {@link VaultTransitTemplate} through
@@ -311,19 +334,29 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(ciphertext).startsWith("vault:v");
 	}
 
-	@Test
-	void encryptShouldCreateCiphertextWithNonceAndContext() {
+	private static Stream<Arguments> encryptWithKeyVersion() {
+		return Stream.of(Arguments.of(1, 1, "v1"), Arguments.of(2, 2, "v2"), Arguments.of(1, 2, ""),
+				Arguments.of(2, 1, "v1"), Arguments.of("2", "0", "v2"));
+	}
 
-		this.transitOperations.createKey("mykey",
-				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
+	@ParameterizedTest
+	@MethodSource
+	void encryptWithKeyVersion(int keyVersion, int usedKeyVersionWhileEncrypting, String expectedKeyPrefix) {
+		this.transitOperations.createKey("mykey", VaultTransitKeyCreationRequest.builder().build());
+		// rotate the key to get the right version
+		IntStream.range(0, keyVersion - 1).forEach(__ -> this.transitOperations.rotate("mykey"));
 
 		VaultTransitContext transitRequest = VaultTransitContext.builder()
-			.context("blubb".getBytes()) //
-			.nonce("123456789012".getBytes()) //
+			.keyVersion(usedKeyVersionWhileEncrypting)
 			.build();
 
-		String ciphertext = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
-		assertThat(ciphertext).startsWith("vault:v1:");
+		try {
+			String ciphertext = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
+			assertThat(ciphertext).startsWith("vault:%s:".formatted(expectedKeyPrefix));
+		}
+		catch (Exception e) {
+			Assertions.assertThat(expectedKeyPrefix).isNullOrEmpty();
+		}
 	}
 
 	@Test
@@ -370,6 +403,38 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String plaintext = this.transitOperations.decrypt("mykey", ciphertext);
 
 		assertThat(plaintext).isEqualTo("hello-world");
+	}
+
+	private static Stream<Arguments> decryptWithKeyVersion() {
+		return Stream.of(Arguments.of(1, 1, true), Arguments.of(2, 2, true), Arguments.of(1, 2, false),
+				Arguments.of(2, 1, true), Arguments.of("2", "0", true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	void decryptWithKeyVersion(int keyVersion, int usedKeyVersionWhileEncrypting, boolean shouldPass) {
+		this.transitOperations.createKey("mykey");
+		// rotate the key to get the right version
+		IntStream.range(0, keyVersion - 1).forEach(__ -> this.transitOperations.rotate("mykey"));
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder()
+			.keyVersion(usedKeyVersionWhileEncrypting)
+			.build();
+
+		try {
+			String ciphertext = this.transitOperations
+				.encrypt("mykey", Plaintext.of("hello-world").with(transitRequest))
+				.getCiphertext();
+			String plaintext = Plaintext.of(this.transitOperations.decrypt("mykey", ciphertext, transitRequest))
+				.asString();
+
+			assertThat(shouldPass).isTrue();
+			assertThat(plaintext).isEqualTo("hello-world");
+
+		}
+		catch (VaultException e) {
+			assertThat(shouldPass).isFalse();
+		}
 	}
 
 	@Test
@@ -564,7 +629,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 		catch (VaultException e) {
 			assertThat(e).hasMessageContaining("error"); // Vault 1.6 behavior is
-															// different
+			// different
 		}
 	}
 

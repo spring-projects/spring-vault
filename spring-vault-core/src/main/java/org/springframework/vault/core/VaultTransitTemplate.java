@@ -16,8 +16,6 @@
 package org.springframework.vault.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -477,6 +475,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		if (!ObjectUtils.isEmpty(context.getNonce())) {
 			request.put("nonce", Base64.getEncoder().encodeToString(context.getNonce()));
+		}
+
+		if (context.getKeyVersion() != 0) {
+			request.put("key_version", "" + context.getKeyVersion());
 		}
 	}
 
