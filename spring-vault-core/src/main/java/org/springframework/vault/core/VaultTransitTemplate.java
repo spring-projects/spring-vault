@@ -602,6 +602,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("convergent_encryption")
 		private boolean supportsConvergentEncryption;
 
+		@JsonProperty("convergent_encryption_version")
+		private int convergentVersion;
+
 		public VaultTransitKeyImpl() {
 		}
 
@@ -643,6 +646,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@Override
 		public boolean supportsConvergentEncryption() {
 			return isSupportsConvergentEncryption();
+		}
+
+		@Override
+		public int getConvergentVersion() {
+			return this.convergentVersion;
 		}
 
 		@Nullable

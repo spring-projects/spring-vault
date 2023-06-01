@@ -108,4 +108,11 @@ public interface VaultTransitKey {
 	 */
 	boolean supportsConvergentEncryption();
 
+	/**
+	 * @return the version of the convergent nonce to use. Note: since version 3 the
+	 * algorithm used in `transit`'s convergent encryption returns -1 since the version is
+	 * stored with the key. For backwards compatability this field might be interesting.
+	 */
+	int getConvergentVersion();
+
 }
