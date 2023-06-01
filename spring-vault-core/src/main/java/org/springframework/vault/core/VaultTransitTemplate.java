@@ -16,8 +16,6 @@
 package org.springframework.vault.core;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jetbrains.annotations.NotNull;
-
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -598,6 +596,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("supports_signing")
 		private boolean supportsSigning;
 
+		@JsonProperty("allow_plaintext_backup")
+		private boolean allowPlaintextBackup;
+
 		public VaultTransitKeyImpl() {
 		}
 
@@ -629,6 +630,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@Override
 		public boolean supportsSigning() {
 			return isSupportsSigning();
+		}
+
+		@Override
+		public boolean allowPlaintextBackup() {
+			return isAllowPlaintextBackup();
 		}
 
 		@Nullable
@@ -666,6 +672,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		public int getMinEncryptionVersion() {
 			return this.minEncryptionVersion;
+		}
+
+		public boolean isAllowPlaintextBackup() {
+			return this.allowPlaintextBackup;
 		}
 
 		public boolean isSupportsDecryption() {
@@ -756,7 +766,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 					&& this.supportsDerivation == that.supportsDerivation
 					&& this.supportsSigning == that.supportsSigning && Objects.equals(this.name, that.name)
 					&& this.cipherMode.equals(that.cipherMode) && Objects.equals(this.type, that.type)
-					&& this.keys.equals(that.keys);
+					&& this.allowPlaintextBackup == that.allowPlaintextBackup;
 		}
 
 		@Override
@@ -764,7 +774,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			return Objects.hash(this.name, this.cipherMode, this.type, this.deletionAllowed, this.derived,
 					this.exportable, this.keys, this.latestVersion, this.minDecryptionVersion,
 					this.minEncryptionVersion, this.supportsDecryption, this.supportsEncryption,
-					this.supportsDerivation, this.supportsSigning);
+					this.supportsDerivation, this.supportsSigning, this.allowPlaintextBackup);
 		}
 
 	}

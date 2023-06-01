@@ -96,4 +96,10 @@ public interface VaultTransitKey {
 	 */
 	boolean supportsSigning();
 
+	/**
+	 * @return if set, enables taking backup of named key in the plaintext format. Once
+	 * set, this cannot be disabled.
+	 */
+	boolean allowPlaintextBackup();
+
 }

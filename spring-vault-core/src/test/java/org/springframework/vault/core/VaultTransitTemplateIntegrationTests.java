@@ -235,6 +235,20 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void createKeyWithPlaintextBackupOption() {
+		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder() //
+			.allowPlaintextBackup(true) //
+			.build();
+
+		this.transitOperations.createKey("mykey", request);
+
+		VaultTransitKey mykey = this.transitOperations.getKey("mykey");
+
+		assertThat(mykey.getName()).isEqualTo("mykey");
+		assertThat(mykey.allowPlaintextBackup()).isTrue();
+	}
+
+	@Test
 	void shouldConfigureKey() {
 
 		this.transitOperations.createKey("mykey");
