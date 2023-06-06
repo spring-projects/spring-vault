@@ -155,13 +155,13 @@ Given the `Credentials` type from the previous sections the default mapping is a
 ----
 {
   "_class": "org.example.Credentials",                 <1>
-  "password", "327215",                                <2>
+  "password": "327215",                                <2>
   "socialSecurityNumber": "AAA-GG-SSSS",
   "address": {                                         <3>
     "street": "308 Negra Arroyo Lane",
     "city": "Albuquerque",
     "state": "New Mexico",
-    "zip":"87104"
+    "zip": "87104"
   }
 }
 ----
@@ -182,27 +182,27 @@ NOTE: The `@Id` property must be mapped to `String`.
 | Simple Type +
 (eg. String)
 | String firstname = "Walter";
-| firstname = "Walter"
+| "firstname": "Walter"
 
 | Complex Type +
 (eg. Address)
 | Address adress = new Address("308 Negra Arroyo Lane");
-| address: { "street": "308 Negra Arroyo Lane" }
+| "address": { "street": "308 Negra Arroyo Lane" }
 
 | List +
 of Simple Type
 | List<String> nicknames = asList("walt", "heisenberg");
-| nicknames: ["walt", "heisenberg"]
+| "nicknames": ["walt", "heisenberg"]
 
 | Map +
 of Simple Type
 | Map<String, Integer> atts = asMap("age", 51)
-| atts : {"age" : 51}
+| "atts" : {"age" : 51}
 
 | List +
 of Complex Type
 | List<Address> addresses = asList(new Address("308…
-| address: [{ "street": "308 Negra Arroyo Lane" }, …]
+| "address": [{ "street": "308 Negra Arroyo Lane" }, …]
 
 |===
 
