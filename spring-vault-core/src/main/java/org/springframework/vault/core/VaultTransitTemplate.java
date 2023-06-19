@@ -58,6 +58,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Luander Ribeiro
  * @author Mikko Koli
  * @author My-Lan Aragon
+ * @author Nanne Baars
  */
 public class VaultTransitTemplate implements VaultTransitOperations {
 
@@ -537,12 +538,18 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@Nullable
 		private String name;
 
-		@JsonProperty("cipher_mode")
-		private String cipherMode = "";
-
 		@JsonProperty("type")
 		@Nullable
 		private String type;
+
+		@JsonProperty("allow_plaintext_backup")
+		private boolean allowPlaintextBackup;
+
+		@JsonProperty("cipher_mode")
+		private String cipherMode = "";
+
+		@JsonProperty("convergent_encryption_version")
+		private int convergentVersion;
 
 		@JsonProperty("deletion_allowed")
 		private boolean deletionAllowed;
@@ -562,28 +569,32 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		@JsonProperty("min_encryption_version")
 		private int minEncryptionVersion;
 
+		@JsonProperty("convergent_encryption")
+		private boolean supportsConvergentEncryption;
+
 		@JsonProperty("supports_decryption")
 		private boolean supportsDecryption;
-
-		@JsonProperty("supports_encryption")
-		private boolean supportsEncryption;
 
 		@JsonProperty("supports_derivation")
 		private boolean supportsDerivation;
 
+		@JsonProperty("supports_encryption")
+		private boolean supportsEncryption;
+
 		@JsonProperty("supports_signing")
 		private boolean supportsSigning;
 
-		@JsonProperty("allow_plaintext_backup")
-		private boolean allowPlaintextBackup;
-
-		@JsonProperty("convergent_encryption")
-		private boolean supportsConvergentEncryption;
-
-		@JsonProperty("convergent_encryption_version")
-		private int convergentVersion;
-
 		public VaultTransitKeyImpl() {
+		}
+
+		@Override
+		@Nullable
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(@Nullable String name) {
+			this.name = name;
 		}
 
 		@Override
@@ -596,9 +607,123 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			return this.cipherMode;
 		}
 
+		public void setType(@Nullable String type) {
+			this.type = type;
+		}
+
+		@Override
+		public boolean allowPlaintextBackup() {
+			return isAllowPlaintextBackup();
+		}
+
+		public boolean isAllowPlaintextBackup() {
+			return this.allowPlaintextBackup;
+		}
+
+		public String getCipherMode() {
+			return this.cipherMode;
+		}
+
+		public void setCipherMode(String cipherMode) {
+			this.cipherMode = cipherMode;
+		}
+
+		@Override
+		public int getConvergentVersion() {
+			return this.convergentVersion;
+		}
+
+		@Override
+		public boolean isDeletionAllowed() {
+			return this.deletionAllowed;
+		}
+
+		public void setDeletionAllowed(boolean deletionAllowed) {
+			this.deletionAllowed = deletionAllowed;
+		}
+
+		@Override
+		public boolean isDerived() {
+			return this.derived;
+		}
+
+		public void setDerived(boolean derived) {
+			this.derived = derived;
+		}
+
+		@Override
+		public boolean isExportable() {
+			return this.exportable;
+		}
+
+		public void setExportable(boolean exportable) {
+			this.exportable = exportable;
+		}
+
+		@Override
+		public Map<String, Object> getKeys() {
+			return this.keys;
+		}
+
+		public void setKeys(Map<String, Object> keys) {
+			this.keys = keys;
+		}
+
+		@Override
+		public int getLatestVersion() {
+			return this.latestVersion;
+		}
+
+		public void setLatestVersion(int latestVersion) {
+			this.latestVersion = latestVersion;
+		}
+
+		@Override
+		public int getMinDecryptionVersion() {
+			return this.minDecryptionVersion;
+		}
+
+		public void setMinDecryptionVersion(int minDecryptionVersion) {
+			this.minDecryptionVersion = minDecryptionVersion;
+		}
+
+		public void setSupportsEncryption(boolean supportsEncryption) {
+			this.supportsEncryption = supportsEncryption;
+		}
+
+		@Override
+		public int getMinEncryptionVersion() {
+			return this.minEncryptionVersion;
+		}
+
+		public void setMinEncryptionVersion(int minEncryptionVersion) {
+			this.minEncryptionVersion = minEncryptionVersion;
+		}
+
+		public boolean isSupportsConvergentEncryption() {
+			return this.supportsConvergentEncryption;
+		}
+
+		@Override
+		public boolean supportsConvergentEncryption() {
+			return isSupportsConvergentEncryption();
+		}
+
+		public boolean isSupportsDecryption() {
+			return this.supportsDecryption;
+		}
+
 		@Override
 		public boolean supportsDecryption() {
 			return isSupportsDecryption();
+		}
+
+		public void setSupportsDecryption(boolean supportsDecryption) {
+			this.supportsDecryption = supportsDecryption;
+		}
+
+		public boolean isSupportsEncryption() {
+			return this.supportsEncryption;
 		}
 
 		@Override
@@ -611,141 +736,25 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			return isSupportsDerivation();
 		}
 
-		@Override
-		public boolean supportsSigning() {
-			return isSupportsSigning();
-		}
-
-		@Override
-		public boolean allowPlaintextBackup() {
-			return isAllowPlaintextBackup();
-		}
-
-		@Override
-		public boolean supportsConvergentEncryption() {
-			return isSupportsConvergentEncryption();
-		}
-
-		@Override
-		public int getConvergentVersion() {
-			return this.convergentVersion;
-		}
-
-		@Nullable
-		public String getName() {
-			return this.name;
-		}
-
-		public String getCipherMode() {
-			return this.cipherMode;
-		}
-
-		public boolean isDeletionAllowed() {
-			return this.deletionAllowed;
-		}
-
-		public boolean isDerived() {
-			return this.derived;
-		}
-
-		public boolean isExportable() {
-			return this.exportable;
-		}
-
-		public Map<String, Object> getKeys() {
-			return this.keys;
-		}
-
-		public int getLatestVersion() {
-			return this.latestVersion;
-		}
-
-		public int getMinDecryptionVersion() {
-			return this.minDecryptionVersion;
-		}
-
-		public int getMinEncryptionVersion() {
-			return this.minEncryptionVersion;
-		}
-
-		public boolean isAllowPlaintextBackup() {
-			return this.allowPlaintextBackup;
-		}
-
-		public boolean isSupportsDecryption() {
-			return this.supportsDecryption;
-		}
-
-		public boolean isSupportsEncryption() {
-			return this.supportsEncryption;
-		}
-
 		public boolean isSupportsDerivation() {
 			return this.supportsDerivation;
-		}
-
-		public boolean isSupportsSigning() {
-			return this.supportsSigning;
-		}
-
-		public boolean isSupportsConvergentEncryption() {
-			return this.supportsConvergentEncryption;
-		}
-
-		public void setName(@Nullable String name) {
-			this.name = name;
-		}
-
-		public void setCipherMode(String cipherMode) {
-			this.cipherMode = cipherMode;
-		}
-
-		public void setType(@Nullable String type) {
-			this.type = type;
-		}
-
-		public void setDeletionAllowed(boolean deletionAllowed) {
-			this.deletionAllowed = deletionAllowed;
-		}
-
-		public void setDerived(boolean derived) {
-			this.derived = derived;
-		}
-
-		public void setExportable(boolean exportable) {
-			this.exportable = exportable;
-		}
-
-		public void setKeys(Map<String, Object> keys) {
-			this.keys = keys;
-		}
-
-		public void setLatestVersion(int latestVersion) {
-			this.latestVersion = latestVersion;
-		}
-
-		public void setMinDecryptionVersion(int minDecryptionVersion) {
-			this.minDecryptionVersion = minDecryptionVersion;
-		}
-
-		public void setMinEncryptionVersion(int minEncryptionVersion) {
-			this.minEncryptionVersion = minEncryptionVersion;
-		}
-
-		public void setSupportsDecryption(boolean supportsDecryption) {
-			this.supportsDecryption = supportsDecryption;
-		}
-
-		public void setSupportsEncryption(boolean supportsEncryption) {
-			this.supportsEncryption = supportsEncryption;
 		}
 
 		public void setSupportsDerivation(boolean supportsDerivation) {
 			this.supportsDerivation = supportsDerivation;
 		}
 
+		public boolean isSupportsSigning() {
+			return this.supportsSigning;
+		}
+
 		public void setSupportsSigning(boolean supportsSigning) {
 			this.supportsSigning = supportsSigning;
+		}
+
+		@Override
+		public boolean supportsSigning() {
+			return isSupportsSigning();
 		}
 
 		@Override
@@ -755,7 +764,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			if (!(o instanceof VaultTransitKeyImpl))
 				return false;
 			VaultTransitKeyImpl that = (VaultTransitKeyImpl) o;
-			return this.deletionAllowed == that.deletionAllowed && this.derived == that.derived
+			return this.allowPlaintextBackup == that.allowPlaintextBackup
+					&& this.deletionAllowed == that.deletionAllowed && this.derived == that.derived
 					&& this.exportable == that.exportable && this.latestVersion == that.latestVersion
 					&& this.minDecryptionVersion == that.minDecryptionVersion
 					&& this.minEncryptionVersion == that.minEncryptionVersion
@@ -764,17 +774,15 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 					&& this.supportsDerivation == that.supportsDerivation
 					&& this.supportsSigning == that.supportsSigning && Objects.equals(this.name, that.name)
 					&& this.cipherMode.equals(that.cipherMode) && Objects.equals(this.type, that.type)
-					&& this.allowPlaintextBackup == that.allowPlaintextBackup
 					&& this.supportsConvergentEncryption == that.supportsConvergentEncryption;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.name, this.cipherMode, this.type, this.deletionAllowed, this.derived,
-					this.exportable, this.keys, this.latestVersion, this.minDecryptionVersion,
+			return Objects.hash(this.allowPlaintextBackup, this.name, this.cipherMode, this.type, this.deletionAllowed,
+					this.derived, this.exportable, this.keys, this.latestVersion, this.minDecryptionVersion,
 					this.minEncryptionVersion, this.supportsDecryption, this.supportsEncryption,
-					this.supportsDerivation, this.supportsSigning, this.allowPlaintextBackup,
-					this.supportsConvergentEncryption);
+					this.supportsDerivation, this.supportsSigning, this.supportsConvergentEncryption);
 		}
 
 	}
@@ -789,10 +797,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		public RawTransitKeyImpl() {
 		}
 
+		@Override
 		public Map<String, String> getKeys() {
 			return this.keys;
 		}
 
+		@Override
 		@Nullable
 		public String getName() {
 			return this.name;

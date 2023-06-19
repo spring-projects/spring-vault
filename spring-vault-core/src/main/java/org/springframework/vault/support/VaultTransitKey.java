@@ -22,6 +22,7 @@ import java.util.Map;
  *
  * @author Mark Paluch
  * @author Sven Schürmann
+ * @author Nanne Baars
  */
 public interface VaultTransitKey {
 
@@ -34,6 +35,22 @@ public interface VaultTransitKey {
 	 * @return the key type ({@code aes-gcm}, {@code ecdsa-p256}, ...).
 	 */
 	String getType();
+
+	/**
+	 * @return whether the key can be backed up in the plaintext format. Once set, this
+	 * cannot be disabled.
+	 * @since 3.0.3
+	 */
+	boolean allowPlaintextBackup();
+
+	/**
+	 * @return the version of the convergent nonce to use. Note: since version 3 the
+	 * algorithm used in {@code transit} convergent encryption returns {@code -1} as the
+	 * version is stored with the key. For backwards compatability this field might be
+	 * useful.
+	 * @since 3.0.3
+	 */
+	int getConvergentVersion();
 
 	/**
 	 * @return {@literal true} if deletion of the key is allowed. Key deletion must be
@@ -73,16 +90,18 @@ public interface VaultTransitKey {
 	int getMinEncryptionVersion();
 
 	/**
+	 * @return whether the key supports convergent encryption (i.e where the same
+	 * plaintext creates the same ciphertext). Requires {@link #isDerived()} to be set to
+	 * {@code true}.
+	 * @since 3.0.3
+	 */
+	boolean supportsConvergentEncryption();
+
+	/**
 	 * @return whether the key supports decryption.
 	 * @since 1.1
 	 */
 	boolean supportsDecryption();
-
-	/**
-	 * @return whether the key supports encryption.
-	 * @since 1.1
-	 */
-	boolean supportsEncryption();
 
 	/**
 	 * @return whether the key supports derivation.
@@ -91,28 +110,15 @@ public interface VaultTransitKey {
 	boolean supportsDerivation();
 
 	/**
+	 * @return whether the key supports encryption.
+	 * @since 1.1
+	 */
+	boolean supportsEncryption();
+
+	/**
 	 * @return whether the key supports signing.
 	 * @since 1.1
 	 */
 	boolean supportsSigning();
-
-	/**
-	 * @return if set, enables taking backup of named key in the plaintext format. Once
-	 * set, this cannot be disabled.
-	 */
-	boolean allowPlaintextBackup();
-
-	/**
-	 * @return If enabled, the key will support convergent encryption, where the same
-	 * plaintext creates the same ciphertext. This requires 'derived' to be set to true.
-	 */
-	boolean supportsConvergentEncryption();
-
-	/**
-	 * @return the version of the convergent nonce to use. Note: since version 3 the
-	 * algorithm used in `transit`'s convergent encryption returns -1 since the version is
-	 * stored with the key. For backwards compatability this field might be interesting.
-	 */
-	int getConvergentVersion();
 
 }
