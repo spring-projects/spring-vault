@@ -166,6 +166,13 @@ public class VaultTransitKeyCreationRequest {
 			return this;
 		}
 
+		/**
+		 * Configure if the key supports plaintext backups.
+		 * @param allowPlaintextBackup {@literal true} the key supports plaintext backups.
+		 * Defaults to {@literal false}.
+		 * @return {@code this} {@link VaultTransitKeyCreationRequestBuilder}.
+		 * @since 3.0.3
+		 */
 		public VaultTransitKeyCreationRequestBuilder allowPlaintextBackup(boolean allowPlaintextBackup) {
 
 			this.allowPlaintextBackup = allowPlaintextBackup;
