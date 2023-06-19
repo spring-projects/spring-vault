@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -168,7 +168,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, String> request = new LinkedHashMap<>();
 
-		request.put("plaintext", Base64Utils.encodeToString(plaintext.getBytes()));
+		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes()));
 
 		return (String) this.vaultOperations.write(String.format("%s/encrypt/%s", this.path, keyName), request)
 			.getRequiredData()
@@ -195,7 +195,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, String> request = new LinkedHashMap<>();
 
-		request.put("plaintext", Base64Utils.encodeToString(plaintext));
+		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext));
 
 		applyTransitOptions(transitContext, request);
 
@@ -216,7 +216,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
-			vaultRequest.put("plaintext", Base64Utils.encodeToString(request.getPlaintext()));
+			vaultRequest.put("plaintext", Base64.getEncoder().encodeToString(request.getPlaintext()));
 
 			if (request.getContext() != null) {
 				applyTransitOptions(request.getContext(), vaultRequest);
@@ -246,7 +246,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.getRequiredData()
 			.get("plaintext");
 
-		return new String(Base64Utils.decodeFromString(plaintext));
+		return new String(Base64.getDecoder().decode(plaintext));
 	}
 
 	@Override
@@ -278,7 +278,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.getRequiredData()
 			.get("plaintext");
 
-		return Base64Utils.decodeFromString(plaintext);
+		return Base64.getDecoder().decode(plaintext);
 	}
 
 	@Override
@@ -360,7 +360,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Map<String, Object> request = new LinkedHashMap<>(3);
 		PropertyMapper mapper = PropertyMapper.get();
 
-		mapper.from(hmacRequest.getPlaintext()::getPlaintext).as(Base64Utils::encodeToString).to("input", request);
+		mapper.from(hmacRequest.getPlaintext()::getPlaintext)
+			.as(Base64.getEncoder()::encodeToString)
+			.to("input", request);
 		mapper.from(hmacRequest::getAlgorithm).whenHasText().to("algorithm", request);
 		mapper.from(hmacRequest::getKeyVersion).whenNonNull().to("key_version", request);
 
@@ -391,7 +393,9 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Map<String, Object> request = new LinkedHashMap<>(3);
 		PropertyMapper mapper = PropertyMapper.get();
 
-		mapper.from(signRequest.getPlaintext()::getPlaintext).as(Base64Utils::encodeToString).to("input", request);
+		mapper.from(signRequest.getPlaintext()::getPlaintext)
+			.as(Base64.getEncoder()::encodeToString)
+			.to("input", request);
 		mapper.from(signRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(signRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
 
@@ -423,7 +427,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(verificationRequest.getPlaintext()::getPlaintext)
-			.as(Base64Utils::encodeToString)
+			.as(Base64.getEncoder()::encodeToString)
 			.to("input", request);
 		mapper.from(verificationRequest::getHmac).whenNonNull().as(Hmac::getHmac).to("hmac", request);
 		mapper.from(verificationRequest::getSignature)
@@ -447,11 +451,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	private static void applyTransitOptions(VaultTransitContext context, Map<String, String> request) {
 
 		if (!ObjectUtils.isEmpty(context.getContext())) {
-			request.put("context", Base64Utils.encodeToString(context.getContext()));
+			request.put("context", Base64.getEncoder().encodeToString(context.getContext()));
 		}
 
 		if (!ObjectUtils.isEmpty(context.getNonce())) {
-			request.put("nonce", Base64Utils.encodeToString(context.getNonce()));
+			request.put("nonce", Base64.getEncoder().encodeToString(context.getNonce()));
 		}
 	}
 
@@ -517,7 +521,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		if (StringUtils.hasText(data.get("plaintext"))) {
 
-			byte[] plaintext = Base64Utils.decodeFromString(data.get("plaintext"));
+			byte[] plaintext = Base64.getDecoder().decode(data.get("plaintext"));
 			return new VaultDecryptionResult(Plaintext.of(plaintext).with(ciphertext.getContext()));
 		}
 
