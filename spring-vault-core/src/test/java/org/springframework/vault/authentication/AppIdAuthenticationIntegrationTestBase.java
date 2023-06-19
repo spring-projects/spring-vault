@@ -20,6 +20,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 
+import org.springframework.vault.util.DisabledOnVaultVersion;
 import org.springframework.vault.util.IntegrationTestSupport;
 
 /**
@@ -27,6 +28,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
  *
  * @author Mark Paluch
  */
+@DisabledOnVaultVersion("1.12")
 public abstract class AppIdAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	@BeforeEach
