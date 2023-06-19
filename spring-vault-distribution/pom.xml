@@ -13,7 +13,7 @@
 	<parent>
 		<groupId>org.springframework.vault</groupId>
 		<artifactId>spring-vault-parent</artifactId>
-		<version>3.1.0-SNAPSHOT</version>
+		<version>3.0.3</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
@@ -200,11 +200,11 @@
 											<!-- Copy files for the single-file HTML version -->
 											<copy failonerror="false" todir="${project.root}/target/site/reference/html">
 												<fileset dir="${generated-docs.directory}">
-													<include name="img/**"/>
-													<include name="images/**"/>
-													<include name="css/**"/>
-													<include name="js/**"/>
-													<include name="**/*.html"/>
+													<include name="img/**" />
+													<include name="images/**" />
+													<include name="css/**" />
+													<include name="js/**" />
+													<include name="**/*.html" />
 												</fileset>
 											</copy>
 
