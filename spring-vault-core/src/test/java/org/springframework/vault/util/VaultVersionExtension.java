@@ -36,7 +36,7 @@ class VaultVersionExtension implements ExecutionCondition {
 	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace.create("vault.version");
 
 	private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = ConditionEvaluationResult
-			.enabled("@VaultVersion is not present");
+		.enabled("@VaultVersion is not present");
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
@@ -66,13 +66,13 @@ class VaultVersionExtension implements ExecutionCondition {
 
 			if (runningVersion.isGreaterThanOrEqualTo(requiredVersion)) {
 				return ConditionEvaluationResult
-						.enabled(String.format("Test is enabled, @VaultVersion(%s) is met with Vault running version %s",
-								requiredVersion, runningVersion));
+					.enabled(String.format("Test is enabled, @VaultVersion(%s) is met with Vault running version %s",
+							requiredVersion, runningVersion));
 			}
 
 			return ConditionEvaluationResult
-					.disabled(String.format("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s",
-							requiredVersion, runningVersion));
+				.disabled(String.format("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s",
+						requiredVersion, runningVersion));
 		}
 
 		if (disabled.isPresent()) {

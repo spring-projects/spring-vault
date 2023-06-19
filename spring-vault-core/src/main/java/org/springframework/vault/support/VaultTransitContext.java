@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  */
 package org.springframework.vault.support;
 
-import org.springframework.util.Assert;
-
 import java.util.Arrays;
+
+import org.springframework.util.Assert;
 
 /**
  * Transit backend encryption/decryption/rewrapping context.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  */
 public class VaultTransitContext {
 
@@ -93,9 +94,10 @@ public class VaultTransitContext {
 	}
 
 	/**
-	 * @return the version of the key to use for the operation. If not set, uses the
-	 * latest version. Must be greater than or equal to the key's min_encryption_version,
+	 * @return the version of the key to use for the operation. Uses the latest version if
+	 * not set. Must be greater than or equal to the key's {@code min_encryption_version},
 	 * if set.
+	 * @since 3.0.3
 	 */
 	public int getKeyVersion() {
 		return this.keyVersion;
@@ -164,7 +166,16 @@ public class VaultTransitContext {
 			return this;
 		}
 
+		/**
+		 * Configure the key version to use. Must be greater than or equal to the key's
+		 * {@code min_encryption_version}. The key version is not used if not set.
+		 * @param keyVersion the key version to be used, must be greater than or equal to
+		 * the key's {@code min_encryption_version}
+		 * @return {@code this} {@link VaultTransitRequestBuilder}.
+		 * @since 3.0.3
+		 */
 		public VaultTransitRequestBuilder keyVersion(int keyVersion) {
+
 			Assert.isTrue(keyVersion >= 0, "Key version must have a positive value");
 
 			this.keyVersion = keyVersion;
