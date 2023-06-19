@@ -865,7 +865,7 @@ Spring Vault provides with {self-docs-root}api/org/springframework/vault/authent
 Depending on the authentication method, a login can create two kinds of tokens:
 
 * {self-docs-root}api/org/springframework/vault/support/VaultToken.html[`VaultToken`]: Generic token encapsulating the actual token.
-* {self-docs-root}api/org/springframework/vault/support/LoginToken.html[`LoginToken`]: Token associated with renewability/TTL.
+* {self-docs-root}api/org/springframework/vault/authentication/LoginToken.html[`LoginToken`]: Token associated with renewability/TTL.
 
 Authentication methods such as {self-docs-root}api/org/springframework/vault/authentication/TokenAuthentication.html[`TokenAuthentication`] just create a `VaultToken` which does not carry any renewability/TTL details. `LifecycleAwareSessionManager` will run a self-lookup on the token to retrieve renewability and TTL from Vault.
 `VaultToken` are renewed periodically if self-lookup is enabled. Note that `VaultToken` are never revoked, only `LoginToken` are revoked.
