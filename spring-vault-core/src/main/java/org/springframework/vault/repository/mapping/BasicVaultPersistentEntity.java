@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.repository.mapping;
 
+import org.springframework.data.keyvalue.core.mapping.AnnotationBasedKeySpaceResolver;
 import org.springframework.data.keyvalue.core.mapping.BasicKeyValuePersistentEntity;
 import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
 import org.springframework.data.util.TypeInformation;
@@ -43,10 +44,25 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 	/**
 	 * Creates new {@link BasicVaultPersistentEntity}.
 	 * @param information must not be {@literal null}.
-	 * @param fallbackKeySpaceResolver can be {@literal null}.
+	 * @param keySpaceResolver can be {@literal null}.
 	 */
-	public BasicVaultPersistentEntity(TypeInformation<T> information, KeySpaceResolver fallbackKeySpaceResolver) {
-		super(information, fallbackKeySpaceResolver);
+	public BasicVaultPersistentEntity(TypeInformation<T> information, @Nullable KeySpaceResolver keySpaceResolver) {
+		super(information, type -> {
+
+			if (keySpaceResolver != null) {
+				return keySpaceResolver.resolveKeySpace(type);
+			}
+
+			String keyspace = AnnotationBasedKeySpaceResolver.INSTANCE.resolveKeySpace(type);
+			if (StringUtils.hasText(keyspace)) {
+
+				// fallback to use keyspace resolution and SpEL expression handling of
+				// BasicKeyValuePersistentEntity.
+				return null;
+			}
+
+			return SimpleClassNameKeySpaceResolver.INSTANCE.resolveKeySpace(type);
+		});
 
 		Secret annotation = findAnnotation(Secret.class);
 

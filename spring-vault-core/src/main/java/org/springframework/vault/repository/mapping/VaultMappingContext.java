@@ -20,9 +20,7 @@ import org.springframework.data.keyvalue.core.mapping.context.KeyValueMappingCon
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.data.util.TypeInformation;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
+import org.springframework.lang.Nullable;
 
 /**
  * Mapping context for {@link VaultPersistentEntity Vault-specific entities}.
@@ -32,45 +30,26 @@ import org.springframework.util.StringUtils;
  */
 public class VaultMappingContext extends KeyValueMappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> {
 
-	private KeySpaceResolver fallbackKeySpaceResolver = SimpleClassNameKeySpaceResolver.INSTANCE;
-
+	/**
+	 * @return the {@link KeySpaceResolver} if configured.
+	 * @deprecated since 3.1, {@link KeySpaceResolver} has fully moved into
+	 * {@link KeyValueMappingContext}.
+	 */
+	@Nullable
+	@Deprecated(since = "3.1", forRemoval = true)
 	public KeySpaceResolver getFallbackKeySpaceResolver() {
-		return this.fallbackKeySpaceResolver;
-	}
-
-	@Override
-	public void setFallbackKeySpaceResolver(KeySpaceResolver fallbackKeySpaceResolver) {
-		this.fallbackKeySpaceResolver = fallbackKeySpaceResolver;
+		return super.getKeySpaceResolver();
 	}
 
 	@Override
 	protected <T> VaultPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {
-		return new BasicVaultPersistentEntity<>(typeInformation, this.fallbackKeySpaceResolver);
+		return new BasicVaultPersistentEntity<>(typeInformation, getKeySpaceResolver());
 	}
 
 	@Override
 	protected VaultPersistentProperty createPersistentProperty(Property property, VaultPersistentEntity<?> owner,
 			SimpleTypeHolder simpleTypeHolder) {
 		return new VaultPersistentProperty(property, owner, simpleTypeHolder);
-	}
-
-	/**
-	 * Most trivial implementation of {@link KeySpaceResolver} returning the
-	 * {@link Class#getName()}.
-	 *
-	 * @author Mark Paluch
-	 */
-	enum SimpleClassNameKeySpaceResolver implements KeySpaceResolver {
-
-		INSTANCE;
-
-		@Override
-		public String resolveKeySpace(Class<?> type) {
-
-			Assert.notNull(type, "Type must not be null");
-			return StringUtils.uncapitalize(ClassUtils.getUserClass(type).getSimpleName());
-		}
-
 	}
 
 }
