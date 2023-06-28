@@ -828,6 +828,42 @@ See also:
 * https://www.vaultproject.io/api-docs/auth/radius[Vault Documentation: Using the RADIUS auth backend]
 * https://www.vaultproject.io/api-docs/auth/okta[Vault Documentation: Using the Okta auth backend]
 
+[[vault.authentication.jwt]]
+== JWT authentication
+
+
+Configuring JWT authentication requires at least the signed JWT to be provided:
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        JwtAuthenticationOptions options = JwtAuthenticationOptions.builder()
+                .role(…).jwt(…).path(…).build();
+
+        return new JwtAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+You can configure the authentication via `JwtAuthenticationOptions`.
+
+On the Vault side you can configure the JWT backend by enabling the JWT auth backend and creating a role. You can either use `oidc_discovery_url`, `jwks_url` or `jwt_validation_pubkeys` to configure the JWT backend.
+
+See also:
+
+* https://developer.hashicorp.com/vault/docs/auth/jwt[Vault Documentation: Using the JWT auth backend]
+
+
 [[vault.authentication.steps]]
 == Authentication Steps
 
