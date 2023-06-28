@@ -722,6 +722,8 @@ class AppConfig extends AbstractVaultConfiguration {
 
     // …
 }
+
+
 ----
 ====
 
@@ -821,12 +823,65 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
+On the Vault side you can configure the
+
+.Crating and storing tokens
+====
+[source,shell]
+----
+$ vault token-create -wrap-ttl="10m"
+Key                            Value
+---                            -----
+wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
+wrapping_token_ttl:            0h10m0s
+wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
+wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
+----
+====
+
+
 See also:
 
 * https://www.vaultproject.io/api-docs/auth/userpass[Vault Documentation: Using the Userpass auth backend]
 * https://www.vaultproject.io/api-docs/auth/ldap[Vault Documentation: Using the LDAP auth backend]
 * https://www.vaultproject.io/api-docs/auth/radius[Vault Documentation: Using the RADIUS auth backend]
 * https://www.vaultproject.io/api-docs/auth/okta[Vault Documentation: Using the Okta auth backend]
+
+[[vault.authentication.jwt]]
+== JWT authentication
+
+
+Configuring JWT authentication requires at least the signed JWT to be provided:
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        JwtAuthenticationOptions options = JwtAuthenticationOptions.builder()
+                .role(…).jwt(…).path(…).build();
+
+        return new JwtAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+You can configure the authentication via `JwtAuthenticationOptions`.
+
+On the Vault side you can configure the JWT backend by enabling the JWT auth backend and creating a role. You can either use `oidc_discovery_url`, `jwks_url` or `jwt_validation_pubkeys` to configure the JWT backend.
+
+See also:
+
+* https://developer.hashicorp.com/vault/docs/auth/jwt[Vault Documentation: Using the JWT auth backend]
+
 
 [[vault.authentication.steps]]
 == Authentication Steps
