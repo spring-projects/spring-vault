@@ -15,8 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import java.util.Optional;
 import java.util.function.Supplier;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -38,7 +38,8 @@ public class JwtAuthenticationOptions {
 	 * Path of the JWT authentication backend mount. Optional and defaults to
 	 * {@literal jwt}.
 	 */
-	private final Optional<String> path;
+	@Nullable
+	private final String path;
 
 	/**
 	 * Name of the role against which the login is being attempted. Defaults to configured
@@ -46,17 +47,18 @@ public class JwtAuthenticationOptions {
 	 * <a href="https://developer.hashicorp.com/vault/api-docs/auth/jwt#configure">Vault
 	 * JWT configuration</a>
 	 */
-	private final Optional<String> role;
+	@Nullable
+	private final String role;
 
 	/**
-	 * The signed JSON Web Token (JWT) to be used for authentication.
+	 * Supplier instance to obtain a service account JSON Web Tokens.
 	 */
-	private final String jwt;
+	private final Supplier<String> jwtSupplier;
 
-	private JwtAuthenticationOptions(Optional<String> role, String jwt, Optional<String> path) {
+	private JwtAuthenticationOptions(String role, Supplier<String> jwtSupplier, String path) {
 
 		this.role = role;
-		this.jwt = jwt;
+		this.jwtSupplier = jwtSupplier;
 		this.path = path;
 	}
 
@@ -70,21 +72,21 @@ public class JwtAuthenticationOptions {
 	/**
 	 * @return name of the role against which the login is being attempted.
 	 */
-	public Optional<String> getRole() {
+	public String getRole() {
 		return this.role;
 	}
 
 	/**
 	 * @return JSON Web Token.
 	 */
-	public String getJwt() {
-		return this.jwt;
+	public Supplier<String> getJwtSupplier() {
+		return this.jwtSupplier;
 	}
 
 	/**
 	 * @return the path of the kubernetes authentication backend mount.
 	 */
-	public Optional<String> getPath() {
+	public String getPath() {
 		return this.path;
 	}
 
@@ -95,7 +97,7 @@ public class JwtAuthenticationOptions {
 
 		private String role;
 
-		private String jwt;
+		private Supplier<String> jwtSupplier;
 
 		private String path;
 
@@ -127,15 +129,15 @@ public class JwtAuthenticationOptions {
 		}
 
 		/**
-		 * Configure the {@link Supplier} to obtain a Kubernetes authentication token.
-		 * @param jwt must not be {@literal null}.
+		 * Configure the {@link Supplier} to obtain a JWT authentication token.
+		 * @param jwtSupplier must not be {@literal null}.
 		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
 		 */
-		public JwtAuthenticationOptionsBuilder jwt(String jwt) {
+		public JwtAuthenticationOptionsBuilder jwt(Supplier<String> jwtSupplier) {
 
-			Assert.notNull(jwt, "Jwt must not be null");
+			Assert.notNull(jwtSupplier, "Jwt supplier must not be null");
 
-			this.jwt = jwt;
+			this.jwtSupplier = jwtSupplier;
 			return this;
 		}
 
@@ -145,10 +147,9 @@ public class JwtAuthenticationOptions {
 		 */
 		public JwtAuthenticationOptions build() {
 
-			Assert.notNull(this.jwt, "JWT must not be null");
+			Assert.notNull(this.jwtSupplier, "JWT must not be null");
 
-			return new JwtAuthenticationOptions(Optional.ofNullable(this.role), this.jwt,
-					Optional.ofNullable(this.path));
+			return new JwtAuthenticationOptions(this.role, this.jwtSupplier, this.path);
 		}
 
 	}

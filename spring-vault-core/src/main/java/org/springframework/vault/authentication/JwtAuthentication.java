@@ -21,6 +21,7 @@ import java.util.Optional;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -63,30 +64,30 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 		this.restOperations = restOperations;
 	}
 
-	private static Map<String, String> getJwtLogin(Optional<String> role, String jwt) {
+	private static Map<String, String> getJwtLogin(String role, String jwt) {
 		Map<String, String> login = new HashMap<>();
 
 		login.put("jwt", jwt);
-		role.ifPresent(r -> login.put("role", r));
+		if (StringUtils.hasText(role)) {
+			login.put("role", role);
+		}
 
 		return login;
 	}
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return AuthenticationSteps.fromValue(options.getJwt())
+		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getJwtLogin(options.getRole(), token))
-			.login(AuthenticationUtil.getLoginPath(options.getPath().orElse(DEFAULT_JWT_AUTHENTICATION_PATH)));
+			.login(getLoginPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
-		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwt());
+		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
 		try {
-			VaultResponse response = this.restOperations.postForObject(
-					AuthenticationUtil.getLoginPath(options.getPath().orElse(DEFAULT_JWT_AUTHENTICATION_PATH)), login,
-					VaultResponse.class);
+			VaultResponse response = this.restOperations.postForObject(getLoginPath(), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
@@ -97,6 +98,11 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 		catch (RestClientException e) {
 			throw VaultLoginException.create("JWT", e);
 		}
+	}
+
+	private String getLoginPath() {
+		return AuthenticationUtil
+			.getLoginPath(Optional.ofNullable(options.getPath()).orElse(DEFAULT_JWT_AUTHENTICATION_PATH));
 	}
 
 }

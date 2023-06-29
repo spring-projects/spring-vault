@@ -16,97 +16,55 @@
 package org.springframework.vault.authentication;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.vault.authentication.JwtAuthentication.DEFAULT_JWT_AUTHENTICATION_PATH;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPublicKey;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
-import okhttp3.mockwebserver.Dispatcher;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.RecordedRequest;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 
 public class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 
-	private static MockWebServer mockServer = new MockWebServer();
+	private KeyPair keyPair;
 
-	private static KeyPair keyPair;
-
-	@BeforeAll
-	static void setupJWKSMockServer() throws Exception {
-		mockServer.start(8000);
-		keyPair = generateRsaKey();
-		var rsaPublicKey = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic()).build();
-		var jwkSet = new JWKSet(rsaPublicKey).toPublicJWKSet();
-		Dispatcher dispatcher = new Dispatcher() {
-			@Override
-			public MockResponse dispatch(RecordedRequest request) {
-				return switch (request.getPath()) {
-					case "/jwks" -> new MockResponse().addHeader("Content-Type", MediaType.APPLICATION_JSON)
-						.setBody(jwkSet.toString());
-					default -> new MockResponse().setResponseCode(404);
-				};
-			}
-		};
-		mockServer.setDispatcher(dispatcher);
-	}
-
-	@AfterAll
-	static void stop() throws IOException {
-		mockServer.close();
-	}
-
-	private static KeyPair generateRsaKey() throws Exception {
+	private KeyPair generateRsaKey() throws Exception {
 		KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
 		keyPairGenerator.initialize(2048);
 		return keyPairGenerator.generateKeyPair();
 	}
 
-	private String createToken() throws Exception {
-		var signer = new RSASSASigner(keyPair.getPrivate());
-		var header = new JWSHeader(JWSAlgorithm.RS256);
-		var body = new JWSObject(header,
-				new JWTClaimsSet.Builder().audience("local")
-					.subject("admin")
-					.claim("user", "Administrator")
-					.issueTime(new Date())
-					.expirationTime(java.sql.Timestamp.valueOf(LocalDateTime.now().plusDays(1)))
-					.issuer("http://localhost:8000")
-					.build()
-					.toPayload());
-		body.sign(signer);
-		return body.serialize();
+	private String encodePublicKey() {
+		return String.format("""
+				-----BEGIN PUBLIC KEY-----
+				%s
+				-----END PUBLIC KEY-----
+				""", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
 	}
 
 	@BeforeEach
-	void before() {
+	void before() throws Exception {
+		keyPair = generateRsaKey();
 		if (!prepare().hasAuth("jwt")) {
 			prepare().mountAuth("jwt");
 		}
 
 		prepare().getVaultOperations().doWithSession(restOperations -> {
 			var jwtConfig = Map.of( //
-					"jwks_url", "http://localhost:8000/jwks", //
+					"jwt_validation_pubkeys", encodePublicKey(), //
 					"oidc_client_id", "", //
 					"oidc_client_secret", "");
 			restOperations.postForEntity("auth/jwt/config", jwtConfig, Map.class);
@@ -122,25 +80,48 @@ public class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 
 	@Test
 	void shouldLoginSuccessfully() throws Exception {
+		var jwt = createToken("Administrator");
 		var restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+
 		var loginToken = new JwtAuthentication(
-				JwtAuthenticationOptions.builder().jwt(createToken()).role("my-role").build(), restTemplate)
+				JwtAuthenticationOptions.builder().jwt(() -> jwt).role("my-role").build(), restTemplate)
 			.login();
+
 		assertThat(loginToken.getToken()).startsWith("hvs.");
 	}
 
 	@Test
-	void claimChangedInTokenShouldFailSignatureVerification() {
-		var token = "eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOiJsb2NhbCIsInN1YiI6InRlc3QiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwMDAiLCJleHAiOjE2ODc5ODI4MjcsInVzZXIiOiJBZG1pbmlzdHJhdG9yIiwiaWF0IjoxNjg3ODk2NDI3fQ.x_4cO5-GGbkDqts6-uRz8XTJbY50oCRqpkFyKmbcAt5Fq6IP4HryMJCd_DNxbZnfhXNxNdAEp4qXQFt6MEpi6YfQ3cc8Tg99pjvB6Hr6DKxao_UwEbWMrc7IIu-ZTjb1Nz91hXnYPpNGQQk4nNQN3_Ahdba6Ptt4i44_DiVyueR5pwE4NQDUoqlB1ETFjWl8O7t4px1No_LEJ5BEE2PboiPCxVU2zlyNL0-pmnWw8b1bRKvRPd2wXXMrYjcXNkL_GlqE4H18WOqwuNIJMbwXcwxE_sjk-6QTFxaeEDBiGKyGTFaIHlpN0OUiSBu2fpVHdaLRjzVBXGUBVsPgXqO2Nw";
+	void claimChangedInTokenShouldFailSignatureVerification() throws Exception {
+		var token1 = createToken("Administrator");
+		var token2 = createToken("Administrator2");
+		// Different user claim with signature of token1 makes an invalid token
+		var jwt = token2.substring(0, token2.lastIndexOf('.') + 1) + token1.substring(token1.lastIndexOf('.') + 1);
+
 		var restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
-		Assertions
-			.assertThatThrownBy(
-					() -> new JwtAuthentication(JwtAuthenticationOptions.builder().jwt(token).role("my-role").build(),
-							restTemplate)
-						.login())
+
+		assertThatThrownBy(
+				() -> new JwtAuthentication(JwtAuthenticationOptions.builder().jwt(() -> jwt).role("my-role").build(),
+						restTemplate)
+					.login())
 			.isInstanceOf(VaultLoginException.class)
 			.hasMessage(
-					"Cannot login using JWT: error validating token: error verifying token signature: failed to verify id token signature");
+					"Cannot login using JWT: error validating token: error verifying token signature: no known key successfully validated the token signature");
+	}
+
+	private String createToken(String user) throws JOSEException {
+		var signer = new RSASSASigner(keyPair.getPrivate());
+		var header = new JWSHeader(JWSAlgorithm.RS256);
+		var body = new JWSObject(header,
+				new JWTClaimsSet.Builder().audience("local")
+					.subject("admin")
+					.claim("user", user)
+					.issueTime(new Date())
+					.expirationTime(java.sql.Timestamp.valueOf(LocalDateTime.now().plusDays(1)))
+					.issuer("http://localhost:8000")
+					.build()
+					.toPayload());
+		body.sign(signer);
+		return body.serialize();
 	}
 
 }
