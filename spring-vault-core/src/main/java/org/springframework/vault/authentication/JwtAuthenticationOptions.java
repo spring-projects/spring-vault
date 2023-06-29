@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.util.function.Supplier;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -25,20 +26,21 @@ import org.springframework.util.Assert;
  * Authentication options provide the role and the JWT. {@link JwtAuthenticationOptions}
  * can be constructed using {@link #builder()}. Instances of this class are immutable once
  * constructed.
- * <p>
  *
  * @author Nanne Baars
- * @since 3.0.4
+ * @author Mark Paluch
+ * @since 3.1
  * @see JwtAuthentication
  * @see #builder()
  */
 public class JwtAuthenticationOptions {
 
+	public static final String DEFAULT_JWT_AUTHENTICATION_PATH = "jwt";
+
 	/**
 	 * Path of the JWT authentication backend mount. Optional and defaults to
 	 * {@literal jwt}.
 	 */
-	@Nullable
 	private final String path;
 
 	/**
@@ -55,7 +57,7 @@ public class JwtAuthenticationOptions {
 	 */
 	private final Supplier<String> jwtSupplier;
 
-	private JwtAuthenticationOptions(String role, Supplier<String> jwtSupplier, String path) {
+	private JwtAuthenticationOptions(@Nullable String role, Supplier<String> jwtSupplier, String path) {
 
 		this.role = role;
 		this.jwtSupplier = jwtSupplier;
@@ -70,8 +72,10 @@ public class JwtAuthenticationOptions {
 	}
 
 	/**
-	 * @return name of the role against which the login is being attempted.
+	 * @return name of the role against which the login is being attempted. Can be
+	 * {@literal null} if not configured.
 	 */
+	@Nullable
 	public String getRole() {
 		return this.role;
 	}
@@ -84,7 +88,7 @@ public class JwtAuthenticationOptions {
 	}
 
 	/**
-	 * @return the path of the kubernetes authentication backend mount.
+	 * @return the path of the JWT authentication backend mount.
 	 */
 	public String getPath() {
 		return this.path;
@@ -95,11 +99,26 @@ public class JwtAuthenticationOptions {
 	 */
 	public static class JwtAuthenticationOptionsBuilder {
 
+		private String path = DEFAULT_JWT_AUTHENTICATION_PATH;
+
+		@Nullable
 		private String role;
 
+		@Nullable
 		private Supplier<String> jwtSupplier;
 
-		private String path;
+		/**
+		 * Configure the mount path.
+		 * @param path must not be {@literal null} or empty.
+		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
+		 */
+		public JwtAuthenticationOptionsBuilder path(String path) {
+
+			Assert.hasText(path, "Path must not be empty");
+
+			this.path = path;
+			return this;
+		}
 
 		/**
 		 * Configure the role.
@@ -116,16 +135,17 @@ public class JwtAuthenticationOptions {
 		}
 
 		/**
-		 * Configure the mount path.
-		 * @param path must not be {@literal null} or empty.
+		 * Configure the JWT authentication token. Vault authentication will use this
+		 * token as singleton. If you want to provide a dynamic token that can change over
+		 * time, see {@link #jwtSupplier(Supplier)}.
+		 * @param jwt must not be {@literal null}.
 		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
 		 */
-		public JwtAuthenticationOptionsBuilder path(String path) {
+		public JwtAuthenticationOptionsBuilder jwt(String jwt) {
 
-			Assert.hasText(path, "Path must not be empty");
+			Assert.hasText(jwt, "JWT must not be empty");
 
-			this.path = path;
-			return this;
+			return jwtSupplier(() -> jwt);
 		}
 
 		/**
@@ -133,9 +153,9 @@ public class JwtAuthenticationOptions {
 		 * @param jwtSupplier must not be {@literal null}.
 		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
 		 */
-		public JwtAuthenticationOptionsBuilder jwt(Supplier<String> jwtSupplier) {
+		public JwtAuthenticationOptionsBuilder jwtSupplier(Supplier<String> jwtSupplier) {
 
-			Assert.notNull(jwtSupplier, "Jwt supplier must not be null");
+			Assert.notNull(jwtSupplier, "JWT supplier must not be null");
 
 			this.jwtSupplier = jwtSupplier;
 			return this;

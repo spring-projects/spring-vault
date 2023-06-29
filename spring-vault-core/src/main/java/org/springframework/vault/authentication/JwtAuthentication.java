@@ -17,9 +17,11 @@ package org.springframework.vault.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -34,7 +36,7 @@ import org.springframework.web.client.RestOperations;
  * to obtain a {@link VaultToken}.
  *
  * @author Nanne Baars
- * @since 3.0.4
+ * @since 3.1
  * @see JwtAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/api-docs/auth/jwt">Vault Auth Backend:
@@ -57,6 +59,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, RestOperations restOperations) {
+
 		Assert.notNull(options, "JwtAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
@@ -64,31 +67,22 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 		this.restOperations = restOperations;
 	}
 
-	private static Map<String, String> getJwtLogin(String role, String jwt) {
-		Map<String, String> login = new HashMap<>();
-
-		login.put("jwt", jwt);
-		if (StringUtils.hasText(role)) {
-			login.put("role", role);
-		}
-
-		return login;
-	}
-
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getJwtLogin(options.getRole(), token))
-			.login(getLoginPath());
+			.login(AuthenticationUtil.getLoginPath(this.options.getPath()));
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
+
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
 		try {
-			VaultResponse response = this.restOperations.postForObject(getLoginPath(), login, VaultResponse.class);
 
+			VaultResponse response = this.restOperations
+				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using JWT authentication");
@@ -100,9 +94,17 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 		}
 	}
 
-	private String getLoginPath() {
-		return AuthenticationUtil
-			.getLoginPath(Optional.ofNullable(options.getPath()).orElse(DEFAULT_JWT_AUTHENTICATION_PATH));
+	private static Map<String, String> getJwtLogin(@Nullable String role, String jwt) {
+
+		Map<String, String> login = new HashMap<>(2);
+
+		login.put("jwt", jwt);
+
+		if (StringUtils.hasText(role)) {
+			login.put("role", role);
+		}
+
+		return login;
 	}
 
 }
