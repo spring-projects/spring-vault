@@ -722,8 +722,6 @@ class AppConfig extends AbstractVaultConfiguration {
 
     // …
 }
-
-
 ----
 ====
 
@@ -822,23 +820,6 @@ class AppConfig extends AbstractVaultConfiguration {
 }
 ----
 ====
-
-On the Vault side you can configure the
-
-.Crating and storing tokens
-====
-[source,shell]
-----
-$ vault token-create -wrap-ttl="10m"
-Key                            Value
----                            -----
-wrapping_token:                397ccb93-ff6c-b17b-9389-380b01ca2645
-wrapping_token_ttl:            0h10m0s
-wrapping_token_creation_time:  2016-09-18 20:29:48.652957077 +0200 CEST
-wrapped_accessor:              46b6aebb-187f-932a-26d7-4f3d86a68319
-----
-====
-
 
 See also:
 
