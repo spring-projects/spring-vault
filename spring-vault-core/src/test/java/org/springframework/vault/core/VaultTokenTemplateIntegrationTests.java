@@ -105,6 +105,18 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void createTokenWithEntityAliasShouldCreateAToken() {
+
+		prepare().getVaultOperations()
+			.doWithSession(template -> template.postForEntity("auth/token/roles/my-role",
+					Map.of("allowed_entity_aliases", "my-entity-alias"), String.class));
+
+		VaultTokenResponse tokenResponse = this.tokenOperations.create("my-role",
+				VaultTokenRequest.builder().entityAlias("my-entity-alias").build());
+		assertThat(tokenResponse.getAuth()).containsKey("client_token");
+	}
+
+	@Test
 	void createOrphanTokenShouldCreateAToken() {
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.createOrphan();
