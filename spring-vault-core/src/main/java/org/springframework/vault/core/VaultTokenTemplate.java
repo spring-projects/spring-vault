@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
@@ -60,6 +61,21 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
 		return writeAndReturn("auth/token/create", request, VaultTokenResponse.class);
+	}
+
+	@Override
+	public VaultTokenResponse create(String role) throws VaultException {
+
+		return create(role, VaultTokenRequest.builder().build());
+	}
+
+	@Override
+	public VaultTokenResponse create(String role, VaultTokenRequest request) throws VaultException {
+
+		Assert.notNull(role, "role must not be null");
+		Assert.notNull(request, "VaultTokenRequest must not be null");
+
+		return writeAndReturn("auth/token/create/%s".formatted(role), request, VaultTokenResponse.class);
 	}
 
 	@Override
