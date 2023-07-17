@@ -60,7 +60,7 @@ Snapshot repository to your maven `pom.xml` which is at the same level of your `
   <repository>
     <id>spring-snapshot</id>
     <name>Spring Maven SNAPSHOT Repository</name>
-    <url>https://repo.spring.io/libs-snapshot</url>
+    <url>https://repo.spring.io/snapshot</url>
   </repository>
 </repositories>
 ----
