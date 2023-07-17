@@ -6,7 +6,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>3.0.4</version>
+	<version>3.0.5-SNAPSHOT</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
