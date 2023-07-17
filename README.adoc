@@ -1,7 +1,3 @@
-image::https://spring.io/badges/spring-vault/ga.svg[link=https://projects.spring.io/spring-vault#quick-start]
-
-image::https://spring.io/badges/spring-vault/snapshot.svg[link=https://projects.spring.io/spring-vault#quick-start]
-
 = Spring Vault
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
