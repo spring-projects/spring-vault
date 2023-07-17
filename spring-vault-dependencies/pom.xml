@@ -57,17 +57,17 @@
 	</licenses>
 
 	<properties>
-		<httpclient.version>4.5.13</httpclient.version>
-		<httpcore.version>4.4.14</httpcore.version>
-		<jetty-reactive-httpclient.version>1.1.6</jetty-reactive-httpclient.version>
-		<netty.version>4.1.90.Final</netty.version>
+		<httpclient.version>4.5.14</httpclient.version>
+		<httpcore.version>4.4.16</httpcore.version>
+		<jetty-reactive-httpclient.version>1.1.14</jetty-reactive-httpclient.version>
+		<netty.version>4.1.94.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<jackson-databind.version>2.12.7</jackson-databind.version>
+		<jackson-databind.version>2.12.7.1</jackson-databind.version>
 		<aws-java-sdk.version>1.11.1034</aws-java-sdk.version>
 		<google-api-services-iam.version>v1-rev20210519-1.31.5</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>1.2.5</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>0.22.2</google-auth-library-oauth2-http.version>
-		<bcpkix-jdk15on.version>1.68</bcpkix-jdk15on.version>
+		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
 	</properties>
 
 	<dependencyManagement>

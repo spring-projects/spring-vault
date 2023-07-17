@@ -28,10 +28,10 @@
 		<kotlin-coroutines.version>1.4.3</kotlin-coroutines.version>
 		<mockk.version>1.10.3-jdk8</mockk.version>
 		<mockito-core.version>3.8.0</mockito-core.version>
-		<spring.version>5.3.26</spring.version>
+		<spring.version>5.3.29</spring.version>
 		<spring-data-bom.version>2020.0.15</spring-data-bom.version>
 		<spring-security-bom.version>5.4.5</spring-security-bom.version>
-		<reactor.version>2020.0.30</reactor.version>
+		<reactor.version>2020.0.34</reactor.version>
 		<java.version>1.8</java.version>
 		<project.type>multi</project.type>
 		<dist.id>spring-vault</dist.id>
