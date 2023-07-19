@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
+import org.springframework.web.reactive.function.client.WebClientResponseException.NotFound;
 import reactor.core.publisher.Mono;
 
 /**
@@ -35,7 +36,7 @@ import reactor.core.publisher.Mono;
  * and {@link ReactiveVaultKeyValue2Template}.
  *
  * @author Timothy R. Weiand
- * @since TBD
+ * @since 3.999.999
  */
 abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOperationsSupport {
 
@@ -73,20 +74,40 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 
 	<I> Mono<VaultResponseSupport<I>> doRead(String path, Class<I> deserializeAs) {
 		var ref = VaultResponses.getTypeReference(deserializeAs);
-		return doReadRaw(createDataPath(path), ref);
+		return doReadRaw(createDataPath(path), ref, false);
 	}
 
 	<I> Mono<VaultResponseSupport<I>> doRead(String path, ParameterizedTypeReference<I> deserializeAs) {
 		var ref = VaultResponses.getTypeReference(deserializeAs);
-		return doReadRaw(createDataPath(path), ref);
+		return doReadRaw(createDataPath(path), ref, true);
 	}
 
-	<I> Mono<I> doReadRaw(String path, ParameterizedTypeReference<I> rawRef) {
+	/**
+	 * Read a secret from the passed path and returns an object of type referenced by
+	 * rawRef. If the path was not found return either Mono.error(NotFound) or
+	 * Mono.empty() based on emitNotFound.
+	 * <p>
+	 * Returns Mono.error(WebClientResponseException.NotFound) if the secret is not found.
+	 * @param path URI for request
+	 * @param rawRef Type reference of return object
+	 * @param <I> return type for converting response data
+	 * @param emitNotFound allow returning of Mono.error(NotFound) when true, Mono.empty()
+	 * otherwise
+	 * @return object with type referenced by rawRef
+	 */
+	protected <I> Mono<I> doReadRaw(String path, ParameterizedTypeReference<I> rawRef, boolean emitNotFound) {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(rawRef, "Response type must not be null");
 
-		return reactiveVaultOperations.doWithSession(
-				webClient -> webClient.get().uri(path).exchangeToMono(mapResponse(rawRef, path, HttpMethod.GET)));
+		return reactiveVaultOperations
+			.doWithSession(
+					webClient -> webClient.get().uri(path).exchangeToMono(mapResponse(rawRef, path, HttpMethod.GET)))
+			.onErrorResume(NotFound.class, t -> {
+				if (emitNotFound) {
+					return Mono.error(t);
+				}
+				return Mono.empty();
+			});
 	}
 
 	/**

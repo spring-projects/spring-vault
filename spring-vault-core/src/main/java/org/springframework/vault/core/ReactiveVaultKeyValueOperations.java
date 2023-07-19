@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  * TODO: Update JavaDocs
  *
  * @author Timothy R. Weiand
- * @since TBD
+ * @since 3.999.999
  * @see ReactiveVaultVersionedKeyValueOperations
  * @see KeyValueBackend
  */

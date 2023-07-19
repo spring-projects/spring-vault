@@ -15,21 +15,18 @@
  */
 package org.springframework.vault.core;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.util.List;
 import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
-import org.springframework.vault.support.VaultResponseSupport;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Support class to build accessor methods for the Vault key-value backend version 2.
  *
  * @author Timothy R. Weiand
- * @since TBD
+ * @since 3.999.999
  * @see KeyValueBackend#KV_2
  */
 abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAccessor {
@@ -59,7 +56,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 		var type = VaultResponses.getTypeReference(new ParameterizedTypeReference<Map<String, Object>>() {
 		});
 
-		return doReadRaw(String.format("%s?list=true", createBackendPath("metadata", pathToUse)), type)
+		return doReadRaw(String.format("%s?list=true", createBackendPath("metadata", pathToUse)), type, false)
 			.flatMap(ReactiveKeyValueHelper::getRequiredData)
 			.flatMapMany(response -> {
 				final var list = (List<String>) response.get("keys");

@@ -40,7 +40,7 @@ import reactor.core.publisher.Mono;
  * Default implementation of {@link ReactiveVaultVersionedKeyValueOperations}.
  *
  * @author Timothy R. Weiand
- * @since TBD
+ * @since 3.999.999
  */
 public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValue2Accessor
 		implements ReactiveVaultVersionedKeyValueOperations {

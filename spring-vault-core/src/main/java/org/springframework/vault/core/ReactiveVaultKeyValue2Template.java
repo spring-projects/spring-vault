@@ -34,9 +34,8 @@ import reactor.core.publisher.Mono;
  * Default implementation of {@link VaultKeyValueOperations} for the key-value backend
  * version 2.
  *
- * @author Mark Paluch
- * @author Younghwan Jang
- * @since 2.1
+ * @author Timothy R. Weiand
+ * @since 3.999.999
  */
 class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor implements ReactiveVaultKeyValueOperations {
 
@@ -79,7 +78,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
 		var ref = VaultResponses.getTypeReference(VaultResponses.getDataTypeReference(responseType));
-		return doReadRaw(createDataPath(path), ref)
+		return doReadRaw(createDataPath(path), ref, false)
 			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
 			.map(response -> {
 				VaultResponseSupport<T> vaultResponse = new VaultResponseSupport<>();

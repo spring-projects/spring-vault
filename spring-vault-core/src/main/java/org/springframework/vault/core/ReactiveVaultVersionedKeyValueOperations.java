@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
  * Key/Value API (kv version 1). TODO: Update JavaDocs
  *
  * @author Timothy R. Weiand
- * @since TBD
+ * @since 3.999.999
  * @see ReactiveVaultKeyValueOperations
  */
 public interface ReactiveVaultVersionedKeyValueOperations extends ReactiveVaultKeyValueOperationsSupport {

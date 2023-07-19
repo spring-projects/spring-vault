@@ -33,9 +33,8 @@ import reactor.core.publisher.Mono;
 /**
  * Default implementation of {@link ReactiveVaultKeyValueMetadataOperations}.
  *
- * @author Zakaria Amine
- * @author Mark Paluch
- * @since 2.3
+ * @author Timothy R. Weiand
+ * @since 3.999.999
  */
 class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMetadataOperations {
 

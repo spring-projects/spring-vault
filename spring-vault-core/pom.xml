@@ -13,6 +13,9 @@
 	<description>Spring Vault Core Components</description>
 	<packaging>jar</packaging>
 
+	<properties>
+		<java-module-name>spring.vault.core</java-module-name>
+	</properties>
 
 	<build>
 		<resources>
@@ -327,7 +330,6 @@
 			<properties>
 				<jacoco.version>0.8.10</jacoco.version>
 				<sonar.version>3.7.0.1746</sonar.version>
-				<java-module-name>spring.vault.core</java-module-name>
 				<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
 				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
 				<sonar.language>java</sonar.language>

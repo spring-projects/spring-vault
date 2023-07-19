@@ -81,7 +81,7 @@ public interface ReactiveVaultOperations {
 	 *
 	 * @return the operations interface to interact with the Vault Key/Value backend.
 	 *
-	 * @since xxx
+	 * @since 3.999.999
 	 */
 	ReactiveVaultKeyValueOperations opsForKeyValue(String path,
 			VaultKeyValueOperationsSupport.KeyValueBackend apiVersion);
@@ -91,7 +91,7 @@ public interface ReactiveVaultOperations {
 	 * @param path the mount path
 	 * @return the operations interface to interact with the versioned Vault Key/Value
 	 * (version 2) backend.
-	 * @since xxx
+	 * @since 3.999.999
 	 */
 	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
