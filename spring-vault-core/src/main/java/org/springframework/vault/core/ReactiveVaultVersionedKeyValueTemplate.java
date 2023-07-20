@@ -122,7 +122,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 		var ref = VaultResponses.getTypeReference(VaultResponses.getTypeReference(responseType));
 
-		return doReadRaw(secretPath, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> {
+		return doReadRaw(secretPath, ref, true).onErrorResume(WebClientResponseException.NotFound.class, e -> {
 			if (e.getResponseBodyAsString().contains("deletion_time")) {
 				return Mono.justOrEmpty(e.getResponseBodyAs(ref));
 			}
