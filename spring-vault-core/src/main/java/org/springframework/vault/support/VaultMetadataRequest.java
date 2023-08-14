@@ -16,6 +16,7 @@
 package org.springframework.vault.support;
 
 import java.time.Duration;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -41,11 +42,15 @@ public class VaultMetadataRequest {
 	@JsonProperty("delete_version_after")
 	private final String deleteVersionAfter;
 
-	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter) {
+	@JsonProperty("custom_metadata")
+	private final Map<String, String> customMetadata;
+
+	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter, @Nullable Map<String, String> customMetadata) {
 		this.maxVersions = maxVersions;
 		this.casRequired = casRequired;
 		this.deleteVersionAfter = DurationParser
 			.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
+		this.customMetadata = customMetadata;
 	}
 
 	public static VaultMetadataRequestBuilder builder() {
@@ -75,6 +80,11 @@ public class VaultMetadataRequest {
 		return this.deleteVersionAfter;
 	}
 
+	@Nullable
+	public Map<String, String> getCustomMetadata(){
+		return this.customMetadata;
+	}
+
 	public static class VaultMetadataRequestBuilder {
 
 		private int maxVersions;
@@ -83,6 +93,9 @@ public class VaultMetadataRequest {
 
 		@Nullable
 		private Duration deleteVersionAfter;
+
+		@Nullable
+		private Map<String, String> customMetadata;
 
 		/**
 		 * Set the number of versions to keep per key.
@@ -115,11 +128,16 @@ public class VaultMetadataRequest {
 			return this;
 		}
 
+		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata){
+			this.customMetadata = customMetadata;
+			return this;
+		}
+
 		/**
 		 * @return a new {@link VaultMetadataRequest}
 		 */
 		public VaultMetadataRequest build() {
-			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter);
+			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter, this.customMetadata);
 		}
 
 	}
