@@ -30,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.domain.Person;
+import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
@@ -117,15 +118,12 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		customMetadata.put("foo", "bar");
 		customMetadata.put("uid", "werwer");
 
-		Metadata metadata= Metadata.builder()
-				.customMetadata(customMetadata)
-				.createdAt(Instant.now())
-				.version(Version.unversioned())
+		this.versionedOperations.put(key, Versioned.create(person));
+
+		VaultMetadataRequest request = VaultMetadataRequest.builder().customMetadata(customMetadata)
 				.build();
 
-		Metadata metadata1 = this.versionedOperations.put(key, Versioned.create(person, metadata));
-
-
+		this.versionedOperations.opsForKeyValueMetadata().put(key, request);
 
 		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
 
