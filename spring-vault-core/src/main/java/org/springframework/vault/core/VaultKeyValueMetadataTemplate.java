@@ -40,96 +40,99 @@ import org.springframework.vault.support.Versioned;
  */
 class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 
-	private final VaultOperations vaultOperations;
+    private final VaultOperations vaultOperations;
 
-	private final String basePath;
+    private final String basePath;
 
-	VaultKeyValueMetadataTemplate(VaultOperations vaultOperations, String basePath) {
+    VaultKeyValueMetadataTemplate(VaultOperations vaultOperations, String basePath) {
 
-		Assert.notNull(vaultOperations, "VaultOperations must not be null");
+        Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
-		this.vaultOperations = vaultOperations;
-		this.basePath = basePath;
-	}
+        this.vaultOperations = vaultOperations;
+        this.basePath = basePath;
+    }
 
-	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public VaultMetadataResponse get(String path) {
+    @Override
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public VaultMetadataResponse get(String path) {
 
-		VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
+        VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
 
-		return response != null ? fromMap(response.getRequiredData()) : null;
-	}
+        return response != null ? fromMap(response.getRequiredData()) : null;
+    }
 
-	@Override
-	public void put(String path, VaultMetadataRequest body) {
+    @Override
+    public void put(String path, VaultMetadataRequest body) {
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.notNull(body, "Body must not be null");
+        Assert.hasText(path, "Path must not be empty");
+        Assert.notNull(body, "Body must not be null");
 
-		this.vaultOperations.write(getPath(path), body);
-	}
+        this.vaultOperations.write(getPath(path), body);
+    }
 
-	@Override
-	public void delete(String path) {
+    @Override
+    public void delete(String path) {
 
-		Assert.hasText(path, "Path must not be empty");
+        Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.delete(getPath(path));
-	}
+        this.vaultOperations.delete(getPath(path));
+    }
 
-	private String getPath(String path) {
+    private String getPath(String path) {
 
-		Assert.hasText(path, "Path must not be empty");
-		return this.basePath + "/metadata/" + path;
-	}
+        Assert.hasText(path, "Path must not be empty");
+        return this.basePath + "/metadata/" + path;
+    }
 
-	@SuppressWarnings({ "ConstantConditions", "unchecked", "rawtypes" })
-	private static VaultMetadataResponse fromMap(Map<String, Object> metadataResponse) {
+    @SuppressWarnings({"ConstantConditions", "unchecked", "rawtypes"})
+    private static VaultMetadataResponse fromMap(Map<String, Object> metadataResponse) {
 
-		Duration duration = DurationParser.parseDuration((String) metadataResponse.get("delete_version_after"));
+        Duration duration = DurationParser.parseDuration((String) metadataResponse.get("delete_version_after"));
 
-		return VaultMetadataResponse.builder()
-			.casRequired(Boolean.parseBoolean(String.valueOf(metadataResponse.get("cas_required"))))
-			.createdTime(toInstant((String) metadataResponse.get("created_time")))
-			.currentVersion(Integer.parseInt(String.valueOf(metadataResponse.get("current_version"))))
-			.deleteVersionAfter(duration)
-			.maxVersions(Integer.parseInt(String.valueOf(metadataResponse.get("max_versions"))))
-			.oldestVersion(Integer.parseInt(String.valueOf(metadataResponse.get("oldest_version"))))
-			.updatedTime(toInstant((String) metadataResponse.get("updated_time")))
-			.versions(buildVersions((Map) metadataResponse.get("versions")))
-			.customMetadata((Map) metadataResponse.get("custom_metadata"))
-			.build();
-	}
+        return VaultMetadataResponse.builder()
+                .casRequired(Boolean.parseBoolean(String.valueOf(metadataResponse.get("cas_required"))))
+                .createdTime(toInstant((String) metadataResponse.get("created_time")))
+                .currentVersion(Integer.parseInt(String.valueOf(metadataResponse.get("current_version"))))
+                .deleteVersionAfter(duration)
+                .maxVersions(Integer.parseInt(String.valueOf(metadataResponse.get("max_versions"))))
+                .oldestVersion(Integer.parseInt(String.valueOf(metadataResponse.get("oldest_version"))))
+                .updatedTime(toInstant((String) metadataResponse.get("updated_time")))
+                .versions(buildVersions((Map) metadataResponse.get("versions")))
+                .customMetadata((Map) metadataResponse.get("custom_metadata"))
+                .build();
+    }
 
-	private static List<Versioned.Metadata> buildVersions(Map<String, Map<String, Object>> versions) {
+    private static List<Versioned.Metadata> buildVersions(Map<String, Map<String, Object>> versions) {
 
-		return versions.entrySet()
-			.stream()
-			.map(entry -> buildVersion(entry.getKey(), entry.getValue()))
-			.collect(Collectors.toList());
-	}
+        return versions.entrySet()
+                .stream()
+                .map(entry -> buildVersion(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
 
-	private static Versioned.Metadata buildVersion(String version, Map<String, Object> versionData) {
+    private static Versioned.Metadata buildVersion(String version, Map<String, Object> versionData) {
 
-		Instant createdTime = toInstant((String) versionData.get("created_time"));
-		Instant deletionTime = toInstant((String) versionData.get("deletion_time"));
-		boolean destroyed = (Boolean) versionData.get("destroyed");
-		Map<String, String> customMetadata = (Map<String, String>) versionData.get("custom_metadata");
-		Versioned.Version kvVersion = Versioned.Version.from(Integer.parseInt(version));
+        Instant createdTime = toInstant((String) versionData.get("created_time"));
+        Instant deletionTime = toInstant((String) versionData.get("deletion_time"));
+        boolean destroyed = (Boolean) versionData.get("destroyed");
+        Versioned.Version kvVersion = Versioned.Version.from(Integer.parseInt(version));
+        Versioned.Metadata.MetadataBuilder builder = Versioned.Metadata.builder()
+                .createdAt(createdTime)
+                .deletedAt(deletionTime)
+                .destroyed(destroyed)
+                .version(kvVersion);
 
-		return Versioned.Metadata.builder()
-			.createdAt(createdTime)
-			.deletedAt(deletionTime)
-			.destroyed(destroyed)
-			.version(kvVersion)
-			.customMetadata(customMetadata)
-			.build();
-	}
+        if (versionData.get("custom_metadata") != null) {
+            Map<String, String> customMetadata = (Map<String, String>) versionData.get("custom_metadata");
+            builder.customMetadata(customMetadata);
+        }
 
-	@Nullable
-	private static Instant toInstant(String date) {
-		return StringUtils.hasText(date) ? Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)) : null;
-	}
+        return builder.build();
+    }
+
+    @Nullable
+    private static Instant toInstant(String date) {
+        return StringUtils.hasText(date) ? Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)) : null;
+    }
 
 }

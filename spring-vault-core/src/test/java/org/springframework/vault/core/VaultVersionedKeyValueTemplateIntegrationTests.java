@@ -105,9 +105,8 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 			.hasMessageContaining("check-and-set parameter did not match the current version");
 	}
 
-
 	@Test
-	void shouldWriteSecretWithCustomMetadata(){
+	void shouldWriteSecretWithCustomMetadata() {
 		Person person = new Person();
 		person.setFirstname("Walter");
 		person.setLastname("White");
@@ -120,8 +119,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		this.versionedOperations.put(key, Versioned.create(person));
 
-		VaultMetadataRequest request = VaultMetadataRequest.builder().customMetadata(customMetadata)
-				.build();
+		VaultMetadataRequest request = VaultMetadataRequest.builder().customMetadata(customMetadata).build();
 
 		this.versionedOperations.opsForKeyValueMetadata().put(key, request);
 
@@ -130,6 +128,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		assertThat(versioned.getMetadata().getCustomMetadata().get("foo")).isEqualTo("bar");
 
 	}
+
 	@Test
 	void shouldReadAndWriteVersionedSecret() {
 
