@@ -98,6 +98,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 			.oldestVersion(Integer.parseInt(String.valueOf(metadataResponse.get("oldest_version"))))
 			.updatedTime(toInstant((String) metadataResponse.get("updated_time")))
 			.versions(buildVersions((Map) metadataResponse.get("versions")))
+			.customMetadata((Map) metadataResponse.get("custom_metadata"))
 			.build();
 	}
 
