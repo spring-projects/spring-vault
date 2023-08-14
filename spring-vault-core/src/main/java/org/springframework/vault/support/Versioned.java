@@ -16,6 +16,7 @@
 package org.springframework.vault.support;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ import org.springframework.util.Assert;
  * <li>Versioned secrets with {@link Metadata} attached
  * {@link Versioned#create(Object, Metadata)}</li>
  * </ul>
- *
+ * <p>
  * Versioned secrets follow a lifecycle that spans from creation to destruction:
  *
  * <ol>
@@ -44,9 +45,9 @@ import org.springframework.util.Assert;
  * </ol>
  *
  * @author Mark Paluch
- * @since 2.1
  * @see Version
  * @see Metadata
+ * @since 2.1
  */
 public class Versioned<T> {
 
@@ -223,11 +224,15 @@ public class Versioned<T> {
 
 		private final Version version;
 
-		private Metadata(Instant createdAt, @Nullable Instant deletedAt, boolean destroyed, Version version) {
+		private final @Nullable Map<String, String> customMetadata;
+
+		private Metadata(Instant createdAt, @Nullable Instant deletedAt, boolean destroyed, Version version,
+				@Nullable Map<String, String> customMetadata) {
 			this.createdAt = createdAt;
 			this.deletedAt = deletedAt;
 			this.destroyed = destroyed;
 			this.version = version;
+			this.customMetadata = customMetadata;
 		}
 
 		/**
@@ -275,11 +280,29 @@ public class Versioned<T> {
 			return this.destroyed;
 		}
 
+		/**
+		 * @return Metadata .
+		 */
+		@Nullable
+		public Map<String, String> getCustomMetadata() {
+			return customMetadata;
+		}
+
 		@Override
 		public String toString() {
 
+			String customMetadataString = "";
+			if (customMetadata != null && customMetadata.keySet().size() > 0) {
+				StringBuilder metadataPrintBuilder = new StringBuilder(", customMetadata=Map[");
+				for (String key : customMetadata.keySet()) {
+					metadataPrintBuilder.append(key).append(":").append(customMetadata.get(key)).append(" ");
+				}
+				metadataPrintBuilder.append("]");
+				customMetadataString = metadataPrintBuilder.toString();
+			}
+
 			return getClass().getSimpleName() + " [createdAt=" + this.createdAt + ", deletedAt=" + this.deletedAt
-					+ ", destroyed=" + this.destroyed + ", version=" + this.version + ']';
+					+ ", destroyed=" + this.destroyed + ", version=" + this.version + customMetadataString + ']';
 		}
 
 		/**
@@ -294,6 +317,8 @@ public class Versioned<T> {
 			private boolean destroyed;
 
 			private @Nullable Version version;
+
+			private @Nullable Map<String, String> customMetadata;
 
 			private MetadataBuilder() {
 			}
@@ -354,6 +379,15 @@ public class Versioned<T> {
 				return this;
 			}
 
+			public MetadataBuilder customMetadata(Map<String, String> customMetadata) {
+
+				Assert.notNull(customMetadata, "customMetadata should not be null");
+				Assert.notEmpty(customMetadata.keySet(), "customMetadata should have at least one key");
+				Assert.notEmpty(customMetadata.values(), "customMetadata should have at least one value");
+				this.customMetadata = customMetadata;
+				return this;
+			}
+
 			/**
 			 * Build the {@link Versioned.Metadata} object. Requires
 			 * {@link #createdAt(Instant)} and {@link #version(Versioned.Version)} to be
@@ -365,7 +399,7 @@ public class Versioned<T> {
 				Assert.notNull(this.createdAt, "CreatedAt must not be null");
 				Assert.notNull(this.version, "Version must not be null");
 
-				return new Metadata(this.createdAt, this.deletedAt, this.destroyed, this.version);
+				return new Metadata(this.createdAt, this.deletedAt, this.destroyed, this.version, this.customMetadata);
 			}
 
 		}

@@ -178,6 +178,11 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		Integer version = (Integer) responseMetadata.get("version");
 		builder.version(Version.from(version));
 
+		if (responseMetadata.get("custom_metadata") != null) {
+			Map<String, String> customMetadata = (Map<String, String>) responseMetadata.get("custom_metadata");
+			builder.customMetadata(customMetadata);
+		}
+
 		return builder.build();
 	}
 

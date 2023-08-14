@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.lang.Nullable;
 
@@ -46,9 +47,11 @@ public class VaultMetadataResponse {
 
 	private final List<Versioned.Metadata> versions;
 
+	private final Map<String, String> customMetadata;
+
 	private VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion,
 			Duration deleteVersionAfter, int maxVersions, int oldestVersion, Instant updatedTime,
-			List<Versioned.Metadata> versions) {
+			List<Versioned.Metadata> versions, Map<String, String> customMetadata) {
 		this.casRequired = casRequired;
 		this.createdTime = createdTime;
 		this.currentVersion = currentVersion;
@@ -57,6 +60,7 @@ public class VaultMetadataResponse {
 		this.oldestVersion = oldestVersion;
 		this.updatedTime = updatedTime;
 		this.versions = versions;
+		this.customMetadata = customMetadata;
 	}
 
 	public static VaultMetadataResponseBuilder builder() {
@@ -91,6 +95,14 @@ public class VaultMetadataResponse {
 	@Nullable
 	public Duration getDeleteVersionAfter() {
 		return this.deleteVersionAfter;
+	}
+
+	/**
+	 * @return KV of customMetadata. Entries can be any arbitrary key-value pairs
+	 */
+	@Nullable
+	public Map<String, String> getCustomMetadata() {
+		return this.customMetadata;
 	}
 
 	/**
@@ -145,6 +157,8 @@ public class VaultMetadataResponse {
 
 		private List<Versioned.Metadata> versions;
 
+		private Map<String, String> customMetadata;
+
 		public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
 			this.casRequired = casRequired;
 			return this;
@@ -185,9 +199,15 @@ public class VaultMetadataResponse {
 			return this;
 		}
 
+		public VaultMetadataResponseBuilder customMetadata(Map<String, String> customMetadata) {
+			this.customMetadata = customMetadata;
+			return this;
+		}
+
 		public VaultMetadataResponse build() {
 			return new VaultMetadataResponse(this.casRequired, this.createdTime, this.currentVersion,
-					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions);
+					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions,
+					this.customMetadata);
 		}
 
 	}

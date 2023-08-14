@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -29,6 +30,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.domain.Person;
+import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
@@ -101,6 +103,30 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		assertThatThrownBy(() -> this.versionedOperations.put(key, Versioned.create(secret, Version.unversioned())))
 			.isExactlyInstanceOf(VaultException.class)
 			.hasMessageContaining("check-and-set parameter did not match the current version");
+	}
+
+	@Test
+	void shouldWriteSecretWithCustomMetadata() {
+		Person person = new Person();
+		person.setFirstname("Walter");
+		person.setLastname("White");
+
+		String key = UUID.randomUUID().toString();
+
+		Map<String, String> customMetadata = new HashMap<>();
+		customMetadata.put("foo", "bar");
+		customMetadata.put("uid", "werwer");
+
+		this.versionedOperations.put(key, Versioned.create(person));
+
+		VaultMetadataRequest request = VaultMetadataRequest.builder().customMetadata(customMetadata).build();
+
+		this.versionedOperations.opsForKeyValueMetadata().put(key, request);
+
+		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
+
+		assertThat(versioned.getMetadata().getCustomMetadata().get("foo")).isEqualTo("bar");
+
 	}
 
 	@Test
