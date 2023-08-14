@@ -45,7 +45,8 @@ public class VaultMetadataRequest {
 	@JsonProperty("custom_metadata")
 	private final Map<String, String> customMetadata;
 
-	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter, @Nullable Map<String, String> customMetadata) {
+	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter,
+			@Nullable Map<String, String> customMetadata) {
 		this.maxVersions = maxVersions;
 		this.casRequired = casRequired;
 		this.deleteVersionAfter = DurationParser
@@ -81,7 +82,7 @@ public class VaultMetadataRequest {
 	}
 
 	@Nullable
-	public Map<String, String> getCustomMetadata(){
+	public Map<String, String> getCustomMetadata() {
 		return this.customMetadata;
 	}
 
@@ -128,7 +129,7 @@ public class VaultMetadataRequest {
 			return this;
 		}
 
-		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata){
+		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata) {
 			this.customMetadata = customMetadata;
 			return this;
 		}
@@ -137,7 +138,8 @@ public class VaultMetadataRequest {
 		 * @return a new {@link VaultMetadataRequest}
 		 */
 		public VaultMetadataRequest build() {
-			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter, this.customMetadata);
+			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter,
+					this.customMetadata);
 		}
 
 	}

@@ -16,6 +16,7 @@
 package org.springframework.vault.support;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ import org.springframework.util.Assert;
  * <li>Versioned secrets with {@link Metadata} attached
  * {@link Versioned#create(Object, Metadata)}</li>
  * </ul>
- *
+ * <p>
  * Versioned secrets follow a lifecycle that spans from creation to destruction:
  *
  * <ol>
@@ -44,413 +45,460 @@ import org.springframework.util.Assert;
  * </ol>
  *
  * @author Mark Paluch
- * @since 2.1
  * @see Version
  * @see Metadata
+ * @since 2.1
  */
 public class Versioned<T> {
 
-	private final @Nullable T data;
-
-	private final Version version;
-
-	private final @Nullable Metadata metadata;
-
-	private Versioned(T data, Version version) {
-
-		this.version = version;
-		this.metadata = null;
-		this.data = data;
-	}
-
-	private Versioned(@Nullable T data, Version version, Metadata metadata) {
-
-		this.version = version;
-		this.metadata = metadata;
-		this.data = data;
-	}
-
-	/**
-	 * Create a {@link Version#unversioned() unversioned} given secret.
-	 * @param secret must not be {@literal null}.
-	 * @return the {@link Versioned} object for {@code secret}
-	 */
-	public static <T> Versioned<T> create(T secret) {
-
-		Assert.notNull(secret, "Versioned data must not be null");
-
-		return new Versioned<>(secret, Version.unversioned());
-	}
-
-	/**
-	 * Create a versioned secret object given {@code secret} and {@link Version}.
-	 * Versioned secret may contain no actual data as they can be in a deleted/destroyed
-	 * state.
-	 * @param secret can be {@literal null}.
-	 * @param version must not be {@literal null}.
-	 * @return the {@link Versioned} object for {@code secret} and {@code Version}.
-	 */
-	public static <T> Versioned<T> create(@Nullable T secret, Version version) {
-
-		Assert.notNull(version, "Version must not be null");
-
-		return new Versioned<>(secret, version);
-	}
-
-	/**
-	 * Create a versioned secret object given {@code secret} and {@link Metadata}.
-	 * Versioned secret may contain no actual data as they can be in a deleted/destroyed
-	 * state.
-	 * @param secret can be {@literal null}.
-	 * @param metadata must not be {@literal null}.
-	 * @return the {@link Versioned} object for {@code secret} and {@link Metadata}.
-	 */
-	public static <T> Versioned<T> create(@Nullable T secret, Metadata metadata) {
-
-		Assert.notNull(metadata, "Metadata must not be null");
-
-		return new Versioned<>(secret, metadata.getVersion(), metadata);
-	}
-
-	/**
-	 * @return the {@link Version} associated with this {@link Versioned} object.
-	 */
-	public Version getVersion() {
-		return this.version;
-	}
-
-	/**
-	 * @return {@literal true} if this versioned object has {@link Metadata} associated,
-	 * otherwise {@code false}
-	 */
-	public boolean hasMetadata() {
-		return this.metadata != null;
-	}
-
-	@Nullable
-	public Metadata getMetadata() {
-		return this.metadata;
-	}
-
-	/**
-	 * Returns the required {@link Metadata} for this versioned object. Throws
-	 * {@link IllegalStateException} if no metadata is associated.
-	 * @return the non-null {@link Metadata} held by this for this versioned object.
-	 * @throws IllegalStateException if no metadata is present.
-	 */
-	public Metadata getRequiredMetadata() {
-
-		Metadata metadata = this.metadata;
-
-		if (metadata == null) {
-			throw new IllegalStateException("Required Metadata is not present");
-		}
-
-		return metadata;
-	}
-
-	/**
-	 * @return {@literal true} if this versioned object has data associated, or
-	 * {@code false}, of the version is deleted or destroyed.
-	 */
-	public boolean hasData() {
-		return this.data != null;
-	}
-
-	/**
-	 * @return the actual data for this versioned object. Can be {@literal null} if the
-	 * version is deleted or destroyed.
-	 */
-	@Nullable
-	public T getData() {
-		return this.data;
-	}
-
-	/**
-	 * Returns the required data for this versioned object. Throws
-	 * {@link IllegalStateException} if no data is associated.
-	 * @return the non-null value held by this for this versioned object.
-	 * @throws IllegalStateException if no data is present.
-	 */
-	public T getRequiredData() {
-
-		T data = this.data;
-
-		if (data == null) {
-			throw new IllegalStateException("Required data is not present");
-		}
-
-		return data;
-	}
-
-	/**
-	 * Convert the data element of this versioned object to an {@link Optional}.
-	 * @return {@link Optional#of(Object) Optional} holding the actual value of this
-	 * versioned object if {@link #hasData() data is present}, {@link Optional#empty()} if
-	 * no data is associated.
-	 */
-	public Optional<T> toOptional() {
-		return Optional.ofNullable(this.data);
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (!(o instanceof Versioned))
-			return false;
-		Versioned<?> versioned = (Versioned<?>) o;
-		return Objects.equals(this.data, versioned.data) && Objects.equals(this.version, versioned.version)
-				&& Objects.equals(this.metadata, versioned.metadata);
-	}
-
-	@Override
-	public int hashCode() {
-
-		return Objects.hash(this.data, this.version, this.metadata);
-	}
-
-	/**
-	 * Value object representing version metadata such as creation/deletion time.
-	 */
-	public static class Metadata {
-
-		private final Instant createdAt;
-
-		private final @Nullable Instant deletedAt;
-
-		private final boolean destroyed;
-
-		private final Version version;
-
-		private Metadata(Instant createdAt, @Nullable Instant deletedAt, boolean destroyed, Version version) {
-			this.createdAt = createdAt;
-			this.deletedAt = deletedAt;
-			this.destroyed = destroyed;
-			this.version = version;
-		}
-
-		/**
-		 * Creates a new {@link MetadataBuilder} to build {@link Metadata} objects.
-		 * @return a new {@link MetadataBuilder} to build {@link Metadata} objects.
-		 */
-		public static MetadataBuilder builder() {
-			return new MetadataBuilder();
-		}
-
-		/**
-		 * @return {@link Instant} at which the version was created.
-		 */
-		public Instant getCreatedAt() {
-			return this.createdAt;
-		}
-
-		/**
-		 * @return {@literal true} if the version was deleted.
-		 */
-		public boolean isDeleted() {
-			return this.deletedAt != null;
-		}
-
-		/**
-		 * @return {@link Instant} at which the version was deleted. Can be
-		 * {@literal null} if the version is not deleted.
-		 */
-		@Nullable
-		public Instant getDeletedAt() {
-			return this.deletedAt;
-		}
-
-		/**
-		 * @return the version number.
-		 */
-		public Version getVersion() {
-			return this.version;
-		}
-
-		/**
-		 * @return {@literal true} if the version was destroyed.
-		 */
-		public boolean isDestroyed() {
-			return this.destroyed;
-		}
-
-		@Override
-		public String toString() {
-
-			return getClass().getSimpleName() + " [createdAt=" + this.createdAt + ", deletedAt=" + this.deletedAt
-					+ ", destroyed=" + this.destroyed + ", version=" + this.version + ']';
-		}
-
-		/**
-		 * Builder for {@link Metadata} objects.
-		 */
-		public static class MetadataBuilder {
-
-			private @Nullable Instant createdAt;
-
-			private @Nullable Instant deletedAt;
-
-			private boolean destroyed;
-
-			private @Nullable Version version;
-
-			private MetadataBuilder() {
-			}
-
-			/**
-			 * Configure a created at {@link Instant}.
-			 * @param createdAt timestamp at which the version was created, must not be
-			 * {@literal null}.
-			 * @return {@code this} {@link MetadataBuilder}.
-			 */
-			public MetadataBuilder createdAt(Instant createdAt) {
-
-				Assert.notNull(createdAt, "Created at must not be null");
-
-				this.createdAt = createdAt;
-				return this;
-			}
-
-			/**
-			 * Configure a deleted at {@link Instant}.
-			 * @param deletedAt timestamp at which the version was deleted, must not be
-			 * {@literal null}.
-			 * @return {@code this} {@link MetadataBuilder}.
-			 */
-			public MetadataBuilder deletedAt(Instant deletedAt) {
-				this.deletedAt = deletedAt;
-				return this;
-			}
-
-			/**
-			 * Configure the version was destroyed.
-			 * @return {@code this} {@link MetadataBuilder}.
-			 */
-			public MetadataBuilder destroyed() {
-				return destroyed(true);
-			}
-
-			/**
-			 * Configure the version was destroyed.
-			 * @param destroyed
-			 * @return {@code this} {@link MetadataBuilder}.
-			 */
-			public MetadataBuilder destroyed(boolean destroyed) {
-				this.destroyed = destroyed;
-				return this;
-			}
-
-			/**
-			 * Configure the {@link Version}.
-			 * @param version must not be {@literal null}.
-			 * @return {@code this} {@link MetadataBuilder}.
-			 */
-			public MetadataBuilder version(Version version) {
-
-				Assert.notNull(version, "Version must not be null");
-
-				this.version = version;
-				return this;
-			}
-
-			/**
-			 * Build the {@link Versioned.Metadata} object. Requires
-			 * {@link #createdAt(Instant)} and {@link #version(Versioned.Version)} to be
-			 * set.
-			 * @return the {@link Versioned.Metadata} object.
-			 */
-			public Metadata build() {
-
-				Assert.notNull(this.createdAt, "CreatedAt must not be null");
-				Assert.notNull(this.version, "Version must not be null");
-
-				return new Metadata(this.createdAt, this.deletedAt, this.destroyed, this.version);
-			}
-
-		}
-
-	}
-
-	/**
-	 * Value object representing a Vault version.
-	 * <p/>
-	 * Versions greater zero point to a specific secret version whereas version number
-	 * zero points to a placeholder whose meaning is tied to a specific operation. Version
-	 * number zero can mean first created version, latest version.
-	 *
-	 * @author Mark Paluch
-	 */
-	public static class Version {
-
-		static final Version UNVERSIONED = new Version(0);
-
-		private final int version;
-
-		private Version(int version) {
-			this.version = version;
-		}
-
-		/**
-		 * @return the unversioned {@link Version} as placeholder for specific operations
-		 * that require version number zero.
-		 */
-		public static Version unversioned() {
-			return UNVERSIONED;
-		}
-
-		/**
-		 * Create a {@link Version} given a {@code versionNumber}.
-		 * @param versionNumber the version number.
-		 * @return the {@link Version} for {@code versionNumber}.
-		 */
-		public static Version from(int versionNumber) {
-
-			if (versionNumber > 0) {
-				return new Version(versionNumber);
-			}
-
-			return UNVERSIONED;
-		}
-
-		/**
-		 * @return {@literal true} if this {@link Version} points to a valid version
-		 * number, {@literal false} otherwise.
-		 * <p/>
-		 * Version numbers that are equal zero are placeholders to denote unversioned or
-		 * latest versions in the context of particular versioning operations.
-		 */
-		public boolean isVersioned() {
-			return this.version > 0;
-		}
-
-		/**
-		 * @return the version number.
-		 */
-		public int getVersion() {
-			return this.version;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o)
-				return true;
-			if (!(o instanceof Version))
-				return false;
-			Version version1 = (Version) o;
-			return this.version == version1.version;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(this.version);
-		}
-
-		@Override
-		public String toString() {
-			return String.format("Version[%d]", this.version);
-		}
-
-	}
+    private final @Nullable T data;
+
+    private final Version version;
+
+    private final @Nullable Metadata metadata;
+
+    private Versioned(T data, Version version) {
+
+        this.version = version;
+        this.metadata = null;
+        this.data = data;
+    }
+
+    private Versioned(@Nullable T data, Version version, Metadata metadata) {
+
+        this.version = version;
+        this.metadata = metadata;
+        this.data = data;
+    }
+
+    /**
+     * Create a {@link Version#unversioned() unversioned} given secret.
+     *
+     * @param secret must not be {@literal null}.
+     * @return the {@link Versioned} object for {@code secret}
+     */
+    public static <T> Versioned<T> create(T secret) {
+
+        Assert.notNull(secret, "Versioned data must not be null");
+
+        return new Versioned<>(secret, Version.unversioned());
+    }
+
+    /**
+     * Create a versioned secret object given {@code secret} and {@link Version}.
+     * Versioned secret may contain no actual data as they can be in a deleted/destroyed
+     * state.
+     *
+     * @param secret  can be {@literal null}.
+     * @param version must not be {@literal null}.
+     * @return the {@link Versioned} object for {@code secret} and {@code Version}.
+     */
+    public static <T> Versioned<T> create(@Nullable T secret, Version version) {
+
+        Assert.notNull(version, "Version must not be null");
+
+        return new Versioned<>(secret, version);
+    }
+
+    /**
+     * Create a versioned secret object given {@code secret} and {@link Metadata}.
+     * Versioned secret may contain no actual data as they can be in a deleted/destroyed
+     * state.
+     *
+     * @param secret   can be {@literal null}.
+     * @param metadata must not be {@literal null}.
+     * @return the {@link Versioned} object for {@code secret} and {@link Metadata}.
+     */
+    public static <T> Versioned<T> create(@Nullable T secret, Metadata metadata) {
+
+        Assert.notNull(metadata, "Metadata must not be null");
+
+        return new Versioned<>(secret, metadata.getVersion(), metadata);
+    }
+
+    /**
+     * @return the {@link Version} associated with this {@link Versioned} object.
+     */
+    public Version getVersion() {
+        return this.version;
+    }
+
+    /**
+     * @return {@literal true} if this versioned object has {@link Metadata} associated,
+     * otherwise {@code false}
+     */
+    public boolean hasMetadata() {
+        return this.metadata != null;
+    }
+
+    @Nullable
+    public Metadata getMetadata() {
+        return this.metadata;
+    }
+
+    /**
+     * Returns the required {@link Metadata} for this versioned object. Throws
+     * {@link IllegalStateException} if no metadata is associated.
+     *
+     * @return the non-null {@link Metadata} held by this for this versioned object.
+     * @throws IllegalStateException if no metadata is present.
+     */
+    public Metadata getRequiredMetadata() {
+
+        Metadata metadata = this.metadata;
+
+        if (metadata == null) {
+            throw new IllegalStateException("Required Metadata is not present");
+        }
+
+        return metadata;
+    }
+
+    /**
+     * @return {@literal true} if this versioned object has data associated, or
+     * {@code false}, of the version is deleted or destroyed.
+     */
+    public boolean hasData() {
+        return this.data != null;
+    }
+
+    /**
+     * @return the actual data for this versioned object. Can be {@literal null} if the
+     * version is deleted or destroyed.
+     */
+    @Nullable
+    public T getData() {
+        return this.data;
+    }
+
+    /**
+     * Returns the required data for this versioned object. Throws
+     * {@link IllegalStateException} if no data is associated.
+     *
+     * @return the non-null value held by this for this versioned object.
+     * @throws IllegalStateException if no data is present.
+     */
+    public T getRequiredData() {
+
+        T data = this.data;
+
+        if (data == null) {
+            throw new IllegalStateException("Required data is not present");
+        }
+
+        return data;
+    }
+
+    /**
+     * Convert the data element of this versioned object to an {@link Optional}.
+     *
+     * @return {@link Optional#of(Object) Optional} holding the actual value of this
+     * versioned object if {@link #hasData() data is present}, {@link Optional#empty()} if
+     * no data is associated.
+     */
+    public Optional<T> toOptional() {
+        return Optional.ofNullable(this.data);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof Versioned))
+            return false;
+        Versioned<?> versioned = (Versioned<?>) o;
+        return Objects.equals(this.data, versioned.data) && Objects.equals(this.version, versioned.version)
+                && Objects.equals(this.metadata, versioned.metadata);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(this.data, this.version, this.metadata);
+    }
+
+    /**
+     * Value object representing version metadata such as creation/deletion time.
+     */
+    public static class Metadata {
+
+        private final Instant createdAt;
+
+        private final @Nullable Instant deletedAt;
+
+        private final boolean destroyed;
+
+        private final Version version;
+
+        private final @Nullable Map<String, String> customMetadata;
+
+        private Metadata(Instant createdAt, @Nullable Instant deletedAt, boolean destroyed, Version version, @Nullable Map<String, String> customMetadata) {
+            this.createdAt = createdAt;
+            this.deletedAt = deletedAt;
+            this.destroyed = destroyed;
+            this.version = version;
+            this.customMetadata = customMetadata;
+        }
+
+        /**
+         * Creates a new {@link MetadataBuilder} to build {@link Metadata} objects.
+         *
+         * @return a new {@link MetadataBuilder} to build {@link Metadata} objects.
+         */
+        public static MetadataBuilder builder() {
+            return new MetadataBuilder();
+        }
+
+        /**
+         * @return {@link Instant} at which the version was created.
+         */
+        public Instant getCreatedAt() {
+            return this.createdAt;
+        }
+
+        /**
+         * @return {@literal true} if the version was deleted.
+         */
+        public boolean isDeleted() {
+            return this.deletedAt != null;
+        }
+
+        /**
+         * @return {@link Instant} at which the version was deleted. Can be
+         * {@literal null} if the version is not deleted.
+         */
+        @Nullable
+        public Instant getDeletedAt() {
+            return this.deletedAt;
+        }
+
+        /**
+         * @return the version number.
+         */
+        public Version getVersion() {
+            return this.version;
+        }
+
+        /**
+         * @return {@literal true} if the version was destroyed.
+         */
+        public boolean isDestroyed() {
+            return this.destroyed;
+        }
+
+
+        /**
+         * @return Metadata .
+         */
+        @Nullable
+        public Map<String, String> getCustomMetadata() {
+            return customMetadata;
+        }
+
+        @Override
+        public String toString() {
+
+            String customMetadataString = "";
+            if (customMetadata != null && customMetadata.keySet().size() > 0) {
+                StringBuilder metadataPrintBuilder = new StringBuilder(", customMetadata=Map[");
+                for (String key : customMetadata.keySet()) {
+                    metadataPrintBuilder.append(key).append(":").append(customMetadata.get(key)).append(" ");
+                }
+                metadataPrintBuilder.append("]");
+                customMetadataString = metadataPrintBuilder.toString();
+            }
+
+            return getClass().getSimpleName() + " [createdAt=" + this.createdAt + ", deletedAt=" + this.deletedAt
+                    + ", destroyed=" + this.destroyed + ", version=" + this.version + customMetadataString + ']';
+        }
+
+        /**
+         * Builder for {@link Metadata} objects.
+         */
+        public static class MetadataBuilder {
+
+            private @Nullable Instant createdAt;
+
+            private @Nullable Instant deletedAt;
+
+            private boolean destroyed;
+
+            private @Nullable Version version;
+
+            private @Nullable Map<String, String> customMetadata;
+
+            private MetadataBuilder() {
+            }
+
+            /**
+             * Configure a created at {@link Instant}.
+             *
+             * @param createdAt timestamp at which the version was created, must not be
+             *                  {@literal null}.
+             * @return {@code this} {@link MetadataBuilder}.
+             */
+            public MetadataBuilder createdAt(Instant createdAt) {
+
+                Assert.notNull(createdAt, "Created at must not be null");
+
+                this.createdAt = createdAt;
+                return this;
+            }
+
+            /**
+             * Configure a deleted at {@link Instant}.
+             *
+             * @param deletedAt timestamp at which the version was deleted, must not be
+             *                  {@literal null}.
+             * @return {@code this} {@link MetadataBuilder}.
+             */
+            public MetadataBuilder deletedAt(Instant deletedAt) {
+                this.deletedAt = deletedAt;
+                return this;
+            }
+
+            /**
+             * Configure the version was destroyed.
+             *
+             * @return {@code this} {@link MetadataBuilder}.
+             */
+            public MetadataBuilder destroyed() {
+                return destroyed(true);
+            }
+
+            /**
+             * Configure the version was destroyed.
+             *
+             * @param destroyed
+             * @return {@code this} {@link MetadataBuilder}.
+             */
+            public MetadataBuilder destroyed(boolean destroyed) {
+                this.destroyed = destroyed;
+                return this;
+            }
+
+            /**
+             * Configure the {@link Version}.
+             *
+             * @param version must not be {@literal null}.
+             * @return {@code this} {@link MetadataBuilder}.
+             */
+            public MetadataBuilder version(Version version) {
+
+                Assert.notNull(version, "Version must not be null");
+
+                this.version = version;
+                return this;
+            }
+
+            public MetadataBuilder customMetadata(Map<String, String> customMetadata) {
+
+                Assert.notNull(customMetadata, "customData should not be null");
+                Assert.notEmpty(customMetadata.keySet(), "customData should have at least one key");
+                Assert.notEmpty(customMetadata.values(), "customData should have at least one value");
+                this.customMetadata = customMetadata;
+                return this;
+            }
+
+            /**
+             * Build the {@link Versioned.Metadata} object. Requires
+             * {@link #createdAt(Instant)} and {@link #version(Versioned.Version)} to be
+             * set.
+             *
+             * @return the {@link Versioned.Metadata} object.
+             */
+            public Metadata build() {
+
+                Assert.notNull(this.createdAt, "CreatedAt must not be null");
+                Assert.notNull(this.version, "Version must not be null");
+
+                return new Metadata(this.createdAt, this.deletedAt, this.destroyed, this.version, this.customMetadata);
+            }
+
+        }
+
+    }
+
+    /**
+     * Value object representing a Vault version.
+     * <p/>
+     * Versions greater zero point to a specific secret version whereas version number
+     * zero points to a placeholder whose meaning is tied to a specific operation. Version
+     * number zero can mean first created version, latest version.
+     *
+     * @author Mark Paluch
+     */
+    public static class Version {
+
+        static final Version UNVERSIONED = new Version(0);
+
+        private final int version;
+
+        private Version(int version) {
+            this.version = version;
+        }
+
+        /**
+         * @return the unversioned {@link Version} as placeholder for specific operations
+         * that require version number zero.
+         */
+        public static Version unversioned() {
+            return UNVERSIONED;
+        }
+
+        /**
+         * Create a {@link Version} given a {@code versionNumber}.
+         *
+         * @param versionNumber the version number.
+         * @return the {@link Version} for {@code versionNumber}.
+         */
+        public static Version from(int versionNumber) {
+
+            if (versionNumber > 0) {
+                return new Version(versionNumber);
+            }
+
+            return UNVERSIONED;
+        }
+
+        /**
+         * @return {@literal true} if this {@link Version} points to a valid version
+         * number, {@literal false} otherwise.
+         * <p/>
+         * Version numbers that are equal zero are placeholders to denote unversioned or
+         * latest versions in the context of particular versioning operations.
+         */
+        public boolean isVersioned() {
+            return this.version > 0;
+        }
+
+        /**
+         * @return the version number.
+         */
+        public int getVersion() {
+            return this.version;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof Version))
+                return false;
+            Version version1 = (Version) o;
+            return this.version == version1.version;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(this.version);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Version[%d]", this.version);
+        }
+
+    }
 
 }

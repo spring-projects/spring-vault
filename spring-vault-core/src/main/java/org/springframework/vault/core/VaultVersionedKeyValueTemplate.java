@@ -50,199 +50,204 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements VaultVersionedKeyValueOperations {
 
-	private final VaultOperations vaultOperations;
+    private final VaultOperations vaultOperations;
 
-	private final String path;
+    private final String path;
 
-	/**
-	 * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
-	 * and the mount {@code path}.
-	 * @param vaultOperations must not be {@literal null}.
-	 * @param path must not be empty or {@literal null}.
-	 */
-	public VaultVersionedKeyValueTemplate(VaultOperations vaultOperations, String path) {
+    /**
+     * Create a new {@link VaultVersionedKeyValueTemplate} given {@link VaultOperations}
+     * and the mount {@code path}.
+     *
+     * @param vaultOperations must not be {@literal null}.
+     * @param path            must not be empty or {@literal null}.
+     */
+    public VaultVersionedKeyValueTemplate(VaultOperations vaultOperations, String path) {
 
-		super(vaultOperations, path);
+        super(vaultOperations, path);
 
-		this.vaultOperations = vaultOperations;
-		this.path = path;
-	}
+        this.vaultOperations = vaultOperations;
+        this.path = path;
+    }
 
-	@Nullable
-	@Override
-	@SuppressWarnings("unchecked")
-	public Versioned<Map<String, Object>> get(String path, Version version) {
+    @Nullable
+    @Override
+    @SuppressWarnings("unchecked")
+    public Versioned<Map<String, Object>> get(String path, Version version) {
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.notNull(version, "Version must not be null");
+        Assert.hasText(path, "Path must not be empty");
+        Assert.notNull(version, "Version must not be null");
 
-		return (Versioned) doRead(path, version, Map.class);
-	}
+        return (Versioned) doRead(path, version, Map.class);
+    }
 
-	@Nullable
-	@Override
-	public <T> Versioned<T> get(String path, Version version, Class<T> responseType) {
+    @Nullable
+    @Override
+    public <T> Versioned<T> get(String path, Version version, Class<T> responseType) {
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.notNull(version, "Version must not be null");
-		Assert.notNull(responseType, "Response type must not be null");
+        Assert.hasText(path, "Path must not be empty");
+        Assert.notNull(version, "Version must not be null");
+        Assert.notNull(responseType, "Response type must not be null");
 
-		return doRead(path, version, responseType);
-	}
+        return doRead(path, version, responseType);
+    }
 
-	@Nullable
-	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
+    @Nullable
+    private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
-		String secretPath = version.isVersioned()
-				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
+        String secretPath = version.isVersioned()
+                ? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		VersionedResponse response = this.vaultOperations.doWithSession(restOperations -> {
+        VersionedResponse response = this.vaultOperations.doWithSession(restOperations -> {
 
-			try {
-				return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
-			}
-			catch (HttpStatusCodeException e) {
+            try {
+                return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
+            } catch (HttpStatusCodeException e) {
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					if (e.getResponseBodyAsString().contains("deletion_time")) {
+                if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
+                    if (e.getResponseBodyAsString().contains("deletion_time")) {
 
-						return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
-					}
+                        return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
+                    }
 
-					return null;
-				}
+                    return null;
+                }
 
-				throw VaultResponses.buildException(e, path);
-			}
-		});
+                throw VaultResponses.buildException(e, path);
+            }
+        });
 
-		if (response == null) {
-			return null;
-		}
+        if (response == null) {
+            return null;
+        }
 
-		VaultResponseSupport<JsonNode> data = response.getRequiredData();
-		Metadata metadata = getMetadata(data.getMetadata());
+        VaultResponseSupport<JsonNode> data = response.getRequiredData();
+        Metadata metadata = getMetadata(data.getMetadata());
 
-		T body = deserialize(data.getRequiredData(), responseType);
+        T body = deserialize(data.getRequiredData(), responseType);
 
-		return Versioned.create(body, metadata);
-	}
+        return Versioned.create(body, metadata);
+    }
 
-	@Override
-	public Metadata put(String path, Object body) {
+    @Override
+    public Metadata put(String path, Object body) {
 
-		Assert.hasText(path, "Path must not be empty");
+        Assert.hasText(path, "Path must not be empty");
 
-		Map<Object, Object> data = new LinkedHashMap<>();
-		Map<Object, Object> requestOptions = new LinkedHashMap<>();
+        Map<Object, Object> data = new LinkedHashMap<>();
+        Map<Object, Object> requestOptions = new LinkedHashMap<>();
 
-		if (body instanceof Versioned) {
+        if (body instanceof Versioned) {
 
-			Versioned<?> versioned = (Versioned<?>) body;
+            Versioned<?> versioned = (Versioned<?>) body;
 
-			data.put("data", versioned.getData());
-			data.put("options", requestOptions);
+            data.put("data", versioned.getData());
+            data.put("options", requestOptions);
 
-			requestOptions.put("cas", versioned.getVersion().getVersion());
-		}
-		else {
-			data.put("data", body);
-		}
+            requestOptions.put("cas", versioned.getVersion().getVersion());
+        } else {
+            data.put("data", body);
+        }
 
-		VaultResponse response = doWrite(createDataPath(path), data);
+        VaultResponse response = doWrite(createDataPath(path), data);
 
-		if (response == null) {
-			throw new IllegalStateException(
-					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount");
-		}
+        if (response == null) {
+            throw new IllegalStateException(
+                    "VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount");
+        }
 
-		return getMetadata(response.getRequiredData());
-	}
+        return getMetadata(response.getRequiredData());
+    }
 
-	private static Metadata getMetadata(Map<String, Object> responseMetadata) {
+    private static Metadata getMetadata(Map<String, Object> responseMetadata) {
 
-		MetadataBuilder builder = Metadata.builder();
-		TemporalAccessor created_time = getDate(responseMetadata, "created_time");
-		TemporalAccessor deletion_time = getDate(responseMetadata, "deletion_time");
+        MetadataBuilder builder = Metadata.builder();
+        TemporalAccessor created_time = getDate(responseMetadata, "created_time");
+        TemporalAccessor deletion_time = getDate(responseMetadata, "deletion_time");
 
-		builder.createdAt(Instant.from(created_time));
+        builder.createdAt(Instant.from(created_time));
 
-		if (deletion_time != null) {
-			builder.deletedAt(Instant.from(deletion_time));
-		}
+        if (deletion_time != null) {
+            builder.deletedAt(Instant.from(deletion_time));
+        }
 
-		if (Boolean.TRUE.equals(responseMetadata.get("destroyed"))) {
-			builder.destroyed();
-		}
+        if (Boolean.TRUE.equals(responseMetadata.get("destroyed"))) {
+            builder.destroyed();
+        }
 
-		Integer version = (Integer) responseMetadata.get("version");
-		builder.version(Version.from(version));
+        Integer version = (Integer) responseMetadata.get("version");
+        builder.version(Version.from(version));
 
-		return builder.build();
-	}
+        if (responseMetadata.get("custom_metadata") != null) {
+            Map<String, String> customMetadata = (Map<String, String>) responseMetadata.get("custom_metadata");
+            builder.customMetadata(customMetadata);
+        }
 
-	@Nullable
-	private static TemporalAccessor getDate(Map<String, Object> responseMetadata, String key) {
 
-		String date = (String) responseMetadata.getOrDefault(key, "");
-		if (StringUtils.hasText(date)) {
-			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
-		}
-		return null;
-	}
+        return builder.build();
+    }
 
-	@Override
-	public void delete(String path, Version... versionsToDelete) {
+    @Nullable
+    private static TemporalAccessor getDate(Map<String, Object> responseMetadata, String key) {
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.noNullElements(versionsToDelete, "Versions must not be null");
+        String date = (String) responseMetadata.getOrDefault(key, "");
+        if (StringUtils.hasText(date)) {
+            return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
+        }
+        return null;
+    }
 
-		if (versionsToDelete.length == 0) {
-			delete(path);
-			return;
-		}
+    @Override
+    public void delete(String path, Version... versionsToDelete) {
 
-		List<Integer> versions = toVersionList(versionsToDelete);
+        Assert.hasText(path, "Path must not be empty");
+        Assert.noNullElements(versionsToDelete, "Versions must not be null");
 
-		doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions));
-	}
+        if (versionsToDelete.length == 0) {
+            delete(path);
+            return;
+        }
 
-	private static List<Integer> toVersionList(Version[] versionsToDelete) {
-		return Arrays.stream(versionsToDelete)
-			.filter(Version::isVersioned)
-			.map(Version::getVersion)
-			.collect(Collectors.toList());
-	}
+        List<Integer> versions = toVersionList(versionsToDelete);
 
-	@Override
-	public void undelete(String path, Version... versionsToDelete) {
+        doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions));
+    }
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.noNullElements(versionsToDelete, "Versions must not be null");
+    private static List<Integer> toVersionList(Version[] versionsToDelete) {
+        return Arrays.stream(versionsToDelete)
+                .filter(Version::isVersioned)
+                .map(Version::getVersion)
+                .collect(Collectors.toList());
+    }
 
-		List<Integer> versions = toVersionList(versionsToDelete);
+    @Override
+    public void undelete(String path, Version... versionsToDelete) {
 
-		doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions));
-	}
+        Assert.hasText(path, "Path must not be empty");
+        Assert.noNullElements(versionsToDelete, "Versions must not be null");
 
-	@Override
-	public void destroy(String path, Version... versionsToDelete) {
+        List<Integer> versions = toVersionList(versionsToDelete);
 
-		Assert.hasText(path, "Path must not be empty");
-		Assert.noNullElements(versionsToDelete, "Versions must not be null");
+        doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions));
+    }
 
-		List<Integer> versions = toVersionList(versionsToDelete);
+    @Override
+    public void destroy(String path, Version... versionsToDelete) {
 
-		doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions));
-	}
+        Assert.hasText(path, "Path must not be empty");
+        Assert.noNullElements(versionsToDelete, "Versions must not be null");
 
-	@Override
-	public VaultKeyValueMetadataOperations opsForKeyValueMetadata() {
-		return new VaultKeyValueMetadataTemplate(this.vaultOperations, this.path);
-	}
+        List<Integer> versions = toVersionList(versionsToDelete);
 
-	private static class VersionedResponse extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
+        doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions));
+    }
 
-	}
+    @Override
+    public VaultKeyValueMetadataOperations opsForKeyValueMetadata() {
+        return new VaultKeyValueMetadataTemplate(this.vaultOperations, this.path);
+    }
+
+    private static class VersionedResponse extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
+
+    }
 
 }

@@ -115,6 +115,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 		Instant createdTime = toInstant((String) versionData.get("created_time"));
 		Instant deletionTime = toInstant((String) versionData.get("deletion_time"));
 		boolean destroyed = (Boolean) versionData.get("destroyed");
+		Map<String, String> customMetadata = (Map<String, String>) versionData.get("custom_metadata");
 		Versioned.Version kvVersion = Versioned.Version.from(Integer.parseInt(version));
 
 		return Versioned.Metadata.builder()
@@ -122,6 +123,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 			.deletedAt(deletionTime)
 			.destroyed(destroyed)
 			.version(kvVersion)
+			.customMetadata(customMetadata)
 			.build();
 	}
 

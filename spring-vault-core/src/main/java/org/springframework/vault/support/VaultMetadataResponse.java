@@ -101,7 +101,7 @@ public class VaultMetadataResponse {
 	 * @return KV of customMetadata. Entries can be any arbitrary key-value pairs
 	 */
 	@Nullable
-	public Map<String, String> getCustomMetadata(){
+	public Map<String, String> getCustomMetadata() {
 		return this.customMetadata;
 	}
 
@@ -200,13 +200,14 @@ public class VaultMetadataResponse {
 		}
 
 		public VaultMetadataResponseBuilder customMetadata(Map<String, String> customMetadata) {
-			this.customMetadata=customMetadata;
+			this.customMetadata = customMetadata;
 			return this;
 		}
 
 		public VaultMetadataResponse build() {
 			return new VaultMetadataResponse(this.casRequired, this.createdTime, this.currentVersion,
-					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions, this.customMetadata);
+					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions,
+					this.customMetadata);
 		}
 
 	}

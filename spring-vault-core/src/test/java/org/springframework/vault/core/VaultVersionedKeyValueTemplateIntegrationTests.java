@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -103,6 +104,34 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 			.hasMessageContaining("check-and-set parameter did not match the current version");
 	}
 
+
+	@Test
+	void shouldWriteSecretWithCustomMetadata(){
+		Person person = new Person();
+		person.setFirstname("Walter");
+		person.setLastname("White");
+
+		String key = UUID.randomUUID().toString();
+
+		Map<String, String> customMetadata = new HashMap<>();
+		customMetadata.put("foo", "bar");
+		customMetadata.put("uid", "werwer");
+
+		Metadata metadata= Metadata.builder()
+				.customMetadata(customMetadata)
+				.createdAt(Instant.now())
+				.version(Version.unversioned())
+				.build();
+
+		Metadata metadata1 = this.versionedOperations.put(key, Versioned.create(person, metadata));
+
+
+
+		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
+
+		assertThat(versioned.getMetadata().getCustomMetadata().get("foo")).isEqualTo("bar");
+
+	}
 	@Test
 	void shouldReadAndWriteVersionedSecret() {
 
