@@ -129,6 +129,11 @@ public class VaultMetadataRequest {
 			return this;
 		}
 
+		/**
+		 * Sets the custom Metadata for the metadatarequest
+		 * @param customMetadata
+		 * @return {@link VaultMetadataRequest}
+		 */
 		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata) {
 			this.customMetadata = customMetadata;
 			return this;
