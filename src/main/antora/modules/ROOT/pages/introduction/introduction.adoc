@@ -1,0 +1,14 @@
+[[vault.introduction]]
+= Introduction
+
+This section explains introductory topics such as how to get started and the new and noteworthy changes for each release.
+
+The Vault support contains a wide range of features which are summarized below.
+
+* Spring configuration support using Java based @Configuration classes
+* xref:vault/imperative-template.adoc[`VaultTemplate`] helper class that increases productivity performing common Vault operations and its xref:vault/reactive-template.adoc[reactive variant].
+Includes integrated object mapping between Vault responses and POJOs.
+* xref:vault/propertysource.adoc[`@VaultPropertySource`] support to mount Vault secret backends as property sources.
+* xref:vault/vault-repositories.adoc[Vault repositories] to interact with Vault as data source using Spring Data repositories.
+
+For most tasks, you will find yourself using `VaultTemplate` that leverages the rich communication functionality. `VaultTemplate` is the place to look for accessing functionality such as reading data from Vault or issuing administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to get a hold of the low-level API artifacts such as `RestTemplate` to communicate directly with Vault.

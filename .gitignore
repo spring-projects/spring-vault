@@ -21,3 +21,8 @@ release.properties
 /vault/
 download/
 work/
+
+node
+node_modules
+package.json
+package-lock.json

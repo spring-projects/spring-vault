@@ -1,5 +1,5 @@
 [[vault.core.propertysupport]]
-= Vault Property Source Support
+= Property Sources
 
 Vault can be used in many different ways. One specific use-case is using
 Vault to store encrypted properties. Spring Vault supports Vault as property

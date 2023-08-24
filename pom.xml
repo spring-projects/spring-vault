@@ -18,6 +18,7 @@
 	</modules>
 
 	<properties>
+		<antora.version>0.0.3</antora.version>
 		<assertj-core.version>3.24.2</assertj-core.version>
 		<aws-java-sdk.version>2.18.24</aws-java-sdk.version>
 		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
@@ -534,6 +535,13 @@
 					<artifactId>maven-compiler-plugin</artifactId>
 					<version>3.11.0</version>
 				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-resources-plugin</artifactId>
+					<version>3.3.1</version>
+				</plugin>
+
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

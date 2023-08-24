@@ -1,0 +1,22 @@
+[[vault.vaultproject]]
+= Knowing Vault
+
+Security and working with secrets is a concern of every developer working with databases, user credentials or API keys.
+Vault steps in by providing a secure storage combined with access control, revocation, key rolling and auditing.
+In short: Vault is a service for securely accessing and storing secrets.
+A secret is anything that you want to tightly control access to, such as API keys, passwords, certificates, and more.
+
+The jumping off ground for learning about Vault is https://www.vaultproject.io[www.vaultproject.io].
+Here is a list of useful resources:
+
+* The manual introduces Vault and contains links to getting started guides, reference documentation and tutorials.
+
+* The online shell provides a convenient way to interact with a Vault instance in combination with the online tutorial.
+
+* https://learn.hashicorp.com/collections/vault/getting-started[Getting Started with Vault]
+
+* https://www.vaultproject.io/docs[HashiCorp Vault Documentation]
+
+Spring Vault provides client-side support for accessing, storing and revoking secrets.
+With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to manage external secret data for applications across all environments.
+Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.

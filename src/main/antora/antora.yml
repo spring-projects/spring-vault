@@ -1,0 +1,12 @@
+name: vault
+version: true
+title: Spring Vault
+nav:
+  - modules/ROOT/nav.adoc
+ext:
+  collector:
+    - run:
+        command: ./mvnw validate process-resources -pl :spring-vault-distribution -am -Pantora-process-resources
+        local: true
+      scan:
+        dir: spring-vault-distribution/target/classes/

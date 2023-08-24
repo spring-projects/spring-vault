@@ -2,15 +2,15 @@
 = Getting Started
 
 Spring Vault support requires Vault 0.6 or higher and Java SE 6 or higher.
-An easy way to bootstrap setting up a working environment is to create a
-Spring based project in https://spring.io/tools/sts[STS].
+An easy way to bootstrap setting up a working environment is to create a Spring based project in https://spring.io/tools/sts[STS].
 
 First you need to set up a running Vault server.
 Refer to the https://www.vaultproject.io/intro/[Vault] for an explanation on how to startup a Vault instance.
 
 To create a Spring project in STS go to File -> New ->
 Spring Template Project -> Simple Spring Utility Project ->
-press Yes when prompted. Then enter a project and a package name such as `org.spring.vault.example`.
+press Yes when prompted.
+Then enter a project and a package name such as `org.spring.vault.example`.
 
 Then add the following to `pom.xml` dependencies section.
 
@@ -32,8 +32,7 @@ Then add the following to `pom.xml` dependencies section.
 ----
 ====
 
-If you are using a milestone or release candidate, you will also need to add the location of the Spring
-Milestone repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
+If you are using a milestone or release candidate, you will also need to add the location of the Spring Milestone repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
 
 ====
 [source,xml]
@@ -42,7 +41,7 @@ Milestone repository to your maven `pom.xml` which is at the same level of your 
   <repository>
     <id>spring-milestone</id>
     <name>Spring Maven MILESTONE Repository</name>
-    <url>https://repo.spring.io/libs-milestone</url>
+    <url>https://repo.spring.io/milestone</url>
   </repository>
 </repositories>
 ----
@@ -50,8 +49,7 @@ Milestone repository to your maven `pom.xml` which is at the same level of your 
 
 The repository is also https://repo.spring.io/milestone/org/springframework/vault/[browseable here].
 
-If you are using a SNAPSHOT, you will also need to add the location of the Spring
-Snapshot repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
+If you are using a SNAPSHOT, you will also need to add the location of the Spring Snapshot repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
 
 ====
 [source,xml]
@@ -135,8 +133,7 @@ object and the `ClientAuthentication`.
 You are not required to spin up a Spring Context to use Spring Vault.
 * Vault is expected to be configured with a root token of
 `00000000-0000-0000-0000-000000000000` to run this application.
-* The mapper works against standard POJO objects without the need for any
-additional metadata (though you can optionally provide that information).
-* Mapping conventions can use field access. Notice the `Secrets` class has only getters.
-* If the constructor argument names match the field names of the stored document,
-they will be used to instantiate the object.
+* The mapper works against standard POJO objects without the need for any additional metadata (though you can optionally provide that information).
+* Mapping conventions can use field access.
+Notice the `Secrets` class has only getters.
+* If the constructor argument names match the field names of the stored document, they will be used to instantiate the object.

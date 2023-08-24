@@ -1,10 +1,5 @@
-[[vault.misc]]
-= Miscellaneous
-
-Learn in this chapter about details worth mentioning like the Spring Security integration.
-
-[[vault.misc.spring-security]]
-== Spring Security
+[[vault.spring-security]]
+= Spring Security
 
 Spring Vault integrates with Spring Security by providing implementations for https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#spring-security-crypto-keygenerators[`BytesKeyGenerator`] and https://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#spring-security-crypto-encryption[`BytesEncryptor`]. Both implementations use Vault's `transit` backend.
 

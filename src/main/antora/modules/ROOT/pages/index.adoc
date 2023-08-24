@@ -1,0 +1,18 @@
+[[spring-vault-reference-documentation]]
+= Spring Vault
+:revnumber: {version}
+:revdate: {localdate}
+:feature-scroll: true
+
+[horizontal]
+xref:introduction/introduction.adoc[Introduction] :: Introduction to Spring Vault
+xref:vault/vault.adoc[Vault Core Support] :: Vault Template and Repositories
+xref:vault/authentication.adoc[Authentication] :: Supported Authentication Methods
+xref:vault/propertysource.adoc[Vault Property Source] :: Mounting Vault Secret Backends as Property Source
+
+Mark Paluch
+
+(C) 2008-2023 VMware, Inc.
+
+Copies of this document may be made for your own use and for distribution to others, provided that you do not charge any fee for such copies and further provided that each copy contains this Copyright Notice, whether distributed in print or electronically.
+

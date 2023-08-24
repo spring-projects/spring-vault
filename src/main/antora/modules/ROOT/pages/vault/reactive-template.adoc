@@ -1,5 +1,5 @@
 [[vault.core.reactive.template]]
-= Introduction to ReactiveVaultTemplate
+= Reactive Infrastructure
 
 This section covers basic information on the reactive programming support using Spring Vault.
 
