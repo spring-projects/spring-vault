@@ -1,0 +1,17 @@
+*.iml
+*.ipr
+*.iws
+*.crt
+*.hcl
+*.key
+.classpath
+.idea
+.project
+build
+target
+pom.xml.releaseBackup
+
+node
+node_modules
+package.json
+package-lock.json
