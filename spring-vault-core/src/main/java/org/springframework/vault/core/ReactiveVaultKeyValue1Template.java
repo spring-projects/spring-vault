@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
  * backend version 1.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOperations {
 
@@ -53,7 +53,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-		var ref = new ParameterizedTypeReference<Map<String, Object>>() {
+		ParameterizedTypeReference<Map<String, Object>> ref = new ParameterizedTypeReference<>() {
 		};
 
 		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())

@@ -20,13 +20,14 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.support.VaultResponseSupport;
 import reactor.core.publisher.Flux;
 
 /**
  * Support class to build accessor methods for the Vault key-value backend version 2.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  * @see KeyValueBackend#KV_2
  */
 abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAccessor {
@@ -53,13 +54,14 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 		String pathToUse = path.equals("/") ? "" : path.endsWith("/") ? path : (path + "/");
 
 		// TODO: to test - null returns empty
-		var type = VaultResponses.getTypeReference(new ParameterizedTypeReference<Map<String, Object>>() {
-		});
+		ParameterizedTypeReference<VaultResponseSupport<Map<String, Object>>> type = VaultResponses
+			.getTypeReference(new ParameterizedTypeReference<>() {
+			});
 
 		return doReadRaw(String.format("%s?list=true", createBackendPath("metadata", pathToUse)), type, false)
 			.flatMap(ReactiveKeyValueHelper::getRequiredData)
 			.flatMapMany(response -> {
-				final var list = (List<String>) response.get("keys");
+				final List<String> list = (List<String>) response.get("keys");
 				if (null == list) {
 					return Flux.empty();
 				}

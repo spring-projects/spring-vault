@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.eclipse.jetty.util.ssl.SslContextFactory.Client;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -35,7 +34,7 @@ import reactor.core.publisher.Mono;
  * version 2.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor implements ReactiveVaultKeyValueOperations {
 
@@ -52,7 +51,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-		var ref = new ParameterizedTypeReference<VaultResponseDataVersion2<Map<String, Object>>>() {
+		ParameterizedTypeReference<VaultResponseDataVersion2<Map<String, Object>>> ref = new ParameterizedTypeReference<>() {
 		};
 
 		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
@@ -66,7 +65,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 				vaultResponse.setWarnings(response.getWarnings());
 				vaultResponse.setWrapInfo(response.getWrapInfo());
 
-				var data = response.getData();
+				VaultResponseDataVersion2<Map<String, Object>> data = response.getData();
 				if (null != data) {
 					vaultResponse.setData(data.getData());
 					vaultResponse.setMetadata(data.getMetadata());
@@ -77,7 +76,8 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
-		var ref = VaultResponses.getTypeReference(VaultResponses.getDataTypeReference(responseType));
+		ParameterizedTypeReference<VaultResponseSupport<VaultResponseDataVersion2<T>>> ref = VaultResponses
+			.getTypeReference(VaultResponses.getDataTypeReference(responseType));
 		return doReadRaw(createDataPath(path), ref, false)
 			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
 			.map(response -> {
@@ -90,7 +90,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 				vaultResponse.setWarnings(response.getWarnings());
 				vaultResponse.setWrapInfo(response.getWrapInfo());
 
-				var data = response.getData();
+				VaultResponseDataVersion2<T> data = response.getData();
 				if (null != data) {
 					vaultResponse.setData(data.getData());
 					vaultResponse.setMetadata(data.getMetadata());

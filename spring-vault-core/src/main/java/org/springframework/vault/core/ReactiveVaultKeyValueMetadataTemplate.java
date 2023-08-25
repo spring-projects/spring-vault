@@ -34,7 +34,7 @@ import reactor.core.publisher.Mono;
  * Default implementation of {@link ReactiveVaultKeyValueMetadataOperations}.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMetadataOperations {
 
@@ -99,7 +99,7 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	public Mono<VaultMetadataResponse> get(String path) {
 
 		return vaultOperations.read(getMetadataPath(path), Map.class).flatMap(response -> {
-			var data = response.getData();
+			Map data = response.getData();
 			if (null == data) {
 				return Mono.empty();
 			}

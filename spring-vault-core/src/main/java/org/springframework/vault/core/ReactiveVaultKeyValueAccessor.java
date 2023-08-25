@@ -36,7 +36,7 @@ import reactor.core.publisher.Mono;
  * and {@link ReactiveVaultKeyValue2Template}.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOperationsSupport {
 
@@ -63,7 +63,7 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	public Mono<Void> delete(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
-		var dataPath = createDataPath(path);
+		String dataPath = createDataPath(path);
 
 		return reactiveVaultOperations
 			.doWithSession(webClient -> webClient.delete()
@@ -73,12 +73,12 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	}
 
 	<I> Mono<VaultResponseSupport<I>> doRead(String path, Class<I> deserializeAs) {
-		var ref = VaultResponses.getTypeReference(deserializeAs);
+		ParameterizedTypeReference<VaultResponseSupport<I>> ref = VaultResponses.getTypeReference(deserializeAs);
 		return doReadRaw(createDataPath(path), ref, false);
 	}
 
 	<I> Mono<VaultResponseSupport<I>> doRead(String path, ParameterizedTypeReference<I> deserializeAs) {
-		var ref = VaultResponses.getTypeReference(deserializeAs);
+		ParameterizedTypeReference<VaultResponseSupport<I>> ref = VaultResponses.getTypeReference(deserializeAs);
 		return doReadRaw(createDataPath(path), ref, true);
 	}
 

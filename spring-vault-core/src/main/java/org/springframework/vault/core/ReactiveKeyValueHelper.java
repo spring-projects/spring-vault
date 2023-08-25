@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
  * Helper for wrapping imperative operations.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 class ReactiveKeyValueHelper {
 

@@ -300,7 +300,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		return doWithSession(webClient -> {
 
-			var ref = VaultResponses.getTypeReference(responseType);
+			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
 			return webClient.get()
 				.uri(path)

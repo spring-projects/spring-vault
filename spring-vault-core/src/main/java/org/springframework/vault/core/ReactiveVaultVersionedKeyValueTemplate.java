@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -40,7 +41,7 @@ import reactor.core.publisher.Mono;
  * Default implementation of {@link ReactiveVaultVersionedKeyValueOperations}.
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  */
 public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValue2Accessor
 		implements ReactiveVaultVersionedKeyValueOperations {
@@ -120,7 +121,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		String secretPath = version.isVersioned()
 				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		var ref = VaultResponses.getTypeReference(VaultResponses.getTypeReference(responseType));
+		ParameterizedTypeReference<VaultResponseSupport<VaultResponseSupport<T>>> ref = VaultResponses
+			.getTypeReference(VaultResponses.getTypeReference(responseType));
 
 		return doReadRaw(secretPath, ref, true).onErrorResume(WebClientResponseException.NotFound.class, e -> {
 			if (e.getResponseBodyAsString().contains("deletion_time")) {
@@ -128,11 +130,11 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			}
 			return Mono.error(VaultResponses.buildException(e.getStatusCode(), path, "Unexpected error during read"));
 		}).flatMap(ReactiveKeyValueHelper::getRequiredData).flatMap(responseSupport -> {
-			var metadataMap = responseSupport.getMetadata();
+			Map<String, Object> metadataMap = responseSupport.getMetadata();
 			if (null == metadataMap) {
 				return Mono.just(Versioned.create(responseSupport.getData(), version));
 			}
-			var metadata = getMetadata(responseSupport.getMetadata());
+			Metadata metadata = getMetadata(responseSupport.getMetadata());
 			return Mono.just(Versioned.create(responseSupport.getData(), metadata));
 		});
 	}
@@ -142,8 +144,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 		Assert.hasText(path, "Path must not be empty");
 
-		var data = new LinkedHashMap<>();
-		var requestOptions = new LinkedHashMap<>();
+		LinkedHashMap<Object, Object> data = new LinkedHashMap<>();
+		LinkedHashMap<Object, Object> requestOptions = new LinkedHashMap<>();
 
 		if (body instanceof Versioned<?> versioned) {
 
@@ -172,7 +174,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			return delete(path);
 		}
 
-		var versions = toVersionList(versionsToDelete);
+		List<Integer> versions = toVersionList(versionsToDelete);
 
 		return doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions)).then().log();
 	}
@@ -183,7 +185,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 
-		var versions = toVersionList(versionsToDelete);
+		List<Integer> versions = toVersionList(versionsToDelete);
 
 		return doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions)).then();
 	}
@@ -194,7 +196,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 
-		var versions = toVersionList(versionsToDelete);
+		List<Integer> versions = toVersionList(versionsToDelete);
 
 		return doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions)).then();
 	}

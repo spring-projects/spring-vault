@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
  * Key/Value API (kv version 1).
  *
  * @author Timothy R. Weiand
- * @since 3.999.999
+ * @since 3.1
  * @see ReactiveVaultKeyValueOperations
  * @see VaultKeyValue2Template
  */

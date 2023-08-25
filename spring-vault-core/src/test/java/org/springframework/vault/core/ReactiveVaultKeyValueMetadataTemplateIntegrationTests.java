@@ -125,13 +125,15 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 
 		vaultKeyValueMetadataOperations.put(CAS_SECRET_NAME, request).as(StepVerifier::create).verifyComplete();
 
+		final var version = prepare().getVersion();
+
 		vaultKeyValueMetadataOperations.get(CAS_SECRET_NAME)
 			.as(StepVerifier::create)
 			.assertNext(metadataResponseAfterUpdate -> {
 				assertThat(metadataResponseAfterUpdate.isCasRequired()).isEqualTo(request.isCasRequired());
 				assertThat(metadataResponseAfterUpdate.getMaxVersions()).isEqualTo(request.getMaxVersions());
 
-				if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
+				if (version.isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
 					assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(duration);
 				}
 			})

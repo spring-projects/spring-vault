@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.vault</groupId>
 		<artifactId>spring-vault-parent</artifactId>
-		<version>3.999.999-SNAPSHOT</version>
+		<version>3.1.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>spring-vault-core</artifactId>
@@ -329,14 +329,6 @@
 			<id>coverage</id>
 			<properties>
 				<jacoco.version>0.8.10</jacoco.version>
-				<sonar.version>3.7.0.1746</sonar.version>
-				<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-				<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
-				<sonar.language>java</sonar.language>
-				<sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-				<sonar.junit.reportPaths>${project.build.directory}/failsafe-reports/,${project.build.directory}/surefire-reports/</sonar.junit.reportPaths>
-				<sonar.sources>${project.build.sourceDirectory}</sonar.sources>
-				<sonar.tests>${project.build.testSourceDirectory}</sonar.tests>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -397,15 +389,6 @@
 						</executions>
 					</plugin>
 				</plugins>
-				<pluginManagement>
-					<plugins>
-						<plugin>
-							<groupId>org.sonarsource.scanner.maven</groupId>
-							<artifactId>sonar-maven-plugin</artifactId>
-							<version>3.7.0.1746</version>
-						</plugin>
-					</plugins>
-				</pluginManagement>
 			</build>
 		</profile>
 	</profiles>
