@@ -15,6 +15,10 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.vault.support.VaultResponseSupport;
 import reactor.core.publisher.Mono;
 
@@ -31,6 +35,18 @@ class ReactiveKeyValueHelper {
 
 	static <T> Mono<T> getRequiredData(VaultResponseSupport<T> support) {
 		return Mono.fromCallable(support::getRequiredData);
+	}
+
+	static Map<String, Object> makeMetadata(final Map<String, Object> metadata, final Map<String, Object> requiredData,
+			Map<String, ?> patch) {
+		Map<String, Object> data = new LinkedHashMap<>(requiredData);
+		data.putAll(patch);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("data", data);
+		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+
+		return body;
 	}
 
 }

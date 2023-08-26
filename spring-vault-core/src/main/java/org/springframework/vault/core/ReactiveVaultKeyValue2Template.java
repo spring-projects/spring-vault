@@ -57,14 +57,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
 			.map(response -> {
 				VaultResponse vaultResponse = new VaultResponse();
-				vaultResponse.setRenewable(response.isRenewable());
-				vaultResponse.setAuth(response.getAuth());
-				vaultResponse.setLeaseDuration(response.getLeaseDuration());
-				vaultResponse.setLeaseId(response.getLeaseId());
-				vaultResponse.setRequestId(response.getRequestId());
-				vaultResponse.setWarnings(response.getWarnings());
-				vaultResponse.setWrapInfo(response.getWrapInfo());
-
+				VaultResponseSupport.updateWithoutData(vaultResponse, response);
 				VaultResponseDataVersion2<Map<String, Object>> data = response.getData();
 				if (null != data) {
 					vaultResponse.setData(data.getData());
@@ -82,14 +75,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
 			.map(response -> {
 				VaultResponseSupport<T> vaultResponse = new VaultResponseSupport<>();
-				vaultResponse.setRenewable(response.isRenewable());
-				vaultResponse.setAuth(response.getAuth());
-				vaultResponse.setLeaseDuration(response.getLeaseDuration());
-				vaultResponse.setLeaseId(response.getLeaseId());
-				vaultResponse.setRequestId(response.getRequestId());
-				vaultResponse.setWarnings(response.getWarnings());
-				vaultResponse.setWrapInfo(response.getWrapInfo());
-
+				VaultResponseSupport.updateWithoutData(vaultResponse, response);
 				VaultResponseDataVersion2<T> data = response.getData();
 				if (null != data) {
 					vaultResponse.setData(data.getData());
@@ -121,14 +107,8 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 					return Mono.error(new VaultException("Metadata must not be null"));
 				}
 
-				Map<String, Object> metadata = readResponse.getMetadata();
-				Map<String, Object> data = new LinkedHashMap<>(readResponse.getRequiredData());
-				data.putAll(patch);
-
-				Map<String, Object> body = new HashMap<>();
-				body.put("data", data);
-				body.put("options", Collections.singletonMap("cas", metadata.get("version")));
-
+				Map<String, Object> body = ReactiveKeyValueHelper.makeMetadata(readResponse.getMetadata(),
+						readResponse.getRequiredData(), patch);
 				return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class, e -> {
 					if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
 							|| e.getMessage().contains("did not match the current version"))) {

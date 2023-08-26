@@ -55,14 +55,7 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		return doRead(path, Map.class, (response, data) -> {
 
 			VaultResponse vaultResponse = new VaultResponse();
-			vaultResponse.setRenewable(response.isRenewable());
-			vaultResponse.setAuth(response.getAuth());
-			vaultResponse.setLeaseDuration(response.getLeaseDuration());
-			vaultResponse.setLeaseId(response.getLeaseId());
-			vaultResponse.setMetadata(response.getMetadata());
-			vaultResponse.setRequestId(response.getRequestId());
-			vaultResponse.setWarnings(response.getWarnings());
-			vaultResponse.setWrapInfo(response.getWrapInfo());
+			VaultResponse.updateWithoutData(vaultResponse, response);
 			vaultResponse.setData(data);
 
 			return vaultResponse;
@@ -103,13 +96,8 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 			throw new VaultException("Metadata must not be null");
 		}
 
-		Map<String, Object> metadata = readResponse.getMetadata();
-		Map<String, Object> data = new LinkedHashMap<>(readResponse.getRequiredData());
-		data.putAll(patch);
-
-		Map<String, Object> body = new HashMap<>();
-		body.put("data", data);
-		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+		Map<String, Object> body = ReactiveKeyValueHelper.makeMetadata(readResponse.getMetadata(),
+				readResponse.getRequiredData(), patch);
 
 		try {
 			doWrite(createDataPath(path), body);

@@ -57,38 +57,6 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		super(reactiveVaultOperations, path);
 	}
 
-	private static Metadata getMetadata(Map<String, Object> responseMetadata) {
-
-		MetadataBuilder builder = Metadata.builder();
-		TemporalAccessor created_time = getDate(responseMetadata, "created_time");
-		TemporalAccessor deletion_time = getDate(responseMetadata, "deletion_time");
-
-		builder.createdAt(Instant.from(created_time));
-
-		if (deletion_time != null) {
-			builder.deletedAt(Instant.from(deletion_time));
-		}
-
-		if (Boolean.TRUE.equals(responseMetadata.get("destroyed"))) {
-			builder.destroyed();
-		}
-
-		Integer version = (Integer) responseMetadata.get("version");
-		builder.version(Version.from(version));
-
-		return builder.build();
-	}
-
-	@Nullable
-	private static TemporalAccessor getDate(Map<String, Object> responseMetadata, String key) {
-
-		String date = (String) responseMetadata.getOrDefault(key, "");
-		if (StringUtils.hasText(date)) {
-			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
-		}
-		return null;
-	}
-
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
 		return Arrays.stream(versionsToDelete)
 			.filter(Version::isVersioned)
@@ -134,7 +102,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			if (null == metadataMap) {
 				return Mono.just(Versioned.create(responseSupport.getData(), version));
 			}
-			Metadata metadata = getMetadata(responseSupport.getMetadata());
+			Metadata metadata = VaultKeyValueUtilities.getMetadata(responseSupport.getMetadata());
 			return Mono.just(Versioned.create(responseSupport.getData(), metadata));
 		});
 	}
@@ -159,7 +127,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		}
 
 		return doWrite(createDataPath(path), data).flatMap(ReactiveKeyValueHelper::getRequiredData)
-			.map(ReactiveVaultVersionedKeyValueTemplate::getMetadata)
+			.map(VaultKeyValueUtilities::getMetadata)
 			.switchIfEmpty(Mono.error(new IllegalStateException(
 					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
 	}

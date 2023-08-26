@@ -121,7 +121,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		VaultResponseSupport<JsonNode> data = response.getRequiredData();
-		Metadata metadata = getMetadata(data.getMetadata());
+		Metadata metadata = VaultKeyValueUtilities.getMetadata(data.getMetadata());
 
 		T body = deserialize(data.getRequiredData(), responseType);
 
@@ -156,39 +156,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount");
 		}
 
-		return getMetadata(response.getRequiredData());
-	}
-
-	private static Metadata getMetadata(Map<String, Object> responseMetadata) {
-
-		MetadataBuilder builder = Metadata.builder();
-		TemporalAccessor created_time = getDate(responseMetadata, "created_time");
-		TemporalAccessor deletion_time = getDate(responseMetadata, "deletion_time");
-
-		builder.createdAt(Instant.from(created_time));
-
-		if (deletion_time != null) {
-			builder.deletedAt(Instant.from(deletion_time));
-		}
-
-		if (Boolean.TRUE.equals(responseMetadata.get("destroyed"))) {
-			builder.destroyed();
-		}
-
-		Integer version = (Integer) responseMetadata.get("version");
-		builder.version(Version.from(version));
-
-		return builder.build();
-	}
-
-	@Nullable
-	private static TemporalAccessor getDate(Map<String, Object> responseMetadata, String key) {
-
-		String date = (String) responseMetadata.getOrDefault(key, "");
-		if (StringUtils.hasText(date)) {
-			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
-		}
-		return null;
+		return VaultKeyValueUtilities.getMetadata(response.getRequiredData());
 	}
 
 	@Override
