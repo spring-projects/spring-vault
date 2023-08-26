@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;

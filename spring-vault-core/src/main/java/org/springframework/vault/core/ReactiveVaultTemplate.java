@@ -15,11 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -50,6 +45,12 @@ import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
