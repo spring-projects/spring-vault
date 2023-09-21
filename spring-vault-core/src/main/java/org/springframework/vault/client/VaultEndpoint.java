@@ -76,6 +76,18 @@ public class VaultEndpoint implements Serializable {
 	}
 
 	/**
+	 * Create a {@link VaultEndpoint} given a {@link String URI}.
+	 * @param uri must contain hostname, port and scheme, must not be empty or
+	 * {@literal null}.
+	 * @return a new {@link VaultEndpoint}.
+	 * @see #from(URI)
+	 * @since 3.1
+	 */
+	public static VaultEndpoint from(String uri) {
+		return from(URI.create(uri));
+	}
+
+	/**
 	 * Create a {@link VaultEndpoint} given a {@link URI}.
 	 * @param uri must contain hostname, port and scheme, must not be empty or
 	 * {@literal null}.

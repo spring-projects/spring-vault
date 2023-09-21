@@ -81,8 +81,7 @@ class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport 
 
 		VaultOperations vaultOperations = prepare.getVaultOperations();
 
-		Policy policy = Policy
-			.of(Rule.builder().capabilities(BuiltinCapabilities.crud().toArray(new Capability[0])).path("/*").build());
+		Policy policy = Policy.of(Rule.builder().capabilities(BuiltinCapabilities.crud()).path("/*").build());
 		vaultOperations.opsForSys().createOrUpdatePolicy("TokenExpiryRotatingSecretsIntegrationTests", policy);
 
 		vaultOperations.write("auth/userpass/users/token-expiry", Map.of("password", "token-expiry", "token_ttl", 8,

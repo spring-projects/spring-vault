@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -59,9 +60,9 @@ import org.springframework.vault.support.Policy.PolicySerializer;
  * {@link Policy} support JSON serialization and deserialization using Jackson.
  *
  * @author Mark Paluch
- * @since 2.0
  * @see Rule
  * @see com.fasterxml.jackson.databind.ObjectMapper
+ * @since 2.0
  */
 @JsonSerialize(using = PolicySerializer.class)
 @JsonDeserialize(using = PolicyDeserializer.class)
@@ -356,7 +357,7 @@ public class Policy {
 			}
 
 			/**
-			 * Configure capabilities. apabilities are added when calling this method and
+			 * Configure capabilities. Capabilities are added when calling this method and
 			 * do not replace already configured capabilities.
 			 * @param capabilities must not be {@literal null}.
 			 * @return {@code this} {@link RuleBuilder}.
@@ -367,6 +368,25 @@ public class Policy {
 				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
 
 				return capabilities(Arrays.asList(capabilities));
+			}
+
+			/**
+			 * Configure capabilities. Capabilities are added when calling this method and
+			 * do not replace already configured capabilities.
+			 * @param capabilities must not be {@literal null}.
+			 * @return {@code this} {@link RuleBuilder}.
+			 * @since 3.1
+			 */
+			public RuleBuilder capabilities(Collection<? extends Capability> capabilities) {
+
+				Assert.notNull(capabilities, "Capabilities must not be null");
+				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
+
+				for (Capability capability : capabilities) {
+					this.capabilities.add(capability);
+				}
+
+				return this;
 			}
 
 			/**
@@ -395,15 +415,6 @@ public class Policy {
 				}).collect(Collectors.toList());
 
 				return capabilities(mapped);
-			}
-
-			private RuleBuilder capabilities(Iterable<Capability> capabilities) {
-
-				for (Capability capability : capabilities) {
-					this.capabilities.add(capability);
-				}
-
-				return this;
 			}
 
 			/**
@@ -749,7 +760,9 @@ public class Policy {
 	static class StringToDurationConverter implements Converter<String, Duration> {
 
 		static Pattern SECONDS = Pattern.compile("(\\d+)s");
+
 		static Pattern MINUTES = Pattern.compile("(\\d+)m");
+
 		static Pattern HOURS = Pattern.compile("(\\d+)h");
 
 		@Override
