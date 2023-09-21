@@ -185,8 +185,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		})
 			.retrieve()
 			.bodyToMono(String.class)
-			.doOnSubscribe(ignore -> dispatch(new BeforeLoginTokenRevocationEvent(token)))
-			.doOnNext(ignore -> dispatch(new AfterLoginTokenRevocationEvent(token)))
+			.doOnSubscribe(ignore -> multicastEvent(new BeforeLoginTokenRevocationEvent(token)))
+			.doOnNext(ignore -> multicastEvent(new AfterLoginTokenRevocationEvent(token)))
 			.onErrorResume(WebClientResponseException.class, e -> onRevokeFailed(token, e))
 			.onErrorResume(Exception.class, e -> onRevokeFailed(token, e))
 			.then();
@@ -202,7 +202,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			this.logger.warn("Cannot revoke VaultToken", e);
 		}
 
-		dispatch(new LoginTokenRevocationFailedEvent(token, e));
+		multicastEvent(new LoginTokenRevocationFailedEvent(token, e));
 
 		return Mono.empty();
 	}
@@ -251,7 +251,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 				this.logger.warn(exception.getMessage());
 			}
 
-			dispatch(new LoginTokenRenewalFailedEvent(wrapper.getToken(), exception));
+			multicastEvent(new LoginTokenRenewalFailedEvent(wrapper.getToken(), exception));
 			return shouldDrop ? EMPTY : Mono.just(wrapper);
 		});
 	}
@@ -264,14 +264,15 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			.retrieve()
 			.bodyToMono(VaultResponse.class);
 
-		return exchange.doOnSubscribe(ignore -> dispatch(new BeforeLoginTokenRenewedEvent(tokenWrapper.getToken())))
+		return exchange
+			.doOnSubscribe(ignore -> multicastEvent(new BeforeLoginTokenRenewedEvent(tokenWrapper.getToken())))
 			.handle((response, sink) -> {
 
 				LoginToken renewed = LoginTokenUtil.from(response.getRequiredAuth());
 
 				if (!isExpired(renewed)) {
 					sink.next(new TokenWrapper(renewed, tokenWrapper.revocable));
-					dispatch(new AfterLoginTokenRenewedEvent(renewed));
+					multicastEvent(new AfterLoginTokenRenewedEvent(renewed));
 					return;
 				}
 
@@ -287,7 +288,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 				}
 
 				dropCurrentToken();
-				dispatch(new LoginTokenExpiredEvent(renewed));
+				multicastEvent(new LoginTokenExpiredEvent(renewed));
 			});
 	}
 
@@ -310,7 +311,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			Mono<TokenWrapper> obtainToken = this.clientAuthentication.getVaultToken()
 				.flatMap(this::doSelfLookup) //
 				.onErrorMap(it -> {
-					dispatch(new LoginFailedEvent(this.clientAuthentication, it));
+					multicastEvent(new LoginFailedEvent(this.clientAuthentication, it));
 					return it;
 				})
 				.doOnNext(it -> {
@@ -319,7 +320,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 						scheduleRenewal(it.getToken());
 					}
 
-					dispatch(new AfterLoginEvent(it.getToken()));
+					multicastEvent(new AfterLoginEvent(it.getToken()));
 				});
 
 			this.token.compareAndSet(tokenWrapper, obtainToken.cache());
@@ -339,7 +340,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			return loginTokenMono.onErrorResume(e -> {
 
 				this.logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
-				dispatch(new AuthenticationErrorEvent(token, e));
+				multicastEvent(new AuthenticationErrorEvent(token, e));
 				return Mono.just(token);
 			}).map(it -> new TokenWrapper(it, false));
 		}
@@ -379,13 +380,13 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 				if (isTokenRenewable(token)) {
 					renewToken().subscribe(this::scheduleRenewal, e -> {
 						this.logger.error("Cannot renew VaultToken", e);
-						dispatch(new LoginTokenRenewalFailedEvent(token, e));
+						multicastEvent(new LoginTokenRenewalFailedEvent(token, e));
 					});
 				}
 			}
 			catch (Exception e) {
 				this.logger.error("Cannot renew VaultToken", e);
-				dispatch(new LoginTokenRenewalFailedEvent(token, e));
+				multicastEvent(new LoginTokenRenewalFailedEvent(token, e));
 			}
 		};
 

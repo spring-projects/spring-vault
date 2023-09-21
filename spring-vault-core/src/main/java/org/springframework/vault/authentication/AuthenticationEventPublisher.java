@@ -22,6 +22,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.authentication.event.AuthenticationListener;
 
 /**
@@ -31,13 +32,13 @@ import org.springframework.vault.authentication.event.AuthenticationListener;
  * {@link AuthenticationErrorListener}.
  *
  * @author Mark Paluch
- * @since 2.2
  * @see AuthenticationEvent
  * @see AuthenticationErrorEvent
  * @see AuthenticationListener
  * @see AuthenticationErrorListener
+ * @since 2.2
  */
-public abstract class AuthenticationEventPublisher {
+public abstract class AuthenticationEventPublisher implements AuthenticationEventMulticaster {
 
 	private final Set<AuthenticationListener> listeners = new CopyOnWriteArraySet<>();
 
@@ -46,8 +47,9 @@ public abstract class AuthenticationEventPublisher {
 	/**
 	 * Add a {@link AuthenticationListener}. The listener starts receiving events as soon
 	 * as possible.
-	 * @param listener lease listener, must not be {@literal null}.
+	 * @param listener the listener, must not be {@literal null}.
 	 */
+	@Override
 	public void addAuthenticationListener(AuthenticationListener listener) {
 
 		Assert.notNull(listener, "AuthenticationEventListener must not be null");
@@ -57,8 +59,9 @@ public abstract class AuthenticationEventPublisher {
 
 	/**
 	 * Remove a {@link AuthenticationListener}.
-	 * @param listener must not be {@literal null}.
+	 * @param listener the listener, must not be {@literal null}.
 	 */
+	@Override
 	public void removeAuthenticationListener(AuthenticationListener listener) {
 		this.listeners.remove(listener);
 	}
@@ -66,8 +69,9 @@ public abstract class AuthenticationEventPublisher {
 	/**
 	 * Add a {@link AuthenticationErrorListener}. The listener starts receiving events as
 	 * soon as possible.
-	 * @param listener lease listener, must not be {@literal null}.
+	 * @param listener the listener, must not be {@literal null}.
 	 */
+	@Override
 	public void addErrorListener(AuthenticationErrorListener listener) {
 
 		Assert.notNull(listener, "AuthenticationEventErrorListener must not be null");
@@ -77,31 +81,24 @@ public abstract class AuthenticationEventPublisher {
 
 	/**
 	 * Remove a {@link AuthenticationErrorListener}.
-	 * @param listener must not be {@literal null}.
+	 * @param listener the listener, must not be {@literal null}.
 	 */
+	@Override
 	public void removeErrorListener(AuthenticationErrorListener listener) {
 		this.errorListeners.remove(listener);
 	}
 
-	/**
-	 * Dispatch the event to all {@link AuthenticationListener}s.
-	 * @param authenticationEvent the event to dispatch.
-	 */
-	void dispatch(AuthenticationEvent authenticationEvent) {
-
+	@Override
+	public void multicastEvent(AuthenticationEvent event) {
 		for (AuthenticationListener listener : this.listeners) {
-			listener.onAuthenticationEvent(authenticationEvent);
+			listener.onAuthenticationEvent(event);
 		}
 	}
 
-	/**
-	 * Dispatch the event to all {@link AuthenticationErrorListener}s.
-	 * @param authenticationEvent the event to dispatch.
-	 */
-	void dispatch(AuthenticationErrorEvent authenticationEvent) {
-
+	@Override
+	public void multicastEvent(AuthenticationErrorEvent event) {
 		for (AuthenticationErrorListener listener : this.errorListeners) {
-			listener.onAuthenticationError(authenticationEvent);
+			listener.onAuthenticationError(event);
 		}
 	}
 

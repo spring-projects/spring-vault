@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
+import org.springframework.vault.authentication.AuthenticationEventPublisher;
 import org.springframework.vault.authentication.AuthenticationStepsFactory;
 import org.springframework.vault.authentication.AuthenticationStepsOperator;
 import org.springframework.vault.authentication.CachingVaultTokenSupplier;
@@ -33,6 +34,11 @@ import org.springframework.vault.authentication.ReactiveSessionManager;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
+import org.springframework.vault.authentication.event.AuthenticationListener;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ReactiveVaultClients;
 import org.springframework.vault.client.ReactiveVaultEndpointProvider;
@@ -70,7 +76,6 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	/**
 	 * @return a {@link ReactiveVaultEndpointProvider} returning the value of
 	 * {@link #vaultEndpointProvider()}.
-	 *
 	 * @see #vaultEndpoint()
 	 * @see #vaultEndpointProvider()
 	 * @since 2.3
@@ -153,7 +158,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	@Bean
 	@Override
 	public SessionManager sessionManager() {
-		return new ReactiveSessionManagerAdapter(getReactiveSessionManager());
+		ReactiveSessionManager rsm = getReactiveSessionManager();
+		return rsm instanceof AuthenticationEventPublisher ? new ReactiveMulticastingSessionManagerAdapter(rsm)
+				: new ReactiveSessionManagerAdapter(rsm);
 	}
 
 	/**
@@ -247,6 +254,52 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 		@Override
 		public VaultToken getSessionToken() {
 			return this.sessionManager.getSessionToken().block(Duration.ofSeconds(30));
+		}
+
+	}
+
+	/**
+	 * Extension to {@link ReactiveSessionManagerAdapter} that can multicast
+	 * {@link AuthenticationEvent}s.
+	 */
+	static class ReactiveMulticastingSessionManagerAdapter extends ReactiveSessionManagerAdapter
+			implements AuthenticationEventMulticaster {
+
+		private final AuthenticationEventMulticaster delegate;
+
+		public ReactiveMulticastingSessionManagerAdapter(ReactiveSessionManager sessionManager) {
+			super(sessionManager);
+			this.delegate = (AuthenticationEventMulticaster) sessionManager;
+		}
+
+		@Override
+		public void addAuthenticationListener(AuthenticationListener listener) {
+			delegate.addAuthenticationListener(listener);
+		}
+
+		@Override
+		public void removeAuthenticationListener(AuthenticationListener listener) {
+			delegate.removeAuthenticationListener(listener);
+		}
+
+		@Override
+		public void addErrorListener(AuthenticationErrorListener listener) {
+			delegate.addErrorListener(listener);
+		}
+
+		@Override
+		public void removeErrorListener(AuthenticationErrorListener listener) {
+			delegate.removeErrorListener(listener);
+		}
+
+		@Override
+		public void multicastEvent(AuthenticationEvent event) {
+			delegate.multicastEvent(event);
+		}
+
+		@Override
+		public void multicastEvent(AuthenticationErrorEvent event) {
+			delegate.multicastEvent(event);
 		}
 
 	}

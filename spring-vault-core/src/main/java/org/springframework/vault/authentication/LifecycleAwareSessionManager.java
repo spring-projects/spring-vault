@@ -169,10 +169,10 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	protected void revoke(VaultToken token) {
 
 		try {
-			dispatch(new BeforeLoginTokenRevocationEvent(token));
+			multicastEvent(new BeforeLoginTokenRevocationEvent(token));
 			this.restOperations.postForObject("auth/token/revoke-self", new HttpEntity<>(VaultHttpHeaders.from(token)),
 					Map.class);
-			dispatch(new AfterLoginTokenRevocationEvent(token));
+			multicastEvent(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
 			if (LoginToken.hasAccessor(token)) {
@@ -183,7 +183,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			else {
 				this.logger.warn("Cannot revoke VaultToken", e);
 			}
-			dispatch(new LoginTokenRevocationFailedEvent(token, e));
+			multicastEvent(new LoginTokenRevocationFailedEvent(token, e));
 		}
 	}
 
@@ -229,14 +229,14 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 				this.logger.warn(exception.getMessage());
 			}
 
-			dispatch(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
+			multicastEvent(new LoginTokenRenewalFailedEvent(tokenWrapper.getToken(), exception));
 			return shouldDrop ? RenewOutcome.TERMINAL_ERROR : RenewOutcome.RENEWABLE_ERROR;
 		}
 	}
 
 	private RenewOutcome doRenew(TokenWrapper wrapper) {
 
-		dispatch(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
+		multicastEvent(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
 		VaultResponse vaultResponse = this.restOperations.postForObject("auth/token/renew-self",
 				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)), VaultResponse.class);
 
@@ -254,12 +254,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 
 			setToken(Optional.empty());
-			dispatch(new LoginTokenExpiredEvent(renewed));
+			multicastEvent(new LoginTokenExpiredEvent(renewed));
 			return RenewOutcome.TERMINAL_ERROR;
 		}
 
 		setToken(Optional.of(new TokenWrapper(renewed, wrapper.revocable)));
-		dispatch(new AfterLoginTokenRenewedEvent(renewed));
+		multicastEvent(new AfterLoginTokenRenewedEvent(renewed));
 
 		return RenewOutcome.SUCCESS;
 	}
@@ -292,7 +292,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			token = this.clientAuthentication.login();
 		}
 		catch (VaultException e) {
-			dispatch(new LoginFailedEvent(this.clientAuthentication, e));
+			multicastEvent(new LoginFailedEvent(this.clientAuthentication, e));
 			throw e;
 		}
 
@@ -305,12 +305,12 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 			catch (VaultTokenLookupException e) {
 				this.logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
-				dispatch(new AuthenticationErrorEvent(token, e));
+				multicastEvent(new AuthenticationErrorEvent(token, e));
 			}
 		}
 
 		setToken(Optional.of(wrapper));
-		dispatch(new AfterLoginEvent(token));
+		multicastEvent(new AfterLoginEvent(token));
 
 		if (isTokenRenewable()) {
 			scheduleRenewal();
@@ -356,7 +356,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 			}
 			catch (Exception e) {
 				this.logger.error("Cannot renew VaultToken", e);
-				dispatch(new LoginTokenRenewalFailedEvent(token, e));
+				multicastEvent(new LoginTokenRenewalFailedEvent(token, e));
 			}
 		};
 
