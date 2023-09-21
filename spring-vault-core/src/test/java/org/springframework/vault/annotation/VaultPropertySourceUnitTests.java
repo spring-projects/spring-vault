@@ -157,6 +157,7 @@ class VaultPropertySourceUnitTests {
 		verify(leaseContainerMock).addLeaseListener(any());
 		verify(leaseContainerMock).addErrorListener(any());
 		verify(leaseContainerMock).addRequestedSecret(RequestedSecret.renewable("foo/renewable"));
+		verify(leaseContainerMock).isAutoStartup();
 		verifyNoMoreInteractions(leaseContainerMock);
 	}
 

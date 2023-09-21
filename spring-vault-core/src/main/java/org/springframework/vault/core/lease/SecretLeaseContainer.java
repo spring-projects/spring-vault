@@ -15,17 +15,19 @@
  */
 package org.springframework.vault.core.lease;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,6 +40,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
@@ -46,7 +49,16 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.backoff.BackOff;
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.ExponentialBackOff;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationEvent;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.domain.Lease;
@@ -62,34 +74,23 @@ import org.springframework.web.client.HttpStatusCodeException;
 /**
  * Event-based container to request secrets from Vault and renew the associated
  * {@link Lease}. Secrets can be rotated, depending on the requested
- * {@link RequestedSecret#getMode()}.
- *
- * Usage example:
- *
- * <pre>
+ * {@link RequestedSecret#getMode()}. Usage example: <pre>
  * <code>
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
- *
  * RequestedSecret requestedSecret = container
  * 		.requestRotatingSecret("mysql/creds/my-role");
  * container.addLeaseListener(new LeaseListenerAdapter() {
  * 	&#64;Override
  * 	public void onLeaseEvent(SecretLeaseEvent secretLeaseEvent) {
- *
  * 		if (requestedSecret == secretLeaseEvent.getSource()) {
- *
  * 			if (secretLeaseEvent instanceof SecretLeaseCreatedEvent) {
- *
- * 			}
- *
+ *            }
  * 			if (secretLeaseEvent instanceof SecretLeaseExpiredEvent) {
- *
- * 			}
- * 		}
- * 	}
+ *            }
+ *        }
+ *    }
  * });
- *
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
  * </code> </pre>
@@ -120,7 +121,8 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @see LeaseEndpoints
  * @see LeaseStrategy
  */
-public class SecretLeaseContainer extends SecretLeaseEventPublisher implements InitializingBean, DisposableBean {
+public class SecretLeaseContainer extends SecretLeaseEventPublisher
+		implements InitializingBean, DisposableBean, SmartLifecycle {
 
 	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
 		.newUpdater(SecretLeaseContainer.class, "status");
@@ -135,6 +137,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 	private static Log logger = LogFactory.getLog(SecretLeaseContainer.class);
+
+	private final Clock clock = Clock.systemDefaultZone();
+
+	private final LeaseAuthenticationEventListener authenticationListener = new LeaseAuthenticationEventListener();
 
 	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
 
@@ -190,12 +196,30 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	}
 
 	/**
+	 * Returns the {@link AuthenticationListener} to listen for login token events.
+	 * @return the {@link AuthenticationListener} to listen for login token events.
+	 * @since 3.1
+	 */
+	public AuthenticationListener getAuthenticationListener() {
+		return this.authenticationListener;
+	}
+
+	/**
+	 * Returns the {@link AuthenticationListener} to listen for login token error events.
+	 * @return the {@link AuthenticationListener} to listen for login token error events
+	 * @since 3.1
+	 */
+	public AuthenticationErrorListener getAuthenticationErrorListener() {
+		return this.authenticationListener;
+	}
+
+	/**
 	 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
 	 * {@link LeaseEndpoints} encapsulates differences between Vault versions that affect
 	 * the location of renewal/revocation endpoints.
 	 * @param leaseEndpoints must not be {@literal null}.
-	 * @since 2.1
 	 * @see LeaseEndpoints
+	 * @since 2.1
 	 */
 	public void setLeaseEndpoints(LeaseEndpoints leaseEndpoints) {
 
@@ -336,6 +360,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	 * @see #afterPropertiesSet()
 	 * @see #stop()
 	 */
+	@Override
 	public void start() {
 
 		Assert.state(this.initialized, "Container is not initialized");
@@ -409,6 +434,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	 *
 	 * @see #start()
 	 */
+	@Override
 	public void stop() {
 
 		if (UPDATER.compareAndSet(this, STATUS_STARTED, STATUS_INITIAL)) {
@@ -420,29 +446,40 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	}
 
 	@Override
+	public boolean isRunning() {
+		return UPDATER.get(this) == STATUS_STARTED;
+	}
+
+	@Override
+	public int getPhase() {
+		return 200;
+	}
+
+	@Override
 	public void afterPropertiesSet() {
 
-		if (!this.initialized) {
+		if (this.initialized) {
+			return;
+		}
 
-			super.afterPropertiesSet();
+		super.afterPropertiesSet();
 
-			this.initialized = true;
+		this.initialized = true;
 
-			if (this.taskScheduler == null) {
+		if (this.taskScheduler == null) {
 
-				ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-				scheduler.setDaemon(true);
-				scheduler
-					.setThreadNamePrefix(String.format("%s-%d-", getClass().getSimpleName(), poolId.incrementAndGet()));
-				scheduler.afterPropertiesSet();
+			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+			scheduler.setDaemon(true);
+			scheduler
+				.setThreadNamePrefix(String.format("%s-%d-", getClass().getSimpleName(), poolId.incrementAndGet()));
+			scheduler.afterPropertiesSet();
 
-				this.taskScheduler = scheduler;
-				this.manageTaskScheduler = true;
-			}
+			this.taskScheduler = scheduler;
+			this.manageTaskScheduler = true;
+		}
 
-			for (RequestedSecret requestedSecret : this.requestedSecrets) {
-				this.renewals.put(requestedSecret, new LeaseRenewalScheduler(this.taskScheduler));
-			}
+		for (RequestedSecret requestedSecret : this.requestedSecrets) {
+			this.renewals.put(requestedSecret, new LeaseRenewalScheduler(this.taskScheduler));
 		}
 	}
 
@@ -472,6 +509,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 						doRevokeLease(entry.getKey(), lease);
 					}
 				}
+				this.renewals.clear();
 
 				if (this.manageTaskScheduler) {
 
@@ -482,6 +520,51 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 				}
 			}
 		}
+	}
+
+	void restartSecrets() {
+
+		int status = this.status;
+		if (status == STATUS_STARTED) {
+
+			logger.debug("Restarting all secrets after token expiry/rotation");
+
+			try {
+
+				Map<RequestedSecret, LeaseRenewalScheduler> previousLeases = new LinkedHashMap<>(this.renewals);
+				this.renewals.clear();
+				previousLeases.values().forEach(LeaseRenewalScheduler::disableScheduleRenewal);
+
+				for (RequestedSecret requestedSecret : this.requestedSecrets) {
+
+					LeaseRenewalScheduler renewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
+					Lease previousLease = getPreviousLease(previousLeases, requestedSecret);
+
+					try {
+						doStart(requestedSecret, renewalScheduler, (secrets, lease) -> {
+							onSecretsRotated(requestedSecret, previousLease, lease, secrets.getRequiredData());
+						}, () -> {
+						});
+
+					}
+					catch (Exception e) {
+						onError(requestedSecret, previousLease, e);
+					}
+				}
+			}
+			catch (Exception e) {
+				logger.error("Cannot restart secrets", e);
+			}
+		}
+	}
+
+	private static Lease getPreviousLease(Map<RequestedSecret, LeaseRenewalScheduler> previousLeases,
+			RequestedSecret requestedSecret) {
+
+		LeaseRenewalScheduler leaseRenewalScheduler = previousLeases.get(requestedSecret);
+		Lease previousLease = leaseRenewalScheduler != null ? leaseRenewalScheduler.getLease() : null;
+
+		return previousLease == null ? Lease.none() : previousLease;
 	}
 
 	/**
@@ -712,6 +795,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
+	@Override
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
 
 		if (requestedSecret.getMode() == Mode.ROTATE) {
@@ -912,6 +996,70 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher implements I
 
 			return lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && !lease.isRenewable()
 					&& requestedSecret.getMode() == Mode.ROTATE;
+		}
+
+	}
+
+	private class LeaseAuthenticationEventListener implements AuthenticationListener, AuthenticationErrorListener {
+
+		private final BackOff backOff = new ExponentialBackOff(500, 1.5);
+
+		private final AtomicReference<Timeout> timeout = new AtomicReference<>();
+
+		@Override
+		public void onAuthenticationError(AuthenticationErrorEvent authenticationEvent) {
+			if (authenticationEvent instanceof LoginTokenRenewalFailedEvent) {
+				logger.debug("LoginTokenRenewalFailedEvent received");
+				restartSecrets();
+			}
+		}
+
+		@Override
+		public void onAuthenticationEvent(AuthenticationEvent leaseEvent) {
+			if (leaseEvent instanceof LoginTokenExpiredEvent) {
+				logger.debug("LoginTokenExpiredEvent received");
+				restartSecrets();
+			}
+		}
+
+		/**
+		 * Restart secrets after a changed token. Either the token was rotated or it has
+		 * expired.
+		 */
+		private void restartSecrets() {
+
+			if (!isRunning()) {
+				logger.debug("Ignore token event as the container is not running");
+			}
+
+			Timeout timeout = this.timeout.get();
+			if (timeout != null && !timeout.isExpired(clock)) {
+				logger.debug("Backoff timeout not reached. Dropping event");
+				return;
+			}
+
+			Timeout executionToSet = new Timeout(backOff.start(), clock);
+
+			if (this.timeout.compareAndSet(timeout, executionToSet)) {
+
+				if (taskScheduler instanceof Executor e) {
+					e.execute(SecretLeaseContainer.this::restartSecrets);
+				}
+				else {
+					taskScheduler.schedule(SecretLeaseContainer.this::restartSecrets, Instant.now());
+				}
+			}
+		}
+
+		record Timeout(BackOffExecution execution, long timeout) {
+
+			public Timeout(BackOffExecution execution, Clock clock) {
+				this(execution, clock.millis() + execution.nextBackOff());
+			}
+
+			public boolean isExpired(Clock clock) {
+				return clock.millis() > timeout;
+			}
 		}
 
 	}

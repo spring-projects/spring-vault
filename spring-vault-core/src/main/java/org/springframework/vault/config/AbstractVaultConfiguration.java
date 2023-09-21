@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.LifecycleAwareSessionManager;
 import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.RestTemplateCustomizer;
@@ -168,8 +169,15 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 		SecretLeaseContainer secretLeaseContainer = new SecretLeaseContainer(
 				getBeanFactory().getBean("vaultTemplate", VaultTemplate.class), getVaultThreadPoolTaskScheduler());
+		SessionManager sessionManager = getBeanFactory().getBean("sessionManager", SessionManager.class);
 
 		secretLeaseContainer.afterPropertiesSet();
+
+		if (sessionManager instanceof AuthenticationEventMulticaster multicaster) {
+			multicaster.addAuthenticationListener(secretLeaseContainer.getAuthenticationListener());
+			multicaster.addErrorListener(secretLeaseContainer.getAuthenticationErrorListener());
+		}
+
 		secretLeaseContainer.start();
 
 		return secretLeaseContainer;
