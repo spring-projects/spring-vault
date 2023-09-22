@@ -43,6 +43,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
+	@Override
 	@Nullable
 	default Versioned<Map<String, Object>> get(String path) {
 		return get(path, Version.unversioned());

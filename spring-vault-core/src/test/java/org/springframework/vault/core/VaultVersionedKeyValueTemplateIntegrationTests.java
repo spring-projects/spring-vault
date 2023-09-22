@@ -45,6 +45,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Integration tests for {@link VaultVersionedKeyValueTemplate}.
  *
  * @author Mark Paluch
+ * @author Jeroen Willemsen
  */
 @ExtendWith(SpringExtension.class)
 @RequiresVaultVersion(VaultInitializer.VERSIONING_INTRODUCED_WITH_VALUE)
@@ -88,6 +89,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
 
 		assertThat(versioned.getRequiredData()).isEqualTo(person);
+		assertThat(versioned.getRequiredMetadata().getCustomMetadata()).isEmpty();
 	}
 
 	@Test
@@ -107,6 +109,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 	@Test
 	void shouldWriteSecretWithCustomMetadata() {
+
 		Person person = new Person();
 		person.setFirstname("Walter");
 		person.setLastname("White");
@@ -124,9 +127,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 		this.versionedOperations.opsForKeyValueMetadata().put(key, request);
 
 		Versioned<Person> versioned = this.versionedOperations.get(key, Person.class);
-
-		assertThat(versioned.getMetadata().getCustomMetadata().get("foo")).isEqualTo("bar");
-
+		assertThat(versioned.getRequiredMetadata().getCustomMetadata()).containsEntry("foo", "bar");
 	}
 
 	@Test

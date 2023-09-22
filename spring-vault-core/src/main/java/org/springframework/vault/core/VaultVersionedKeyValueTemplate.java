@@ -46,6 +46,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  *
  * @author Mark Paluch
  * @author Maciej Drozdzowski
+ * @author Jeroen Willemsen
  * @since 2.1
  */
 public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements VaultVersionedKeyValueOperations {
@@ -159,6 +160,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		return getMetadata(response.getRequiredData());
 	}
 
+	@SuppressWarnings("unchecked")
 	private static Metadata getMetadata(Map<String, Object> responseMetadata) {
 
 		MetadataBuilder builder = Metadata.builder();
@@ -176,12 +178,8 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		Integer version = (Integer) responseMetadata.get("version");
-		builder.version(Version.from(version));
-
-		if (responseMetadata.get("custom_metadata") != null) {
-			Map<String, String> customMetadata = (Map<String, String>) responseMetadata.get("custom_metadata");
-			builder.customMetadata(customMetadata);
-		}
+		builder.version(Version.from(version))
+			.customMetadata((Map<String, String>) responseMetadata.get("custom_metadata"));
 
 		return builder.build();
 	}

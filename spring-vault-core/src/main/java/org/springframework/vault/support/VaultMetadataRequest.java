@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
  * Value object to bind Vault HTTP kv metadata update API requests.
  *
  * @author Zakaria Amine
+ * @author Jeroen Willemsen
  * @see <a href=
  * "https://www.vaultproject.io/api-docs/secret/kv/kv-v2#update-metadata">Update
  * Metadata</a>
@@ -43,26 +44,19 @@ public class VaultMetadataRequest {
 	private final String deleteVersionAfter;
 
 	@JsonProperty("custom_metadata")
-	private final Map<String, String> customMetadata;
+	private final @Nullable Map<String, String> customMetadata;
 
-	private VaultMetadataRequest(int maxVersions, boolean casRequired, @Nullable Duration deleteVersionAfter,
-			@Nullable Map<String, String> customMetadata) {
-		this.maxVersions = maxVersions;
+	private VaultMetadataRequest(boolean casRequired, @Nullable Map<String, String> customMetadata,
+			@Nullable Duration deleteVersionAfter, int maxVersions) {
 		this.casRequired = casRequired;
+		this.customMetadata = customMetadata;
 		this.deleteVersionAfter = DurationParser
 			.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
-		this.customMetadata = customMetadata;
+		this.maxVersions = maxVersions;
 	}
 
 	public static VaultMetadataRequestBuilder builder() {
 		return new VaultMetadataRequestBuilder();
-	}
-
-	/**
-	 * @return The number of versions to keep per key.
-	 */
-	public int getMaxVersions() {
-		return this.maxVersions;
 	}
 
 	/**
@@ -73,6 +67,11 @@ public class VaultMetadataRequest {
 		return this.casRequired;
 	}
 
+	@Nullable
+	public Map<String, String> getCustomMetadata() {
+		return this.customMetadata;
+	}
+
 	/**
 	 * @return the deletion_time for all new versions written to this key. Accepts
 	 * <a href="https://golang.org/pkg/time/#ParseDuration">Go duration format string</a>.
@@ -81,31 +80,33 @@ public class VaultMetadataRequest {
 		return this.deleteVersionAfter;
 	}
 
-	@Nullable
-	public Map<String, String> getCustomMetadata() {
-		return this.customMetadata;
+	/**
+	 * @return The number of versions to keep per key.
+	 */
+	public int getMaxVersions() {
+		return this.maxVersions;
 	}
 
 	public static class VaultMetadataRequestBuilder {
 
-		private int maxVersions;
-
 		private boolean casRequired;
-
-		@Nullable
-		private Duration deleteVersionAfter;
 
 		@Nullable
 		private Map<String, String> customMetadata;
 
+		@Nullable
+		private Duration deleteVersionAfter;
+
+		private int maxVersions;
+
 		/**
-		 * Set the number of versions to keep per key.
-		 * @param maxVersions
+		 * Set the cas_required parameter to {@code true} to require the cas parameter to
+		 * be set on all write requests.
 		 * @return {@link VaultMetadataRequest}
+		 * @since 3.1
 		 */
-		public VaultMetadataRequestBuilder maxVersions(int maxVersions) {
-			this.maxVersions = maxVersions;
-			return this;
+		public VaultMetadataRequestBuilder casRequired() {
+			return casRequired(true);
 		}
 
 		/**
@@ -120,6 +121,17 @@ public class VaultMetadataRequest {
 		}
 
 		/**
+		 * Sets the custom Metadata for the metadata request.
+		 * @param customMetadata
+		 * @return {@link VaultMetadataRequest}
+		 * @since 3.1
+		 */
+		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata) {
+			this.customMetadata = customMetadata;
+			return this;
+		}
+
+		/**
 		 * Sets the deletion time for all new versions written to this key.
 		 * @param deleteVersionAfter
 		 * @return {@link VaultMetadataRequest}
@@ -130,12 +142,12 @@ public class VaultMetadataRequest {
 		}
 
 		/**
-		 * Sets the custom Metadata for the metadatarequest
-		 * @param customMetadata
+		 * Set the number of versions to keep per key.
+		 * @param maxVersions
 		 * @return {@link VaultMetadataRequest}
 		 */
-		public VaultMetadataRequestBuilder customMetadata(Map<String, String> customMetadata) {
-			this.customMetadata = customMetadata;
+		public VaultMetadataRequestBuilder maxVersions(int maxVersions) {
+			this.maxVersions = maxVersions;
 			return this;
 		}
 
@@ -143,8 +155,8 @@ public class VaultMetadataRequest {
 		 * @return a new {@link VaultMetadataRequest}
 		 */
 		public VaultMetadataRequest build() {
-			return new VaultMetadataRequest(this.maxVersions, this.casRequired, this.deleteVersionAfter,
-					this.customMetadata);
+			return new VaultMetadataRequest(this.casRequired, this.customMetadata, this.deleteVersionAfter,
+					this.maxVersions);
 		}
 
 	}

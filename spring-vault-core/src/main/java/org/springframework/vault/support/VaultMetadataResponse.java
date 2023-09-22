@@ -18,15 +18,18 @@ package org.springframework.vault.support;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.Period;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
+import org.springframework.vault.support.Versioned.Metadata;
 
 /**
  * Value object to bind Vault HTTP kv read metadata API responses.
  *
  * @author Zakaria Amine
+ * @author Jeroen Willemsen
  * @since 2.3
  */
 public class VaultMetadataResponse {
@@ -36,6 +39,8 @@ public class VaultMetadataResponse {
 	private final Instant createdTime;
 
 	private final int currentVersion;
+
+	private final Map<String, String> customMetadata;
 
 	private final Duration deleteVersionAfter;
 
@@ -47,20 +52,19 @@ public class VaultMetadataResponse {
 
 	private final List<Versioned.Metadata> versions;
 
-	private final Map<String, String> customMetadata;
-
 	private VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion,
-			Duration deleteVersionAfter, int maxVersions, int oldestVersion, Instant updatedTime,
-			List<Versioned.Metadata> versions, Map<String, String> customMetadata) {
+			Map<String, String> customMetadata, Duration deleteVersionAfter, int maxVersions, int oldestVersion,
+			Instant updatedTime, List<Metadata> versions) {
+
 		this.casRequired = casRequired;
 		this.createdTime = createdTime;
+		this.customMetadata = customMetadata;
 		this.currentVersion = currentVersion;
 		this.deleteVersionAfter = deleteVersionAfter;
 		this.maxVersions = maxVersions;
 		this.oldestVersion = oldestVersion;
 		this.updatedTime = updatedTime;
 		this.versions = versions;
-		this.customMetadata = customMetadata;
 	}
 
 	public static VaultMetadataResponseBuilder builder() {
@@ -98,9 +102,9 @@ public class VaultMetadataResponse {
 	}
 
 	/**
-	 * @return KV of customMetadata. Entries can be any arbitrary key-value pairs
+	 * @return the custom metadata. Entries can be any arbitrary key-value pairs
+	 * @since 3.1
 	 */
-	@Nullable
 	public Map<String, String> getCustomMetadata() {
 		return this.customMetadata;
 	}
@@ -127,12 +131,10 @@ public class VaultMetadataResponse {
 	}
 
 	/**
-	 * Follows the following format.
-	 *
-	 * "versions": { "1": { "created_time": "2020-05-18T12:23:09.895587932Z",
-	 * "deletion_time": "2020-05-18T12:31:00.66257744Z", "destroyed": false }, "2": {
-	 * "created_time": "2020-05-18T12:23:10.122081788Z", "deletion_time": "", "destroyed":
-	 * false } }
+	 * Follows the following format. "versions": { "1": { "created_time":
+	 * "2020-05-18T12:23:09.895587932Z", "deletion_time": "2020-05-18T12:31:00.66257744Z",
+	 * "destroyed": false }, "2": { "created_time": "2020-05-18T12:23:10.122081788Z",
+	 * "deletion_time": "", "destroyed": false } }
 	 * @return the key versions and their details
 	 */
 	public List<Versioned.Metadata> getVersions() {
@@ -142,6 +144,8 @@ public class VaultMetadataResponse {
 	public static class VaultMetadataResponseBuilder {
 
 		private boolean casRequired;
+
+		private Map<String, String> customMetadata;
 
 		private Instant createdTime;
 
@@ -157,8 +161,6 @@ public class VaultMetadataResponse {
 
 		private List<Versioned.Metadata> versions;
 
-		private Map<String, String> customMetadata;
-
 		public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
 			this.casRequired = casRequired;
 			return this;
@@ -171,6 +173,11 @@ public class VaultMetadataResponse {
 
 		public VaultMetadataResponseBuilder currentVersion(int currentVersion) {
 			this.currentVersion = currentVersion;
+			return this;
+		}
+
+		public VaultMetadataResponseBuilder customMetadata(@Nullable Map<String, String> customMetadata) {
+			this.customMetadata = customMetadata != null ? customMetadata : Collections.emptyMap();
 			return this;
 		}
 
@@ -199,15 +206,10 @@ public class VaultMetadataResponse {
 			return this;
 		}
 
-		public VaultMetadataResponseBuilder customMetadata(Map<String, String> customMetadata) {
-			this.customMetadata = customMetadata;
-			return this;
-		}
-
 		public VaultMetadataResponse build() {
 			return new VaultMetadataResponse(this.casRequired, this.createdTime, this.currentVersion,
-					this.deleteVersionAfter, this.maxVersions, this.oldestVersion, this.updatedTime, this.versions,
-					this.customMetadata);
+					this.customMetadata, this.deleteVersionAfter, this.maxVersions, this.oldestVersion,
+					this.updatedTime, this.versions);
 		}
 
 	}

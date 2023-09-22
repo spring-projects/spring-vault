@@ -36,6 +36,7 @@ import org.springframework.vault.support.Versioned;
  *
  * @author Zakaria Amine
  * @author Mark Paluch
+ * @author Jeroen Willemsen
  * @since 2.3
  */
 class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
@@ -120,12 +121,8 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 			.createdAt(createdTime)
 			.deletedAt(deletionTime)
 			.destroyed(destroyed)
-			.version(kvVersion);
-
-		if (versionData.get("custom_metadata") != null) {
-			Map<String, String> customMetadata = (Map<String, String>) versionData.get("custom_metadata");
-			builder.customMetadata(customMetadata);
-		}
+			.version(kvVersion)
+			.customMetadata((Map<String, String>) versionData.get("custom_metadata"));
 
 		return builder.build();
 	}
