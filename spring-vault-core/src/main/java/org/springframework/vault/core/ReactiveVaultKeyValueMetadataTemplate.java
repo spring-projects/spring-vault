@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,23 +25,25 @@ import reactor.core.publisher.Mono;
  * Default implementation of {@link ReactiveVaultKeyValueMetadataOperations}.
  *
  * @author Timothy R. Weiand
+ * @author Mark Paluch
  * @since 3.1
  */
 class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMetadataOperations {
 
 	private final ReactiveVaultOperations vaultOperations;
 
-	private final String basePath;
+	private final String path;
 
-	ReactiveVaultKeyValueMetadataTemplate(ReactiveVaultOperations vaultOperations, String basePath) {
+	ReactiveVaultKeyValueMetadataTemplate(ReactiveVaultOperations vaultOperations, String path) {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
 		this.vaultOperations = vaultOperations;
-		this.basePath = basePath;
+		this.path = path;
 	}
 
 	@Override
+	@SuppressWarnings("rawtypes")
 	public Mono<VaultMetadataResponse> get(String path) {
 
 		return vaultOperations.read(getMetadataPath(path), Map.class).flatMap(response -> {
@@ -51,11 +53,12 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 			}
 
 			return Mono.just(data);
-		}).map(VaultKeyValueUtilities::fromMap);
+		}).map(KeyValueUtilities::fromMap);
 	}
 
 	@Override
 	public Mono<Void> put(String path, VaultMetadataRequest body) {
+
 		Assert.notNull(body, "Body must not be null");
 
 		return vaultOperations.write(getMetadataPath(path), body).then();
@@ -67,8 +70,10 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	}
 
 	private String getMetadataPath(String path) {
+
 		Assert.hasText(path, "Path must not be empty");
-		return basePath + "/metadata/" + path;
+
+		return this.path + "/metadata/" + path;
 	}
 
 }

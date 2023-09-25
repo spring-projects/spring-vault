@@ -19,6 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.domain.Person;
+import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Version;
 import org.springframework.vault.util.IntegrationTestSupport;
@@ -49,11 +52,11 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 	@Autowired
 	ReactiveVaultVersionedKeyValueTemplateIntegrationTests(ReactiveVaultOperations reactiveVaultOperations) {
 		reactiveVersionedOperations = reactiveVaultOperations.opsForVersionedKeyValue("versioned");
-
 	}
 
 	@Test
 	void shouldCreateVersionedSecret() {
+
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
@@ -68,6 +71,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldCreateComplexVersionedSecret() {
+
 		var person = new Person();
 		person.setFirstname("Walter");
 		person.setLastname("White");
@@ -85,6 +89,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldCreateVersionedWithCAS() {
+
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
@@ -101,7 +106,35 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 	}
 
 	@Test
+	void shouldWriteSecretWithCustomMetadata() {
+
+		Person person = new Person();
+		person.setFirstname("Walter");
+		person.setLastname("White");
+
+		String key = UUID.randomUUID().toString();
+
+		Map<String, String> customMetadata = new HashMap<>();
+		customMetadata.put("foo", "bar");
+		customMetadata.put("uid", "werwer");
+
+		reactiveVersionedOperations.put(key, Versioned.create(person)).then().as(StepVerifier::create).verifyComplete();
+
+		VaultMetadataRequest request = VaultMetadataRequest.builder().customMetadata(customMetadata).build();
+
+		reactiveVersionedOperations.opsForKeyValueMetadata()
+			.put(key, request)
+			.as(StepVerifier::create)
+			.verifyComplete();
+
+		reactiveVersionedOperations.get(key, Person.class).as(StepVerifier::create).assertNext(versioned -> {
+			assertThat(versioned.getRequiredMetadata().getCustomMetadata()).containsEntry("foo", "bar");
+		}).verifyComplete();
+	}
+
+	@Test
 	void shouldReadAndWriteVersionedSecret() {
+
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
@@ -119,6 +152,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldListExistingSecrets() {
+
 		var secret = Collections.singletonMap("key", "value");
 		var key = UUID.randomUUID().toString();
 
@@ -135,6 +169,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldReadDifferentVersions() {
+
 		var key = UUID.randomUUID().toString();
 
 		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
@@ -149,6 +184,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		reactiveVersionedOperations.get(key, Version.from(1))
 			.as(StepVerifier::create)
 			.assertNext(versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v1")));
+
 		reactiveVersionedOperations.get(key, Version.from(2))
 			.as(StepVerifier::create)
 			.assertNext(versioned -> assertThat(versioned.getData()).isEqualTo(Collections.singletonMap("key", "v2")));
@@ -180,6 +216,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldUndeleteVersion() {
+
 		var key = UUID.randomUUID().toString();
 
 		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
@@ -204,6 +241,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldDeleteIntermediateRecentVersion() {
+
 		var key = UUID.randomUUID().toString();
 
 		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
@@ -228,12 +266,14 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 
 	@Test
 	void shouldDestroyVersion() {
+
 		var key = UUID.randomUUID().toString();
 
 		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v1"))
 			.as(StepVerifier::create)
 			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(1))
 			.verifyComplete();
+
 		reactiveVersionedOperations.put(key, Collections.singletonMap("key", "v2"))
 			.as(StepVerifier::create)
 			.assertNext(m -> assertThat(m.getVersion().getVersion()).isEqualTo(2))

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import reactor.core.publisher.Mono;
  * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
  * backend. Paths used in this operations interface are relative and outgoing requests
  * prepend paths with the according operation-specific prefix.
- * <p/>
  *
  * @author Timothy R. Weiand
+ * @author Mark Paluch
  * @since 3.1
  */
 public interface ReactiveVaultKeyValueOperationsSupport {
@@ -42,7 +42,7 @@ public interface ReactiveVaultKeyValueOperationsSupport {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal Mono.empty()} if the path does not exist.
 	 */
-	<T> Mono<T> get(String path);
+	Mono<? extends Object> get(String path);
 
 	/**
 	 * Delete the secret at {@code path}.

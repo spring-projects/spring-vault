@@ -50,7 +50,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 
 		VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
 
-		return response != null ? VaultKeyValueUtilities.fromMap(response.getRequiredData()) : null;
+		return response != null ? KeyValueUtilities.fromMap(response.getRequiredData()) : null;
 	}
 
 	@Override

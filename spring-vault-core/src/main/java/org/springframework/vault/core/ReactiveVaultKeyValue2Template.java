@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,12 @@
 package org.springframework.vault.core;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.VaultResponseDataVersion2;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+
 import reactor.core.publisher.Mono;
 
 /**
@@ -34,9 +29,12 @@ import reactor.core.publisher.Mono;
  * version 2.
  *
  * @author Timothy R. Weiand
+ * @author Mark Paluch
  * @since 3.1
  */
 class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor implements ReactiveVaultKeyValueOperations {
+
+	private final String path;
 
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue2Template} given {@link VaultOperations}
@@ -46,69 +44,58 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	 */
 	public ReactiveVaultKeyValue2Template(ReactiveVaultOperations vaultOperations, String path) {
 		super(vaultOperations, path);
+		this.path = path;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-		ParameterizedTypeReference<VaultResponseDataVersion2<Map<String, Object>>> ref = new ParameterizedTypeReference<>() {
-		};
 
-		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-			.map(response -> {
-				VaultResponse vaultResponse = new VaultResponse();
-				VaultResponseSupport.updateWithoutData(vaultResponse, response);
-				VaultResponseDataVersion2<Map<String, Object>> data = response.getData();
-				if (null != data) {
-					vaultResponse.setData(data.getData());
-					vaultResponse.setMetadata(data.getMetadata());
-				}
-				return vaultResponse;
-			});
+		Assert.hasText(path, "Path must not be empty");
+
+		return doRead(path, Map.class, (response, data) -> {
+
+			VaultResponse vaultResponse = new VaultResponse();
+			VaultResponse.updateWithoutData(vaultResponse, response);
+			vaultResponse.setData(data);
+
+			return vaultResponse;
+		});
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
-		ParameterizedTypeReference<VaultResponseSupport<VaultResponseDataVersion2<T>>> ref = VaultResponses
-			.getTypeReference(VaultResponses.getDataTypeReference(responseType));
-		return doReadRaw(createDataPath(path), ref, false)
-			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-			.map(response -> {
-				VaultResponseSupport<T> vaultResponse = new VaultResponseSupport<>();
-				VaultResponseSupport.updateWithoutData(vaultResponse, response);
-				VaultResponseDataVersion2<T> data = response.getData();
-				if (null != data) {
-					vaultResponse.setData(data.getData());
-					vaultResponse.setMetadata(data.getMetadata());
-				}
-				return vaultResponse;
-			});
+
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(responseType, "Response type must not be null");
+
+		return doRead(path, responseType, (response, data) -> {
+
+			VaultResponseSupport result = response;
+			result.setData(data);
+			return result;
+		});
 	}
 
 	@Override
 	public Mono<Boolean> patch(String path, Map<String, ?> patch) {
+
 		Assert.notNull(patch, "Patch body must not be null");
-		return get(path)
-			.onErrorResume(WebClientResponseException.NotFound.class,
-					e -> Mono.error(new SecretNotFoundException(String
-						.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-							String.format("%s/%s", this.path, path))))
+
+		return get(path).filter(it -> it.getData() != null)
 			.switchIfEmpty(Mono.error(new SecretNotFoundException(
 					String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-					String.format("%s/%s", this.path, path))))
+					createLogicalPath(path))))
 			.flatMap(readResponse -> {
-				if (null == readResponse.getData()) {
-					return Mono.error(new SecretNotFoundException(String
-						.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-							String.format("%s/%s", this.path, path)));
-				}
 
 				if (readResponse.getMetadata() == null) {
 					return Mono.error(new VaultException("Metadata must not be null"));
 				}
 
-				Map<String, Object> body = ReactiveKeyValueHelper.makeMetadata(readResponse.getMetadata(),
-						readResponse.getRequiredData(), patch);
+				Map<String, Object> body = KeyValueUtilities.createPatchRequest(patch, readResponse.getRequiredData(),
+						readResponse.getMetadata());
+
 				return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class, e -> {
 					if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
 							|| e.getMessage().contains("did not match the current version"))) {
@@ -122,6 +109,10 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	@Override
 	public Mono<Void> put(String path, Object body) {
 		return doWrite(createDataPath(path), Collections.singletonMap("data", body)).then();
+	}
+
+	private String createLogicalPath(String path) {
+		return String.format("%s/%s", this.path, path);
 	}
 
 }

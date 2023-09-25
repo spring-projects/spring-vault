@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,27 @@
 package org.springframework.vault.core;
 
 import java.util.Map;
-import org.springframework.core.ParameterizedTypeReference;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Default implementation of {@link ReactiveVaultKeyValueOperations} for the Key/Value
  * backend version 1.
  *
  * @author Timothy R. Weiand
+ * @author Mark Paluch
  * @since 3.1
  */
 class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOperations {
+
+	private final String path;
 
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue1Template} given
@@ -43,6 +47,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	public ReactiveVaultKeyValue1Template(ReactiveVaultOperations vaultOperations, String path) {
 
 		super(vaultOperations, path);
+		this.path = path;
 	}
 
 	@Override
@@ -53,22 +58,28 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-		ParameterizedTypeReference<Map<String, Object>> ref = new ParameterizedTypeReference<>() {
-		};
 
-		return doRead(path, ref).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-			.map(response -> {
-				VaultResponse vaultResponse = new VaultResponse();
-				VaultResponseSupport.updateWithoutData(vaultResponse, response);
-				vaultResponse.setData(response.getData());
-				return vaultResponse;
-			});
+		return doRead(path, Map.class, (response, map) -> {
+			VaultResponse vaultResponse = new VaultResponse();
+			VaultResponseSupport.updateWithoutData(vaultResponse, response);
+			vaultResponse.setData(map);
+			return vaultResponse;
+		});
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
 
-		return doRead(path, responseType).onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
+		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(responseType, "Response type must not be null");
+
+		return doRead(path, responseType, (response, data) -> {
+
+			VaultResponseSupport result = response;
+			result.setData(data);
+			return result;
+		});
 	}
 
 	@Override
@@ -87,6 +98,11 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	@Override
 	public KeyValueBackend getApiVersion() {
 		return KeyValueBackend.KV_1;
+	}
+
+	@Override
+	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
+		return response.getRequiredData();
 	}
 
 	@Override

@@ -33,7 +33,7 @@ import org.springframework.vault.support.VaultResponseSupport;
  */
 abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
-	final String path;
+	private final String path;
 
 	/**
 	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and the
@@ -53,10 +53,10 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	@SuppressWarnings("unchecked")
 	public List<String> list(String path) {
 
-		String pathToUse = path.equals("/") ? "" : path.endsWith("/") ? path : (path + "/");
-
 		VaultListResponse read = doRead(restOperations -> {
-			return restOperations.exchange(String.format("%s?list=true", createBackendPath("metadata", pathToUse)),
+			return restOperations.exchange(
+					String.format("%s?list=true",
+							createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
 					HttpMethod.GET, null, VaultListResponse.class);
 		});
 
@@ -72,10 +72,12 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 		return KeyValueBackend.KV_2;
 	}
 
+	@Override
 	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
 		return response.getRequiredData().at("/data");
 	}
 
+	@Override
 	String createDataPath(String path) {
 		return createBackendPath("data", path);
 	}

@@ -26,13 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.domain.Person;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.VaultInitializer;
 import reactor.test.StepVerifier;
 
 /**
- * Integration tests for {@link ReactiveVaultKeyValue2Template}.
+ * Integration tests for {@link ReactiveVaultKeyValueOperations}.
  *
  * @author Timothy R. Weiand
  */
@@ -73,10 +74,9 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.list("/")
+			.collectList()
 			.as(StepVerifier::create)
-			.recordWith(ArrayList::new)
-			.thenConsumeWhile(x -> true)
-			.expectRecordedMatches(elements -> elements.contains(key))
+			.assertNext(elements -> assertThat(elements).contains(key))
 			.verifyComplete();
 	}
 
@@ -90,7 +90,7 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get(key)
-			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.map(VaultResponseSupport::getRequiredData)
 			.as(StepVerifier::create)
 			.assertNext(n -> assertThat(n).containsEntry("key", "value"))
 			.verifyComplete();
@@ -106,6 +106,7 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 
 	@Test
 	void shouldReadComplexSecret() {
+
 		var person = new Person();
 		person.setFirstname("Walter");
 		person.setLastname("Heisenberg");
@@ -114,7 +115,7 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put("my-secret", person).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get("my-secret")
-			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.map(VaultResponseSupport::getRequiredData)
 			.as(StepVerifier::create)
 			.assertNext(m -> {
 				assertThat(m).containsAllEntriesOf(
@@ -124,7 +125,7 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 			.verifyComplete();
 
 		kvOperations.get("my-secret", Person.class)
-			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+			.map(VaultResponseSupport::getRequiredData)
 			.as(StepVerifier::create)
 			.assertNext(p -> assertThat(p).isEqualTo(person))
 			.verifyComplete();

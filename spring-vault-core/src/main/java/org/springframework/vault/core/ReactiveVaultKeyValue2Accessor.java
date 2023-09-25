@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 package org.springframework.vault.core;
 
 import java.util.List;
-import java.util.Map;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.vault.client.VaultResponses;
+
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponseSupport;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Flux;
 
 /**
  * Support class to build accessor methods for the Vault key-value backend version 2.
  *
  * @author Timothy R. Weiand
+ * @author Mark Paluch
  * @since 3.1
  * @see KeyValueBackend#KV_2
  */
 abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAccessor {
 
-	final String path;
+	private final String path;
 
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue2Accessor} given {@link VaultOperations}
@@ -51,22 +52,13 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
 
-		String pathToUse = path.equals("/") ? "" : path.endsWith("/") ? path : (path + "/");
-
-		// TODO: to test - null returns empty
-		ParameterizedTypeReference<VaultResponseSupport<Map<String, Object>>> type = VaultResponses
-			.getTypeReference(new ParameterizedTypeReference<>() {
-			});
-
-		return doReadRaw(String.format("%s?list=true", createBackendPath("metadata", pathToUse)), type, false)
-			.flatMap(ReactiveKeyValueHelper::getRequiredData)
+		return doRead(
+				String.format("%s?list=true", createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+				VaultListResponse.class)
 			.flatMapMany(response -> {
-				final List<String> list = (List<String>) response.get("keys");
-				if (null == list) {
-					return Flux.empty();
-				}
-				return Flux.fromIterable(list);
 
+				List<String> list = (List<String>) response.getRequiredData().get("keys");
+				return null == list ? Flux.empty() : Flux.fromIterable(list);
 			});
 	}
 
@@ -75,6 +67,12 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 		return KeyValueBackend.KV_2;
 	}
 
+	@Override
+	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
+		return response.getRequiredData().at("/data");
+	}
+
+	@Override
 	String createDataPath(String path) {
 		return createBackendPath("data", path);
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.vault.core;
 
-package org.springframework.vault.support;
+import com.fasterxml.jackson.databind.JsonNode;
 
-public class VaultResponseVersion2<T> extends VaultResponseSupport<VaultResponseDataVersion2<T>> {
+import org.springframework.vault.support.VaultResponseSupport;
+
+/**
+ * @author Mark Paluch
+ */
+class VersionedResponse extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
 
 }

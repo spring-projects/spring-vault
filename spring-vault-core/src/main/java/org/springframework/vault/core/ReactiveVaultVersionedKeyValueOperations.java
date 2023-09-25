@@ -28,7 +28,7 @@ public interface ReactiveVaultVersionedKeyValueOperations extends ReactiveVaultK
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@SuppressWarnings("unchecked")
+	@Override
 	default Mono<Versioned<Map<String, Object>>> get(String path) {
 		return get(path, Version.unversioned());
 	}

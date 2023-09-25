@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -28,16 +25,13 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
-import org.springframework.vault.support.Versioned.Metadata.MetadataBuilder;
 import org.springframework.vault.support.Versioned.Version;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -106,7 +100,6 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					if (e.getResponseBodyAsString().contains("deletion_time")) {
-
 						return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
 					}
 
@@ -122,7 +115,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		VaultResponseSupport<JsonNode> data = response.getRequiredData();
-		Metadata metadata = VaultKeyValueUtilities.getMetadata(data.getMetadata());
+		Metadata metadata = KeyValueUtilities.getMetadata(data.getMetadata());
 
 		T body = deserialize(data.getRequiredData(), responseType);
 
@@ -157,7 +150,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount");
 		}
 
-		return VaultKeyValueUtilities.getMetadata(response.getRequiredData());
+		return KeyValueUtilities.getMetadata(response.getRequiredData());
 	}
 
 	@Override
@@ -208,10 +201,6 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	@Override
 	public VaultKeyValueMetadataOperations opsForKeyValueMetadata() {
 		return new VaultKeyValueMetadataTemplate(this.vaultOperations, this.path);
-	}
-
-	private static class VersionedResponse extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
-
 	}
 
 }

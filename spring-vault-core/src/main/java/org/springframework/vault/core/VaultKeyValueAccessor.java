@@ -110,7 +110,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 			JsonNode jsonNode = getJsonNode(response);
 			JsonNode jsonMeta = response.getRequiredData().at("/metadata");
-			response.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<Map<String, Object>>() {
+			response.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<>() {
 			}));
 
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
@@ -179,7 +179,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	/**
 	 * Write the {@code body} to the given Vault {@code path}.
 	 * @param path must not be {@literal null} or empty.
-	 * @param body
+	 * @param body the body to write.
 	 * @return the response of this write action.
 	 */
 	@Nullable
@@ -201,8 +201,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	/**
 	 * Return the {@link JsonNode} that contains the actual response body.
-	 * @param response
-	 * @return
+	 * @param response the response to extract the appropriate node from.
+	 * @return the extracted {@link JsonNode}.
 	 */
 	abstract JsonNode getJsonNode(VaultResponseSupport<JsonNode> response);
 

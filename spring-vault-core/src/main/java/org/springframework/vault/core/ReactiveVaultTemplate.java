@@ -174,35 +174,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		this.sessionClient = webClientBuilder.build().mutate().filter(getSessionFilter()).build();
 	}
 
-	public static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path, HttpMethod method) {
-		return response -> isSuccess(response) ? response.bodyToMono(bodyType) : mapOtherwise(response, path, method);
-	}
-
-	public static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference,
-			String path, HttpMethod method) {
-
-		return response -> isSuccess(response) ? response.body(BodyExtractors.toMono(typeReference))
-				: mapOtherwise(response, path, method);
-	}
-
-	private static boolean isSuccess(ClientResponse response) {
-		return response.statusCode().is2xxSuccessful();
-	}
-
-	private static <T> Mono<T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
-
-		if (HttpStatusUtil.isNotFound(response.statusCode()) && method == HttpMethod.GET) {
-			return response.createError();
-		}
-
-		return response.bodyToMono(String.class).flatMap(body -> {
-
-			String error = VaultResponses.getError(body);
-
-			return Mono.error(VaultResponses.buildException(response.statusCode(), path, error));
-		});
-	}
-
 	/**
 	 * Create a {@link WebClient} to be used by {@link ReactiveVaultTemplate} for Vault
 	 * communication given {@link VaultEndpointProvider} and {@link ClientHttpConnector}.
@@ -384,6 +355,35 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
+	static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path, HttpMethod method) {
+		return response -> isSuccess(response) ? response.bodyToMono(bodyType) : mapOtherwise(response, path, method);
+	}
+
+	static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference, String path,
+			HttpMethod method) {
+
+		return response -> isSuccess(response) ? response.body(BodyExtractors.toMono(typeReference))
+				: mapOtherwise(response, path, method);
+	}
+
+	private static boolean isSuccess(ClientResponse response) {
+		return response.statusCode().is2xxSuccessful();
+	}
+
+	private static <T> Mono<T> mapOtherwise(ClientResponse response, String path, HttpMethod method) {
+
+		if (HttpStatusUtil.isNotFound(response.statusCode()) && method == HttpMethod.GET) {
+			return response.createError();
+		}
+
+		return response.bodyToMono(String.class).flatMap(body -> {
+
+			String error = VaultResponses.getError(body);
+
+			return Mono.error(VaultResponses.buildException(response.statusCode(), path, error));
+		});
+	}
+
 	private enum NoTokenSupplier implements VaultTokenSupplier {
 
 		INSTANCE;
@@ -392,10 +392,6 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		public Mono<VaultToken> getVaultToken() {
 			return Mono.error(new UnsupportedOperationException("Token retrieval disabled"));
 		}
-
-	}
-
-	private static class VaultListResponse extends VaultResponseSupport<Map<String, Object>> {
 
 	}
 

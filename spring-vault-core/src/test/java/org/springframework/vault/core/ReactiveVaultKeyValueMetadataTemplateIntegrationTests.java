@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -49,7 +50,7 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 	private ReactiveVaultKeyValueMetadataOperations vaultKeyValueMetadataOperations;
 
 	ReactiveVaultKeyValueMetadataTemplateIntegrationTests() {
-		super("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
+		super("versioned", KeyValueBackend.versioned());
 	}
 
 	@BeforeEach

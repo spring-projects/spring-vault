@@ -15,23 +15,25 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Fail.fail;
-
 import java.util.Collections;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import reactor.test.StepVerifier;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
-import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link ReactiveVaultKeyValue2Template} using the versioned
  * Key/Value (k/v version 2) backend.
  *
  * @author Timothy Weiand
+ * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -60,6 +62,7 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 			.as(StepVerifier::create)
 			.assertNext(b -> assertThat(b).isTrue())
 			.verifyComplete();
+
 		kvOperations.list("/")
 			.collectList()
 			.as(StepVerifier::create)
@@ -77,16 +80,13 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 
 		kvOperations.patch("unknown", Collections.singletonMap("foo", "newValue"))
 			.as(StepVerifier::create)
-			.expectErrorSatisfies(t -> {
-				if (t instanceof SecretNotFoundException e) {
-					assertThat(e).hasMessageContaining("versioned/data/unknown");
-					assertThat(e.getPath()).isEqualTo("versioned/unknown");
-				}
-				else {
-					fail("missing SecretNotFoundException");
-				}
-			})
-			.verify();
+			.verifyErrorSatisfies(t -> {
+
+				assertThat(t).isInstanceOf(SecretNotFoundException.class)
+					.hasMessageContaining("versioned/data/unknown");
+
+				assertThat(((SecretNotFoundException) t).getPath()).isEqualTo("versioned/unknown");
+			});
 	}
 
 }

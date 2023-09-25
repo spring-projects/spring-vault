@@ -26,6 +26,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import reactor.test.StepVerifier;
 
+/**
+ * Integration tests for {@link ReactiveVaultKeyValue1Template}.
+ *
+ * @author Timothy R. Weiand
+ * @author Mark Paluch
+ */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
 class ReactiveVaultKeyValueTemplateIntegrationTests extends AbstractReactiveVaultKeyValueTemplateIntegrationTests {

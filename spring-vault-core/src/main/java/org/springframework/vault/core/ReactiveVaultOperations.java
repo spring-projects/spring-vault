@@ -27,6 +27,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
+import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
+
 /**
  * Interface that specifies a basic set of Vault operations executed on a reactive
  * infrastructure, implemented by
@@ -44,11 +46,32 @@ import java.util.function.Function;
  * @see #doWithSession(Function)
  * @see #doWithVault(Function)
  * @see org.springframework.web.reactive.function.client.WebClient
- * @see org.springframework.vault.core.VaultTemplate
- * @see org.springframework.vault.core.VaultTokenOperations
+ * @see org.springframework.vault.core.ReactiveVaultTemplate
  * @see org.springframework.vault.authentication.VaultTokenSupplier
  */
 public interface ReactiveVaultOperations {
+
+	/*
+	 * Return {@link VaultKeyValueOperations}.
+	 *
+	 * @param path the mount path, must not be empty or {@literal null}.
+	 *
+	 * @param apiVersion API version to use, must not be {@literal null}.
+	 *
+	 * @return the operations interface to interact with the Vault Key/Value backend.
+	 *
+	 * @since 3.1
+	 */
+	ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
+
+	/**
+	 * Return {@link ReactiveVaultVersionedKeyValueOperations}.
+	 * @param path the mount path
+	 * @return the operations interface to interact with the versioned Vault Key/Value
+	 * (version 2) backend.
+	 * @since 3.1
+	 */
+	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
 	/**
 	 * @return the operations interface to interact with the Vault transit backend.
@@ -70,29 +93,6 @@ public interface ReactiveVaultOperations {
 	 * @since 3.1
 	 */
 	ReactiveVaultSysOperations opsForSys();
-
-	/*
-	 * Return {@link VaultKeyValueOperations}.
-	 *
-	 * @param path the mount path, must not be empty or {@literal null}.
-	 *
-	 * @param apiVersion API version to use, must not be {@literal null}.
-	 *
-	 * @return the operations interface to interact with the Vault Key/Value backend.
-	 *
-	 * @since 3.1
-	 */
-	ReactiveVaultKeyValueOperations opsForKeyValue(String path,
-			VaultKeyValueOperationsSupport.KeyValueBackend apiVersion);
-
-	/**
-	 * Return {@link ReactiveVaultVersionedKeyValueOperations}.
-	 * @param path the mount path
-	 * @return the operations interface to interact with the versioned Vault Key/Value
-	 * (version 2) backend.
-	 * @since 3.1
-	 */
-	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API

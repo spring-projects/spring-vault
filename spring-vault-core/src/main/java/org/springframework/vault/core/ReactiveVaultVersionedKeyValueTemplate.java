@@ -15,27 +15,25 @@
  */
 package org.springframework.vault.core;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.lang.Nullable;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import reactor.core.publisher.Mono;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
-import org.springframework.vault.support.Versioned.Metadata.MetadataBuilder;
 import org.springframework.vault.support.Versioned.Version;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
+import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Default implementation of {@link ReactiveVaultVersionedKeyValueOperations}.
@@ -46,6 +44,8 @@ import reactor.core.publisher.Mono;
 public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValue2Accessor
 		implements ReactiveVaultVersionedKeyValueOperations {
 
+	private final String path;
+
 	/**
 	 * Create a new {@link ReactiveVaultVersionedKeyValueTemplate} given
 	 * {@link ReactiveVaultOperations} and the mount {@code path}.
@@ -53,8 +53,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public ReactiveVaultVersionedKeyValueTemplate(ReactiveVaultOperations reactiveVaultOperations, String path) {
-
 		super(reactiveVaultOperations, path);
+		this.path = path;
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
@@ -72,7 +72,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.notNull(version, "Version must not be null");
 
 		return doRead(path, version, Map.class)
-			.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getMetadata()));
+			.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getRequiredMetadata()));
 	}
 
 	@Override
@@ -86,24 +86,20 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	}
 
 	private <T> Mono<Versioned<T>> doRead(String path, Version version, Class<T> responseType) {
+
 		String secretPath = version.isVersioned()
 				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		ParameterizedTypeReference<VaultResponseSupport<VaultResponseSupport<T>>> ref = VaultResponses
-			.getTypeReference(VaultResponses.getTypeReference(responseType));
+		Mono<VersionedResponse> versionedResponseMono = doReadVersioned(secretPath);
 
-		return doReadRaw(secretPath, ref, true).onErrorResume(WebClientResponseException.NotFound.class, e -> {
-			if (e.getResponseBodyAsString().contains("deletion_time")) {
-				return Mono.justOrEmpty(e.getResponseBodyAs(ref));
-			}
-			return Mono.error(VaultResponses.buildException(e.getStatusCode(), path, "Unexpected error during read"));
-		}).flatMap(ReactiveKeyValueHelper::getRequiredData).flatMap(responseSupport -> {
-			Map<String, Object> metadataMap = responseSupport.getMetadata();
-			if (null == metadataMap) {
-				return Mono.just(Versioned.create(responseSupport.getData(), version));
-			}
-			Metadata metadata = VaultKeyValueUtilities.getMetadata(responseSupport.getMetadata());
-			return Mono.just(Versioned.create(responseSupport.getData(), metadata));
+		return versionedResponseMono.map(response -> {
+
+			VaultResponseSupport<JsonNode> data = response.getRequiredData();
+			Metadata metadata = KeyValueUtilities.getMetadata(data.getMetadata());
+
+			T body = deserialize(data.getRequiredData(), responseType);
+
+			return Versioned.create(body, metadata);
 		});
 	}
 
@@ -126,8 +122,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			data.put("data", body);
 		}
 
-		return doWrite(createDataPath(path), data).flatMap(ReactiveKeyValueHelper::getRequiredData)
-			.map(VaultKeyValueUtilities::getMetadata)
+		return doWrite(createDataPath(path), data).map(VaultResponseSupport::getRequiredData)
+			.map(KeyValueUtilities::getMetadata)
 			.switchIfEmpty(Mono.error(new IllegalStateException(
 					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
 	}
@@ -174,8 +170,34 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		return new ReactiveVaultKeyValueMetadataTemplate(reactiveVaultOperations, path);
 	}
 
-	private static class VersionedResponse<T> extends VaultResponseSupport<VaultResponseSupport<T>> {
+	/**
+	 * Read a secret at {@code path} and read it into {@link VersionedResponse}.
+	 * @param path must not be {@literal null} or empty.
+	 * @return mapped value.
+	 */
+	<T> Mono<VersionedResponse> doReadVersioned(String path) {
 
+		Function<ClientResponse, Mono<ResponseEntity<VersionedResponse>>> toEntity = cr -> cr
+			.toEntity(VersionedResponse.class);
+		ResponseFunction<VersionedResponse> defaults = new ResponseFunction<>(toEntity);
+		Function<ClientResponse, Mono<VersionedResponse>> responseFunction = clientResponse -> {
+
+			if (HttpStatusUtil.isNotFound(clientResponse.statusCode())) {
+
+				return clientResponse.bodyToMono(String.class).flatMap(it -> {
+
+					if (it.contains("deletion_time")) {
+						return Mono.justOrEmpty(VaultResponses.unwrap(it, VersionedResponse.class));
+					}
+
+					return Mono.empty();
+				});
+			}
+
+			return defaults.apply(clientResponse);
+		};
+
+		return doRead((webClient) -> webClient.get().uri(path), responseFunction);
 	}
 
 }

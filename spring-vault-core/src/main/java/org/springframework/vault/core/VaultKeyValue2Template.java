@@ -16,8 +16,6 @@
 package org.springframework.vault.core;
 
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.lang.Nullable;
@@ -36,6 +34,8 @@ import org.springframework.vault.support.VaultResponseSupport;
  */
 class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyValueOperations {
 
+	private final String path;
+
 	/**
 	 * Create a new {@link VaultKeyValue2Template} given {@link VaultOperations} and the
 	 * mount {@code path}.
@@ -44,6 +44,7 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 	 */
 	public VaultKeyValue2Template(VaultOperations vaultOperations, String path) {
 		super(vaultOperations, path);
+		this.path = path;
 	}
 
 	@Nullable
@@ -96,8 +97,8 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 			throw new VaultException("Metadata must not be null");
 		}
 
-		Map<String, Object> body = ReactiveKeyValueHelper.makeMetadata(readResponse.getMetadata(),
-				readResponse.getRequiredData(), patch);
+		Map<String, Object> body = KeyValueUtilities.createPatchRequest(patch, readResponse.getRequiredData(),
+				readResponse.getMetadata());
 
 		try {
 			doWrite(createDataPath(path), body);

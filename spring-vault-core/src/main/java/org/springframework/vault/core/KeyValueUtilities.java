@@ -4,10 +4,15 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.DurationParser;
 import org.springframework.vault.support.VaultMetadataResponse;
@@ -16,8 +21,16 @@ import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Metadata.MetadataBuilder;
 import org.springframework.vault.support.Versioned.Version;
 
-class VaultKeyValueUtilities {
+/**
+ * Common utility methods to map raw vault data structures to Spring Vault objects
+ *
+ * @author Timothy R. Weiand
+ * @author Mark Paluch
+ * @since 3.1
+ */
+class KeyValueUtilities {
 
+	@SuppressWarnings("unchecked")
 	static Metadata getMetadata(Map<String, Object> responseMetadata) {
 
 		MetadataBuilder builder = Metadata.builder();
@@ -33,6 +46,8 @@ class VaultKeyValueUtilities {
 		if (Boolean.TRUE.equals(responseMetadata.get("destroyed"))) {
 			builder.destroyed();
 		}
+
+		builder.customMetadata((Map) responseMetadata.get("custom_metadata"));
 
 		Integer version = (Integer) responseMetadata.get("version");
 		builder.version(Version.from(version));
@@ -93,6 +108,26 @@ class VaultKeyValueUtilities {
 			.destroyed(destroyed)
 			.version(kvVersion)
 			.build();
+	}
+
+	static Map<String, Object> createPatchRequest(Map<String, ?> patch, Map<String, Object> previous,
+			Map<String, Object> metadata) {
+
+		Map<String, Object> result = new LinkedHashMap<>(previous);
+		result.putAll(patch);
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("data", result);
+		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
+
+		return body;
+	}
+
+	static String normalizeListPath(String path) {
+
+		Assert.notNull(path, "Path must not be null");
+
+		return path.equals("/") ? "" : path.endsWith("/") ? path : path + "/";
 	}
 
 }
