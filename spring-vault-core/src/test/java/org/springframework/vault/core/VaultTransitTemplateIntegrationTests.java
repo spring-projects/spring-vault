@@ -535,6 +535,31 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void encryptAndRewrapInBatchShouldCreateCiphertext() {
+
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder() //
+			.context("blubb".getBytes()) //
+			.nonce("123456789012".getBytes()) //
+			.build();
+
+		String ciphertext1 = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
+		String ciphertext2 = this.transitOperations.encrypt("mykey", "hello-vault".getBytes(), transitRequest);
+		this.transitOperations.rotate("mykey");
+
+		List<Ciphertext> batchRequest = List.of(ciphertext1, ciphertext2)
+			.stream()
+			.map(ct -> Ciphertext.of(ct).with(transitRequest))
+			.toList();
+		List<VaultEncryptionResult> rewrappedResult = this.transitOperations.rewrap("mykey", batchRequest);
+		Assertions.assertThat(rewrappedResult)
+			.hasSize(2)
+			.allMatch(result -> result.get().getCiphertext().startsWith("vault:v2"));
+	}
+
+	@Test
 	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchEncrypt() {
 

@@ -340,6 +340,32 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	public List<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest) {
+		Assert.hasText(keyName, "Key name must not be empty");
+		Assert.notEmpty(batchRequest, "BatchRequest must not be null and must have at least one entry");
+
+		List<Map<String, String>> batch = new ArrayList<>(batchRequest.size());
+
+		for (Ciphertext request : batchRequest) {
+
+			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
+
+			vaultRequest.put("ciphertext", request.getCiphertext());
+
+			if (request.getContext() != null) {
+				applyTransitOptions(request.getContext(), vaultRequest);
+			}
+
+			batch.add(vaultRequest);
+		}
+
+		VaultResponse vaultResponse = this.vaultOperations.write(String.format("%s/rewrap/%s", this.path, keyName),
+				Collections.singletonMap("batch_input", batch));
+
+		return toRewrappedEncryptionResults(vaultResponse, batchRequest);
+	}
+
+	@Override
 	public Hmac getHmac(String keyName, Plaintext plaintext) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -504,6 +530,37 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			}
 			else {
 				encrypted = new VaultEncryptionResult(new VaultException("No result for plaintext #" + i));
+			}
+
+			result.add(encrypted);
+		}
+
+		return result;
+	}
+
+	static List<VaultEncryptionResult> toRewrappedEncryptionResults(VaultResponse vaultResponse,
+			List<Ciphertext> batchRequest) {
+
+		List<VaultEncryptionResult> result = new ArrayList<>(batchRequest.size());
+		List<Map<String, String>> batchData = getBatchData(vaultResponse);
+
+		for (int i = 0; i < batchRequest.size(); i++) {
+
+			VaultEncryptionResult encrypted;
+			Ciphertext ciphertext = batchRequest.get(i);
+			if (batchData.size() > i) {
+
+				Map<String, String> data = batchData.get(i);
+				if (StringUtils.hasText(data.get("error"))) {
+					encrypted = new VaultEncryptionResult(new VaultException(data.get("error")));
+				}
+				else {
+					encrypted = new VaultEncryptionResult(
+							toCiphertext(data.get("ciphertext"), ciphertext.getContext()));
+				}
+			}
+			else {
+				encrypted = new VaultEncryptionResult(new VaultException("No result for cipher text #" + i));
 			}
 
 			result.add(encrypted);
