@@ -21,8 +21,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -30,6 +28,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -147,6 +146,47 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		});
 	}
 
+	@Override
+	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
+
+		Assert.hasText(issuer, "Issuer must not be empty");
+
+		return this.vaultOperations.doWithSession(restOperations -> {
+
+			try {
+				return restOperations.getForObject("{path}/issuer/{issuer}/json",
+						VaultIssuerCertificateRequestResponse.class, this.path, issuer);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		});
+	}
+
+	@Override
+	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
+		Assert.hasText(issuer, "Issuer must not be empty");
+		Assert.notNull(encoding, "Encoding must not be null");
+
+		return this.vaultOperations.doWithSession(restOperations -> {
+
+			String requestPath = encoding == Encoding.DER ? "{path}/issuer/{issuer}/der" : "{path}/issuer/{issuer}/pem";
+			try {
+				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,
+						issuer);
+
+				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+					return new ByteArrayInputStream(response.getBody());
+				}
+
+				return null;
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		});
+	}
+
 	/**
 	 * Create a request body stub for {@code pki/issue} and {@code pki/sign} from
 	 * {@link VaultCertificateRequest}.
@@ -184,6 +224,8 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			.to("exclude_cn_from_sans", request);
 		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
 		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
+		mapper.from(certificateRequest::getNotAfter).whenHasText().as(i -> i.toString()).to("not_after", request);
+		mapper.from(certificateRequest::getUserIds).whenHasText().to("user_ids", request);
 
 		return request;
 	}

@@ -52,10 +52,12 @@ import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.util.Settings.*;
@@ -114,6 +116,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		role.put("allowed_domains", "localhost,example.com");
 		role.put("allow_subdomains", "true");
 		role.put("allow_localhost", "true");
+		role.put("allowed_user_ids", "humanoid,robot");
 		role.put("allow_ip_sans", "true");
 		role.put("max_ttl", "72h");
 
@@ -124,7 +127,6 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 			role.put("key_bits", "" + value.bits);
 			this.vaultOperations.write("pki/roles/testrole-" + value.name(), role);
 		}
-
 	}
 
 	@Test
@@ -265,6 +267,106 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void signShouldSignCsrWithNotAfter() {
+		Instant notAfter = Instant.now().plus(50, ChronoUnit.DAYS);
+		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
+				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
+				+ "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
+				+ "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
+				+ "dmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVlDBT1gAONIp4\n"
+				+ "GQQ7BWDeqNzlscWqu5oQyfvw6oNFZzYWGVTgX/n72biv8d1Wx30MWpVYhbL0mk9m\n"
+				+ "Uu15elMZHPb4F4bk8VDSiB9527SwAd/QpkNC1RsPp2h6g2LvGPJ2eidHSlLtF2To\n"
+				+ "A4i6z0K0++nvYKSf9Af0sod2Z51xc9uPj/oN5z/8BQuGoCBpxJqgl7N/csMICixY\n"
+				+ "2fQcCUbdPPqE9INIInUHe3mPE/yvxko9aYGZ5jnrdZyiQaRRKBdWpvbRLKXQ78Fz\n"
+				+ "vXR3G33yn9JAN6wl1A916DiXzy2xHT19vyAn1hBUj2M6KFXChQ30oxTyTOqHCMLP\n"
+				+ "m/BSEOsPAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAYFssueiUh3YGxnXcQ4dp\n"
+				+ "ZqVWeVyOuGGaFJ4BA0drwJ9Mt/iNmPUTGE2oBNnh2R7e7HwGcNysFHZZOZBEQ0Hh\n"
+				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
+				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
+				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "-----END CERTIFICATE REQUEST-----";
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+			.commonName("hello.example.com")
+			.notAfter(notAfter)
+			.build();
+
+		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
+				csr, request);
+
+		Certificate data = certificateResponse.getRequiredData();
+		assertThat(data.getX509Certificate().getNotAfter()).isEqualTo(notAfter.truncatedTo(ChronoUnit.SECONDS));
+	}
+
+	@Test
+	@RequiresVaultVersion("1.14.2")
+	void signShouldFailWithUnknownUserIds() {
+		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
+				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
+				+ "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
+				+ "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
+				+ "dmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVlDBT1gAONIp4\n"
+				+ "GQQ7BWDeqNzlscWqu5oQyfvw6oNFZzYWGVTgX/n72biv8d1Wx30MWpVYhbL0mk9m\n"
+				+ "Uu15elMZHPb4F4bk8VDSiB9527SwAd/QpkNC1RsPp2h6g2LvGPJ2eidHSlLtF2To\n"
+				+ "A4i6z0K0++nvYKSf9Af0sod2Z51xc9uPj/oN5z/8BQuGoCBpxJqgl7N/csMICixY\n"
+				+ "2fQcCUbdPPqE9INIInUHe3mPE/yvxko9aYGZ5jnrdZyiQaRRKBdWpvbRLKXQ78Fz\n"
+				+ "vXR3G33yn9JAN6wl1A916DiXzy2xHT19vyAn1hBUj2M6KFXChQ30oxTyTOqHCMLP\n"
+				+ "m/BSEOsPAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAYFssueiUh3YGxnXcQ4dp\n"
+				+ "ZqVWeVyOuGGaFJ4BA0drwJ9Mt/iNmPUTGE2oBNnh2R7e7HwGcNysFHZZOZBEQ0Hh\n"
+				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
+				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
+				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "-----END CERTIFICATE REQUEST-----";
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+			.commonName("hello.example.com")
+			.userIds("test1,test2")
+			.build();
+
+		assertThatThrownBy(() -> this.pkiOperations.signCertificateRequest("testrole", csr, request))
+			.hasCauseInstanceOf(HttpClientErrorException.BadRequest.class)
+			.hasMessageContaining("user_id test1 is not allowed by this role");
+	}
+
+	@Test
+	@RequiresVaultVersion("1.14.2")
+	void signShouldSignWithKnownUserIds() {
+		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
+				+ "MIICzTCCAbUCAQAwgYcxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpTb21lLVN0YXRl\n"
+				+ "MRUwEwYDVQQHEwxTYW4gVmF1bHRpbm8xFTATBgNVBAoTDFNwcmluZyBWYXVsdDEY\n"
+				+ "MBYGA1UEAxMPY3NyLmV4YW1wbGUuY29tMRswGQYJKoZIhvcNAQkBFgxzcHJpbmdA\n"
+				+ "dmF1bHQwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDVlDBT1gAONIp4\n"
+				+ "GQQ7BWDeqNzlscWqu5oQyfvw6oNFZzYWGVTgX/n72biv8d1Wx30MWpVYhbL0mk9m\n"
+				+ "Uu15elMZHPb4F4bk8VDSiB9527SwAd/QpkNC1RsPp2h6g2LvGPJ2eidHSlLtF2To\n"
+				+ "A4i6z0K0++nvYKSf9Af0sod2Z51xc9uPj/oN5z/8BQuGoCBpxJqgl7N/csMICixY\n"
+				+ "2fQcCUbdPPqE9INIInUHe3mPE/yvxko9aYGZ5jnrdZyiQaRRKBdWpvbRLKXQ78Fz\n"
+				+ "vXR3G33yn9JAN6wl1A916DiXzy2xHT19vyAn1hBUj2M6KFXChQ30oxTyTOqHCMLP\n"
+				+ "m/BSEOsPAgMBAAGgADANBgkqhkiG9w0BAQsFAAOCAQEAYFssueiUh3YGxnXcQ4dp\n"
+				+ "ZqVWeVyOuGGaFJ4BA0drwJ9Mt/iNmPUTGE2oBNnh2R7e7HwGcNysFHZZOZBEQ0Hh\n"
+				+ "Vn93GO7cfaTOetK0VtDqis1VFQD0eVPWf5s6UqT/+XGrFRhwJ9hM+2FQSrUDFecs\n"
+				+ "+/605n1rD7qOj3vkGrtwvEUrxyRaQaKpPLHmVHENqV6F1NsO3Z27f2FWWAZF2VKN\n"
+				+ "cCQQJNc//DbIN3J3JSElpIDBDHctoBoQVnMiwpCbSA+CaAtlWYJKnAfhTKeqnNMy\n"
+				+ "qf3ACZ+1sBIuqSP7dEJ2KfIezaCPQ88+PAloRB52LFa+iq3yI7F5VzkwAvQFnTi+\n" + "cQ==\n"
+				+ "-----END CERTIFICATE REQUEST-----";
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+			.commonName("hello.example.com")
+			.userIds("robot,humanoid")
+			.build();
+
+		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
+				csr, request);
+
+		Certificate data = certificateResponse.getRequiredData();
+
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).contains("UID=humanoid")
+			.contains("UID=robot");
+	}
+
+	@Test
 	void signShouldSignCsr() {
 
 		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
@@ -344,6 +446,31 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 			byte[] bytes = StreamUtils.copyToByteArray(crl);
 			assertThat(bytes).isNotEmpty();
 		}
+	}
+
+	@Test
+	void shouldReturnCA() throws Exception {
+		VaultIssuerCertificateRequestResponse certificateResponse = this.pkiOperations.getIssuerCertificate("default");
+
+		Certificate data = certificateResponse.getRequiredData();
+		KeyStore trustStore = data.createTrustStore(true);
+		assertThat(trustStore.size()).isEqualTo(3);
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getX509IssuerCertificates()).hasSize(2);
+
+		try (InputStream in = this.pkiOperations.getIssuerCertificate("default", Encoding.DER)) {
+
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+			assertThat(cf.generateCertificate(in)).isInstanceOf(java.security.cert.Certificate.class);
+		}
+
+		try (InputStream crl = this.pkiOperations.getIssuerCertificate("default", Encoding.PEM)) {
+
+			byte[] bytes = StreamUtils.copyToByteArray(crl);
+			assertThat(bytes).isNotEmpty();
+		}
+
 	}
 
 }

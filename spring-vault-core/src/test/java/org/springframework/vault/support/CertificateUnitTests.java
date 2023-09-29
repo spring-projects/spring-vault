@@ -17,6 +17,7 @@ package org.springframework.vault.support;
 
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +42,8 @@ class CertificateUnitTests {
 	void before() throws Exception {
 		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
 
-		this.certificate = Certificate.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"));
+		this.certificate = Certificate.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"),
+				List.of(), 0L);
 	}
 
 	@Test

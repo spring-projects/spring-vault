@@ -18,7 +18,6 @@ package org.springframework.vault.support;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
@@ -58,8 +57,6 @@ public class CertificateBundle extends Certificate {
 	@Nullable
 	private final String privateKeyType;
 
-	private final List<String> caChain;
-
 	/**
 	 * Create a new {@link CertificateBundle}.
 	 * @param serialNumber the serial number.
@@ -72,12 +69,12 @@ public class CertificateBundle extends Certificate {
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey,
-			@Nullable @JsonProperty("private_key_type") String privateKeyType) {
+			@Nullable @JsonProperty("private_key_type") String privateKeyType,
+			@JsonProperty("revocation_time") Long revocationTime) {
 
-		super(serialNumber, certificate, issuingCaCertificate);
+		super(serialNumber, certificate, issuingCaCertificate, caChain, revocationTime);
 		this.privateKey = privateKey;
 		this.privateKeyType = privateKeyType;
-		this.caChain = caChain;
 	}
 
 	/**
@@ -98,7 +95,7 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(privateKey, "Private key must not be empty");
 
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), privateKey, null);
+				Collections.singletonList(issuingCaCertificate), null, privateKey, null);
 	}
 
 	/**
@@ -122,7 +119,33 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(privateKeyType, "Private key type must not be empty");
 
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType);
+				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType, null);
+	}
+
+	/**
+	 * Create a {@link CertificateBundle} given a private key with certificates and the
+	 * serial number.
+	 * @param serialNumber must not be empty or {@literal null}.
+	 * @param certificate must not be empty or {@literal null}.
+	 * @param issuingCaCertificate must not be empty or {@literal null}.
+	 * @param privateKey must not be empty or {@literal null}.
+	 * @param privateKeyType must not be empty or {@literal null}.
+	 * @param revocationTime the revocation time.
+	 * @return the {@link CertificateBundle}
+	 * @since 2.4
+	 */
+	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
+			String privateKey, @Nullable String privateKeyType, Long revocationTime) {
+
+		Assert.hasText(serialNumber, "Serial number must not be empty");
+		Assert.hasText(certificate, "Certificate must not be empty");
+		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+		Assert.hasText(privateKey, "Private key must not be empty");
+		Assert.hasText(privateKeyType, "Private key type must not be empty");
+		Assert.notNull(revocationTime, "Revocation time must not be null");
+
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
+				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType, revocationTime);
 	}
 
 	/**
@@ -274,27 +297,6 @@ public class CertificateBundle extends Certificate {
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
 		}
-	}
-
-	/**
-	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}.
-	 * @return the issuing CA {@link X509Certificate}.
-	 * @since 2.3.3
-	 */
-	public List<X509Certificate> getX509IssuerCertificates() {
-
-		List<X509Certificate> certificates = new ArrayList<>();
-
-		for (String data : this.caChain) {
-			try {
-				certificates.addAll(getCertificates(data));
-			}
-			catch (CertificateException e) {
-				throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
-			}
-		}
-
-		return certificates;
 	}
 
 	private static KeySpec getPrivateKey(String privateKey, String keyType)

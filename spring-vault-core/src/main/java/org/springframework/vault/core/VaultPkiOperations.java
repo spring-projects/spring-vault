@@ -22,6 +22,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 
 /**
@@ -107,5 +108,31 @@ public interface VaultPkiOperations {
 		DER, PEM,
 
 	}
+
+	/**
+	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
+	 * issuer.
+	 * @param issuer reference to an existing issuer, either by Vault-generated
+	 * identifier, or the name assigned to an issuer. Pass the literal string 'default' to
+	 * refer to the currently configured issuer.
+	 * @return the {@link VaultIssuerCertificateRequestResponse} containing a
+	 * {@link org.springframework.vault.support.Certificate}
+	 * @see <a href=
+	 * "https://www.vaultproject.io/api/secret/pki/#read-issuer-certificate">GET *
+	 * /pki/issuer/:issuer_ref/json</a>
+	 *
+	 */
+	VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException;
+
+	/**
+	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
+	 * issuer.
+	 * @return {@link java.io.InputStream} containing the encoded certificate or
+	 * {@literal null}
+	 * @see <a href=
+	 * "https://www.vaultproject.io/api/secret/pki/#read-issuer-certificate">GET
+	 * /pki/issuer/:issuer_ref/{der, pem}</a>
+	 */
+	InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException;
 
 }
