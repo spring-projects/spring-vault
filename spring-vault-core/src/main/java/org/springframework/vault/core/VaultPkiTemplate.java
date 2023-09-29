@@ -184,6 +184,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			.to("exclude_cn_from_sans", request);
 		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
 		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
+		mapper.from(certificateRequest::getNotAfter).whenHasText().as(i -> i.toString()).to("not_after", request);
 
 		return request;
 	}

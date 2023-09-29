@@ -16,10 +16,13 @@
 package org.springframework.vault.support;
 
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -89,6 +92,13 @@ public class VaultCertificateRequest {
 	private final String privateKeyFormat;
 
 	/**
+	 * Set the Not After field of the certificate with specified date value. The value
+	 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K end
+	 * date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
+	 */
+	private Instant notAfter;
+
+	/**
 	 * If {@literal true}, the given common name will not be included in DNS or Email
 	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
 	 * email address, but is instead some human-readable identifier.
@@ -97,7 +107,7 @@ public class VaultCertificateRequest {
 
 	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
 			List<String> uriSubjectAltNames, List<String> otherSans, @Nullable Duration ttl, String format,
-			@Nullable String privateKeyFormat, boolean excludeCommonNameFromSubjectAltNames) {
+			@Nullable String privateKeyFormat, boolean excludeCommonNameFromSubjectAltNames, Instant notAfter) {
 
 		this.commonName = commonName;
 		this.altNames = altNames;
@@ -108,6 +118,7 @@ public class VaultCertificateRequest {
 		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 		this.format = format;
 		this.privateKeyFormat = privateKeyFormat;
+		this.notAfter = notAfter;
 	}
 
 	/**
@@ -164,6 +175,10 @@ public class VaultCertificateRequest {
 		return this.excludeCommonNameFromSubjectAltNames;
 	}
 
+	public Instant getNotAfter() {
+		return this.notAfter;
+	}
+
 	public static class VaultCertificateRequestBuilder {
 
 		@Nullable
@@ -186,6 +201,8 @@ public class VaultCertificateRequest {
 		private String privateKeyFormat;
 
 		private boolean excludeCommonNameFromSubjectAltNames;
+
+		private Instant notAfter;
 
 		VaultCertificateRequestBuilder() {
 		}
@@ -387,6 +404,17 @@ public class VaultCertificateRequest {
 		}
 
 		/**
+		 * Set the Not After field of the certificate with specified date value. The value
+		 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K
+		 * end date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 */
+		public VaultCertificateRequestBuilder notAfter(Instant notAfter) {
+			this.notAfter = Instant.from(notAfter).truncatedTo(ChronoUnit.SECONDS);
+			return this;
+		}
+
+		/**
 		 * Build a new {@link VaultCertificateRequest} instance. Requires
 		 * {@link #commonName(String)} to be configured.
 		 * @return a new {@link VaultCertificateRequest}.
@@ -446,7 +474,8 @@ public class VaultCertificateRequest {
 			}
 
 			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
-					otherSans, this.ttl, this.format, this.privateKeyFormat, this.excludeCommonNameFromSubjectAltNames);
+					otherSans, this.ttl, this.format, this.privateKeyFormat, this.excludeCommonNameFromSubjectAltNames,
+					notAfter);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

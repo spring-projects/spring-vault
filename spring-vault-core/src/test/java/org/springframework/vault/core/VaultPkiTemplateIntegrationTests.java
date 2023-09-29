@@ -265,6 +265,21 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
+	void issueCertificateWithNotAfter() {
+		Instant now = Instant.now();
+		VaultCertificateRequest request = VaultCertificateRequest.builder()
+			.notAfter(Instant.now())
+			.commonName("hello.example.com")
+			.build();
+
+		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
+
+		X509Certificate certificate = certificateResponse.getRequiredData().getX509Certificate();
+
+		assertThat(certificate.getNotAfter().toInstant()).isEqualTo(now.truncatedTo(ChronoUnit.SECONDS));
+	}
+
+	@Test
 	void signShouldSignCsr() {
 
 		String csr = "-----BEGIN CERTIFICATE REQUEST-----\n"
