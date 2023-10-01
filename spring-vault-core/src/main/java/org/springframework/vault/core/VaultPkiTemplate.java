@@ -21,7 +21,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -29,6 +28,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -133,6 +133,45 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path);
+
+				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+					return new ByteArrayInputStream(response.getBody());
+				}
+
+				return null;
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		});
+	}
+
+	@Override
+	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
+
+		return this.vaultOperations.doWithSession(restOperations -> {
+
+			try {
+				return restOperations.getForObject("{path}/issuer/{issuer}/json",
+						VaultIssuerCertificateRequestResponse.class, this.path,
+						StringUtils.hasText(issuer) ? issuer : "default");
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e);
+			}
+		});
+	}
+
+	@Override
+	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
+		Assert.notNull(encoding, "Encoding must not be null");
+
+		return this.vaultOperations.doWithSession(restOperations -> {
+
+			String requestPath = encoding == Encoding.DER ? "{path}/issuer/{issuer}/der" : "{path}/issuer/{issuer}/pem";
+			try {
+				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,
+						StringUtils.hasText(issuer) ? issuer : "default");
 
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());

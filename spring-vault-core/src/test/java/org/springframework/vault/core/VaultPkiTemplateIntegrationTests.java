@@ -52,6 +52,7 @@ import org.springframework.vault.support.Certificate;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
+import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
@@ -445,6 +446,31 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 			byte[] bytes = StreamUtils.copyToByteArray(crl);
 			assertThat(bytes).isNotEmpty();
 		}
+	}
+
+	@Test
+	void shouldReturnCA() throws Exception {
+		VaultIssuerCertificateRequestResponse certificateResponse = this.pkiOperations.getIssuerCertificate(null);
+
+		Certificate data = certificateResponse.getRequiredData();
+		KeyStore trustStore = data.createTrustStore(true);
+		assertThat(trustStore.size()).isEqualTo(3);
+		assertThat(data.getCertificate()).isNotEmpty();
+		assertThat(data.getX509IssuerCertificates()).hasSize(2);
+
+		try (InputStream in = this.pkiOperations.getIssuerCertificate(null, Encoding.DER)) {
+
+			CertificateFactory cf = CertificateFactory.getInstance("X.509");
+
+			assertThat(cf.generateCertificate(in)).isInstanceOf(java.security.cert.Certificate.class);
+		}
+
+		try (InputStream crl = this.pkiOperations.getIssuerCertificate(null, Encoding.PEM)) {
+
+			byte[] bytes = StreamUtils.copyToByteArray(crl);
+			assertThat(bytes).isNotEmpty();
+		}
+
 	}
 
 }

@@ -47,12 +47,19 @@ public class Certificate {
 
 	private final String issuingCaCertificate;
 
+	private final List<String> caChain;
+
+	private final long revocationTime;
+
 	Certificate(@JsonProperty("serial_number") String serialNumber, @JsonProperty("certificate") String certificate,
-			@JsonProperty("issuing_ca") String issuingCaCertificate) {
+			@JsonProperty("issuing_ca") String issuingCaCertificate, @JsonProperty("ca_chain") List<String> caChain,
+			@JsonProperty("revocation_time") long revocationTime) {
 
 		this.serialNumber = serialNumber;
 		this.certificate = certificate;
 		this.issuingCaCertificate = issuingCaCertificate;
+		this.caChain = caChain;
+		this.revocationTime = revocationTime;
 	}
 
 	/**
@@ -63,13 +70,14 @@ public class Certificate {
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @return the {@link Certificate}
 	 */
-	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate) {
+	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
+			List<String> caChain, long revocationTime) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 
-		return new Certificate(serialNumber, certificate, issuingCaCertificate);
+		return new Certificate(serialNumber, certificate, issuingCaCertificate, caChain, revocationTime);
 	}
 
 	/**
@@ -130,9 +138,27 @@ public class Certificate {
 	 * @return the {@link KeyStore} containing the private key and certificate chain.
 	 */
 	public KeyStore createTrustStore() {
+		return createTrustStore(false);
+	}
 
+	/**
+	 * Create a trust store as {@link KeyStore} from this {@link Certificate} containing *
+	 * the certificate chain.
+	 * @param includeCaChain whether to include the certificate authority chain instead of
+	 * just the issuer certificate.
+	 * @return the {@link KeyStore} containing the certificate and certificate chain.
+	 */
+	public KeyStore createTrustStore(boolean includeCaChain) {
 		try {
-			return KeystoreUtil.createKeyStore(getX509Certificate(), getX509IssuerCertificate());
+			List<X509Certificate> certificates = new ArrayList<>();
+			certificates.add(getX509Certificate());
+			if (includeCaChain) {
+				certificates.addAll(getX509IssuerCertificates());
+			}
+			else {
+				certificates.add(getX509IssuerCertificate());
+			}
+			return KeystoreUtil.createKeyStore(certificates.toArray(new X509Certificate[0]));
 		}
 		catch (GeneralSecurityException | IOException e) {
 			throw new VaultException("Cannot create KeyStore", e);
@@ -159,6 +185,31 @@ public class Certificate {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Retrieve the issuing CA certificates as list of {@link X509Certificate}.
+	 * @return the issuing CA {@link X509Certificate}.
+	 * @since 2.3.3
+	 */
+	public List<X509Certificate> getX509IssuerCertificates() {
+
+		List<X509Certificate> certificates = new ArrayList<>();
+
+		for (String data : this.caChain) {
+			try {
+				certificates.addAll(getCertificates(data));
+			}
+			catch (CertificateException e) {
+				throw new VaultException("Cannot create Certificate from issuing CA certificate", e);
+			}
+		}
+
+		return certificates;
+	}
+
+	public long getRevocationTime() {
+		return this.revocationTime;
 	}
 
 }
