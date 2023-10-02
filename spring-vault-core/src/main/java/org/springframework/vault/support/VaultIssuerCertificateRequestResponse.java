@@ -18,7 +18,7 @@ package org.springframework.vault.support;
 /**
  * Value object to bind Vault HTTP PKI issue certificate API responses.
  *
- * @author Mark Paluch
+ * @author Nanne Baars
  */
 public class VaultIssuerCertificateRequestResponse extends VaultResponseSupport<Certificate> {
 
