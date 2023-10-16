@@ -15,16 +15,12 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.fail;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import org.assertj.core.api.Assertions;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -57,7 +54,6 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -812,6 +808,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void signAndVerifyWithPrehashedInput() {
+
 		String keyName = createEcdsaP256Key();
 		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
 		VaultSignRequest signRequest = VaultSignRequest.builder()
@@ -836,6 +833,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 	@Test
 	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void signWithPrehashedAndVerifyWithoutShouldFail() {
+
 		String keyName = createEcdsaP256Key();
 		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
 		VaultSignRequest signRequest = VaultSignRequest.builder()

@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
  * @author Luander Ribeiro
  * @author Mark Paluch
  * @author My-Lan Aragon
+ * @author Nanne Baars
  * @since 2.0
  */
 public class VaultSignRequest {
@@ -101,6 +102,7 @@ public class VaultSignRequest {
 
 	/**
 	 * @return true if the input is already hashed.
+	 * @since 3.1
 	 */
 	public boolean isPrehashed() {
 		return this.prehashed;
@@ -149,6 +151,19 @@ public class VaultSignRequest {
 		}
 
 		/**
+		 * Set to {@literal true} when the input is already hashed. If the key type is
+		 * {@literal rsa-2048}, {@literal rsa-3072}, or {@literal rsa-4096} then specify
+		 * the algorithm used to hash the input through {@link #hashAlgorithm(String)}.
+		 * @param prehashed whether the input is already hashed.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @since 3.1
+		 */
+		public VaultSignRequestBuilder prehashed(boolean prehashed) {
+			this.prehashed = prehashed;
+			return this;
+		}
+
+		/**
 		 * Configure the signature algorithm to be used for the operation when using an
 		 * RSA key.
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
@@ -178,23 +193,12 @@ public class VaultSignRequest {
 		}
 
 		/**
-		 * Set to true when the input is already hashed. If the key type is rsa-2048,
-		 * rsa-3072 or rsa-4096, then the algorithm used to hash the input should be
-		 * indicated by the hash_algorithm parameter.
-		 * @param prehashed whether the input is already hashed
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
-		 */
-		public VaultSignRequestBuilder prehashed(boolean prehashed) {
-			this.prehashed = prehashed;
-			return this;
-		}
-
-		/**
 		 * Build a new {@link VaultSignRequest} instance. Requires
 		 * {@link #plaintext(Plaintext)} to be configured.
 		 * @return a new {@link VaultSignRequest}.
 		 */
 		public VaultSignRequest build() {
+
 			Assert.notNull(this.plaintext, "Plaintext input must not be null");
 
 			return new VaultSignRequest(this.plaintext, this.hashAlgorithm, this.signatureAlgorithm, this.prehashed);

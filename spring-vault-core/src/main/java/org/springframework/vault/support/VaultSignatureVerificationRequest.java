@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.support;
 
-import org.checkerframework.checker.units.qual.A;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -26,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @author My-Lan Aragon
  * @author James Luke
+ * @author Nanne Baars
  * @since 2.0
  */
 public class VaultSignatureVerificationRequest {
@@ -141,7 +141,8 @@ public class VaultSignatureVerificationRequest {
 	}
 
 	/**
-	 * @return true if the input is already hashed.
+	 * @return {@literal true} if the input is already hashed.
+	 * @since 3.1
 	 */
 	public boolean isPrehashed() {
 		return this.prehashed;
@@ -227,6 +228,19 @@ public class VaultSignatureVerificationRequest {
 		}
 
 		/**
+		 * Set to {@literal true} when the input is already hashed. If the key type is
+		 * {@literal rsa-2048}, {@literal rsa-3072}, or {@literal rsa-4096} then specify
+		 * the algorithm used to hash the input through {@link #hashAlgorithm(String)}.
+		 * @param prehashed whether the input is already hashed.
+		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 * @since 3.1
+		 */
+		public VaultSignatureVerificationRequestBuilder prehashed(boolean prehashed) {
+			this.prehashed = prehashed;
+			return this;
+		}
+
+		/**
 		 * Configure the signature algorithm to be used for the operation when using an
 		 * RSA key.
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
@@ -240,11 +254,6 @@ public class VaultSignatureVerificationRequest {
 			Assert.hasText(signatureAlgorithm, "Signature algorithm must not be null or empty");
 
 			this.signatureAlgorithm = signatureAlgorithm;
-			return this;
-		}
-
-		public VaultSignatureVerificationRequestBuilder prehashed(boolean prehashed) {
-			this.prehashed = prehashed;
 			return this;
 		}
 

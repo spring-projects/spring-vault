@@ -17,8 +17,8 @@ package org.springframework.vault.support;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Objects;
+
 import org.springframework.util.Assert;
 
 /**
@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Praveendra Singh
  * @author Mark Paluch
+ * @author Nanne Baars
  * @since 1.1
  */
 public class Plaintext {
