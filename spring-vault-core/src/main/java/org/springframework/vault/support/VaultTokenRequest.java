@@ -22,10 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.stream.StreamSupport;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -33,8 +33,11 @@ import org.springframework.util.Assert;
  * Value object to bind Vault HTTP Token API requests.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  */
 public class VaultTokenRequest {
+
+	private static final VaultTokenRequest EMPTY = VaultTokenRequest.builder().build();
 
 	@Nullable
 	private final String id;
@@ -61,15 +64,15 @@ public class VaultTokenRequest {
 	@JsonProperty("display_name")
 	private final String displayName;
 
-	@JsonProperty("num_uses")
-	private final int numUses;
-
 	@JsonProperty("entity_alias")
 	private final String entityAlias;
 
+	@JsonProperty("num_uses")
+	private final int numUses;
+
 	VaultTokenRequest(@Nullable String id, List<String> policies, Map<String, String> meta, boolean noParent,
 			boolean noDefaultPolicy, boolean renewable, @Nullable String ttl, @Nullable String explicitMaxTtl,
-			String displayName, int numUses, String entityAlias) {
+			String displayName, String entityAlias, int numUses) {
 
 		this.id = id;
 		this.policies = policies;
@@ -89,6 +92,14 @@ public class VaultTokenRequest {
 	 */
 	public static VaultTokenRequestBuilder builder() {
 		return new VaultTokenRequestBuilder();
+	}
+
+	/**
+	 * @return an empty token request.
+	 * @since 3.1
+	 */
+	public static VaultTokenRequest empty() {
+		return EMPTY;
 	}
 
 	/**
@@ -159,19 +170,19 @@ public class VaultTokenRequest {
 	}
 
 	/**
+	 * @return then name of the entity alias to associate with during token creation. Only
+	 * works in combination with role name.
+	 * @since 3.1
+	 */
+	public String getEntityAlias() {
+		return this.entityAlias;
+	}
+
+	/**
 	 * @return the number of allowed token uses.
 	 */
 	public int getNumUses() {
 		return this.numUses;
-	}
-
-	/**
-	 * @return then name of the entity alias to associate with during token creation. Only
-	 * works in combination with role_name argument and used entity alias must be listed
-	 * in allowed_entity_aliases
-	 */
-	public String getEntityAlias() {
-		return this.entityAlias;
 	}
 
 	/**
@@ -200,17 +211,18 @@ public class VaultTokenRequest {
 
 		private String displayName = "";
 
-		private int numUses;
-
+		@Nullable
 		private String entityAlias;
+
+		private int numUses;
 
 		VaultTokenRequestBuilder() {
 		}
 
 		/**
-		 * Configure a the Id of the client token. Can only be specified by a root token.
-		 * Otherwise, the token Id is a randomly generated UUID.
-		 * @param id the token Id.
+		 * Configure the token identifier. Can only be specified by a root token.
+		 * Otherwise, the token identifier is a randomly generated UUID.
+		 * @param id the token identifier.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
 		public VaultTokenRequestBuilder id(String id) {
@@ -387,21 +399,6 @@ public class VaultTokenRequest {
 		}
 
 		/**
-		 * Configure the maximum uses for the token. This can be used to create a
-		 * one-time-token or limited use token. Defaults to {@literal 0}, which has no
-		 * limit to the number of uses.
-		 * @param numUses number of uses, must not be negative.
-		 * @return {@code this} {@link VaultTokenRequestBuilder}.
-		 */
-		public VaultTokenRequestBuilder numUses(int numUses) {
-
-			Assert.isTrue(numUses >= 0, "Number of uses must not be negative");
-
-			this.numUses = numUses;
-			return this;
-		}
-
-		/**
 		 * Configure a display name for the token, defaults to "token".
 		 * @param displayName must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
@@ -418,6 +415,7 @@ public class VaultTokenRequest {
 		 * Configure the entity alias for the token.
 		 * @param entityAlias must not be empty or {@literal null}.
 		 * @return {@code this} {@link VaultTokenRequestBuilder}.
+		 * @since 3.1
 		 */
 		public VaultTokenRequestBuilder entityAlias(String entityAlias) {
 
@@ -428,9 +426,20 @@ public class VaultTokenRequest {
 		}
 
 		/**
-		 * Build a new {@link VaultTokenRequest} instance.
-		 * @return a new {@link VaultCertificateRequest}.
+		 * Configure the maximum uses for the token. This can be used to create a
+		 * one-time-token or limited use token. Defaults to {@literal 0}, which has no
+		 * limit to the number of uses.
+		 * @param numUses number of uses, must not be negative.
+		 * @return {@code this} {@link VaultTokenRequestBuilder}.
 		 */
+		public VaultTokenRequestBuilder numUses(int numUses) {
+
+			Assert.isTrue(numUses >= 0, "Number of uses must not be negative");
+
+			this.numUses = numUses;
+			return this;
+		}
+
 		/**
 		 * Build a new {@link VaultTokenRequest} instance.
 		 * @return a new {@link VaultCertificateRequest}.
@@ -442,13 +451,12 @@ public class VaultTokenRequest {
 				case 1 -> List.of(this.policies.get(0));
 				default -> List.copyOf(this.policies);
 			};
-			Map<String, String> meta = switch (this.meta.size()) {
-				case 0 -> Map.of();
-				default -> Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
-			};
+
+			Map<String, String> meta = this.meta.isEmpty() ? Map.of()
+					: Collections.unmodifiableMap(new LinkedHashMap<>(this.meta));
 
 			return new VaultTokenRequest(this.id, policies, meta, this.noParent, this.noDefaultPolicy, this.renewable,
-					this.ttl, this.explicitMaxTtl, this.displayName, this.numUses, this.entityAlias);
+					this.ttl, this.explicitMaxTtl, this.displayName, this.entityAlias, this.numUses);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

@@ -34,6 +34,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * Default implementation of {@link VaultTokenOperations}.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  */
 public class VaultTokenTemplate implements VaultTokenOperations {
 
@@ -51,11 +52,6 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 	}
 
 	@Override
-	public VaultTokenResponse create() {
-		return create(VaultTokenRequest.builder().build());
-	}
-
-	@Override
 	public VaultTokenResponse create(VaultTokenRequest request) {
 
 		Assert.notNull(request, "VaultTokenRequest must not be null");
@@ -64,23 +60,12 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 	}
 
 	@Override
-	public VaultTokenResponse create(String role) throws VaultException {
-
-		return create(role, VaultTokenRequest.builder().build());
-	}
-
-	@Override
 	public VaultTokenResponse create(String role, VaultTokenRequest request) throws VaultException {
 
-		Assert.notNull(role, "role must not be null");
+		Assert.hasText(role, "Role must not be null or empty");
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return writeAndReturn("auth/token/create/%s".formatted(role), request, VaultTokenResponse.class);
-	}
-
-	@Override
-	public VaultTokenResponse createOrphan() {
-		return createOrphan(VaultTokenRequest.builder().build());
+		return writeAndReturn(String.format("auth/token/create/%s", role), request, VaultTokenResponse.class);
 	}
 
 	@Override

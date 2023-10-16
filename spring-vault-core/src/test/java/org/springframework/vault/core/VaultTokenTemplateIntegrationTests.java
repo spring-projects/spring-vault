@@ -47,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  * Integration tests for {@link VaultTokenTemplate} through {@link VaultTokenOperations}.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -100,8 +101,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	void noTokenWhenRoleDoesNotExists() {
-
-		assertThatThrownBy(() -> this.tokenOperations.create("unknown-role")).isInstanceOf(VaultException.class);
+		assertThatExceptionOfType(VaultException.class).isThrownBy(() -> this.tokenOperations.create("unknown-role"));
 	}
 
 	@Test
