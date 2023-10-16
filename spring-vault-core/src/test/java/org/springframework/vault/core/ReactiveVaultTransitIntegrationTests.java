@@ -15,10 +15,20 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -38,16 +48,15 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.*;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.AES256_GCM96_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.BATCH_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.ECDSA521_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.ED25519_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.KEY_EXPORT_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.RSA3072_INTRODUCED_IN_VERSION;
+import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.SIGN_VERIFY_INTRODUCED_IN_VERSION;
 
 /**
  * Integration tests for {@link ReactiveVaultTransitTemplate} using the {@code transit}
@@ -438,6 +447,36 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 			.then(this.reactiveTransitOperations.rewrap("myKey", ciphertext))
 			.as(StepVerifier::create)
 			.assertNext(rewrapped -> assertThat(rewrapped).startsWith("vault:v2:"))
+			.verifyComplete();
+	}
+
+	@Test
+	void encryptAndRewrapInBatchShouldCreateCiphertext() {
+
+		this.reactiveTransitOperations
+			.createKey("mykey",
+					VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build())
+			.as(StepVerifier::create)
+			.verifyComplete();
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder() //
+			.context("blubb".getBytes()) //
+			.nonce("123456789012".getBytes()) //
+			.build();
+
+		String ciphertext1 = this.reactiveTransitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest)
+			.block();
+		String ciphertext2 = this.reactiveTransitOperations.encrypt("mykey", "hello-vault".getBytes(), transitRequest)
+			.block();
+		this.reactiveTransitOperations.rotate("mykey").as(StepVerifier::create).verifyComplete();
+
+		List<Ciphertext> batchRequest = Stream.of(ciphertext1, ciphertext2)
+			.map(ct -> Ciphertext.of(ct).with(transitRequest))
+			.toList();
+		this.reactiveTransitOperations.rewrap("mykey", batchRequest)
+			.as(StepVerifier::create)
+			.assertNext(it -> assertThat(it.get().getCiphertext()).startsWith("vault:v2"))
+			.expectNextCount(1)
 			.verifyComplete();
 	}
 

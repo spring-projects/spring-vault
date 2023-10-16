@@ -42,6 +42,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Sven Schürmann
  * @author Praveendra Singh
  * @author Luander Ribeiro
+ * @author Nanne Baars
  * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
  * Secret Backend</a>
  */
@@ -227,6 +228,7 @@ public interface VaultTransitOperations {
 	 * context
 	 * @return the rewrapped result in the order of {@code batchRequest} ciphertexts.
 	 * @see #rewrap(String, String)
+	 * @since 3.1
 	 */
 	List<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest);
 

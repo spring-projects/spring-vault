@@ -215,6 +215,15 @@ public interface ReactiveVaultTransitOperations {
 	Mono<String> rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
 
 	/**
+	 * Rewrap the provided batch of cipher text using the latest version of the named key.
+	 * @param batchRequest a list of {@link Ciphertext} which includes cipher text and a
+	 * context
+	 * @return the rewrapped result in the order of {@code batchRequest} ciphertexts.
+	 * @see #rewrap(String, String)
+	 */
+	Flux<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest);
+
+	/**
 	 * Create a HMAC using {@code keyName} of given {@link Plaintext} using the default
 	 * hash algorithm. The key can be of any type supported by transit; the raw key will
 	 * be marshaled into bytes to be used for the HMAC function. If the key is of a type

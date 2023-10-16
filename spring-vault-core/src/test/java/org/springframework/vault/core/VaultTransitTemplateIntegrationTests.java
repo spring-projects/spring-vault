@@ -55,6 +55,7 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
@@ -67,6 +68,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Praveendra Singh
  * @author Luander Ribeiro
  * @author Mikko Koli
+ * @author Nanne Baars
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -372,7 +374,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 			assertThat(ciphertext).startsWith("vault:%s:".formatted(expectedKeyPrefix));
 		}
 		catch (Exception e) {
-			Assertions.assertThat(expectedKeyPrefix).isNullOrEmpty();
+			assertThat(expectedKeyPrefix).isNullOrEmpty();
 		}
 	}
 
@@ -549,14 +551,11 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 		String ciphertext2 = this.transitOperations.encrypt("mykey", "hello-vault".getBytes(), transitRequest);
 		this.transitOperations.rotate("mykey");
 
-		List<Ciphertext> batchRequest = List.of(ciphertext1, ciphertext2)
-			.stream()
+		List<Ciphertext> batchRequest = Stream.of(ciphertext1, ciphertext2)
 			.map(ct -> Ciphertext.of(ct).with(transitRequest))
 			.toList();
 		List<VaultEncryptionResult> rewrappedResult = this.transitOperations.rewrap("mykey", batchRequest);
-		Assertions.assertThat(rewrappedResult)
-			.hasSize(2)
-			.allMatch(result -> result.get().getCiphertext().startsWith("vault:v2"));
+		assertThat(rewrappedResult).hasSize(2).allMatch(result -> result.get().getCiphertext().startsWith("vault:v2"));
 	}
 
 	@Test
