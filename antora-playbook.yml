@@ -1,10 +1,10 @@
 antora:
   extensions:
   - '@springio/antora-extensions/partial-build-extension'
+  - '@springio/antora-extensions/static-page-extension'
   - require: '@springio/antora-extensions/latest-version-extension'
   - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
   - '@antora/collector-extension'
-  - './antora/lib/version-fix.js'
   - '@antora/atlas-extension'
   - require: '@springio/antora-extensions/root-component-extension'
     root_component_name: 'vault'
@@ -25,7 +25,8 @@ content:
 asciidoc:
   attributes:
     page-stackoverflow-url: https://stackoverflow.com/tags/spring-vault
-    page-pagination: ''
+    page-related-doc-categories: security,cloud
+    page-related-doc-projects: framework
     hide-uri-scheme: '@'
     tabs-sync-option: '@'
   extensions:
@@ -35,11 +36,11 @@ urls:
   latest_version_segment_strategy: redirect:to
   latest_version_segment: ''
   redirect_facility: httpd
-ui:
-  bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.2/ui-bundle.zip
-    snapshot: true
 runtime:
   log:
     failure_level: warn
     format: pretty
+ui:
+  bundle:
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.3/ui-bundle.zip
+    snapshot: true
