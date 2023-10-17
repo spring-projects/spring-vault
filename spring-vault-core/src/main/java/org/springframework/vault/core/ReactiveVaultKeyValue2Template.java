@@ -56,7 +56,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 		return doRead(path, Map.class, (response, data) -> {
 
 			VaultResponse vaultResponse = new VaultResponse();
-			VaultResponse.updateWithoutData(vaultResponse, response);
+			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(data);
 
 			return vaultResponse;

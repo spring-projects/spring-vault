@@ -63,15 +63,21 @@ public class VaultResponseSupport<T> {
 	@Nullable
 	private List<String> warnings;
 
-	public static void updateWithoutData(final VaultResponseSupport<?> dst, final VaultResponseSupport<?> src) {
-		dst.auth = src.auth;
-		dst.metadata = src.metadata;
-		dst.wrapInfo = src.wrapInfo;
-		dst.leaseDuration = src.leaseDuration;
-		dst.leaseId = src.leaseId;
-		dst.requestId = src.requestId;
-		dst.renewable = src.renewable;
-		dst.warnings = src.warnings;
+	/**
+	 * Apply metadata such as auth or warnings without copying data.
+	 * @param other
+	 * @since 3.1
+	 */
+	public void applyMetadata(VaultResponseSupport<?> other) {
+
+		this.auth = other.auth;
+		this.metadata = other.metadata;
+		this.wrapInfo = other.wrapInfo;
+		this.leaseDuration = other.leaseDuration;
+		this.leaseId = other.leaseId;
+		this.requestId = other.requestId;
+		this.renewable = other.renewable;
+		this.warnings = other.warnings;
 	}
 
 	/**

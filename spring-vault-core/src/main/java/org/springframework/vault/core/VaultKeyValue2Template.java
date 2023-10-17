@@ -56,7 +56,7 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		return doRead(path, Map.class, (response, data) -> {
 
 			VaultResponse vaultResponse = new VaultResponse();
-			VaultResponse.updateWithoutData(vaultResponse, response);
+			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(data);
 
 			return vaultResponse;
