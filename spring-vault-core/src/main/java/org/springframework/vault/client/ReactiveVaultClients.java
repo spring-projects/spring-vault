@@ -111,12 +111,12 @@ public class ReactiveVaultClients {
 
 			CustomCodecs cc = configurer.customCodecs();
 
-			cc.decoder(new ByteArrayDecoder());
-			cc.decoder(new Jackson2JsonDecoder());
-			cc.decoder(StringDecoder.allMimeTypes());
+			cc.register(new ByteArrayDecoder());
+			cc.register(new Jackson2JsonDecoder());
+			cc.register(StringDecoder.allMimeTypes());
 
-			cc.encoder(new ByteArrayEncoder());
-			cc.encoder(new Jackson2JsonEncoder());
+			cc.register(new ByteArrayEncoder());
+			cc.register(new Jackson2JsonEncoder());
 
 		}).build();
 

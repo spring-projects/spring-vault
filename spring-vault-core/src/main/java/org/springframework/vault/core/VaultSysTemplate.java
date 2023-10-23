@@ -38,6 +38,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -237,7 +238,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			String rules = (String) response.getBody().getRequiredData().get("rules");
 
-			if (StringUtils.isEmpty(rules)) {
+			if (ObjectUtils.isEmpty(rules)) {
 				return Policy.empty();
 			}
 

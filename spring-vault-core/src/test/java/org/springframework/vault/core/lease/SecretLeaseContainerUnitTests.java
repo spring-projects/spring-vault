@@ -16,6 +16,7 @@
 package org.springframework.vault.core.lease;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -488,9 +489,8 @@ class SecretLeaseContainerUnitTests {
 		ArgumentCaptor<Trigger> captor = ArgumentCaptor.forClass(Trigger.class);
 		verify(this.taskScheduler).schedule(any(Runnable.class), captor.capture());
 
-		Date nextExecutionTime = captor.getValue().nextExecutionTime(null);
-		assertThat(nextExecutionTime).isBetween(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(35)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(41)));
+		Instant nextExecutionTime = captor.getValue().nextExecution(null);
+		assertThat(nextExecutionTime).isBetween(Instant.now().plusSeconds(35), Instant.now().plusSeconds(41));
 	}
 
 	@Test
@@ -536,13 +536,11 @@ class SecretLeaseContainerUnitTests {
 		ArgumentCaptor<Trigger> captor = ArgumentCaptor.forClass(Trigger.class);
 		verify(this.taskScheduler, times(2)).schedule(any(Runnable.class), captor.capture());
 
-		assertThat(captor.getAllValues().get(0).nextExecutionTime(null)).isBetween(
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(35)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(41)));
+		assertThat(captor.getAllValues().get(0).nextExecution(null)).isBetween(Instant.now().plusSeconds(31),
+				Instant.now().plusSeconds(41));
 
-		assertThat(captor.getAllValues().get(1).nextExecutionTime(null)).isBetween(
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(9)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(11)));
+		assertThat(captor.getAllValues().get(1).nextExecution(null)).isBetween(Instant.now().plusSeconds(9),
+				Instant.now().plusSeconds(11));
 	}
 
 	@Test
@@ -557,8 +555,8 @@ class SecretLeaseContainerUnitTests {
 
 		Trigger trigger = captor.getValue();
 
-		assertThat(trigger.nextExecutionTime(null)).isNotNull();
-		assertThat(trigger.nextExecutionTime(null)).isNull();
+		assertThat(trigger.nextExecution(null)).isNotNull();
+		assertThat(trigger.nextExecution(null)).isNull();
 	}
 
 	@Test

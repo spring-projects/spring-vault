@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -47,7 +48,7 @@ public class DurationParser {
 	@Nullable
 	public static Duration parseDuration(String duration) {
 
-		if (StringUtils.isEmpty(duration)) {
+		if (ObjectUtils.isEmpty(duration)) {
 			return null;
 		}
 

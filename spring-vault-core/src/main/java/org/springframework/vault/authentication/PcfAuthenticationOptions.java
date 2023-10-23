@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -239,7 +240,7 @@ public class PcfAuthenticationOptions {
 
 			String value = System.getenv(name);
 
-			if (StringUtils.isEmpty(value)) {
+			if (ObjectUtils.isEmpty(value)) {
 				throw new IllegalStateException(String.format("Environment variable %s not set", name));
 			}
 
