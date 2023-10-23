@@ -42,7 +42,7 @@
 		<spring.version>6.1.0-M5</spring.version>
 		<spring-data-bom.version>2023.1.0-M3</spring-data-bom.version>
 		<spring-security-bom.version>6.2.0-M3</spring-security-bom.version>
-		<reactor.version>2023.0.0-M3</reactor.version>
+		<reactor.version>2023.0.0-RC1</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
