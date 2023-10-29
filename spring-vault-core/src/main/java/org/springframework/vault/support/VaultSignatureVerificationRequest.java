@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
  * @author Mark Paluch
  * @author My-Lan Aragon
  * @author James Luke
+ * @author Nanne Baars
  * @since 2.0
  */
 public class VaultSignatureVerificationRequest {
@@ -39,14 +40,17 @@ public class VaultSignatureVerificationRequest {
 
 	private final @Nullable String signatureAlgorithm;
 
+	private final boolean prehashed;
+
 	private VaultSignatureVerificationRequest(Plaintext plaintext, @Nullable Signature signature, @Nullable Hmac hmac,
-			@Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
+			@Nullable String hashAlgorithm, @Nullable String signatureAlgorithm, boolean prehashed) {
 
 		this.plaintext = plaintext;
 		this.signature = signature;
 		this.hmac = hmac;
 		this.hashAlgorithm = hashAlgorithm;
 		this.signatureAlgorithm = signatureAlgorithm;
+		this.prehashed = prehashed;
 	}
 
 	/**
@@ -137,6 +141,14 @@ public class VaultSignatureVerificationRequest {
 	}
 
 	/**
+	 * @return {@literal true} if the input is already hashed.
+	 * @since 3.1
+	 */
+	public boolean isPrehashed() {
+		return this.prehashed;
+	}
+
+	/**
 	 * Builder to build a {@link VaultSignatureVerificationRequest}.
 	 */
 	public static class VaultSignatureVerificationRequestBuilder {
@@ -150,6 +162,8 @@ public class VaultSignatureVerificationRequest {
 		private @Nullable String hashAlgorithm;
 
 		private @Nullable String signatureAlgorithm;
+
+		private boolean prehashed;
 
 		/**
 		 * Configure the {@link Plaintext} input to be used to verify the signature.
@@ -214,6 +228,19 @@ public class VaultSignatureVerificationRequest {
 		}
 
 		/**
+		 * Set to {@literal true} when the input is already hashed. If the key type is
+		 * {@literal rsa-2048}, {@literal rsa-3072}, or {@literal rsa-4096} then specify
+		 * the algorithm used to hash the input through {@link #hashAlgorithm(String)}.
+		 * @param prehashed whether the input is already hashed.
+		 * @return {@code this} {@link VaultSignatureVerificationRequestBuilder}.
+		 * @since 3.1
+		 */
+		public VaultSignatureVerificationRequestBuilder prehashed(boolean prehashed) {
+			this.prehashed = prehashed;
+			return this;
+		}
+
+		/**
 		 * Configure the signature algorithm to be used for the operation when using an
 		 * RSA key.
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
@@ -255,7 +282,7 @@ public class VaultSignatureVerificationRequest {
 			Assert.isTrue(this.hmac != null || this.signature != null, "Either Signature or Hmac must not be null");
 
 			return new VaultSignatureVerificationRequest(this.input, this.signature, this.hmac, this.hashAlgorithm,
-					this.signatureAlgorithm);
+					this.signatureAlgorithm, this.prehashed);
 		}
 
 	}

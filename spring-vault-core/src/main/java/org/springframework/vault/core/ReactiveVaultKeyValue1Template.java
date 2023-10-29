@@ -60,9 +60,11 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	public Mono<VaultResponse> get(String path) {
 
 		return doRead(path, Map.class, (response, map) -> {
+
 			VaultResponse vaultResponse = new VaultResponse();
-			VaultResponseSupport.updateWithoutData(vaultResponse, response);
+			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(map);
+
 			return vaultResponse;
 		});
 	}

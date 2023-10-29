@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +66,7 @@ import static org.assertj.core.api.Assertions.fail;
  * @author Praveendra Singh
  * @author Luander Ribeiro
  * @author Mikko Koli
+ * @author Nanne Baars
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -372,7 +372,7 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 			assertThat(ciphertext).startsWith("vault:%s:".formatted(expectedKeyPrefix));
 		}
 		catch (Exception e) {
-			Assertions.assertThat(expectedKeyPrefix).isNullOrEmpty();
+			assertThat(expectedKeyPrefix).isNullOrEmpty();
 		}
 	}
 
@@ -532,6 +532,28 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		String rewrapped = this.transitOperations.rewrap("mykey", ciphertext, transitRequest);
 		assertThat(rewrapped).startsWith("vault:v2");
+	}
+
+	@Test
+	void encryptAndRewrapInBatchShouldCreateCiphertext() {
+
+		this.transitOperations.createKey("mykey",
+				VaultTransitKeyCreationRequest.builder().convergentEncryption(true).derived(true).build());
+
+		VaultTransitContext transitRequest = VaultTransitContext.builder() //
+			.context("blubb".getBytes()) //
+			.nonce("123456789012".getBytes()) //
+			.build();
+
+		String ciphertext1 = this.transitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest);
+		String ciphertext2 = this.transitOperations.encrypt("mykey", "hello-vault".getBytes(), transitRequest);
+		this.transitOperations.rotate("mykey");
+
+		List<Ciphertext> batchRequest = Stream.of(ciphertext1, ciphertext2)
+			.map(ct -> Ciphertext.of(ct).with(transitRequest))
+			.toList();
+		List<VaultEncryptionResult> rewrappedResult = this.transitOperations.rewrap("mykey", batchRequest);
+		assertThat(rewrappedResult).hasSize(2).allMatch(result -> result.get().getCiphertext().startsWith("vault:v2"));
 	}
 
 	@Test
@@ -781,6 +803,56 @@ class VaultTransitTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Signature signature = this.transitOperations.sign(keyName, request);
 		assertThat(signature.getSignature()).isNotEmpty();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signAndVerifyWithPrehashedInput() {
+
+		String keyName = createEcdsaP256Key();
+		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
+		VaultSignRequest signRequest = VaultSignRequest.builder()
+			.plaintext(plaintext)
+			.signatureAlgorithm("pkcs1v15")
+			.prehashed(true)
+			.build();
+
+		Signature signature = this.transitOperations.sign(keyName, signRequest);
+		assertThat(signature.getSignature()).isNotEmpty();
+
+		VaultSignatureVerificationRequest verifyRequest = VaultSignatureVerificationRequest.builder()
+			.prehashed(true)
+			.plaintext(plaintext)
+			.signature(signature)
+			.signatureAlgorithm("pkcs1v15")
+			.build();
+		SignatureValidation validation = this.transitOperations.verify(keyName, verifyRequest);
+		assertThat(validation.isValid()).isTrue();
+	}
+
+	@Test
+	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
+	void signWithPrehashedAndVerifyWithoutShouldFail() {
+
+		String keyName = createEcdsaP256Key();
+		Plaintext plaintext = Plaintext.of("P8m2iUWdc4+MiKOkiqnjNUIBa3pAUuABqqU2/KdIE8s=");
+		VaultSignRequest signRequest = VaultSignRequest.builder()
+			.plaintext(plaintext)
+			.signatureAlgorithm("pkcs1v15")
+			.prehashed(true)
+			.build();
+
+		Signature signature = this.transitOperations.sign(keyName, signRequest);
+		assertThat(signature.getSignature()).isNotEmpty();
+
+		VaultSignatureVerificationRequest verifyRequest = VaultSignatureVerificationRequest.builder()
+			.prehashed(false)
+			.plaintext(plaintext)
+			.signature(signature)
+			.signatureAlgorithm("pkcs1v15")
+			.build();
+		SignatureValidation validation = this.transitOperations.verify(keyName, verifyRequest);
+		assertThat(validation.isValid()).isFalse();
 	}
 
 	@Test

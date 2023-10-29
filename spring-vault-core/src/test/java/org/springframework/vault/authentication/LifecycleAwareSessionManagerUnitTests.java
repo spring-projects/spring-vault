@@ -382,8 +382,8 @@ class LifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.getSessionToken();
 		verify(this.taskScheduler).schedule(any(Runnable.class), triggerCaptor.capture());
 
-		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNotNull();
-		assertThat(triggerCaptor.getValue().nextExecutionTime(null)).isNull();
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isNotNull();
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isNull();
 	}
 
 	@Test

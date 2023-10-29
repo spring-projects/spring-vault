@@ -15,8 +15,6 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
@@ -26,6 +24,7 @@ import org.springframework.util.Assert;
  * @author Luander Ribeiro
  * @author Mark Paluch
  * @author My-Lan Aragon
+ * @author Nanne Baars
  * @since 2.0
  */
 public class VaultSignRequest {
@@ -36,11 +35,15 @@ public class VaultSignRequest {
 
 	private final @Nullable String signatureAlgorithm;
 
-	private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm) {
+	private final boolean prehashed;
+
+	private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm,
+			boolean prehashed) {
 
 		this.plaintext = plaintext;
 		this.hashAlgorithm = hashAlgorithm;
 		this.signatureAlgorithm = signatureAlgorithm;
+		this.prehashed = prehashed;
 	}
 
 	/**
@@ -98,6 +101,14 @@ public class VaultSignRequest {
 	}
 
 	/**
+	 * @return true if the input is already hashed.
+	 * @since 3.1
+	 */
+	public boolean isPrehashed() {
+		return this.prehashed;
+	}
+
+	/**
 	 * Builder to build a {@link VaultSignRequest}.
 	 */
 	public static class VaultSignRequestBuilder {
@@ -107,6 +118,8 @@ public class VaultSignRequest {
 		private @Nullable String hashAlgorithm;
 
 		private @Nullable String signatureAlgorithm;
+
+		private boolean prehashed;
 
 		/**
 		 * Configure the input to be used to create the signature.
@@ -134,6 +147,19 @@ public class VaultSignRequest {
 			Assert.hasText(hashAlgorithm, "Hash algorithm must not be null or empty");
 
 			this.hashAlgorithm = hashAlgorithm;
+			return this;
+		}
+
+		/**
+		 * Set to {@literal true} when the input is already hashed. If the key type is
+		 * {@literal rsa-2048}, {@literal rsa-3072}, or {@literal rsa-4096} then specify
+		 * the algorithm used to hash the input through {@link #hashAlgorithm(String)}.
+		 * @param prehashed whether the input is already hashed.
+		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @since 3.1
+		 */
+		public VaultSignRequestBuilder prehashed(boolean prehashed) {
+			this.prehashed = prehashed;
 			return this;
 		}
 
@@ -175,7 +201,7 @@ public class VaultSignRequest {
 
 			Assert.notNull(this.plaintext, "Plaintext input must not be null");
 
-			return new VaultSignRequest(this.plaintext, this.hashAlgorithm, this.signatureAlgorithm);
+			return new VaultSignRequest(this.plaintext, this.hashAlgorithm, this.signatureAlgorithm, this.prehashed);
 		}
 
 	}

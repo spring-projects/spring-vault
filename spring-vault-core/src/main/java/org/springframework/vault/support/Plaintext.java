@@ -27,6 +27,7 @@ import org.springframework.util.Assert;
  *
  * @author Praveendra Singh
  * @author Mark Paluch
+ * @author Nanne Baars
  * @since 1.1
  */
 public class Plaintext {

@@ -22,8 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -227,7 +229,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		VaultResponse vaultResponse = this.vaultOperations.write(String.format("%s/encrypt/%s", this.path, keyName),
 				Collections.singletonMap("batch_input", batch));
 
-		return toEncryptionResults(vaultResponse, batchRequest);
+		return toBatchResults(vaultResponse, batchRequest, Plaintext::getContext);
 	}
 
 	@Override
@@ -328,15 +330,31 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
-		Map<String, String> request = new LinkedHashMap<>();
-
-		request.put("ciphertext", ciphertext);
-
-		applyTransitOptions(transitContext, request);
+		Map<String, String> request = createRewrapRequest(toCiphertext(ciphertext, transitContext));
 
 		return (String) this.vaultOperations.write(String.format("%s/rewrap/%s", this.path, keyName), request)
 			.getRequiredData()
 			.get("ciphertext");
+	}
+
+	@Override
+	public List<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest) {
+
+		Assert.hasText(keyName, "Key name must not be empty");
+		Assert.notEmpty(batchRequest, "BatchRequest must not be null and must have at least one entry");
+
+		List<Map<String, String>> batch = new ArrayList<>(batchRequest.size());
+
+		for (Ciphertext request : batchRequest) {
+
+			Map<String, String> vaultRequest = createRewrapRequest(request);
+			batch.add(vaultRequest);
+		}
+
+		VaultResponse vaultResponse = this.vaultOperations.write(String.format("%s/rewrap/%s", this.path, keyName),
+				Collections.singletonMap("batch_input", batch));
+
+		return toBatchResults(vaultResponse, batchRequest, Ciphertext::getContext);
 	}
 
 	@Override
@@ -407,7 +425,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 	static Map<String, Object> toRequestBody(VaultSignRequest signRequest) {
 
-		Map<String, Object> request = new LinkedHashMap<>(3);
+		Map<String, Object> request = new LinkedHashMap<>(4);
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(signRequest.getPlaintext()::getPlaintext)
@@ -415,6 +433,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.to("input", request);
 		mapper.from(signRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(signRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
+		mapper.from(signRequest::isPrehashed).to("prehashed", request);
 
 		return request;
 	}
@@ -464,6 +483,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			.to("signature", request);
 		mapper.from(verificationRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(verificationRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
+		mapper.from(verificationRequest::isPrehashed).to("prehashed", request);
 
 		return request;
 	}
@@ -483,15 +503,16 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 	}
 
-	static List<VaultEncryptionResult> toEncryptionResults(VaultResponse vaultResponse, List<Plaintext> batchRequest) {
+	static <T> List<VaultEncryptionResult> toBatchResults(VaultResponse vaultResponse, List<T> batchRequests,
+			Function<T, VaultTransitContext> contextExtractor) {
 
-		List<VaultEncryptionResult> result = new ArrayList<>(batchRequest.size());
+		List<VaultEncryptionResult> result = new ArrayList<>(batchRequests.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
 
-		for (int i = 0; i < batchRequest.size(); i++) {
+		for (int i = 0; i < batchRequests.size(); i++) {
 
 			VaultEncryptionResult encrypted;
-			Plaintext plaintext = batchRequest.get(i);
+			T request = batchRequests.get(i);
 			if (batchData.size() > i) {
 
 				Map<String, String> data = batchData.get(i);
@@ -499,11 +520,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 					encrypted = new VaultEncryptionResult(new VaultException(data.get("error")));
 				}
 				else {
-					encrypted = new VaultEncryptionResult(toCiphertext(data.get("ciphertext"), plaintext.getContext()));
+					encrypted = new VaultEncryptionResult(
+							toCiphertext(data.get("ciphertext"), contextExtractor.apply(request)));
 				}
 			}
 			else {
-				encrypted = new VaultEncryptionResult(new VaultException("No result for plaintext #" + i));
+				encrypted = new VaultEncryptionResult(new VaultException("No result for request #" + i));
 			}
 
 			result.add(encrypted);
@@ -548,6 +570,15 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		return new VaultDecryptionResult(Plaintext.empty().with(ciphertext.getContext()));
+	}
+
+	static Map<String, String> createRewrapRequest(Ciphertext request) {
+
+		Map<String, String> vaultRequest = new LinkedHashMap<>(2);
+		vaultRequest.put("ciphertext", request.getCiphertext());
+		applyTransitOptions(request.getContext(), vaultRequest);
+
+		return vaultRequest;
 	}
 
 	static Ciphertext toCiphertext(String ciphertext, @Nullable VaultTransitContext context) {

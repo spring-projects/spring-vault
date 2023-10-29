@@ -3,7 +3,12 @@
 # The purpose of this Antora playbook is to build the docs in the current branch.
 antora:
   extensions:
+    - '@springio/antora-extensions/partial-build-extension'
+    - '@springio/antora-extensions/static-page-extension'
+    - require: '@springio/antora-extensions/latest-version-extension'
+    - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
     - '@antora/collector-extension'
+    - '@antora/atlas-extension'
     - require: '@springio/antora-extensions/root-component-extension'
       root_component_name: 'vault'
 site:
@@ -17,7 +22,8 @@ content:
       worktrees: true
 asciidoc:
   attributes:
-    page-pagination: ''
+    page-related-doc-categories: security,cloud
+    page-related-doc-projects: framework
     hide-uri-scheme: '@'
     tabs-sync-option: '@'
     chomp: 'all'
@@ -33,5 +39,5 @@ runtime:
     format: pretty
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.3.3/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.3/ui-bundle.zip
     snapshot: true

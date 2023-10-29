@@ -42,6 +42,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
  * @author Sven Schürmann
  * @author Praveendra Singh
  * @author Luander Ribeiro
+ * @author Nanne Baars
  * @see <a href="https://www.vaultproject.io/docs/secrets/transit/index.html">Transit
  * Secret Backend</a>
  */
@@ -220,6 +221,16 @@ public interface VaultTransitOperations {
 	 * @see #rotate(String)
 	 */
 	String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext);
+
+	/**
+	 * Rewrap the provided batch of cipher text using the latest version of the named key.
+	 * @param batchRequest a list of {@link Ciphertext} which includes cipher text and a
+	 * context
+	 * @return the rewrapped result in the order of {@code batchRequest} ciphertexts.
+	 * @see #rewrap(String, String)
+	 * @since 3.1
+	 */
+	List<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest);
 
 	/**
 	 * Create a HMAC using {@code keyName} of given {@link Plaintext} using the default

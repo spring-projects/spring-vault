@@ -38,6 +38,7 @@ import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -223,9 +224,7 @@ public class ReactiveVaultTransitTemplate implements ReactiveVaultTransitOperati
 		Assert.hasText(ciphertext, "Ciphertext must not be empty");
 		Assert.notNull(transitContext, "VaultTransitContext must not be null");
 
-		Map<String, String> request = new LinkedHashMap<>();
-
-		request.put("ciphertext", ciphertext);
+		Map<String, String> request = createRewrapRequest(toCiphertext(ciphertext, transitContext));
 
 		applyTransitOptions(transitContext, request);
 
@@ -234,7 +233,22 @@ public class ReactiveVaultTransitTemplate implements ReactiveVaultTransitOperati
 	}
 
 	@Override
+	public Flux<VaultEncryptionResult> rewrap(String keyName, List<Ciphertext> batchRequest) {
+
+		Assert.hasText(keyName, "Key name must not be empty");
+		Assert.notEmpty(batchRequest, "BatchRequest must not be null and must have at least one entry");
+
+		return Flux.fromIterable(batchRequest)
+			.map(VaultTransitTemplate::createRewrapRequest)
+			.collectList()
+			.flatMap(batch -> this.reactiveVaultOperations.write(String.format("%s/rewrap/%s", this.path, keyName),
+					Collections.singletonMap("batch_input", batch)))
+			.flatMapIterable(vaultResponse -> toBatchResults(vaultResponse, batchRequest, Ciphertext::getContext));
+	}
+
+	@Override
 	public Flux<VaultEncryptionResult> encrypt(String keyName, List<Plaintext> batchRequest) {
+
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notEmpty(batchRequest, "BatchRequest must not be null and must have at least one entry");
 
@@ -247,7 +261,7 @@ public class ReactiveVaultTransitTemplate implements ReactiveVaultTransitOperati
 			.collectList()
 			.flatMap(batch -> this.reactiveVaultOperations.write(String.format("%s/encrypt/%s", this.path, keyName),
 					Collections.singletonMap("batch_input", batch)))
-			.flatMapIterable(vaultResponse -> toEncryptionResults(vaultResponse, batchRequest));
+			.flatMapIterable(vaultResponse -> toBatchResults(vaultResponse, batchRequest, Plaintext::getContext));
 	}
 
 	@Override

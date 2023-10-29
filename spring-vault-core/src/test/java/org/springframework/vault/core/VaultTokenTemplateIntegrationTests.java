@@ -17,6 +17,7 @@ package org.springframework.vault.core;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,12 +39,15 @@ import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Integration tests for {@link VaultTokenTemplate} through {@link VaultTokenOperations}.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
@@ -83,6 +87,33 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
+	}
+
+	@Test
+	void createTokenWithRoleShouldCreateAToken() {
+
+		prepare().getVaultOperations()
+			.doWithSession(template -> template.postForEntity("auth/token/roles/my-role", Map.of(), String.class));
+
+		VaultTokenResponse tokenResponse = this.tokenOperations.create("my-role");
+		assertThat(tokenResponse.getAuth()).containsKey("client_token");
+	}
+
+	@Test
+	void noTokenWhenRoleDoesNotExists() {
+		assertThatExceptionOfType(VaultException.class).isThrownBy(() -> this.tokenOperations.create("unknown-role"));
+	}
+
+	@Test
+	void createTokenWithEntityAliasShouldCreateAToken() {
+
+		prepare().getVaultOperations()
+			.doWithSession(template -> template.postForEntity("auth/token/roles/my-role",
+					Map.of("allowed_entity_aliases", "my-entity-alias"), String.class));
+
+		VaultTokenResponse tokenResponse = this.tokenOperations.create("my-role",
+				VaultTokenRequest.builder().entityAlias("my-entity-alias").build());
+		assertThat(tokenResponse.getAuth()).containsKey("client_token");
 	}
 
 	@Test
