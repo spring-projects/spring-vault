@@ -113,9 +113,8 @@ public interface VaultPkiOperations {
 	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
 	 * issuer.
 	 * @param issuer reference to an existing issuer, either by Vault-generated
-	 * identifier, or the name assigned to an issuer. If empty or {@literal null}, the
-	 * issuer will default to the literal string default to refer to the currently
-	 * configured default issuer.
+	 * identifier, or the name assigned to an issuer. Pass the literal string 'default' to
+	 * refer to the currently configured issuer.
 	 * @return the {@link VaultIssuerCertificateRequestResponse} containing a
 	 * {@link org.springframework.vault.support.Certificate}
 	 * @see <a href=
@@ -123,7 +122,7 @@ public interface VaultPkiOperations {
 	 * /pki/issuer/:issuer_ref/json</a>
 	 *
 	 */
-	VaultIssuerCertificateRequestResponse getIssuerCertificate(@Nullable String issuer) throws VaultException;
+	VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException;
 
 	/**
 	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
@@ -134,6 +133,6 @@ public interface VaultPkiOperations {
 	 * "https://www.vaultproject.io/api/secret/pki/#read-issuer-certificate">GET
 	 * /pki/issuer/:issuer_ref/{der, pem}</a>
 	 */
-	InputStream getIssuerCertificate(@Nullable String issuer, Encoding encoding) throws VaultException;
+	InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException;
 
 }

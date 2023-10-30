@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
@@ -49,11 +50,11 @@ public class Certificate {
 
 	private final List<String> caChain;
 
-	private final long revocationTime;
+	private final Long revocationTime;
 
 	Certificate(@JsonProperty("serial_number") String serialNumber, @JsonProperty("certificate") String certificate,
 			@JsonProperty("issuing_ca") String issuingCaCertificate, @JsonProperty("ca_chain") List<String> caChain,
-			@JsonProperty("revocation_time") long revocationTime) {
+			@JsonProperty("revocation_time") Long revocationTime) {
 
 		this.serialNumber = serialNumber;
 		this.certificate = certificate;
@@ -70,12 +71,53 @@ public class Certificate {
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @return the {@link Certificate}
 	 */
-	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
-			List<String> caChain, long revocationTime) {
+	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+
+		return new Certificate(serialNumber, certificate, issuingCaCertificate, List.of(), null);
+	}
+
+	/**
+	 * Create a {@link Certificate} given a private key with certificates and the serial
+	 * number.
+	 * @param serialNumber must not be empty or {@literal null}.
+	 * @param certificate must not be empty or {@literal null}.
+	 * @param issuingCaCertificate must not be empty or {@literal null}.
+	 * @param caChain empty list allowed
+	 * @return the {@link Certificate}
+	 */
+	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
+			List<String> caChain) {
+
+		Assert.hasText(serialNumber, "Serial number must not be empty");
+		Assert.hasText(certificate, "Certificate must not be empty");
+		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+		Assert.notNull(caChain, "CA chain must not be null");
+
+		return new Certificate(serialNumber, certificate, issuingCaCertificate, caChain, null);
+	}
+
+	/**
+	 * Create a {@link Certificate} given a private key with certificates and the serial
+	 * number.
+	 * @param serialNumber must not be empty or {@literal null}.
+	 * @param certificate must not be empty or {@literal null}.
+	 * @param issuingCaCertificate must not be empty or {@literal null}.
+	 * @param caChain empty list allowed
+	 * @param revocationTime revocation time, must not be {@literal null}
+	 * @return the {@link Certificate}
+	 */
+	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
+			List<String> caChain, Long revocationTime) {
+
+		Assert.hasText(serialNumber, "Serial number must not be empty");
+		Assert.hasText(certificate, "Certificate must not be empty");
+		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+		Assert.notNull(caChain, "CA chain must not be null");
+		Assert.notNull(revocationTime, "Revocation time");
 
 		return new Certificate(serialNumber, certificate, issuingCaCertificate, caChain, revocationTime);
 	}
@@ -208,7 +250,7 @@ public class Certificate {
 		return certificates;
 	}
 
-	public long getRevocationTime() {
+	public @Nullable Long getRevocationTime() {
 		return this.revocationTime;
 	}
 

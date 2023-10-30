@@ -450,7 +450,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	void shouldReturnCA() throws Exception {
-		VaultIssuerCertificateRequestResponse certificateResponse = this.pkiOperations.getIssuerCertificate(null);
+		VaultIssuerCertificateRequestResponse certificateResponse = this.pkiOperations.getIssuerCertificate("default");
 
 		Certificate data = certificateResponse.getRequiredData();
 		KeyStore trustStore = data.createTrustStore(true);
@@ -458,14 +458,14 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
-		try (InputStream in = this.pkiOperations.getIssuerCertificate(null, Encoding.DER)) {
+		try (InputStream in = this.pkiOperations.getIssuerCertificate("default", Encoding.DER)) {
 
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 
 			assertThat(cf.generateCertificate(in)).isInstanceOf(java.security.cert.Certificate.class);
 		}
 
-		try (InputStream crl = this.pkiOperations.getIssuerCertificate(null, Encoding.PEM)) {
+		try (InputStream crl = this.pkiOperations.getIssuerCertificate("default", Encoding.PEM)) {
 
 			byte[] bytes = StreamUtils.copyToByteArray(crl);
 			assertThat(bytes).isNotEmpty();

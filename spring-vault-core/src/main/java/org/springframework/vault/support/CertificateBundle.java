@@ -68,9 +68,9 @@ public class CertificateBundle extends Certificate {
 	 */
 	CertificateBundle(@JsonProperty("serial_number") String serialNumber,
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
-			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("revocation_time") long revocationTime,
-			@JsonProperty("private_key") String privateKey,
-			@Nullable @JsonProperty("private_key_type") String privateKeyType) {
+			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey,
+			@Nullable @JsonProperty("private_key_type") String privateKeyType,
+			@JsonProperty("revocation_time") Long revocationTime) {
 
 		super(serialNumber, certificate, issuingCaCertificate, caChain, revocationTime);
 		this.privateKey = privateKey;
@@ -84,11 +84,10 @@ public class CertificateBundle extends Certificate {
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param privateKey must not be empty or {@literal null}.
-	 * @param revocationTime the revocation time.
 	 * @return the {@link CertificateBundle} instead.
 	 */
 	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
-			String privateKey, long revocationTime) {
+			String privateKey) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
@@ -96,7 +95,31 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(privateKey, "Private key must not be empty");
 
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), revocationTime, privateKey, null);
+				Collections.singletonList(issuingCaCertificate), null, privateKey, null);
+	}
+
+	/**
+	 * Create a {@link CertificateBundle} given a private key with certificates and the
+	 * serial number.
+	 * @param serialNumber must not be empty or {@literal null}.
+	 * @param certificate must not be empty or {@literal null}.
+	 * @param issuingCaCertificate must not be empty or {@literal null}.
+	 * @param privateKey must not be empty or {@literal null}.
+	 * @param privateKeyType must not be empty or {@literal null}.
+	 * @return the {@link CertificateBundle}
+	 * @since 2.4
+	 */
+	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
+			String privateKey, @Nullable String privateKeyType) {
+
+		Assert.hasText(serialNumber, "Serial number must not be empty");
+		Assert.hasText(certificate, "Certificate must not be empty");
+		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
+		Assert.hasText(privateKey, "Private key must not be empty");
+		Assert.hasText(privateKeyType, "Private key type must not be empty");
+
+		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
+				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType, null);
 	}
 
 	/**
@@ -112,16 +135,17 @@ public class CertificateBundle extends Certificate {
 	 * @since 2.4
 	 */
 	public static CertificateBundle of(String serialNumber, String certificate, String issuingCaCertificate,
-			String privateKey, @Nullable String privateKeyType, long revocationTime) {
+			String privateKey, @Nullable String privateKeyType, Long revocationTime) {
 
 		Assert.hasText(serialNumber, "Serial number must not be empty");
 		Assert.hasText(certificate, "Certificate must not be empty");
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 		Assert.hasText(privateKey, "Private key must not be empty");
 		Assert.hasText(privateKeyType, "Private key type must not be empty");
+		Assert.notNull(revocationTime, "Revocation time must not be null");
 
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), revocationTime, privateKey, privateKeyType);
+				Collections.singletonList(issuingCaCertificate), privateKey, privateKeyType, revocationTime);
 	}
 
 	/**

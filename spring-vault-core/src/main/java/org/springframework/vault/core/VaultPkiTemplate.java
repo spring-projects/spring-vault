@@ -149,12 +149,13 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@Override
 	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
 
+		Assert.hasText(issuer, "Issuer must not be empty");
+
 		return this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
 				return restOperations.getForObject("{path}/issuer/{issuer}/json",
-						VaultIssuerCertificateRequestResponse.class, this.path,
-						StringUtils.hasText(issuer) ? issuer : "default");
+						VaultIssuerCertificateRequestResponse.class, this.path, issuer);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -164,6 +165,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 	@Override
 	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
+		Assert.hasText(issuer, "Issuer must not be empty");
 		Assert.notNull(encoding, "Encoding must not be null");
 
 		return this.vaultOperations.doWithSession(restOperations -> {
@@ -171,7 +173,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			String requestPath = encoding == Encoding.DER ? "{path}/issuer/{issuer}/der" : "{path}/issuer/{issuer}/pem";
 			try {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,
-						StringUtils.hasText(issuer) ? issuer : "default");
+						issuer);
 
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());
