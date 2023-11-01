@@ -46,17 +46,9 @@ import org.springframework.vault.support.VaultTransitContext;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
 import org.springframework.vault.support.VaultTransitKeyCreationRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.AES256_GCM96_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.BATCH_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.ECDSA521_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.ED25519_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.KEY_EXPORT_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.RSA3072_INTRODUCED_IN_VERSION;
-import static org.springframework.vault.core.VaultTransitTemplateIntegrationTests.SIGN_VERIFY_INTRODUCED_IN_VERSION;
 
 /**
  * Integration tests for {@link ReactiveVaultTransitTemplate} using the {@code transit}
@@ -135,7 +127,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion("0.6.4")
 	void createKeyShouldCreateEcDsaKey() {
 
 		createEcdsaP256Key().flatMap(keyName -> this.reactiveTransitOperations.getKey(keyName))
@@ -149,7 +140,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void createKeyShouldCreateEdKey() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
@@ -166,7 +156,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(ECDSA521_INTRODUCED_IN_VERSION)
 	void createKeyShouldCreateEcdsaKey() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("ecdsa-p521");
@@ -182,7 +171,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(RSA3072_INTRODUCED_IN_VERSION)
 	void createKeyShouldCreateRsa3072Key() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("rsa-3072");
@@ -198,7 +186,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(AES256_GCM96_INTRODUCED_IN_VERSION)
 	void createKeyShouldCreateAes256Gcm96Key() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.ofKeyType("aes256-gcm96");
@@ -262,7 +249,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion("0.6.4")
 	void shouldEnumerateKey() {
 
 		this.reactiveTransitOperations.getKeys().as(StepVerifier::create).verifyComplete();
@@ -312,17 +298,14 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	void encryptShouldCreateCiphertextWithNonceAndContext() {
+	void encryptShouldCreateCiphertextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
 			.convergentEncryption(true)
 			.derived(true)
 			.build();
 
-		VaultTransitContext context = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		this.reactiveTransitOperations.createKey("mykey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), context))
@@ -332,7 +315,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void encryptShouldEncryptEmptyValues() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
@@ -340,10 +322,7 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 			.derived(true)
 			.build();
 
-		VaultTransitContext context = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("").with(context)))
@@ -356,17 +335,14 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	void encryptShouldCreateWrappedCiphertextWithNonceAndContext() {
+	void encryptShouldCreateWrappedCiphertextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
 			.convergentEncryption(true)
 			.derived(true)
 			.build();
 
-		VaultTransitContext context = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("hello-world").with(context)))
@@ -390,17 +366,14 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	void decryptShouldCreatePlaintextWithNonceAndContext() {
+	void decryptShouldCreatePlaintextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
 			.convergentEncryption(true)
 			.derived(true)
 			.build();
 
-		VaultTransitContext transitRequest = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), transitRequest))
@@ -411,17 +384,14 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	void decryptShouldCreateWrappedPlaintextWithNonceAndContext() {
+	void decryptShouldCreateWrappedPlaintextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
 			.convergentEncryption(true)
 			.derived(true)
 			.build();
 
-		VaultTransitContext context = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext context = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", Plaintext.of("hello-world").with(context)))
@@ -461,7 +431,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 
 		VaultTransitContext transitRequest = VaultTransitContext.builder() //
 			.context("blubb".getBytes()) //
-			.nonce("123456789012".getBytes()) //
 			.build();
 
 		String ciphertext1 = this.reactiveTransitOperations.encrypt("mykey", "hello-world".getBytes(), transitRequest)
@@ -496,17 +465,14 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	void encryptAndRewrapShouldCreateCiphertextWithNonceAndContext() {
+	void encryptAndRewrapShouldCreateCiphertextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
 			.convergentEncryption(true)
 			.derived(true)
 			.build();
 
-		VaultTransitContext transitRequest = VaultTransitContext.builder()
-			.context("blubb".getBytes())
-			.nonce("123456789012".getBytes())
-			.build();
+		VaultTransitContext transitRequest = VaultTransitContext.builder().context("blubb".getBytes()).build();
 
 		String ciphertext = this.reactiveTransitOperations.createKey("myKey", request)
 			.then(this.reactiveTransitOperations.encrypt("myKey", "hello-world".getBytes(), transitRequest))
@@ -522,7 +488,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchEncrypt() {
 
 		this.reactiveTransitOperations.createKey("myKey")
@@ -541,7 +506,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecrypt() {
 
 		this.reactiveTransitOperations.createKey("myKey").block();
@@ -567,7 +531,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchEncryptWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
@@ -586,7 +549,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecryptWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
@@ -609,7 +571,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecryptWithWrongContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
@@ -649,7 +610,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecryptEmptyPlaintext() {
 
 		this.reactiveTransitOperations.createKey("myKey")
@@ -661,7 +621,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(BATCH_INTRODUCED_IN_VERSION)
 	void shouldBatchDecryptEmptyPlaintextWithContext() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder().derived(true).build();
@@ -680,7 +639,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void generateHmacShouldCreateHmac() {
 
 		createEcdsaP256Key()
@@ -691,7 +649,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void generateHmacShouldCreateHmacForRotatedKey() {
 
 		VaultHmacRequest request = VaultHmacRequest.builder()
@@ -708,7 +665,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void generateHmacWithCustomAlgorithmShouldCreateHmac() {
 
 		VaultHmacRequest request = VaultHmacRequest.builder()
@@ -737,7 +693,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void signShouldCreateSignature() {
 
 		createEcdsaP256Key()
@@ -748,7 +703,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void signShouldCreateSignatureUsingEd25519() {
 
 		VaultTransitKeyCreationRequest keyCreationRequest = VaultTransitKeyCreationRequest.ofKeyType("ed25519");
@@ -771,7 +725,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void signWithCustomAlgorithmShouldCreateSignature() {
 
 		VaultSignRequest request = VaultSignRequest.builder()
@@ -786,7 +739,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void shouldVerifyValidSignature() {
 
 		Plaintext plaintext = Plaintext.of("hello-world");
@@ -800,7 +752,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void shouldVerifyValidHmac() {
 
 		Plaintext plaintext = Plaintext.of("hello-world");
@@ -815,7 +766,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(SIGN_VERIFY_INTRODUCED_IN_VERSION)
 	void shouldVerifyValidSignatureWithCustomAlgorithm() {
 
 		Plaintext plaintext = Plaintext.of("hello-world");
@@ -839,7 +789,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldCreateNewExportableKey() {
 
 		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
@@ -858,7 +807,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldCreateNotExportableKeyByDefault() {
 
 		reactiveTransitOperations.createKey("myKey")
@@ -872,7 +820,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldExportEncryptionKey() {
 
 		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
@@ -891,7 +838,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldNotAllowExportSigningKey() {
 
 		VaultTransitKeyCreationRequest vaultTransitKeyCreationRequest = VaultTransitKeyCreationRequest.builder()
@@ -906,7 +852,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(KEY_EXPORT_INTRODUCED_IN_VERSION)
 	void shouldExportEcDsaKey() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
@@ -924,7 +869,6 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 	}
 
 	@Test
-	@RequiresVaultVersion(ED25519_INTRODUCED_IN_VERSION)
 	void shouldExportEdKey() {
 
 		VaultTransitKeyCreationRequest request = VaultTransitKeyCreationRequest.builder()
