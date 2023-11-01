@@ -366,8 +366,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	}
 
 	private OneShotTrigger createTrigger(TokenWrapper tokenWrapper) {
-
-		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime((LoginToken) tokenWrapper.getToken()));
+		return new OneShotTrigger(getRefreshTrigger().nextExecution((LoginToken) tokenWrapper.getToken()));
 	}
 
 	private static String format(String message, RuntimeException e) {

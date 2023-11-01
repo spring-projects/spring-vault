@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.authentication;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -180,19 +181,20 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 		private final AtomicBoolean fired = new AtomicBoolean();
 
-		private final Date nextExecutionTime;
+		@Nullable
+		private final Instant nextExecutionTime;
 
-		public OneShotTrigger(Date nextExecutionTime) {
+		public OneShotTrigger(@Nullable Date nextExecutionTime) {
+			this(nextExecutionTime != null ? nextExecutionTime.toInstant() : null);
+		}
+
+		public OneShotTrigger(@Nullable Instant nextExecutionTime) {
 			this.nextExecutionTime = nextExecutionTime;
 		}
 
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
-			if (this.fired.compareAndSet(false, true)) {
-				return this.nextExecutionTime.toInstant();
-			}
-
-			return null;
+			return this.fired.compareAndSet(false, true) ? this.nextExecutionTime : null;
 		}
 
 	}
@@ -207,9 +209,25 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		 * Determine the next execution time according to the given trigger context.
 		 * @param loginToken login token encapsulating renewability and lease duration.
 		 * @return the next execution time as defined by the trigger, or {@code null} if
-		 * the trigger won't fire anymore
+		 * the trigger won't fire anymore.
+		 * @deprecated since 3.1, use {@link #nextExecution(LoginToken) instead}.
 		 */
-		Date nextExecutionTime(LoginToken loginToken);
+		@Nullable
+		@Deprecated(since = "3.1")
+		default Date nextExecutionTime(LoginToken loginToken) {
+			Instant instant = nextExecution(loginToken);
+			return instant != null ? Date.from(instant) : null;
+		}
+
+		/**
+		 * Determine the next execution time according to the given trigger context.
+		 * @param loginToken login token encapsulating renewability and lease duration.
+		 * @return the next execution time as defined by the trigger, or {@code null} if
+		 * the trigger won't fire anymore.
+		 * @since 3.1
+		 */
+		@Nullable
+		Instant nextExecution(LoginToken loginToken);
 
 		/**
 		 * Returns the minimum TTL duration to consider a token valid after renewal.
@@ -230,6 +248,8 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	 * @since 1.0.1
 	 */
 	public static class FixedTimeoutRefreshTrigger implements RefreshTrigger {
+
+		private static final Clock CLOCK = Clock.systemDefaultZone();
 
 		private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
@@ -289,12 +309,12 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		}
 
 		@Override
-		public Date nextExecutionTime(LoginToken loginToken) {
+		public Instant nextExecution(LoginToken loginToken) {
 
 			long milliseconds = Math.max(ONE_SECOND.toMillis(),
 					loginToken.getLeaseDuration().toMillis() - this.duration.toMillis());
 
-			return new Date(System.currentTimeMillis() + milliseconds);
+			return CLOCK.instant().plusMillis(milliseconds);
 		}
 
 		@Override

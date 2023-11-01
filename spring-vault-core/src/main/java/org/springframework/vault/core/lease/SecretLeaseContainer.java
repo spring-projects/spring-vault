@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
@@ -1070,6 +1069,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 */
 	static class OneShotTrigger implements Trigger {
 
+		private static final Clock CLOCK = Clock.systemDefaultZone();
+
 		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
 			.newUpdater(OneShotTrigger.class, "status");
 
@@ -1089,11 +1090,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		@Nullable
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
-			if (UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED)) {
-				return Instant.ofEpochMilli(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(this.seconds));
-			}
-
-			return null;
+			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? CLOCK.instant().plusSeconds(this.seconds)
+					: null;
 		}
 
 	}

@@ -395,7 +395,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 	private OneShotTrigger createTrigger(VaultToken token) {
 
-		return new OneShotTrigger(getRefreshTrigger().nextExecutionTime((LoginToken) token));
+		return new OneShotTrigger(getRefreshTrigger().nextExecution((LoginToken) token));
 	}
 
 	private static Mono<VaultToken> augmentWithSelfLookup(WebClient webClient, VaultToken token) {

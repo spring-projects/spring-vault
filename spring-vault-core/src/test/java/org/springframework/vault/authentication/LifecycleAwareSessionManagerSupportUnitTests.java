@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -37,9 +38,8 @@ class LifecycleAwareSessionManagerSupportUnitTests {
 
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5, TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo".toCharArray(), Duration.ofMinutes(1)));
-		assertThat(nextExecutionTime).isBetween(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(52)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(56)));
+		Instant nextExecutionTime = trigger.nextExecution(LoginToken.of("foo".toCharArray(), Duration.ofMinutes(1)));
+		assertThat(nextExecutionTime).isBetween(Instant.now().plusSeconds(52), Instant.now().plusSeconds(56));
 	}
 
 	@Test
@@ -47,9 +47,8 @@ class LifecycleAwareSessionManagerSupportUnitTests {
 
 		FixedTimeoutRefreshTrigger trigger = new FixedTimeoutRefreshTrigger(5, TimeUnit.SECONDS);
 
-		Date nextExecutionTime = trigger.nextExecutionTime(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)));
-		assertThat(nextExecutionTime).isBetween(new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(0)),
-				new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(2)));
+		Instant nextExecutionTime = trigger.nextExecution(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)));
+		assertThat(nextExecutionTime).isBetween(Instant.now(), Instant.now().plusSeconds(2));
 	}
 
 }
