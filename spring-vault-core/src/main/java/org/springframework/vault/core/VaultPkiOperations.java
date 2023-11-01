@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.vault.support.VaultSignCertificateRequestResponse;
  * provide the verification functionality.
  *
  * @author Mark Paluch
+ * @author Nanne Baars
  * @see <a href=
  * "https://www.vaultproject.io/docs/secrets/pki/index.html">https://www.vaultproject.io/docs/secrets/pki/index.html</a>
  */
@@ -66,10 +67,10 @@ public interface VaultPkiOperations {
 	 * @param certificateRequest must not be {@literal null}.
 	 * @return the {@link VaultCertificateResponse} containing a
 	 * {@link org.springframework.vault.support.Certificate} .
-	 * @since 2.0
 	 * @see <a href=
 	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#pki-issue">POST
 	 * /pki/sign/[role name]</a>
+	 * @since 2.0
 	 */
 	VaultSignCertificateRequestResponse signCertificateRequest(String roleName, String csr,
 			VaultCertificateRequest certificateRequest) throws VaultException;
@@ -79,10 +80,10 @@ public interface VaultPkiOperations {
 	 * standard method of revoking using Vault lease IDs. A successful revocation will
 	 * rotate the CRL
 	 * @param serialNumber must not be empty or {@literal null}.
-	 * @since 2.0
 	 * @see <a href=
 	 * "https://www.vaultproject.io/docs/secrets/pki/index.html#revoke-certificate">POST
 	 * /pki/revoke</a>
+	 * @since 2.0
 	 */
 	void revoke(String serialNumber) throws VaultException;
 
@@ -96,43 +97,56 @@ public interface VaultPkiOperations {
 	 * is {@literal null}.
 	 * @return {@link java.io.InputStream} containing the encoded CRL or {@literal null}
 	 * if Vault responds with 204 No Content.
-	 * @since 2.0
 	 * @see <a href="https://www.vaultproject.io/api/secret/pki/index.html#read-crl">GET
 	 * /pki/crl</a>
+	 * @since 2.0
 	 */
 	@Nullable
 	InputStream getCrl(Encoding encoding) throws VaultException;
 
-	enum Encoding {
-
-		DER, PEM,
-
-	}
-
 	/**
-	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
-	 * issuer.
+	 * Retrieves the specified issuer's certificate. Includes the full {@code ca_chain} of
+	 * the issuer.
 	 * @param issuer reference to an existing issuer, either by Vault-generated
-	 * identifier, or the name assigned to an issuer. Pass the literal string 'default' to
-	 * refer to the currently configured issuer.
+	 * identifier, or the name assigned to an issuer. Pass the literal string
+	 * {@code default} to refer to the currently configured issuer.
 	 * @return the {@link VaultIssuerCertificateRequestResponse} containing a
 	 * {@link org.springframework.vault.support.Certificate}
 	 * @see <a href=
 	 * "https://www.vaultproject.io/api/secret/pki/#read-issuer-certificate">GET *
 	 * /pki/issuer/:issuer_ref/json</a>
-	 *
+	 * @since 3.1
 	 */
 	VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException;
 
 	/**
-	 * Retrieves the specified issuer's certificate. Includes the full ca_chain of the
-	 * issuer.
-	 * @return {@link java.io.InputStream} containing the encoded certificate or
-	 * {@literal null}
+	 * Retrieves the specified issuer's certificate. Includes the full {@code ca_chain} of
+	 * the issuer.
+	 * @param issuer reference to an existing issuer, either by Vault-generated
+	 * identifier, or the name assigned to an issuer. Pass the literal string
+	 * {@code default} to refer to the currently configured issuer.
+	 * @param encoding encoding to use.
+	 * @return {@link java.io.InputStream} containing the encoded certificate.
 	 * @see <a href=
 	 * "https://www.vaultproject.io/api/secret/pki/#read-issuer-certificate">GET
 	 * /pki/issuer/:issuer_ref/{der, pem}</a>
+	 * @since 3.1
 	 */
 	InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException;
+
+	enum Encoding {
+
+		/**
+		 * DER (Distinguished Encoding Rules) format in its binary representation, see
+		 * X.690.
+		 */
+		DER,
+
+		/**
+		 * Privacy-Enhanced Mail (PEM) format in base64.
+		 */
+		PEM;
+
+	}
 
 }

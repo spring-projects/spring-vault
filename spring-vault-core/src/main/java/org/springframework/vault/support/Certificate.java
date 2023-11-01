@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2022 the original author or authors.
+ * Copyright 2017-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,9 +37,9 @@ import org.springframework.vault.VaultException;
  * encoded. Certificates can be obtained as {@link X509Certificate}.
  *
  * @author Mark Paluch
- * @since 2.0
  * @see #getX509Certificate()
  * @see #getIssuingCaCertificate()
+ * @since 2.0
  */
 public class Certificate {
 
@@ -50,17 +51,18 @@ public class Certificate {
 
 	private final List<String> caChain;
 
-	private final Long revocationTime;
+	@Nullable
+	private final Instant revocationTime;
 
 	Certificate(@JsonProperty("serial_number") String serialNumber, @JsonProperty("certificate") String certificate,
 			@JsonProperty("issuing_ca") String issuingCaCertificate, @JsonProperty("ca_chain") List<String> caChain,
-			@JsonProperty("revocation_time") Long revocationTime) {
+			@Nullable @JsonProperty("revocation_time") Long revocationTime) {
 
 		this.serialNumber = serialNumber;
 		this.certificate = certificate;
 		this.issuingCaCertificate = issuingCaCertificate;
 		this.caChain = caChain;
-		this.revocationTime = revocationTime;
+		this.revocationTime = revocationTime != null ? Instant.ofEpochMilli(revocationTime * 1000) : null;
 	}
 
 	/**
@@ -87,7 +89,8 @@ public class Certificate {
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param caChain empty list allowed
-	 * @return the {@link Certificate}
+	 * @return the {@link Certificate}.
+	 * @since 3.1
 	 */
 	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
 			List<String> caChain) {
@@ -107,8 +110,9 @@ public class Certificate {
 	 * @param certificate must not be empty or {@literal null}.
 	 * @param issuingCaCertificate must not be empty or {@literal null}.
 	 * @param caChain empty list allowed
-	 * @param revocationTime revocation time, must not be {@literal null}
-	 * @return the {@link Certificate}
+	 * @param revocationTime revocation time, must not be {@literal null}.
+	 * @return the {@link Certificate}.
+	 * @since 3.1
 	 */
 	public static Certificate of(String serialNumber, String certificate, String issuingCaCertificate,
 			List<String> caChain, Long revocationTime) {
@@ -250,8 +254,13 @@ public class Certificate {
 		return certificates;
 	}
 
-	public @Nullable Long getRevocationTime() {
+	@Nullable
+	public Instant getRevocationTime() {
 		return this.revocationTime;
+	}
+
+	public boolean isRevoked() {
+		return this.revocationTime != null;
 	}
 
 }

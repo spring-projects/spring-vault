@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Request for a Certificate.
@@ -39,6 +42,13 @@ public class VaultCertificateRequest {
 	 * The CN of the certificate. Should match the host name.
 	 */
 	private final String commonName;
+
+	/**
+	 * If {@literal true}, the given common name will not be included in DNS or Email
+	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
+	 * email address, but is instead some human-readable identifier.
+	 */
+	private final boolean excludeCommonNameFromSubjectAltNames;
 
 	/**
 	 * Alternate CN names for additional host names.
@@ -59,6 +69,7 @@ public class VaultCertificateRequest {
 	 * Specifies custom OID/UTF8-string Subject Alternative Names. These must match values
 	 * specified on the role in {@literal allowed_other_sans}. The format is the same as
 	 * OpenSSL: {@literal <oid>;<type>:<value>} where the only current valid type is UTF8.
+	 *
 	 * @since 2.4
 	 */
 	private final List<String> otherSans;
@@ -70,12 +81,21 @@ public class VaultCertificateRequest {
 	private final Duration ttl;
 
 	/**
+	 * Set the Not After field of the certificate with specified date value. The value
+	 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K end
+	 * date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
+	 */
+	@Nullable
+	private final Instant notAfter;
+
+	/**
 	 * Specifies the format for returned data. Can be {@literal pem}, {@literal der}, or
 	 * {@literal pem_bundle}; defaults to {@literal der} (in vault api the default is
 	 * {@literal pem}). If der, the output is base64 encoded. If {@literal pem_bundle},
 	 * the certificate field will contain the private key and certificate, concatenated;
 	 * if the issuing CA is not a Vault-derived self-signed root, this will be included as
 	 * well.
+	 *
 	 * @since 2.4
 	 */
 	private final String format;
@@ -85,18 +105,11 @@ public class VaultCertificateRequest {
 	 * which will return either base64-encoded DER or PEM-encoded DER, depending on the
 	 * value of {@literal format}. The other option is {@literal pkcs8} which will return
 	 * the key marshalled as PEM-encoded PKCS8.
+	 *
 	 * @since 2.4
 	 */
 	@Nullable
 	private final String privateKeyFormat;
-
-	/**
-	 * Set the Not After field of the certificate with specified date value. The value
-	 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K end
-	 * date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
-	 */
-	@Nullable
-	private Instant notAfter;
 
 	/**
 	 * Specifies the comma-separated list of requested User ID (OID
@@ -104,30 +117,23 @@ public class VaultCertificateRequest {
 	 * This field is validated against allowed_user_ids on the role.
 	 */
 	@Nullable
-	private String userIds;
+	private final String userIds;
 
-	/**
-	 * If {@literal true}, the given common name will not be included in DNS or Email
-	 * Subject Alternate Names (as appropriate). Useful if the CN is not a hostname or
-	 * email address, but is instead some human-readable identifier.
-	 */
-	private final boolean excludeCommonNameFromSubjectAltNames;
-
-	private VaultCertificateRequest(String commonName, List<String> altNames, List<String> ipSubjectAltNames,
-			List<String> uriSubjectAltNames, List<String> otherSans, @Nullable Duration ttl, String format,
-			@Nullable String privateKeyFormat, boolean excludeCommonNameFromSubjectAltNames, @Nullable Instant notAfter,
-			@Nullable String userIds) {
+	private VaultCertificateRequest(String commonName, boolean excludeCommonNameFromSubjectAltNames,
+			List<String> altNames, List<String> ipSubjectAltNames, List<String> uriSubjectAltNames,
+			List<String> otherSans, @Nullable Duration ttl, @Nullable Instant notAfter, String format,
+			@Nullable String privateKeyFormat, @Nullable String userIds) {
 
 		this.commonName = commonName;
+		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
 		this.altNames = altNames;
 		this.ipSubjectAltNames = ipSubjectAltNames;
 		this.uriSubjectAltNames = uriSubjectAltNames;
 		this.otherSans = otherSans;
 		this.ttl = ttl;
-		this.excludeCommonNameFromSubjectAltNames = excludeCommonNameFromSubjectAltNames;
+		this.notAfter = notAfter;
 		this.format = format;
 		this.privateKeyFormat = privateKeyFormat;
-		this.notAfter = notAfter;
 		this.userIds = userIds;
 	}
 
@@ -237,6 +243,18 @@ public class VaultCertificateRequest {
 			Assert.hasText(commonName, "Common name must not be empty");
 
 			this.commonName = commonName;
+			return this;
+		}
+
+		/**
+		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
+		 * appropriate). Useful if the CN is not a hostname or email address, but is
+		 * instead some human-readable identifier.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 */
+		public VaultCertificateRequestBuilder excludeCommonNameFromSubjectAltNames() {
+
+			this.excludeCommonNameFromSubjectAltNames = true;
 			return this;
 		}
 
@@ -382,6 +400,21 @@ public class VaultCertificateRequest {
 		}
 
 		/**
+		 * Set the {@code Not After} field of the certificate with specified date value.
+		 * Supports the Y10K end date for IEEE 802.1AR-2018 standard devices,
+		 * 9999-12-31T23:59:59Z.
+		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 3.1
+		 */
+		public VaultCertificateRequestBuilder notAfter(Instant notAfter) {
+
+			Assert.notNull(notAfter, "Not after must not be null");
+
+			this.notAfter = Instant.from(notAfter).truncatedTo(ChronoUnit.SECONDS);
+			return this;
+		}
+
+		/**
 		 * Configure the certificate format.
 		 * @param format the certificate format to use. Can be {@code pem}, {@code der},
 		 * or {@code pem_bundle}
@@ -412,28 +445,17 @@ public class VaultCertificateRequest {
 		}
 
 		/**
-		 * Exclude the given common name from DNS or Email Subject Alternate Names (as
-		 * appropriate). Useful if the CN is not a hostname or email address, but is
-		 * instead some human-readable identifier.
+		 * Specifies the comma-separated list of requested User ID (OID
+		 * 0.9.2342.19200300.100.1.1) Subject values to be placed on the signed
+		 * certificate. This field is validated against allowed_user_ids on the role.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 3.1
 		 */
-		public VaultCertificateRequestBuilder excludeCommonNameFromSubjectAltNames() {
+		public VaultCertificateRequestBuilder userId(String userId) {
 
-			this.excludeCommonNameFromSubjectAltNames = true;
-			return this;
-		}
+			Assert.hasText(userId, "User ID must not be empty or null");
 
-		/**
-		 * Set the Not After field of the certificate with specified date value. The value
-		 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K
-		 * end date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
-		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
-		 */
-		public VaultCertificateRequestBuilder notAfter(Instant notAfter) {
-
-			Assert.notNull(notAfter, "Not after must not be null");
-
-			this.notAfter = Instant.from(notAfter).truncatedTo(ChronoUnit.SECONDS);
+			this.userIds = userId;
 			return this;
 		}
 
@@ -442,12 +464,13 @@ public class VaultCertificateRequest {
 		 * 0.9.2342.19200300.100.1.1) Subject values to be placed on the signed
 		 * certificate. This field is validated against allowed_user_ids on the role.
 		 * @return {@code this} {@link VaultCertificateRequestBuilder}.
+		 * @since 3.1
 		 */
-		public VaultCertificateRequestBuilder userIds(String userIds) {
+		public VaultCertificateRequestBuilder userIds(Collection<String> userIds) {
 
-			Assert.hasText(userIds, "User IDs must not be empty or null");
+			Assert.notNull(userIds, "User IDs must not be null");
 
-			this.userIds = userIds;
+			this.userIds = StringUtils.collectionToCommaDelimitedString(userIds);
 			return this;
 		}
 
@@ -510,9 +533,9 @@ public class VaultCertificateRequest {
 					otherSans = java.util.Collections.unmodifiableList(new ArrayList<>(this.otherSans));
 			}
 
-			return new VaultCertificateRequest(this.commonName, altNames, ipSubjectAltNames, uriSubjectAltNames,
-					otherSans, this.ttl, this.format, this.privateKeyFormat, this.excludeCommonNameFromSubjectAltNames,
-					notAfter, userIds);
+			return new VaultCertificateRequest(this.commonName, this.excludeCommonNameFromSubjectAltNames, altNames,
+					ipSubjectAltNames, uriSubjectAltNames, otherSans, this.ttl, notAfter, this.format,
+					this.privateKeyFormat, userIds);
 		}
 
 		private static <E> List<E> toList(Iterable<E> iter) {

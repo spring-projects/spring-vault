@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 the original author or authors.
+ * Copyright 2016-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@ package org.springframework.vault.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -165,12 +167,14 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 	@Override
 	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
+
 		Assert.hasText(issuer, "Issuer must not be empty");
 		Assert.notNull(encoding, "Encoding must not be null");
 
 		return this.vaultOperations.doWithSession(restOperations -> {
 
-			String requestPath = encoding == Encoding.DER ? "{path}/issuer/{issuer}/der" : "{path}/issuer/{issuer}/pem";
+			String requestPath = String.format("{path}/issuer/{issuer}/%s", encoding.name().toLowerCase(Locale.ROOT));
+
 			try {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,
 						issuer);
@@ -224,7 +228,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			.to("exclude_cn_from_sans", request);
 		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
 		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
-		mapper.from(certificateRequest::getNotAfter).whenHasText().as(i -> i.toString()).to("not_after", request);
+		mapper.from(certificateRequest::getNotAfter).whenHasText().as(Instant::toString).to("not_after", request);
 		mapper.from(certificateRequest::getUserIds).whenHasText().to("user_ids", request);
 
 		return request;
