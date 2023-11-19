@@ -9,7 +9,7 @@ asciidoc:
     attribute-missing: 'warn'
     include-xml-namespaces: false
     self-docs-root: https://docs.spring.io/spring-vault/reference/
-    spring-data-commons-docs-url: https://docs.spring.io/spring-data-commons/reference
+    spring-data-commons-docs-url: https://docs.spring.io/spring-data/commons/reference
     spring-data-commons-javadoc-base: https://docs.spring.io/spring-data/commons/docs/current/api/
     spring-framework-docs: https://docs.spring.io/spring-framework/reference/{springversionshort}
     springjavadocurl: https://docs.spring.io/spring-framework/docs/${spring.version}/javadoc-api
