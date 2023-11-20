@@ -516,7 +516,7 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 		assertThat(two).isNotNull();
 
 		this.reactiveTransitOperations.decrypt("myKey", Arrays.asList(one, two))
-			.zipWith(Flux.merge(this.reactiveTransitOperations.decrypt("myKey", one),
+			.zipWith(Flux.concat(this.reactiveTransitOperations.decrypt("myKey", one),
 					this.reactiveTransitOperations.decrypt("myKey", two)))
 			.as(StepVerifier::create)
 			.assertNext(it -> {
@@ -860,7 +860,7 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 			.build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
-			.thenMany(Flux.merge(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
+			.thenMany(Flux.concat(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
 					this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.SIGNING_KEY)))
 			.as(StepVerifier::create)
 			.assertNext(hmacKey -> assertThat(hmacKey.getKeys()).isNotEmpty())
@@ -877,7 +877,7 @@ public class ReactiveVaultTransitIntegrationTests extends IntegrationTestSupport
 			.build();
 
 		this.reactiveTransitOperations.createKey("myKey", request)
-			.thenMany(Flux.merge(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
+			.thenMany(Flux.concat(this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.HMAC_KEY),
 					this.reactiveTransitOperations.exportKey("myKey", TransitKeyType.SIGNING_KEY)))
 			.as(StepVerifier::create)
 			.assertNext(hmacKey -> assertThat(hmacKey.getKeys()).isNotEmpty())
