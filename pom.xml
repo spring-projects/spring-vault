@@ -39,7 +39,7 @@
 		<mockito-core.version>5.6.0</mockito-core.version>
 		<netty.version>4.1.100.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<spring.version>6.1.0-RC1</spring.version>
+		<spring.version>6.1.0</spring.version>
 		<spring-data-bom.version>2023.1.0</spring-data-bom.version>
 		<spring-security-bom.version>6.2.0-RC1</spring-security-bom.version>
 		<reactor.version>2023.0.0-RC1</reactor.version>
@@ -687,7 +687,7 @@
 			<id>springNext</id>
 
 			<properties>
-				<spring.version>6.1.0-SNAPSHOT</spring.version>
+				<spring.version>6.1.1-SNAPSHOT</spring.version>
 			</properties>
 
 			<repositories>
