@@ -43,8 +43,13 @@ jobs:
           package.json
           package-lock.json
         key: ${{ runner.os }}-nodejs-${{ hashFiles('pom.xml') }}
+    - name: Cache Maven
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-maven
     - name: Run Antora
-      run: ./mvnw -B antora -Dantora.playbook=playbooks/${{ github.event.inputs.module }}.yml
+      run: ./mvnw -B antora
     - name: Publish Docs
       uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.11
       with:
@@ -54,7 +59,7 @@ jobs:
         docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
         site-path: target/antora/site
     - name: Bust Cloudflare Cache
-      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.11
+      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.12
       with:
         context-root: spring-vault
         cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}

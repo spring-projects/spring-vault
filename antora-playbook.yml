@@ -1,13 +1,14 @@
 antora:
   extensions:
-  - '@springio/antora-extensions/partial-build-extension'
-  - '@springio/antora-extensions/static-page-extension'
-  - require: '@springio/antora-extensions/latest-version-extension'
-  - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
-  - '@antora/collector-extension'
-  - '@antora/atlas-extension'
-  - require: '@springio/antora-extensions/root-component-extension'
-    root_component_name: 'vault'
+    - '@springio/antora-extensions/partial-build-extension'
+    - '@springio/antora-extensions/static-page-extension'
+    - require: '@springio/antora-extensions/latest-version-extension'
+    - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
+    - '@antora/collector-extension'
+    - 'antora/lib/version-fix.js'
+    - '@antora/atlas-extension'
+    - require: '@springio/antora-extensions/root-component-extension'
+      root_component_name: 'vault'
 site:
   title: Spring Vault
   url: https://docs.spring.io/spring-vault/reference
@@ -30,17 +31,17 @@ asciidoc:
     hide-uri-scheme: '@'
     tabs-sync-option: '@'
   extensions:
-  - '@asciidoctor/tabs'
-  - '@springio/asciidoctor-extensions'
+    - '@asciidoctor/tabs'
+    - '@springio/asciidoctor-extensions'
 urls:
   latest_version_segment_strategy: redirect:to
   latest_version_segment: ''
   redirect_facility: httpd
-runtime:
-  log:
-    failure_level: warn
-    format: pretty
 ui:
   bundle:
     url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.7/ui-bundle.zip
     snapshot: true
+runtime:
+  log:
+    failure_level: warn
+    format: pretty
