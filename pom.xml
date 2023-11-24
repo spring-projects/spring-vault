@@ -601,15 +601,13 @@
 						<doclint>none</doclint>
 						<links>
 							<link>
-								https://docs.spring.io/spring/docs/current/javadoc-api
+								https://docs.spring.io/spring-framework/docs/current/javadoc-api
 							</link>
 							<link>
 								https://docs.spring.io/spring-data/commons/docs/current/api
 							</link>
 							<link>
 								https://docs.spring.io/spring-data/keyvalue/docs/current/api
-							</link>
-							<link>https://docs.spring.io/spring/docs/current/javadoc-api
 							</link>
 							<link>
 								https://docs.spring.io/spring-security/site/docs/current/api
