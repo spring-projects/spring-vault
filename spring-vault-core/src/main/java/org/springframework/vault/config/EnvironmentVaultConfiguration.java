@@ -189,6 +189,11 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	private @Nullable ApplicationContext applicationContext;
 
+	private static final String[] SEARCH_PATH = { "", "spring.cloud." };
+
+	public EnvironmentVaultConfiguration() {
+	}
+
 	@Override
 	public RestOperations restOperations() {
 
@@ -445,22 +450,31 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	private List<String> getPropertyAsList(String key) {
 
-		String val = getEnvironment().getProperty(key);
+		String val = getProperty(key);
 
 		if (val == null) {
 			return Collections.emptyList();
 		}
 
-		return Arrays.stream(val.split(",")).map(String::trim).collect(Collectors.toList());
+		return Arrays.stream(val.split(",")).map(String::trim).toList();
 	}
 
 	@Nullable
 	private String getProperty(String key) {
-		return getEnvironment().getProperty(key);
+		final String val = getProperty(key, "", SEARCH_PATH);
+		return (!val.isEmpty()) ? val : null;
 	}
 
-	private String getProperty(String key, String defaultValue) {
-		return getEnvironment().getProperty(key, defaultValue);
+	private String getProperty(String key, @Nullable String defaultValue) {
+		return getProperty(key, defaultValue, SEARCH_PATH);
+	}
+
+	private String getProperty(String key, String defaultValue, String[] probes) {
+		return Arrays.stream(probes)
+			.map(x -> getEnvironment().getProperty(x + key, String.class, defaultValue))
+			.filter(x -> x == null || !x.isEmpty())
+			.findAny()
+			.orElse(defaultValue);
 	}
 
 	private URI getUri(String key, URI defaultValue) {

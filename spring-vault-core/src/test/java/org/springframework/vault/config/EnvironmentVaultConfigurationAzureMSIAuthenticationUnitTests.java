@@ -51,7 +51,6 @@ class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 
 	@Test
 	void shouldConfigureAuthentication(@Autowired EnvironmentVaultConfiguration configuration) {
-
 		ClientAuthentication clientAuthentication = configuration.clientAuthentication();
 
 		assertThat(clientAuthentication).isInstanceOf(AzureMsiAuthentication.class);

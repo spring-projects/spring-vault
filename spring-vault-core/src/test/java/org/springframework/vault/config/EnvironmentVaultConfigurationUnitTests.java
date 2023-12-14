@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ryan Gow
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.token=my-token",
+@TestPropertySource(properties = { "spring.cloud.vault.uri=https://localhost:8123", "vault.token=my-token",
 		"vault.ssl.key-store-password=key store password", "vault.ssl.trust-store-password=trust store password" })
 class EnvironmentVaultConfigurationUnitTests {
 
