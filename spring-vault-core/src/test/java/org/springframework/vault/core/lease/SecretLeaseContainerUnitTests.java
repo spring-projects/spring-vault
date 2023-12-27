@@ -631,6 +631,27 @@ class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
+	void shouldRevokeSecretsOnDestroy() throws Exception {
+
+		VaultResponse secrets = new VaultResponse();
+		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+		secrets.setLeaseId("1234");
+		secrets.setLeaseDuration(1000);
+
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(secrets);
+
+		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
+		this.secretLeaseContainer.start();
+		this.secretLeaseContainer.stop();
+
+		this.secretLeaseContainer.destroy();
+
+		verify(this.leaseListenerAdapter).onLeaseEvent(any(SecretLeaseCreatedEvent.class));
+		verify(this.leaseListenerAdapter).onLeaseEvent(any(BeforeSecretLeaseRevocationEvent.class));
+		verify(this.leaseListenerAdapter).onLeaseEvent(any(AfterSecretLeaseRevocationEvent.class));
+	}
+
+	@Test
 	void shouldRequestRotatingGenericSecrets() {
 
 		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
