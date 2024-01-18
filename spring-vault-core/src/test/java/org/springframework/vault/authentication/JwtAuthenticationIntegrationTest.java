@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.vault.authentication.JwtAuthentication.DEFAULT_JWT_AUTHENTICATION_PATH;
 
 /**
- * Integration tests for {@link KubernetesAuthentication} using
+ * Integration tests for {@link JwtAuthentication} using
  * {@link AuthenticationStepsExecutor}.
  *
  * @author Nanne Baars
