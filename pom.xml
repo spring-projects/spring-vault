@@ -31,7 +31,7 @@
 		<httpcore5.version>5.2.4</httpcore5.version>
 		<jackson-databind.version>2.15.3</jackson-databind.version>
 		<jetty-reactive-httpclient.version>4.0.1</jetty-reactive-httpclient.version>
-		<json-path.version>2.8.0</json-path.version>
+		<json-path.version>2.9.0</json-path.version>
 		<junit.version>5.10.1</junit.version>
 		<kotlin.version>1.8.22</kotlin.version>
 		<kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
