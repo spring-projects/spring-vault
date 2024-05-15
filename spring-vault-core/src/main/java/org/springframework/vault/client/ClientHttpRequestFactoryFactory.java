@@ -328,6 +328,7 @@ public class ClientHttpRequestFactoryFactory {
 
 			RequestConfig requestConfig = RequestConfig.custom()
 				.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
+				.setConnectionRequestTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
 				.setAuthenticationEnabled(true) //
 				.setRedirectsEnabled(true)
 				.build();
