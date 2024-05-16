@@ -47,11 +47,11 @@ import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.client5.http.ssl.HttpsSupport;
@@ -298,6 +298,28 @@ public class ClientHttpRequestFactoryFactory {
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
+			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
+
+			ConnectionConfig connectionConfig = ConnectionConfig.custom()
+				.setConnectTimeout(connectTimeout) //
+				.setSocketTimeout(readTimeout) //
+				.build();
+
+			RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectionRequestTimeout(connectTimeout)
+				.setResponseTimeout(readTimeout)
+				.setAuthenticationEnabled(true) //
+				.setRedirectsEnabled(true)
+				.build();
+
+			PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder //
+				.create()
+				.setDefaultConnectionConfig(connectionConfig) //
+				.setDefaultSocketConfig(SocketConfig.custom() //
+					.setSoTimeout(readTimeout)
+					.build());
+
 			if (hasSslConfiguration(sslConfiguration)) {
 
 				SSLContext sslContext = getSSLContext(sslConfiguration);
@@ -316,24 +338,12 @@ public class ClientHttpRequestFactoryFactory {
 
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
 						enabledProtocols, enabledCipherSuites, HttpsSupport.getDefaultHostnameVerifier());
-				PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder //
-					.create()
-					.setSSLSocketFactory(sslSocketFactory) //
-					.setDefaultSocketConfig(SocketConfig.custom() //
-						.setSoTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-						.build()) //
-					.build(); //
-				httpClientBuilder.setConnectionManager(connectionManager);
+				connectionManagerBuilder.setSSLSocketFactory(sslSocketFactory);
 			}
 
-			RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
-				.setConnectionRequestTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-				.setAuthenticationEnabled(true) //
-				.setRedirectsEnabled(true)
-				.build();
-
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
+
 			return httpClientBuilder;
 		}
 
