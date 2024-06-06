@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -37,6 +38,11 @@ public class AwsEc2AuthenticationOptions {
 
 	public static final URI DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI = URI
 		.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
+
+	/**
+	 * @since 3.2
+	 */
+	public static final URI DEFAULT_IMDSV2_TOKEN_URI = URI.create("http://169.254.169.254/latest/api/token");
 
 	public static final String DEFAULT_AWS_AUTHENTICATION_PATH = "aws-ec2";
 
@@ -68,16 +74,39 @@ public class AwsEc2AuthenticationOptions {
 	 */
 	private final Nonce nonce;
 
+	/**
+	 * IMDSv2 token TTL.
+	 * @since 3.2
+	 */
+	private final Duration metadataTokenTtl;
+
+	/**
+	 * {@link URI} to request a token for the AWS EC2 Instance Metadata service v2.
+	 * @since 3.2
+	 */
+	private final URI metadataTokenRequestUri;
+
+	/**
+	 * Metadata service version.
+	 * @since 3.2
+	 */
+	private final InstanceMetadataServiceVersion version;
+
 	private AwsEc2AuthenticationOptions() {
-		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "", Nonce.generated());
+		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "", Nonce.generated(),
+				Duration.ofMinutes(1), DEFAULT_IMDSV2_TOKEN_URI, InstanceMetadataServiceVersion.V1);
 	}
 
-	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, @Nullable String role, Nonce nonce) {
+	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, @Nullable String role, Nonce nonce,
+			Duration metadataTokenTtl, URI metadataTokenRequestUri, InstanceMetadataServiceVersion version) {
 
 		this.path = path;
 		this.identityDocumentUri = identityDocumentUri;
 		this.role = role;
 		this.nonce = nonce;
+		this.metadataTokenTtl = metadataTokenTtl;
+		this.metadataTokenRequestUri = metadataTokenRequestUri;
+		this.version = version;
 	}
 
 	/**
@@ -117,6 +146,30 @@ public class AwsEc2AuthenticationOptions {
 	}
 
 	/**
+	 * @return the configured {@link InstanceMetadataServiceVersion}.
+	 * @since 3.2
+	 */
+	public InstanceMetadataServiceVersion getVersion() {
+		return version;
+	}
+
+	/**
+	 * @return the configured IMDSv2 token TTL.
+	 * @since 3.2
+	 */
+	public Duration getMetadataTokenTtl() {
+		return metadataTokenTtl;
+	}
+
+	/**
+	 * @return the {@link URI} to the AWS EC2 Metadata Service to obtain IMDSv2 tokens.
+	 * @since 3.2
+	 */
+	public URI getMetadataTokenRequestUri() {
+		return this.metadataTokenRequestUri;
+	}
+
+	/**
 	 * Builder for {@link AwsEc2AuthenticationOptionsBuilder}.
 	 */
 	public static class AwsEc2AuthenticationOptionsBuilder {
@@ -129,6 +182,12 @@ public class AwsEc2AuthenticationOptions {
 		private String role;
 
 		private Nonce nonce = Nonce.generated();
+
+		private Duration metadataTokenTtl = Duration.ofMinutes(1);
+
+		private URI metadataTokenRequestUri = DEFAULT_IMDSV2_TOKEN_URI;
+
+		private InstanceMetadataServiceVersion version = InstanceMetadataServiceVersion.V1;
 
 		AwsEc2AuthenticationOptionsBuilder() {
 		}
@@ -189,6 +248,51 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 		/**
+		 * Configure the Instance Service Metadata v2 Token TTL. Defaults to 1 minute.
+		 * @param ttl must not be {@literal null}.
+		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @since 3.2
+		 */
+		public AwsEc2AuthenticationOptionsBuilder metadataTokenTtl(Duration ttl) {
+
+			Assert.notNull(ttl, "Duration must not be null");
+			Assert.isTrue(!ttl.isNegative() && !ttl.isZero(), "Duration must not be zero or negative");
+
+			this.metadataTokenTtl = ttl;
+			return this;
+		}
+
+		/**
+		 * Configure the Identity Metadata token request {@link URI}.
+		 * @param metadataTokenRequestUri must not be {@literal null}.
+		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @since 3.2
+		 * @see #DEFAULT_IMDSV2_TOKEN_URI
+		 */
+		public AwsEc2AuthenticationOptionsBuilder metadataTokenRequestUri(URI metadataTokenRequestUri) {
+
+			Assert.notNull(metadataTokenRequestUri, "Metadata token request URI must not be null");
+
+			this.metadataTokenRequestUri = metadataTokenRequestUri;
+			return this;
+		}
+
+		/**
+		 * Configure the Instance Service Metadata {@link InstanceMetadataServiceVersion
+		 * version}. Defaults to {@link InstanceMetadataServiceVersion#V1}.
+		 * @param version must not be {@literal null}.
+		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @since 3.2
+		 */
+		public AwsEc2AuthenticationOptionsBuilder version(InstanceMetadataServiceVersion version) {
+
+			Assert.notNull(version, "Version must not be null");
+
+			this.version = version;
+			return this;
+		}
+
+		/**
 		 * Build a new {@link AwsEc2AuthenticationOptions} instance.
 		 * @return a new {@link AwsEc2AuthenticationOptions}.
 		 */
@@ -196,7 +300,8 @@ public class AwsEc2AuthenticationOptions {
 
 			Assert.notNull(this.identityDocumentUri, "IdentityDocumentUri must not be null");
 
-			return new AwsEc2AuthenticationOptions(this.path, this.identityDocumentUri, this.role, this.nonce);
+			return new AwsEc2AuthenticationOptions(this.path, this.identityDocumentUri, this.role, this.nonce,
+					this.metadataTokenTtl, this.metadataTokenRequestUri, this.version);
 		}
 
 	}
@@ -255,6 +360,26 @@ public class AwsEc2AuthenticationOptions {
 			}
 
 		}
+
+	}
+
+	/**
+	 * Enumeration for the Instance metadata service version.
+	 *
+	 * @since 3.2
+	 */
+	public enum InstanceMetadataServiceVersion {
+
+		/**
+		 * Request/Response (default) oriented version 1.
+		 */
+		V1,
+
+		/**
+		 * Session-oriented version 2.
+		 */
+
+		V2;
 
 	}
 

@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,6 +27,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -36,9 +40,6 @@ import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.post;
 
 /**
  * Unit tests for {@link AuthenticationStepsOperator}.
@@ -120,6 +121,34 @@ class AuthenticationStepsOperatorUnitTests {
 			.consumeNextWith(actual -> {
 				assertThat(actual.getToken()).startsWith("eyJhbGciOiJSUz");
 			})
+			.verifyComplete();
+	}
+
+	@Test
+	void headersShouldBeConsideredForHttpRequest() {
+
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/cert/login");
+		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
+		response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+		response.setBody(
+				"{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}" + "}");
+		ClientHttpConnector connector = (method, uri, fn) -> {
+
+			return fn.apply(request).doOnSuccess(unused -> {
+				assertThat(request.getHeaders().get("a")).contains("b");
+			}).then(Mono.just(response));
+		};
+
+		WebClient webClient = WebClient.builder().clientConnector(connector).build();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("a", "b");
+
+		AuthenticationSteps steps = AuthenticationSteps.fromValue(headers)
+			.login(post("/auth/{path}/login", "cert").as(VaultResponse.class));
+
+		login(steps, webClient).as(StepVerifier::create) //
+			.expectNext(VaultToken.of("my-token")) //
 			.verifyComplete();
 	}
 

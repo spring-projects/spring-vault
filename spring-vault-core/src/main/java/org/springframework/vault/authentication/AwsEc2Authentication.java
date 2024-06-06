@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -24,12 +25,17 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -51,6 +57,10 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	private static final Log logger = LogFactory.getLog(AwsEc2Authentication.class);
 
 	private static final char[] EMPTY = new char[0];
+
+	private static final String METADATA_TOKEN_TTL_HEADER = "X-aws-ec2-metadata-token-ttl-seconds";
+
+	private static final String METADATA_TOKEN_HEADER = "X-aws-ec2-metadata-token";
 
 	private final AwsEc2AuthenticationOptions options;
 
@@ -107,13 +117,34 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	protected static AuthenticationSteps createAuthenticationSteps(AwsEc2AuthenticationOptions options,
 			AtomicReference<char[]> nonce, Supplier<char[]> nonceSupplier) {
 
-		return AuthenticationSteps
-			.fromHttpRequest(HttpRequestBuilder.get(options.getIdentityDocumentUri().toString()).as(String.class)) //
+		AuthenticationSteps.HttpRequest<String> identityRequest = HttpRequestBuilder
+			.get(options.getIdentityDocumentUri().toString())
+			.as(String.class);
+		AuthenticationSteps.Node<String> identity;
+
+		if (options.getVersion() == AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2) {
+
+			identity = AuthenticationSteps
+				.fromHttpRequest(HttpRequestBuilder.put(options.getMetadataTokenRequestUri())
+					.with(createTokenRequestHeaders(options))
+					.as(String.class))
+				.map(it -> {
+					HttpHeaders headers = new HttpHeaders();
+					headers.add(METADATA_TOKEN_HEADER, it);
+					return headers;
+				})
+				.request(identityRequest);
+		}
+		else {
+			identity = AuthenticationSteps.fromHttpRequest(identityRequest);
+		}
+
+		return identity //
 			.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
 			.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
 			.map(pkcs7 -> {
 
-				Map<String, String> login = new HashMap<>();
+				Map<String, String> login = new LinkedHashMap<>();
 
 				if (StringUtils.hasText(options.getRole())) {
 					login.put("role", options.getRole());
@@ -175,6 +206,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	protected Map<String, String> getEc2Login() {
 
 		Map<String, String> login = new HashMap<>();
+		HttpHeaders headers = new HttpHeaders();
+
+		if (options.getVersion() == AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2) {
+			headers.add(METADATA_TOKEN_HEADER, createIMDSv2Token());
+		}
 
 		if (StringUtils.hasText(this.options.getRole())) {
 			login.put("role", this.options.getRole());
@@ -187,8 +223,15 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-			String pkcs7 = this.awsMetadataRestOperations.getForObject(this.options.getIdentityDocumentUri(),
-					String.class);
+
+			HttpEntity<Object> entity = new HttpEntity<>(headers);
+			ResponseEntity<String> exchange = this.awsMetadataRestOperations
+				.exchange(this.options.getIdentityDocumentUri(), HttpMethod.GET, entity, String.class);
+			if (!exchange.getStatusCode().is2xxSuccessful()) {
+				throw new HttpClientErrorException(exchange.getStatusCode());
+			}
+
+			String pkcs7 = exchange.getBody();
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replaceAll("\\n", ""));
 			}
@@ -201,12 +244,38 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		}
 	}
 
+	private String createIMDSv2Token() {
+
+		try {
+
+			HttpEntity<Object> entity = new HttpEntity<>(createTokenRequestHeaders(this.options));
+
+			ResponseEntity<String> exchange = this.awsMetadataRestOperations
+				.exchange(this.options.getMetadataTokenRequestUri(), HttpMethod.PUT, entity, String.class);
+			if (!exchange.getStatusCode().is2xxSuccessful()) {
+				throw new HttpClientErrorException(exchange.getStatusCode());
+			}
+
+			return exchange.getBody();
+		}
+		catch (RestClientException e) {
+			throw new VaultLoginException(
+					String.format("Cannot obtain IMDSv2 Token from %s", this.options.getMetadataTokenRequestUri()), e);
+		}
+	}
+
 	protected char[] createNonce() {
 		return doCreateNonce(this.options);
 	}
 
 	private static char[] doCreateNonce(AwsEc2AuthenticationOptions options) {
 		return options.getNonce().getValue();
+	}
+
+	private static HttpHeaders createTokenRequestHeaders(AwsEc2AuthenticationOptions options) {
+		HttpHeaders tokenRequestHeaders = new HttpHeaders();
+		tokenRequestHeaders.add(METADATA_TOKEN_TTL_HEADER, String.valueOf(options.getMetadataTokenTtl().toSeconds()));
+		return tokenRequestHeaders;
 	}
 
 }

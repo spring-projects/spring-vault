@@ -343,6 +343,27 @@ public class AuthenticationSteps {
 		}
 
 		/**
+		 * Builder entry point to {@code PUT} to {@code uriTemplate}.
+		 * @param uriTemplate must not be {@literal null} or empty.
+		 * @param uriVariables the variables to expand the template.
+		 * @return a new {@link HttpRequestBuilder}.
+		 * @since 3.2
+		 */
+		public static HttpRequestBuilder put(String uriTemplate, String... uriVariables) {
+			return new HttpRequestBuilder(HttpMethod.PUT, uriTemplate, uriVariables);
+		}
+
+		/**
+		 * Builder entry point to {@code PUT} to {@code uri}.
+		 * @param uri must not be {@literal null}.
+		 * @return a new {@link HttpRequestBuilder}.
+		 * @since 3.2
+		 */
+		public static HttpRequestBuilder put(URI uri) {
+			return new HttpRequestBuilder(HttpMethod.PUT, uri);
+		}
+
+		/**
 		 * Builder entry point to use {@link HttpMethod} for {@code uriTemplate}.
 		 * @param uriTemplate must not be {@literal null} or empty.
 		 * @param uriVariables the variables to expand the template.

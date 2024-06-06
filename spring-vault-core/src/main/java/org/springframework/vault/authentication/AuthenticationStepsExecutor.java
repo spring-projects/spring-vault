@@ -19,6 +19,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -48,7 +49,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class AuthenticationStepsExecutor implements ClientAuthentication {
 
-	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
+	private static final Log logger = LogFactory.getLog(AuthenticationStepsExecutor.class);
 
 	private final AuthenticationSteps chain;
 
@@ -166,9 +167,14 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	}
 
-	private static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
+	static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
 
 		if (entity == null) {
+
+			if (state instanceof HttpHeaders headers) {
+				return new HttpEntity<>(headers);
+			}
+
 			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
 		}
 

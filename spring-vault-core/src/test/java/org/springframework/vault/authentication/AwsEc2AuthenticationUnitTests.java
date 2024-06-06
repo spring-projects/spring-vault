@@ -19,12 +19,22 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.mock.http.client.reactive.MockClientHttpRequest;
+import org.springframework.mock.http.client.reactive.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.client.VaultClients;
@@ -33,9 +43,7 @@ import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
@@ -70,6 +78,57 @@ class AwsEc2AuthenticationUnitTests {
 		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
+	}
+
+	@Test
+	void shouldObtainIdentityDocumentV2() {
+
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2)
+			.build();
+
+		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
+			.andExpect(method(HttpMethod.PUT)) //
+			.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
+			.andRespond(withSuccess().body("my-token"));
+
+		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+			.andExpect(method(HttpMethod.GET)) //
+			.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
+			.andRespond(withSuccess().body("Hello, world"));
+
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
+
+		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
+	}
+
+	@Test
+	void shouldObtainIdentityDocumentWithImperativeAuthenticationStepsV2() {
+
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2)
+			.build();
+
+		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
+			.andExpect(method(HttpMethod.PUT)) //
+			.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
+			.andRespond(withSuccess().body("my-token"));
+
+		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+			.andExpect(method(HttpMethod.GET)) //
+			.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
+			.andRespond(withSuccess().body("Hello, world"));
+
+		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
+			.andExpect(method(HttpMethod.POST))
+			.andExpect(jsonPath("$.pkcs7").value("Hello, world"))
+			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
+
+		AuthenticationSteps steps = AwsEc2Authentication.createAuthenticationSteps(options);
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);
+
+		assertThat(executor.login()).isEqualTo(LoginToken.of("my-token"));
 	}
 
 	@Test

@@ -29,6 +29,7 @@ import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -161,7 +162,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
 
 		HttpRequest<Object> definition = step.getDefinition();
-		HttpEntity<?> entity = getEntity(definition.getEntity(), state);
+		HttpEntity<?> entity = AuthenticationStepsExecutor.getEntity(definition.getEntity(), state);
 
 		RequestBodySpec spec;
 		if (definition.getUri() == null) {
@@ -182,19 +183,6 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		}
 
 		return spec.retrieve().bodyToMono(definition.getResponseType());
-	}
-
-	private static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
-
-		if (entity == null) {
-			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
-		}
-
-		if (entity.getBody() == null && state != null) {
-			return new HttpEntity<>(state, entity.getHeaders());
-		}
-
-		return entity;
 	}
 
 	private static Object doMapStep(MapStep<Object, Object> o, Object state) {

@@ -306,6 +306,9 @@ further investigation.
 
 The nonce is kept in memory and is lost during application restart.
 
+Since Spring Vault 3.2, AWS-EC2 authentication supports request/response
+(IMDSv1) metadata retrieval and the session-based variant (IMDSv2).
+
 AWS-EC2 authentication roles are optional and default to the AMI.
 You can configure the authentication role by setting
 it in `AwsEc2AuthenticationOptions`.
