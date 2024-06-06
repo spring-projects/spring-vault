@@ -549,6 +549,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 					Lease previousLease = getPreviousLease(previousLeases, requestedSecret);
 
 					try {
+						this.renewals.put(requestedSecret, renewalScheduler);
 						doStart(requestedSecret, renewalScheduler, (secrets, lease) -> {
 							onSecretsRotated(requestedSecret, previousLease, lease, secrets.getRequiredData());
 						}, () -> {
@@ -807,7 +808,19 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
 
 		if (requestedSecret.getMode() == Mode.ROTATE) {
-			doStart(requestedSecret, this.renewals.get(requestedSecret), (secrets, currentLease) -> {
+			LeaseRenewalScheduler renewalScheduler = this.renewals.get(requestedSecret);
+			// prevent races for concurrent renewals of the same secret using different
+			// leases
+			if (renewalScheduler == null || !renewalScheduler.leaseEquals(lease)) {
+				logger.debug(String.format(
+						"Skipping rotation after renewal expiry for secret %s with lease %s as no LeaseRenewalScheduler is found. This can happen if leases have been restarted while concurrent expiry processing.",
+						requestedSecret.getPath(), lease.getLeaseId()));
+
+				super.onLeaseExpired(requestedSecret, lease);
+				return;
+			}
+
+			doStart(requestedSecret, renewalScheduler, (secrets, currentLease) -> {
 				onSecretsRotated(requestedSecret, lease, currentLease, secrets.getRequiredData());
 			}, () -> super.onLeaseExpired(requestedSecret, lease));
 		}
@@ -1021,6 +1034,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			return lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && !lease.isRenewable()
 					&& requestedSecret.getMode() == Mode.ROTATE;
+		}
+
+		boolean leaseEquals(Lease lease) {
+			return getLease() == lease;
 		}
 
 	}
