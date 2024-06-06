@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.IOException;
 import java.net.URL;
 import java.security.KeyFactory;
@@ -26,8 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link CertificateBundle}.
@@ -98,6 +98,18 @@ class CertificateBundleUnitTests {
 	}
 
 	@Test
+	void shouldReturnPrivateKey() {
+
+		String serialNumber = "aserialnumber";
+		String certificate = "certificate";
+		String caCertificate = "caCertificate";
+		String privateKey = "aprivatekey";
+
+		CertificateBundle bundle = CertificateBundle.of(serialNumber, certificate, caCertificate, privateKey);
+		assertThat(bundle.getPrivateKey()).isNotNull();
+	}
+
+	@Test
 	void getAsKeystore() throws Exception {
 
 		CertificateBundle bundle = loadCertificateBundle("certificate.json");
@@ -115,9 +127,9 @@ class CertificateBundleUnitTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "certificate-response-rsa-pem.json", "certificate-response-rsa-der.json",
+	@ValueSource(strings = {"certificate-response-rsa-pem.json", "certificate-response-rsa-der.json",
 			"certificate-response-rsa-pembundle.json", "certificate-response-ec-pem.json",
-			"certificate-response-ec-der.json", "certificate-response-ec-pembundle.json" })
+			"certificate-response-ec-der.json", "certificate-response-ec-pembundle.json"})
 	void createKeystore(String path) {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
@@ -132,7 +144,7 @@ class CertificateBundleUnitTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "certificate-response-rsa-pem-pkcs8.json", "certificate-response-ec-pem-pkcs8.json" })
+	@ValueSource(strings = {"certificate-response-rsa-pem-pkcs8.json", "certificate-response-ec-pem-pkcs8.json"})
 	void shouldCreateKeystore(String path) {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
