@@ -53,10 +53,13 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 			prepare().mountAuth("github");
 		}
 
-		prepare().getVaultOperations()
-			.doWithSession(
-					restOperations -> restOperations.postForEntity("auth/github/config", Map.of("organization_id", 1,
-							"base_url", "http://localhost:%d".formatted(gitHubMockServer.getPort())), Map.class));
+		gitHubMockServer.start();
+
+		prepare().getVaultOperations().doWithSession(restOperations -> {
+			Map<String, String> config = Map.of("organization", "foo", "organization_id", "" + organizationId,
+					"base_url", "http://localhost:%d".formatted(gitHubMockServer.getPort()));
+			return restOperations.postForEntity("auth/github/config", config, Map.class);
+		});
 	}
 
 	@AfterEach
@@ -66,21 +69,45 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 
 	@Test
 	void shouldLoginSuccessfully() {
+
+		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
+			.tokenSupplier(() -> "TOKEN")
+			.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
 				gitHubTeamResponse(organizationId));
 
-		GitHubAuthentication authentication = new GitHubAuthentication(
-				GitHubAuthenticationOptions.builder().tokenSupplier(() -> "TOKEN").build(), restTemplate);
+		GitHubAuthentication authentication = new GitHubAuthentication(options, restTemplate);
 		VaultToken loginToken = authentication.login();
 
 		assertThat(loginToken.getToken()).isNotNull();
 	}
 
 	@Test
-	void shouldFailIfOrganizationIsNotTheSame() {
+	void shouldLoginUsingAuthenticationSteps() {
+
+		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
+			.tokenSupplier(() -> "TOKEN")
+			.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
-		var wrongOrganizationId = organizationId + 1;
+		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
+				gitHubTeamResponse(organizationId));
+
+		AuthenticationSteps steps = GitHubAuthentication.createAuthenticationSteps(options);
+
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, restTemplate);
+		VaultToken loginToken = executor.login();
+
+		assertThat(loginToken.getToken()).isNotNull();
+	}
+
+	@Test
+	void shouldFailIfOrganizationIsNotTheSame() {
+
+		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+
+		int wrongOrganizationId = organizationId + 1;
+
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(wrongOrganizationId),
 				gitHubTeamResponse(wrongOrganizationId));
 

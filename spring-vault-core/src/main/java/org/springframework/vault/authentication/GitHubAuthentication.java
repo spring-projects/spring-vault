@@ -16,8 +16,10 @@
 package org.springframework.vault.authentication;
 
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
@@ -30,6 +32,7 @@ import org.springframework.web.client.RestOperations;
  * personal access token.
  *
  * @author Nanne Baars
+ * @author Mark Paluch
  * @since 3.2
  * @see GitHubAuthentication
  * @see RestOperations
@@ -58,11 +61,24 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 		this.restOperations = restOperations;
 	}
 
+	/**
+	 * Creates a {@link AuthenticationSteps} for GitHub authentication given
+	 * {@link GitHubAuthenticationOptions}.
+	 * @param options must not be {@literal null}.
+	 * @return {@link AuthenticationSteps} for github authentication.
+	 */
+	public static AuthenticationSteps createAuthenticationSteps(GitHubAuthenticationOptions options) {
+
+		Assert.notNull(options, "GitHubAuthentication must not be null");
+
+		return AuthenticationSteps.fromSupplier(options.getTokenSupplier())
+			.map(GitHubAuthentication::getGitHubLogin)
+			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+	}
+
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
-		return AuthenticationSteps.fromSupplier(options.getTokenSupplier())
-			.map(token -> getGitHubLogin(token))
-			.login(AuthenticationUtil.getLoginPath(this.options.getPath()));
+		return createAuthenticationSteps(options);
 	}
 
 	@Override

@@ -537,6 +537,44 @@ See also:
 * https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt
 * https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/signJwt (deprecated)
 
+[[vault.authentication.github]]
+== GitHub Authentication
+
+The https://www.vaultproject.io/docs/auth/github.html[github]
+auth backend provides an authentication mechanism based on GitHub tokens.
+Vault does not support an OAuth workflow to generate GitHub tokens,
+so it does not act as a GitHub application.
+
+The authentication mechanism requires a GitHub token (or a supplier)
+to pass on the token to Vault which then authenticates against your GitHub
+account.
+
+====
+[source,java]
+----
+@Configuration
+class AppConfig extends AbstractVaultConfiguration {
+
+    // …
+
+    @Override
+    public ClientAuthentication clientAuthentication() {
+
+        GitHubAuthentication options = GitHubAuthentication.builder()
+                    .token(…).build();
+
+        return new GitHubAuthentication(options, restOperations());
+    }
+
+    // …
+}
+----
+====
+
+See also:
+
+* https://www.vaultproject.io/api-docs/auth/github[Vault Documentation: GitHub auth method]
+
 [[vault.authentication.pcf]]
 == PCF authentication
 

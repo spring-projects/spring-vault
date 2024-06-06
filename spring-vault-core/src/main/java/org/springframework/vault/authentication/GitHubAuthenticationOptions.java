@@ -27,7 +27,6 @@ import org.springframework.util.Assert;
  * Instances of this class are immutable once constructed.
  *
  * @author Nanne Baars
- * @author Mark Paluch
  * @since 3.2
  * @see GitHubAuthentication
  * @see #builder()
