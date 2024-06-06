@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
@@ -477,6 +478,78 @@ class SecretLeaseContainerUnitTests {
 
 		assertThat(events.get(1)).isInstanceOf(SecretLeaseRotatedEvent.class);
 		assertThat(((SecretLeaseCreatedEvent) events.get(1)).getSecrets()).containsOnlyKeys("foo");
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void secretShouldContinueOnRestartSecrets() {
+
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+
+		VaultResponse first = createSecrets();
+		VaultResponse second = createSecrets();
+		second.setData(Collections.singletonMap("foo", (Object) "bar"));
+
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(first, second);
+		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
+
+		RequestedSecret secret = RequestedSecret.rotating("my-secret");
+
+		this.secretLeaseContainer.setExpiryThreshold(Duration.ofSeconds(1));
+		this.secretLeaseContainer.addRequestedSecret(secret);
+		this.secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		this.secretLeaseContainer.restartSecrets();
+
+		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+		captor.getAllValues().get(0).run(); // old lease run
+		captor.getAllValues().get(1).run(); // new lease run
+
+		// one from restartSecrets, the second from the scheduler detecting expiry
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(any(SecretLeaseRotatedEvent.class));
+		verify(this.leaseListenerAdapter, never()).onLeaseEvent(any(SecretLeaseExpiredEvent.class));
+		verify(this.leaseListenerAdapter, never()).onLeaseEvent(any(SecretLeaseErrorEvent.class));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	void concurrentRenewalAfterRestartSecretShouldContinueOnRestartSecrets() {
+
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+
+		VaultResponse first = createSecrets();
+		VaultResponse second = createSecrets();
+		second.setData(Collections.singletonMap("foo", (Object) "bar"));
+
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(first, second);
+		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
+
+		RequestedSecret secret = RequestedSecret.rotating("my-secret");
+
+		this.secretLeaseContainer.setExpiryThreshold(Duration.ofSeconds(1));
+		this.secretLeaseContainer.addRequestedSecret(secret);
+		this.secretLeaseContainer.start();
+
+		Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler> renewals = (Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler>) ReflectionTestUtils.getField(this.secretLeaseContainer, "renewals");
+
+		SecretLeaseContainer.LeaseRenewalScheduler scheduler = renewals.get(secret);
+		Lease lease = scheduler.getLease();
+		ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
+		this.secretLeaseContainer.restartSecrets();
+
+		scheduler.associateLease(lease);
+
+		verify(this.taskScheduler, times(2)).schedule(captor.capture(), any(Trigger.class));
+		captor.getAllValues().get(1).run(); // new lease run
+		captor.getAllValues().get(0).run(); // old lease run
+
+		// one from restartSecrets, the second from the scheduler detecting expiry
+		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(any(SecretLeaseRotatedEvent.class));
+		verify(this.leaseListenerAdapter).onLeaseEvent(any(SecretLeaseExpiredEvent.class));
+		verify(this.leaseListenerAdapter, never()).onLeaseEvent(any(SecretLeaseErrorEvent.class));
 	}
 
 	@Test
