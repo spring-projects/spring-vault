@@ -34,6 +34,7 @@ import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -127,6 +128,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
 		.newUpdater(SecretLeaseContainer.class, "status");
 
+	/**
+	 * {@link Predicate} to test whether a {@link Lease} has no lease identifier.
+	 */
+	public static Predicate<Lease> NO_LEASE_ID = Predicate.not(Lease::hasLeaseId);
+
+	/**
+	 * {@link Predicate} to test whether a {@link Lease} has no lease identifier.
+	 */
+	public static Predicate<Lease> NO_LEASE_DURATION = forDuration(Duration::isZero);
+
 	private static final AtomicInteger poolId = new AtomicInteger();
 
 	private static final int STATUS_INITIAL = 0;
@@ -153,6 +164,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	private LeaseEndpoints leaseEndpoints = LeaseEndpoints.Leases;
 
 	private Duration minRenewal = Duration.ofSeconds(10);
+
+	private @Nullable Predicate<Lease> isExpired;
+
+	private Predicate<Lease> isExpiredFallback = createIsExpiredPredicate(this.minRenewal);
 
 	private Duration expiryThreshold = Duration.ofSeconds(60);
 
@@ -241,6 +256,20 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		Assert.isTrue(!minRenewal.isNegative(), "Minimal renewal time must not be negative");
 
 		this.minRenewal = minRenewal;
+		this.isExpiredFallback = createIsExpiredPredicate(this.minRenewal);
+	}
+
+	/**
+	 * Sets the {@link Predicate} to determine whether a {@link Lease} is expired.
+	 * Defaults to comparing whether a lease {@link Lease#hasLeaseId() has no identifier},
+	 * its remaining TTL is zero or less or equal to {@code minRenewal}.
+	 * @since 3.2
+	 */
+	public void setExpiryPredicate(Predicate<Lease> isExpired) {
+
+		Assert.notNull(isExpired, "Expiry predicate must not be null");
+
+		this.isExpired = isExpired;
 	}
 
 	/**
@@ -737,8 +766,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		try {
 			Lease renewed = lease.hasLeaseId() ? doRenew(lease) : lease;
 
-			if (!renewed.hasLeaseId() || renewed.getLeaseDuration().isZero()
-					|| renewed.getLeaseDuration().getSeconds() < this.minRenewal.getSeconds()) {
+			if (isExpired(renewed)) {
 
 				onLeaseExpired(requestedSecret, lease);
 				return Lease.none();
@@ -776,6 +804,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 				return lease;
 			}
 		}
+	}
+
+	boolean isExpired(Lease lease) {
+		return isExpired == null ? isExpiredFallback.test(lease) : isExpired.test(lease);
 	}
 
 	@Nullable
@@ -855,6 +887,18 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);
 		}
+	}
+
+	private Predicate<Lease> createIsExpiredPredicate(Duration minRenewal) {
+		return NO_LEASE_ID.or(NO_LEASE_DURATION).or(forDuration(isLessOrEqual(minRenewal)));
+	}
+
+	private static <T extends Comparable<T>> Predicate<T> isLessOrEqual(T other) {
+		return it -> it.compareTo(other) <= 0;
+	}
+
+	private static Predicate<Lease> forDuration(Predicate<Duration> predicate) {
+		return lease -> predicate.test(lease.getLeaseDuration());
 	}
 
 	/**

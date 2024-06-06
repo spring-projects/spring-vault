@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -110,6 +111,36 @@ class SecretLeaseContainerUnitTests {
 		assertThat(this.secretLeaseContainer.getMinRenewalSeconds()).isEqualTo(120);
 		assertThat(this.secretLeaseContainer.getExpiryThreshold().getSeconds()).isEqualTo(180);
 		assertThat(this.secretLeaseContainer.getExpiryThresholdSeconds()).isEqualTo(180);
+	}
+
+	@Test
+	void defaultIsExpiredShouldCalculateCorrectResult() {
+
+		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).accepts(Lease.none())
+			.accepts(Lease.of("foo", Duration.ZERO, false))
+			.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
+			.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
+			.accepts(Lease.of("foo", Duration.ofSeconds(10), false))
+			.rejects(Lease.of("foo", Duration.ofSeconds(11), false));
+
+		this.secretLeaseContainer.setMinRenewal(Duration.ofMinutes(2));
+
+		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).accepts(Lease.none())
+			.accepts(Lease.of("foo", Duration.ZERO, false))
+			.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
+			.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
+			.accepts(Lease.of("foo", Duration.ofSeconds(120), false))
+			.rejects(Lease.of("foo", Duration.ofSeconds(121), false));
+	}
+
+	@Test
+	void configuredExpiryPredicateShouldBeEvaluated() {
+
+		secretLeaseContainer.setExpiryPredicate(lease -> "expired".equals(lease.getLeaseId()));
+
+		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).rejects(Lease.none())
+			.rejects(Lease.of("not-expired", Duration.ZERO, false))
+			.accepts(Lease.of("expired", Duration.ZERO, false));
 	}
 
 	@Test
