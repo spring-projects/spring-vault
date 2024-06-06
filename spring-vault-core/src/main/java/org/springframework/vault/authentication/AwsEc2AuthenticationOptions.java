@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  * Authentication options provide the path, the Identity Document URI and an optional
  * role. {@link AwsEc2AuthenticationOptions} can be constructed using {@link #builder()}.
  * Instances of this class are immutable once constructed.
+ * <p>
+ * Metadata retrieval defaults to IMDSv2 (session-token).
  *
  * @author Mark Paluch
  * @see AwsEc2Authentication
@@ -94,7 +96,7 @@ public class AwsEc2AuthenticationOptions {
 
 	private AwsEc2AuthenticationOptions() {
 		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "", Nonce.generated(),
-				Duration.ofMinutes(1), DEFAULT_IMDSV2_TOKEN_URI, InstanceMetadataServiceVersion.V1);
+				Duration.ofMinutes(1), DEFAULT_IMDSV2_TOKEN_URI, InstanceMetadataServiceVersion.V2);
 	}
 
 	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, @Nullable String role, Nonce nonce,
@@ -187,7 +189,7 @@ public class AwsEc2AuthenticationOptions {
 
 		private URI metadataTokenRequestUri = DEFAULT_IMDSV2_TOKEN_URI;
 
-		private InstanceMetadataServiceVersion version = InstanceMetadataServiceVersion.V1;
+		private InstanceMetadataServiceVersion version = InstanceMetadataServiceVersion.V2;
 
 		AwsEc2AuthenticationOptionsBuilder() {
 		}

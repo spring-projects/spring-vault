@@ -36,6 +36,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.StandaloneMockMvcBuilder;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
@@ -69,23 +70,23 @@ class AwsEc2AuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldObtainIdentityDocument() {
+	void shouldObtainIdentityDocumentV1() {
+
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andExpect(method(HttpMethod.GET)) //
 			.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
 	}
 
 	@Test
-	void shouldObtainIdentityDocumentV2() {
-
-		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2)
-			.build();
+	void shouldObtainIdentityDocument() {
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
 			.andExpect(method(HttpMethod.PUT)) //
@@ -97,7 +98,7 @@ class AwsEc2AuthenticationUnitTests {
 			.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
 			.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
 	}
@@ -106,7 +107,7 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldObtainIdentityDocumentWithImperativeAuthenticationStepsV2() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2)
+			.version(InstanceMetadataServiceVersion.V2)
 			.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
@@ -134,11 +135,15 @@ class AwsEc2AuthenticationUnitTests {
 	@Test
 	void shouldCleanUpIdentityResponse() {
 
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
+
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andExpect(method(HttpMethod.GET)) //
 			.andRespond(withSuccess().body("Hello, \r\r\n\nworld"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world");
 	}
@@ -146,7 +151,10 @@ class AwsEc2AuthenticationUnitTests {
 	@Test
 	void shouldContainRole() {
 
-		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder().role("ami").build();
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.role("ami")
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andExpect(method(HttpMethod.GET)) //
@@ -166,7 +174,10 @@ class AwsEc2AuthenticationUnitTests {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
-		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder().nonce(nonce).build();
+		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder()
+			.nonce(nonce)
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andExpect(method(HttpMethod.GET)) //
@@ -195,7 +206,10 @@ class AwsEc2AuthenticationUnitTests {
 
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
-		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder().nonce(nonce).build();
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.nonce(nonce)
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andExpect(method(HttpMethod.GET)) //
@@ -221,25 +235,34 @@ class AwsEc2AuthenticationUnitTests {
 	@Test
 	void loginShouldFailWhileObtainingIdentityDocument() {
 
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
+
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 			.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new AwsEc2Authentication(this.restTemplate).login());
+			.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate).login());
 	}
 
 	@Test
 	void loginShouldFail() {
 
+		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
+			.version(InstanceMetadataServiceVersion.V1)
+			.build();
+
 		this.mockRest.expect(requestTo("/auth/aws-ec2/login")) //
 			.andRespond(withServerError());
 
-		assertThatExceptionOfType(VaultException.class).isThrownBy(() -> new AwsEc2Authentication(this.restTemplate) {
-			@Override
-			protected Map<String, String> getEc2Login() {
-				return Collections.singletonMap("pkcs7", "value");
-			}
-		}.login());
+		assertThatExceptionOfType(VaultException.class)
+			.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate) {
+				@Override
+				protected Map<String, String> getEc2Login() {
+					return Collections.singletonMap("pkcs7", "value");
+				}
+			}.login());
 	}
 
 }
