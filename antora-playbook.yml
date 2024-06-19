@@ -1,13 +1,6 @@
 antora:
   extensions:
-    - '@springio/antora-extensions/partial-build-extension'
-    - '@springio/antora-extensions/static-page-extension'
-    - require: '@springio/antora-extensions/latest-version-extension'
-    - require: '@springio/antora-extensions/inject-collector-cache-config-extension'
-    - '@antora/collector-extension'
-    - 'antora/lib/version-fix.js'
-    - '@antora/atlas-extension'
-    - require: '@springio/antora-extensions/root-component-extension'
+    - require: '@springio/antora-extensions'
       root_component_name: 'vault'
 site:
   title: Spring Vault
@@ -39,7 +32,7 @@ urls:
   redirect_facility: httpd
 ui:
   bundle:
-    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.7/ui-bundle.zip
+    url: https://github.com/spring-io/antora-ui-spring/releases/download/v0.4.16/ui-bundle.zip
     snapshot: true
 runtime:
   log:
