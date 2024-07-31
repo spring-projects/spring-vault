@@ -980,14 +980,14 @@ VaultToken token = executor.login();
 Vault's tokens can be associated with a time to live. Tokens obtained by an authentication method
 are intended to be used as long as the session is active and should not expire while the application is active.
 
-Spring Vault provides with {self-docs-root}api/org/springframework/vault/authentication/LifecycleAwareSessionManager.html[`LifecycleAwareSessionManager`] a session manager that can renew the token until it reaches its terminal TTL to then perform another login to obtain the next token which is associated with the session.
+Spring Vault provides with javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] a session manager that can renew the token until it reaches its terminal TTL to then perform another login to obtain the next token which is associated with the session.
 
 Depending on the authentication method, a login can create two kinds of tokens:
 
-* {self-docs-root}api/org/springframework/vault/support/VaultToken.html[`VaultToken`]: Generic token encapsulating the actual token.
-* {self-docs-root}api/org/springframework/vault/authentication/LoginToken.html[`LoginToken`]: Token associated with renewability/TTL.
+* javadoc:org.springframework.vault.support.VaultToken[]: Generic token encapsulating the actual token.
+* javadoc:org.springframework.vault.authentication.LoginToken[]: Token associated with renewability/TTL.
 
-Authentication methods such as {self-docs-root}api/org/springframework/vault/authentication/TokenAuthentication.html[`TokenAuthentication`] just create a `VaultToken` which does not carry any renewability/TTL details. `LifecycleAwareSessionManager` will run a self-lookup on the token to retrieve renewability and TTL from Vault.
+Authentication methods such as javadoc:org.springframework.vault.authentication.TokenAuthentication[] just create a `VaultToken` which does not carry any renewability/TTL details. javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] will run a self-lookup on the token to retrieve renewability and TTL from Vault.
 `VaultToken` are renewed periodically if self-lookup is enabled. Note that `VaultToken` are never revoked, only `LoginToken` are revoked.
 
 Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.

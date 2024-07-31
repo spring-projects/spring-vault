@@ -124,24 +124,17 @@
 						</configuration>
 					</plugin>
 					<plugin>
-						<groupId>io.spring.maven.antora</groupId>
+						<groupId>org.antora</groupId>
 						<artifactId>antora-maven-plugin</artifactId>
-						<version>${antora.version}</version>
+						<version>${maven.antora-version}</version>
 						<extensions>true</extensions>
 						<configuration>
+							<playbook>${project.basedir}/../src/main/antora/antora-playbook.yml</playbook>
 							<options>
 								<option>--to-dir=target/antora/site</option>
 								<option>--stacktrace</option>
 								<option>--fetch</option>
 							</options>
-							<playbook>${project.basedir}/../src/main/antora/antora-playbook.yml</playbook>
-							<packages>
-								<package>@antora/atlas-extension@1.0.0-alpha.1</package>
-								<package>@antora/collector-extension@1.0.0-alpha.3</package>
-								<package>@asciidoctor/tabs@1.0.0-beta.3</package>
-								<package>@springio/antora-extensions@1.8.0</package>
-								<package>@springio/asciidoctor-extensions@1.0.0-alpha.9</package>
-							</packages>
 						</configuration>
 						<executions>
 							<execution>
@@ -245,6 +238,20 @@
 									</goals>
 								</execution>
 
+								<execution>
+									<id>copy-javadoc</id>
+									<phase>package</phase>
+									<configuration>
+										<target>
+											<copy todir="${project.root}/target/antora/modules/ROOT/assets/attachments/api/java">
+												<fileset dir="${project.root}/target/site/apidocs" erroronmissingdir="true" />
+											</copy>
+										</target>
+									</configuration>
+									<goals>
+										<goal>run</goal>
+									</goals>
+								</execution>
 							</executions>
 
 						</plugin>

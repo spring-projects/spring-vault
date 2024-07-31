@@ -98,7 +98,7 @@ NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-5.2.x/logg
 [[vault.client-ssl]]
 == Vault Client SSL configuration
 
-SSL can be configured using `SslConfiguration` by setting various properties.
+SSL can be configured using javadoc:org.springframework.vault.support.SslConfiguration[] by setting various properties.
 You can set either `javax.net.ssl.trustStore` to configure
 JVM-wide SSL settings or configure `SslConfiguration`
 to set SSL settings only for Spring Vault.
@@ -128,7 +128,7 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
 <4> Configuring only key store settings with providing a key-configuration.
 ====
 
-Please note that providing `SslConfiguration` can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
+Please note that providing javadoc:org.springframework.vault.support.SslConfiguration[] can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
 
 The SSL configuration supports also PEM-encoded certificates as alternative to a Java Key Store.
 
