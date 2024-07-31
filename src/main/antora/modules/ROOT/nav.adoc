@@ -12,3 +12,6 @@
 ** xref:vault/client-support.adoc[]
 ** xref:vault/authentication.adoc[]
 ** xref:vault/spring-security.adoc[]
+
+
+* xref:attachment$api/java/index.html[Javadoc,role=link-external,window=_blank]

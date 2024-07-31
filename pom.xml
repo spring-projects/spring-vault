@@ -18,6 +18,7 @@
 	</modules>
 
 	<properties>
+		<maven.antora-version>1.0.0-alpha.4</maven.antora-version>
 		<antora.version>0.0.3</antora.version>
 		<assertj-core.version>3.25.1</assertj-core.version>
 		<aws-java-sdk.version>2.21.46</aws-java-sdk.version>
@@ -994,6 +995,32 @@
 
 				</plugins>
 
+			</build>
+		</profile>
+		<profile>
+
+			<id>antora</id>
+
+			<properties>
+				<maven.main.skip>true</maven.main.skip>
+				<maven.test.skip>true</maven.test.skip>
+				<aspectj.skip>true</aspectj.skip>
+				<maven.install.skip>true</maven.install.skip>
+				<skipTests>true</skipTests>
+			</properties>
+
+			<build>
+				<plugins>
+					<!-- force-skip -->
+					<plugin>
+						<groupId>org.jetbrains.kotlin</groupId>
+						<artifactId>kotlin-maven-plugin</artifactId>
+						<inherited>false</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
 			</build>
 		</profile>
 	</profiles>

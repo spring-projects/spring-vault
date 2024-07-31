@@ -1,7 +1,7 @@
 [[vault.repositories]]
 = Vault Repositories
 
-Working with `VaultTemplate` and responses mapped to Java classes allows basic data operations like read, write and delete.
+Working with javadoc:org.springframework.vault.core.VaultTemplate[] and responses mapped to Java classes allows basic data operations like read, write and delete.
 Vault repositories apply Spring Data's repository concept on top of Vault.
 A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining the identifier property, paging and sorting.
 Vault repositories use the key/value secrets engine functionality to persist and query data.

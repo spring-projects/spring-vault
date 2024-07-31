@@ -5,14 +5,14 @@ Vault can be used in many different ways. One specific use-case is using
 Vault to store encrypted properties. Spring Vault supports Vault as property
 source to obtain configuration properties using Spring's {spring-framework-docs}core.html#beans-property-source-abstraction[PropertySource abstraction].
 
-NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A `VaultPropertySource` must be initialized at that time to retrieve properties from Vault.
+NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A javadoc:org.springframework.vault.core.env.VaultPropertySource[] must be initialized at that time to retrieve properties from Vault.
 
 NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault]'s
 configuration integration that initializes various property sources during application startup.
 
 == Registering `VaultPropertySource`
 
-Spring Vault provides a `VaultPropertySource` to be used with Vault to obtain
+Spring Vault provides a javadoc:org.springframework.vault.core.env.VaultPropertySource[] to be used with Vault to obtain
 properties. It uses the nested `data` element to expose properties stored and
 encrypted in Vault.
 
@@ -25,7 +25,7 @@ sources.addFirst(new VaultPropertySource(vaultTemplate, "secret/my-application")
 ----
 ====
 
-In the code above, `VaultPropertySource` has been added with highest precedence
+In the code above, javadoc:org.springframework.vault.core.env.VaultPropertySource[] has been added with highest precedence
 in the search. If it contains a ´foo` property, it will be detected and returned
 ahead of any `foo` property in any other `PropertySource`.
 `MutablePropertySources` exposes a number of methods that allow for precise
