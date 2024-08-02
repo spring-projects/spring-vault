@@ -59,10 +59,12 @@ pipeline {
 			}
 			steps {
 				script {
-					docker.image("${p['docker.image']}").inside(p['docker.java.inside.basic']) {
-						sh 'src/test/bash/create_certificates.sh'
-						sh '/opt/vault/vault server -config=$(pwd)/src/test/bash/vault.conf &'
-						sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
+					docker.withRegistry(p['docker.proxy.registry'], p['docker.proxy.credentials']) {
+						docker.image("${p['docker.image']}").inside(p['docker.java.inside.basic']) {
+							sh 'src/test/bash/create_certificates.sh'
+							sh '/opt/vault/vault server -config=$(pwd)/src/test/bash/vault.conf &'
+							sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
+						}
 					}
 				}
 			}
@@ -80,13 +82,15 @@ pipeline {
 				docker {
 					image "${p['docker.image']}"
 					args "${p['docker.java.inside.basic']}"
+					registryUrl "${p['docker.proxy.registry']}"
+					registryCredentialsId "${p['docker.proxy.credentials']}"
 				}
 			}
 			options { timeout(time: 20, unit: 'MINUTES') }
 
 			environment {
 				ARTIFACTORY = credentials("${p['artifactory.credentials']}")
-				SONATYPE = credentials('oss-login')
+				SONATYPE = credentials('oss-s01-token')
 				KEYRING = credentials('spring-signing-secring.gpg')
 				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
