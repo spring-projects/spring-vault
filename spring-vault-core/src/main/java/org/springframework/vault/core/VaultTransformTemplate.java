@@ -16,13 +16,13 @@
 package org.springframework.vault.core;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -180,7 +180,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		}
 
 		if (!ObjectUtils.isEmpty(context.getTweak())) {
-			request.put("tweak", Base64Utils.encodeToString(context.getTweak()));
+			request.put("tweak", Base64.getEncoder().encodeToString(context.getTweak()));
 		}
 	}
 
@@ -260,7 +260,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		VaultTransformContext contextToUse = context;
 		if (data.containsKey("tweak")) {
-			byte[] tweak = Base64Utils.decodeFromString((String) data.get("tweak"));
+			byte[] tweak = Base64.getDecoder().decode((String) data.get("tweak"));
 			contextToUse = VaultTransformContext.builder()
 				.transformation(context.getTransformation())
 				.tweak(tweak)

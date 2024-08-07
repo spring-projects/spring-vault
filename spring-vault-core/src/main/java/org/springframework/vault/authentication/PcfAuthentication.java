@@ -20,6 +20,7 @@ import java.security.spec.RSAPrivateKeySpec;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +33,6 @@ import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
 
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.PemObject;
 import org.springframework.vault.support.VaultResponse;
@@ -165,7 +165,8 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 		signer.update(message, 0, message.length);
 
 		byte[] signature = signer.generateSignature();
-		return Base64Utils.encodeToUrlSafeString(signature);
+
+		return Base64.getUrlEncoder().encodeToString(signature);
 	}
 
 }

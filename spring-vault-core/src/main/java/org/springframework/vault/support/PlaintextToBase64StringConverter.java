@@ -16,7 +16,6 @@
 package org.springframework.vault.support;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
-import org.springframework.util.Base64Utils;
 
 import java.util.Base64;
 
