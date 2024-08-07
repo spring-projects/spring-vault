@@ -51,8 +51,7 @@ class ReactiveVaultClientsIntegrationTests extends IntegrationTestSupport {
 
 		client.get()
 			.uri("/sys/health")
-			.exchange()
-			.flatMap(it -> it.bodyToMono(String.class))
+			.exchangeToMono(it -> it.bodyToMono(String.class))
 			.as(StepVerifier::create)
 			.consumeNextWith(actual -> {
 				assertThat(actual).contains("initialized").contains("standby");
@@ -61,8 +60,7 @@ class ReactiveVaultClientsIntegrationTests extends IntegrationTestSupport {
 
 		client.get()
 			.uri("sys/health")
-			.exchange()
-			.flatMap(it -> it.bodyToMono(String.class))
+			.exchangeToMono(it -> it.bodyToMono(String.class))
 			.as(StepVerifier::create)
 			.consumeNextWith(actual -> {
 				assertThat(actual).contains("initialized").contains("standby");

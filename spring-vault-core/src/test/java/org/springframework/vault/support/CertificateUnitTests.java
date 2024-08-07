@@ -51,7 +51,7 @@ class CertificateUnitTests {
 
 		X509Certificate x509Certificate = this.certificate.getX509Certificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).isEqualTo("CN=hello.example.com");
+		assertThat(x509Certificate.getSubjectX500Principal().getName()).isEqualTo("CN=hello.example.com");
 	}
 
 	@Test
@@ -59,7 +59,7 @@ class CertificateUnitTests {
 
 		X509Certificate x509Certificate = this.certificate.getX509IssuerCertificate();
 
-		assertThat(x509Certificate.getSubjectDN().getName()).startsWith("CN=Intermediate CA Certificate");
+		assertThat(x509Certificate.getSubjectX500Principal().getName()).startsWith("CN=Intermediate CA Certificate");
 	}
 
 	@Test

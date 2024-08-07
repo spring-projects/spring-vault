@@ -111,7 +111,8 @@ class PemObjectUnitTests {
 		PemObject pemObject = PemObject.parseFirst(content);
 
 		assertThat(pemObject.isCertificate()).isTrue();
-		assertThat(pemObject.getCertificate().getSubjectDN().getName()).contains("O=spring-cloud-vault-config");
+		assertThat(pemObject.getCertificate().getSubjectX500Principal().getName())
+			.contains("O=spring-cloud-vault-config");
 	}
 
 }

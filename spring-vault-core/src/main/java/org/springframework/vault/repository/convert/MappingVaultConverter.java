@@ -176,8 +176,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Object idValue;
 
 		if (entity.requiresPropertyPopulation()) {
-			if (idProperty != null && !entity.isConstructorArgument(idProperty)
-					&& documentAccessor.hasValue(idProperty)) {
+			if (idProperty != null && !entity.isCreatorArgument(idProperty) && documentAccessor.hasValue(idProperty)) {
 
 				idValue = readIdValue(idProperty, documentAccessor);
 				accessor.setProperty(idProperty, idValue);
@@ -210,7 +209,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 				continue;
 			}
 
-			if (entity.isConstructorArgument(prop) || !documentAccessor.hasValue(prop)) {
+			if (entity.isCreatorArgument(prop) || !documentAccessor.hasValue(prop)) {
 				continue;
 			}
 

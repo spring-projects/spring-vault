@@ -25,10 +25,10 @@ import javax.net.ssl.SSLParameters;
 
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
-import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
@@ -54,10 +54,8 @@ import static org.springframework.vault.client.ClientHttpRequestFactoryFactory.*
 
 /**
  * Factory for {@link ClientHttpConnector} that supports
- * {@link ReactorClientHttpConnector} and {@link JettyClientHttpConnector}.
- *
- * This factory configures a {@link ClientHttpConnector} depending on the available
- * dependencies.
+ * {@link ReactorClientHttpConnector} and {@link JettyClientHttpConnector}. This factory
+ * configures a {@link ClientHttpConnector} depending on the available dependencies.
  *
  * @author Mark Paluch
  * @author Ryan Gow
@@ -208,6 +206,24 @@ public class ClientHttpConnectorFactory {
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
 
+			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
+
+			ConnectionConfig connectionConfig = ConnectionConfig.custom()
+				.setConnectTimeout(connectTimeout) //
+				.setSocketTimeout(readTimeout) //
+				.build();
+
+			RequestConfig requestConfig = RequestConfig.custom()
+				.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
+				.setAuthenticationEnabled(true) //
+				.setRedirectsEnabled(true)
+				.build();
+
+			PoolingAsyncClientConnectionManagerBuilder connectionManagerBuilder = PoolingAsyncClientConnectionManagerBuilder //
+				.create()
+				.setDefaultConnectionConfig(connectionConfig);
+
 			if (hasSslConfiguration(sslConfiguration)) {
 
 				SSLContext sslContext = getSSLContext(sslConfiguration);
@@ -229,21 +245,11 @@ public class ClientHttpConnectorFactory {
 					}
 				}, null);
 
-				PoolingAsyncClientConnectionManager connectionManager = PoolingAsyncClientConnectionManagerBuilder //
-					.create()
-					.setTlsStrategy(tlsStrategy) //
-					.build(); //
-				httpClientBuilder.setConnectionManager(connectionManager);
+				connectionManagerBuilder.setTlsStrategy(tlsStrategy);
 			}
 
-			RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectTimeout(Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis()))
-				.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-				.setAuthenticationEnabled(true) //
-				.setRedirectsEnabled(true)
-				.build();
-
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 
 			return httpClientBuilder;
 		}
