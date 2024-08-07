@@ -18,7 +18,7 @@ package org.springframework.vault.authentication;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of{@link GcpProjectIdAccessor} and
@@ -34,7 +34,7 @@ enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor, GcpServiceAc
 	INSTANCE;
 
 	/**
-	 * Get a the service account id (email) to be placed in the signed JWT.
+	 * Get the service account id (email) to be placed in the signed JWT.
 	 * @param credential credential object to obtain the service account id from.
 	 * @return the service account id to use.
 	 */
@@ -49,7 +49,7 @@ enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor, GcpServiceAc
 	}
 
 	/**
-	 * Get a the GCP project id to used in Google Cloud IAM API calls.
+	 * Get the GCP project id to used in Google Cloud IAM API calls.
 	 * @param credential the credential object to obtain the project id from.
 	 * @return the service account id to use.
 	 */
@@ -58,7 +58,7 @@ enum DefaultGcpCredentialAccessors implements GcpProjectIdAccessor, GcpServiceAc
 
 		Assert.notNull(credential, "GoogleCredential must not be null");
 
-		return StringUtils.isEmpty(credential.getServiceAccountProjectId()) ? "-"
+		return ObjectUtils.isEmpty(credential.getServiceAccountProjectId()) ? "-"
 				: credential.getServiceAccountProjectId();
 	}
 

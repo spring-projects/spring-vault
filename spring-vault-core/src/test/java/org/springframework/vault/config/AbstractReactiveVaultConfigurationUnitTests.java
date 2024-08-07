@@ -48,7 +48,11 @@ class AbstractReactiveVaultConfigurationUnitTests {
 		WebClientFactory factory = context.getBean(WebClientFactory.class);
 		WebClient webClient = factory.create();
 
-		webClient.get().uri("/foo").exchange().as(StepVerifier::create).verifyError(CustomizedSignal.class);
+		webClient.get()
+			.uri("/foo")
+			.exchangeToMono(it -> it.bodyToMono(String.class))
+			.as(StepVerifier::create)
+			.verifyError(CustomizedSignal.class);
 	}
 
 	@Test
