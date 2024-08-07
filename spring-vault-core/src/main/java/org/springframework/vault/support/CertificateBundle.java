@@ -22,6 +22,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.KeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -31,7 +32,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 
 /**
@@ -317,7 +317,7 @@ public class CertificateBundle extends Certificate {
 			throw new IllegalArgumentException("No private key found in PEM-encoded key spec");
 		}
 
-		return getPrivateKey(Base64Utils.decodeFromString(privateKey), keyType);
+		return getPrivateKey(Base64.getDecoder().decode(privateKey), keyType);
 	}
 
 	private static KeySpec getPrivateKey(byte[] privateKey, String keyType)

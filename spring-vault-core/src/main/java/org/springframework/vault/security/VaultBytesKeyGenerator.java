@@ -15,11 +15,11 @@
  */
 package org.springframework.vault.security;
 
+import java.util.Base64;
 import java.util.Collections;
 
 import org.springframework.security.crypto.keygen.BytesKeyGenerator;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
@@ -82,7 +82,7 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 				Collections.singletonMap("format", "base64"));
 
 		String randomBytes = (String) response.getRequiredData().get("random_bytes");
-		return Base64Utils.decodeFromString(randomBytes);
+		return Base64.getDecoder().decode(randomBytes);
 	}
 
 }

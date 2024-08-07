@@ -24,6 +24,7 @@ import java.security.cert.X509Certificate;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +32,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 
 /**
  * Represents a PEM object that is internally decoded to a DER object. Typically, used to
@@ -56,7 +56,7 @@ public class PemObject {
 
 		this.objectType = objectType;
 		String sanitized = content.replaceAll("\r", "").replaceAll("\n", "");
-		this.content = Base64Utils.decodeFromString(sanitized);
+		this.content = Base64.getDecoder().decode(sanitized);
 	}
 
 	/**

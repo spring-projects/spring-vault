@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,7 +27,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultTransitKeyConfiguration;
@@ -101,8 +101,8 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncrypt() {
 
-		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext", Base64Utils.encodeToString("that message is secret".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey", Collections
+			.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("ciphertext")).isNotEmpty();
 	}
@@ -110,14 +110,14 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldEncryptAndDecrypt() {
 
-		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey",
-				Collections.singletonMap("plaintext", Base64Utils.encodeToString("that message is secret".getBytes())));
+		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey", Collections
+			.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
 
 		VaultResponse decrypted = this.vaultOperations.write("transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext", response.getRequiredData().get("ciphertext")));
 
 		assertThat((String) decrypted.getRequiredData().get("plaintext"))
-			.isEqualTo(Base64Utils.encodeToString("that message is secret".getBytes()));
+			.isEqualTo(Base64.getEncoder().encodeToString("that message is secret".getBytes()));
 	}
 
 }

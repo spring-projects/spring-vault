@@ -16,6 +16,7 @@
 package org.springframework.vault.authentication;
 
 import java.io.ByteArrayInputStream;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,7 +38,6 @@ import software.amazon.awssdk.regions.Region;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -80,7 +80,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	private static final String REQUEST_BODY = "Action=GetCallerIdentity&Version=2011-06-15";
 
-	private static final String REQUEST_BODY_BASE64_ENCODED = Base64Utils.encodeToString(REQUEST_BODY.getBytes());
+	private static final String REQUEST_BODY_BASE64_ENCODED = Base64.getEncoder()
+		.encodeToString(REQUEST_BODY.getBytes());
 
 	private final AwsIamAuthenticationOptions options;
 
@@ -195,12 +196,13 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Map<String, String> login = new HashMap<>();
 
 		login.put("iam_http_request_method", "POST");
-		login.put("iam_request_url", Base64Utils.encodeToString(options.getEndpointUri().toString().getBytes()));
+		login.put("iam_request_url",
+				Base64.getEncoder().encodeToString(options.getEndpointUri().toString().getBytes()));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 
 		String headerJson = getSignedHeaders(options, credentials, region);
 
-		login.put("iam_request_headers", Base64Utils.encodeToString(headerJson.getBytes()));
+		login.put("iam_request_headers", Base64.getEncoder().encodeToString(headerJson.getBytes()));
 
 		if (!ObjectUtils.isEmpty(options.getRole())) {
 			login.put("role", options.getRole());

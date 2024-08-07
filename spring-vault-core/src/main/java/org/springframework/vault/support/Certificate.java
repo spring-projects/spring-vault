@@ -21,12 +21,12 @@ import java.security.KeyStore;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import org.springframework.util.Assert;
-import org.springframework.util.Base64Utils;
 import org.springframework.vault.VaultException;
 
 /**
@@ -155,7 +155,7 @@ public class Certificate {
 			}
 		}
 		else {
-			result.addAll(KeystoreUtil.getCertificates(Base64Utils.decodeFromString(certificates)));
+			result.addAll(KeystoreUtil.getCertificates(Base64.getDecoder().decode(certificates)));
 		}
 
 		return result;
