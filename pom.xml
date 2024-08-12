@@ -20,7 +20,7 @@
 	<properties>
 		<maven.antora-version>1.0.0-alpha.4</maven.antora-version>
 		<antora.version>0.0.3</antora.version>
-		<assertj-core.version>3.25.1</assertj-core.version>
+		<assertj-core.version>3.26.3</assertj-core.version>
 		<aws-java-sdk.version>2.21.46</aws-java-sdk.version>
 		<bcpkix-jdk15on.version>1.70</bcpkix-jdk15on.version>
 		<google-api-services-iam.version>v1-rev20221013-2.0.0
@@ -28,17 +28,17 @@
 		<google-cloud-iamcredentials.version>2.24.0</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>1.20.0
 		</google-auth-library-oauth2-http.version>
-		<httpclient5.version>5.3</httpclient5.version>
-		<httpcore5.version>5.2.4</httpcore5.version>
-		<jackson-databind.version>2.15.3</jackson-databind.version>
-		<jetty-reactive-httpclient.version>4.0.1</jetty-reactive-httpclient.version>
+		<httpclient5.version>5.3.1</httpclient5.version>
+		<httpcore5.version>5.2.5</httpcore5.version>
+		<jackson-databind.version>2.15.4</jackson-databind.version>
+		<jetty-reactive-httpclient.version>4.0.6</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
-		<junit.version>5.10.1</junit.version>
+		<junit.version>5.10.3</junit.version>
 		<kotlin.version>1.8.22</kotlin.version>
 		<kotlin-coroutines.version>1.7.3</kotlin-coroutines.version>
-		<mockk.version>1.13.7</mockk.version>
-		<mockito-core.version>5.8.0</mockito-core.version>
-		<netty.version>4.1.104.Final</netty.version>
+		<mockk.version>1.13.12</mockk.version>
+		<mockito-core.version>5.12.0</mockito-core.version>
+		<netty.version>4.1.112.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>6.2.0-M6</spring.version>
 		<spring-data-bom.version>2023.1.2</spring-data-bom.version>
