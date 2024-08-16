@@ -40,7 +40,7 @@
 		<mockito-core.version>5.12.0</mockito-core.version>
 		<netty.version>4.1.112.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<spring.version>6.1.12-SNAPSHOT</spring.version>
+		<spring.version>6.1.12</spring.version>
 		<spring-data-bom.version>2023.1.9-SNAPSHOT</spring-data-bom.version>
 		<spring-security-bom.version>6.2.6-SNAPSHOT</spring-security-bom.version>
 		<reactor.version>2023.0.9-SNAPSHOT</reactor.version>
