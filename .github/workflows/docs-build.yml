@@ -48,6 +48,11 @@ jobs:
       with:
         path: ~/.m2
         key: ${{ runner.os }}-maven
+    - name: Cache Antora
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache
+        key: ${{ runner.os }}-antora
     - name: Run Antora
       run: ./mvnw -B antora
     - name: Publish Docs
