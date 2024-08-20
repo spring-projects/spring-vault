@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.support;
 
-import org.springframework.util.Assert;
-
 import java.util.Objects;
+
+import org.springframework.util.Assert;
 
 /**
  * Value object representing cipher text with an optional {@link VaultTransformContext}.
@@ -75,9 +75,8 @@ public class TransformCiphertext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof TransformCiphertext))
+		if (!(o instanceof TransformCiphertext that))
 			return false;
-		TransformCiphertext that = (TransformCiphertext) o;
 		return this.ciphertext.equals(that.ciphertext) && this.context.equals(that.context);
 	}
 

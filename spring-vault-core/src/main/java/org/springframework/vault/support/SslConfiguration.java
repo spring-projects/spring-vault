@@ -163,7 +163,7 @@ public class SslConfiguration {
 	public static SslConfiguration forTrustStore(Resource trustStore, @Nullable char[] trustStorePassword) {
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
-		Assert.isTrue(trustStore.exists(), () -> String.format("TrustStore %s does not exist", trustStore));
+		Assert.isTrue(trustStore.exists(), () -> "TrustStore %s does not exist".formatted(trustStore));
 
 		return new SslConfiguration(KeyStoreConfiguration.unconfigured(), KeyConfiguration.unconfigured(),
 				new KeyStoreConfiguration(trustStore, trustStorePassword, DEFAULT_KEYSTORE_TYPE));
@@ -240,7 +240,7 @@ public class SslConfiguration {
 			KeyConfiguration keyConfiguration) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
-		Assert.isTrue(keyStore.exists(), () -> String.format("KeyStore %s does not exist", keyStore));
+		Assert.isTrue(keyStore.exists(), () -> "KeyStore %s does not exist".formatted(keyStore));
 		Assert.notNull(keyConfiguration, "KeyConfiguration must not be null");
 
 		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword, DEFAULT_KEYSTORE_TYPE),
@@ -263,10 +263,10 @@ public class SslConfiguration {
 			@Nullable char[] trustStorePassword) {
 
 		Assert.notNull(keyStore, "KeyStore must not be null");
-		Assert.isTrue(keyStore.exists(), () -> String.format("KeyStore %s does not exist", keyStore));
+		Assert.isTrue(keyStore.exists(), () -> "KeyStore %s does not exist".formatted(keyStore));
 
 		Assert.notNull(trustStore, "TrustStore must not be null");
-		Assert.isTrue(trustStore.exists(), String.format("TrustStore %s does not exist", trustStore));
+		Assert.isTrue(trustStore.exists(), "TrustStore %s does not exist".formatted(trustStore));
 
 		return new SslConfiguration(new KeyStoreConfiguration(keyStore, keyStorePassword, DEFAULT_KEYSTORE_TYPE),
 				new KeyStoreConfiguration(trustStore, trustStorePassword, DEFAULT_KEYSTORE_TYPE));
@@ -482,7 +482,7 @@ public class SslConfiguration {
 
 			Assert.notNull(resource, "Resource must not be null");
 			Assert.isTrue(resource instanceof AbsentResource || resource.exists(),
-					() -> String.format("Resource %s does not exist", resource));
+					() -> "Resource %s does not exist".formatted(resource));
 			Assert.notNull(storeType, "Keystore type must not be null");
 
 			this.resource = resource;

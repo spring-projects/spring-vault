@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.junit.jupiter.api.Assumptions.*;
+import static org.springframework.vault.util.Settings.*;
+
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -27,9 +30,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
-
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
  * Integration test base class for {@link KubernetesAuthentication} tests.
@@ -54,7 +54,7 @@ public abstract class KubernetesAuthenticationIntegrationTestBase extends Integr
 
 			String certificate = Files.contentOf(new File(workDir, "minikube/ca.crt"), StandardCharsets.US_ASCII);
 
-			String host = String.format("https://%s:8443", minikubeIp);
+			String host = "https://%s:8443".formatted(minikubeIp);
 
 			Map<String, String> kubeConfig = new HashMap<>();
 			kubeConfig.put("kubernetes_ca_cert", certificate);

@@ -189,7 +189,7 @@ public class VaultClients {
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
 
-		return String.format("%s://%s:%s/%s", endpoint.getScheme(), endpoint.getHost(), endpoint.getPort(),
+		return "%s://%s:%s/%s".formatted(endpoint.getScheme(), endpoint.getHost(), endpoint.getPort(),
 				endpoint.getPath());
 	}
 

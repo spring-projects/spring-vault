@@ -34,12 +34,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
@@ -169,7 +167,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		this.vaultOperations.write(String.format("sys/mounts/%s", path), vaultMount);
+		this.vaultOperations.write("sys/mounts/%s".formatted(path), vaultMount);
 	}
 
 	@Override
@@ -182,7 +180,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.delete(String.format("sys/mounts/%s", path));
+		this.vaultOperations.delete("sys/mounts/%s".formatted(path));
 	}
 
 	@Override
@@ -191,7 +189,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
 
-		this.vaultOperations.write(String.format("sys/auth/%s", path), vaultMount);
+		this.vaultOperations.write("sys/auth/%s".formatted(path), vaultMount);
 	}
 
 	@Override
@@ -204,7 +202,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.delete(String.format("sys/auth/%s", path));
+		this.vaultOperations.delete("sys/auth/%s".formatted(path));
 	}
 
 	@Override
@@ -279,7 +277,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		this.vaultOperations.delete(String.format("sys/policy/%s", name));
+		this.vaultOperations.delete("sys/policy/%s".formatted(name));
 	}
 
 	@Override
@@ -313,16 +311,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class GetMounts implements RestOperationsCallback<Map<String, VaultMount>> {
+	private record GetMounts(String path) implements RestOperationsCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
-
-		private final String path;
-
-		GetMounts(String path) {
-			this.path = path;
-		}
 
 		@Override
 		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
@@ -439,9 +431,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof VaultInitializationResponseImpl))
+			if (!(o instanceof VaultInitializationResponseImpl that))
 				return false;
-			VaultInitializationResponseImpl that = (VaultInitializationResponseImpl) o;
 			return this.keys.equals(that.keys) && this.rootToken.equals(that.rootToken);
 		}
 
@@ -503,9 +494,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof VaultUnsealStatusImpl))
+			if (!(o instanceof VaultUnsealStatusImpl that))
 				return false;
-			VaultUnsealStatusImpl that = (VaultUnsealStatusImpl) o;
 			return this.sealed == that.sealed && this.secretThreshold == that.secretThreshold
 					&& this.secretShares == that.secretShares && this.progress == that.progress;
 		}
@@ -584,9 +574,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof VaultHealthImpl))
+			if (!(o instanceof VaultHealthImpl that))
 				return false;
-			VaultHealthImpl that = (VaultHealthImpl) o;
 			return this.initialized == that.initialized && this.sealed == that.sealed && this.standby == that.standby
 					&& this.performanceStandby == that.performanceStandby
 					&& this.replicationRecoverySecondary == that.replicationRecoverySecondary

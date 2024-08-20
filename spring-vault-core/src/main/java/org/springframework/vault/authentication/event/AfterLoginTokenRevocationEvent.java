@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication.event;
 
+import java.io.Serial;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.vault.support.VaultToken;
 
@@ -27,6 +29,7 @@ import org.springframework.vault.support.VaultToken;
  */
 public class AfterLoginTokenRevocationEvent extends AuthenticationEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

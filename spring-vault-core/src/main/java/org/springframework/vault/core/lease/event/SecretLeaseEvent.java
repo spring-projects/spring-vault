@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core.lease.event;
 
+import java.io.Serial;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.lang.Nullable;
 import org.springframework.vault.core.lease.domain.Lease;
@@ -31,6 +33,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
  */
 public abstract class SecretLeaseEvent extends ApplicationEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Nullable

@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -25,9 +27,6 @@ import org.springframework.vault.authentication.AppRoleAuthenticationOptions.Sec
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link AppRoleAuthentication}.
@@ -80,7 +79,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 
 		String roleId = getRoleId("with-secret-id");
 		String secretId = (String) getVaultOperations()
-			.write(String.format("auth/approle/role/%s/secret-id", "with-secret-id"), null)
+			.write("auth/approle/role/%s/secret-id".formatted("with-secret-id"), null)
 			.getRequiredData()
 			.get("secret_id");
 

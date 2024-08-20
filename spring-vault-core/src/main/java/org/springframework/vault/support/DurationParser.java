@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Utility to parse a Go format duration into {@link Duration}.
@@ -57,7 +56,7 @@ public class DurationParser {
 		}
 
 		if (!VERIFY_PATTERN.matcher(duration.toLowerCase(Locale.ENGLISH)).matches()) {
-			throw new IllegalArgumentException(String.format("Cannot parse '%s' into a Duration", duration));
+			throw new IllegalArgumentException("Cannot parse '%s' into a Duration".formatted(duration));
 		}
 
 		Matcher matcher = PARSE_PATTERN.matcher(duration.toLowerCase(Locale.ENGLISH));
@@ -67,32 +66,17 @@ public class DurationParser {
 			int num = Integer.parseInt(matcher.group(1));
 			String typ = matcher.group(2);
 
-			switch (typ) {
-				case "ns":
-					result = result.plus(Duration.ofNanos(num));
-					break;
-				case "us":
-					result = result.plus(Duration.ofNanos(num * 1000));
-					break;
-				case "ms":
-					result = result.plus(Duration.ofMillis(num));
-					break;
-				case "s":
-					result = result.plus(Duration.ofSeconds(num));
-					break;
-				case "m":
-					result = result.plus(Duration.ofMinutes(num));
-					break;
-				case "h":
-					result = result.plus(Duration.ofHours(num));
-					break;
-				case "d":
-					result = result.plus(Duration.ofDays(num));
-					break;
-				case "w":
-					result = result.plus(Duration.ofDays(num * 7));
-					break;
-			}
+			result = switch (typ) {
+				case "ns" -> result.plus(Duration.ofNanos(num));
+				case "us" -> result.plus(Duration.ofNanos(num * 1000));
+				case "ms" -> result.plus(Duration.ofMillis(num));
+				case "s" -> result.plus(Duration.ofSeconds(num));
+				case "m" -> result.plus(Duration.ofMinutes(num));
+				case "h" -> result.plus(Duration.ofHours(num));
+				case "d" -> result.plus(Duration.ofDays(num));
+				case "w" -> result.plus(Duration.ofDays(num * 7));
+				default -> result;
+			};
 		}
 
 		return result;

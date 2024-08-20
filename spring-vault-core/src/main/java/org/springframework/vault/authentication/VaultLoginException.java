@@ -58,10 +58,10 @@ public class VaultLoginException extends VaultException {
 
 			String response = ((RestClientResponseException) cause).getResponseBodyAsString();
 			return new VaultLoginException(
-					String.format("Cannot login using %s: %s", authMethod, VaultResponses.getError(response)), cause);
+					"Cannot login using %s: %s".formatted(authMethod, VaultResponses.getError(response)), cause);
 		}
 
-		return new VaultLoginException(String.format("Cannot login using %s", cause), cause);
+		return new VaultLoginException("Cannot login using %s".formatted(cause), cause);
 	}
 
 }

@@ -156,9 +156,8 @@ public class Policy {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Policy))
+		if (!(o instanceof Policy policy))
 			return false;
-		Policy policy = (Policy) o;
 		return this.rules.equals(policy.rules);
 	}
 
@@ -297,9 +296,8 @@ public class Policy {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof Rule))
+			if (!(o instanceof Rule rule))
 				return false;
-			Rule rule = (Rule) o;
 			return this.path.equals(rule.path);
 		}
 
@@ -490,17 +488,11 @@ public class Policy {
 				Assert.state(StringUtils.hasText(this.path), "Path must not be empty");
 				Assert.state(!this.capabilities.isEmpty(), "Rule must define one or more capabilities");
 
-				List<Capability> capabilities;
-				switch (this.capabilities.size()) {
-					case 0:
-						capabilities = Collections.emptyList();
-						break;
-					case 1:
-						capabilities = Collections.singletonList(this.capabilities.iterator().next());
-						break;
-					default:
-						capabilities = Collections.unmodifiableList(new ArrayList<>(this.capabilities));
-				}
+				List<Capability> capabilities = switch (this.capabilities.size()) {
+					case 0 -> Collections.emptyList();
+					case 1 -> Collections.singletonList(this.capabilities.iterator().next());
+					default -> Collections.unmodifiableList(new ArrayList<>(this.capabilities));
+				};
 
 				return new Rule(this.path, capabilities, this.minWrappingTtl, this.maxWrappingTtl,
 						createMap(this.allowedParameters), createMap(this.deniedParameters));

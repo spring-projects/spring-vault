@@ -15,16 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
+import static java.util.Collections.*;
+import static org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions.*;
+import static org.springframework.vault.support.Policy.BuiltinCapabilities.*;
+
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.util.IntegrationTestSupport;
-
-import static java.util.Collections.*;
-import static org.springframework.vault.authentication.UsernamePasswordAuthenticationOptions.*;
-import static org.springframework.vault.support.Policy.BuiltinCapabilities.*;
 
 /**
  * Integration test base class for {@link UsernamePasswordAuthentication} tests.
@@ -49,7 +49,7 @@ public abstract class UsernamePasswordAuthenticationIntegrationTestBase extends 
 		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy(DEFAULT_USERPASS_AUTHENTICATION_PATH, POLICY);
 		prepare().getVaultOperations()
 			.doWithSession(restOperations -> restOperations.postForEntity(
-					String.format("auth/%s/users/%s", DEFAULT_USERPASS_AUTHENTICATION_PATH, username),
+					"auth/%s/users/%s".formatted(DEFAULT_USERPASS_AUTHENTICATION_PATH, username),
 					singletonMap("password", password), Map.class));
 	}
 

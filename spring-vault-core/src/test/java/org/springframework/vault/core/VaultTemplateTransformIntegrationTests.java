@@ -15,6 +15,10 @@
  */
 package org.springframework.vault.core;
 
+import static org.assertj.core.api.Assertions.*;
+
+import java.util.Base64;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,10 +33,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Base64;
 
 /**
  * Integration tests for {@link VaultTemplate} using the {@code transform} backend.
@@ -79,8 +79,8 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 	void shouldEncode() {
 
 		VaultResponse response = this.vaultOperations.write("transform/encode/myrole",
-				String.format("{\"value\": \"123-45-6789\", \"tweak\": \"%s\"}",
-						Base64.getEncoder().encodeToString("somenum".getBytes())));
+				"{\"value\": \"123-45-6789\", \"tweak\": \"%s\"}"
+					.formatted(Base64.getEncoder().encodeToString("somenum".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("encoded_value")).isNotEmpty();
 	}
@@ -90,12 +90,12 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 
 		String value = "123-45-6789";
 		VaultResponse response = this.vaultOperations.write("transform/encode/myrole",
-				String.format("{\"value\": \"%s\", \"tweak\": \"%s\"}", value,
+				"{\"value\": \"%s\", \"tweak\": \"%s\"}".formatted(value,
 						Base64.getEncoder().encodeToString("somenum".getBytes())));
 
 		String encoded = (String) response.getRequiredData().get("encoded_value");
 		VaultResponse decoded = this.vaultOperations.write("transform/decode/myrole",
-				String.format("{\"value\": \"%s\", \"tweak\": \"%s\"}", encoded,
+				"{\"value\": \"%s\", \"tweak\": \"%s\"}".formatted(encoded,
 						Base64.getEncoder().encodeToString("somenum".getBytes())));
 
 		assertThat((String) decoded.getRequiredData().get("decoded_value")).isEqualTo(value);

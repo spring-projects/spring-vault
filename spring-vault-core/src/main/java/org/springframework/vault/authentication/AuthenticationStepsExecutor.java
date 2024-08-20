@@ -81,15 +81,14 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 			return (VaultToken) state;
 		}
 
-		if (state instanceof VaultResponse) {
+		if (state instanceof VaultResponse response) {
 
-			VaultResponse response = (VaultResponse) state;
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 			return LoginTokenUtil.from(response.getAuth());
 		}
 
 		throw new IllegalStateException(
-				String.format("Cannot retrieve VaultToken from authentication chain. Got instead %s", state));
+				"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(state));
 	}
 
 	@SuppressWarnings({ "unchecked", "ConstantConditions" })
@@ -100,7 +99,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Executing %s with current state %s", o, state));
+				logger.debug("Executing %s with current state %s".formatted(o, state));
 			}
 
 			try {
@@ -129,17 +128,15 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				}
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Executed %s with current state %s", o, state));
+					logger.debug("Executed %s with current state %s".formatted(o, state));
 				}
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultLoginException(
-						String.format("HTTP request %s in state %s failed with Status %s and body %s", o, state,
-								e.getStatusCode().value(), VaultResponses.getError(e.getResponseBodyAsString())),
-						e);
+				throw new VaultLoginException("HTTP request %s in state %s failed with Status %s and body %s".formatted(
+						o, state, e.getStatusCode().value(), VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 			catch (RuntimeException e) {
-				throw new VaultLoginException(String.format("Authentication execution failed in %s", o), e);
+				throw new VaultLoginException("Authentication execution failed in %s".formatted(o), e);
 			}
 		}
 		return state;

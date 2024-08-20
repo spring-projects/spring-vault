@@ -54,9 +54,8 @@ public class Signature {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Signature))
+		if (!(o instanceof Signature that))
 			return false;
-		Signature that = (Signature) o;
 		return this.signature.equals(that.signature);
 	}
 

@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core.lease.event;
 
+import java.io.Serial;
+
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
@@ -26,6 +28,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
  */
 public class SecretNotFoundEvent extends SecretLeaseEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

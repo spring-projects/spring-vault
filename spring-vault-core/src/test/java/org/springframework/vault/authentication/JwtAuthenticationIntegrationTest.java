@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.authentication.JwtAuthentication.*;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.time.Instant;
@@ -37,10 +40,6 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.vault.authentication.JwtAuthentication.DEFAULT_JWT_AUTHENTICATION_PATH;
 
 /**
  * Integration tests for {@link KubernetesAuthentication} using
@@ -82,11 +81,11 @@ class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 	}
 
 	private String encodePublicKey() {
-		return String.format("""
+		return """
 				-----BEGIN PUBLIC KEY-----
 				%s
 				-----END PUBLIC KEY-----
-				""", Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
+				""".formatted(Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded()));
 	}
 
 	private String createToken(String user) throws JOSEException {

@@ -21,7 +21,6 @@ import java.util.function.Supplier;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Authentication options for {@link PcfAuthentication}.
@@ -241,7 +240,7 @@ public class PcfAuthenticationOptions {
 			String value = System.getenv(name);
 
 			if (ObjectUtils.isEmpty(value)) {
-				throw new IllegalStateException(String.format("Environment variable %s not set", name));
+				throw new IllegalStateException("Environment variable %s not set".formatted(name));
 			}
 
 			return value;

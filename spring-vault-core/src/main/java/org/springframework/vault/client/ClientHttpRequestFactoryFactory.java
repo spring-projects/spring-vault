@@ -63,7 +63,6 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -216,7 +215,7 @@ public class ClientHttpRequestFactoryFactory {
 			throws IOException, GeneralSecurityException {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Loading keystore from %s", keyStoreConfiguration.getResource()));
+			logger.debug("Loading keystore from %s".formatted(keyStoreConfiguration.getResource()));
 		}
 
 		InputStream inputStream = null;
@@ -233,7 +232,7 @@ public class ClientHttpRequestFactoryFactory {
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Keystore loaded with %d entries", keyStore.size()));
+				logger.debug("Keystore loaded with %d entries".formatted(keyStore.size()));
 			}
 		}
 		finally {
@@ -253,7 +252,7 @@ public class ClientHttpRequestFactoryFactory {
 				String alias = cert.getSubjectX500Principal().getName();
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(String.format("Adding certificate with alias %s", alias));
+					logger.debug("Adding certificate with alias %s".formatted(alias));
 				}
 
 				keyStore.setCertificateEntry(alias, cert);

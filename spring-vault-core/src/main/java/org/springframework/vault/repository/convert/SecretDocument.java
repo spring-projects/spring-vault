@@ -22,7 +22,6 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.Versioned;
 
 /**
  * Vault database exchange object containing data before/after it's exchanged with Vault.
@@ -186,10 +185,9 @@ public class SecretDocument {
 		if (this == o) {
 			return true;
 		}
-		if (!(o instanceof SecretDocument)) {
+		if (!(o instanceof SecretDocument that)) {
 			return false;
 		}
-		SecretDocument that = (SecretDocument) o;
 		if (!ObjectUtils.nullSafeEquals(this.id, that.id)) {
 			return false;
 		}

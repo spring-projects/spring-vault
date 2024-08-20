@@ -331,13 +331,7 @@ class PropertyMapper {
 	/**
 	 * Supplier that will catch and ignore any {@link NullPointerException}.
 	 */
-	private static class NullPointerExceptionSafeSupplier<T> implements Supplier<T> {
-
-		private final Supplier<T> supplier;
-
-		NullPointerExceptionSafeSupplier(Supplier<T> supplier) {
-			this.supplier = supplier;
-		}
+	private record NullPointerExceptionSafeSupplier<T>(Supplier<T> supplier) implements Supplier<T> {
 
 		@Override
 		public T get() {

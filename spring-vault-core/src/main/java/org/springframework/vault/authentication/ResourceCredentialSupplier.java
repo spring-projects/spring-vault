@@ -68,7 +68,7 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	 */
 	public ResourceCredentialSupplier(Resource resource) {
 
-		Assert.isTrue(resource.exists(), () -> String.format("Resource %s does not exist", resource));
+		Assert.isTrue(resource.exists(), () -> "Resource %s does not exist".formatted(resource));
 
 		this.resource = resource;
 	}
@@ -80,7 +80,7 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 			return new String(readToken(this.resource), CHARSET);
 		}
 		catch (IOException e) {
-			throw new VaultException(String.format("Credential retrieval from %s failed", this.resource), e);
+			throw new VaultException("Credential retrieval from %s failed".formatted(this.resource), e);
 		}
 	}
 

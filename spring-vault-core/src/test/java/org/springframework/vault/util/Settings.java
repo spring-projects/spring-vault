@@ -68,8 +68,8 @@ public class Settings {
 			searchLevel = searchLevel.getParentFile();
 		}
 
-		throw new IllegalStateException(String.format("Cannot find work directory in %s or any parent directories",
-				directory.getAbsoluteFile()));
+		throw new IllegalStateException(
+				"Cannot find work directory in %s or any parent directories".formatted(directory.getAbsoluteFile()));
 	}
 
 	/**

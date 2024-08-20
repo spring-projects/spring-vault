@@ -109,7 +109,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 
 	@Override
 	String createDataPath(String path) {
-		return String.format("%s/%s", this.path, path);
+		return "%s/%s".formatted(this.path, path);
 	}
 
 }

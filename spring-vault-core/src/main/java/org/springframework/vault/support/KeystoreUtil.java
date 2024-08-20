@@ -127,7 +127,7 @@ class KeystoreUtil {
 
 		int counter = 0;
 		for (X509Certificate certificate : certificates) {
-			keyStore.setCertificateEntry(String.format("cert_%d", counter++), certificate);
+			keyStore.setCertificateEntry("cert_%d".formatted(counter++), certificate);
 		}
 
 		return keyStore;

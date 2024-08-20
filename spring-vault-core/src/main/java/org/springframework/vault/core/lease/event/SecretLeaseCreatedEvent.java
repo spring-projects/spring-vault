@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core.lease.event;
 
+import java.io.Serial;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,6 +30,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
  */
 public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Map<String, Object> secrets;

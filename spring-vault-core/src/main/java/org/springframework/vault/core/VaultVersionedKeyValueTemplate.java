@@ -89,7 +89,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()
-				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
+				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
 
 		VersionedResponse response = this.vaultOperations.doWithSession(restOperations -> {
 
@@ -130,9 +130,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		Map<Object, Object> data = new LinkedHashMap<>();
 		Map<Object, Object> requestOptions = new LinkedHashMap<>();
 
-		if (body instanceof Versioned) {
-
-			Versioned<?> versioned = (Versioned<?>) body;
+		if (body instanceof Versioned<?> versioned) {
 
 			data.put("data", versioned.getData());
 			data.put("options", requestOptions);

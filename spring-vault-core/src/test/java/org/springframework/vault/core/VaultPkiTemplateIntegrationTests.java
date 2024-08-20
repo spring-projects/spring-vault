@@ -15,6 +15,9 @@
  */
 package org.springframework.vault.core;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.util.Settings.*;
+
 import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -58,11 +61,6 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 import org.springframework.web.client.HttpClientErrorException;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.springframework.vault.util.Settings.findWorkDir;
 
 /**
  * Integration tests for {@link VaultPkiTemplate} through {@link VaultPkiOperations}.
@@ -245,7 +243,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		@Override
 		public String toString() {
-			return String.format("[%s, %s, %s]", this.format, this.privateKeyFormat, this.keyType);
+			return "[%s, %s, %s]".formatted(this.format, this.privateKeyFormat, this.keyType);
 		}
 
 	}

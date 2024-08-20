@@ -66,13 +66,13 @@ class VaultVersionExtension implements ExecutionCondition {
 
 			if (runningVersion.isGreaterThanOrEqualTo(requiredVersion)) {
 				return ConditionEvaluationResult
-					.enabled(String.format("Test is enabled, @VaultVersion(%s) is met with Vault running version %s",
-							requiredVersion, runningVersion));
+					.enabled("Test is enabled, @VaultVersion(%s) is met with Vault running version %s"
+						.formatted(requiredVersion, runningVersion));
 			}
 
 			return ConditionEvaluationResult
-				.disabled(String.format("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s",
-						requiredVersion, runningVersion));
+				.disabled("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s"
+					.formatted(requiredVersion, runningVersion));
 		}
 
 		if (disabled.isPresent()) {
@@ -80,14 +80,14 @@ class VaultVersionExtension implements ExecutionCondition {
 			Version disabledVersion = Version.parse(disabled.get().value());
 
 			if (runningVersion.isGreaterThanOrEqualTo(disabledVersion)) {
-				return ConditionEvaluationResult.disabled(String.format(
-						"Test is disabled, @DisabledOnVaultVersion(%s) is met with Vault running version %s",
-						disabledVersion, runningVersion));
+				return ConditionEvaluationResult
+					.disabled("Test is disabled, @DisabledOnVaultVersion(%s) is met with Vault running version %s"
+						.formatted(disabledVersion, runningVersion));
 			}
 
-			return ConditionEvaluationResult.enabled(String.format(String.format(
-					"Test is enabled, @DisabledOnVaultVersion(%s) is not met with Vault running version %s",
-					disabledVersion, runningVersion)));
+			return ConditionEvaluationResult
+				.enabled("Test is enabled, @DisabledOnVaultVersion(%s) is not met with Vault running version %s"
+					.formatted(disabledVersion, runningVersion));
 		}
 
 		return ENABLED_BY_DEFAULT;

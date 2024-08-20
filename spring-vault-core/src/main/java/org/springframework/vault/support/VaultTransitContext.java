@@ -107,9 +107,8 @@ public class VaultTransitContext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof VaultTransitContext))
+		if (!(o instanceof VaultTransitContext that))
 			return false;
-		VaultTransitContext that = (VaultTransitContext) o;
 		return Arrays.equals(this.context, that.context) && Arrays.equals(this.nonce, that.nonce)
 				&& this.keyVersion == that.keyVersion;
 	}

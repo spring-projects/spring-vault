@@ -66,9 +66,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 		RepositoryComposition.RepositoryFragments fragments = super.getRepositoryFragments(metadata, operations);
 
 		if (RevisionRepository.class.isAssignableFrom(metadata.getRepositoryInterface())
-				&& operations instanceof VaultKeyValueTemplate) {
-
-			VaultKeyValueTemplate template = (VaultKeyValueTemplate) operations;
+				&& operations instanceof VaultKeyValueTemplate template) {
 
 			VaultPersistentEntity<?> entity = (VaultPersistentEntity<?>) this.operations.getMappingContext()
 				.getRequiredPersistentEntity(metadata.getDomainType());

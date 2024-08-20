@@ -27,7 +27,17 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
-import org.springframework.vault.core.lease.event.*;
+import org.springframework.vault.core.lease.event.AfterSecretLeaseRenewedEvent;
+import org.springframework.vault.core.lease.event.AfterSecretLeaseRevocationEvent;
+import org.springframework.vault.core.lease.event.BeforeSecretLeaseRevocationEvent;
+import org.springframework.vault.core.lease.event.LeaseErrorListener;
+import org.springframework.vault.core.lease.event.LeaseListener;
+import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseErrorEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
+import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
+import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 
 /**
  * Publisher for {@link SecretLeaseEvent}s.
@@ -229,8 +239,7 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 
 		@Override
 		public void onLeaseError(SecretLeaseEvent leaseEvent, Exception exception) {
-			logger.warn(
-					String.format("[%s] %s %s", leaseEvent.getSource(), leaseEvent.getLease(), exception.getMessage()),
+			logger.warn("[%s] %s %s".formatted(leaseEvent.getSource(), leaseEvent.getLease(), exception.getMessage()),
 					exception);
 		}
 

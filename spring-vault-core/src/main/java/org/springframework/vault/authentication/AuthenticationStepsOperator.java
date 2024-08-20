@@ -101,9 +101,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 				return (VaultToken) stateObject;
 			}
 
-			if (stateObject instanceof VaultResponse) {
-
-				VaultResponse response = (VaultResponse) stateObject;
+			if (stateObject instanceof VaultResponse response) {
 
 				Assert.state(response.getAuth() != null, "Auth field must not be null");
 
@@ -111,7 +109,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			}
 
 			throw new IllegalStateException(
-					String.format("Cannot retrieve VaultToken from authentication chain. Got instead %s", stateObject));
+					"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(stateObject));
 		}).onErrorMap(t -> new VaultLoginException("Cannot retrieve VaultToken from authentication chain", t));
 	}
 
@@ -123,7 +121,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		for (Node<?> o : steps) {
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Executing %s with current state %s", o, state));
+				logger.debug("Executing %s with current state %s".formatted(o, state));
 			}
 
 			if (o instanceof HttpRequestNode) {
@@ -152,7 +150,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			}
 
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Executed %s with current state %s", o, state));
+				logger.debug("Executed %s with current state %s".formatted(o, state));
 			}
 		}
 		return state;
@@ -217,11 +215,9 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 		Supplier<?> supplier = supplierStep.getSupplier();
 
-		if (!(supplier instanceof ResourceCredentialSupplier)) {
+		if (!(supplier instanceof ResourceCredentialSupplier resourceSupplier)) {
 			return Mono.fromSupplier(supplierStep.getSupplier()).subscribeOn(Schedulers.boundedElastic());
 		}
-
-		ResourceCredentialSupplier resourceSupplier = (ResourceCredentialSupplier) supplier;
 
 		return DataBufferUtils.join(DataBufferUtils.read(resourceSupplier.getResource(), this.factory, 4096))
 			.map(dataBuffer -> {
@@ -230,7 +226,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 				return (Object) result;
 			})
 			.onErrorMap(IOException.class, e -> new VaultException(
-					String.format("Credential retrieval from %s failed", resourceSupplier.getResource()), e));
+					"Credential retrieval from %s failed".formatted(resourceSupplier.getResource()), e));
 	}
 
 	enum Undefinded {

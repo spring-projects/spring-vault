@@ -140,9 +140,8 @@ public class TransformPlaintext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof TransformPlaintext))
+		if (!(o instanceof TransformPlaintext that))
 			return false;
-		TransformPlaintext that = (TransformPlaintext) o;
 		if (!ObjectUtils.nullSafeEquals(this.plaintext, that.plaintext)) {
 			return false;
 		}

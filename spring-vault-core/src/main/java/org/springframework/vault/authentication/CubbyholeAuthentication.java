@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -32,8 +34,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.method;
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
@@ -225,9 +225,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 			return false;
 		}
 
-		if (token instanceof LoginToken) {
-
-			LoginToken loginToken = (LoginToken) token;
+		if (token instanceof LoginToken loginToken) {
 
 			if (loginToken.getLeaseDuration().isZero()) {
 				return false;
@@ -273,8 +271,8 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		Map<String, Object> data = response.getData();
 		if (data == null || data.isEmpty()) {
 			throw new VaultLoginException(
-					String.format("Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token",
-							options.getPath()));
+					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token"
+						.formatted(options.getPath()));
 		}
 
 		if (data.size() == 1) {
@@ -282,8 +280,8 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 			return VaultToken.of(token);
 		}
 
-		throw new VaultLoginException(String
-			.format("Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token", url));
+		throw new VaultLoginException(
+				"Cannot retrieve Token from Cubbyhole: Response at %s does not contain an unique token".formatted(url));
 	}
 
 }

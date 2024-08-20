@@ -167,7 +167,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	private void loadProperties() {
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Requesting secrets from Vault at %s using %s", this.requestedSecret.getPath(),
+			logger.debug("Requesting secrets from Vault at %s using %s".formatted(this.requestedSecret.getPath(),
 					this.requestedSecret.getMode()));
 		}
 
@@ -178,11 +178,11 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 		Exception loadError = this.loadError;
 		if (this.notFound || loadError != null) {
 
-			String msg = String.format("Vault location [%s] not resolvable", this.requestedSecret.getPath());
+			String msg = "Vault location [%s] not resolvable".formatted(this.requestedSecret.getPath());
 
 			if (this.ignoreSecretNotFound) {
 				if (logger.isInfoEnabled()) {
-					logger.info(String.format("%s: %s", msg, loadError != null ? loadError.getMessage() : "Not found"));
+					logger.info("%s: %s".formatted(msg, loadError != null ? loadError.getMessage() : "Not found"));
 				}
 			}
 			else {
@@ -234,9 +234,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 			properties.clear();
 		}
 
-		if (leaseEvent instanceof SecretLeaseCreatedEvent) {
-
-			SecretLeaseCreatedEvent created = (SecretLeaseCreatedEvent) leaseEvent;
+		if (leaseEvent instanceof SecretLeaseCreatedEvent created) {
 
 			Map<String, Object> secrets = doTransformProperties(flattenMap(created.getSecrets()));
 

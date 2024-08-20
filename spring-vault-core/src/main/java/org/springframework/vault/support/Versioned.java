@@ -200,9 +200,8 @@ public class Versioned<T> {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Versioned))
+		if (!(o instanceof Versioned<?> versioned))
 			return false;
-		Versioned<?> versioned = (Versioned<?>) o;
 		return Objects.equals(this.data, versioned.data) && Objects.equals(this.version, versioned.version)
 				&& Objects.equals(this.metadata, versioned.metadata);
 	}
@@ -488,7 +487,7 @@ public class Versioned<T> {
 
 		@Override
 		public String toString() {
-			return String.format("Version[%d]", this.version);
+			return "Version[%d]".formatted(this.version);
 		}
 
 	}

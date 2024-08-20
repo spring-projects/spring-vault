@@ -55,8 +55,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 		VaultListResponse read = doRead(restOperations -> {
 			return restOperations.exchange(
-					String.format("%s?list=true",
-							createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+					"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
 					HttpMethod.GET, null, VaultListResponse.class);
 		});
 
@@ -83,7 +82,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createBackendPath(String segment, String path) {
-		return String.format("%s/%s/%s", this.path, segment, path);
+		return "%s/%s/%s".formatted(this.path, segment, path);
 	}
 
 }

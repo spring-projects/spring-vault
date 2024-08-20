@@ -79,7 +79,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 
 		if (propertyPath.getLeafProperty() != null && !propertyPath.getLeafProperty().isIdProperty()) {
 			throw new InvalidDataAccessApiUsageException(
-					String.format("Cannot create criteria for non-@Id property %s", propertyPath.getLeafProperty()));
+					"Cannot create criteria for non-@Id property %s".formatted(propertyPath.getLeafProperty()));
 		}
 
 		VariableAccessor accessor = getVariableAccessor(part);
@@ -171,42 +171,24 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 		return part.shouldIgnoreCase() != IgnoreCaseType.NEVER;
 	}
 
-	static final class Criteria<T> implements Predicate<String> {
-
-		private final T value;
-
-		private final BiPredicate<T, String> predicate;
-
-		public Criteria(T value, BiPredicate<T, String> predicate) {
-			this.value = value;
-			this.predicate = predicate;
-		}
+	record Criteria<T>(T value, BiPredicate<T, String> predicate) implements Predicate<String> {
 
 		@Override
 		public boolean test(String s) {
 			return this.predicate.test(this.value, s);
 		}
 
-		public T getValue() {
-			return this.value;
-		}
-
-		public BiPredicate<T, String> getPredicate() {
-			return this.predicate;
-		}
-
 		public boolean equals(final Object o) {
 			if (o == this)
 				return true;
-			if (!(o instanceof Criteria))
+			if (!(o instanceof Criteria<?> other))
 				return false;
-			final Criteria<?> other = (Criteria<?>) o;
-			final Object this$value = this.getValue();
-			final Object other$value = other.getValue();
+			final Object this$value = this.value();
+			final Object other$value = other.value();
 			if (this$value == null ? other$value != null : !this$value.equals(other$value))
 				return false;
-			final Object this$predicate = this.getPredicate();
-			final Object other$predicate = other.getPredicate();
+			final Object this$predicate = this.predicate();
+			final Object other$predicate = other.predicate();
 			if (this$predicate == null ? other$predicate != null : !this$predicate.equals(other$predicate))
 				return false;
 			return true;
@@ -215,9 +197,9 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 		public int hashCode() {
 			final int PRIME = 59;
 			int result = 1;
-			final Object $value = this.getValue();
+			final Object $value = this.value();
 			result = result * PRIME + ($value == null ? 43 : $value.hashCode());
-			final Object $predicate = this.getPredicate();
+			final Object $predicate = this.predicate();
 			result = result * PRIME + ($predicate == null ? 43 : $predicate.hashCode());
 			return result;
 		}

@@ -89,8 +89,8 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		VaultResponse readResponse = get(path);
 		if (readResponse == null || readResponse.getData() == null) {
 			throw new SecretNotFoundException(
-					String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
-					String.format("%s/%s", this.path, path));
+					"No data found at %s; patch only works on existing data".formatted(createDataPath(path)),
+					"%s/%s".formatted(this.path, path));
 		}
 
 		if (readResponse.getMetadata() == null) {

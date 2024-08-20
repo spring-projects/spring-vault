@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication.event;
 
+import java.io.Serial;
+
 import org.springframework.context.ApplicationEvent;
 
 /**
@@ -30,6 +32,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class AuthenticationErrorEvent extends ApplicationEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private final Throwable exception;
