@@ -85,7 +85,7 @@ public class Version implements Comparable<Version> {
 					intParts[i] = Integer.parseInt(input);
 				}
 				catch (IllegalArgumentException o_O) {
-					throw new IllegalArgumentException(String.format(VERSION_PARSE_ERROR, input, version), o_O);
+					throw new IllegalArgumentException(VERSION_PARSE_ERROR.formatted(input, version), o_O);
 				}
 			}
 		}
@@ -201,9 +201,8 @@ public class Version implements Comparable<Version> {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Version))
+		if (!(o instanceof Version version))
 			return false;
-		Version version = (Version) o;
 		return this.major == version.major && this.minor == version.minor && this.bugfix == version.bugfix
 				&& this.build == version.build && this.enterprise == version.enterprise;
 	}

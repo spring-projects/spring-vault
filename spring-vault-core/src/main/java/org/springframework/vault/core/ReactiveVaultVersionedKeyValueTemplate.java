@@ -88,7 +88,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	private <T> Mono<Versioned<T>> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()
-				? String.format("%s?version=%d", createDataPath(path), version.getVersion()) : createDataPath(path);
+				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
 
 		Mono<VersionedResponse> versionedResponseMono = doReadVersioned(secretPath);
 

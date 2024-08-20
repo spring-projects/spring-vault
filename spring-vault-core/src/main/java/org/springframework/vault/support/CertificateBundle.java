@@ -325,15 +325,13 @@ public class CertificateBundle extends Certificate {
 	private static KeySpec getPrivateKey(byte[] privateKey, String keyType)
 			throws GeneralSecurityException, IOException {
 
-		switch (keyType.toLowerCase(Locale.ROOT)) {
-			case "rsa":
-				return KeyFactories.RSA_PRIVATE.getKey(privateKey);
-			case "ec":
-				return KeyFactories.EC.getKey(privateKey);
-		}
+		return switch (keyType.toLowerCase(Locale.ROOT)) {
+			case "rsa" -> KeyFactories.RSA_PRIVATE.getKey(privateKey);
+			case "ec" -> KeyFactories.EC.getKey(privateKey);
+			default -> throw new IllegalArgumentException(
+					"Key type %s not supported. Supported types are: rsa, ec.".formatted(keyType));
+		};
 
-		throw new IllegalArgumentException(
-				String.format("Key type %s not supported. Supported types are: rsa, ec.", keyType));
 	}
 
 }

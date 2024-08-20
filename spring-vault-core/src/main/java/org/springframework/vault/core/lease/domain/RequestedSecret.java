@@ -100,10 +100,8 @@ public class RequestedSecret {
 
 		if (this == o)
 			return true;
-		if (!(o instanceof RequestedSecret))
+		if (!(o instanceof RequestedSecret that))
 			return false;
-
-		RequestedSecret that = (RequestedSecret) o;
 
 		if (!this.path.equals(that.path))
 			return false;

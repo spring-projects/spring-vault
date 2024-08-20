@@ -146,7 +146,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 		try {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Fetching properties from Vault at %s", this.path));
+				logger.debug("Fetching properties from Vault at %s".formatted(this.path));
 			}
 
 			Map<String, Object> properties = null;
@@ -161,11 +161,11 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 			if (properties == null) {
 
-				String msg = String.format("Vault location [%s] not resolvable", this.path);
+				String msg = "Vault location [%s] not resolvable".formatted(this.path);
 
 				if (this.ignoreSecretNotFound) {
 					if (logger.isInfoEnabled()) {
-						logger.info(String.format("%s: %s", msg, error != null ? error.getMessage() : "Not found"));
+						logger.info("%s: %s".formatted(msg, error != null ? error.getMessage() : "Not found"));
 					}
 				}
 				else {
@@ -220,7 +220,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 
 		if (vaultResponse == null || vaultResponse.getData() == null) {
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("No properties found at %s", path));
+				logger.debug("No properties found at %s".formatted(path));
 			}
 
 			return null;

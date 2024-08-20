@@ -94,7 +94,7 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 	@Override
 	public String getKeySpace() {
-		return String.format("%s/%s", getSecretBackend(), super.getKeySpace());
+		return "%s/%s".formatted(getSecretBackend(), super.getKeySpace());
 	}
 
 	@Override

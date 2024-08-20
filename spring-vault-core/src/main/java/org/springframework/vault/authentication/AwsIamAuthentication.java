@@ -156,8 +156,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug(String.format("Login successful using AWS-IAM authentication for user id %s, ARN %s",
-							metadata.get("client_user_id"), metadata.get("canonical_arn")));
+					logger.debug("Login successful using AWS-IAM authentication for user id %s, ARN %s"
+						.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
 				}
 				else {
 					logger.debug("Login successful using AWS-IAM authentication");

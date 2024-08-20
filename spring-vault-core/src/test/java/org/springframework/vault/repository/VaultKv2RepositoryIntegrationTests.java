@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.repository;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -46,8 +48,6 @@ import org.springframework.vault.repository.mapping.Secret;
 import org.springframework.vault.support.VaultMount;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.util.IntegrationTestSupport;
-
-import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for Vault repositories using KeyValue version 2.
@@ -300,10 +300,9 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 			if (this == o) {
 				return true;
 			}
-			if (!(o instanceof VersionedPerson)) {
+			if (!(o instanceof VersionedPerson that)) {
 				return false;
 			}
-			VersionedPerson that = (VersionedPerson) o;
 			if (version != that.version) {
 				return false;
 			}
@@ -363,10 +362,9 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 			if (this == o) {
 				return true;
 			}
-			if (!(o instanceof VersionedPerson)) {
+			if (!(o instanceof VersionedPerson that)) {
 				return false;
 			}
-			VersionedPerson that = (VersionedPerson) o;
 			if (!ObjectUtils.nullSafeEquals(id, that.id)) {
 				return false;
 			}

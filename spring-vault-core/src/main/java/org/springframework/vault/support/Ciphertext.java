@@ -75,9 +75,8 @@ public class Ciphertext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Ciphertext))
+		if (!(o instanceof Ciphertext that))
 			return false;
-		Ciphertext that = (Ciphertext) o;
 		return this.ciphertext.equals(that.ciphertext) && this.context.equals(that.context);
 	}
 

@@ -27,7 +27,18 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.authentication.event.*;
+import org.springframework.vault.authentication.event.AfterLoginEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
+import org.springframework.vault.authentication.event.AuthenticationErrorListener;
+import org.springframework.vault.authentication.event.AuthenticationListener;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
+import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
+import org.springframework.vault.authentication.event.LoginFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
+import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -195,8 +206,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	private Mono<String> onRevokeFailed(VaultToken token, Throwable e) {
 
 		if (LoginToken.hasAccessor(token)) {
-			this.logger.warn(
-					String.format("Cannot revoke VaultToken with accessor: %s", ((LoginToken) token).getAccessor()), e);
+			this.logger.warn("Cannot revoke VaultToken with accessor: %s".formatted(((LoginToken) token).getAccessor()),
+					e);
 		}
 		else {
 			this.logger.warn("Cannot revoke VaultToken", e);
@@ -279,9 +290,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 				if (this.logger.isDebugEnabled()) {
 
 					Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(renewed);
-					this.logger
-						.info(String.format("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token.",
-								renewed.getLeaseDuration(), validTtlThreshold));
+					this.logger.info("Token TTL (%s) exceeded validity TTL threshold (%s). Dropping token."
+						.formatted(renewed.getLeaseDuration(), validTtlThreshold));
 				}
 				else {
 					this.logger.info("Token TTL exceeded validity TTL threshold. Dropping token.");
@@ -339,7 +349,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 			return loginTokenMono.onErrorResume(e -> {
 
-				this.logger.warn(String.format("Cannot enhance VaultToken to a LoginToken: %s", e.getMessage()));
+				this.logger.warn("Cannot enhance VaultToken to a LoginToken: %s".formatted(e.getMessage()));
 				multicastEvent(new AuthenticationErrorEvent(token, e));
 				return Mono.just(token);
 			}).map(it -> new TokenWrapper(it, false));
@@ -424,10 +434,9 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 	private static String format(String message, RuntimeException e) {
 
-		if (e instanceof WebClientResponseException) {
+		if (e instanceof WebClientResponseException wce) {
 
-			WebClientResponseException wce = (WebClientResponseException) e;
-			return String.format("%s: Status %s %s %s", message, wce.getStatusCode().value(), wce.getStatusText(),
+			return "%s: Status %s %s %s".formatted(message, wce.getStatusCode().value(), wce.getStatusText(),
 					VaultResponses.getError(wce.getResponseBodyAsString()));
 		}
 

@@ -162,7 +162,7 @@ public class PemObject {
 
 					if (!endTitle.equals(title)) {
 						throw new IllegalArgumentException(
-								String.format("end tag (%s) doesn't match begin tag (%s)", endTitle, title));
+								"end tag (%s) doesn't match begin tag (%s)".formatted(endTitle, title));
 					}
 					return new PemObject(PemObjectType.of(title), keyBuilder.toString());
 				}
@@ -308,7 +308,7 @@ public class PemObject {
 				}
 			}
 
-			throw new IllegalArgumentException(String.format("No enum constant %s", identifier));
+			throw new IllegalArgumentException("No enum constant %s".formatted(identifier));
 		}
 
 	}

@@ -17,11 +17,11 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
-import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
-import org.springframework.vault.support.VaultResponseSupport;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Flux;
+
+import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.support.VaultResponseSupport;
 
 /**
  * Support class to build accessor methods for the Vault key-value backend version 2.
@@ -53,7 +53,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	public Flux<String> list(String path) {
 
 		return doRead(
-				String.format("%s?list=true", createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+				"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
 				VaultListResponse.class)
 			.flatMapMany(response -> {
 
@@ -78,7 +78,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	}
 
 	String createBackendPath(String segment, String path) {
-		return String.format("%s/%s/%s", this.path, segment, path);
+		return "%s/%s/%s".formatted(this.path, segment, path);
 	}
 
 }

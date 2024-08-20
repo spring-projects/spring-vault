@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.core;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
@@ -35,9 +37,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Integration tests for {@link VaultWrappingTemplate} through
@@ -149,30 +148,23 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 			.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
-	static final class Secret {
-
-		private final String key;
+	record Secret(String key) {
 
 		Secret(@JsonProperty("key") String key) {
 			this.key = key;
 		}
 
-		public String getKey() {
-			return this.key;
-		}
-
 		public String toString() {
-			return "VaultWrappingTemplateIntegrationTests.Secret(key=" + this.getKey() + ")";
+			return "VaultWrappingTemplateIntegrationTests.Secret(key=" + this.key() + ")";
 		}
 
 		public boolean equals(final Object o) {
 			if (o == this)
 				return true;
-			if (!(o instanceof Secret))
+			if (!(o instanceof Secret other))
 				return false;
-			final Secret other = (Secret) o;
-			final Object this$key = this.getKey();
-			final Object other$key = other.getKey();
+			final Object this$key = this.key();
+			final Object other$key = other.key();
 			if (this$key == null ? other$key != null : !this$key.equals(other$key))
 				return false;
 			return true;
@@ -181,7 +173,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		public int hashCode() {
 			final int PRIME = 59;
 			int result = 1;
-			final Object $key = this.getKey();
+			final Object $key = this.key();
 			result = result * PRIME + ($key == null ? 43 : $key.hashCode());
 			return result;
 		}

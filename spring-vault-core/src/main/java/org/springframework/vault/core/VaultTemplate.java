@@ -22,7 +22,6 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -286,15 +285,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@Override
 	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
 
-		switch (apiVersion) {
-			case KV_1:
-				return new VaultKeyValue1Template(this, path);
-			case KV_2:
-				return new VaultKeyValue2Template(this, path);
-		}
-
-		throw new UnsupportedOperationException(
-				String.format("Key/Value backend version %s not supported", apiVersion));
+		return switch (apiVersion) {
+			case KV_1 -> new VaultKeyValue1Template(this, path);
+			case KV_2 -> new VaultKeyValue2Template(this, path);
+		};
 
 	}
 
@@ -388,7 +382,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		VaultListResponse read = doRead(String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")),
+		VaultListResponse read = doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")),
 				VaultListResponse.class);
 		if (read == null) {
 			return Collections.emptyList();

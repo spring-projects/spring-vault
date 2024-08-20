@@ -17,12 +17,13 @@ package org.springframework.vault.core;
 
 import java.util.Collections;
 import java.util.Map;
+
+import reactor.core.publisher.Mono;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-
-import reactor.core.publisher.Mono;
 
 /**
  * Default implementation of {@link VaultKeyValueOperations} for the key-value backend
@@ -85,7 +86,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 
 		return get(path).filter(it -> it.getData() != null)
 			.switchIfEmpty(Mono.error(new SecretNotFoundException(
-					String.format("No data found at %s; patch only works on existing data", createDataPath(path)),
+					"No data found at %s; patch only works on existing data".formatted(createDataPath(path)),
 					createLogicalPath(path))))
 			.flatMap(readResponse -> {
 
@@ -112,7 +113,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	}
 
 	private String createLogicalPath(String path) {
-		return String.format("%s/%s", this.path, path);
+		return "%s/%s".formatted(this.path, path);
 	}
 
 }

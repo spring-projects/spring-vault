@@ -15,7 +15,15 @@
  */
 package org.springframework.vault.core;
 
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.*;
+
+import java.util.List;
+import java.util.function.Function;
+
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -43,14 +51,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.ofRequestProcessor;
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
@@ -287,7 +287,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doRead(String.format("%s?list=true", path.endsWith("/") ? path : (path + "/")), VaultListResponse.class)
+		return doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")), VaultListResponse.class)
 			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
 			.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
 			.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));

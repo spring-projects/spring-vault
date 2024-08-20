@@ -78,7 +78,7 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 	}
 
 	String getRoleId(String roleName) {
-		return (String) getVaultOperations().read(String.format("auth/approle/role/%s/role-id", roleName))
+		return (String) getVaultOperations().read("auth/approle/role/%s/role-id".formatted(roleName))
 			.getRequiredData()
 			.get("role_id");
 	}

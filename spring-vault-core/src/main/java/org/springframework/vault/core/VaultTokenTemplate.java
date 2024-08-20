@@ -65,7 +65,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		Assert.hasText(role, "Role must not be null or empty");
 		Assert.notNull(request, "VaultTokenRequest must not be null");
 
-		return writeAndReturn(String.format("auth/token/create/%s", role), request, VaultTokenResponse.class);
+		return writeAndReturn("auth/token/create/%s".formatted(role), request, VaultTokenResponse.class);
 	}
 
 	@Override

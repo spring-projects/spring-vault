@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication.event;
 
+import java.io.Serial;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.VaultTokenSupplier;
@@ -32,6 +34,7 @@ import org.springframework.vault.support.VaultToken;
  */
 public class LoginFailedEvent extends AuthenticationErrorEvent {
 
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	/**

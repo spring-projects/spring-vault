@@ -119,10 +119,8 @@ public class Lease {
 
 		if (this == o)
 			return true;
-		if (!(o instanceof Lease))
+		if (!(o instanceof Lease lease))
 			return false;
-
-		Lease lease = (Lease) o;
 
 		if (this.leaseDuration != lease.leaseDuration)
 			return false;

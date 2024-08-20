@@ -66,7 +66,7 @@ class Sha256 {
 		StringBuilder sb = new StringBuilder(bytes.length * 2);
 
 		for (byte b : bytes) {
-			sb.append(String.format("%X", b));
+			sb.append("%X".formatted(b));
 		}
 
 		return sb.toString();

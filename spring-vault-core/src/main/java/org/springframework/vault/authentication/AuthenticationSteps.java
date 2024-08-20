@@ -467,7 +467,7 @@ public class AuthenticationSteps {
 
 		@Override
 		public String toString() {
-			return String.format("%s %s AS %s", getMethod(), getUri() != null ? getUri() : getUriTemplate(),
+			return "%s %s AS %s".formatted(getMethod(), getUri() != null ? getUri() : getUriTemplate(),
 					getResponseType());
 		}
 
@@ -529,9 +529,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof HttpRequestNode))
+			if (!(o instanceof HttpRequestNode<?> that))
 				return false;
-			HttpRequestNode<?> that = (HttpRequestNode<?>) o;
 			return this.definition.equals(that.definition) && this.previous.equals(that.previous);
 		}
 
@@ -574,9 +573,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof MapStep))
+			if (!(o instanceof MapStep<?, ?> mapStep))
 				return false;
-			MapStep<?, ?> mapStep = (MapStep<?, ?>) o;
 			return this.mapper.equals(mapStep.mapper) && this.previous.equals(mapStep.previous);
 		}
 
@@ -620,9 +618,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof ZipStep))
+			if (!(o instanceof ZipStep<?, ?> zipStep))
 				return false;
-			ZipStep<?, ?> zipStep = (ZipStep<?, ?>) o;
 			return this.left.equals(zipStep.left) && this.right.equals(zipStep.right);
 		}
 
@@ -666,9 +663,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof OnNextStep))
+			if (!(o instanceof OnNextStep<?> that))
 				return false;
-			OnNextStep<?> that = (OnNextStep<?>) o;
 			return this.consumer.equals(that.consumer) && this.previous.equals(that.previous);
 		}
 
@@ -707,9 +703,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof ScalarValueStep))
+			if (!(o instanceof ScalarValueStep<?> that))
 				return false;
-			ScalarValueStep<?> that = (ScalarValueStep<?>) o;
 			return this.value.equals(that.value) && this.previous.equals(that.previous);
 		}
 
@@ -752,9 +747,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof SupplierStep))
+			if (!(o instanceof SupplierStep<?> that))
 				return false;
-			SupplierStep<?> that = (SupplierStep<?>) o;
 			return this.supplier.equals(that.supplier) && this.previous.equals(that.previous);
 		}
 
@@ -819,9 +813,8 @@ public class AuthenticationSteps {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof Pair))
+			if (!(o instanceof Pair<?, ?> pair))
 				return false;
-			Pair<?, ?> pair = (Pair<?, ?>) o;
 			return this.left.equals(pair.left) && this.right.equals(pair.right);
 		}
 

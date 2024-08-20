@@ -302,7 +302,7 @@ class DerParser {
 		BigInteger getInteger() {
 
 			if (this.type != INTEGER) {
-				throw new IllegalStateException(String.format("Invalid DER: object (%d) is not integer.", this.type));
+				throw new IllegalStateException("Invalid DER: object (%d) is not integer.".formatted(this.type));
 			}
 
 			return new BigInteger(this.value);
@@ -343,8 +343,7 @@ class DerParser {
 				case OID:
 					return getObjectIdentifier(this.value);
 				default:
-					throw new IllegalStateException(
-							String.format("Invalid DER: object (%d) is not a string", this.type));
+					throw new IllegalStateException("Invalid DER: object (%d) is not a string".formatted(this.type));
 			}
 
 			return new String(this.value, encoding);

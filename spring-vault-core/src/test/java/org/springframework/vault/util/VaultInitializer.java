@@ -105,8 +105,8 @@ public class VaultInitializer {
 		}
 		catch (Exception ex) {
 			throw new IllegalStateException(
-					String.format("Vault is not running on localhost:%d which is required to run a test using @Rule %s",
-							this.vaultEndpoint.getPort(), getClass().getSimpleName()));
+					"Vault is not running on localhost:%d which is required to run a test using @Rule %s"
+						.formatted(this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 	}
 

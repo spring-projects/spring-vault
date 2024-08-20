@@ -40,9 +40,9 @@ public class MappingVaultEntityInformation<T, ID> extends PersistentEntityInform
 
 		if (!entity.hasIdProperty()) {
 
-			throw new MappingException(String.format(
-					"Entity %s requires to have an explicit id field. Did you forget to provide one using @Id?",
-					entity.getName()));
+			throw new MappingException(
+					"Entity %s requires to have an explicit id field. Did you forget to provide one using @Id?"
+						.formatted(entity.getName()));
 		}
 	}
 

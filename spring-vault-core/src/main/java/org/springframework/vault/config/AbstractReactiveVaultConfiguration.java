@@ -192,15 +192,12 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
-		if (clientAuthentication instanceof TokenAuthentication) {
+		if (clientAuthentication instanceof TokenAuthentication authentication) {
 
-			TokenAuthentication authentication = (TokenAuthentication) clientAuthentication;
 			return () -> Mono.just(authentication.login());
 		}
 
-		if (clientAuthentication instanceof AuthenticationStepsFactory) {
-
-			AuthenticationStepsFactory factory = (AuthenticationStepsFactory) clientAuthentication;
+		if (clientAuthentication instanceof AuthenticationStepsFactory factory) {
 
 			WebClient webClient = getWebClientFactory().create();
 			AuthenticationStepsOperator stepsOperator = new AuthenticationStepsOperator(
@@ -209,10 +206,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 			return CachingVaultTokenSupplier.of(stepsOperator);
 		}
 
-		throw new IllegalStateException(String.format(
-				"Cannot construct VaultTokenSupplier from %s. "
-						+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication",
-				clientAuthentication));
+		throw new IllegalStateException("Cannot construct VaultTokenSupplier from %s. "
+				+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication"
+					.formatted(clientAuthentication));
 	}
 
 	/**

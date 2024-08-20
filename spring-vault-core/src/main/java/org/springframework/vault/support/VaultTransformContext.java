@@ -19,7 +19,6 @@ import java.util.Arrays;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * Transform backend encode/decode context object.
@@ -103,9 +102,8 @@ public class VaultTransformContext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof VaultTransformContext))
+		if (!(o instanceof VaultTransformContext that))
 			return false;
-		VaultTransformContext that = (VaultTransformContext) o;
 		return this.transformation.equals(that.transformation) && Arrays.equals(this.tweak, that.tweak);
 	}
 

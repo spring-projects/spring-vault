@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,8 +30,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * Username and password implementation of {@link ClientAuthentication}. Can be used for
@@ -77,7 +77,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Map<String, Object> body = createLoginBody(options);
 
 		return AuthenticationSteps.fromSupplier(() -> body)
-			.login(String.format("%s/%s", getLoginPath(options.getPath()), options.getUsername()));
+			.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
 	}
 
 	@Override
@@ -94,16 +94,16 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 
 		try {
 			VaultResponse response = restOperations.postForObject(
-					String.format("%s/%s", getLoginPath(options.getPath()), options.getUsername()),
-					createLoginBody(options), VaultResponse.class);
+					"%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()), createLoginBody(options),
+					VaultResponse.class);
 
 			logger.debug("Login successful using username and password credentials");
 
 			return LoginTokenUtil.from(response.getAuth());
 		}
 		catch (HttpStatusCodeException e) {
-			throw new VaultException(String.format("Cannot login using username and password: %s",
-					VaultResponses.getError(e.getResponseBodyAsString())), e);
+			throw new VaultException("Cannot login using username and password: %s"
+				.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 

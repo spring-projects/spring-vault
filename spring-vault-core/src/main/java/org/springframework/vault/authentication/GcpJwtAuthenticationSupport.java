@@ -70,8 +70,8 @@ public abstract class GcpJwtAuthenticationSupport {
 				if (response.getAuth().get("metadata") instanceof Map) {
 
 					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug(String.format("Login successful using %s authentication for user id %s",
-							authenticationName, metadata.get("service_account_email")));
+					logger.debug("Login successful using %s authentication for user id %s".formatted(authenticationName,
+							metadata.get("service_account_email")));
 				}
 				else {
 					logger.debug("Login successful using " + authenticationName + " authentication");

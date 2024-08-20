@@ -71,7 +71,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		request.put("value", plaintext);
 
-		return (String) this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName), request)
+		return (String) this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
 			.getRequiredData()
 			.get("encoded_value");
 	}
@@ -88,8 +88,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		applyTransformOptions(plaintext.getContext(), request);
 
-		Map<String, Object> data = this.vaultOperations
-			.write(String.format("%s/encode/%s", this.path, roleName), request)
+		Map<String, Object> data = this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
 			.getRequiredData();
 
 		return toCiphertext(data, plaintext.getContext());
@@ -114,7 +113,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write(String.format("%s/encode/%s", this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toEncodedResults(vaultResponse, batchRequest);
@@ -144,7 +143,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		applyTransformOptions(transformContext, request);
 
-		return (String) this.vaultOperations.write(String.format("%s/decode/%s", this.path, roleName), request)
+		return (String) this.vaultOperations.write("%s/decode/%s".formatted(this.path, roleName), request)
 			.getRequiredData()
 			.get("decoded_value");
 	}
@@ -167,7 +166,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write(String.format("%s/decode/%s", this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.write("%s/decode/%s".formatted(this.path, roleName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toDecryptionResults(vaultResponse, batchRequest);

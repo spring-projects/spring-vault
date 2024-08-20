@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,8 +30,6 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
 
 /**
  * GCP GCE (Google Compute Engine)-based login implementation using GCE's metadata service
@@ -157,7 +157,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	}
 
 	private static String getAudience(String role) {
-		return String.format("https://localhost:8200/vault/%s", role);
+		return "https://localhost:8200/vault/%s".formatted(role);
 	}
 
 }

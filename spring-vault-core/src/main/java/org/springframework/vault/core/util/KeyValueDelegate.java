@@ -91,7 +91,7 @@ public class KeyValueDelegate {
 
 		String keyPath = requestedSecret.substring(mountPath.length());
 
-		return String.format("%sdata/%s", mountPath, keyPath);
+		return "%sdata/%s".formatted(mountPath, keyPath);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -108,7 +108,7 @@ public class KeyValueDelegate {
 	@SuppressWarnings("unchecked")
 	private MountInfo doGetMountInfo(String path) {
 
-		VaultResponse response = this.operations.read(String.format("sys/internal/ui/mounts/%s", path));
+		VaultResponse response = this.operations.read("sys/internal/ui/mounts/%s".formatted(path));
 
 		if (response == null || response.getData() == null) {
 			return MountInfo.unavailable();

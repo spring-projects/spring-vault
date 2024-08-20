@@ -134,7 +134,7 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 			SignJwt signJwt = iam.projects()
 				.serviceAccounts()
-				.signJwt(String.format("projects/%s/serviceAccounts/%s", projectId, serviceAccount), request);
+				.signJwt("projects/%s/serviceAccounts/%s".formatted(projectId, serviceAccount), request);
 
 			SignJwtResponse response = signJwt.execute();
 

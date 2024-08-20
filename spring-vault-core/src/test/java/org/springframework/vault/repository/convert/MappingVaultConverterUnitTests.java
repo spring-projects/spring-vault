@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.repository.convert;
 
+import static org.assertj.core.api.Assertions.*;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -30,8 +32,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link MappingVaultConverter}.
@@ -543,9 +543,8 @@ class MappingVaultConverterUnitTests {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			if (!(o instanceof NestedType))
+			if (!(o instanceof NestedType that))
 				return false;
-			NestedType that = (NestedType) o;
 			return Objects.equals(this.username, that.username) && Objects.equals(this.password, that.password);
 		}
 

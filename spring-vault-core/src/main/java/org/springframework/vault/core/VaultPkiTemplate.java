@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -173,7 +174,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		return this.vaultOperations.doWithSession(restOperations -> {
 
-			String requestPath = String.format("{path}/issuer/{issuer}/%s", encoding.name().toLowerCase(Locale.ROOT));
+			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
 
 			try {
 				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,

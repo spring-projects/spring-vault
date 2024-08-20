@@ -16,7 +16,6 @@
 package org.springframework.vault.core;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -216,9 +215,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		Optional<ObjectMapper> mapper = vaultOperations.doWithSession(operations -> {
 
-			if (operations instanceof RestTemplate) {
-
-				RestTemplate template = (RestTemplate) operations;
+			if (operations instanceof RestTemplate template) {
 
 				Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template.getMessageConverters()
 					.stream()

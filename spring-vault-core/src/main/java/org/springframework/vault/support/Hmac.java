@@ -54,9 +54,8 @@ public class Hmac {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Hmac))
+		if (!(o instanceof Hmac other))
 			return false;
-		Hmac other = (Hmac) o;
 		return this.hmac.equals(other.hmac);
 	}
 

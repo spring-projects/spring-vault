@@ -188,8 +188,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 				if (response.getAuth().get("metadata") instanceof Map) {
 					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug(String.format("Login successful using AWS-EC2 authentication for instance %s, AMI %s",
-							metadata.get("instance_id"), metadata.get("instance_id")));
+					logger.debug("Login successful using AWS-EC2 authentication for instance %s, AMI %s"
+						.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
 				}
 				else {
 					logger.debug("Login successful using AWS-EC2 authentication");
@@ -240,7 +240,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		}
 		catch (RestClientException e) {
 			throw new VaultLoginException(
-					String.format("Cannot obtain Identity Document from %s", this.options.getIdentityDocumentUri()), e);
+					"Cannot obtain Identity Document from %s".formatted(this.options.getIdentityDocumentUri()), e);
 		}
 	}
 
@@ -260,7 +260,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		}
 		catch (RestClientException e) {
 			throw new VaultLoginException(
-					String.format("Cannot obtain IMDSv2 Token from %s", this.options.getMetadataTokenRequestUri()), e);
+					"Cannot obtain IMDSv2 Token from %s".formatted(this.options.getMetadataTokenRequestUri()), e);
 		}
 	}
 

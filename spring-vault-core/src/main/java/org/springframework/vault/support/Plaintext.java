@@ -143,9 +143,8 @@ public class Plaintext {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof Plaintext))
+		if (!(o instanceof Plaintext plaintext1))
 			return false;
-		Plaintext plaintext1 = (Plaintext) o;
 		return Arrays.equals(this.plaintext, plaintext1.plaintext) && this.context.equals(plaintext1.context);
 	}
 

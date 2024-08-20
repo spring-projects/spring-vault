@@ -78,9 +78,8 @@ public class VaultToken {
 	public boolean equals(Object o) {
 		if (this == o)
 			return true;
-		if (!(o instanceof VaultToken))
+		if (!(o instanceof VaultToken that))
 			return false;
-		VaultToken that = (VaultToken) o;
 		return Arrays.equals(this.token, that.token);
 	}
 

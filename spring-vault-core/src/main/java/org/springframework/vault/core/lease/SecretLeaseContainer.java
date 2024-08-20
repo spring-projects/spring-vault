@@ -502,8 +502,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 			scheduler.setDaemon(true);
-			scheduler
-				.setThreadNamePrefix(String.format("%s-%d-", getClass().getSimpleName(), poolId.incrementAndGet()));
+			scheduler.setThreadNamePrefix("%s-%d-".formatted(getClass().getSimpleName(), poolId.incrementAndGet()));
 			scheduler.afterPropertiesSet();
 
 			this.taskScheduler = scheduler;
@@ -621,7 +620,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		Lease lease = renewalScheduler.getLease();
 
 		if (lease == null) {
-			throw new IllegalStateException(String.format("No lease associated with secret %s", secret));
+			throw new IllegalStateException("No lease associated with secret %s".formatted(secret));
 		}
 
 		if (!renewalScheduler.isLeaseRenewable(lease, secret)) {
@@ -646,7 +645,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		Lease lease = renewalScheduler.getLease();
 
 		if (lease == null) {
-			throw new IllegalStateException(String.format("No lease associated with secret %s", secret));
+			throw new IllegalStateException("No lease associated with secret %s".formatted(secret));
 		}
 
 		if (!renewalScheduler.isLeaseRenewable(lease, secret) && !renewalScheduler.isLeaseRotateOnly(lease, secret)) {
@@ -699,7 +698,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		LeaseRenewalScheduler renewalScheduler = this.renewals.get(secret);
 
 		if (renewalScheduler == null) {
-			throw new IllegalArgumentException(String.format("No such secret %s", secret));
+			throw new IllegalArgumentException("No such secret %s".formatted(secret));
 		}
 		return renewalScheduler;
 	}
@@ -709,12 +708,12 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		if (logger.isDebugEnabled()) {
 
 			if (lease.hasLeaseId()) {
-				logger.debug(String.format("Secret %s with Lease %s qualified for %s", requestedSecret.getPath(),
+				logger.debug("Secret %s with Lease %s qualified for %s".formatted(requestedSecret.getPath(),
 						lease.getLeaseId(), action));
 			}
 			else {
-				logger.debug(String.format("Secret %s with cache hint is qualified for %s", requestedSecret.getPath(),
-						action));
+				logger.debug(
+						"Secret %s with cache hint is qualified for %s".formatted(requestedSecret.getPath(), action));
 			}
 		}
 	}
@@ -787,7 +786,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 					onLeaseExpired(requestedSecret, lease);
 				}
 
-				exceptionToUse = new VaultException(String.format("Cannot renew lease: Status %s %s %s",
+				exceptionToUse = new VaultException("Cannot renew lease: Status %s %s %s".formatted(
 						httpException.getStatusCode().value(), httpException.getStatusText(),
 						VaultResponses.getError(httpException.getResponseBodyAsString())), e);
 			}
@@ -844,9 +843,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			// prevent races for concurrent renewals of the same secret using different
 			// leases
 			if (renewalScheduler == null || !renewalScheduler.leaseEquals(lease)) {
-				logger.debug(String.format(
-						"Skipping rotation after renewal expiry for secret %s with lease %s as no LeaseRenewalScheduler is found. This can happen if leases have been restarted while concurrent expiry processing.",
-						requestedSecret.getPath(), lease.getLeaseId()));
+				logger.debug(
+						"Skipping rotation after renewal expiry for secret %s with lease %s as no LeaseRenewalScheduler is found. This can happen if leases have been restarted while concurrent expiry processing."
+							.formatted(requestedSecret.getPath(), lease.getLeaseId()));
 
 				super.onLeaseExpired(requestedSecret, lease);
 				return;
@@ -882,7 +881,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 		catch (HttpStatusCodeException e) {
 			onError(requestedSecret, lease, new VaultException(
-					String.format("Cannot revoke lease: %s", VaultResponses.getError(e.getResponseBodyAsString()))));
+					"Cannot revoke lease: %s".formatted(VaultResponses.getError(e.getResponseBodyAsString()))));
 		}
 		catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);
@@ -948,12 +947,12 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			if (logger.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
-					logger.debug(String.format("Scheduling renewal for secret %s with lease %s, lease duration %d",
+					logger.debug("Scheduling renewal for secret %s with lease %s, lease duration %d".formatted(
 							requestedSecret.getPath(), lease.getLeaseId(), lease.getLeaseDuration().getSeconds()));
 				}
 				else {
-					logger.debug(String.format("Scheduling renewal for secret %s, with cache hint duration %d",
-							requestedSecret.getPath(), lease.getLeaseDuration().getSeconds()));
+					logger.debug("Scheduling renewal for secret %s, with cache hint duration %d"
+						.formatted(requestedSecret.getPath(), lease.getLeaseDuration().getSeconds()));
 				}
 			}
 
@@ -978,11 +977,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 					if (logger.isDebugEnabled()) {
 						if (lease.hasLeaseId()) {
-							logger.debug(String.format("Renewing lease %s for secret %s", lease.getLeaseId(),
+							logger.debug("Renewing lease %s for secret %s".formatted(lease.getLeaseId(),
 									requestedSecret.getPath()));
 						}
 						else {
-							logger.debug(String.format("Renewing secret without lease %s", requestedSecret.getPath()));
+							logger.debug("Renewing secret without lease %s".formatted(requestedSecret.getPath()));
 						}
 					}
 
@@ -994,7 +993,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 						CURRENT_UPDATER.compareAndSet(LeaseRenewalScheduler.this, lease, renewLease.renewLease(lease));
 					}
 					catch (Exception e) {
-						logger.error(String.format("Cannot renew lease %s", lease.getLeaseId()), e);
+						logger.error("Cannot renew lease %s".formatted(lease.getLeaseId()), e);
 					}
 				}
 			};
@@ -1015,8 +1014,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			if (scheduledFuture != null) {
 
 				if (logger.isDebugEnabled()) {
-					logger.debug(
-							String.format("Canceling previously registered schedule for lease %s", lease.getLeaseId()));
+					logger.debug("Canceling previously registered schedule for lease %s".formatted(lease.getLeaseId()));
 				}
 
 				scheduledFuture.cancel(false);
