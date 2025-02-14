@@ -59,4 +59,22 @@ class VaultTransformContextUnitTests {
 		assertThat(context.getTransformation()).isEmpty();
 	}
 
+	@Test
+	void createsContextWithReference() {
+
+		String transformName = "some_transformation";
+		byte[] tweak = { 1, 2, 3, 4, 5, 6, 7 };
+		String referenceValue = "my-reference";
+
+		VaultTransformContext context = VaultTransformContext.builder()
+				.transformation(transformName)
+				.tweak(tweak)
+				.reference(referenceValue)
+				.build();
+
+		assertThat(context.getTransformation()).isEqualTo(transformName);
+		assertThat(context.getTweak()).isEqualTo(tweak);
+		assertThat(context.getReference()).isEqualTo(referenceValue);
+	}
+
 }

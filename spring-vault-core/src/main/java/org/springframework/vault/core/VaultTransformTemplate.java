@@ -72,8 +72,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		request.put("value", plaintext);
 
 		return (String) this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
-			.getRequiredData()
-			.get("encoded_value");
+				.getRequiredData()
+				.get("encoded_value");
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		applyTransformOptions(plaintext.getContext(), request);
 
 		Map<String, Object> data = this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
-			.getRequiredData();
+				.getRequiredData();
 
 		return toCiphertext(data, plaintext.getContext());
 	}
@@ -144,8 +144,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		applyTransformOptions(transformContext, request);
 
 		return (String) this.vaultOperations.write("%s/decode/%s".formatted(this.path, roleName), request)
-			.getRequiredData()
-			.get("decoded_value");
+				.getRequiredData()
+				.get("decoded_value");
 	}
 
 	@Override
@@ -181,10 +181,14 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		if (!ObjectUtils.isEmpty(context.getTweak())) {
 			request.put("tweak", Base64.getEncoder().encodeToString(context.getTweak()));
 		}
+		// NEW: pass "reference" in each item, if present
+		if (StringUtils.hasText(context.getReference())) {
+			request.put("reference", context.getReference());
+		}
 	}
 
 	private static List<VaultTransformEncodeResult> toEncodedResults(VaultResponse vaultResponse,
-			List<TransformPlaintext> batchRequest) {
+																	 List<TransformPlaintext> batchRequest) {
 
 		List<VaultTransformEncodeResult> result = new ArrayList<>(batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
@@ -214,31 +218,31 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 	}
 
 	private static List<VaultTransformDecodeResult> toDecryptionResults(VaultResponse vaultResponse,
-			List<TransformCiphertext> batchRequest) {
+																		List<TransformCiphertext> batchRequest) {
 
 		List<VaultTransformDecodeResult> result = new ArrayList<>(batchRequest.size());
 		List<Map<String, String>> batchData = getBatchData(vaultResponse);
 
 		for (int i = 0; i < batchRequest.size(); i++) {
 
-			VaultTransformDecodeResult encrypted;
+			VaultTransformDecodeResult decodeResult; // Renamed from "encrypted"
 			TransformCiphertext ciphertext = batchRequest.get(i);
 
 			if (batchData.size() > i) {
-				encrypted = getDecryptionResult(batchData.get(i), ciphertext);
+				decodeResult = getDecryptionResult(batchData.get(i), ciphertext);
 			}
 			else {
-				encrypted = new VaultTransformDecodeResult(new VaultException("No result for ciphertext #" + i));
+				decodeResult = new VaultTransformDecodeResult(new VaultException("No result for ciphertext #" + i));
 			}
 
-			result.add(encrypted);
+			result.add(decodeResult);
 		}
 
 		return result;
 	}
 
 	private static VaultTransformDecodeResult getDecryptionResult(Map<String, String> data,
-			TransformCiphertext ciphertext) {
+																  TransformCiphertext ciphertext) {
 
 		if (StringUtils.hasText(data.get("error"))) {
 			return new VaultTransformDecodeResult(new VaultException(data.get("error")));
@@ -246,8 +250,29 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		if (StringUtils.hasText(data.get("decoded_value"))) {
 
-			return new VaultTransformDecodeResult(
-					TransformPlaintext.of(data.get("decoded_value")).with(ciphertext.getContext()));
+			// 1. Read reference from Vault's response (if present).
+			String returnedRef = data.get("reference");
+
+			// 2. Build an updated context that merges the existing transformation/tweak
+			// with the newly-returned reference. If no reference is returned, keep the
+			// old one. Note:- Relying on reference from originalContext is aimed at
+			// providing a
+			// fallback strategy, if vault does not return the reference, in any
+			// circumstance.
+			VaultTransformContext originalContext = ciphertext.getContext();
+			VaultTransformContext updatedContext = VaultTransformContext.builder()
+					.transformation(originalContext.getTransformation())
+					.tweak(originalContext.getTweak())
+					.reference(returnedRef != null ? returnedRef : originalContext.getReference())
+					.build();
+
+			// 3. Attach that updated context to the newly decoded plaintext.
+			TransformPlaintext decodedPlaintext = TransformPlaintext.of(data.get("decoded_value")).with(updatedContext);
+
+			return new VaultTransformDecodeResult(decodedPlaintext);
+
+			// return new VaultTransformDecodeResult(
+			// TransformPlaintext.of(data.get("decoded_value")).with(ciphertext.getContext()));
 		}
 
 		return new VaultTransformDecodeResult(TransformPlaintext.empty().with(ciphertext.getContext()));
@@ -257,13 +282,17 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		String ciphertext = (String) data.get("encoded_value");
 
+		// if Vault returns "reference" in batch_results,capturing it for co-relation.
+		String returnedRef = (String) data.get("reference");
+
 		VaultTransformContext contextToUse = context;
 		if (data.containsKey("tweak")) {
 			byte[] tweak = Base64.getDecoder().decode((String) data.get("tweak"));
 			contextToUse = VaultTransformContext.builder()
-				.transformation(context.getTransformation())
-				.tweak(tweak)
-				.build();
+					.transformation(context.getTransformation())
+					.tweak(tweak)
+					.reference(returnedRef != null ? returnedRef : context.getReference())
+					.build();
 		}
 
 		return contextToUse.isEmpty() ? TransformCiphertext.of(ciphertext)
