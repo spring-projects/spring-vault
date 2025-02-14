@@ -7,8 +7,8 @@ Vault can manage static and dynamic secrets such as application data, username/p
 == Getting Help
 
 For a comprehensive treatment of all the Spring Vault features, please refer to:
-
-* the https://docs.spring.io/spring-vault/reference/[User Guide]
+roopesh
+* the https://docs.spring.io/spring-vault/reference/[User Guide].
 * the https://docs.spring.io/spring-vault/docs/current/api/[JavaDocs] have extensive comments in them as well.
 * the home page of https://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
 * for more detailed questions, use https://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
