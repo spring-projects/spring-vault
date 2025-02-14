@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -246,6 +247,39 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 		for (int i = 0; i < decoded.size(); i++) {
 			assertThat(decoded.get(i).getAsString()).isEqualTo(ssns.get(i));
 		}
+	}
+
+	@Test
+	void batchEncodeAndDecodeWithReference() {
+		// Prepare test data
+		List<TransformPlaintext> batch = new ArrayList<>();
+		batch.add(TransformPlaintext.of("123-45-6789")
+			.with(VaultTransformContext.builder().transformation("myssn").reference("ref-1").build()));
+		batch.add(TransformPlaintext.of("234-56-7890")
+			.with(VaultTransformContext.builder().transformation("myssn").reference("ref-2").build()));
+
+		// Encode
+		List<VaultTransformEncodeResult> encodeResults = transformOperations.encode("myrole", batch);
+
+		// Verify encode results
+		assertThat(encodeResults).hasSize(2);
+		assertThat(encodeResults.get(0).isSuccessful()).isTrue();
+		assertThat(encodeResults.get(1).isSuccessful()).isTrue();
+
+		// Prepare decode batch
+		List<TransformCiphertext> ciphertexts = new ArrayList<>();
+		ciphertexts.add(encodeResults.get(0).get());
+		ciphertexts.add(encodeResults.get(1).get());
+
+		// Decode
+		List<VaultTransformDecodeResult> decodeResults = transformOperations.decode("myrole", ciphertexts);
+
+		// Verify decode results
+		assertThat(decodeResults).hasSize(2);
+		assertThat(decodeResults.get(0).get().asString()).isEqualTo("123-45-6789");
+		assertThat(decodeResults.get(1).get().asString()).isEqualTo("234-56-7890");
+		assertThat(decodeResults.get(0).get().getContext().getReference()).isEqualTo("ref-1");
+		assertThat(decodeResults.get(1).get().getContext().getReference()).isEqualTo("ref-2");
 	}
 
 }
