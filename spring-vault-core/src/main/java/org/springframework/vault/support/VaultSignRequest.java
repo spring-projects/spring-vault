@@ -91,17 +91,6 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * @return algorithm used for creating the signature or {@literal null} to use the
-	 * default algorithm.
-	 * @deprecated since 2.4, use {@link #getSignatureAlgorithm()} instead.
-	 */
-	@Deprecated(since = "2.4")
-	@Nullable
-	public String getAlgorithm() {
-		return getSignatureAlgorithm();
-	}
-
-	/**
 	 * @return true if the input is already hashed.
 	 * @since 3.1
 	 */
@@ -178,19 +167,6 @@ public class VaultSignRequest {
 
 			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
-		}
-
-		/**
-		 * Configure the algorithm to be used for the operation.
-		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
-		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
-		 * @deprecated since 2.4, use {@link #signatureAlgorithm(String)} instead.
-		 */
-		@Deprecated(since = "2.4")
-		public VaultSignRequestBuilder algorithm(String algorithm) {
-			return signatureAlgorithm(algorithm);
 		}
 
 		/**

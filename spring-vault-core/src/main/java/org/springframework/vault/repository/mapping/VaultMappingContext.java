@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.repository.mapping;
 
-import org.jspecify.annotations.Nullable;
-
-import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
 import org.springframework.data.keyvalue.core.mapping.context.KeyValueMappingContext;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
@@ -30,17 +27,6 @@ import org.springframework.data.util.TypeInformation;
  * @since 2.0
  */
 public class VaultMappingContext extends KeyValueMappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> {
-
-	/**
-	 * @return the {@link KeySpaceResolver} if configured.
-	 * @deprecated since 3.1, {@link KeySpaceResolver} has fully moved into
-	 * {@link KeyValueMappingContext}.
-	 */
-	@Nullable
-	@Deprecated(since = "3.1", forRemoval = true)
-	public KeySpaceResolver getFallbackKeySpaceResolver() {
-		return super.getKeySpaceResolver();
-	}
 
 	@Override
 	protected <T> VaultPersistentEntity<?> createPersistentEntity(TypeInformation<T> typeInformation) {

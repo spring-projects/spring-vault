@@ -34,7 +34,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.authentication.*;
-import org.springframework.vault.authentication.AppIdAuthenticationOptions.AppIdAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
@@ -263,7 +262,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 		return switch (authenticationMethod) {
 			case TOKEN -> tokenAuthentication();
-			case APPID -> appIdAuthentication();
 			case APPROLE -> appRoleAuthentication();
 			case AWS_EC2 -> awsEc2Authentication();
 			case AWS_IAM -> awsIamAuthentication();
@@ -288,24 +286,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return new TokenAuthentication(token);
 	}
 
-	protected ClientAuthentication appIdAuthentication() {
-
-		String appId = getProperty("vault.app-id.app-id", getProperty("spring.application.name"));
-		String userId = getProperty("vault.app-id.user-id");
-		String path = getProperty("vault.app-id.app-id-path",
-				AppIdAuthenticationOptions.DEFAULT_APPID_AUTHENTICATION_PATH);
-
-		Assert.hasText(appId, "Vault AppId authentication: AppId (vault.app-id.app-id) must not be empty");
-		Assert.hasText(userId, "Vault AppId authentication: UserId (vault.app-id.user-id) must not be empty");
-
-		AppIdAuthenticationOptionsBuilder builder = AppIdAuthenticationOptions.builder()
-			.appId(appId)
-			.userIdMechanism(getAppIdUserIdMechanism(userId))
-			.path(path);
-
-		return new AppIdAuthentication(builder.build(), restOperations());
-	}
-
 	protected ClientAuthentication appRoleAuthentication() {
 
 		String roleId = getProperty("vault.app-role.role-id");
@@ -324,19 +304,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		}
 
 		return new AppRoleAuthentication(builder.build(), restOperations());
-	}
-
-	protected AppIdUserIdMechanism getAppIdUserIdMechanism(String userId) {
-
-		if (userId.equalsIgnoreCase(AppIdUserId.IP_ADDRESS.name())) {
-			return new IpAddressUserId();
-		}
-
-		if (userId.equalsIgnoreCase(AppIdUserId.MAC_ADDRESS.name())) {
-			return new MacAddressUserId();
-		}
-
-		return new StaticUserId(userId);
 	}
 
 	protected ClientAuthentication awsEc2Authentication() {
@@ -463,15 +430,9 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return value != null ? this.applicationContext.getResource(value) : null;
 	}
 
-	enum AppIdUserId {
-
-		IP_ADDRESS, MAC_ADDRESS;
-
-	}
-
 	enum AuthenticationMethod {
 
-		TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES;
+		TOKEN, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES;
 
 	}
 
