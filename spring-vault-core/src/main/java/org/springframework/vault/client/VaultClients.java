@@ -136,7 +136,7 @@ public class VaultClients {
 
 			HttpHeaders headers = request.getHeaders();
 
-			if (!headers.containsKey(VaultHttpHeaders.VAULT_NAMESPACE)) {
+			if (!headers.containsHeader(VaultHttpHeaders.VAULT_NAMESPACE)) {
 				headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
 			}
 

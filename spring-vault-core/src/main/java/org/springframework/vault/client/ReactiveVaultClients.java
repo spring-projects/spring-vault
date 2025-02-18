@@ -182,7 +182,7 @@ public class ReactiveVaultClients {
 
 				return ClientRequest.from(request).headers(headers -> {
 
-					if (!headers.containsKey(VaultHttpHeaders.VAULT_NAMESPACE)) {
+					if (!headers.containsHeader(VaultHttpHeaders.VAULT_NAMESPACE)) {
 						headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
 					}
 				}).build();
