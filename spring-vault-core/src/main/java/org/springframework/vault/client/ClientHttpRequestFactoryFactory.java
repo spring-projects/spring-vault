@@ -33,8 +33,6 @@ import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
@@ -75,9 +73,6 @@ import static org.springframework.vault.client.ClientConfiguration.*;
  * @since 2.2
  */
 public class ClientHttpRequestFactoryFactory {
-
-	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
-	private static Log logger = LogFactory.getLog(ClientHttpRequestFactoryFactory.class);
 
 	private static final boolean reactorNettyPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient",
 			ClientHttpConnectorFactory.class.getClassLoader());

@@ -126,7 +126,7 @@ public abstract class VaultResponses {
 			}
 		};
 
-		return new ParameterizedTypeReference<VaultResponseSupport<T>>() {
+		return new ParameterizedTypeReference<>() {
 			@Override
 			public Type getType() {
 				return supportType;
@@ -179,7 +179,7 @@ public abstract class VaultResponses {
 		try {
 			return (T) converter.read(responseType, new HttpInputMessage() {
 				@Override
-				public InputStream getBody() throws IOException {
+				public InputStream getBody() {
 					return new ByteArrayInputStream(wrappedResponse.getBytes());
 				}
 

@@ -217,7 +217,7 @@ public class VaultClients {
 				return uriTemplate;
 			}
 		}
-		catch (IllegalArgumentException e) {
+		catch (IllegalArgumentException ignored) {
 		}
 
 		if (!uriTemplate.startsWith("/")) {
