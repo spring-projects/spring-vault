@@ -18,6 +18,8 @@ package org.springframework.vault.annotation;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
 import org.springframework.beans.factory.aot.BeanRegistrationAotContribution;
 import org.springframework.beans.factory.aot.BeanRegistrationAotProcessor;
@@ -31,7 +33,6 @@ import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.support.RegisteredBean;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.javapoet.CodeBlock;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
@@ -48,7 +49,7 @@ import org.springframework.vault.core.util.PropertyTransformers.NoOpPropertyTran
 class PropertySourceAotProcessor implements BeanRegistrationAotProcessor {
 
 	@Override
-	public BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
+	public @Nullable BeanRegistrationAotContribution processAheadOfTime(RegisteredBean registeredBean) {
 
 		if (registeredBean.getBeanClass() == org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class) {
 			return BeanRegistrationAotContribution.withCustomCodeFragments(AotContribution::new);

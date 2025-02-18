@@ -18,7 +18,8 @@ package org.springframework.vault.authentication;
 import java.time.Duration;
 import java.util.Arrays;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.VaultToken;
@@ -205,8 +206,8 @@ public class LoginToken extends VaultToken {
 	 */
 	public static class LoginTokenBuilder {
 
-		@Nullable
-		private char[] token;
+
+		private char @Nullable[] token;
 
 		private boolean renewable;
 

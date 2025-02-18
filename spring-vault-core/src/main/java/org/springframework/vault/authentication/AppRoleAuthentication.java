@@ -20,12 +20,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
@@ -214,7 +214,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(getRoleIdIdPath(this.options),
 						HttpMethod.GET, createHttpEntity(token), VaultResponse.class);
-				return (String) entity.getBody().getRequiredData().get("role_id");
+				return (String) ResponseUtil.getRequiredData(entity).get("role_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultLoginException("Cannot get Role id using AppRole: %s"
@@ -231,7 +231,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(unwrappingEndpoints.getPath(),
 						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
 
-				VaultResponse response = unwrappingEndpoints.unwrap(entity.getBody());
+				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
 
 				return (String) response.getRequiredData().get("role_id");
 			}
@@ -257,7 +257,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			try {
 				VaultResponse response = this.restOperations.postForObject(getSecretIdPath(this.options),
 						createHttpEntity(token), VaultResponse.class);
-				return (String) response.getRequiredData().get("secret_id");
+				return (String) ResponseUtil.getRequiredData(response).get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultLoginException("Cannot get Secret id using AppRole: %s"
@@ -275,7 +275,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(unwrappingEndpoints.getPath(),
 						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
 
-				VaultResponse response = unwrappingEndpoints.unwrap(entity.getBody());
+				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
 
 				return (String) response.getRequiredData().get("secret_id");
 			}

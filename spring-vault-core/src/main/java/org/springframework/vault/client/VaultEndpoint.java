@@ -20,7 +20,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.Objects;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 

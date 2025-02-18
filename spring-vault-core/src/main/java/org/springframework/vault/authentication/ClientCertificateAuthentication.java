@@ -108,6 +108,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 			VaultResponse response = this.restOperations
 				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), request, VaultResponse.class);
 
+			Assert.state(response != null, "Response must not be null");
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using TLS certificates");

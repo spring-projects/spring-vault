@@ -19,8 +19,7 @@ import java.time.Duration;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Value object to bind Vault HTTP kv metadata update API requests.

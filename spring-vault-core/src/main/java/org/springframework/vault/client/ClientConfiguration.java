@@ -39,11 +39,11 @@ import org.apache.commons.logging.LogFactory;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.jspecify.annotations.Nullable;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
-import org.springframework.lang.Nullable;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
@@ -69,7 +69,7 @@ class ClientConfiguration {
 	}
 
 	static SSLContext getSSLContext(SslConfiguration.KeyStoreConfiguration keyStoreConfiguration,
-			SslConfiguration.KeyConfiguration keyConfiguration, @Nullable TrustManager[] trustManagers)
+			SslConfiguration.KeyConfiguration keyConfiguration, TrustManager @Nullable[] trustManagers)
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = keyStoreConfiguration.isPresent()
@@ -113,9 +113,9 @@ class ClientConfiguration {
 		return keyStore;
 	}
 
-	@Nullable
-	static TrustManager[] getTrustManagers(SslConfiguration sslConfiguration)
-			throws GeneralSecurityException, IOException {
+
+	static TrustManager @Nullable[] getTrustManagers(SslConfiguration sslConfiguration)
+		throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()
 				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;

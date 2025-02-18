@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -230,14 +229,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			.build();
 		SdkHttpFullRequest signedRequest = signer.sign(request, signerParams);
 
-		Map<String, Object> map = new LinkedHashMap<>();
-
-		for (Entry<String, List<String>> entry : signedRequest.headers().entrySet()) {
-			map.put(entry.getKey(), entry.getValue());
-		}
-
 		try {
-			return OBJECT_MAPPER.writeValueAsString(map);
+			return OBJECT_MAPPER.writeValueAsString(new LinkedHashMap<>(signedRequest.headers()));
 		}
 		catch (JsonProcessingException e) {
 			throw new IllegalStateException("Cannot serialize headers to JSON", e);

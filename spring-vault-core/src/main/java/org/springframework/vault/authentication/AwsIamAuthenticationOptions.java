@@ -17,6 +17,7 @@ package org.springframework.vault.authentication;
 
 import java.net.URI;
 
+import org.jspecify.annotations.Nullable;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
@@ -24,7 +25,6 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.regions.providers.AwsRegionProvider;
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
