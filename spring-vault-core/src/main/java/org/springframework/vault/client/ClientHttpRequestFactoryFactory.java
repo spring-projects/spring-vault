@@ -39,11 +39,18 @@ import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import okhttp3.ConnectionSpec;
-import okhttp3.OkHttpClient.Builder;
+
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.KeyManagerFactorySpi;
+import javax.net.ssl.ManagerFactoryParameters;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509ExtendedKeyManager;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -60,7 +67,6 @@ import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.http.client.OkHttp3ClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
@@ -75,7 +81,7 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
- * OkHttp, Netty and the JDK HTTP client (in that order). This factory configures a
+ *  Netty and the JDK HTTP client (in that order). This factory configures a
  * {@link ClientHttpRequestFactory} depending on the available dependencies.
  *
  * @author Mark Paluch
@@ -91,9 +97,6 @@ public class ClientHttpRequestFactoryFactory {
 
 	private static final boolean httpComponentsPresent = ClassUtils.isPresent(
 			"org.apache.hc.client5.http.impl.classic.HttpClientBuilder",
-			ClientHttpRequestFactoryFactory.class.getClassLoader());
-
-	private static final boolean okHttp3Present = ClassUtils.isPresent("okhttp3.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
 	/**
@@ -113,10 +116,6 @@ public class ClientHttpRequestFactoryFactory {
 
 			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
-			}
-
-			if (okHttp3Present) {
-				return OkHttp3.usingOkHttp3(options, sslConfiguration);
 			}
 		}
 		catch (GeneralSecurityException | IOException e) {
@@ -344,102 +343,6 @@ public class ClientHttpRequestFactoryFactory {
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 
 			return httpClientBuilder;
-		}
-
-	}
-
-	/**
-	 * Utilities to create a {@link ClientHttpRequestFactory} for the
-	 * {@link okhttp3.OkHttpClient}.
-	 *
-	 * @author Mark Paluch
-	 */
-	public static class OkHttp3 {
-
-		/**
-		 * Create a {@link ClientHttpRequestFactory} using {@link okhttp3.OkHttpClient}.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
-		 * @return a new and configured {@link OkHttp3ClientHttpRequestFactory} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
-		 */
-		public static OkHttp3ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
-				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
-			Builder builder = getBuilder(options, sslConfiguration);
-
-			return new OkHttp3ClientHttpRequestFactory(builder.build());
-		}
-
-		public static Builder getBuilder(ClientOptions options, SslConfiguration sslConfiguration)
-				throws GeneralSecurityException, IOException {
-
-			Builder builder = new Builder();
-
-			ConnectionSpec sslConnectionSpec = ConnectionSpec.MODERN_TLS;
-
-			if (hasSslConfiguration(sslConfiguration)) {
-
-				TrustManager[] trustManagers = getTrustManagers(sslConfiguration);
-
-				if (trustManagers == null || trustManagers.length != 1
-						|| !(trustManagers[0] instanceof X509TrustManager)) {
-					throw new IllegalStateException(
-							"Unexpected default trust managers:" + Arrays.toString(trustManagers));
-				}
-
-				SSLContext sslContext = getSSLContext(sslConfiguration.getKeyStoreConfiguration(),
-						sslConfiguration.getKeyConfiguration(), trustManagers);
-
-				ConnectionSpec.Builder sslConnectionSpecBuilder = new ConnectionSpec.Builder(sslConnectionSpec);
-
-				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-					sslConnectionSpecBuilder.tlsVersions(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
-				}
-
-				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-					sslConnectionSpecBuilder
-						.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
-				}
-
-				sslConnectionSpec = sslConnectionSpecBuilder.build();
-
-				builder.sslSocketFactory(sslContext.getSocketFactory(), (X509TrustManager) trustManagers[0]);
-			}
-
-			builder.connectionSpecs(Arrays.asList(sslConnectionSpec, ConnectionSpec.CLEARTEXT));
-
-			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
-				.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
-			return builder;
-		}
-
-	}
-
-	/**
-	 * Utilities to create a {@link ClientHttpRequestFactory} for the
-	 * {@link SimpleClientHttpRequestFactory}.
-	 *
-	 * @author Luciano Canales
-	 * @since 3.1.3
-	 */
-	public static class SimpleClient {
-
-		/**
-		 * Create a {@link ClientHttpRequestFactory} using
-		 * {@link SimpleClientHttpRequestFactory}.
-		 * @param options must not be {@literal null}
-		 * @return a new and configured {@link SimpleClientHttpRequestFactory} instance.
-		 */
-		public static SimpleClientHttpRequestFactory usingSimpleClientHttpRequest(ClientOptions options) {
-
-			SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-
-			factory.setConnectTimeout((int) options.getConnectionTimeout().toMillis());
-			factory.setReadTimeout((int) options.getReadTimeout().toMillis());
-
-			return factory;
 		}
 
 	}

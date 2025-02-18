@@ -10,7 +10,6 @@ Spring Vault supports following HTTP imperative clients:
 
 * Java's builtin `HttpURLConnection` (default client if no other is available)
 * Apache Http Components
-* OkHttp 3
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
@@ -50,17 +49,6 @@ dependencies to your project. You can omit the version number if using
 ====
 
 NOTE: Apache HttpClient's https://hc.apache.org/httpcomponents-client-5.2.x/logging.html[wire logging] can be enabled through logging configuration. Make sure to not accidentally enable wire logging as logs may expose traffic (tokens and secrets) between your application and Vault in plain text.
-
-.Square OkHttp 3
-====
-[source, xml]
-----
-<dependency>
-  <groupId>com.squareup.okhttp3</groupId>
-  <artifactId>okhttp</artifactId>
-</dependency>
-----
-====
 
 .Reactor Netty
 ====
@@ -128,7 +116,7 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
 <4> Configuring only key store settings with providing a key-configuration.
 ====
 
-Please note that providing javadoc:org.springframework.vault.support.SslConfiguration[] can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
+Please note that providing javadoc:org.springframework.vault.support.SslConfiguration[] can be only applied when Apache Http Components is on your class-path.
 
 The SSL configuration supports also PEM-encoded certificates as alternative to a Java Key Store.
 
