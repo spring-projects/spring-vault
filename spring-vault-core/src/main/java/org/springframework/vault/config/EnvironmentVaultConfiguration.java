@@ -269,8 +269,6 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			case CERT -> new ClientCertificateAuthentication(restOperations());
 			case CUBBYHOLE -> cubbyholeAuthentication();
 			case KUBERNETES -> kubeAuthentication();
-			default -> throw new IllegalStateException("Vault authentication method %s is not supported with %s"
-				.formatted(authenticationMethod, getClass().getSimpleName()));
 		};
 	}
 

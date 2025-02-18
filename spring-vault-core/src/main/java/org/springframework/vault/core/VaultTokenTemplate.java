@@ -123,7 +123,6 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		return response;
 	}
 
-	@Nullable
 	private void writeToken(String path, VaultToken token, Class<?> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");

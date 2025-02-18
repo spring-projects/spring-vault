@@ -150,9 +150,8 @@ class ClientConfiguration {
 			logger.debug("Loading keystore from %s".formatted(keyStoreConfiguration.getResource()));
 		}
 
-		InputStream inputStream = null;
-		try {
-			inputStream = keyStoreConfiguration.getResource().getInputStream();
+		try (InputStream inputStream = keyStoreConfiguration.getResource()
+				.getInputStream()) {
 
 			if (SslConfiguration.PEM_KEYSTORE_TYPE.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
 
@@ -165,11 +164,6 @@ class ClientConfiguration {
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Keystore loaded with %d entries".formatted(keyStore.size()));
-			}
-		}
-		finally {
-			if (inputStream != null) {
-				inputStream.close();
 			}
 		}
 	}
