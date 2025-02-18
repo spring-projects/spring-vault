@@ -2,7 +2,6 @@
 * xref:introduction/introduction.adoc[]
 ** xref:introduction/getting-started.adoc[]
 ** xref:introduction/dependencies.adoc[]
-** xref:introduction/new-features.adoc[]
 * xref:vault/vault.adoc[]
 ** xref:vault/imperative-template.adoc[]
 ** xref:vault/vault-secret-engines.adoc[]
@@ -12,6 +11,5 @@
 ** xref:vault/client-support.adoc[]
 ** xref:vault/authentication.adoc[]
 ** xref:vault/spring-security.adoc[]
-
 
 * xref:attachment$api/java/index.html[Javadoc,role=link-external,window=_blank]

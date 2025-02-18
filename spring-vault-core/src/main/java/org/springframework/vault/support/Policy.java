@@ -547,14 +547,6 @@ public class Policy {
 		UPDATE,
 
 		/**
-		 * Deprecated: Previous capability literal before it was split into
-		 * {@link #CREATE} and {@link #UPDATE}.
-		 * @deprecated since 2.3 and Vault 0.5.
-		 */
-		@Deprecated(since = "2.3")
-		WRITE,
-
-		/**
 		 * Allows deleting the data at the given path.
 		 */
 		DELETE,
