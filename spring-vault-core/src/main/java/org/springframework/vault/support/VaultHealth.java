@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Vault health state.

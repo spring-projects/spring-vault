@@ -17,11 +17,11 @@ package org.springframework.vault.authentication;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
@@ -71,7 +71,6 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public VaultToken login() throws VaultException {
 
 		Iterable<Node<?>> steps = this.chain.steps;

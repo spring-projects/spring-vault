@@ -17,7 +17,8 @@ package org.springframework.vault.authentication;
 
 import java.net.URI;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

@@ -21,6 +21,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -36,7 +38,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.annotation.VaultPropertySource.Renewal;
@@ -200,9 +201,9 @@ class VaultPropertySourceRegistrar
 		Set<AnnotationAttributes> result = new LinkedHashSet<>();
 		addAttributesIfNotNull(result, metadata.getAnnotationAttributes(annotationClassName, false));
 
-		Map<String, Object> container = metadata.getAnnotationAttributes(containerClassName, false);
+		Map<String, @Nullable Object> container = metadata.getAnnotationAttributes(containerClassName, false);
 		if (container != null && container.containsKey("value")) {
-			for (Map<String, Object> containedAttributes : (Map<String, Object>[]) container.get("value")) {
+			for (Map<String, Object> containedAttributes : (Map<String, @Nullable Object>[]) container.get("value")) {
 				addAttributesIfNotNull(result, containedAttributes);
 			}
 		}
@@ -210,7 +211,7 @@ class VaultPropertySourceRegistrar
 	}
 
 	private static void addAttributesIfNotNull(Set<AnnotationAttributes> result,
-			@Nullable Map<String, Object> attributes) {
+			@Nullable Map<String, @Nullable Object> attributes) {
 		if (attributes != null) {
 			result.add(AnnotationAttributes.fromMap(attributes));
 		}

@@ -17,7 +17,7 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret

@@ -20,12 +20,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
@@ -190,7 +190,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataRestOperations
 			.exchange(this.options.getIdentityTokenServiceUri(), HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return (String) response.getBody().get("access_token");
+		return (String) ResponseUtil.getRequiredBody(response).get("access_token");
 	}
 
 	private AzureVmEnvironment getVmEnvironment() {
@@ -205,7 +205,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataRestOperations
 			.exchange(this.options.getInstanceMetadataServiceUri(), HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return toAzureVmEnvironment(response.getBody());
+		return toAzureVmEnvironment(ResponseUtil.getRequiredBody(response));
 	}
 
 	@SuppressWarnings("unchecked")

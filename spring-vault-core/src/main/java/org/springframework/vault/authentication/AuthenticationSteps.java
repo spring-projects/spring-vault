@@ -24,10 +24,11 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -298,8 +299,7 @@ public class AuthenticationSteps {
 		@Nullable
 		String uriTemplate;
 
-		@Nullable
-		String[] urlVariables;
+		String @Nullable[] urlVariables;
 
 		@Nullable
 		HttpEntity<?> entity;
@@ -379,14 +379,14 @@ public class AuthenticationSteps {
 			this.uri = uri;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate, @Nullable String[] urlVariables) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate, String @Nullable[] urlVariables) {
 			this.method = method;
 			this.uriTemplate = uriTemplate;
 			this.urlVariables = urlVariables;
 		}
 
 		private HttpRequestBuilder(HttpMethod method, @Nullable URI uri, @Nullable String uriTemplate,
-				@Nullable String[] urlVariables, @Nullable HttpEntity<?> entity) {
+			String @Nullable[] urlVariables, @Nullable HttpEntity<?> entity) {
 			this.method = method;
 			this.uri = uri;
 			this.uriTemplate = uriTemplate;
@@ -448,8 +448,8 @@ public class AuthenticationSteps {
 		@Nullable
 		final String uriTemplate;
 
-		@Nullable
-		final String[] urlVariables;
+
+		final String @Nullable[] urlVariables;
 
 		@Nullable
 		final HttpEntity<?> entity;
@@ -485,8 +485,7 @@ public class AuthenticationSteps {
 			return this.uriTemplate;
 		}
 
-		@Nullable
-		String[] getUrlVariables() {
+		String @Nullable[] getUrlVariables() {
 			return this.urlVariables;
 		}
 

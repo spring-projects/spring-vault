@@ -16,8 +16,7 @@
 package org.springframework.vault.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Value object to bind Vault HTTP Transit Key Config API requests.

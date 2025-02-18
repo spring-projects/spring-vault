@@ -20,7 +20,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**
