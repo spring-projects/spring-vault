@@ -22,9 +22,7 @@ import org.springframework.data.keyvalue.core.mapping.BasicKeyValuePersistentEnt
 import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.Expression;
-import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.LiteralExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
