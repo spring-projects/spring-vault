@@ -231,7 +231,7 @@ public class RestTemplateBuilder {
 
 			HttpHeaders headers = httpRequest.getHeaders();
 			defaultHeaders.forEach((key, value) -> {
-				if (!headers.containsKey(key)) {
+				if (!headers.containsHeader(key)) {
 					headers.add(key, value);
 				}
 			});

@@ -15,8 +15,6 @@
  */
 package org.springframework.vault.client;
 
-import java.util.Collections;
-
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -58,8 +56,7 @@ class ReactiveVaultClientsUnitTests {
 			.as(StepVerifier::create) //
 			.verifyComplete();
 
-		assertThat(request.getHeaders()).containsEntry(VaultHttpHeaders.VAULT_NAMESPACE,
-				Collections.singletonList("foo/bar"));
+		assertThat(request.getHeaders().containsHeaderValue(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar")).isTrue();
 	}
 
 	@Test
@@ -83,8 +80,7 @@ class ReactiveVaultClientsUnitTests {
 			.as(StepVerifier::create) //
 			.verifyComplete();
 
-		assertThat(request.getHeaders()).containsEntry(VaultHttpHeaders.VAULT_NAMESPACE,
-				Collections.singletonList("baz"));
+		assertThat(request.getHeaders().containsHeaderValue(VaultHttpHeaders.VAULT_NAMESPACE, "baz")).isTrue();
 	}
 
 }
