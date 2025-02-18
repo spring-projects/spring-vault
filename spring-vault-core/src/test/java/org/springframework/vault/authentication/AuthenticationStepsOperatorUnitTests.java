@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.vault.authentication;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +37,9 @@ import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * Unit tests for {@link AuthenticationStepsOperator}.

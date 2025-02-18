@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 the original author or authors.
+ * Copyright 2018-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,9 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.springframework.vault.annotation.VaultPropertySource.Renewal.RENEW;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.vault.annotation.VaultPropertySource.Renewal.*;
 
 /**
  * Unit test for {@link VaultPropertySource}.

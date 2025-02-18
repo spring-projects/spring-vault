@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 the original author or authors.
+ * Copyright 2016-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.vault.authentication;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +42,9 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId (optional)

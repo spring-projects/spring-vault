@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.util.Assert;
-import org.springframework.vault.authentication.AuthenticationEventPublisher;
 import org.springframework.vault.authentication.ClientAuthentication;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.UsernamePasswordAuthentication;
@@ -47,14 +46,13 @@ import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.Policy.BuiltinCapabilities;
-import org.springframework.vault.support.Policy.Capability;
 import org.springframework.vault.support.Policy.Rule;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.PrepareVault;
 import org.springframework.vault.util.VaultInitializer;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assumptions.assumeThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assumptions.*;
 
 /**
  * Integration tests for rotating generic secrets.

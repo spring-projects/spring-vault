@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 the original author or authors.
+ * Copyright 2016-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.get;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * Static Token-based {@link ClientAuthentication} method.

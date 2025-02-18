@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.as;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.vault.util.Settings.createSslConfiguration;
-import static org.springframework.vault.util.Settings.findWorkDir;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -29,15 +24,24 @@ import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.ListAssert;
 import org.assertj.core.util.Files;
 import org.junit.jupiter.api.BeforeEach;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.support.*;
+import org.springframework.vault.support.Policy;
+import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
+import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration test base class for {@link ClientCertificateAuthentication} tests.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 the original author or authors.
+ * Copyright 2023-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,22 +33,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.Ciphertext;
-import org.springframework.vault.support.Plaintext;
-import org.springframework.vault.support.SignatureValidation;
-import org.springframework.vault.support.TransitKeyType;
-import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultHmacRequest;
-import org.springframework.vault.support.VaultMount;
-import org.springframework.vault.support.VaultSignRequest;
-import org.springframework.vault.support.VaultSignatureVerificationRequest;
-import org.springframework.vault.support.VaultTransitContext;
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
-import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+import org.springframework.vault.support.*;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ReactiveVaultTransitTemplate} using the {@code transit}

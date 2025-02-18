@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,25 @@
  */
 package org.springframework.vault.core;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.util.Version;
-import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
 
 /**
  * Integration tests for {@link VaultKeyValueMetadataOperations}.

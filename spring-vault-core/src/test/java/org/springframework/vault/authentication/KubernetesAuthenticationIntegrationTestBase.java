@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.junit.jupiter.api.Assumptions.*;
-import static org.springframework.vault.util.Settings.*;
-
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -30,6 +27,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
+
+import static org.junit.jupiter.api.Assumptions.*;
+import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration test base class for {@link KubernetesAuthentication} tests.

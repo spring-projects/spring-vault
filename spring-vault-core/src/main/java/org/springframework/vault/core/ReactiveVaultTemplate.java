@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.vault.core;
-
-import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.*;
 
 import java.util.List;
 import java.util.function.Function;
@@ -51,6 +49,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import org.springframework.web.reactive.function.client.WebClientException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+
+import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.*;
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log

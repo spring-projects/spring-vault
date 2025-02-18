@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 the original author or authors.
+ * Copyright 2016-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 package org.springframework.vault.core;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.springframework.vault.util.Settings.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -61,6 +58,9 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 import org.springframework.web.client.HttpClientErrorException;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration tests for {@link VaultPkiTemplate} through {@link VaultPkiOperations}.

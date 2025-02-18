@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,37 +33,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.authentication.AppIdAuthentication;
-import org.springframework.vault.authentication.AppIdAuthenticationOptions;
+import org.springframework.vault.authentication.*;
 import org.springframework.vault.authentication.AppIdAuthenticationOptions.AppIdAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.AppIdUserIdMechanism;
-import org.springframework.vault.authentication.AppRoleAuthentication;
-import org.springframework.vault.authentication.AppRoleAuthenticationOptions;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.AppRoleAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
-import org.springframework.vault.authentication.AwsEc2Authentication;
-import org.springframework.vault.authentication.AwsEc2AuthenticationOptions;
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsEc2AuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.AwsIamAuthentication;
-import org.springframework.vault.authentication.AwsIamAuthenticationOptions;
-import org.springframework.vault.authentication.AzureMsiAuthentication;
-import org.springframework.vault.authentication.AzureMsiAuthenticationOptions;
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.ClientCertificateAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthentication;
-import org.springframework.vault.authentication.CubbyholeAuthenticationOptions;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.IpAddressUserId;
-import org.springframework.vault.authentication.KubernetesAuthentication;
-import org.springframework.vault.authentication.KubernetesAuthenticationOptions;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
-import org.springframework.vault.authentication.KubernetesJwtSupplier;
-import org.springframework.vault.authentication.KubernetesServiceAccountTokenFile;
-import org.springframework.vault.authentication.MacAddressUserId;
-import org.springframework.vault.authentication.StaticUserId;
-import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
