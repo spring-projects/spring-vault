@@ -8,28 +8,25 @@ that is scoped only to Spring Vault's client components.
 
 Spring Vault supports following HTTP imperative clients:
 
-* Java's builtin `HttpURLConnection` (default client if no other is available)
+* Java's builtin `HttpClient` (default client if no other is available)
 * Apache Http Components
+* Reactor Netty
+* Jetty
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
 * Java's builtin reactive `HttpClient` (default client if no other is available)
-* Reactor Netty
 * Apache Http Components
+* Reactor Netty
 * Jetty
 
 Using a specific client requires the according dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
 
-== Java's builtin `HttpURLConnection`
+== Java's builtin `HttpClient`
 
-Java's builtin `HttpURLConnection` is available out-of-the-box without additional
-configuration. Using `HttpURLConnection` comes with a limitation regarding SSL configuration.
-Spring Vault won't apply <<vault.client-ssl,customized SSL configuration>> as it would
-require a deep reconfiguration of the JVM. This configuration would affect all
-components relying on the default SSL context. Configuring SSL settings using
-`HttpURLConnection` requires you providing these settings as System Properties. See
-https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#InstallationAndCustomization[Customizing JSSE] for further details.
+Java's builtin `HttpClient` is available out-of-the-box since Java 11 without additional
+dependencies.
 
 == External Clients
 You can use external clients to access Vault's API. Simply add one of the following
