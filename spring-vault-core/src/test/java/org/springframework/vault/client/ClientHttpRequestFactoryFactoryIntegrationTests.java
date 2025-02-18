@@ -47,6 +47,52 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	String url = new VaultEndpoint().createUriString("sys/health");
 
 	@Test
+	void reactorNettyClientShouldWork() {
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.ReactorNetty
+			.usingReactorNetty(new ClientOptions(), Settings.createSslConfiguration());
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void reactorNettyClientWithExplicitEnabledCipherSuitesShouldWork() {
+
+		List<String> enabledCipherSuites = new ArrayList<String>();
+		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
+		enabledCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.ReactorNetty.usingReactorNetty(
+				new ClientOptions(), Settings.createSslConfiguration().withEnabledCipherSuites(enabledCipherSuites));
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void reactorNettyClientWithExplicitEnabledProtocolsShouldWork() {
+
+		List<String> enabledProtocols = new ArrayList<String>();
+		enabledProtocols.add("TLSv1.2");
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.ReactorNetty.usingReactorNetty(
+				new ClientOptions(), Settings.createSslConfiguration().withEnabledProtocols(enabledProtocols));
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
 	void httpComponentsClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(new ClientOptions(),
@@ -115,6 +161,65 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 		assertThat(response).isNotNull().contains("initialized");
 
 		((DisposableBean) factory).destroy();
+	}
+
+	@Test
+	void jettyClientShouldWork() throws Exception {
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.JettyClient.usingJetty(new ClientOptions(),
+				Settings.createSslConfiguration());
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void jettyClientWithExplicitEnabledCipherSuitesShouldWork() throws Exception {
+
+		List<String> enabledCipherSuites = new ArrayList<String>();
+		enabledCipherSuites.add("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384");
+		enabledCipherSuites.add("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.JettyClient.usingJetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledCipherSuites(enabledCipherSuites));
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void jettyClientWithExplicitEnabledProtocolsShouldWork() throws Exception {
+
+		List<String> enabledProtocols = new ArrayList<String>();
+		enabledProtocols.add("TLSv1.2");
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.JettyClient.usingJetty(new ClientOptions(),
+				Settings.createSslConfiguration().withEnabledProtocols(enabledProtocols));
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
+	}
+
+	@Test
+	void jdkHttpClientShouldWork() throws Exception {
+
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.JdkHttpClient
+			.usingJdkHttpClient(new ClientOptions(), Settings.createSslConfiguration());
+
+		RestTemplate template = new RestTemplate(factory);
+
+		String response = request(template);
+
+		assertThat(response).isNotNull().contains("initialized");
 	}
 
 	private String request(RestTemplate template) {

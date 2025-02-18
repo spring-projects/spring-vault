@@ -76,6 +76,8 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 	@Test
 	void shouldReadMetadataForANewKVEntry() {
 
+		Version version = prepare().getVersion();
+
 		vaultKeyValueMetadataOperations.get(SECRET_NAME).as(StepVerifier::create).assertNext(metadataResponse -> {
 			assertThat(metadataResponse.getMaxVersions()).isEqualTo(0);
 			assertThat(metadataResponse.getCurrentVersion()).isEqualTo(1);
@@ -86,7 +88,7 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 
 			var version1 = metadataResponse.getVersions().get(0);
 
-			if (prepare().getVersion().isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
+			if (version.isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
 
 				assertThat(metadataResponse.getDeleteVersionAfter()).isEqualTo(Duration.ZERO);
 
