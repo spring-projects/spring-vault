@@ -170,7 +170,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
 		}
 
-		for (Entry<String, List<String>> header : entity.getHeaders().entrySet()) {
+		for (Entry<String, List<String>> header : entity.getHeaders().headerSet()) {
 			spec = spec.header(header.getKey(), header.getValue().get(0));
 		}
 

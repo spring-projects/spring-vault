@@ -17,7 +17,6 @@ package org.springframework.vault.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
 
@@ -74,7 +73,7 @@ class RestTemplateBuilderUnitTests {
 
 		ClientHttpRequest request = restTemplate.getRequestFactory().createRequest(URI.create("/"), HttpMethod.GET);
 
-		assertThat(request.getHeaders()).containsEntry("header", Collections.singletonList("value"));
+		assertThat(request.getHeaders().get("header")).containsOnly("value");
 	}
 
 }

@@ -196,7 +196,7 @@ public class WebClientBuilder {
 
 				return next
 					.exchange(ClientRequest.from(request).headers(headers -> defaultHeaders.forEach((key, value) -> {
-						if (!headers.containsKey(key)) {
+						if (!headers.containsHeader(key)) {
 							headers.add(key, value);
 						}
 					})).build());

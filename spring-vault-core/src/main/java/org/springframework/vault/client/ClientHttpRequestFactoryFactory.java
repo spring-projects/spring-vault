@@ -81,7 +81,7 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
- *  Netty and the JDK HTTP client (in that order). This factory configures a
+ * Netty and the JDK HTTP client (in that order). This factory configures a
  * {@link ClientHttpRequestFactory} depending on the available dependencies.
  *
  * @author Mark Paluch

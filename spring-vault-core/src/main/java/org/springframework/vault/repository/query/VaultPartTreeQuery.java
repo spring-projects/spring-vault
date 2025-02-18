@@ -21,7 +21,7 @@ import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.repository.query.ParameterAccessor;
 import org.springframework.data.repository.query.QueryMethod;
-import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
+import org.springframework.data.repository.query.ValueExpressionDelegate;
 import org.springframework.data.repository.query.parser.AbstractQueryCreator;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.data.spel.EvaluationContextProvider;
@@ -41,15 +41,15 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 	 * {@link EvaluationContextProvider}, {@link KeyValueOperations} and query creator
 	 * type.
 	 * @param queryMethod must not be {@literal null}.
-	 * @param evaluationContextProvider must not be {@literal null}.
+	 * @param valueExpressionDelegate must not be {@literal null}.
 	 * @param keyValueOperations must not be {@literal null}.
 	 * @param queryCreator must not be {@literal null}.
 	 */
 	@SuppressWarnings({ "unchecked", "RedundantCast", "rawtypes" })
-	public VaultPartTreeQuery(QueryMethod queryMethod, QueryMethodEvaluationContextProvider evaluationContextProvider,
+	public VaultPartTreeQuery(QueryMethod queryMethod, ValueExpressionDelegate valueExpressionDelegate,
 			KeyValueOperations keyValueOperations, Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 
-		super(queryMethod, evaluationContextProvider, keyValueOperations,
+		super(queryMethod, valueExpressionDelegate, keyValueOperations,
 				(QueryCreatorFactory) new VaultQueryCreatorFactory(
 						(MappingContext) keyValueOperations.getMappingContext()));
 	}

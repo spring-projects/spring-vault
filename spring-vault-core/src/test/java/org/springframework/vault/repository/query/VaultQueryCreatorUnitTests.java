@@ -226,7 +226,7 @@ class VaultQueryCreatorUnitTests {
 		return queryCreator.createQuery().getCriteria();
 	}
 
-	private static interface dummy {
+	private interface dummy {
 
 		Object someUnrelatedMethod(String arg);
 
