@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2024 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,15 +26,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link PcfAuthentication}.

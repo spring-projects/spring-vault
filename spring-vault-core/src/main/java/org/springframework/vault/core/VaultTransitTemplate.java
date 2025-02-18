@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 the original author or authors.
+ * Copyright 2016-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,24 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.Ciphertext;
-import org.springframework.vault.support.Hmac;
-import org.springframework.vault.support.Plaintext;
-import org.springframework.vault.support.RawTransitKey;
-import org.springframework.vault.support.Signature;
-import org.springframework.vault.support.SignatureValidation;
-import org.springframework.vault.support.TransitKeyType;
-import org.springframework.vault.support.VaultDecryptionResult;
-import org.springframework.vault.support.VaultEncryptionResult;
-import org.springframework.vault.support.VaultHmacRequest;
-import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.vault.support.VaultSignRequest;
-import org.springframework.vault.support.VaultSignatureVerificationRequest;
-import org.springframework.vault.support.VaultTransitContext;
-import org.springframework.vault.support.VaultTransitKey;
-import org.springframework.vault.support.VaultTransitKeyConfiguration;
-import org.springframework.vault.support.VaultTransitKeyCreationRequest;
+import org.springframework.vault.support.*;
 
 /**
  * Default implementation of {@link VaultTransitOperations}.

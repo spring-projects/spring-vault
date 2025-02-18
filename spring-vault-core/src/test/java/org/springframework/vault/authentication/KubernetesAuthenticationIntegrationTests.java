@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2024 the original author or authors.
+ * Copyright 2017-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,8 @@ import org.springframework.vault.util.Settings;
 import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.springframework.vault.util.Settings.findWorkDir;
+import static org.assertj.core.api.Assertions.*;
+import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration tests for {@link KubernetesAuthentication}.

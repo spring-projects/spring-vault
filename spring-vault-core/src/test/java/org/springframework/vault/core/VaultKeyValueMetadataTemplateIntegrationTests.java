@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 the original author or authors.
+ * Copyright 2020-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,7 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.util.Version;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.vault.support.VaultMetadataRequest;
-import org.springframework.vault.support.VaultMetadataResponse;
-import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.Versioned;
-import org.springframework.vault.util.Version;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link VaultKeyValueMetadataOperations}.

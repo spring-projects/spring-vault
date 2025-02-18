@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 the original author or authors.
+ * Copyright 2021-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
-
 import java.io.IOException;
 import java.security.PrivateKey;
 import java.time.Duration;
@@ -30,23 +22,12 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestTemplate;
-
 import com.google.api.gax.grpc.GrpcTransportChannel;
 import com.google.api.gax.rpc.FixedTransportChannelProvider;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.cloud.iam.credentials.v1.SignJwtRequest;
 import com.google.cloud.iam.credentials.v1.SignJwtResponse;
-
 import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 import io.grpc.Server;
@@ -55,6 +36,22 @@ import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.protobuf.lite.ProtoLiteUtils;
 import io.grpc.stub.ServerCalls;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestTemplate;
+
+import static io.grpc.stub.ServerCalls.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
  * Unit tests for {@link GcpIamCredentialsAuthentication}.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 the original author or authors.
+ * Copyright 2021-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-
 import java.security.PrivateKey;
 import java.util.Date;
-
-import org.junit.jupiter.api.Test;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link GcpIamCredentialsAuthenticationOptions}.

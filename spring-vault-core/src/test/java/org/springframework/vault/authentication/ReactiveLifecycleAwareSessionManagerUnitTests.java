@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 the original author or authors.
+ * Copyright 2018-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,17 +35,7 @@ import reactor.test.StepVerifier;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
-import org.springframework.vault.authentication.event.AfterLoginEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorListener;
-import org.springframework.vault.authentication.event.AuthenticationEvent;
-import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.LoginFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
+import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -57,15 +47,9 @@ import org.springframework.web.reactive.function.client.WebClient.RequestHeaders
 import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Unit tests for {@link ReactiveLifecycleAwareSessionManager}.

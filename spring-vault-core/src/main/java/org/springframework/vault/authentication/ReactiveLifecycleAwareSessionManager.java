@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2024 the original author or authors.
+ * Copyright 2018-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.authentication.event.AfterLoginEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.AfterLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
-import org.springframework.vault.authentication.event.AuthenticationErrorListener;
-import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRenewedEvent;
-import org.springframework.vault.authentication.event.BeforeLoginTokenRevocationEvent;
-import org.springframework.vault.authentication.event.LoginFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
-import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
-import org.springframework.vault.authentication.event.LoginTokenRevocationFailedEvent;
+import org.springframework.vault.authentication.event.*;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
