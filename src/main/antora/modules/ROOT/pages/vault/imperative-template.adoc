@@ -182,20 +182,13 @@ vault.token=00000000-0000-0000-0000-000000000000
 ** Truststore type: `vault.ssl.trust-store-type` (optional, typically `jks`, supports also `pem`)
 ** Enabled SSL/TLS protocols: `vault.ssl.enabled-protocols` (since 2.3.2, optional, protocols separated with comma)
 ** Enabled SSL/TLS cipher suites: `vault.ssl.enabled-cipher-suites` (since 2.3.2, optional, cipher suites separated with comma)
-* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AWS_IAM`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
+* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPROLE`, `AWS_EC2`, `AWS_IAM`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
 
 **Authentication-specific property keys**
 
 **<<vault.authentication.token>>**
 
 * Vault Token: `vault.token`
-
-**<<vault.authentication.appid>>**
-
-* AppId path: `vault.app-id.app-id-path` (defaults to `app-id`)
-* AppId: `vault.app-id.app-id`
-* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use `MacAddressUserId`, respective `IpAddressUserId` user id mechanisms.
-Any other value is used with `StaticUserId`.
 
 **<<vault.authentication.approle>>**
 

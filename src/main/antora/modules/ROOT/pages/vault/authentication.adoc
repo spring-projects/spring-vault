@@ -80,127 +80,12 @@ See also:
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
 * https://www.vaultproject.io/docs/auth/token.html[Vault Documentation: Using the Token auth backend]
 
-[[vault.authentication.appid]]
-== AppId authentication
-
-NOTE: AppId authentication is deprecated by Vault. Use <<vault.authentication.approle>> instead.
-
-Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
-authentication that consists of two hard to guess tokens. The AppId
-defaults to `spring.application.name` that is statically configured.
-The second token is the UserId which is a part determined by the application,
-usually related to the runtime environment. IP address, Mac address or a
-Docker container name are good examples. Spring Vault supports
-IP address, Mac address and static UserId's (e.g. supplied via System properties).
-The IP and Mac address are represented as Hex-encoded SHA256 hash.
-
-IP address-based UserId's use the local host's IP address.
-
-====
-[source,java]
-----
-@Configuration
-class AppConfig extends AbstractVaultConfiguration {
-
-    // …
-
-    @Override
-    public ClientAuthentication clientAuthentication() {
-        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-                .appId("myapp")
-                .userIdMechanism(new IpAddressUserId())
-                .build();
-
-        return new AppIdAuthentication(options, restOperations());
-    }
-
-    // …
-}
-----
-====
-
-The corresponding command to generate the IP address UserId from a command line is:
-
-----
-$ echo -n 192.168.99.1 | sha256sum
-----
-
-NOTE: Including the line break of `echo` leads to a different hash value
-so make sure to include the `-n` flag.
-
-Mac address-based UserId's obtain their network device from the
-localhost-bound device. The configuration also allows specifying
-a `network-interface` hint to pick the right device. The value of
-`network-interface` is optional and can be either an interface
-name or interface index (0-based).
-
-====
-[source,java]
-----
-@Configuration
-class AppConfig extends AbstractVaultConfiguration {
-
-    // …
-
-    @Override
-    public ClientAuthentication clientAuthentication() {
-
-        AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-                .appId("myapp")
-                .userIdMechanism(new MacAddressUserId())
-                .build();
-
-        return new AppIdAuthentication(options, restOperations());
-    }
-
-    // …
-}
-----
-====
-
-The corresponding command to generate the Mac address UserId from a command line is:
-
-----
-$ echo -n 0AFEDE1234AC | sha256sum
-----
-
-NOTE: The Mac address is specified uppercase and without colons.
-Including the line break of `echo` leads to a different hash value
-so make sure to include the `-n` flag.
-
-=== Custom UserId
-
-A more advanced approach lets you implementing your own `AppIdUserIdMechanism`.
-This class must be on your classpath and must implement
-the `org.springframework.vault.authentication.AppIdUserIdMechanism` interface
-and the `createUserId` method. Spring Vault will obtain the UserId
-by calling `createUserId` each time it authenticates using AppId to
-obtain a token.
-
-====
-[source,java]
-.MyUserIdMechanism.java
-----
-public class MyUserIdMechanism implements AppIdUserIdMechanism {
-
-  @Override
-  public String createUserId() {
-
-    String userId = …
-    return userId;
-  }
-}
-----
-====
-
-See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation: Using the App ID auth backend]
-
 [[vault.authentication.approle]]
 == AppRole authentication
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] allows machine
-authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.appid>>.
-AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
+authentication. AppRole authentication consists of two hard to guess (secret)
+tokens: RoleId and SecretId.
 
 Spring Vault supports AppRole authentication by providing either RoleId only
 or together with a provided SecretId and fetching RoleId/SecretId from Vault

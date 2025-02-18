@@ -209,20 +209,6 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		 * @param loginToken login token encapsulating renewability and lease duration.
 		 * @return the next execution time as defined by the trigger, or {@code null} if
 		 * the trigger won't fire anymore.
-		 * @deprecated since 3.1, use {@link #nextExecution(LoginToken) instead}.
-		 */
-		@Nullable
-		@Deprecated(since = "3.1")
-		default Date nextExecutionTime(LoginToken loginToken) {
-			Instant instant = nextExecution(loginToken);
-			return instant != null ? Date.from(instant) : null;
-		}
-
-		/**
-		 * Determine the next execution time according to the given trigger context.
-		 * @param loginToken login token encapsulating renewability and lease duration.
-		 * @return the next execution time as defined by the trigger, or {@code null} if
-		 * the trigger won't fire anymore.
 		 * @since 3.1
 		 */
 		@Nullable
