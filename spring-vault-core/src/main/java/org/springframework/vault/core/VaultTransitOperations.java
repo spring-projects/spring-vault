@@ -17,7 +17,8 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.vault.support.*;
 
 /**

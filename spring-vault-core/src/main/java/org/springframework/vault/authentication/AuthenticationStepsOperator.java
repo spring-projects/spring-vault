@@ -155,6 +155,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
+	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
 
 		HttpRequest<Object> definition = step.getDefinition();
@@ -164,7 +165,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		if (definition.getUri() == null) {
 
 			spec = this.webClient.method(definition.getMethod())
-				.uri(definition.getUriTemplate(), definition.getUrlVariables());
+				.uri(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
 		}
 		else {
 			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());

@@ -23,6 +23,7 @@
 		<assertj-core.version>3.27.3</assertj-core.version>
 		<aws-java-sdk.version>2.31.29</aws-java-sdk.version>
 		<bcpkix-jdk18on.version>1.80</bcpkix-jdk18on.version>
+		<errorprone.version>2.36.0</errorprone.version>
 		<google-api-services-iam.version>v1-rev20221013-2.0.0
 		</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>2.60.0</google-cloud-iamcredentials.version>
@@ -39,6 +40,7 @@
 		<mockk.version>1.13.17</mockk.version>
 		<mockito-core.version>5.17.0</mockito-core.version>
 		<netty.version>4.1.121.Final</netty.version>
+		<nullaway.version>0.12.3</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.0-M2</spring.version>
 		<spring-data-bom.version>2025.1.0-M1</spring-data-bom.version>
@@ -379,9 +381,22 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>${java.version}</source>
-					<target>${java.version}</target>
+					<release>${java.version}</release>
 					<parameters>true</parameters>
+					<release>${source.level}</release>
+					<showWarnings>true</showWarnings>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>com.google.errorprone</groupId>
+							<artifactId>error_prone_core</artifactId>
+							<version>${errorprone.version}</version>
+						</path>
+						<path>
+							<groupId>com.uber.nullaway</groupId>
+							<artifactId>nullaway</artifactId>
+							<version>${nullaway.version}</version>
+						</path>
+					</annotationProcessorPaths>
 				</configuration>
 				<executions>
 					<execution>
@@ -398,6 +413,13 @@
 						<goals>
 							<goal>compile</goal>
 						</goals>
+						<configuration>
+							<compilerArgs>
+								<arg>-XDcompilePolicy=simple</arg>
+								<arg>--should-stop=ifError=FLOW</arg>
+								<arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:CustomContractAnnotations=org.springframework.lang.Contract</arg>
+							</compilerArgs>
+						</configuration>
 					</execution>
 					<execution>
 						<id>java-test-compile</id>

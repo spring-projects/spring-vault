@@ -17,7 +17,8 @@ package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 

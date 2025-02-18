@@ -23,10 +23,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.data.convert.WritingConverter;
-import org.springframework.lang.Nullable;
 import org.springframework.vault.repository.mapping.VaultSimpleTypes;
 
 /**

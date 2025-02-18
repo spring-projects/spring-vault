@@ -1,6 +1,5 @@
 /**
  * Classes supporting the Vault packages, such as value objects.
  */
-@org.springframework.lang.NonNullApi
-@org.springframework.lang.NonNullFields
+@org.jspecify.annotations.NullMarked
 package org.springframework.vault.support;

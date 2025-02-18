@@ -18,6 +18,8 @@ package org.springframework.vault.aot;
 import java.io.IOException;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.ReflectionHints;
 import org.springframework.aot.hint.RuntimeHints;
@@ -41,7 +43,7 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 	private final CachingMetadataReaderFactory factory = new CachingMetadataReaderFactory();
 
 	@Override
-	public void registerHints(RuntimeHints hints, ClassLoader classLoader) {
+	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
 

@@ -24,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
@@ -181,8 +181,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 		private final AtomicBoolean fired = new AtomicBoolean();
 
-		@Nullable
-		private final Instant nextExecutionTime;
+		private final @Nullable Instant nextExecutionTime;
 
 		public OneShotTrigger(@Nullable Date nextExecutionTime) {
 			this(nextExecutionTime != null ? nextExecutionTime.toInstant() : null);
@@ -193,7 +192,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		}
 
 		@Override
-		public Instant nextExecution(TriggerContext triggerContext) {
+		public @Nullable Instant nextExecution(TriggerContext triggerContext) {
 			return this.fired.compareAndSet(false, true) ? this.nextExecutionTime : null;
 		}
 

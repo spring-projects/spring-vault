@@ -140,7 +140,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 			ResponseEntity<String> response = this.googleMetadataRestOperations.exchange(COMPUTE_METADATA_URL_TEMPLATE,
 					HttpMethod.GET, entity, String.class, urlParameters);
 
-			return response.getBody();
+			return ResponseUtil.getRequiredBody(response);
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultLoginException("Cannot obtain signed identity", e);

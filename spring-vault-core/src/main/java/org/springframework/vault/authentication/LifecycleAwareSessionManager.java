@@ -203,7 +203,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		this.logger.info("Renewing token");
 
 		Optional<TokenWrapper> token = getToken();
-		if (!token.isPresent()) {
+		if (token.isEmpty()) {
 			getSessionToken();
 			return RenewOutcome.TERMINAL_ERROR;
 		}
@@ -266,11 +266,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	@Override
 	public VaultToken getSessionToken() {
 
-		if (!getToken().isPresent()) {
+		if (getToken().isEmpty()) {
 
 			this.lock.lock();
 			try {
-				if (!getToken().isPresent()) {
+				if (getToken().isEmpty()) {
 					doGetSessionToken();
 				}
 			}
@@ -339,7 +339,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		Runnable task = () -> {
 			Optional<TokenWrapper> tokenWrapper = getToken();
 
-			if (!tokenWrapper.isPresent()) {
+			if (tokenWrapper.isEmpty()) {
 				return;
 			}
 

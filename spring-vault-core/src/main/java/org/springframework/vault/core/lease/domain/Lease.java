@@ -17,7 +17,8 @@ package org.springframework.vault.core.lease.domain;
 
 import java.time.Duration;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 
 /**

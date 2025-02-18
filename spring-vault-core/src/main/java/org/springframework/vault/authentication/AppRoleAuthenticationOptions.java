@@ -15,7 +15,8 @@
  */
 package org.springframework.vault.authentication;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.authentication.AppRoleTokens.AbsentSecretId;
 import org.springframework.vault.authentication.AppRoleTokens.Provided;

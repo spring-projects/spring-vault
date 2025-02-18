@@ -17,7 +17,8 @@ package org.springframework.vault.core;
 
 import java.io.InputStream;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;

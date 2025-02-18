@@ -256,7 +256,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
 
-			return exchange.getBody();
+			return ResponseUtil.getRequiredBody(exchange);
 		}
 		catch (RestClientException e) {
 			throw new VaultLoginException(

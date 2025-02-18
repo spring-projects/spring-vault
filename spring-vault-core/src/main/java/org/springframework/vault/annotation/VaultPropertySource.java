@@ -113,7 +113,7 @@ public @interface VaultPropertySource {
 	 */
 	Renewal renewal() default Renewal.OFF;
 
-	public enum Renewal {
+	enum Renewal {
 
 		/**
 		 * Do not renew leases associated with secrets.

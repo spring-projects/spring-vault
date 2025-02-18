@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.StreamSupport;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
