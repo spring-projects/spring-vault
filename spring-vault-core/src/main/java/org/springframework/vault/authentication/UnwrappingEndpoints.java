@@ -26,6 +26,7 @@ import org.springframework.vault.support.VaultResponse;
  * @author Mark Paluch
  * @since 2.2
  */
+@SuppressWarnings("NullAway")
 public enum UnwrappingEndpoints {
 
 	/**

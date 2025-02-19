@@ -185,7 +185,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	}
 
 	@Override
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		return this.properties.get(name);
 	}
 
@@ -193,7 +193,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	public String[] getPropertyNames() {
 
 		Set<String> strings = this.properties.keySet();
-		return strings.toArray(new String[strings.size()]);
+		return strings.toArray(new String[0]);
 	}
 
 	// -------------------------------------------------------------------------
@@ -206,8 +206,7 @@ public class VaultPropertySource extends EnumerablePropertySource<VaultOperation
 	 * @return the resulting {@link Map} or {@literal null} if properties were not found.
 	 * @throws VaultException on problems retrieving properties
 	 */
-	@Nullable
-	protected Map<String, Object> doGetProperties(String path) throws VaultException {
+	protected @Nullable Map<String, Object> doGetProperties(String path) throws VaultException {
 
 		VaultResponse vaultResponse;
 

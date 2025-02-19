@@ -199,7 +199,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	}
 
 	@Override
-	public Object getProperty(String name) {
+	public @Nullable Object getProperty(String name) {
 		return this.properties.get(name);
 	}
 
@@ -207,7 +207,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	public String[] getPropertyNames() {
 
 		Set<String> strings = this.properties.keySet();
-		return strings.toArray(new String[strings.size()]);
+		return strings.toArray(new String[0]);
 	}
 
 	// -------------------------------------------------------------------------

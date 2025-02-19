@@ -383,7 +383,6 @@
 				<configuration>
 					<release>${java.version}</release>
 					<parameters>true</parameters>
-					<release>${source.level}</release>
 					<showWarnings>true</showWarnings>
 					<annotationProcessorPaths>
 						<path>

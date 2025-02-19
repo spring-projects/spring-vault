@@ -70,7 +70,7 @@ public class CertificateBundle extends Certificate {
 			@JsonProperty("certificate") String certificate, @JsonProperty("issuing_ca") String issuingCaCertificate,
 			@JsonProperty("ca_chain") List<String> caChain, @JsonProperty("private_key") String privateKey,
 			@Nullable @JsonProperty("private_key_type") String privateKeyType,
-			@JsonProperty("revocation_time") Long revocationTime) {
+			@Nullable @JsonProperty("revocation_time") Long revocationTime) {
 
 		super(serialNumber, certificate, issuingCaCertificate, caChain, revocationTime);
 		this.privateKey = privateKey;

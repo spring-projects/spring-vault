@@ -208,7 +208,7 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 
 		throw new IllegalStateException(("Cannot construct VaultTokenSupplier from %s. "
 				+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication")
-					.formatted(clientAuthentication));
+			.formatted(clientAuthentication));
 	}
 
 	/**

@@ -16,6 +16,7 @@
 
 package org.springframework.vault.support;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -33,18 +34,15 @@ import org.jspecify.annotations.Nullable;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultResponseSupport<T> {
 
-	@Nullable
-	private Map<String, Object> auth;
+	private Map<String, Object> auth = Collections.emptyMap();
 
 	@Nullable
 	private T data;
 
-	@Nullable
-	private Map<String, Object> metadata;
+	private Map<String, Object> metadata = Collections.emptyMap();
 
 	@JsonProperty("wrap_info")
-	@Nullable
-	private Map<String, String> wrapInfo;
+	private Map<String, String> wrapInfo = Collections.emptyMap();
 
 	@JsonProperty("lease_duration")
 	private long leaseDuration;
@@ -59,8 +57,7 @@ public class VaultResponseSupport<T> {
 
 	private boolean renewable;
 
-	@Nullable
-	private List<String> warnings;
+	private List<String> warnings = Collections.emptyList();
 
 	/**
 	 * Apply metadata such as auth or warnings without copying data.
@@ -82,28 +79,14 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return authentication payload.
 	 */
-	@Nullable
 	public Map<String, Object> getAuth() {
 		return this.auth;
 	}
 
 	/**
-	 * @return the authentication payload.
-	 * @throws IllegalStateException if {@code auth} is null.
-	 */
-	public Map<String, Object> getRequiredAuth() {
-
-		if (this.auth != null) {
-			return this.auth;
-		}
-
-		throw new IllegalStateException("Auth field is empty");
-	}
-
-	/**
 	 * @param auth the authentication payload.
 	 */
-	public void setAuth(@Nullable Map<String, Object> auth) {
+	public void setAuth(Map<String, Object> auth) {
 		this.auth = auth;
 	}
 
@@ -138,7 +121,6 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return request metadata.
 	 */
-	@Nullable
 	public Map<String, Object> getMetadata() {
 		return this.metadata;
 	}
@@ -146,7 +128,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @param metadata request metadata.
 	 */
-	public void setMetadata(@Nullable Map<String, Object> metadata) {
+	public void setMetadata(Map<String, Object> metadata) {
 		this.metadata = metadata;
 	}
 
@@ -196,7 +178,6 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return response wrapping details.
 	 */
-	@Nullable
 	public Map<String, String> getWrapInfo() {
 		return this.wrapInfo;
 	}
@@ -204,7 +185,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @param wrapInfo response wrapping details.
 	 */
-	public void setWrapInfo(@Nullable Map<String, String> wrapInfo) {
+	public void setWrapInfo(Map<String, String> wrapInfo) {
 		this.wrapInfo = wrapInfo;
 	}
 
@@ -226,7 +207,6 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return the warnings.
 	 */
-	@Nullable
 	public List<String> getWarnings() {
 		return this.warnings;
 	}
@@ -234,7 +214,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @param warnings the warnings.
 	 */
-	public void setWarnings(@Nullable List<String> warnings) {
+	public void setWarnings(List<String> warnings) {
 		this.warnings = warnings;
 	}
 

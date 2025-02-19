@@ -219,6 +219,8 @@ public class RestTemplateBuilder {
 	 */
 	protected RestTemplate createTemplate() {
 
+		Assert.notNull(this.endpointProvider, "VaultEndpointProvider must not be null");
+
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
 
 		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);

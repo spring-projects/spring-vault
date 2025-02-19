@@ -16,6 +16,7 @@
 package org.springframework.vault.core;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -75,11 +76,12 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void delete(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.doWithSession((restOperations -> {
+		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) (restOperations -> {
 			restOperations.exchange(createDataPath(path), HttpMethod.DELETE, null, Void.class);
 
 			return null;
@@ -97,8 +99,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @param <T> return type. Value is created by the {@code mappingFunction}.
 	 * @return mapped value.
 	 */
-	@Nullable
-	<I, T> T doRead(String path, Class<I> deserializeAs, BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
+	<I, T> @Nullable T doRead(String path, Class<I> deserializeAs,
+			BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
 
 		ParameterizedTypeReference<VaultResponseSupport<JsonNode>> ref = VaultResponses
 			.getTypeReference(JsonNode.class);
@@ -125,8 +127,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @param typeReference must not be {@literal null}
 	 * @return mapped value.
 	 */
-	@Nullable
-	<T> T doRead(String path, ParameterizedTypeReference<T> typeReference) {
+	<T> @Nullable T doRead(String path, ParameterizedTypeReference<T> typeReference) {
 
 		return doRead((restOperations) -> {
 			return restOperations.exchange(path, HttpMethod.GET, null, typeReference);
@@ -156,10 +157,10 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @param callback must not be {@literal null}.
 	 * @return can be {@literal null}.
 	 */
-	@Nullable
-	<T> T doRead(Function<RestOperations, ResponseEntity<T>> callback) {
+	@SuppressWarnings("NullAway")
+	<T extends @Nullable Object> @Nullable T doRead(Function<RestOperations, ResponseEntity<T>> callback) {
 
-		return this.vaultOperations.doWithSession((restOperations) -> {
+		return this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable T>) (restOperations) -> {
 
 			try {
 				return callback.apply(restOperations).getBody();
@@ -182,16 +183,18 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @return the response of this write action.
 	 */
 	@Nullable
+	@SuppressWarnings("NullAway")
 	VaultResponse doWrite(String path, Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
 		try {
 
-			return this.vaultOperations.doWithSession((restOperations) -> {
-				return restOperations.exchange(path, HttpMethod.POST, new HttpEntity<>(body), VaultResponse.class)
-					.getBody();
-			});
+			return this.vaultOperations
+				.doWithSession((RestOperationsCallback<@Nullable VaultResponse>) (restOperations) -> {
+					return restOperations.exchange(path, HttpMethod.POST, new HttpEntity<>(body), VaultResponse.class)
+						.getBody();
+				});
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e, path);
@@ -229,7 +232,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 			return Optional.empty();
 		});
 
-		return mapper.orElseGet(ObjectMapper::new);
+		return Objects.requireNonNull(mapper).orElseGet(ObjectMapper::new);
 	}
 
 }

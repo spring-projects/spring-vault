@@ -40,8 +40,8 @@ final class LoginTokenUtil {
 	static LoginToken from(Map<String, Object> auth) {
 
 		Assert.notNull(auth, "Authentication must not be null");
-
 		String token = (String) auth.get("client_token");
+		Assert.notNull(token, "Authentication must contain 'client_token' key");
 
 		return from(token.toCharArray(), auth);
 	}
@@ -52,6 +52,7 @@ final class LoginTokenUtil {
 	 * @return the {@link LoginToken}
 	 * @since 2.0
 	 */
+	@SuppressWarnings("NullAway")
 	static LoginToken from(char[] token, Map<String, ?> auth) {
 
 		Assert.notNull(auth, "Authentication must not be null");

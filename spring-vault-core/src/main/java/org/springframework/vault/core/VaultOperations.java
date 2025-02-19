@@ -122,8 +122,8 @@ public interface VaultOperations {
 	VaultWrappingOperations opsForWrapping();
 
 	/**
-	 * Read from a Vault path. Reading data using this method is suitable for API
-	 * calls/secret backends that do not require a request body.
+	 * Read ({@code GET)} from a Vault path. Reading data using this method is suitable
+	 * for API calls/secret backends that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -131,14 +131,52 @@ public interface VaultOperations {
 	VaultResponse read(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret
-	 * backends that do not require a request body.
+	 * Read ({@code GET)} from a Vault path. Reading data using this method is suitable
+	 * for API calls/secret backends that do not require a request body.
+	 * @param path must not be {@literal null}.
+	 * @return the data.
+	 * @throws SecretNotFoundException if the path does not exist.
+	 * @since 4.0
+	 */
+	default VaultResponse readRequired(String path) throws SecretNotFoundException {
+
+		VaultResponse response = read(path);
+
+		if (response == null) {
+			throw new SecretNotFoundException("No data found at '%s'".formatted(path), path);
+		}
+
+		return response;
+	}
+
+	/**
+	 * Read ({@code GET)} from a secret backend. Reading data using this method is
+	 * suitable for secret backends that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	<T> VaultResponseSupport<T> read(String path, Class<T> responseType);
+	<T extends @Nullable Object> VaultResponseSupport<T> read(String path, Class<T> responseType);
+
+	/**
+	 * Read ({@code GET)} from a secret backend. Reading data using this method is
+	 * suitable for secret backends that do not require a request body.
+	 * @param path must not be {@literal null}.
+	 * @param responseType must not be {@literal null}.
+	 * @return the data.
+	 * @throws SecretNotFoundException if the path does not exist.
+	 * @since 4.0
+	 */
+	default <T> VaultResponseSupport<T> readRequired(String path, Class<T> responseType) {
+
+		VaultResponseSupport<T> response = read(path, responseType);
+
+		if (response == null) {
+			throw new SecretNotFoundException("No data found at '%s'".formatted(path), path);
+		}
+
+		return response;
+	}
 
 	/**
 	 * Enumerate keys from a Vault path.
@@ -149,7 +187,7 @@ public interface VaultOperations {
 	List<String> list(String path);
 
 	/**
-	 * Write to a Vault path.
+	 * Write ({@code POST)} to a Vault path.
 	 * @param path must not be {@literal null}.
 	 * @return the response, may be {@literal null}.
 	 * @since 2.0
@@ -160,13 +198,34 @@ public interface VaultOperations {
 	}
 
 	/**
-	 * Write to a Vault path.
+	 * Write ({@code POST)} to a Vault path.
 	 * @param path must not be {@literal null}.
 	 * @param body the body, may be {@literal null} if absent.
 	 * @return the response, may be {@literal null}.
 	 */
 	@Nullable
 	VaultResponse write(String path, @Nullable Object body);
+
+	/**
+	 * Invoke an operation on a Vault path, typically a {@code POST} request along with an
+	 * optional request body expecing a response.
+	 * @param path must not be {@literal null}.
+	 * @param body the body, may be {@literal null} if absent.
+	 * @return the response.
+	 * @throws IllegalStateException if the operation returns without returning a
+	 * response.
+	 * @since 4.0
+	 */
+	default VaultResponse invoke(String path, @Nullable Object body) {
+
+		VaultResponse response = write(path, body);
+
+		if (response == null) {
+			throw new IllegalStateException("No response received from Vault, writing to '%s'".formatted(path));
+		}
+
+		return response;
+	}
 
 	/**
 	 * Delete a path.
@@ -185,8 +244,8 @@ public interface VaultOperations {
 	 * @throws RestClientException exceptions from
 	 * {@link org.springframework.web.client.RestOperations}.
 	 */
-	@Nullable
-	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException, RestClientException;
+	<T extends @Nullable Object> T doWithVault(RestOperationsCallback<T> clientCallback)
+			throws VaultException, RestClientException;
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
@@ -198,7 +257,7 @@ public interface VaultOperations {
 	 * @throws RestClientException exceptions from
 	 * {@link org.springframework.web.client.RestOperations}.
 	 */
-	@Nullable
-	<T> T doWithSession(RestOperationsCallback<T> sessionCallback) throws VaultException, RestClientException;
+	<T extends @Nullable Object> T doWithSession(RestOperationsCallback<T> sessionCallback)
+			throws VaultException, RestClientException;
 
 }

@@ -38,6 +38,7 @@ import org.springframework.data.mapping.model.ParameterValueProvider;
 import org.springframework.data.mapping.model.PersistentEntityParameterValueProvider;
 import org.springframework.data.mapping.model.PropertyValueProvider;
 import org.springframework.data.util.TypeInformation;
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -105,7 +106,11 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Class<? extends S> rawType = typeToUse.getType();
 
 		if (this.conversions.hasCustomReadTarget(source.getClass(), rawType)) {
-			return this.conversionService.convert(source, rawType);
+
+			S result = this.conversionService.convert(source, rawType);
+
+			Assert.state(result != null, "Conversion result must not be null");
+			return result;
 		}
 
 		if (SecretDocument.class.isAssignableFrom(rawType)) {
@@ -124,22 +129,26 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			return (S) source;
 		}
 
+		if (secretDocument == null) {
+			throw new MappingException("Unsupported source type: " + source.getClass().getName());
+		}
+
 		return read((VaultPersistentEntity<S>) this.mappingContext.getRequiredPersistentEntity(typeToUse),
 				secretDocument);
 	}
 
-	@Nullable
 	@SuppressWarnings("unchecked")
-	private SecretDocument getSecretDocument(Object source) {
+	private @Nullable SecretDocument getSecretDocument(Object source) {
 
-		SecretDocument secretDocument = null;
 		if (source instanceof Map) {
-			secretDocument = new SecretDocument((Map) source);
+			return new SecretDocument((Map) source);
 		}
-		else if (source instanceof SecretDocument) {
-			secretDocument = (SecretDocument) source;
+
+		if (source instanceof SecretDocument) {
+			return (SecretDocument) source;
 		}
-		return secretDocument;
+
+		return null;
 	}
 
 	private ParameterValueProvider<VaultPersistentProperty> getParameterProvider(VaultPersistentEntity<?> entity,
@@ -152,9 +161,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 		return new ParameterValueProvider<VaultPersistentProperty>() {
 
-			@Nullable
 			@Override
-			public <T> T getParameterValue(Parameter<T, VaultPersistentProperty> parameter) {
+			public <T> @Nullable T getParameterValue(Parameter<T, VaultPersistentProperty> parameter) {
 				Object value = parameterProvider.getParameterValue(parameter);
 				return value != null ? readValue(value, parameter.getType()) : null;
 			}
@@ -246,7 +254,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @return the converted {@link Collection} or array, will never be {@literal null}.
 	 */
 	@Nullable
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes" })
 	private Object readCollectionOrArray(TypeInformation<?> targetType, List sourceValue) {
 
 		Assert.notNull(targetType, "Target type must not be null");
@@ -258,7 +266,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Class<?> rawComponentType = componentType.getType();
 
 		collectionType = Collection.class.isAssignableFrom(collectionType) ? collectionType : List.class;
-		Collection<Object> items = targetType.getType().isArray() ? new ArrayList<>(sourceValue.size())
+		Collection<@Nullable Object> items = targetType.getType().isArray() ? new ArrayList<>(sourceValue.size())
 				: CollectionFactory.createCollection(collectionType, rawComponentType, sourceValue.size());
 
 		if (sourceValue.isEmpty()) {
@@ -289,7 +297,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @param sourceMap must not be {@literal null}
 	 * @return the converted {@link Map}.
 	 */
-	protected Map<Object, Object> readMap(TypeInformation<?> type, Map<String, Object> sourceMap) {
+	protected Map<@Nullable Object, @Nullable Object> readMap(TypeInformation<?> type, Map<String, Object> sourceMap) {
 
 		Assert.notNull(sourceMap, "Source map must not be null");
 
@@ -301,7 +309,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Class<?> rawKeyType = keyType != null ? keyType.getType() : null;
 		Class<?> rawValueType = valueType != null ? valueType.getType() : null;
 
-		Map<Object, Object> map = CollectionFactory.createMap(mapType, rawKeyType, sourceMap.keySet().size());
+		Map<@Nullable Object, @Nullable Object> map = CollectionFactory.createMap(mapType, rawKeyType,
+				sourceMap.keySet().size());
 
 		for (Entry<String, Object> entry : sourceMap.entrySet()) {
 
@@ -385,6 +394,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		if (customTarget.isPresent()) {
 
 			SecretDocument result = this.conversionService.convert(obj, SecretDocument.class);
+
+			Assert.state(result != null, "Custom conversion must not return null");
 
 			if (result.getId() != null) {
 				sink.setId(result.getId());
@@ -511,7 +522,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @param sink the {@link List} to write to.
 	 * @return the converted {@link List}.
 	 */
-	private List<Object> writeCollectionInternal(Collection<?> source, @Nullable TypeInformation<?> type,
+	private List<Object> writeCollectionInternal(Collection<@Nullable ?> source, @Nullable TypeInformation<?> type,
 			List<Object> sink) {
 
 		TypeInformation<?> componentType = null;
@@ -609,7 +620,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	protected void addCustomTypeKeyIfNecessary(@Nullable TypeInformation<?> type, Object value,
 			SecretDocumentAccessor accessor) {
 
-		Class<?> reference = type != null ? type.getActualType().getType() : Object.class;
+		Class<?> reference = type != null ? type.getRequiredActualType().getType() : Object.class;
 		Class<?> valueType = ClassUtils.getUserClass(value.getClass());
 
 		boolean notTheSameClass = !valueType.equals(reference);
@@ -626,8 +637,9 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @param targetType
 	 * @return the converted value. Can be {@literal null}.
 	 */
-	@Nullable
-	private Object getPotentiallyConvertedSimpleWrite(@Nullable Object value, Class<?> targetType) {
+
+	@Contract("null, _ -> null; !null, _ -> !null")
+	private @Nullable Object getPotentiallyConvertedSimpleWrite(@Nullable Object value, Class<?> targetType) {
 
 		if (value == null) {
 			return null;

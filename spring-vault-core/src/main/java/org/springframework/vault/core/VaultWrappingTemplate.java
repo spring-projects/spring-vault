@@ -83,7 +83,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			return null;
 		}
 
-		return getWrappedMetadata(response.getData(), token);
+		return getWrappedMetadata(response.getRequiredData(), token);
 	}
 
 	@Nullable
@@ -107,11 +107,11 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		});
 	}
 
-	@Nullable
-	private <T extends VaultResponseSupport<?>> T doUnwrap(VaultToken token,
-			BiFunction<RestOperations, HttpEntity<?>, T> requestFunction) {
+	@SuppressWarnings("NullAway")
+	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
+			BiFunction<RestOperations, HttpEntity<?>, @Nullable T> requestFunction) {
 
-		return this.vaultOperations.doWithVault(restOperations -> {
+		return this.vaultOperations.doWithVault((RestOperationsCallback<@Nullable T>) restOperations -> {
 
 			try {
 				return requestFunction.apply(restOperations, new HttpEntity<>(VaultHttpHeaders.from(token)));
@@ -133,11 +133,12 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public WrappedMetadata rewrap(VaultToken token) {
 
 		Assert.notNull(token, "token VaultToken not be null");
 
-		VaultResponse response = this.vaultOperations.write("sys/wrapping/rewrap",
+		VaultResponse response = this.vaultOperations.invoke("sys/wrapping/rewrap",
 				Collections.singletonMap("token", token.getToken()));
 
 		Map<String, String> wrapInfo = response.getWrapInfo();
@@ -146,6 +147,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public WrappedMetadata wrap(Object body, Duration duration) {
 
 		Assert.notNull(body, "Body must not be null");
@@ -175,15 +177,17 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		return new WrappedMetadata(token, ttl, Instant.from(creation_time), path);
 	}
 
-	@Nullable
 	private static TemporalAccessor getDate(Map<String, ?> responseMetadata, String key) {
 
 		String date = (String) ((Map) responseMetadata).getOrDefault(key, "");
 
-		return StringUtils.hasText(date) ? DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date) : null;
+		if (StringUtils.hasText(date)) {
+			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
+		}
+
+		throw new IllegalArgumentException("Cannot obtain date");
 	}
 
-	@Nullable
 	private static Duration getTtl(Map<String, ?> wrapInfo) {
 
 		Object creationTtl = wrapInfo.get("ttl");
@@ -196,13 +200,12 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			creationTtl = Integer.parseInt((String) creationTtl);
 		}
 
-		Duration ttl = null;
-
 		if (creationTtl instanceof Integer) {
-			ttl = Duration.ofSeconds((Integer) creationTtl);
+			return Duration.ofSeconds((Integer) creationTtl);
 
 		}
-		return ttl;
+
+		throw new IllegalArgumentException("Cannot obtain TTL");
 	}
 
 }

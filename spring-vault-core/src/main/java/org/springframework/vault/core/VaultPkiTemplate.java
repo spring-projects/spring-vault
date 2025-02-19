@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -87,12 +89,13 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		return requestCertificate(roleName, "{path}/sign/{roleName}", body, VaultSignCertificateRequestResponse.class);
 	}
 
+	@SuppressWarnings("NullAway")
 	private <T> T requestCertificate(String roleName, String requestPath, Map<String, Object> request,
 			Class<T> responseType) {
 
 		request.putIfAbsent("format", "der");
 
-		T response = this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSession(restOperations -> {
 
 			try {
 				return restOperations.postForObject(requestPath, request, responseType, this.path, roleName);
@@ -101,18 +104,15 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 				throw VaultResponses.buildException(e);
 			}
 		});
-
-		Assert.state(response != null, "VaultCertificateResponse must not be null");
-
-		return response;
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void revoke(String serialNumber) throws VaultException {
 
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
 
-		this.vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 
 			try {
 				restOperations.postForObject("{path}/revoke", Collections.singletonMap("serial_number", serialNumber),
@@ -127,6 +127,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	}
 
 	@Override
+	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
 	public InputStream getCrl(Encoding encoding) throws VaultException {
 
 		Assert.notNull(encoding, "Encoding must not be null");
@@ -150,6 +151,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
 
 		Assert.hasText(issuer, "Issuer must not be empty");
@@ -167,6 +169,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	}
 
 	@Override
+	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
 	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
 
 		Assert.hasText(issuer, "Issuer must not be empty");

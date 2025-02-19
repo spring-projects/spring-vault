@@ -43,6 +43,7 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -344,7 +345,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public VaultResponse read(String path) {
+	public @Nullable VaultResponse read(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -352,8 +353,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	@Nullable
-	public <T> VaultResponseSupport<T> read(String path, Class<T> responseType) {
+	@SuppressWarnings("NullAway")
+	public <T> @Nullable VaultResponseSupport<T> read(String path, Class<T> responseType) {
 
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
@@ -378,13 +379,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	@Override
 	@SuppressWarnings("unchecked")
-	@Nullable
-	public List<String> list(String path) {
+	public @Nullable List<String> list(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
 		VaultListResponse read = doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")),
 				VaultListResponse.class);
+
 		if (read == null) {
 			return Collections.emptyList();
 		}
@@ -393,8 +394,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	@Nullable
-	public VaultResponse write(String path, @Nullable Object body) {
+	@SuppressWarnings("NullAway")
+	public @Nullable VaultResponse write(String path, @Nullable Object body) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -402,11 +403,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void delete(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		doWithSession(restOperations -> {
+		doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 
 			try {
 				restOperations.delete(path);
@@ -425,7 +427,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public <T> T doWithVault(RestOperationsCallback<T> clientCallback) {
+	public <T extends @Nullable Object> T doWithVault(RestOperationsCallback<T> clientCallback) {
 
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
@@ -438,7 +440,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	@Override
-	public <T> T doWithSession(RestOperationsCallback<T> sessionCallback) {
+	public <T extends @Nullable Object> T doWithSession(RestOperationsCallback<T> sessionCallback) {
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
@@ -450,10 +452,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 	}
 
-	@Nullable
-	private <T> T doRead(String path, Class<T> responseType) {
+	@SuppressWarnings("NullAway")
+	private <T extends @Nullable Object> T doRead(String path, Class<T> responseType) {
 
-		return doWithSession(restOperations -> {
+		return doWithSession((RestOperations restOperations) -> {
 
 			try {
 				return restOperations.getForObject(path, responseType);

@@ -84,7 +84,7 @@ class PropertyMapper {
 	 * @return a {@link Source} that can be used to complete the mapping
 	 * @see #from(Object)
 	 */
-	public <T> Source<T> from(Supplier<T> supplier) {
+	public <T> Source<T> from(Supplier<@Nullable T> supplier) {
 		Assert.notNull(supplier, "Supplier must not be null");
 		Source<T> source = getSource(supplier);
 		if (this.sourceOperator != null) {
@@ -332,10 +332,10 @@ class PropertyMapper {
 	/**
 	 * Supplier that will catch and ignore any {@link NullPointerException}.
 	 */
-	private record NullPointerExceptionSafeSupplier<T>(Supplier<T> supplier) implements Supplier<T> {
+	private record NullPointerExceptionSafeSupplier<T>(Supplier<T> supplier) implements Supplier<@Nullable T> {
 
 		@Override
-		public T get() {
+		public @Nullable T get() {
 			try {
 				return this.supplier.get();
 			}

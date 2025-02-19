@@ -46,7 +46,7 @@ public enum LeaseEndpoints {
 		public void revoke(Lease lease, RestOperations operations) {
 
 			operations.exchange("sys/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
-					lease.getLeaseId());
+					lease.getRequiredLeaseId());
 		}
 
 		@Override
@@ -72,7 +72,7 @@ public enum LeaseEndpoints {
 		public void revoke(Lease lease, RestOperations operations) {
 
 			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease),
-					Map.class, lease.getLeaseId());
+					Map.class, lease.getRequiredLeaseId());
 		}
 
 		@Override
@@ -97,7 +97,7 @@ public enum LeaseEndpoints {
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
 
-			String endpoint = "sys/leases/revoke-prefix/" + lease.getLeaseId();
+			String endpoint = "sys/leases/revoke-prefix/" + lease.getRequiredLeaseId();
 			operations.put(endpoint, null);
 		}
 
@@ -129,6 +129,7 @@ public enum LeaseEndpoints {
 	 */
 	abstract Lease renew(Lease lease, RestOperations operations);
 
+	@SuppressWarnings("NullAway")
 	private static Lease toLease(Map<String, Object> body) {
 
 		String leaseId = (String) body.get("lease_id");
@@ -141,7 +142,7 @@ public enum LeaseEndpoints {
 	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {
 
 		Map<String, String> leaseRenewalData = new HashMap<>();
-		leaseRenewalData.put("lease_id", lease.getLeaseId());
+		leaseRenewalData.put("lease_id", lease.getRequiredLeaseId());
 		leaseRenewalData.put("increment", Long.toString(lease.getLeaseDuration().getSeconds()));
 
 		return new HttpEntity<>(leaseRenewalData);
@@ -150,7 +151,7 @@ public enum LeaseEndpoints {
 	private static HttpEntity<Object> getLeaseRevocationBody(Lease lease) {
 
 		Map<String, String> leaseRenewalData = new HashMap<>();
-		leaseRenewalData.put("lease_id", lease.getLeaseId());
+		leaseRenewalData.put("lease_id", lease.getRequiredLeaseId());
 
 		return new HttpEntity<>(leaseRenewalData);
 	}

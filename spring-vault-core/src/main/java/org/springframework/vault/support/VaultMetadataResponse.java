@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.vault.support.Versioned.Metadata;
 
 /**
@@ -43,7 +44,7 @@ public class VaultMetadataResponse {
 
 	private final Map<String, String> customMetadata;
 
-	private final Duration deleteVersionAfter;
+	private final @Nullable Duration deleteVersionAfter;
 
 	private final int maxVersions;
 
@@ -54,8 +55,8 @@ public class VaultMetadataResponse {
 	private final List<Versioned.Metadata> versions;
 
 	private VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion,
-			Map<String, String> customMetadata, Duration deleteVersionAfter, int maxVersions, int oldestVersion,
-			Instant updatedTime, List<Metadata> versions) {
+			Map<String, String> customMetadata, @Nullable Duration deleteVersionAfter, int maxVersions,
+			int oldestVersion, Instant updatedTime, List<Metadata> versions) {
 
 		this.casRequired = casRequired;
 		this.createdTime = createdTime;
@@ -97,8 +98,7 @@ public class VaultMetadataResponse {
 	 * @return the duration after which a secret is to be deleted. {@link Period#ZERO} for
 	 * unlimited duration. Versions prior to Vault 1.2 may return {@code null}.
 	 */
-	@Nullable
-	public Duration getDeleteVersionAfter() {
+	public @Nullable Duration getDeleteVersionAfter() {
 		return this.deleteVersionAfter;
 	}
 
@@ -146,21 +146,21 @@ public class VaultMetadataResponse {
 
 		private boolean casRequired;
 
-		private Map<String, String> customMetadata;
+		private Map<String, String> customMetadata = Collections.emptyMap();
 
-		private Instant createdTime;
+		private @Nullable Instant createdTime;
 
 		private int currentVersion;
 
-		private Duration deleteVersionAfter;
+		private @Nullable Duration deleteVersionAfter;
 
 		private int maxVersions;
 
 		private int oldestVersion;
 
-		private Instant updatedTime;
+		private @Nullable Instant updatedTime;
 
-		private List<Versioned.Metadata> versions;
+		private List<Versioned.Metadata> versions = Collections.emptyList();
 
 		public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
 			this.casRequired = casRequired;
@@ -182,7 +182,7 @@ public class VaultMetadataResponse {
 			return this;
 		}
 
-		public VaultMetadataResponseBuilder deleteVersionAfter(Duration deleteVersionAfter) {
+		public VaultMetadataResponseBuilder deleteVersionAfter(@Nullable Duration deleteVersionAfter) {
 			this.deleteVersionAfter = deleteVersionAfter;
 			return this;
 		}
@@ -208,6 +208,10 @@ public class VaultMetadataResponse {
 		}
 
 		public VaultMetadataResponse build() {
+
+			Assert.notNull(this.createdTime, "Created time must not be null");
+			Assert.notNull(this.updatedTime, "Updated time must not be null");
+
 			return new VaultMetadataResponse(this.casRequired, this.createdTime, this.currentVersion,
 					this.customMetadata, this.deleteVersionAfter, this.maxVersions, this.oldestVersion,
 					this.updatedTime, this.versions);
