@@ -54,15 +54,13 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 		this.path = path;
 	}
 
-	@Nullable
 	@Override
-	public List<String> list(String path) {
+	public @Nullable List<String> list(String path) {
 		return this.vaultOperations.list(createDataPath(path));
 	}
 
-	@Nullable
 	@Override
-	public VaultResponse get(String path) {
+	public @Nullable VaultResponse get(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -76,10 +74,9 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 		});
 	}
 
-	@Nullable
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> VaultResponseSupport<T> get(String path, Class<T> responseType) {
+	public <T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");

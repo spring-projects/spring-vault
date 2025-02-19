@@ -425,7 +425,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	private Resource getResource(String key) {
 
 		String value = getProperty(key);
-		return value != null ? this.applicationContext.getResource(value) : null;
+		return value != null && this.applicationContext != null ? this.applicationContext.getResource(value) : null;
 	}
 
 	enum AuthenticationMethod {

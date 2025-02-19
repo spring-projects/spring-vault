@@ -94,11 +94,25 @@ public class Lease {
 	}
 
 	/**
-	 * @return the lease Id
+	 * @return the lease Id.
 	 */
-	@Nullable
-	public String getLeaseId() {
+	public @Nullable String getLeaseId() {
 		return this.leaseId;
+	}
+
+	/**
+	 * @return the required lease Id.
+	 * @since 4.0
+	 */
+	public String getRequiredLeaseId() {
+
+		String leaseId = getLeaseId();
+
+		if (leaseId == null) {
+			throw new IllegalStateException("No leaseId available.");
+		}
+
+		return leaseId;
 	}
 
 	/**

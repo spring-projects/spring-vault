@@ -299,7 +299,8 @@ public class AuthenticationSteps {
 		@Nullable
 		String uriTemplate;
 
-		String @Nullable[] urlVariables;
+		@Nullable
+		String[] urlVariables = new String[0];
 
 		@Nullable
 		HttpEntity<?> entity;
@@ -379,14 +380,14 @@ public class AuthenticationSteps {
 			this.uri = uri;
 		}
 
-		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate, String @Nullable[] urlVariables) {
+		private HttpRequestBuilder(HttpMethod method, @Nullable String uriTemplate, @Nullable String[] urlVariables) {
 			this.method = method;
 			this.uriTemplate = uriTemplate;
 			this.urlVariables = urlVariables;
 		}
 
 		private HttpRequestBuilder(HttpMethod method, @Nullable URI uri, @Nullable String uriTemplate,
-			String @Nullable[] urlVariables, @Nullable HttpEntity<?> entity) {
+				@Nullable String[] urlVariables, @Nullable HttpEntity<?> entity) {
 			this.method = method;
 			this.uri = uri;
 			this.uriTemplate = uriTemplate;
@@ -448,8 +449,7 @@ public class AuthenticationSteps {
 		@Nullable
 		final String uriTemplate;
 
-
-		final String @Nullable[] urlVariables;
+		final @Nullable String[] urlVariables;
 
 		@Nullable
 		final HttpEntity<?> entity;
@@ -485,7 +485,8 @@ public class AuthenticationSteps {
 			return this.uriTemplate;
 		}
 
-		String @Nullable[] getUrlVariables() {
+		@Nullable
+		String[] getUrlVariables() {
 			return this.urlVariables;
 		}
 

@@ -214,7 +214,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(getRoleIdIdPath(this.options),
 						HttpMethod.GET, createHttpEntity(token), VaultResponse.class);
-				return (String) ResponseUtil.getRequiredData(entity).get("role_id");
+				return (String) ResponseUtil.getRequiredValue(entity, "role_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultLoginException("Cannot get Role id using AppRole: %s"
@@ -233,7 +233,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
 
-				return (String) response.getRequiredData().get("role_id");
+				return (String) ResponseUtil.getRequiredValue(response, "role_id");
 			}
 			catch (HttpStatusCodeException e) {
 				throw new VaultLoginException("Cannot unwrap Role id using AppRole: %s"
@@ -244,6 +244,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
 	}
 
+	@SuppressWarnings("NullAway")
 	private String getSecretId(SecretId secretId) throws VaultLoginException {
 
 		if (secretId instanceof Provided) {

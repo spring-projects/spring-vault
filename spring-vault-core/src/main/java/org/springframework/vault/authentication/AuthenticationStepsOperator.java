@@ -155,7 +155,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
-	@SuppressWarnings({"NullAway", "DataFlowIssue"})
+	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
 	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
 
 		HttpRequest<Object> definition = step.getDefinition();

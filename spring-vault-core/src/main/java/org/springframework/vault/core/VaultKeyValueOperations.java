@@ -54,8 +54,7 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	<T> VaultResponseSupport<T> get(String path, Class<T> responseType);
+	<T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType);
 
 	/**
 	 * Update the secret at {@code path} without removing the existing secrets. Requires a

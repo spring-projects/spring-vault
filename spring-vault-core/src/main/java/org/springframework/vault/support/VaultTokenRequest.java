@@ -39,8 +39,7 @@ public class VaultTokenRequest {
 
 	private static final VaultTokenRequest EMPTY = VaultTokenRequest.builder().build();
 
-	@Nullable
-	private final String id;
+	private final @Nullable String id;
 
 	private final List<String> policies;
 
@@ -54,25 +53,23 @@ public class VaultTokenRequest {
 
 	private final boolean renewable;
 
-	@Nullable
-	private final String ttl;
+	private final @Nullable String ttl;
 
 	@JsonProperty("explicit_max_ttl")
-	@Nullable
-	private final String explicitMaxTtl;
+	private final @Nullable String explicitMaxTtl;
 
 	@JsonProperty("display_name")
 	private final String displayName;
 
 	@JsonProperty("entity_alias")
-	private final String entityAlias;
+	private final @Nullable String entityAlias;
 
 	@JsonProperty("num_uses")
 	private final int numUses;
 
 	VaultTokenRequest(@Nullable String id, List<String> policies, Map<String, String> meta, boolean noParent,
 			boolean noDefaultPolicy, boolean renewable, @Nullable String ttl, @Nullable String explicitMaxTtl,
-			String displayName, String entityAlias, int numUses) {
+			String displayName, @Nullable String entityAlias, int numUses) {
 
 		this.id = id;
 		this.policies = policies;
@@ -174,7 +171,7 @@ public class VaultTokenRequest {
 	 * works in combination with role name.
 	 * @since 3.1
 	 */
-	public String getEntityAlias() {
+	public @Nullable String getEntityAlias() {
 		return this.entityAlias;
 	}
 

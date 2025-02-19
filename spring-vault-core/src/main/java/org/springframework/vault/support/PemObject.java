@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 
 /**
@@ -143,7 +144,6 @@ public class PemObject {
 		StringBuilder keyBuilder = null;
 		while (true) {
 			String line = reader.readLine();
-			;
 			if (line == null) {
 				Assert.isTrue(title == null, "missing end tag " + title);
 				return null;
@@ -299,7 +299,8 @@ public class PemObject {
 			return name;
 		}
 
-		public static PemObjectType of(String identifier) {
+		@Contract("null -> fail")
+		public static PemObjectType of(@Nullable String identifier) {
 
 			Assert.hasText(identifier, "Identifier must not be empty");
 

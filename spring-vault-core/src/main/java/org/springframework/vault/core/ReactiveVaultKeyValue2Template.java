@@ -86,7 +86,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 
 		return get(path).filter(it -> it.getData() != null)
 			.switchIfEmpty(Mono.error(new SecretNotFoundException(
-					"No data found at %s; patch only works on existing data".formatted(createDataPath(path)),
+					"No data found at '%s'; patch only works on existing data".formatted(createDataPath(path)),
 					createLogicalPath(path))))
 			.flatMap(readResponse -> {
 

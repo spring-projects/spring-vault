@@ -92,7 +92,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	@SuppressWarnings({ "unchecked", "ConstantConditions" })
-	private Object evaluate(Iterable<Node<?>> steps) {
+	private @Nullable Object evaluate(Iterable<Node<?>> steps) {
 
 		Object state = null;
 
@@ -108,14 +108,17 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				}
 
 				if (o instanceof MapStep) {
+					Assert.state(state != null, "No state available for MapStep");
 					state = doMapStep((MapStep<Object, Object>) o, state);
 				}
 
 				if (o instanceof ZipStep) {
+					Assert.state(state != null, "No state available for ZipStep");
 					state = doZipStep((ZipStep<Object, Object>) o, state);
 				}
 
 				if (o instanceof OnNextStep) {
+					Assert.state(state != null, "No state available for OnNextStep");
 					state = doOnNext((OnNextStep<Object>) o, state);
 				}
 
@@ -143,12 +146,11 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	@SuppressWarnings("ConstantConditions")
-	@Nullable
-	private Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
+	private @Nullable Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
 
 		HttpRequest<Object> definition = step.getDefinition();
 
-		if (definition.getUri() == null) {
+		if (definition.getUriTemplate() != null) {
 
 			ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUriTemplate(),
 					definition.getMethod(), getEntity(definition.getEntity(), state), definition.getResponseType(),
@@ -156,11 +158,16 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 			return exchange.getBody();
 		}
-		ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUri(), definition.getMethod(),
-				getEntity(definition.getEntity(), state), definition.getResponseType());
 
-		return exchange.getBody();
+		if (definition.getUri() != null) {
 
+			ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUri(), definition.getMethod(),
+					getEntity(definition.getEntity(), state), definition.getResponseType());
+
+			return exchange.getBody();
+		}
+
+		return null;
 	}
 
 	static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
@@ -185,6 +192,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		return o.apply(state);
 	}
 
+	@SuppressWarnings("NullAway")
 	private Object doZipStep(ZipStep<Object, Object> o, Object state) {
 
 		Object result = evaluate(o.getRight());

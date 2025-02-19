@@ -159,7 +159,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 			VaultResponse response = this.vaultRestOperations
 				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
+			Assert.state(response != null, "Auth field must not be null");
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Login successful using Azure authentication");
@@ -185,6 +185,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		return loginBody;
 	}
 
+	@SuppressWarnings({ "NullAway", "rawtypes" })
 	private String getAccessToken() {
 
 		ResponseEntity<Map> response = this.azureMetadataRestOperations
@@ -200,6 +201,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		return vmEnvironment != null ? vmEnvironment : fetchAzureVmEnvironment();
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private AzureVmEnvironment fetchAzureVmEnvironment() {
 
 		ResponseEntity<Map> response = this.azureMetadataRestOperations
@@ -208,15 +210,22 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		return toAzureVmEnvironment(ResponseUtil.getRequiredBody(response));
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static AzureVmEnvironment toAzureVmEnvironment(Map<String, Object> instanceMetadata) {
 
 		Map<String, String> compute = (Map) instanceMetadata.get("compute");
+
+		Assert.notNull(compute, "Metadata does not contain compute");
 
 		String subscriptionId = compute.get("subscriptionId");
 		String resourceGroupName = compute.get("resourceGroupName");
 		String vmName = compute.get("name");
 		String vmScaleSetName = compute.get("vmScaleSetName");
+
+		Assert.notNull(subscriptionId, "Metadata does not contain subscriptionId");
+		Assert.notNull(resourceGroupName, "Metadata does not contain resourceGroupName");
+		Assert.notNull(vmName, "Metadata does not contain name");
+		Assert.notNull(vmScaleSetName, "Metadata does not contain vmScaleSetName");
 
 		return new AzureVmEnvironment(subscriptionId, resourceGroupName, vmName, vmScaleSetName);
 	}

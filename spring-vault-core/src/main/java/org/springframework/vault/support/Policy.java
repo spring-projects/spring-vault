@@ -48,8 +48,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import org.jspecify.annotations.Nullable;
 
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.Policy.PolicyDeserializer;
@@ -138,8 +138,7 @@ public class Policy {
 	 * @param path must not be {@literal null}.
 	 * @return the {@link Rule} or {@literal null}, if not found.
 	 */
-	@Nullable
-	public Rule getRule(String path) {
+	public @Nullable Rule getRule(String path) {
 
 		Assert.notNull(path, "Path must not be null");
 

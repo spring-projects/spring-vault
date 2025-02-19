@@ -17,6 +17,8 @@ package org.springframework.vault.core;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
@@ -46,7 +48,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public VaultMetadataResponse get(String path) {
+	public @Nullable VaultMetadataResponse get(String path) {
 
 		VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
 

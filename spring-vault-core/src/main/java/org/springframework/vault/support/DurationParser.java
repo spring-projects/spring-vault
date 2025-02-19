@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -45,8 +46,8 @@ public class DurationParser {
 	 * @return the duration object. Can be {@literal null} if {@code duration} is empty.
 	 * @throws IllegalArgumentException if unable to parse the requested duration.
 	 */
-	@Nullable
-	public static Duration parseDuration(String duration) {
+	@Contract("null -> null")
+	public static @Nullable Duration parseDuration(@Nullable String duration) {
 
 		if (ObjectUtils.isEmpty(duration)) {
 			return null;
@@ -69,13 +70,13 @@ public class DurationParser {
 
 			result = switch (typ) {
 				case "ns" -> result.plus(Duration.ofNanos(num));
-				case "us" -> result.plus(Duration.ofNanos(num * 1000));
+				case "us" -> result.plus(Duration.ofNanos(num * 1000L));
 				case "ms" -> result.plus(Duration.ofMillis(num));
 				case "s" -> result.plus(Duration.ofSeconds(num));
 				case "m" -> result.plus(Duration.ofMinutes(num));
 				case "h" -> result.plus(Duration.ofHours(num));
 				case "d" -> result.plus(Duration.ofDays(num));
-				case "w" -> result.plus(Duration.ofDays(num * 7));
+				case "w" -> result.plus(Duration.ofDays(num * 7L));
 				default -> result;
 			};
 		}

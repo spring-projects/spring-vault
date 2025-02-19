@@ -101,12 +101,13 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		writeToken("auth/token/revoke-orphan", vaultToken, VaultTokenResponse.class);
 	}
 
+	@SuppressWarnings("NullAway")
 	private <T extends VaultResponseSupport<?>> T writeAndReturn(String path, @Nullable Object body,
 			Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		T response = this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSession(restOperations -> {
 			try {
 				ResponseEntity<T> exchange = restOperations.exchange(path, HttpMethod.POST,
 						body == null ? HttpEntity.EMPTY : new HttpEntity<>(body), responseType);
@@ -117,17 +118,14 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 				throw VaultResponses.buildException(e, path);
 			}
 		});
-
-		Assert.state(response != null, "Response must not be null");
-
-		return response;
 	}
 
+	@SuppressWarnings("NullAway")
 	private void writeToken(String path, VaultToken token, Class<?> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 
 			try {
 				restOperations.exchange(path, HttpMethod.POST,

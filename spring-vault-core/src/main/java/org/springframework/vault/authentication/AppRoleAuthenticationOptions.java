@@ -128,20 +128,15 @@ public class AppRoleAuthenticationOptions {
 
 		private String path = DEFAULT_APPROLE_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String providedRoleId;
+		private @Nullable String providedRoleId;
 
-		@Nullable
-		private RoleId roleId;
+		private @Nullable RoleId roleId;
 
-		@Nullable
-		private String providedSecretId;
+		private @Nullable String providedSecretId;
 
-		@Nullable
-		private SecretId secretId;
+		private @Nullable SecretId secretId;
 
-		@Nullable
-		private String appRole;
+		private @Nullable String appRole;
 
 		private UnwrappingEndpoints unwrappingEndpoints = UnwrappingEndpoints.SysWrapping;
 
@@ -249,6 +244,9 @@ public class AppRoleAuthenticationOptions {
 				Assert.notNull(this.appRole,
 						"AppRole authentication configured for pull mode. AppRole must not be null.");
 			}
+
+			Assert.notNull(this.roleId, "RoleId must not be null");
+			Assert.notNull(this.secretId, "SecretId must not be null");
 
 			return new AppRoleAuthenticationOptions(this.path, this.roleId, this.secretId, this.appRole,
 					this.unwrappingEndpoints);

@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jspecify.annotations.NonNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.DisposableBean;
@@ -91,7 +92,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 * The token state: Contains the currently valid token that identifies the Vault
 	 * session.
 	 */
-	private volatile AtomicReference<Mono<TokenWrapper>> token = new AtomicReference<>(EMPTY);
+	private final AtomicReference<@NonNull Mono<TokenWrapper>> token = new AtomicReference<>(EMPTY);
 
 	/**
 	 * Create a {@link ReactiveLifecycleAwareSessionManager} given
@@ -136,6 +137,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void destroy() {
 
 		Mono<TokenWrapper> tokenMono = this.token.get();
@@ -149,6 +151,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 * @return a mono emitting completion upon successful revocation.
 	 * @since 3.0.2
 	 */
+	@SuppressWarnings("NullAway")
 	public Mono<Void> revoke() {
 		return doRevoke(this.token.get()).doOnSuccess(unused -> this.token.set(EMPTY));
 	}
@@ -216,6 +219,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 * obtained. {@link Mono#empty()} if a new the token expired or
 	 * {@link Mono#error(Throwable)} if refresh failed.
 	 */
+	@SuppressWarnings("NullAway")
 	public Mono<VaultToken> renewToken() {
 
 		this.logger.info("Renewing token");
@@ -268,7 +272,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			.doOnSubscribe(ignore -> multicastEvent(new BeforeLoginTokenRenewedEvent(tokenWrapper.getToken())))
 			.handle((response, sink) -> {
 
-				LoginToken renewed = LoginTokenUtil.from(response.getRequiredAuth());
+				LoginToken renewed = LoginTokenUtil.from(response.getAuth());
 
 				if (!isExpired(renewed)) {
 					sink.next(new TokenWrapper(renewed, tokenWrapper.revocable));
@@ -301,6 +305,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
 		Mono<TokenWrapper> tokenWrapper = this.token.get();

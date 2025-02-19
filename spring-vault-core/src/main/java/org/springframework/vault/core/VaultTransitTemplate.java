@@ -70,7 +70,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), null);
+		writeForData("%s/keys/%s".formatted(this.path, keyName), null);
 	}
 
 	@Override
@@ -79,15 +79,17 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(createKeyRequest, "VaultTransitKeyCreationRequest must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), createKeyRequest);
+		writeForData("%s/keys/%s".formatted(this.path, keyName), createKeyRequest);
 	}
 
 	@Override
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<String> getKeys() {
 
 		VaultResponse response = this.vaultOperations.read("%s/keys?list=true".formatted(this.path));
 
-		return response == null ? Collections.emptyList() : (List) response.getRequiredData().get("keys");
+		return response == null ? Collections.emptyList()
+				: (List) response.getRequiredData().getOrDefault("keys", Collections.emptyList());
 	}
 
 	@Override
@@ -96,7 +98,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s/config".formatted(this.path, keyName), keyConfiguration);
+		writeForData("%s/keys/%s/config".formatted(this.path, keyName), keyConfiguration);
 	}
 
 	@Override
@@ -141,10 +143,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s/rotate".formatted(this.path, keyName), null);
+		writeForData("%s/keys/%s/rotate".formatted(this.path, keyName), null);
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String encrypt(String keyName, String plaintext) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -154,9 +157,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes()));
 
-		return (String) this.vaultOperations.write("%s/encrypt/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("ciphertext");
+		return (String) writeForData("%s/encrypt/%s".formatted(this.path, keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -171,6 +172,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String encrypt(String keyName, byte[] plaintext, VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -183,9 +185,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		applyTransitOptions(transitContext, request);
 
-		return (String) this.vaultOperations.write("%s/encrypt/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("ciphertext");
+		return (String) writeForData("%s/encrypt/%s".formatted(this.path, keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -201,15 +201,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
 			vaultRequest.put("plaintext", Base64.getEncoder().encodeToString(request.getPlaintext()));
-
-			if (request.getContext() != null) {
-				applyTransitOptions(request.getContext(), vaultRequest);
-			}
+			applyTransitOptions(request.getContext(), vaultRequest);
 
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write("%s/encrypt/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse("%s/encrypt/%s".formatted(this.path, keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toBatchResults(vaultResponse, batchRequest, Plaintext::getContext);
@@ -225,8 +222,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		request.put("ciphertext", ciphertext);
 
-		String plaintext = (String) this.vaultOperations.write("%s/decrypt/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
+		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
 			.get("plaintext");
 
 		return new String(Base64.getDecoder().decode(plaintext));
@@ -256,8 +252,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		applyTransitOptions(transitContext, request);
 
-		String plaintext = (String) this.vaultOperations.write("%s/decrypt/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
+		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
 			.get("plaintext");
 
 		return Base64.getDecoder().decode(plaintext);
@@ -276,21 +271,19 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			Map<String, String> vaultRequest = new LinkedHashMap<>(2);
 
 			vaultRequest.put("ciphertext", request.getCiphertext());
-
-			if (request.getContext() != null) {
-				applyTransitOptions(request.getContext(), vaultRequest);
-			}
+			applyTransitOptions(request.getContext(), vaultRequest);
 
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write("%s/decrypt/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse("%s/decrypt/%s".formatted(this.path, keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toDecryptionResults(vaultResponse, batchRequest);
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String rewrap(String keyName, String ciphertext) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -299,12 +292,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("ciphertext", ciphertext);
 
-		return (String) this.vaultOperations.write("%s/rewrap/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("ciphertext");
+		return (String) writeForData("%s/rewrap/%s".formatted(this.path, keyName), request).get("ciphertext");
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String rewrap(String keyName, String ciphertext, VaultTransitContext transitContext) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -313,9 +305,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, String> request = createRewrapRequest(toCiphertext(ciphertext, transitContext));
 
-		return (String) this.vaultOperations.write("%s/rewrap/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("ciphertext");
+		return (String) writeForData("%s/rewrap/%s".formatted(this.path, keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -332,7 +322,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write("%s/rewrap/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse("%s/rewrap/%s".formatted(this.path, keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toBatchResults(vaultResponse, batchRequest, Ciphertext::getContext);
@@ -350,6 +340,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Hmac getHmac(String keyName, VaultHmacRequest hmacRequest) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -357,9 +348,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(hmacRequest);
 
-		String hmac = (String) this.vaultOperations.write("%s/hmac/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("hmac");
+		String hmac = (String) writeForData("%s/hmac/%s".formatted(this.path, keyName), request).get("hmac");
 
 		return Hmac.of(hmac);
 	}
@@ -390,6 +379,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Signature sign(String keyName, VaultSignRequest signRequest) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
@@ -397,9 +387,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(signRequest);
 
-		String signature = (String) this.vaultOperations.write("%s/sign/%s".formatted(this.path, keyName), request)
-			.getRequiredData()
-			.get("signature");
+		String signature = (String) writeForData("%s/sign/%s".formatted(this.path, keyName), request).get("signature");
 
 		return Signature.of(signature);
 	}
@@ -438,14 +426,28 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(verificationRequest);
 
-		Map<String, Object> response = this.vaultOperations.write("%s/verify/%s".formatted(this.path, keyName), request)
-			.getRequiredData();
+		Map<String, Object> response = writeForData("%s/verify/%s".formatted(this.path, keyName), request);
 
 		if (response.containsKey("valid") && Boolean.valueOf("" + response.get("valid"))) {
 			return SignatureValidation.valid();
 		}
 
 		return SignatureValidation.invalid();
+	}
+
+	private Map<String, Object> writeForData(String path, @Nullable Object request) {
+		return writeForResponse(path, request).getRequiredData();
+	}
+
+	private VaultResponse writeForResponse(String path, @Nullable Object request) {
+
+		VaultResponse response = this.vaultOperations.write(path, request);
+
+		if (response == null) {
+			throw new IllegalStateException("Write to '%s' did not return a response".formatted(path));
+		}
+
+		return response;
 	}
 
 	static Map<String, Object> toRequestBody(VaultSignatureVerificationRequest verificationRequest) {
@@ -483,6 +485,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 	}
 
+	@SuppressWarnings("NullAway")
 	static <T> List<VaultEncryptionResult> toBatchResults(VaultResponse vaultResponse, List<T> batchRequests,
 			Function<T, VaultTransitContext> contextExtractor) {
 
@@ -565,11 +568,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext.of(ciphertext);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "NullAway", "unchecked" })
 	static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
 	}
 
+	@SuppressWarnings("NullAway")
 	static class VaultTransitKeyImpl implements VaultTransitKey {
 
 		@Nullable
@@ -625,7 +629,6 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		@Override
-		@Nullable
 		public String getName() {
 			return this.name;
 		}
@@ -827,10 +830,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		private Map<String, String> keys = Collections.emptyMap();
 
-		@Nullable
-		private String name;
+		private final String name;
 
-		public RawTransitKeyImpl() {
+		public RawTransitKeyImpl(@JsonProperty("name") String name) {
+			this.name = name;
 		}
 
 		@Override
@@ -839,17 +842,12 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		}
 
 		@Override
-		@Nullable
 		public String getName() {
 			return this.name;
 		}
 
 		public void setKeys(Map<String, String> keys) {
 			this.keys = keys;
-		}
-
-		public void setName(@Nullable String name) {
-			this.name = name;
 		}
 
 		@Override

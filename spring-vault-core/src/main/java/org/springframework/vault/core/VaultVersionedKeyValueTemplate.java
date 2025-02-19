@@ -65,7 +65,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 	@Nullable
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Versioned<Map<String, Object>> get(String path, Version version) {
 
 		Assert.hasText(path, "Path must not be empty");
@@ -86,29 +86,31 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	}
 
 	@Nullable
+	@SuppressWarnings("NullAway")
 	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()
 				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		VersionedResponse response = this.vaultOperations.doWithSession(restOperations -> {
+		VersionedResponse response = this.vaultOperations
+			.doWithSession((RestOperationsCallback<@Nullable VersionedResponse>) restOperations -> {
 
-			try {
-				return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
-			}
-			catch (HttpStatusCodeException e) {
+				try {
+					return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
+				}
+				catch (HttpStatusCodeException e) {
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					if (e.getResponseBodyAsString().contains("deletion_time")) {
-						return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
+					if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
+						if (e.getResponseBodyAsString().contains("deletion_time")) {
+							return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
+						}
+
+						return null;
 					}
 
-					return null;
+					throw VaultResponses.buildException(e, path);
 				}
-
-				throw VaultResponses.buildException(e, path);
-			}
-		});
+			});
 
 		if (response == null) {
 			return null;
@@ -132,7 +134,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 		if (body instanceof Versioned<?> versioned) {
 
-			data.put("data", versioned.getData());
+			data.put("data", versioned.getRequiredData());
 			data.put("options", requestOptions);
 
 			requestOptions.put("cas", versioned.getVersion().getVersion());

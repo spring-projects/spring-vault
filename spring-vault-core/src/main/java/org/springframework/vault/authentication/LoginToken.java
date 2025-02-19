@@ -206,8 +206,7 @@ public class LoginToken extends VaultToken {
 	 */
 	public static class LoginTokenBuilder {
 
-
-		private char @Nullable[] token;
+		private char @Nullable [] token;
 
 		private boolean renewable;
 
