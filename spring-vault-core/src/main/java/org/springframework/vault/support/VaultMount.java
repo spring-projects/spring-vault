@@ -21,6 +21,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 
 /**
@@ -119,11 +120,9 @@ public class VaultMount {
 	 */
 	public static class VaultMountBuilder {
 
-		@Nullable
-		private String type;
+		private @Nullable String type;
 
-		@Nullable
-		private String description;
+		private @Nullable String description;
 
 		private Map<String, Object> config = Collections.emptyMap();
 
@@ -137,7 +136,8 @@ public class VaultMount {
 		 * @param type the backend type, must not be empty or {@literal null}.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
-		public VaultMountBuilder type(String type) {
+		@Contract("null -> fail")
+		public VaultMountBuilder type(@Nullable String type) {
 
 			Assert.hasText(type, "Type must not be empty or null");
 
@@ -146,11 +146,11 @@ public class VaultMount {
 		}
 
 		/**
-		 * Configure a human readable description of this mount.
-		 * @param description a human readable description of this mount.
+		 * Configure a human-readable description of this mount.
+		 * @param description a human-readable description of this mount.
 		 * @return {@literal this} {@link VaultMountBuilder}.
 		 */
-		public VaultMountBuilder description(String description) {
+		public VaultMountBuilder description(@Nullable String description) {
 
 			this.description = description;
 			return this;

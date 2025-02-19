@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jspecify.annotations.NonNull;
 import reactor.core.publisher.Mono;
 
 import org.springframework.vault.VaultException;
@@ -38,7 +39,7 @@ public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSe
 
 	private final VaultTokenSupplier clientAuthentication;
 
-	private final AtomicReference<Mono<VaultToken>> tokenRef = new AtomicReference<>(EMPTY);
+	private final AtomicReference<@NonNull Mono<VaultToken>> tokenRef = new AtomicReference<>(EMPTY);
 
 	private CachingVaultTokenSupplier(VaultTokenSupplier clientAuthentication) {
 		this.clientAuthentication = clientAuthentication;
@@ -56,6 +57,7 @@ public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSe
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 
 		if (Objects.equals(this.tokenRef.get(), EMPTY)) {

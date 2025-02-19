@@ -64,8 +64,7 @@ public abstract class AbstractResult<V> {
 	 * Returns the cause of the failed operation if the operation completed with an error.
 	 * @return the cause of the failure or {@literal null} if succeeded.
 	 */
-	@Nullable
-	public Exception getCause() {
+	public @Nullable Exception getCause() {
 		return this.exception;
 	}
 
@@ -76,8 +75,9 @@ public abstract class AbstractResult<V> {
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
-	@Nullable
-	public V get() {
+
+	@SuppressWarnings("NullAway")
+	public @Nullable V get() {
 
 		if (isSuccessful()) {
 			return get0();
@@ -89,7 +89,6 @@ public abstract class AbstractResult<V> {
 	/**
 	 * @return the actual result if this result completed successfully.
 	 */
-	@Nullable
-	protected abstract V get0();
+	protected abstract @Nullable V get0();
 
 }

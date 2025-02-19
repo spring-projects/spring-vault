@@ -96,7 +96,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean isInitialized() {
 
 		return requireResponse(this.vaultOperations.doWithSession(restOperations -> {
@@ -107,7 +107,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 				Assert.state(body.getBody() != null, "Initialization response must not be null");
 
-				return body.getBody().get("initialized");
+				Boolean initialized = body.getBody().get("initialized");
+				return initialized != null && initialized.booleanValue();
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -209,16 +210,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@SuppressWarnings("unchecked")
 	public List<String> getPolicyNames() throws VaultException {
 		return requireResponse(
-				(List<String>) this.vaultOperations.read("sys/policy").getRequiredData().get("policies"));
+				(List<String>) this.vaultOperations.readRequired("sys/policy").getRequiredData().get("policies"));
 	}
 
-	@Nullable
 	@Override
-	public Policy getPolicy(String name) throws VaultException {
+	@SuppressWarnings("NullAway")
+	public @Nullable Policy getPolicy(String name) throws VaultException {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Policy>) restOperations -> {
 
 			ResponseEntity<VaultResponse> response;
 
@@ -234,7 +235,13 @@ public class VaultSysTemplate implements VaultSysOperations {
 				throw e;
 			}
 
-			String rules = (String) response.getBody().getRequiredData().get("rules");
+			VaultResponse body = response.getBody();
+
+			if (body == null) {
+				return null;
+			}
+
+			String rules = (String) body.getRequiredData().get("rules");
 
 			if (ObjectUtils.isEmpty(rules)) {
 				return Policy.empty();
@@ -249,6 +256,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public void createOrUpdatePolicy(String name, Policy policy) throws VaultException {
 
 		Assert.hasText(name, "Name must not be null or empty");
@@ -263,7 +271,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			throw new VaultException("Cannot serialize policy to JSON", e);
 		}
 
-		this.vaultOperations.doWithSession(restOperations -> {
+		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 
 			restOperations.exchange("sys/policy/{name}", HttpMethod.PUT,
 					new HttpEntity<>(Collections.singletonMap("rules", rules)), VaultResponse.class, name);
@@ -296,12 +304,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		@Override
 		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
-			return restOperations.getForObject("sys/seal-status", VaultUnsealStatusImpl.class);
+			return requireResponse(restOperations.getForObject("sys/seal-status", VaultUnsealStatusImpl.class));
 		}
 
 	}
 
-	private static class Seal implements RestOperationsCallback<Void> {
+	private static class Seal implements RestOperationsCallback<@Nullable Void> {
 
 		@Override
 		public Void doWithRestOperations(RestOperations restOperations) {
@@ -335,14 +343,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
 
-			private Map<String, VaultMount> topLevelMounts = new HashMap<>();
+			private final Map<String, VaultMount> topLevelMounts = new HashMap<>();
 
 			@JsonIgnore
 			public Map<String, VaultMount> getTopLevelMounts() {
 				return this.topLevelMounts;
 			}
 
-			@SuppressWarnings("unchecked")
+			@SuppressWarnings({ "unchecked", "NullAway", "rawtypes" })
 			@JsonAnySetter
 			public void set(String name, Object value) {
 
@@ -386,7 +394,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			try {
 				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange("sys/health", HttpMethod.GET,
 						emptyNamespace(null), VaultHealthImpl.class);
-				return healthResponse.getBody();
+				return requireResponse(healthResponse.getBody());
 			}
 			catch (RestClientResponseException responseError) {
 

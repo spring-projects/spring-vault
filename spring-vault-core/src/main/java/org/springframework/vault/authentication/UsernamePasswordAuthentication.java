@@ -90,6 +90,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		return createAuthenticationSteps(this.options);
 	}
 
+	@SuppressWarnings("NullAway")
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 
 		try {

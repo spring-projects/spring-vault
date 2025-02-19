@@ -48,6 +48,7 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 		return this.previousLease;
 	}
 
+	@SuppressWarnings("NullAway")
 	public Lease getCurrentLease() {
 		return getLease();
 	}

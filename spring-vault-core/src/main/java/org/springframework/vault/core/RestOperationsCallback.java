@@ -25,14 +25,13 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  */
 @FunctionalInterface
-public interface RestOperationsCallback<T> {
+public interface RestOperationsCallback<T extends @Nullable Object> {
 
 	/**
 	 * Callback method.
 	 * @param restOperations restOperations to use, must not be {@literal null}.
 	 * @return a result object or null if none.
 	 */
-	@Nullable
 	T doWithRestOperations(RestOperations restOperations);
 
 }

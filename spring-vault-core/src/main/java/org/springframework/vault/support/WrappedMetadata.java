@@ -34,7 +34,7 @@ public class WrappedMetadata {
 
 	private final Instant creationTime;
 
-	private final String path;
+	private final @Nullable String path;
 
 	private final Duration ttl;
 

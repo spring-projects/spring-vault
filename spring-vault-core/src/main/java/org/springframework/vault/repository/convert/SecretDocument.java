@@ -100,16 +100,14 @@ public class SecretDocument {
 	 * @param vaultResponse must not be {@literal null}.
 	 * @return the {@link SecretDocument}.
 	 */
-	@SuppressWarnings("ConstantConditions")
 	public static SecretDocument from(@Nullable String id, VaultResponse vaultResponse) {
-		return new SecretDocument(id, vaultResponse.getData());
+		return new SecretDocument(id, vaultResponse.getRequiredData());
 	}
 
 	/**
 	 * @return the identifier or {@literal null} if the identifier is not set.
 	 */
-	@Nullable
-	public String getId() {
+	public @Nullable String getId() {
 		return this.id;
 	}
 

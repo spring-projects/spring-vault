@@ -74,7 +74,7 @@ public class KeyValueDelegate {
 
 		MountInfo mountInfo = this.mountInfo.get(path);
 
-		if (!mountInfo.isKeyValue(KeyValueBackend.versioned())) {
+		if (mountInfo == null || !mountInfo.isKeyValue(KeyValueBackend.versioned())) {
 			return this.operations.read(path);
 		}
 
@@ -106,7 +106,7 @@ public class KeyValueDelegate {
 		response.setData(nested);
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "NullAway" })
 	private MountInfo doGetMountInfo(String path) {
 
 		VaultResponse response = this.operations.read("sys/internal/ui/mounts/%s".formatted(path));

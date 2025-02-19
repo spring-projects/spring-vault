@@ -75,6 +75,7 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public byte[] generateKey() {
 
 		VaultResponse response = this.vaultOperations.write("%s/random/%d".formatted(this.transitPath, getKeyLength()),

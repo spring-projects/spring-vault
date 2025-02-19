@@ -61,6 +61,7 @@ import org.springframework.vault.authentication.event.AuthenticationListener;
 import org.springframework.vault.authentication.event.LoginTokenExpiredEvent;
 import org.springframework.vault.authentication.event.LoginTokenRenewalFailedEvent;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.core.RestOperationsCallback;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
@@ -560,6 +561,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	void restartSecrets() {
 
+		Assert.state(this.taskScheduler != null, "TaskScheduler is not set");
+
 		int status = this.status;
 		if (status == STATUS_STARTED) {
 
@@ -865,14 +868,14 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("NullAway")
 	protected void doRevokeLease(RequestedSecret requestedSecret, Lease lease) {
 
 		try {
 
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
-			this.operations.doWithSession(restOperations -> {
+			this.operations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 				this.leaseEndpoints.revoke(lease, restOperations);
 				return null;
 			});
@@ -1111,6 +1114,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		 * expired.
 		 */
 		private void restartSecrets() {
+
+			Assert.state(taskScheduler != null, "TaskScheduler is not set");
 
 			if (!isRunning()) {
 				logger.debug("Ignore token event as the container is not running");

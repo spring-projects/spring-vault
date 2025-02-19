@@ -15,12 +15,16 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Map;
+
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
+ * Utilities to extract required responses from {@link ResponseEntity}.
+ *
  * @author Mark Paluch
  */
 class ResponseUtil {
@@ -49,4 +53,25 @@ class ResponseUtil {
 
 		return response.getRequiredData();
 	}
+
+	public static Object getRequiredValue(ResponseEntity<? extends VaultResponseSupport<Map<String, Object>>> response,
+			String key) {
+		return getRequiredValue(getRequiredBody(response), key);
+	}
+
+	public static Object getRequiredValue(@Nullable VaultResponseSupport<Map<String, Object>> response, String key) {
+
+		if (response == null) {
+			throw new IllegalStateException("Expected non-null response body");
+		}
+
+		Object value = response.getRequiredData().get(key);
+
+		if (value == null) {
+			throw new IllegalStateException(String.format("Key '%s' not found in response", key));
+		}
+
+		return value;
+	}
+
 }

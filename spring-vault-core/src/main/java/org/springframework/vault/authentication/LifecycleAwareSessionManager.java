@@ -239,7 +239,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		VaultResponse vaultResponse = this.restOperations.postForObject("auth/token/renew-self",
 				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)), VaultResponse.class);
 
-		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getRequiredAuth());
+		Assert.notNull(vaultResponse, "VaultResponse must not be null");
+
+		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getAuth());
 
 		if (isExpired(renewed)) {
 

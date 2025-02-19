@@ -35,7 +35,7 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
  * @author Mark Paluch
  * @since 2.0
  */
-class SecretDocumentAccessor {
+public class SecretDocumentAccessor {
 
 	private final SecretDocument document;
 
@@ -204,8 +204,7 @@ class SecretDocumentAccessor {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	@Nullable
-	private static Map<String, Object> getAsMap(Object source) {
+	private @Nullable static Map<String, Object> getAsMap(@Nullable Object source) {
 
 		if (source instanceof Map) {
 			return (Map<String, Object>) source;

@@ -48,10 +48,9 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 		this.path = path;
 	}
 
-	@Nullable
 	@Override
 	@SuppressWarnings("unchecked")
-	public List<String> list(String path) {
+	public @Nullable List<String> list(String path) {
 
 		VaultListResponse read = doRead(restOperations -> {
 			return restOperations.exchange(

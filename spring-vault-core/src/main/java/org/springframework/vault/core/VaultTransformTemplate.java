@@ -22,6 +22,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -62,6 +64,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String encode(String roleName, String plaintext) {
 
 		Assert.hasText(roleName, "Role name must not be empty");
@@ -71,7 +74,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		request.put("value", plaintext);
 
-		return (String) this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
+		return (String) this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName), request)
 			.getRequiredData()
 			.get("encoded_value");
 	}
@@ -88,7 +91,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		applyTransformOptions(plaintext.getContext(), request);
 
-		Map<String, Object> data = this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName), request)
+		Map<String, Object> data = this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName), request)
 			.getRequiredData();
 
 		return toCiphertext(data, plaintext.getContext());
@@ -113,10 +116,10 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write("%s/encode/%s".formatted(this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName),
 				Collections.singletonMap("batch_input", batch));
 
-		return toEncodedResults(vaultResponse, batchRequest);
+		return toEncodedResults(requireResponse(vaultResponse), batchRequest);
 	}
 
 	@Override
@@ -131,6 +134,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public String decode(String roleName, String ciphertext, VaultTransformContext transformContext) {
 
 		Assert.hasText(roleName, "Role name must not be empty");
@@ -143,7 +147,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		applyTransformOptions(transformContext, request);
 
-		return (String) this.vaultOperations.write("%s/decode/%s".formatted(this.path, roleName), request)
+		return (String) this.vaultOperations.invoke("%s/decode/%s".formatted(this.path, roleName), request)
 			.getRequiredData()
 			.get("decoded_value");
 	}
@@ -166,10 +170,10 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = this.vaultOperations.write("%s/decode/%s".formatted(this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.invoke("%s/decode/%s".formatted(this.path, roleName),
 				Collections.singletonMap("batch_input", batch));
 
-		return toDecryptionResults(vaultResponse, batchRequest);
+		return toDecryptionResults(requireResponse(vaultResponse), batchRequest);
 	}
 
 	private static void applyTransformOptions(VaultTransformContext context, Map<String, String> request) {
@@ -253,6 +257,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		return new VaultTransformDecodeResult(TransformPlaintext.empty().with(ciphertext.getContext()));
 	}
 
+	@SuppressWarnings("NullAway")
 	private static TransformCiphertext toCiphertext(Map<String, ?> data, VaultTransformContext context) {
 
 		String ciphertext = (String) data.get("encoded_value");
@@ -279,9 +284,16 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		return context;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "NullAway", "unchecked" })
 	private static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
+	}
+
+	private static <T> T requireResponse(@Nullable T response) {
+
+		Assert.state(response != null, "Response must not be null");
+
+		return response;
 	}
 
 }

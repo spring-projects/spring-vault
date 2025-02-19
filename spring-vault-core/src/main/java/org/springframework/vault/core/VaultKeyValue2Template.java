@@ -48,9 +48,8 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		this.path = path;
 	}
 
-	@Nullable
 	@Override
-	public VaultResponse get(String path) {
+	public @Nullable VaultResponse get(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
 
@@ -64,10 +63,9 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		});
 	}
 
-	@Nullable
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public <T> VaultResponseSupport<T> get(String path, Class<T> responseType) {
+	public <T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType) {
 
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");
@@ -90,7 +88,7 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		VaultResponse readResponse = get(path);
 		if (readResponse == null || readResponse.getData() == null) {
 			throw new SecretNotFoundException(
-					"No data found at %s; patch only works on existing data".formatted(createDataPath(path)),
+					"No data found at '%s'; patch only works on existing data".formatted(createDataPath(path)),
 					"%s/%s".formatted(this.path, path));
 		}
 

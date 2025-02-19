@@ -47,6 +47,7 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Mono<Boolean> isInitialized() {
 
 		return this.vaultOperations.doWithSession(webClient -> {
@@ -54,11 +55,13 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 				.uri("sys/init")
 				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
 				.exchangeToMono(clientResponse -> clientResponse.toEntity(Map.class))
+				.filter(HttpEntity::hasBody)
 				.map(it -> (Boolean) it.getBody().get("initialized"));
 		});
 	}
 
 	@Override
+	@SuppressWarnings("NullAway")
 	public Mono<VaultHealth> health() {
 
 		return this.vaultOperations.doWithVault(webClient -> {
@@ -67,7 +70,9 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 				.uri("sys/health")
 				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
 				.exchangeToMono(clientResponse -> {
-					return clientResponse.toEntity(VaultSysTemplate.VaultHealthImpl.class).map(HttpEntity::getBody);
+					return clientResponse.toEntity(VaultSysTemplate.VaultHealthImpl.class)
+						.filter(HttpEntity::hasBody)
+						.map(HttpEntity::getBody);
 				});
 		});
 	}

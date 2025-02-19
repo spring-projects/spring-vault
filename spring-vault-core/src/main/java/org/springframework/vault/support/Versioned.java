@@ -60,7 +60,7 @@ public class Versioned<T> {
 
 	private final @Nullable Metadata metadata;
 
-	private Versioned(T data, Version version) {
+	private Versioned(@Nullable T data, Version version) {
 
 		this.version = version;
 		this.metadata = null;
@@ -345,7 +345,7 @@ public class Versioned<T> {
 			 * {@literal null}.
 			 * @return {@code this} {@link MetadataBuilder}.
 			 */
-			public MetadataBuilder deletedAt(Instant deletedAt) {
+			public MetadataBuilder deletedAt(@Nullable Instant deletedAt) {
 				this.deletedAt = deletedAt;
 				return this;
 			}
@@ -387,7 +387,7 @@ public class Versioned<T> {
 			 * @return {@code this} {@link MetadataBuilder}.
 			 * @since 3.1
 			 */
-			public MetadataBuilder customMetadata(Map<String, String> customMetadata) {
+			public MetadataBuilder customMetadata(@Nullable Map<String, String> customMetadata) {
 
 				this.customMetadata = customMetadata != null && !CollectionUtils.isEmpty(customMetadata)
 						? new LinkedHashMap<>(customMetadata) : null;

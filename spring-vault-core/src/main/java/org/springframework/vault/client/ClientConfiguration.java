@@ -69,7 +69,7 @@ class ClientConfiguration {
 	}
 
 	static SSLContext getSSLContext(SslConfiguration.KeyStoreConfiguration keyStoreConfiguration,
-			SslConfiguration.KeyConfiguration keyConfiguration, TrustManager @Nullable[] trustManagers)
+			SslConfiguration.KeyConfiguration keyConfiguration, TrustManager @Nullable [] trustManagers)
 			throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = keyStoreConfiguration.isPresent()
@@ -113,9 +113,8 @@ class ClientConfiguration {
 		return keyStore;
 	}
 
-
-	static TrustManager @Nullable[] getTrustManagers(SslConfiguration sslConfiguration)
-		throws GeneralSecurityException, IOException {
+	static TrustManager @Nullable [] getTrustManagers(SslConfiguration sslConfiguration)
+			throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()
 				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;
@@ -150,8 +149,7 @@ class ClientConfiguration {
 			logger.debug("Loading keystore from %s".formatted(keyStoreConfiguration.getResource()));
 		}
 
-		try (InputStream inputStream = keyStoreConfiguration.getResource()
-				.getInputStream()) {
+		try (InputStream inputStream = keyStoreConfiguration.getResource().getInputStream()) {
 
 			if (SslConfiguration.PEM_KEYSTORE_TYPE.equalsIgnoreCase(keyStoreConfiguration.getStoreType())) {
 
@@ -408,11 +406,11 @@ class ClientConfiguration {
 		}
 
 		@Override
-		public String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
+		public @Nullable String chooseClientAlias(String[] keyType, Principal[] issuers, Socket socket) {
 			return this.keyConfiguration.getKeyAlias();
 		}
 
-		public String chooseEngineClientAlias(String[] keyType, Principal[] issuers, SSLEngine engine) {
+		public @Nullable String chooseEngineClientAlias(String[] keyType, Principal[] issuers, SSLEngine engine) {
 			return this.keyConfiguration.getKeyAlias();
 		}
 

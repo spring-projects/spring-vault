@@ -82,7 +82,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	}
 
 	private DefaultVaultTypeMapper(@Nullable String typeKey, TypeAliasAccessor<Map<String, Object>> accessor,
-			MappingContext<? extends PersistentEntity<?, ?>, ?> mappingContext,
+			@Nullable MappingContext<? extends PersistentEntity<?, ?>, ?> mappingContext,
 			List<? extends TypeInformationMapper> mappers) {
 
 		super(accessor, mappingContext, mappers);

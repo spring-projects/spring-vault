@@ -18,6 +18,9 @@ package org.springframework.vault.support;
 
 import java.util.Arrays;
 
+import org.jspecify.annotations.Nullable;
+
+import org.springframework.lang.Contract;
 import org.springframework.util.Assert;
 
 /**
@@ -42,7 +45,8 @@ public class VaultToken {
 	 * @param token must not be empty or {@literal null}.
 	 * @return the created {@link VaultToken}
 	 */
-	public static VaultToken of(String token) {
+	@Contract("null -> fail")
+	public static VaultToken of(@Nullable String token) {
 
 		Assert.hasText(token, "Token must not be empty");
 
