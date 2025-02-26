@@ -280,7 +280,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 				return (String) response.getRequiredData().get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
-				throw new VaultLoginException("Cannot unwrap Role id using AppRole: %s"
+				throw new VaultLoginException("Cannot unwrap Secret id using AppRole: %s"
 					.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
 			}
 		}
