@@ -33,7 +33,7 @@ enum DefaultGoogleCredentialsAccessors implements GoogleCredentialsAccountIdAcce
 	INSTANCE;
 
 	/**
-	 * Get a the service account id (email) to be placed in the signed JWT.
+	 * Get the service account id (email) to be placed in the signed JWT.
 	 * @param credentials credentials object to obtain the service account id from.
 	 * @return the service account id to use.
 	 */
