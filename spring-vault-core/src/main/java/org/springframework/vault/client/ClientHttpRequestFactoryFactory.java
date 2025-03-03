@@ -82,6 +82,7 @@ import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
  * @author Mark Paluch
  * @author Ryan Gow
  * @author Spencer Gibb
+ * @author Luciano Canales
  * @since 2.2
  */
 public class ClientHttpRequestFactoryFactory {
@@ -128,7 +129,7 @@ public class ClientHttpRequestFactoryFactory {
 					+ "must be applied outside the Vault Client to use the JDK HTTP client");
 		}
 
-		return new SimpleClientHttpRequestFactory();
+		return SimpleClient.usingSimpleClientHttpRequest(options);
 	}
 
 	static SSLContext getSSLContext(SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
@@ -413,6 +414,32 @@ public class ClientHttpRequestFactoryFactory {
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
 				.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
 			return builder;
+		}
+
+	}
+
+	/**
+	 * Utilities to create a {@link ClientHttpRequestFactory} for the
+	 * {@link SimpleClientHttpRequestFactory}.
+	 *
+	 * @author Luciano Canales
+	 */
+	public static class SimpleClient {
+
+		/**
+		 * Create a {@link ClientHttpRequestFactory} using
+		 * {@link SimpleClientHttpRequestFactory}.
+		 * @param options must not be {@literal null}
+		 * @return a new and configured {@link SimpleClientHttpRequestFactory} instance.
+		 */
+		public static SimpleClientHttpRequestFactory usingSimpleClientHttpRequest(ClientOptions options) {
+
+			SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+
+			factory.setConnectTimeout((int) options.getConnectionTimeout().toMillis());
+			factory.setReadTimeout((int) options.getReadTimeout().toMillis());
+
+			return factory;
 		}
 
 	}
