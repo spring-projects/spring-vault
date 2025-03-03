@@ -251,6 +251,7 @@ class VaultTransformTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@Test
 	void batchEncodeAndDecodeWithReference() {
+
 		// Prepare test data
 		List<TransformPlaintext> batch = new ArrayList<>();
 		batch.add(TransformPlaintext.of("123-45-6789")

@@ -99,7 +99,7 @@ class PropertyMapper {
 	 * @param value the value
 	 * @return a {@link Source} that can be used to complete the mapping
 	 */
-	public <T> Source<T> from(T value) {
+	public <T> Source<T> from(@Nullable T value) {
 		return from(() -> value);
 	}
 

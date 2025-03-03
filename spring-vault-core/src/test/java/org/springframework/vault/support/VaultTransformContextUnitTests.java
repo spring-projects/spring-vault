@@ -23,6 +23,8 @@ import static org.assertj.core.api.Assertions.*;
  * Unit tests for {@link VaultTransitContext}.
  *
  * @author Lauren Voswinkel
+ * @author Roopesh Chandran
+ * @author Mark Paluch
  */
 class VaultTransformContextUnitTests {
 
@@ -61,6 +63,19 @@ class VaultTransformContextUnitTests {
 	@Test
 	void createsContextWithReference() {
 
+		String referenceValue = "my-reference";
+
+		VaultTransformContext context = VaultTransformContext.builder().reference(referenceValue).build();
+
+		assertThat(context.getReference()).isEqualTo(referenceValue);
+		assertThat(context).isEqualTo(context).isNotEqualTo(VaultTransformContext.fromTweak(new byte[] { 1 }));
+		assertThat(context).hasSameHashCodeAs(context)
+			.doesNotHaveSameHashCodeAs(VaultTransformContext.fromTweak(new byte[] { 1 }));
+	}
+
+	@Test
+	void appliesMutation() {
+
 		String transformName = "some_transformation";
 		byte[] tweak = { 1, 2, 3, 4, 5, 6, 7 };
 		String referenceValue = "my-reference";
@@ -69,6 +84,8 @@ class VaultTransformContextUnitTests {
 			.transformation(transformName)
 			.tweak(tweak)
 			.reference(referenceValue)
+			.build()
+			.mutate()
 			.build();
 
 		assertThat(context.getTransformation()).isEqualTo(transformName);

@@ -17,6 +17,7 @@ package org.springframework.vault.support;
 
 import java.util.Arrays;
 
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -24,6 +25,7 @@ import org.springframework.util.ObjectUtils;
  * Transform backend encode/decode context object.
  *
  * @author Lauren Voswinkel
+ * @author Roopesh Chandran
  * @since 2.3
  */
 public class VaultTransformContext {
@@ -32,15 +34,15 @@ public class VaultTransformContext {
 	 * Empty (default) {@link VaultTransformContext} without a {@literal context} and
 	 * {@literal nonce}.
 	 */
-	private static final VaultTransformContext EMPTY = new VaultTransformContext("", new byte[0], "");
+	private static final VaultTransformContext EMPTY = new VaultTransformContext("", new byte[0], null);
 
 	private final String transformation;
 
 	private final byte[] tweak;
 
-	private final String reference;
+	private final @Nullable String reference;
 
-	private VaultTransformContext(String transformation, byte[] tweak, String reference) {
+	private VaultTransformContext(String transformation, byte[] tweak, @Nullable String reference) {
 		this.transformation = transformation;
 		this.tweak = tweak;
 		this.reference = reference;
@@ -84,7 +86,8 @@ public class VaultTransformContext {
 	 * @return {@code true} if this object is empty.
 	 */
 	public boolean isEmpty() {
-		return ObjectUtils.isEmpty(this.transformation) && ObjectUtils.isEmpty(this.tweak);
+		return ObjectUtils.isEmpty(this.transformation) && ObjectUtils.isEmpty(this.tweak)
+				&& ObjectUtils.isEmpty(this.reference);
 	}
 
 	/**
@@ -102,10 +105,19 @@ public class VaultTransformContext {
 	}
 
 	/**
-	 * @return The reference identifier for batch operations
+	 * @return the reference identifier for batch operations.
+	 * @since 3.2
 	 */
-	public String getReference() {
+	public @Nullable String getReference() {
 		return this.reference;
+	}
+
+	/**
+	 * Return a builder to create a new {@code VaultTransformContext} whose settings are
+	 * replicated from the current {@code VaultTransformContext}.
+	 */
+	public VaultTransformRequestBuilder mutate() {
+		return new VaultTransformRequestBuilder(this);
 	}
 
 	@Override
@@ -114,13 +126,15 @@ public class VaultTransformContext {
 			return true;
 		if (!(o instanceof VaultTransformContext that))
 			return false;
-		return this.transformation.equals(that.transformation) && Arrays.equals(this.tweak, that.tweak);
+		return this.transformation.equals(that.transformation) && Arrays.equals(this.tweak, that.tweak)
+				&& ObjectUtils.nullSafeEquals(this.reference, that.reference);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = this.transformation.hashCode();
 		result = 31 * result + Arrays.hashCode(this.tweak);
+		result = 31 * result + ObjectUtils.nullSafeHash(this.reference);
 		return result;
 	}
 
@@ -136,18 +150,20 @@ public class VaultTransformContext {
 		/**
 		 * A user-defined identifier that can be used to correlate items in a batch
 		 * request with their corresponding results in Vault's {@code batch_results}.
-		 * <br/>
-		 * <br/>
-		 *
 		 * <p>
 		 * If set, Vault echoes this value in the response so clients can match inputs to
 		 * outputs reliably. If Vault does not return the {@code reference}, the original
 		 * client-supplied reference remains available for correlation.
-		 * </p>
 		 */
-		private String reference = "";
+		private @Nullable String reference;
 
 		private VaultTransformRequestBuilder() {
+		}
+
+		private VaultTransformRequestBuilder(VaultTransformContext context) {
+			this.transformation = context.transformation;
+			this.tweak = Arrays.copyOf(context.tweak, context.tweak.length);
+			this.reference = context.reference;
 		}
 
 		/**
@@ -185,8 +201,9 @@ public class VaultTransformContext {
 		 * Set a user-defined reference identifier. This reference is placed into each
 		 * item of a batch request and, if supported by Vault, echoed in the batch
 		 * results.
-		 * @param reference the correlation identifier; can be {@code null} or empty.
-		 * @return {@code this} builder instance .
+		 * @param reference the correlation identifier; can be or empty.
+		 * @return {@code this} builder instance.
+		 * @since 3.2
 		 */
 		public VaultTransformRequestBuilder reference(String reference) {
 			this.reference = reference;

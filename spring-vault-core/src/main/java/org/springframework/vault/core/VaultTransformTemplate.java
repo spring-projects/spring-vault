@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.TransformCiphertext;
@@ -38,6 +37,7 @@ import org.springframework.vault.support.VaultTransformEncodeResult;
  *
  * @author Lauren Voswinkel
  * @author Mark Paluch
+ * @author Roopesh Chandran
  * @since 2.3
  */
 public class VaultTransformTemplate implements VaultTransformOperations {
@@ -174,17 +174,11 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 	private static void applyTransformOptions(VaultTransformContext context, Map<String, String> request) {
 
-		if (!ObjectUtils.isEmpty(context.getTransformation())) {
-			request.put("transformation", context.getTransformation());
-		}
+		PropertyMapper mapper = PropertyMapper.get();
 
-		if (!ObjectUtils.isEmpty(context.getTweak())) {
-			request.put("tweak", Base64.getEncoder().encodeToString(context.getTweak()));
-		}
-		// NEW: pass "reference" in each item, if present
-		if (StringUtils.hasText(context.getReference())) {
-			request.put("reference", context.getReference());
-		}
+		mapper.from(context.getTransformation()).whenNotEmpty().to("transformation", request);
+		mapper.from(context.getTweak()).whenNotEmpty().as(Base64.getEncoder()::encodeToString).to("tweak", request);
+		mapper.from(context.getReference()).whenNotEmpty().to("reference", request);
 	}
 
 	private static List<VaultTransformEncodeResult> toEncodedResults(VaultResponse vaultResponse,
@@ -250,29 +244,10 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 
 		if (StringUtils.hasText(data.get("decoded_value"))) {
 
-			// 1. Read reference from Vault's response (if present).
-			String returnedRef = data.get("reference");
-
-			// 2. Build an updated context that merges the existing transformation/tweak
-			// with the newly-returned reference. If no reference is returned, keep the
-			// old one. Note:- Relying on reference from originalContext is aimed at
-			// providing a
-			// fallback strategy, if vault does not return the reference, in any
-			// circumstance.
-			VaultTransformContext originalContext = ciphertext.getContext();
-			VaultTransformContext updatedContext = VaultTransformContext.builder()
-				.transformation(originalContext.getTransformation())
-				.tweak(originalContext.getTweak())
-				.reference(returnedRef != null ? returnedRef : originalContext.getReference())
-				.build();
-
-			// 3. Attach that updated context to the newly decoded plaintext.
+			VaultTransformContext updatedContext = postProcessTransformContext(data, ciphertext.getContext());
 			TransformPlaintext decodedPlaintext = TransformPlaintext.of(data.get("decoded_value")).with(updatedContext);
 
 			return new VaultTransformDecodeResult(decodedPlaintext);
-
-			// return new VaultTransformDecodeResult(
-			// TransformPlaintext.of(data.get("decoded_value")).with(ciphertext.getContext()));
 		}
 
 		return new VaultTransformDecodeResult(TransformPlaintext.empty().with(ciphertext.getContext()));
@@ -281,22 +256,27 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 	private static TransformCiphertext toCiphertext(Map<String, ?> data, VaultTransformContext context) {
 
 		String ciphertext = (String) data.get("encoded_value");
-
-		// if Vault returns "reference" in batch_results,capturing it for co-relation.
-		String returnedRef = (String) data.get("reference");
-
-		VaultTransformContext contextToUse = context;
-		if (data.containsKey("tweak")) {
-			byte[] tweak = Base64.getDecoder().decode((String) data.get("tweak"));
-			contextToUse = VaultTransformContext.builder()
-				.transformation(context.getTransformation())
-				.tweak(tweak)
-				.reference(returnedRef != null ? returnedRef : context.getReference())
-				.build();
-		}
+		VaultTransformContext contextToUse = postProcessTransformContext(data, context);
 
 		return contextToUse.isEmpty() ? TransformCiphertext.of(ciphertext)
 				: TransformCiphertext.of(ciphertext).with(contextToUse);
+	}
+
+	private static VaultTransformContext postProcessTransformContext(Map<String, ?> data,
+			VaultTransformContext context) {
+
+		if (data.containsKey("tweak") || data.containsKey("reference")) {
+
+			PropertyMapper mapper = PropertyMapper.get();
+			VaultTransformContext.VaultTransformRequestBuilder builder = context.mutate();
+
+			mapper.from((String) data.get("tweak")).whenNotEmpty().as(Base64.getDecoder()::decode).to(builder::tweak);
+			mapper.from((String) data.get("reference")).whenNotEmpty().to(builder::reference);
+
+			return builder.build();
+		}
+
+		return context;
 	}
 
 	@SuppressWarnings("unchecked")
