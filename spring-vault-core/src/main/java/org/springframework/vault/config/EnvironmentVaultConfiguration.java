@@ -102,15 +102,6 @@ import org.springframework.web.client.RestOperations;
  * <ul>
  * <li>Vault Token: {@code vault.token}</li>
  * </ul>
- * <li>AppId authentication
- * <ul>
- * <li>AppId path: {@code vault.app-id.app-id-path} (since 2.2.1, defaults to
- * {@link AppIdAuthenticationOptions#DEFAULT_APPID_AUTHENTICATION_PATH})</li>
- * <li>AppId: {@code vault.app-id.app-id}</li>
- * <li>UserId: {@code vault.app-id.user-id}. {@literal MAC_ADDRESS} and
- * {@literal IP_ADDRESS} use {@link MacAddressUserId}, respective {@link IpAddressUserId}.
- * Any other value is used with {@link StaticUserId}.</li>
- * </ul>
  * <li>AppRole authentication
  * <ul>
  * <li>AppRole path: {@code vault.app-role.app-role-path} (since 2.2.1, defaults to
@@ -170,7 +161,6 @@ import org.springframework.web.client.RestOperations;
  * @see org.springframework.core.env.Environment
  * @see org.springframework.core.env.PropertySource
  * @see VaultEndpoint
- * @see AppIdAuthentication
  * @see AppRoleAuthentication
  * @see AwsEc2Authentication
  * @see AwsIamAuthentication
