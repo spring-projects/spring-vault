@@ -350,7 +350,7 @@ public class VaultCertificateRequest {
 
 			Assert.notNull(otherSans, "Other subject alt names must not be null");
 
-			this.otherSans = toList(uriSubjectAltNames);
+			this.otherSans = toList(otherSans);
 			return this;
 		}
 
