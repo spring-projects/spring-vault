@@ -63,7 +63,7 @@ pipeline {
 						docker.image("${p['docker.image']}").inside(p['docker.java.inside.basic']) {
 							sh 'src/test/bash/create_certificates.sh'
 							sh '/opt/vault/vault server -config=$(pwd)/src/test/bash/vault.conf &'
-							sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
+							sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/vault" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
 						}
 					}
 				}
