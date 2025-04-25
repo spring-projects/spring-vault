@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml -Pci,milestone,artifactory,release \
+MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/vault" ./mvnw -s settings.xml -Pci,milestone,artifactory,release \
       -Dartifactory.server=https://repo.spring.io \
       -Dartifactory.username=${ARTIFACTORY_USR} \
       -Dartifactory.password=${ARTIFACTORY_PSW} \
@@ -11,7 +11,7 @@ MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s setting
       -Dartifactory.build-number=${BUILD_NUMBER} \
       clean deploy -U -B
 
-MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home" ./mvnw -s settings.xml -Pdistribute \
+MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/vault" ./mvnw -s settings.xml -Pdistribute \
       -Dartifactory.server=https://repo.spring.io \
       -Dartifactory.username=${ARTIFACTORY_USR} \
       -Dartifactory.password=${ARTIFACTORY_PSW} \
