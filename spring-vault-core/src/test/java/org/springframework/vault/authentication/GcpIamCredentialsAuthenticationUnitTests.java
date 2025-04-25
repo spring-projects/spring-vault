@@ -16,6 +16,9 @@
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.time.Duration;
 import java.time.Instant;
@@ -103,7 +106,7 @@ class GcpIamCredentialsAuthenticationUnitTests {
 	}
 
 	@Test
-	void shouldLogin() {
+	void shouldLogin() throws NoSuchAlgorithmException {
 		this.serverCall = ((request, responseObserver) -> {
 			SignJwtResponse signJwtResponse = SignJwtResponse.newBuilder()
 				.setSignedJwt("my-jwt")
@@ -121,11 +124,14 @@ class GcpIamCredentialsAuthenticationUnitTests {
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
 						+ "}"));
 
-		PrivateKey privateKeyMock = mock(PrivateKey.class);
+		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
+		kpg.initialize(2048);
+		KeyPair kp = kpg.generateKeyPair();
+
 		ServiceAccountCredentials credential = (ServiceAccountCredentials) ServiceAccountCredentials.newBuilder()
 			.setClientEmail("hello@world")
 			.setProjectId("foobar")
-			.setPrivateKey(privateKeyMock)
+			.setPrivateKey(kp.getPrivate())
 			.setPrivateKeyId("key-id")
 			.setAccessToken(new AccessToken("foobar", Date.from(Instant.now().plus(1, ChronoUnit.DAYS))))
 			.build();
