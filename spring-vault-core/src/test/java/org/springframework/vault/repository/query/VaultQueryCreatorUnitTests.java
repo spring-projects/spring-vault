@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.repository.query.DefaultParameters;
 import org.springframework.data.repository.query.ParametersParameterAccessor;
+import org.springframework.data.repository.query.ParametersSource;
 import org.springframework.data.repository.query.parser.PartTree;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.vault.repository.mapping.VaultMappingContext;
@@ -191,7 +192,7 @@ class VaultQueryCreatorUnitTests {
 	VaultQuery createQuery(String methodName, String value) {
 
 		DefaultParameters defaultParameters = new DefaultParameters(
-				ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class));
+				ParametersSource.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class)));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
@@ -203,7 +204,7 @@ class VaultQueryCreatorUnitTests {
 	VaultQuery createQuery(String methodName, List<String> value) {
 
 		DefaultParameters defaultParameters = new DefaultParameters(
-				ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", List.class));
+				ParametersSource.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", List.class)));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
@@ -214,8 +215,8 @@ class VaultQueryCreatorUnitTests {
 
 	VaultQuery createQuery(String methodName, String value, String anotherValue) {
 
-		DefaultParameters defaultParameters = new DefaultParameters(
-				ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class, String.class));
+		DefaultParameters defaultParameters = new DefaultParameters(ParametersSource
+			.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class, String.class)));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,

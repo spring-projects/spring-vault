@@ -41,7 +41,7 @@
 		<netty.version>4.1.121.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>6.2.6</spring.version>
-		<spring-data-bom.version>2023.1.2</spring-data-bom.version>
+		<spring-data-bom.version>2025.0.0-RC1</spring-data-bom.version>
 		<spring-security-bom.version>6.4.5</spring-security-bom.version>
 		<reactor.version>2024.0.5</reactor.version>
 

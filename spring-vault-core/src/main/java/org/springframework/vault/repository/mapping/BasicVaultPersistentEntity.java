@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.repository.mapping;
 
+import org.springframework.data.expression.ValueExpression;
+import org.springframework.data.expression.ValueExpressionParser;
 import org.springframework.data.keyvalue.core.mapping.AnnotationBasedKeySpaceResolver;
 import org.springframework.data.keyvalue.core.mapping.BasicKeyValuePersistentEntity;
 import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
@@ -24,6 +26,7 @@ import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.LiteralExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.lang.Nullable;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -35,11 +38,11 @@ import org.springframework.util.StringUtils;
 public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity<T, VaultPersistentProperty>
 		implements VaultPersistentEntity<T> {
 
-	private static final SpelExpressionParser PARSER = new SpelExpressionParser();
+	private static final ValueExpressionParser PARSER = ValueExpressionParser.create();
 
 	private final String backend;
 
-	private final @Nullable Expression backendExpression;
+	private final @Nullable ValueExpression backendExpression;
 
 	/**
 	 * Creates new {@link BasicVaultPersistentEntity}.
@@ -86,10 +89,9 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 	 * @return
 	 */
 	@Nullable
-	private static Expression detectExpression(String potentialExpression) {
-
-		Expression expression = PARSER.parseExpression(potentialExpression, ParserContext.TEMPLATE_EXPRESSION);
-		return expression instanceof LiteralExpression ? null : expression;
+	private static ValueExpression detectExpression(String potentialExpression) {
+		ValueExpression expression = PARSER.parse(potentialExpression);
+		return expression.isLiteral() ? null : expression;
 	}
 
 	@Override
@@ -102,7 +104,8 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 		return this.backendExpression == null //
 				? this.backend //
-				: this.backendExpression.getValue(getEvaluationContext(null), String.class);
+				: ObjectUtils.nullSafeToString(this.backendExpression
+					.evaluate(getValueEvaluationContext(null, backendExpression.getExpressionDependencies())));
 	}
 
 }
