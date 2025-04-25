@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
@@ -126,6 +127,9 @@ public class KeyValueDelegate {
 			try {
 
 				mountInfo = doGetMountInfo(path);
+			}
+			catch (VaultException e) {
+				return MountInfo.unavailable();
 			}
 			catch (RuntimeException e) {
 				mountInfo = MountInfo.unavailable();

@@ -255,6 +255,10 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 		KeyValueDelegate.MountInfo mountInfo = keyValueDelegate.getMountInfo(keyspace);
 
+		if (!mountInfo.isAvailable()) {
+			throw new VaultException("Cannot determine MountInfo");
+		}
+
 		return accessors.computeIfAbsent(keyspace, it -> {
 
 			if (keyValueDelegate.isVersioned(it)) {
