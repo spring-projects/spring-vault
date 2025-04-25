@@ -20,6 +20,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.lang.Nullable;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -39,6 +42,8 @@ import org.springframework.vault.support.VaultResponse;
  * @since 2.2
  */
 public class KeyValueDelegate {
+
+	private static final Log logger = LogFactory.getLog(KeyValueDelegate.class);
 
 	private final Map<String, MountInfo> mountInfo;
 
@@ -125,13 +130,20 @@ public class KeyValueDelegate {
 
 		if (mountInfo == null) {
 			try {
-
 				mountInfo = doGetMountInfo(path);
 			}
 			catch (VaultException e) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unable to determine mount information for [%s]. Returning unavailable MountInfo: %s"
+						.formatted(path, e.getMessage()), e);
+				}
 				return MountInfo.unavailable();
 			}
 			catch (RuntimeException e) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Unable to determine mount information for [%s]. Caching unavailable MountInfo: %s"
+						.formatted(path, e.getMessage()), e);
+				}
 				mountInfo = MountInfo.unavailable();
 			}
 
