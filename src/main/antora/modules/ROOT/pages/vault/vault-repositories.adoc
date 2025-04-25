@@ -9,6 +9,8 @@ As of version 2.4, Spring Vault can use additionally key/value version 2 secrets
 
 NOTE: Deletes within versioned key/value secrets engine use the `DELETE` operation. Secrets are not destroyed through `CrudRepository.delete(…)`.
 
+NOTE: Vault Repositories determine the mount path through Vault's `sys/internal/ui/mounts/…` endpoint. Make sure that your policy allows accessing that path, otherwise you won't be able to use the repository abstraction.
+
 NOTE: Read more about Spring Data Repositories in the https://docs.spring.io/spring-data/commons/docs/current/reference/html/#repositories[Spring Data Commons reference documentation].
 The reference documentation will give you an introduction to Spring Data repositories.
 
