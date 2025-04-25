@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -62,6 +64,17 @@ class VaultCertificateRequestUnitTests {
 		assertThat(request.isExcludeCommonNameFromSubjectAltNames()).isTrue();
 		assertThat(request.getFormat()).isEqualTo("pem");
 		assertThat(request.getPrivateKeyFormat()).isEqualTo("der");
+	}
+
+	@Test
+	void shouldConsiderOtherSansList() {
+
+		VaultCertificateRequest request = VaultCertificateRequest.builder() //
+			.commonName("hello.com") //
+			.otherSans(Arrays.asList("foo", "bar")) //
+			.build();
+
+		assertThat(request.getOtherSans()).contains("foo", "bar");
 	}
 
 }
