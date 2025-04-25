@@ -12,7 +12,7 @@
 				Adds reference manual (html and pdf) to the distribution archive
 				under the 'docs/reference' directory see pom.xml 'maven-javadoc-plugin' declaration.
 			-->
-			<directory>${project.root}/target/site/reference</directory>
+			<directory>${project.root}/target/reports/reference</directory>
 			<outputDirectory>reference</outputDirectory>
 		</fileSet>
 		<fileSet>
@@ -20,7 +20,7 @@
 				Adds javadoc html to the distribution archive under the 'docs/javadoc'
 				directory see pom.xml 'maven-javadoc-plugin' declaration.
 			-->
-			<directory>${project.root}/target/site/apidocs</directory>
+			<directory>${project.root}/target/reports/apidocs</directory>
 			<outputDirectory>api</outputDirectory>
 		</fileSet>
 	</fileSets>

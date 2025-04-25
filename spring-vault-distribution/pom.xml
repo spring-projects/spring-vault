@@ -244,7 +244,7 @@
 									<configuration>
 										<target>
 											<copy todir="${project.root}/target/antora/modules/ROOT/assets/attachments/api/java">
-												<fileset dir="${project.root}/target/site/apidocs" erroronmissingdir="true" />
+												<fileset dir="${project.root}/target/reports/apidocs" erroronmissingdir="true" />
 											</copy>
 										</target>
 									</configuration>
