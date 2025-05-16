@@ -30,7 +30,7 @@
 		</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.4.4</httpclient5.version>
 		<httpcore5.version>5.3.4</httpcore5.version>
-		<jackson-databind.version>2.18.3</jackson-databind.version>
+		<jackson-databind.version>2.19.0</jackson-databind.version>
 		<jetty-reactive-httpclient.version>4.0.9</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>5.12.2</junit.version>
@@ -40,10 +40,10 @@
 		<mockito-core.version>5.17.0</mockito-core.version>
 		<netty.version>4.1.121.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<spring.version>6.2.6</spring.version>
-		<spring-data-bom.version>2025.0.0-RC1</spring-data-bom.version>
+		<spring.version>6.2.7</spring.version>
+		<spring-data-bom.version>2025.0.0</spring-data-bom.version>
 		<spring-security-bom.version>6.4.5</spring-security-bom.version>
-		<reactor.version>2024.0.5</reactor.version>
+		<reactor.version>2024.0.6</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
@@ -1024,19 +1024,5 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>spring-plugins-release</id>
-			<url>https://repo.spring.io/plugins-release</url>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<repositories>
-		<repository>
-			<id>spring-milestone</id>
-			<url>https://repo.spring.io/milestone</url>
-		</repository>
-	</repositories>
 
 </project>
