@@ -9,6 +9,7 @@ on:
   #- cron: '0 10 * * *' # Once per day at 10am UTC
   workflow_dispatch:
 permissions:
+  contents: read
   actions: write
 jobs:
   build:
