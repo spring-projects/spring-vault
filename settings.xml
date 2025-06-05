@@ -25,9 +25,9 @@
 			<password>${env.ARTIFACTORY_PSW}</password>
 		</server>
 		<server>
-			<id>sonatype-nexus-staging</id>
-			<username>${env.SONATYPE_USR}</username>
-			<password>${env.SONATYPE_PSW}</password>
+			<id>central</id>
+			<username>${env.CENTRAL_TOKEN_USERNAME}</username>
+			<password>${env.CENTRAL_TOKEN_PASSWORD}</password>
 		</server>
 	</servers>
 
