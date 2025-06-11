@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-RAW_VERSION=`MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/vault" ./mvnw \
+RAW_VERSION=`MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home -Dmaven.repo.local=/tmp/jenkins-home/.m2/spring-vault" ./mvnw \
   org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate \
   -Dexpression=project.version -q -DforceStdout`
 
