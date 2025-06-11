@@ -17,9 +17,9 @@ package org.springframework.vault.core;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
@@ -103,7 +103,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	}
 
 	@Override
-	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
+	Object getJsonNode(VaultResponseSupport<Object> response) {
 		return response.getRequiredData();
 	}
 

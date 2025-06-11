@@ -18,7 +18,6 @@ package org.springframework.vault.core;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
@@ -108,7 +107,7 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 	}
 
 	@Override
-	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
+	Object getJsonNode(VaultResponseSupport<Object> response) {
 		return response.getRequiredData();
 	}
 

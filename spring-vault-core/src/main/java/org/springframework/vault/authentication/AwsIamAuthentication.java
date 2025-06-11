@@ -23,8 +23,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
@@ -33,6 +31,7 @@ import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.regions.Region;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -40,6 +39,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
@@ -74,8 +74,6 @@ import org.springframework.web.client.RestOperations;
 public class AwsIamAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(AwsIamAuthentication.class);
-
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
 	private static final String REQUEST_BODY = "Action=GetCallerIdentity&Version=2011-06-15";
 
@@ -229,12 +227,9 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			.build();
 		SdkHttpFullRequest signedRequest = signer.sign(request, signerParams);
 
-		try {
-			return OBJECT_MAPPER.writeValueAsString(new LinkedHashMap<>(signedRequest.headers()));
-		}
-		catch (JsonProcessingException e) {
-			throw new IllegalStateException("Cannot serialize headers to JSON", e);
-		}
+		return JacksonCompat.instance()
+			.getObjectMapperAccessor()
+			.writeValueAsString(new LinkedHashMap<>(signedRequest.headers()));
 	}
 
 	private static Map<String, List<String>> createIamRequestHeaders(AwsIamAuthenticationOptions options) {

@@ -15,19 +15,18 @@
  */
 package org.springframework.vault.support;
 
-import java.io.IOException;
 import java.net.URL;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import tools.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for {@link CertificateBundle}.
@@ -160,14 +159,9 @@ class CertificateBundleUnitTests {
 
 	CertificateBundle loadCertificateBundle(String path) {
 
-		try {
-			URL resource = getClass().getClassLoader().getResource(path);
-			assertThat(resource).as("Resource " + path).isNotNull();
-			return this.OBJECT_MAPPER.readValue(resource, CertificateBundle.class);
-		}
-		catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		URL resource = getClass().getClassLoader().getResource(path);
+		assertThat(resource).as("Resource " + path).isNotNull();
+		return this.OBJECT_MAPPER.readValue(resource, CertificateBundle.class);
 	}
 
 }

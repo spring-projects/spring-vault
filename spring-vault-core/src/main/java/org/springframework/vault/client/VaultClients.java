@@ -27,8 +27,10 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
@@ -104,14 +106,14 @@ public class VaultClients {
 	 * <p>
 	 * Requires Jackson 2 for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
-	 * @see MappingJackson2HttpMessageConverter
+	 * @see JacksonJsonHttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate() {
 
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(3);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
-		messageConverters.add(new MappingJackson2HttpMessageConverter());
+		messageConverters.add(JacksonCompat.instance().createHttpMessageConverter());
 
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
 

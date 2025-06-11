@@ -25,9 +25,8 @@ import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
-import org.springframework.http.codec.json.Jackson2JsonDecoder;
-import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.util.Assert;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
@@ -112,12 +111,11 @@ public class ReactiveVaultClients {
 			CustomCodecs cc = configurer.customCodecs();
 
 			cc.register(new ByteArrayDecoder());
-			cc.register(new Jackson2JsonDecoder());
 			cc.register(StringDecoder.allMimeTypes());
 
 			cc.register(new ByteArrayEncoder());
-			cc.register(new Jackson2JsonEncoder());
 
+			JacksonCompat.instance().registerCodecs(cc::register);
 		}).build();
 
 		WebClient.Builder builder = WebClient.builder().exchangeStrategies(strategies).clientConnector(connector);

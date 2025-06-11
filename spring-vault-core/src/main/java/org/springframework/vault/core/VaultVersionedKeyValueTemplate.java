@@ -22,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
@@ -92,17 +92,25 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		String secretPath = version.isVersioned()
 				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		VersionedResponse response = this.vaultOperations
-			.doWithSession((RestOperationsCallback<@Nullable VersionedResponse>) restOperations -> {
+		Class<? extends VaultResponseSupport> responseTypeToUse;
+		if (JacksonCompat.instance().isJackson3()) {
+			responseTypeToUse = VersionedResponse.class;
+		}
+		else {
+			responseTypeToUse = VersionedJackson2Response.class;
+		}
+
+		VaultResponseSupport<VaultResponseSupport<Object>> response = this.vaultOperations
+			.doWithSession((RestOperationsCallback<@Nullable VaultResponseSupport>) restOperations -> {
 
 				try {
-					return restOperations.exchange(secretPath, HttpMethod.GET, null, VersionedResponse.class).getBody();
+					return restOperations.exchange(secretPath, HttpMethod.GET, null, responseTypeToUse).getBody();
 				}
 				catch (HttpStatusCodeException e) {
 
 					if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 						if (e.getResponseBodyAsString().contains("deletion_time")) {
-							return VaultResponses.unwrap(e.getResponseBodyAsString(), VersionedResponse.class);
+							return VaultResponses.unwrap(e.getResponseBodyAsString(), responseTypeToUse);
 						}
 
 						return null;
@@ -116,7 +124,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 			return null;
 		}
 
-		VaultResponseSupport<JsonNode> data = response.getRequiredData();
+		VaultResponseSupport<Object> data = response.getRequiredData();
 		Metadata metadata = KeyValueUtilities.getMetadata(data.getMetadata());
 
 		T body = deserialize(data.getRequiredData(), responseType);

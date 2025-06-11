@@ -15,7 +15,7 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * {@link ObjectMapper} supplier for testing holding a singleton {@link ObjectMapper}

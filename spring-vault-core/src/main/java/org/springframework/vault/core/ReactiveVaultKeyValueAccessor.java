@@ -15,13 +15,10 @@
  */
 package org.springframework.vault.core;
 
-import java.io.IOException;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
@@ -31,15 +28,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
 
-import static org.springframework.vault.core.ReactiveVaultTemplate.*;
+import static org.springframework.vault.core.ReactiveVaultTemplate.mapResponse;
 
 /**
  * Base class for {@link ReactiveVaultVersionedKeyValueTemplate} and
@@ -59,7 +56,7 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 
 	private final String path;
 
-	private final ObjectMapper mapper = new ObjectMapper();
+	private final JacksonCompat.ObjectMapperAccessor mapper;
 
 	/**
 	 * Create a new {@link ReactiveVaultKeyValueAccessor} given
@@ -74,6 +71,7 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 
 		this.reactiveVaultOperations = reactiveVaultOperations;
 		this.path = path;
+		this.mapper = JacksonCompat.instance().getObjectMapperAccessor();
 	}
 
 	@Override
@@ -103,18 +101,16 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	<I, T> Mono<T> doRead(String path, Class<I> deserializeAs,
 			BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
 
-		ParameterizedTypeReference<VaultResponseSupport<JsonNode>> ref = VaultResponses
-			.getTypeReference(JsonNode.class);
+		ParameterizedTypeReference<VaultResponseSupport<Object>> ref = VaultResponses
+			.getTypeReference(JacksonCompat.instance().getJsonNodeClass());
 
-		Mono<VaultResponseSupport<JsonNode>> response = doRead(createDataPath(path), ref);
+		Mono<VaultResponseSupport<Object>> response = doRead(createDataPath(path), ref);
 
 		return response.map(it -> {
 
-			JsonNode jsonNode = getJsonNode(it);
-			JsonNode jsonMeta = it.getRequiredData().at("/metadata");
-			it.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<>() {
-			}));
-
+			Object jsonNode = getJsonNode(it);
+			Object jsonMeta = JacksonCompat.instance().getAt(it.getRequiredData(), "/metadata");
+			it.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
 			return mappingFunction.apply(it, deserialize(jsonNode, deserializeAs));
 		});
 	}
@@ -144,19 +140,13 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	}
 
 	/**
-	 * Deserialize a {@link JsonNode} to the requested {@link Class type}.
+	 * Deserialize a {@code JsonNode} to the requested {@link Class type}.
 	 * @param jsonNode must not be {@literal null}.
 	 * @param type must not be {@literal null}.
 	 * @return the deserialized object.
 	 */
-	<T> T deserialize(JsonNode jsonNode, Class<T> type) {
-
-		try {
-			return this.mapper.reader().readValue(jsonNode.traverse(), type);
-		}
-		catch (IOException e) {
-			throw new VaultException("Cannot deserialize response", e);
-		}
+	<T> T deserialize(Object jsonNode, Class<T> type) {
+		return this.mapper.deserialize(jsonNode, type);
 	}
 
 	/**
@@ -185,11 +175,11 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	}
 
 	/**
-	 * Return the {@link JsonNode} that contains the actual response body.
+	 * Return the {@code JsonNode} that contains the actual response body.
 	 * @param response the response to extract the appropriate node from.
-	 * @return the extracted {@link JsonNode}.
+	 * @return the extracted {@code JsonNode}.
 	 */
-	abstract JsonNode getJsonNode(VaultResponseSupport<JsonNode> response);
+	abstract Object getJsonNode(VaultResponseSupport<Object> response);
 
 	/**
 	 * @param path must not be {@literal null} or empty.

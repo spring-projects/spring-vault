@@ -18,6 +18,7 @@ package org.springframework.vault.support;
 import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.Nullable;
 
@@ -34,6 +35,7 @@ import org.springframework.util.Assert;
  * @author Maciej Drozdzowski
  * @see #builder()
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultMount {
 
 	/**
@@ -42,7 +44,7 @@ public class VaultMount {
 	private final String type;
 
 	/**
-	 * Human readable description of the mount.
+	 * Human-readable description of the mount.
 	 */
 	@Nullable
 	private final String description;

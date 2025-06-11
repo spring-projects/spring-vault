@@ -13,12 +13,23 @@ If you want to use Spring Vault in your project, declare a dependency to the `sp
         <artifactId>spring-vault-core</artifactId>
         <version>{version}</version>
     </dependency>
+
+    <dependency>
+        <groupId>tools.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson-databind.version}</version>
+    </dependency>
 </dependencies>
 ----
 ====
 
 The easiest way to find compatible versions of Spring Vault dependencies is by inspecting the properties section of link:https://github.com/spring-projects/spring-vault/blob/main/pom.xml[`spring-vault-parent`].
-We generally recommend upgrading to the latest dependency of Jackson, your HTTP clients and your Cloud provider SDK.
+We generally recommend upgrading to the latest dependency of Jackson 3, your HTTP clients and your Cloud provider SDK.
+
+NOTE: Spring Vault 4.0 supports Jackson 3 and Jackson 2.
+Make sure to declare a Jackson dependency as Spring Vault does not include Jackson transitively for easier opt-in.
+When both Jackson 2 and Jackson 3 are on the classpath, Spring Vault will use Jackson 3 aligning with Spring Framework 7 preferences.
+Spring Vault also assumes the usage of Jackson 3 in the HTTP client.
 
 [[dependencies.spring-framework]]
 == Spring Framework

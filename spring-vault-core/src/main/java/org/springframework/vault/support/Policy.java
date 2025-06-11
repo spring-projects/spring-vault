@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.support;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -36,24 +33,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.databind.util.Converter;
 import org.jspecify.annotations.Nullable;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.support.Policy.PolicyDeserializer;
-import org.springframework.vault.support.Policy.PolicySerializer;
 
 /**
  * Value object representing a Vault policy associated with {@link Rule}s. Instances of
@@ -61,11 +47,13 @@ import org.springframework.vault.support.Policy.PolicySerializer;
  *
  * @author Mark Paluch
  * @see Rule
- * @see com.fasterxml.jackson.databind.ObjectMapper
+ * @see ObjectMapper
  * @since 2.0
  */
-@JsonSerialize(using = PolicySerializer.class)
-@JsonDeserialize(using = PolicyDeserializer.class)
+@JsonSerialize(using = PolicyJackson3.PolicySerializer.class)
+@JsonDeserialize(using = PolicyJackson3.PolicyDeserializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonSerialize(using = PolicyJackson2.PolicySerializer.class)
+@com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = PolicyJackson2.PolicyDeserializer.class)
 public class Policy {
 
 	private static final Policy EMPTY = new Policy(Collections.emptySet());
@@ -184,8 +172,12 @@ public class Policy {
 		 * One or more capabilities which provide fine-grained control over permitted (or
 		 * denied) operations.
 		 */
-		@JsonSerialize(contentConverter = CapabilityToStringConverter.class)
-		@JsonDeserialize(contentConverter = StringToCapabilityConverter.class)
+		@JsonSerialize(contentConverter = PolicyJackson3.CapabilityToStringConverter.class)
+		@JsonDeserialize(contentConverter = PolicyJackson3.StringToCapabilityConverter.class)
+		@com.fasterxml.jackson.databind.annotation.JsonSerialize(
+				contentConverter = PolicyJackson2.CapabilityToStringConverter.class)
+		@com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+				contentConverter = PolicyJackson2.StringToCapabilityConverter.class)
 		private final List<Capability> capabilities;
 
 		/**
@@ -194,7 +186,9 @@ public class Policy {
 		 * wrapping mandatory for a particular path.
 		 */
 		@JsonProperty("min_wrapping_ttl")
-		@JsonSerialize(converter = DurationToStringConverter.class)
+		@JsonSerialize(converter = PolicyJackson3.DurationToStringConverter.class)
+		@com.fasterxml.jackson.databind.annotation.JsonSerialize(
+				converter = PolicyJackson2.DurationToStringConverter.class)
 		@Nullable
 		private final Duration minWrappingTtl;
 
@@ -202,7 +196,9 @@ public class Policy {
 		 * The maximum allowed TTL that clients can specify for a wrapped response.
 		 */
 		@JsonProperty("max_wrapping_ttl")
-		@JsonSerialize(converter = DurationToStringConverter.class)
+		@JsonSerialize(converter = PolicyJackson3.DurationToStringConverter.class)
+		@com.fasterxml.jackson.databind.annotation.JsonSerialize(
+				converter = PolicyJackson2.DurationToStringConverter.class)
 		@Nullable
 		private final Duration maxWrappingTtl;
 
@@ -226,9 +222,11 @@ public class Policy {
 		@JsonCreator
 		private Rule(@JsonProperty("capabilities") List<Capability> capabilities,
 				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(
-						converter = StringToDurationConverter.class) Duration minWrappingTtl,
+						converter = PolicyJackson3.StringToDurationConverter.class) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+								converter = PolicyJackson2.StringToDurationConverter.class) Duration minWrappingTtl,
 				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(
-						converter = StringToDurationConverter.class) Duration maxWrappingTtl,
+						converter = PolicyJackson3.StringToDurationConverter.class) @com.fasterxml.jackson.databind.annotation.JsonDeserialize(
+								converter = PolicyJackson2.StringToDurationConverter.class) Duration maxWrappingTtl,
 				@JsonProperty("allowed_parameters") Map<String, List<String>> allowedParameters,
 				@JsonProperty("denied_parameters") Map<String, List<String>> deniedParameters) {
 
@@ -260,7 +258,7 @@ public class Policy {
 			return new RuleBuilder();
 		}
 
-		private Rule withPath(String path) {
+		Rule withPath(String path) {
 			return new Rule(path, this.capabilities, this.minWrappingTtl, this.maxWrappingTtl, this.allowedParameters,
 					this.deniedParameters);
 		}
@@ -312,7 +310,7 @@ public class Policy {
 
 			private @Nullable String path;
 
-			private Set<Capability> capabilities = new LinkedHashSet<>();
+			private final Set<Capability> capabilities = new LinkedHashSet<>();
 
 			@Nullable
 			private Duration minWrappingTtl;
@@ -320,11 +318,9 @@ public class Policy {
 			@Nullable
 			private Duration maxWrappingTtl;
 
-			private Map<String, List<String>> allowedParameters = new LinkedHashMap<String, List<String>>();
+			private final Map<String, List<String>> allowedParameters = new LinkedHashMap<>();
 
-			private Map<String, List<String>> deniedParameters = new LinkedHashMap<String, List<String>>();
-
-			;
+			private final Map<String, List<String>> deniedParameters = new LinkedHashMap<>();
 
 			/**
 			 * Associate a {@code path} with the rule.
@@ -379,9 +375,7 @@ public class Policy {
 				Assert.notNull(capabilities, "Capabilities must not be null");
 				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
 
-				for (Capability capability : capabilities) {
-					this.capabilities.add(capability);
-				}
+				this.capabilities.addAll(capabilities);
 
 				return this;
 			}
@@ -607,182 +601,6 @@ public class Policy {
 		 */
 		public static List<Capability> crudAndSudo() {
 			return Arrays.asList(CREATE, READ, UPDATE, DELETE, LIST, SUDO);
-		}
-
-	}
-
-	static class PolicySerializer extends JsonSerializer<Policy> {
-
-		@Override
-		public void serialize(Policy value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-
-			gen.writeStartObject();
-
-			gen.writeFieldName("path");
-			gen.writeStartObject();
-
-			for (Rule rule : value.getRules()) {
-				gen.writeObjectField(rule.path, rule);
-			}
-
-			gen.writeEndObject();
-			gen.writeEndObject();
-		}
-
-	}
-
-	static class PolicyDeserializer extends JsonDeserializer<Policy> {
-
-		@Override
-		public Policy deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-
-			Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
-					"Expected START_OBJECT, got: " + p.getCurrentToken());
-
-			String fieldName = p.nextFieldName();
-
-			Set<Rule> rules = new LinkedHashSet<>();
-
-			if ("path".equals(fieldName)) {
-
-				p.nextToken();
-				Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
-						"Expected START_OBJECT, got: " + p.getCurrentToken());
-
-				p.nextToken();
-
-				while (p.currentToken() == JsonToken.FIELD_NAME) {
-
-					String path = p.getCurrentName();
-					p.nextToken();
-
-					Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
-							"Expected START_OBJECT, got: " + p.getCurrentToken());
-
-					Rule rule = p.getCodec().readValue(p, Rule.class);
-					rules.add(rule.withPath(path));
-
-					JsonToken jsonToken = p.nextToken();
-					if (jsonToken == JsonToken.END_OBJECT) {
-						break;
-					}
-				}
-
-				Assert.isTrue(p.getCurrentToken() == JsonToken.END_OBJECT,
-						"Expected END_OBJECT, got: " + p.getCurrentToken());
-				p.nextToken();
-			}
-
-			Assert.isTrue(p.getCurrentToken() == JsonToken.END_OBJECT,
-					"Expected END_OBJECT, got: " + p.getCurrentToken());
-			return Policy.of(rules);
-		}
-
-	}
-
-	static class CapabilityToStringConverter implements Converter<Capability, String> {
-
-		@Override
-		public String convert(Capability value) {
-			return value.name().toLowerCase();
-		}
-
-		@Override
-		public JavaType getInputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(Capability.class);
-		}
-
-		@Override
-		public JavaType getOutputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(String.class);
-		}
-
-	}
-
-	static class StringToCapabilityConverter implements Converter<String, Capability> {
-
-		@Override
-		public Capability convert(String value) {
-
-			Capability capability = BuiltinCapabilities.find(value);
-
-			return capability != null ? capability : () -> value;
-		}
-
-		@Override
-		public JavaType getInputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(String.class);
-		}
-
-		@Override
-		public JavaType getOutputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(Capability.class);
-		}
-
-	}
-
-	static class DurationToStringConverter implements Converter<Duration, String> {
-
-		@Override
-		public String convert(Duration value) {
-			return "" + value.getSeconds();
-		}
-
-		@Override
-		public JavaType getInputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(Duration.class);
-		}
-
-		@Override
-		public JavaType getOutputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(String.class);
-		}
-
-	}
-
-	static class StringToDurationConverter implements Converter<String, Duration> {
-
-		static Pattern SECONDS = Pattern.compile("(\\d+)s");
-
-		static Pattern MINUTES = Pattern.compile("(\\d+)m");
-
-		static Pattern HOURS = Pattern.compile("(\\d+)h");
-
-		@Override
-		public Duration convert(String value) {
-
-			try {
-				return Duration.ofSeconds(Long.parseLong(value));
-			}
-			catch (NumberFormatException e) {
-
-				Matcher matcher = SECONDS.matcher(value);
-				if (matcher.matches()) {
-					return Duration.ofSeconds(Long.parseLong(matcher.group(1)));
-				}
-
-				matcher = MINUTES.matcher(value);
-				if (matcher.matches()) {
-					return Duration.ofMinutes(Long.parseLong(matcher.group(1)));
-				}
-
-				matcher = HOURS.matcher(value);
-				if (matcher.matches()) {
-					return Duration.ofHours(Long.parseLong(matcher.group(1)));
-				}
-
-				throw new IllegalArgumentException("Unsupported duration value: " + value);
-			}
-		}
-
-		@Override
-		public JavaType getInputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(String.class);
-		}
-
-		@Override
-		public JavaType getOutputType(TypeFactory typeFactory) {
-			return typeFactory.constructType(Capability.class);
 		}
 
 	}

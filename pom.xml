@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -33,7 +33,10 @@
 		</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.4.4</httpclient5.version>
 		<httpcore5.version>5.3.4</httpcore5.version>
-		<jackson-databind.version>2.19.0</jackson-databind.version>
+		<jackson-annotations.version>3.0-rc5</jackson-annotations.version>
+		<jackson-core.version>3.0.0-rc5</jackson-core.version>
+		<jackson-databind.version>3.0.0-rc5</jackson-databind.version>
+		<jackson2-databind.version>2.19.0</jackson2-databind.version>
 		<jetty-reactive-httpclient.version>4.0.9</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>5.12.2</junit.version>
@@ -44,7 +47,7 @@
 		<netty.version>4.1.121.Final</netty.version>
 		<nullaway.version>0.12.3</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<spring.version>7.0.0-M2</spring.version>
+		<spring.version>7.0.0-M5</spring.version>
 		<spring-data-bom.version>2025.1.0-M1</spring-data-bom.version>
 		<spring-security-bom.version>6.2.0</spring-security-bom.version>
 		<reactor.version>2024.0.2</reactor.version>
@@ -121,8 +124,26 @@
 
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>${jackson-annotations.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson-core.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>tools.jackson.core</groupId>
 				<artifactId>jackson-databind</artifactId>
 				<version>${jackson-databind.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson2-databind.version}</version>
 			</dependency>
 
 			<dependency>
@@ -418,7 +439,10 @@
 							<compilerArgs>
 								<arg>-XDcompilePolicy=simple</arg>
 								<arg>--should-stop=ifError=FLOW</arg>
-								<arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:CustomContractAnnotations=org.springframework.lang.Contract</arg>
+								<arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR
+									-XepOpt:NullAway:OnlyNullMarked=true
+									-XepOpt:NullAway:CustomContractAnnotations=org.springframework.lang.Contract
+								</arg>
 							</compilerArgs>
 						</configuration>
 					</execution>
@@ -809,8 +833,9 @@
 								</goals>
 								<configuration>
 									<rules>
-										<requireReleaseDeps />
-										<NoSnapshotDependenciesInDependencyManagementRule implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
+										<requireReleaseDeps/>
+										<NoSnapshotDependenciesInDependencyManagementRule
+												implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
 											<onlyWhenRelease>true</onlyWhenRelease>
 										</NoSnapshotDependenciesInDependencyManagementRule>
 									</rules>

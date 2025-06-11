@@ -17,10 +17,10 @@ package org.springframework.vault.core;
 
 import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Flux;
 
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
@@ -68,8 +68,8 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	}
 
 	@Override
-	JsonNode getJsonNode(VaultResponseSupport<JsonNode> response) {
-		return response.getRequiredData().at("/data");
+	Object getJsonNode(VaultResponseSupport<Object> response) {
+		return JacksonCompat.instance().getAt(response.getRequiredData(), "/data");
 	}
 
 	@Override

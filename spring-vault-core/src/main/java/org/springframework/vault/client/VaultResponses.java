@@ -23,16 +23,15 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 
@@ -43,10 +42,8 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 public abstract class VaultResponses {
 
-	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-	private static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
-			OBJECT_MAPPER);
+	private static final AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
+		.createHttpMessageConverter();
 
 	/**
 	 * Build a {@link VaultException} given {@link HttpStatusCodeException}.
@@ -146,20 +143,16 @@ public abstract class VaultResponses {
 
 		if (json.contains("\"errors\":")) {
 
-			try {
-				Map<String, Object> map = OBJECT_MAPPER.readValue(json.getBytes(), Map.class);
-				if (map.containsKey("errors")) {
+			Map<String, Object> map = JacksonCompat.instance()
+				.getObjectMapperAccessor()
+				.deserialize(json.getBytes(), Map.class);
+			if (map.containsKey("errors")) {
 
-					Collection<String> errors = (Collection<String>) map.get("errors");
-					if (errors.size() == 1) {
-						return errors.iterator().next();
-					}
-					return errors.toString();
+				Collection<String> errors = (Collection<String>) map.get("errors");
+				if (errors.size() == 1) {
+					return errors.iterator().next();
 				}
-
-			}
-			catch (IOException o_O) {
-				// ignore
+				return errors.toString();
 			}
 		}
 		return json;

@@ -15,15 +15,10 @@
  */
 package org.springframework.vault.core;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -31,15 +26,13 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Base class for {@link VaultVersionedKeyValueTemplate} and
@@ -57,7 +50,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	private final String path;
 
-	private final ObjectMapper mapper;
+	private final JacksonCompat.ObjectMapperAccessor mapper;
 
 	/**
 	 * Create a new {@link VaultKeyValueAccessor} given {@link VaultOperations} and the
@@ -72,7 +65,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		this.vaultOperations = vaultOperations;
 		this.path = path;
-		this.mapper = extractObjectMapper(vaultOperations);
+		this.mapper = JacksonCompat.ObjectMapperAccessor.from(vaultOperations);
 	}
 
 	@Override
@@ -102,17 +95,16 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	<I, T> @Nullable T doRead(String path, Class<I> deserializeAs,
 			BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
 
-		ParameterizedTypeReference<VaultResponseSupport<JsonNode>> ref = VaultResponses
-			.getTypeReference(JsonNode.class);
+		ParameterizedTypeReference<VaultResponseSupport<Object>> ref = VaultResponses
+			.getTypeReference(JacksonCompat.instance().getJsonNodeClass());
 
-		VaultResponseSupport<JsonNode> response = doRead(createDataPath(path), ref);
+		VaultResponseSupport<Object> response = doRead(createDataPath(path), ref);
 
 		if (response != null) {
 
-			JsonNode jsonNode = getJsonNode(response);
-			JsonNode jsonMeta = response.getRequiredData().at("/metadata");
-			response.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<>() {
-			}));
+			Object jsonNode = getJsonNode(response);
+			Object jsonMeta = JacksonCompat.instance().getAt(response.getRequiredData(), "/metadata");
+			response.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
 
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}
@@ -135,19 +127,13 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	}
 
 	/**
-	 * Deserialize a {@link JsonNode} to the requested {@link Class type}.
+	 * Deserialize a {@code JsonNode} to the requested {@link Class type}.
 	 * @param jsonNode must not be {@literal null}.
 	 * @param type must not be {@literal null}.
 	 * @return the deserialized object.
 	 */
-	<T> T deserialize(JsonNode jsonNode, Class<T> type) {
-
-		try {
-			return this.mapper.reader().readValue(jsonNode.traverse(), type);
-		}
-		catch (IOException e) {
-			throw new VaultException("Cannot deserialize response", e);
-		}
+	<T> T deserialize(Object jsonNode, Class<T> type) {
+		return this.mapper.deserialize(jsonNode, type);
 	}
 
 	/**
@@ -202,37 +188,16 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	}
 
 	/**
-	 * Return the {@link JsonNode} that contains the actual response body.
+	 * Return the {@code JsonNode} that contains the actual response body.
 	 * @param response the response to extract the appropriate node from.
-	 * @return the extracted {@link JsonNode}.
+	 * @return the extracted {@code JsonNode}.
 	 */
-	abstract JsonNode getJsonNode(VaultResponseSupport<JsonNode> response);
+	abstract Object getJsonNode(VaultResponseSupport<Object> response);
 
 	/**
 	 * @param path must not be {@literal null} or empty.
 	 * @return backend path representing the data path.
 	 */
 	abstract String createDataPath(String path);
-
-	private static ObjectMapper extractObjectMapper(VaultOperations vaultOperations) {
-
-		Optional<ObjectMapper> mapper = vaultOperations.doWithSession(operations -> {
-
-			if (operations instanceof RestTemplate template) {
-
-				Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template.getMessageConverters()
-					.stream()
-					.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
-					.map(AbstractJackson2HttpMessageConverter.class::cast) //
-					.findFirst();
-
-				return jackson2Converter.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
-			}
-
-			return Optional.empty();
-		});
-
-		return Objects.requireNonNull(mapper).orElseGet(ObjectMapper::new);
-	}
 
 }

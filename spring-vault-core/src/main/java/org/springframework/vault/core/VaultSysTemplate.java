@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.core;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -41,6 +38,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.Policy;
 import org.springframework.vault.support.VaultHealth;
 import org.springframework.vault.support.VaultInitializationRequest;
@@ -71,15 +69,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 	private static final GetMounts GET_AUTH_MOUNTS = new GetMounts("sys/auth");
 
 	private static final Health HEALTH = new Health();
-
-	private static final ObjectMapper OBJECT_MAPPER;
-
-	static {
-
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.enable(SerializationFeature.INDENT_OUTPUT);
-		OBJECT_MAPPER = mapper;
-	}
 
 	private final VaultOperations vaultOperations;
 
@@ -264,12 +253,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		String rules;
 
-		try {
-			rules = OBJECT_MAPPER.writeValueAsString(policy);
-		}
-		catch (IOException e) {
-			throw new VaultException("Cannot serialize policy to JSON", e);
-		}
+		rules = JacksonCompat.instance().getPrettyPrintObjectMapperAccessor().writeValueAsString(policy);
 
 		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
 
@@ -341,6 +325,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return body.getTopLevelMounts();
 		}
 
+		@JsonIgnoreProperties(ignoreUnknown = true)
 		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
 
 			private final Map<String, VaultMount> topLevelMounts = new HashMap<>();
@@ -399,7 +384,9 @@ public class VaultSysTemplate implements VaultSysOperations {
 			catch (RestClientResponseException responseError) {
 
 				try {
-					return OBJECT_MAPPER.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
+					return JacksonCompat.instance()
+						.getObjectMapperAccessor()
+						.deserialize(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
 				}
 				catch (Exception jsonError) {
 					throw responseError;
@@ -409,6 +396,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
 
 		private List<String> keys = new ArrayList<>();
@@ -451,6 +439,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
+	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class VaultUnsealStatusImpl implements VaultUnsealStatus {
 
 		private boolean sealed;

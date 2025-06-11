@@ -15,12 +15,15 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Value object to bind Vault HTTP PKI issue certificate API responses.
  *
  * @author Nanne Baars
  * @since 3.1
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultIssuerCertificateRequestResponse extends VaultResponseSupport<Certificate> {
 
 }

@@ -13,23 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault.support;
+package org.springframework.vault.core;
 
-import java.util.Base64;
+import com.fasterxml.jackson.databind.JsonNode;
 
-import com.fasterxml.jackson.databind.util.StdConverter;
+import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Converts Plaintext to Base64 encoded string for use with
- * {@link com.fasterxml.jackson.databind.ObjectMapper}
- *
- * @author James Luke
+ * @author Mark Paluch
  */
-public class PlaintextToBase64StringConverter extends StdConverter<Plaintext, String> {
-
-	@Override
-	public String convert(Plaintext plaintext) {
-		return Base64.getEncoder().encodeToString(plaintext.getPlaintext());
-	}
+@Deprecated(forRemoval = true)
+class VersionedJackson2Response extends VaultResponseSupport<VaultResponseSupport<JsonNode>> {
 
 }

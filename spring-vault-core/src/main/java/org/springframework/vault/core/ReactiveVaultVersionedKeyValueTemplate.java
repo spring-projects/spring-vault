@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponses;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
@@ -90,11 +90,20 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		String secretPath = version.isVersioned()
 				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
 
-		Mono<VersionedResponse> versionedResponseMono = doReadVersioned(secretPath);
+		Class<? extends VaultResponseSupport> responseTypeToUse;
+		if (JacksonCompat.instance().isJackson3()) {
+			responseTypeToUse = VersionedResponse.class;
+		}
+		else {
+			responseTypeToUse = VersionedJackson2Response.class;
+		}
+
+		Mono<VaultResponseSupport<VaultResponseSupport<Object>>> versionedResponseMono = (Mono) doReadVersioned(
+				secretPath, responseTypeToUse);
 
 		return versionedResponseMono.map(response -> {
 
-			VaultResponseSupport<JsonNode> data = response.getRequiredData();
+			VaultResponseSupport<Object> data = response.getRequiredData();
 			Metadata metadata = KeyValueUtilities.getMetadata(data.getMetadata());
 
 			T body = deserialize(data.getRequiredData(), responseType);
@@ -175,19 +184,18 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	 * @param path must not be {@literal null} or empty.
 	 * @return mapped value.
 	 */
-	<T> Mono<VersionedResponse> doReadVersioned(String path) {
+	<T> Mono<T> doReadVersioned(String path, Class<T> responseType) {
 
-		Function<ClientResponse, Mono<ResponseEntity<VersionedResponse>>> toEntity = cr -> cr
-			.toEntity(VersionedResponse.class);
-		ResponseFunction<VersionedResponse> defaults = new ResponseFunction<>(toEntity);
-		Function<ClientResponse, Mono<VersionedResponse>> responseFunction = clientResponse -> {
+		Function<ClientResponse, Mono<ResponseEntity<T>>> toEntity = cr -> cr.toEntity(responseType);
+		ResponseFunction<T> defaults = new ResponseFunction<>(toEntity);
+		Function<ClientResponse, Mono<T>> responseFunction = clientResponse -> {
 
 			if (HttpStatusUtil.isNotFound(clientResponse.statusCode())) {
 
 				return clientResponse.bodyToMono(String.class).flatMap(it -> {
 
 					if (it.contains("deletion_time")) {
-						return Mono.justOrEmpty(VaultResponses.unwrap(it, VersionedResponse.class));
+						return Mono.justOrEmpty(VaultResponses.unwrap(it, responseType));
 					}
 
 					return Mono.empty();

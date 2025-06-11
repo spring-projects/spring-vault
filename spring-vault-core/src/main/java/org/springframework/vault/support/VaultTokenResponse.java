@@ -15,11 +15,14 @@
  */
 package org.springframework.vault.support;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Value object to bind Vault HTTP Token API responses.
  *
  * @author Mark Paluch
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VaultTokenResponse extends VaultResponse {
 
 	/**
