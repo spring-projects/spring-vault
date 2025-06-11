@@ -16,6 +16,7 @@
 package org.springframework.vault.repository.core;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
@@ -23,6 +24,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.keyvalue.core.KeyValueAdapter;
+import org.springframework.data.keyvalue.core.KeyValueCallback;
 import org.springframework.data.keyvalue.core.KeyValueTemplate;
 import org.springframework.data.keyvalue.core.event.KeyValueEvent;
 import org.springframework.data.keyvalue.core.mapping.KeyValuePersistentEntity;
@@ -98,7 +100,7 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 
 		potentiallyPublishEvent(KeyValueEvent.beforeInsert(id, keyspace, objectToInsert.getClass(), objectToInsert));
 
-		T saved = execute(adapter -> {
+		T saved = executeRequired(adapter -> {
 
 			if (adapter.contains(id, keyspace)) {
 				throw new DuplicateKeyException(
@@ -124,7 +126,7 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 
 		potentiallyPublishEvent(KeyValueEvent.beforeUpdate(id, keyspace, objectToUpdate.getClass(), objectToUpdate));
 
-		T updated = execute(adapter -> (T) adapter.put(id, objectToUpdate, keyspace));
+		T updated = executeRequired(adapter -> (T) adapter.put(id, objectToUpdate, keyspace));
 
 		potentiallyPublishEvent(
 				KeyValueEvent.afterUpdate(id, keyspace, objectToUpdate.getClass(), objectToUpdate, updated));
@@ -134,18 +136,18 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T delete(T objectToDelete) {
+	public <T> @Nullable T delete(T objectToDelete) {
 
 		Class<T> type = (Class<T>) ClassUtils.getUserClass(objectToDelete);
 		KeyValuePersistentEntity<?, ?> entity = getEntity(type);
 
-		Object id = entity.getIdentifierAccessor(objectToDelete).getIdentifier();
+		Object id = Objects.requireNonNull(entity.getIdentifierAccessor(objectToDelete).getIdentifier());
 
 		String keyspace = resolveKeySpace(type);
 
 		potentiallyPublishEvent(KeyValueEvent.beforeDelete(id, keyspace, type));
 
-		T result = execute(adapter -> ((VaultKeyValueAdapter) adapter).deleteEntity(objectToDelete, keyspace));
+		T result = executeRequired(adapter -> ((VaultKeyValueAdapter) adapter).deleteEntity(objectToDelete, keyspace));
 
 		potentiallyPublishEvent(KeyValueEvent.afterDelete(id, keyspace, type, result));
 
@@ -160,7 +162,7 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	private String resolveKeySpace(Class<?> type) {
 
 		KeyValuePersistentEntity<?, ?> entity = getEntity(type);
-		return entity.getKeySpace();
+		return Objects.requireNonNull(entity.getKeySpace());
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -181,11 +183,11 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 	}
 
 	public VaultConverter getConverter() {
-		return execute(adapter -> ((VaultKeyValueAdapter) adapter).getConverter());
+		return executeRequired(adapter -> ((VaultKeyValueAdapter) adapter).getConverter());
 	}
 
 	public VaultOperations getVaultOperations() {
-		return execute(adapter -> ((VaultKeyValueAdapter) adapter).getVaultOperations());
+		return executeRequired(adapter -> ((VaultKeyValueAdapter) adapter).getVaultOperations());
 	}
 
 }

@@ -48,7 +48,7 @@
 		<nullaway.version>0.12.3</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.0-M5</spring.version>
-		<spring-data-bom.version>2025.1.0-M1</spring-data-bom.version>
+		<spring-data-bom.version>2025.1.0-M3</spring-data-bom.version>
 		<spring-security-bom.version>6.2.0</spring-security-bom.version>
 		<reactor.version>2025.0.0-M4</reactor.version>
 

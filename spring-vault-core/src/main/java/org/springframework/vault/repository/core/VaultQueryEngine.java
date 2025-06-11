@@ -121,7 +121,7 @@ class VaultQueryEngine extends QueryEngine<VaultKeyValueAdapter, VaultQuery, Com
 		INSTANCE;
 
 		@Override
-		public VaultQuery resolve(KeyValueQuery<?> query) {
+		public @Nullable VaultQuery resolve(KeyValueQuery<?> query) {
 			return (VaultQuery) query.getCriteria();
 		}
 

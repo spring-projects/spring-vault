@@ -151,7 +151,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	}
 
 	@Override
-	public Iterable<?> getAllOf(String keyspace) {
+	public Iterable<Object> getAllOf(String keyspace) {
 
 		List<String> list = doList(keyspace);
 		List<Object> items = new ArrayList<>(list.size());
@@ -173,7 +173,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		List<String> list = doList(keyspace);
 		Iterator<String> iterator = list.iterator();
 
-		return new CloseableIterator<Entry<Object, Object>>() {
+		return new CloseableIterator<>() {
 			@Override
 			public void close() {
 
@@ -189,7 +189,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 				final String key = iterator.next();
 
-				return new Entry<Object, Object>() {
+				return new Entry<>() {
 					@Override
 					public Object getKey() {
 						return key;

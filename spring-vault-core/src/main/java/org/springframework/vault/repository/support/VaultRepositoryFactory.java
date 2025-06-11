@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.repository.support;
 
+import java.util.Objects;
+
 import org.springframework.data.keyvalue.core.KeyValueOperations;
 import org.springframework.data.keyvalue.repository.query.KeyValuePartTreeQuery;
 import org.springframework.data.keyvalue.repository.support.KeyValueRepositoryFactory;
@@ -72,7 +74,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 				.getRequiredPersistentEntity(metadata.getDomainType());
 			EntityInformation<?, String> entityInformation = getEntityInformation(metadata.getDomainType());
 			VaultRevisionRepository<?> repository = new VaultRevisionRepository<>(entityInformation,
-					entity.getKeySpace(), template);
+					Objects.requireNonNull(entity.getKeySpace()), template);
 
 			return fragments.append(RepositoryFragment.implemented(repository));
 		}

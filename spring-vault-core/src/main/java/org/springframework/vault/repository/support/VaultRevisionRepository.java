@@ -107,6 +107,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 		return Revisions.of(collectRevisions(id, metadata.getVersions()));
 	}
 
+	@SuppressWarnings("NullAway")
 	private List<Revision<Integer, T>> collectRevisions(String id, List<Versioned.Metadata> versions) {
 
 		List<Revision<Integer, T>> revisions = new ArrayList<>();
@@ -121,6 +122,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 
 			T entity = versioned.hasData() ? converter.read(this.metadata.getJavaType(), createDocument(id, versioned))
 					: null;
+
 			revisions.add(Revision.of(new VaultRevisionMetadata(versioned), entity));
 		}
 		return revisions;
@@ -157,6 +159,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 		return toRevision(operations.get(getPath(id), Versioned.Version.from(revisionNumber)), id);
 	}
 
+	@SuppressWarnings("NullAway")
 	private Optional<Revision<Integer, T>> toRevision(@Nullable Versioned<Map<String, Object>> versioned, String id) {
 
 		if (versioned == null) {

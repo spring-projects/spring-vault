@@ -22,6 +22,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.keyvalue.core.query.KeyValueQuery;
@@ -152,7 +154,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 	}
 
 	@Override
-	protected KeyValueQuery<VaultQuery> complete(VaultQuery vaultQuery, Sort sort) {
+	protected KeyValueQuery<VaultQuery> complete(@Nullable VaultQuery vaultQuery, Sort sort) {
 
 		KeyValueQuery<VaultQuery> query = new KeyValueQuery<>(vaultQuery);
 
