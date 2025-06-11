@@ -60,10 +60,10 @@ pipeline {
 			steps {
 				script {
 					docker.withRegistry(p['docker.proxy.registry'], p['docker.proxy.credentials']) {
-						docker.image("${p['docker.image']}").inside(p['docker.java.inside.basic']) {
+						docker.image("${p['docker.image']}").inside(p['docker.java.inside.docker']) {
 							sh 'src/test/bash/create_certificates.sh'
 							sh '/opt/vault/vault server -config=$(pwd)/src/test/bash/vault.conf &'
-							sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/vault" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
+							sh 'MAVEN_OPTS="-Duser.name=jenkins -Duser.home=/tmp/jenkins-home -Dmaven.repo.local=/tmp/jenkins-home/.m2/spring-vault" ./mvnw -s settings.xml clean dependency:list verify -Dsort -U -B'
 						}
 					}
 				}
@@ -81,7 +81,7 @@ pipeline {
 			agent {
 				docker {
 					image "${p['docker.image']}"
-					args "${p['docker.java.inside.basic']}"
+					args "${p['docker.java.inside.docker']}"
 					registryUrl "${p['docker.proxy.registry']}"
 					registryCredentialsId "${p['docker.proxy.credentials']}"
 				}
