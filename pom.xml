@@ -44,13 +44,13 @@
 		<kotlin-coroutines.version>1.10.1</kotlin-coroutines.version>
 		<mockk.version>1.13.17</mockk.version>
 		<mockito-core.version>5.17.0</mockito-core.version>
-		<netty.version>4.1.121.Final</netty.version>
+		<netty.version>4.2.1.Final</netty.version>
 		<nullaway.version>0.12.3</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.0-M5</spring.version>
 		<spring-data-bom.version>2025.1.0-M1</spring-data-bom.version>
 		<spring-security-bom.version>6.2.0</spring-security-bom.version>
-		<reactor.version>2024.0.2</reactor.version>
+		<reactor.version>2025.0.0-M4</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
