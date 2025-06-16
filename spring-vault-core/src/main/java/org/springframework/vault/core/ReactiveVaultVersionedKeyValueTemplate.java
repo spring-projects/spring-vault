@@ -85,6 +85,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		return doRead(path, version, responseType);
 	}
 
+	@SuppressWarnings("removal")
 	private <T> Mono<Versioned<T>> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()

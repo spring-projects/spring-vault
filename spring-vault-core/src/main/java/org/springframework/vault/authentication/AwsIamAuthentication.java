@@ -28,10 +28,12 @@ import org.apache.commons.logging.LogFactory;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.signer.Aws4Signer;
 import software.amazon.awssdk.auth.signer.params.Aws4SignerParams;
+import software.amazon.awssdk.http.ContentStreamProvider;
 import software.amazon.awssdk.http.SdkHttpFullRequest;
 import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
+import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
 import software.amazon.awssdk.regions.Region;
-import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -212,24 +214,25 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 		Map<String, List<String>> headers = createIamRequestHeaders(options);
 
+		ContentStreamProvider contentStreamProvider = () -> new ByteArrayInputStream(REQUEST_BODY.getBytes());
 		SdkHttpFullRequest.Builder builder = SdkHttpFullRequest.builder()
-			.contentStreamProvider(() -> new ByteArrayInputStream(REQUEST_BODY.getBytes()))
+			.contentStreamProvider(contentStreamProvider)
 			.headers(headers)
 			.method(SdkHttpMethod.POST)
 			.uri(options.getEndpointUri());
-		SdkHttpFullRequest request = builder.build();
 
-		Aws4Signer signer = Aws4Signer.create();
-		Aws4SignerParams signerParams = Aws4SignerParams.builder()
-			.awsCredentials(credentials)
-			.signingName("sts")
-			.signingRegion(region)
-			.build();
-		SdkHttpFullRequest signedRequest = signer.sign(request, signerParams);
+		SdkHttpFullRequest request = builder.build();
+		AwsV4HttpSigner signer = AwsV4HttpSigner.create();
+
+		SignedRequest signedRequest = signer.sign(r -> r.identity(credentials)
+			.request(request)
+			.payload(contentStreamProvider)
+			.putProperty(AwsV4HttpSigner.SERVICE_SIGNING_NAME, "sts")
+			.putProperty(AwsV4HttpSigner.REGION_NAME, region.id()));
 
 		return JacksonCompat.instance()
 			.getObjectMapperAccessor()
-			.writeValueAsString(new LinkedHashMap<>(signedRequest.headers()));
+			.writeValueAsString(new LinkedHashMap<>(signedRequest.request().headers()));
 	}
 
 	private static Map<String, List<String>> createIamRequestHeaders(AwsIamAuthenticationOptions options) {

@@ -15,21 +15,9 @@
  */
 package org.springframework.vault.client;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.KeyManagerFactorySpi;
-import javax.net.ssl.ManagerFactoryParameters;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.net.ssl.X509TrustManager;
-
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
-import java.security.KeyStore;
 
 import javax.net.ssl.SSLContext;
 
@@ -40,9 +28,10 @@ import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.HttpsSupport;
-import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.reactor.ssl.SSLBufferMode;
 import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -54,12 +43,8 @@ import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.support.SslConfiguration.KeyConfiguration;
-
-import static org.springframework.vault.client.ClientConfiguration.*;
 
 /**
  * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
@@ -210,9 +195,9 @@ public class ClientHttpRequestFactoryFactory {
 					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
 				}
 
-				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
-						enabledProtocols, enabledCipherSuites, HttpsSupport.getDefaultHostnameVerifier());
-				connectionManagerBuilder.setSSLSocketFactory(sslSocketFactory);
+				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext, enabledProtocols,
+						enabledCipherSuites, SSLBufferMode.STATIC, HttpsSupport.getDefaultHostnameVerifier());
+				connectionManagerBuilder.setTlsSocketStrategy(tlsStrategy);
 			}
 
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);

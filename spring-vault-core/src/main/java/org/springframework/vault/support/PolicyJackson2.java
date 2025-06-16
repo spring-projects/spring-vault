@@ -85,7 +85,7 @@ class PolicyJackson2 {
 
 				while (p.currentToken() == JsonToken.FIELD_NAME) {
 
-					String path = p.getCurrentName();
+					String path = p.currentName();
 					p.nextToken();
 
 					Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,

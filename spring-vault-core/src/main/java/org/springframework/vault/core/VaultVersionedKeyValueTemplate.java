@@ -86,7 +86,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 	}
 
 	@Nullable
-	@SuppressWarnings("NullAway")
+	@SuppressWarnings({ "NullAway", "removal" })
 	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 
 		String secretPath = version.isVersioned()
