@@ -31,7 +31,7 @@
 		<google-cloud-iamcredentials.version>2.60.0</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>1.33.1
 		</google-auth-library-oauth2-http.version>
-		<httpclient5.version>5.4.4</httpclient5.version>
+		<httpclient5.version>5.5</httpclient5.version>
 		<httpcore5.version>5.3.4</httpcore5.version>
 		<jackson-annotations.version>3.0-rc5</jackson-annotations.version>
 		<jackson-core.version>3.0.0-rc5</jackson-core.version>
@@ -40,8 +40,8 @@
 		<jetty-reactive-httpclient.version>4.0.9</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>5.12.2</junit.version>
-		<kotlin.version>2.1.20-Beta2</kotlin.version>
-		<kotlin-coroutines.version>1.10.1</kotlin-coroutines.version>
+		<kotlin.version>2.2.0-RC2</kotlin.version>
+		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
 		<mockk.version>1.13.17</mockk.version>
 		<mockito-core.version>5.17.0</mockito-core.version>
 		<netty.version>4.2.1.Final</netty.version>
@@ -367,8 +367,8 @@
 				<artifactId>kotlin-maven-plugin</artifactId>
 				<version>${kotlin.version}</version>
 				<configuration>
-					<apiVersion>1.7</apiVersion>
-					<languageVersion>1.7</languageVersion>
+					<apiVersion>2.1</apiVersion>
+					<languageVersion>2.1</languageVersion>
 				</configuration>
 				<executions>
 					<execution>
