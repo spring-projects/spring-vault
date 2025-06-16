@@ -80,6 +80,7 @@ pipeline {
 			}
 			agent {
 				docker {
+					label 'data'
 					image "${p['docker.image']}"
 					args "${p['docker.java.inside.docker']}"
 					registryUrl "${p['docker.proxy.registry']}"
@@ -90,7 +91,7 @@ pipeline {
 
 			environment {
 				ARTIFACTORY = credentials("${p['artifactory.credentials']}")
-				SONATYPE = credentials('oss-s01-token')
+				CENTRAL_TOKEN = credentials('central-token')
 				KEYRING = credentials('spring-signing-secring.gpg')
 				PASSPHRASE = credentials('spring-gpg-passphrase')
 			}
