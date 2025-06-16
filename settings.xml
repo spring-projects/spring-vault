@@ -26,8 +26,8 @@
 		</server>
 		<server>
 			<id>central</id>
-			<username>${env.CENTRAL_TOKEN_USERNAME}</username>
-			<password>${env.CENTRAL_TOKEN_PASSWORD}</password>
+			<username>${env.CENTRAL_TOKEN_USR}</username>
+			<password>${env.CENTRAL_TOKEN_PSW}</password>
 		</server>
 	</servers>
 
