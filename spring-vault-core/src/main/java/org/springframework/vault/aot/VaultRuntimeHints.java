@@ -48,9 +48,8 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
 
 		ReflectionHints reflection = hints.reflection();
-		MemberCategory[] dataObjectCategories = new MemberCategory[] { MemberCategory.DECLARED_FIELDS,
-				MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
-				MemberCategory.INTROSPECT_DECLARED_CONSTRUCTORS, MemberCategory.INTROSPECT_DECLARED_METHODS };
+		MemberCategory[] dataObjectCategories = new MemberCategory[] { MemberCategory.ACCESS_DECLARED_FIELDS,
+				MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
 		try {
 			Resource[] resources = resolver.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
 					+ ClassUtils.convertClassNameToResourcePath("org.springframework.vault.support") + "/*.class");
