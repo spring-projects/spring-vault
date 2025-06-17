@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -32,6 +33,11 @@ import org.springframework.web.client.RestClientException;
  * {@link VaultOperations} allows execution of callback methods. Callbacks can execute
  * requests within a {@link #doWithSession(RestOperationsCallback) session context} and
  * the {@link #doWithVault(RestOperationsCallback) without a session}.
+ * <p>
+ * Paths used in this interface (and interfaces accessible from here) are considered
+ * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
+ * to access Vault cluster members in an authenticated context. To prevent unwanted full
+ * URI access, make sure to sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author Lauren Voswinkel

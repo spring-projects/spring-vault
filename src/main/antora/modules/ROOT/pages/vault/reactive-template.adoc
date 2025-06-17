@@ -47,6 +47,11 @@ the use of the Vault API and javadoc:org.springframework.vault.core.ReactiveVaul
 the two APIs is that javadoc:org.springframework.vault.core.ReactiveVaultOperations[] can be passed domain objects instead of
 JSON Key-Value pairs.
 
+Paths used in `ReactiveVaultTemplate` (and interfaces accessible from there) are considered
+relative to the `VaultEndpoint`. Paths that are fully-qualified URI's can be used
+to access Vault cluster members in an authenticated context. To prevent unwanted
+full URI access, make sure to sanitize paths before passing them to `ReactiveVaultTemplate`.
+
 NOTE: The preferred way to reference the operations on javadoc:org.springframework.vault.core.ReactiveVaultTemplate[] instance
 is via its interface javadoc:org.springframework.vault.core.ReactiveVaultOperations[].
 
