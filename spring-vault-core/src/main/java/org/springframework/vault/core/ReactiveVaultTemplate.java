@@ -54,7 +54,18 @@ import static org.springframework.web.reactive.function.client.ExchangeFilterFun
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
- * into Vault on initialization and use the token throughout the whole lifetime.
+ * into Vault on initialization and use the token throughout the whole lifetime. This is
+ * the main entry point to interact with Vault in an authenticated and unauthenticated
+ * context.
+ * <p>
+ * {@link ReactiveVaultTemplate} allows execution of callback methods. Callbacks can
+ * execute requests within a {@link #doWithSession(Function) session context} and the
+ * {@link #doWithVault(Function) without a session}.
+ * <p>
+ * Paths used in this interface (and interfaces accessible from here) are considered
+ * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
+ * to access Vault cluster members in an authenticated context. To prevent unwanted full
+ * URI access, make sure to sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author Raoof Mohammed

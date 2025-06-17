@@ -23,6 +23,11 @@ the use of the Vault API and `VaultOperations`. A major difference in between
 the two APIs is that `VaultOperations` can be passed domain objects instead of
 JSON Key-Value pairs.
 
+Paths used in `VaultTemplate` (and interfaces accessible from there) are considered
+relative to the `VaultEndpoint`. Paths that are fully-qualified URI's can be used
+to access Vault cluster members in an authenticated context. To prevent unwanted
+full URI access, make sure to sanitize paths before passing them to `VaultTemplate`.
+
 NOTE: The preferred way to reference the operations on javadoc:org.springframework.vault.core.VaultTemplate[] instance
 is via its interface javadoc:org.springframework.vault.core.VaultOperations[].
 

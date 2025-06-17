@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,6 +40,11 @@ import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
  * {@link ReactiveVaultOperations} allows execution of callback methods. Callbacks can
  * execute requests within a {@link #doWithSession(Function) session context} and the
  * {@link #doWithVault(Function) without a session}.
+ * <p>
+ * Paths used in this interface (and interfaces accessible from here) are considered
+ * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
+ * to access Vault cluster members in an authenticated context. To prevent unwanted full
+ * URI access, make sure to sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author James Luke
