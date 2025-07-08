@@ -115,7 +115,6 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	 */
 	public LeaseAwareVaultPropertySource(String name, SecretLeaseContainer secretLeaseContainer,
 			RequestedSecret requestedSecret, PropertyTransformer propertyTransformer) {
-
 		this(name, secretLeaseContainer, requestedSecret, propertyTransformer, true);
 	}
 
@@ -138,8 +137,8 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 
 		super(name);
 
-		Assert.notNull(secretLeaseContainer, "Path name must contain at least one character");
-		Assert.notNull(requestedSecret, "SecretLeaseContainer must not be null");
+		Assert.notNull(secretLeaseContainer, "SecretLeaseContainer must not be null");
+		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
 		Assert.notNull(propertyTransformer, "PropertyTransformer must not be null");
 
 		this.secretLeaseContainer = secretLeaseContainer;
