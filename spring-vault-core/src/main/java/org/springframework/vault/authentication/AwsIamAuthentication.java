@@ -50,7 +50,7 @@ import org.springframework.web.client.RestOperations;
 /**
  * AWS IAM authentication using signed HTTP requests to query the current identity.
  * <p>
- * AWS IAM authentication creates a {@link Aws4Signer signed} HTTP request that is
+ * AWS IAM authentication creates a {@link AwsV4HttpSigner signed} HTTP request that is
  * executed by Vault to get the identity of the signer using AWS STS
  * {@literal GetCallerIdentity}. A signature requires
  * {@link software.amazon.awssdk.auth.credentials.AwsCredentials} to calculate the
