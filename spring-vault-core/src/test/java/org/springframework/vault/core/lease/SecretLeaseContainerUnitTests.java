@@ -32,6 +32,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.TaskScheduler;
@@ -51,6 +53,7 @@ import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
@@ -67,6 +70,7 @@ import static org.mockito.Mockito.*;
  * @author Thomas Kåsene
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class SecretLeaseContainerUnitTests {
 
 	@Mock
@@ -97,6 +101,12 @@ class SecretLeaseContainerUnitTests {
 		this.secretLeaseContainer.addLeaseListener(this.leaseListenerAdapter);
 		this.secretLeaseContainer.addErrorListener(this.leaseListenerAdapter);
 		this.secretLeaseContainer.afterPropertiesSet();
+
+		VaultResponse mountInfo = new VaultResponse();
+		Map<String, Object> data = Map.of("path", "data", "options", Map.of("version", "1"));
+		mountInfo.setData(data);
+
+		when(vaultOperations.read("sys/internal/ui/mounts/my-secret")).thenReturn(mountInfo);
 	}
 
 	@Test

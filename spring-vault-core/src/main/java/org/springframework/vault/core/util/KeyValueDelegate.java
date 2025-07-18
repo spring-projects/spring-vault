@@ -22,14 +22,16 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.jspecify.annotations.Nullable;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
+import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Key-Value utility to retrieve secrets from a versioned key-value backend. For internal
@@ -132,19 +134,22 @@ public class KeyValueDelegate {
 			try {
 				mountInfo = doGetMountInfo(path);
 			}
-			catch (VaultException e) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Unable to determine mount information for [%s]. Returning unavailable MountInfo: %s"
-						.formatted(path, e.getMessage()), e);
-				}
-				return MountInfo.unavailable();
-			}
 			catch (RuntimeException e) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("Unable to determine mount information for [%s]. Caching unavailable MountInfo: %s"
-						.formatted(path, e.getMessage()), e);
+
+				if (e.getCause() instanceof RestClientResponseException rcx
+						&& rcx.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
+
+					if (logger.isDebugEnabled()) {
+						logger
+							.debug("Unable to determine mount information for [%s]. Returning unavailable MountInfo: %s"
+								.formatted(path, e.getMessage()), e);
+					}
+
+					return MountInfo.unavailable();
 				}
-				mountInfo = MountInfo.unavailable();
+
+				throw new VaultException(
+						"Cannot determine MountInfo for path '%s' using 'sys/internal/ui/mounts'".formatted(path), e);
 			}
 
 			this.mountInfo.put(path, mountInfo);

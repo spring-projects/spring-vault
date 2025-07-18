@@ -19,10 +19,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultTemplate;
@@ -38,16 +41,26 @@ import static org.mockito.Mockito.*;
  * @author Mark Paluch
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class VaultPropertySourceUnitTests {
 
 	@Mock
 	VaultTemplate vaultTemplate;
 
+	@BeforeEach
+	void setUp() {
+
+		VaultResponse mountInfo = new VaultResponse();
+		Map<String, Object> data = Map.of("path", "data", "options", Map.of("version", "1"));
+		mountInfo.setData(data);
+
+		when(vaultTemplate.read("sys/internal/ui/mounts/my-secret")).thenReturn(mountInfo);
+	}
+
 	@Test
 	void shouldRejectEmptyPath() {
 		assertThatIllegalArgumentException()
 			.isThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
-
 	}
 
 	@Test

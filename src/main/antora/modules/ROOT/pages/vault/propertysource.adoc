@@ -10,6 +10,8 @@ NOTE: You can reference properties stored inside Vault in other property sources
 NOTE: Spring Boot/Spring Cloud users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault]'s
 configuration integration that initializes various property sources during application startup.
 
+NOTE: Vault determines the mount path through Vault's `sys/internal/ui/mounts/…` endpoint. Make sure that your policy allows accessing that path, otherwise you won't be able to use  Vault Property sources.
+
 == Registering `VaultPropertySource`
 
 Spring Vault provides a javadoc:org.springframework.vault.core.env.VaultPropertySource[] to be used with Vault to obtain
