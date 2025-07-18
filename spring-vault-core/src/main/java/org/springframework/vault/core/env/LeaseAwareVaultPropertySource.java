@@ -18,6 +18,7 @@ package org.springframework.vault.core.env;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -220,7 +221,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	 */
 	protected void handleLeaseEvent(SecretLeaseEvent leaseEvent, Map<String, Object> properties) {
 
-		if (leaseEvent.getSource() != getRequestedSecret()) {
+		if (!Objects.equals(leaseEvent.getSource(), getRequestedSecret())) {
 			return;
 		}
 
@@ -256,7 +257,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 	 */
 	protected void handleLeaseErrorEvent(SecretLeaseEvent leaseEvent, Exception exception) {
 
-		if (leaseEvent.getSource() != getRequestedSecret()) {
+		if (!Objects.equals(leaseEvent.getSource(), getRequestedSecret())) {
 			return;
 		}
 
