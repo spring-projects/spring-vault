@@ -272,7 +272,6 @@ public abstract class JacksonCompat {
 		static final Jackson3 INSTANCE = new Jackson3();
 
 		static final tools.jackson.databind.json.JsonMapper JSON_MAPPER = JsonMapper.builder().build();
-		static final tools.jackson.databind.ObjectMapper OBJECT_MAPPER = new tools.jackson.databind.ObjectMapper();
 		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
 			.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
 			.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
@@ -310,7 +309,7 @@ public abstract class JacksonCompat {
 
 		@Override
 		public ObjectMapperAccessor getObjectMapperAccessor() {
-			return new Jackson3.Jackson3ObjectMapperAccessor(OBJECT_MAPPER);
+			return new Jackson3.Jackson3ObjectMapperAccessor(JSON_MAPPER);
 		}
 
 		@Override
