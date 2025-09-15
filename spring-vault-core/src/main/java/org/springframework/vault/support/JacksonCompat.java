@@ -271,6 +271,7 @@ public abstract class JacksonCompat {
 
 		static final Jackson3 INSTANCE = new Jackson3();
 
+		static final tools.jackson.databind.json.JsonMapper JSON_MAPPER = JsonMapper.builder().build();
 		static final tools.jackson.databind.ObjectMapper OBJECT_MAPPER = new tools.jackson.databind.ObjectMapper();
 		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
 			.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
@@ -279,7 +280,7 @@ public abstract class JacksonCompat {
 		static final Jackson3ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
 
-		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(OBJECT_MAPPER);
+		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(JSON_MAPPER);
 
 		public static boolean isAvailable() {
 			return JACKSON_3_JSON_NODE != null;
@@ -293,8 +294,8 @@ public abstract class JacksonCompat {
 		@Override
 		public void registerCodecs(Consumer<Object> messageConverters) {
 
-			messageConverters.accept(new JacksonJsonDecoder(OBJECT_MAPPER));
-			messageConverters.accept(new JacksonJsonEncoder(OBJECT_MAPPER));
+			messageConverters.accept(new JacksonJsonDecoder(JSON_MAPPER));
+			messageConverters.accept(new JacksonJsonEncoder(JSON_MAPPER));
 		}
 
 		@Override
@@ -324,7 +325,7 @@ public abstract class JacksonCompat {
 				.map(AbstractJacksonHttpMessageConverter.class::cast) //
 				.findFirst();
 
-			return jackson3Converter.map(AbstractJacksonHttpMessageConverter::getObjectMapper)
+			return jackson3Converter.map(AbstractJacksonHttpMessageConverter::getMapper)
 				.map(Jackson3.Jackson3ObjectMapperAccessor::new)
 				.orElse(null);
 		}
