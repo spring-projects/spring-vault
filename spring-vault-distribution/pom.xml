@@ -89,6 +89,9 @@
 												<replaceregex pattern="([\d]+\.[\d]+)(\..*)" replace="\1" />
 											</filterchain>
 										</loadresource>
+										<tstamp>
+											<format pattern="yyyy" property="current.year"/>
+										</tstamp>
 									</target>
 									<exportAntProperties>true</exportAntProperties>
 								</configuration>
