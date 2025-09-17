@@ -64,15 +64,13 @@ public class AwsIamAuthenticationOptions {
 	 * specified, the friendly name (i.e., role name or username) of the IAM principal
 	 * authenticated. If a matching role is not found, login fails.
 	 */
-	@Nullable
-	private final String role;
+	private final @Nullable String role;
 
 	/**
 	 * Server name to mitigate risk of replay attacks, preferably set to Vault server's
 	 * DNS name. Used for {@literal Vault-AWS-IAM-Server-ID} header.
 	 */
-	@Nullable
-	private final String serverId;
+	private final @Nullable String serverId;
 
 	/**
 	 * STS server URI.
@@ -123,8 +121,7 @@ public class AwsIamAuthenticationOptions {
 	/**
 	 * @return the role, may be {@literal null} if none.
 	 */
-	@Nullable
-	public String getRole() {
+	public @Nullable String getRole() {
 		return this.role;
 	}
 
@@ -134,8 +131,7 @@ public class AwsIamAuthenticationOptions {
 	 * {@literal Vault-AWS-IAM-Server-ID} header.
 	 * @since 2.0
 	 */
-	@Nullable
-	public String getServerId() {
+	public @Nullable String getServerId() {
 		return this.serverId;
 	}
 
@@ -153,16 +149,13 @@ public class AwsIamAuthenticationOptions {
 
 		private String path = DEFAULT_AWS_AUTHENTICATION_PATH;
 
-		@Nullable
-		private AwsCredentialsProvider credentialsProvider;
+		private @Nullable AwsCredentialsProvider credentialsProvider;
 
 		private AwsRegionProvider regionProvider = DefaultAwsRegionProviderChain.builder().build();
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private String serverId;
+		private @Nullable String serverId;
 
 		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
 

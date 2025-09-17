@@ -66,8 +66,7 @@ public class VaultMetadataRequest {
 		return this.casRequired;
 	}
 
-	@Nullable
-	public Map<String, String> getCustomMetadata() {
+	public @Nullable Map<String, String> getCustomMetadata() {
 		return this.customMetadata;
 	}
 
@@ -90,11 +89,9 @@ public class VaultMetadataRequest {
 
 		private boolean casRequired;
 
-		@Nullable
-		private Map<String, String> customMetadata;
+		private @Nullable Map<String, String> customMetadata;
 
-		@Nullable
-		private Duration deleteVersionAfter;
+		private @Nullable Duration deleteVersionAfter;
 
 		private int maxVersions;
 

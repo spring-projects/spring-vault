@@ -93,8 +93,7 @@ public class GcpComputeAuthenticationOptions {
 
 		private String path = DEFAULT_GCP_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
 		private String serviceAccount = "default";
 

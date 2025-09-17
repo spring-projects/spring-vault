@@ -65,8 +65,7 @@ public class VaultTransformDecodeResult extends AbstractResult<TransformPlaintex
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
-	@Nullable
-	public String getAsString() {
+	public @Nullable String getAsString() {
 
 		TransformPlaintext plaintext = get();
 		return plaintext == null ? null : plaintext.asString();

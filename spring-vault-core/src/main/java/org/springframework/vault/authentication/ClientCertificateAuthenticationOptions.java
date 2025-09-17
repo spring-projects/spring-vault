@@ -44,8 +44,7 @@ public class ClientCertificateAuthenticationOptions {
 	/**
 	 * Named certificate role to authenticate against. Can be {@literal null}.
 	 */
-	@Nullable
-	private final String role;
+	private final @Nullable String role;
 
 	private ClientCertificateAuthenticationOptions(String path, @Nullable String role) {
 		this.path = path;
@@ -70,8 +69,7 @@ public class ClientCertificateAuthenticationOptions {
 	 * @return the optional named certificate role to authenticate against.
 	 * @since 2.3.4
 	 */
-	@Nullable
-	public String getRole() {
+	public @Nullable String getRole() {
 		return this.role;
 	}
 
@@ -82,8 +80,7 @@ public class ClientCertificateAuthenticationOptions {
 
 		private String path = DEFAULT_CERT_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
 		ClientCertificateAuthenticationOptionsBuilder() {
 		}

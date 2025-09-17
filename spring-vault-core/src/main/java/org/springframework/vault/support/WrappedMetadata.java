@@ -69,8 +69,7 @@ public class WrappedMetadata {
 		return this.creationTime;
 	}
 
-	@Nullable
-	public String getPath() {
+	public @Nullable String getPath() {
 		return this.path;
 	}
 

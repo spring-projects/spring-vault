@@ -156,8 +156,7 @@ public class VaultClients {
 	 */
 	public static class PrefixAwareUriBuilderFactory extends DefaultUriBuilderFactory {
 
-		@Nullable
-		private final VaultEndpointProvider endpointProvider;
+		private final @Nullable VaultEndpointProvider endpointProvider;
 
 		public PrefixAwareUriBuilderFactory() {
 			this.endpointProvider = null;

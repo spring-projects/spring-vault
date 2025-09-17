@@ -102,8 +102,7 @@ public interface VaultPkiOperations {
 	 * /pki/crl</a>
 	 * @since 2.0
 	 */
-	@Nullable
-	InputStream getCrl(Encoding encoding) throws VaultException;
+	@Nullable InputStream getCrl(Encoding encoding) throws VaultException;
 
 	/**
 	 * Retrieves the specified issuer's certificate. Includes the full {@code ca_chain} of

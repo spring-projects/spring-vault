@@ -77,16 +77,14 @@ public class VaultCertificateRequest {
 	/**
 	 * Requested Time to Live
 	 */
-	@Nullable
-	private final Duration ttl;
+	private final @Nullable Duration ttl;
 
 	/**
 	 * Set the Not After field of the certificate with specified date value. The value
 	 * format should be given in UTC format YYYY-MM-ddTHH:MM:SSZ. Supports the Y10K end
 	 * date for IEEE 802.1AR-2018 standard devices, 9999-12-31T23:59:59Z.
 	 */
-	@Nullable
-	private final Instant notAfter;
+	private final @Nullable Instant notAfter;
 
 	/**
 	 * Specifies the format for returned data. Can be {@literal pem}, {@literal der}, or
@@ -108,16 +106,14 @@ public class VaultCertificateRequest {
 	 *
 	 * @since 2.4
 	 */
-	@Nullable
-	private final String privateKeyFormat;
+	private final @Nullable String privateKeyFormat;
 
 	/**
 	 * Specifies the comma-separated list of requested User ID (OID
 	 * 0.9.2342.19200300.100.1.1) Subject values to be placed on the signed certificate.
 	 * This field is validated against allowed_user_ids on the role.
 	 */
-	@Nullable
-	private final String userIds;
+	private final @Nullable String userIds;
 
 	private VaultCertificateRequest(String commonName, boolean excludeCommonNameFromSubjectAltNames,
 			List<String> altNames, List<String> ipSubjectAltNames, List<String> uriSubjectAltNames,
@@ -173,8 +169,7 @@ public class VaultCertificateRequest {
 		return this.otherSans;
 	}
 
-	@Nullable
-	public Duration getTtl() {
+	public @Nullable Duration getTtl() {
 		return this.ttl;
 	}
 
@@ -182,8 +177,7 @@ public class VaultCertificateRequest {
 		return format;
 	}
 
-	@Nullable
-	public String getPrivateKeyFormat() {
+	public @Nullable String getPrivateKeyFormat() {
 		return privateKeyFormat;
 	}
 
@@ -191,20 +185,17 @@ public class VaultCertificateRequest {
 		return this.excludeCommonNameFromSubjectAltNames;
 	}
 
-	@Nullable
-	public Instant getNotAfter() {
+	public @Nullable Instant getNotAfter() {
 		return this.notAfter;
 	}
 
-	@Nullable
-	public String getUserIds() {
+	public @Nullable String getUserIds() {
 		return this.userIds;
 	}
 
 	public static class VaultCertificateRequestBuilder {
 
-		@Nullable
-		private String commonName;
+		private @Nullable String commonName;
 
 		private List<String> altNames = new ArrayList<>();
 
@@ -214,21 +205,17 @@ public class VaultCertificateRequest {
 
 		private List<String> otherSans = new ArrayList<>();
 
-		@Nullable
-		private Duration ttl;
+		private @Nullable Duration ttl;
 
 		private String format = DEFAULT_FORMAT;
 
-		@Nullable
-		private String privateKeyFormat;
+		private @Nullable String privateKeyFormat;
 
 		private boolean excludeCommonNameFromSubjectAltNames;
 
-		@Nullable
-		private Instant notAfter;
+		private @Nullable Instant notAfter;
 
-		@Nullable
-		private String userIds;
+		private @Nullable String userIds;
 
 		VaultCertificateRequestBuilder() {
 		}

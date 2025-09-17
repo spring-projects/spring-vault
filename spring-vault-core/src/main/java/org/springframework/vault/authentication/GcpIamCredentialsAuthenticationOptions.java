@@ -88,11 +88,9 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 
 		private String path = DEFAULT_GCP_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private GoogleCredentialsSupplier credentialsSupplier;
+		private @Nullable GoogleCredentialsSupplier credentialsSupplier;
 
 		private Duration jwtValidity = Duration.ofMinutes(15);
 

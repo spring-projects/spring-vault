@@ -131,8 +131,7 @@ public class Versioned<T> {
 		return this.metadata != null;
 	}
 
-	@Nullable
-	public Metadata getMetadata() {
+	public @Nullable Metadata getMetadata() {
 		return this.metadata;
 	}
 
@@ -165,8 +164,7 @@ public class Versioned<T> {
 	 * @return the actual data for this versioned object. Can be {@literal null} if the
 	 * version is deleted or destroyed.
 	 */
-	@Nullable
-	public T getData() {
+	public @Nullable T getData() {
 		return this.data;
 	}
 
@@ -271,8 +269,7 @@ public class Versioned<T> {
 		 * @return {@link Instant} at which the version was deleted. Can be
 		 * {@literal null} if the version is not deleted.
 		 */
-		@Nullable
-		public Instant getDeletedAt() {
+		public @Nullable Instant getDeletedAt() {
 			return this.deletedAt;
 		}
 

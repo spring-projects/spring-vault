@@ -120,8 +120,7 @@ public class VaultEndpoint implements Serializable {
 		return vaultEndpoint;
 	}
 
-	@Nullable
-	private static String getPath(URI uri) {
+	private @Nullable static String getPath(URI uri) {
 
 		String path = uri.getPath();
 		return path != null && path.startsWith("/") ? path.substring(1) : path;

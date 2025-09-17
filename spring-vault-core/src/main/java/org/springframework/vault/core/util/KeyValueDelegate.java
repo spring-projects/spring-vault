@@ -76,8 +76,7 @@ public class KeyValueDelegate {
 	 * @param path the path to fetch the secret from.
 	 * @return the secret, can be {@literal null}.
 	 */
-	@Nullable
-	public VaultResponse getSecret(String path) {
+	public @Nullable VaultResponse getSecret(String path) {
 
 		MountInfo mountInfo = this.mountInfo.get(path);
 
@@ -217,8 +216,7 @@ public class KeyValueDelegate {
 			return this.path;
 		}
 
-		@Nullable
-		public Map<String, Object> getOptions() {
+		public @Nullable Map<String, Object> getOptions() {
 			return this.options;
 		}
 

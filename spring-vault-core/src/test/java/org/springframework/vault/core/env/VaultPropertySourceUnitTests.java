@@ -83,8 +83,9 @@ class VaultPropertySourceUnitTests {
 
 		when(this.vaultTemplate.read("secret/myapp")).thenThrow(new VaultException("HTTP error"));
 		assertThatThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
-				PropertyTransformers.noop(), false)).isInstanceOf(VaultPropertySourceNotFoundException.class)
-						.hasRootCauseExactlyInstanceOf(VaultException.class);
+				PropertyTransformers.noop(), false))
+			.isInstanceOf(VaultPropertySourceNotFoundException.class)
+			.hasRootCauseExactlyInstanceOf(VaultException.class);
 	}
 
 	@Test

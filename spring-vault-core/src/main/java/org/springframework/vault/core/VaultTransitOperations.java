@@ -70,16 +70,14 @@ public interface VaultTransitOperations {
 	 * @param type must not be {@literal null}.
 	 * @return the {@link RawTransitKey}.
 	 */
-	@Nullable
-	RawTransitKey exportKey(String keyName, TransitKeyType type);
+	@Nullable RawTransitKey exportKey(String keyName, TransitKeyType type);
 
 	/**
 	 * Return information about a named encryption key.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @return the {@link VaultTransitKey}.
 	 */
-	@Nullable
-	VaultTransitKey getKey(String keyName);
+	@Nullable VaultTransitKey getKey(String keyName);
 
 	/**
 	 * Deletes a named encryption key. It will no longer be possible to decrypt any data

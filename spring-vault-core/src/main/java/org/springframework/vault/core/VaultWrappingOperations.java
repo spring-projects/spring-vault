@@ -40,16 +40,14 @@ public interface VaultWrappingOperations {
 	 * @return the {@link WrappedMetadata} the {@code token} or {@literal null} if the
 	 * token was invalid or expired.
 	 */
-	@Nullable
-	WrappedMetadata lookup(VaultToken token);
+	@Nullable WrappedMetadata lookup(VaultToken token);
 
 	/**
 	 * Read a wrapped secret.
 	 * @param token must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
-	@Nullable
-	VaultResponse read(VaultToken token);
+	@Nullable VaultResponse read(VaultToken token);
 
 	/**
 	 * Read a wrapped secret of type {@link Class responseType}.
@@ -57,8 +55,7 @@ public interface VaultWrappingOperations {
 	 * @param responseType must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
-	@Nullable
-	<T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
+	@Nullable <T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
 
 	/**
 	 * Rewraps a response-wrapped token. The new token will use the same creation TTL as

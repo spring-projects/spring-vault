@@ -133,8 +133,7 @@ public interface VaultOperations {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	VaultResponse read(String path);
+	@Nullable VaultResponse read(String path);
 
 	/**
 	 * Read ({@code GET)} from a Vault path. Reading data using this method is suitable
@@ -189,8 +188,7 @@ public interface VaultOperations {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	List<String> list(String path);
+	@Nullable List<String> list(String path);
 
 	/**
 	 * Write ({@code POST)} to a Vault path.
@@ -198,8 +196,7 @@ public interface VaultOperations {
 	 * @return the response, may be {@literal null}.
 	 * @since 2.0
 	 */
-	@Nullable
-	default VaultResponse write(String path) {
+	@Nullable default VaultResponse write(String path) {
 		return write(path, null);
 	}
 
@@ -209,8 +206,7 @@ public interface VaultOperations {
 	 * @param body the body, may be {@literal null} if absent.
 	 * @return the response, may be {@literal null}.
 	 */
-	@Nullable
-	VaultResponse write(String path, @Nullable Object body);
+	@Nullable VaultResponse write(String path, @Nullable Object body);
 
 	/**
 	 * Invoke an operation on a Vault path, typically a {@code POST} request along with an

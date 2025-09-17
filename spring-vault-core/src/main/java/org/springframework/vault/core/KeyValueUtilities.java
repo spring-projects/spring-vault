@@ -93,8 +93,7 @@ class KeyValueUtilities {
 			.build();
 	}
 
-	@Nullable
-	static Instant toInstant(@Nullable String date) {
+	@Nullable static Instant toInstant(@Nullable String date) {
 		return StringUtils.hasText(date) ? Instant.from(DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date)) : null;
 	}
 

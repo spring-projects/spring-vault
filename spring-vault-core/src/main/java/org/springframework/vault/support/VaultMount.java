@@ -46,8 +46,7 @@ public class VaultMount {
 	/**
 	 * Human-readable description of the mount.
 	 */
-	@Nullable
-	private final String description;
+	private final @Nullable String description;
 
 	/**
 	 * Additional configuration.
@@ -95,16 +94,14 @@ public class VaultMount {
 	/**
 	 * @return human readable description of this mount.
 	 */
-	@Nullable
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return this.description;
 	}
 
 	/**
 	 * @return additional configuration details.
 	 */
-	@Nullable
-	public Map<String, Object> getConfig() {
+	public @Nullable Map<String, Object> getConfig() {
 		return this.config;
 	}
 
@@ -112,8 +109,7 @@ public class VaultMount {
 	 * @return mount type specific options.
 	 * @since 2.2
 	 */
-	@Nullable
-	public Map<String, String> getOptions() {
+	public @Nullable Map<String, String> getOptions() {
 		return this.options;
 	}
 

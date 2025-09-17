@@ -124,14 +124,11 @@ public class PcfAuthenticationOptions {
 
 		private Clock clock = Clock.systemUTC();
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private Supplier<String> instanceCertSupplier;
+		private @Nullable Supplier<String> instanceCertSupplier;
 
-		@Nullable
-		private Supplier<String> instanceKeySupplier;
+		private @Nullable Supplier<String> instanceKeySupplier;
 
 		PcfAuthenticationOptionsBuilder() {
 		}

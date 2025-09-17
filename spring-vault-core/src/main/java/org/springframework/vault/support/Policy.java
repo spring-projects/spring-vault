@@ -189,8 +189,7 @@ public class Policy {
 		@JsonSerialize(converter = PolicyJackson3.DurationToStringConverter.class)
 		@com.fasterxml.jackson.databind.annotation.JsonSerialize(
 				converter = PolicyJackson2.DurationToStringConverter.class)
-		@Nullable
-		private final Duration minWrappingTtl;
+		private final @Nullable Duration minWrappingTtl;
 
 		/**
 		 * The maximum allowed TTL that clients can specify for a wrapped response.
@@ -199,8 +198,7 @@ public class Policy {
 		@JsonSerialize(converter = PolicyJackson3.DurationToStringConverter.class)
 		@com.fasterxml.jackson.databind.annotation.JsonSerialize(
 				converter = PolicyJackson2.DurationToStringConverter.class)
-		@Nullable
-		private final Duration maxWrappingTtl;
+		private final @Nullable Duration maxWrappingTtl;
 
 		/**
 		 * Whitelists a list of keys and values that are permitted on the given path.
@@ -271,13 +269,11 @@ public class Policy {
 			return this.capabilities;
 		}
 
-		@Nullable
-		public Duration getMinWrappingTtl() {
+		public @Nullable Duration getMinWrappingTtl() {
 			return this.minWrappingTtl;
 		}
 
-		@Nullable
-		public Duration getMaxWrappingTtl() {
+		public @Nullable Duration getMaxWrappingTtl() {
 			return this.maxWrappingTtl;
 		}
 
@@ -312,11 +308,9 @@ public class Policy {
 
 			private final Set<Capability> capabilities = new LinkedHashSet<>();
 
-			@Nullable
-			private Duration minWrappingTtl;
+			private @Nullable Duration minWrappingTtl;
 
-			@Nullable
-			private Duration maxWrappingTtl;
+			private @Nullable Duration maxWrappingTtl;
 
 			private final Map<String, List<String>> allowedParameters = new LinkedHashMap<>();
 
@@ -570,8 +564,7 @@ public class Policy {
 		 * @param value must not be {@literal null}.
 		 * @return the {@link Capability} or {@literal null}, if not found.
 		 */
-		@Nullable
-		public static Capability find(String value) {
+		public @Nullable static Capability find(String value) {
 
 			for (BuiltinCapabilities cap : values()) {
 				if (cap.name().equalsIgnoreCase(value)) {

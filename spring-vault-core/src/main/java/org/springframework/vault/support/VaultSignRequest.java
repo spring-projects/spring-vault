@@ -75,8 +75,7 @@ public class VaultSignRequest {
 	 * default hash algorithm.
 	 * @since 2.4
 	 */
-	@Nullable
-	public String getHashAlgorithm() {
+	public @Nullable String getHashAlgorithm() {
 		return this.hashAlgorithm;
 	}
 
@@ -85,8 +84,7 @@ public class VaultSignRequest {
 	 * {@literal null} to use the default signature algorithm.
 	 * @since 2.4
 	 */
-	@Nullable
-	public String getSignatureAlgorithm() {
+	public @Nullable String getSignatureAlgorithm() {
 		return this.signatureAlgorithm;
 	}
 

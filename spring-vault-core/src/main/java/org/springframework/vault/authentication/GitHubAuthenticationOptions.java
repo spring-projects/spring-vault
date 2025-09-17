@@ -82,8 +82,7 @@ public class GitHubAuthenticationOptions {
 
 		private String path = DEFAULT_GITHUB_AUTHENTICATION_PATH;
 
-		@Nullable
-		private Supplier<String> tokenSupplier;
+		private @Nullable Supplier<String> tokenSupplier;
 
 		/**
 		 * Configure the mount path.

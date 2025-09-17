@@ -35,16 +35,14 @@ public interface VaultKeyValueOperationsSupport {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	List<String> list(String path);
+	@Nullable List<String> list(String path);
 
 	/**
 	 * Read the secret at {@code path}.
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	Object get(String path);
+	@Nullable Object get(String path);
 
 	/**
 	 * Delete the secret at {@code path}.

@@ -26,16 +26,13 @@ import org.jspecify.annotations.Nullable;
 public class VaultTransitKeyConfiguration {
 
 	@JsonProperty("deletion_allowed")
-	@Nullable
-	private final Boolean deletionAllowed;
+	private final @Nullable Boolean deletionAllowed;
 
 	@JsonProperty("min_decryption_version")
-	@Nullable
-	private final Integer minDecryptionVersion;
+	private final @Nullable Integer minDecryptionVersion;
 
 	@JsonProperty("min_encryption_version")
-	@Nullable
-	private final Integer minEncryptionVersion;
+	private final @Nullable Integer minEncryptionVersion;
 
 	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed, @Nullable Integer minDecryptionVersion,
 			@Nullable Integer minEncryptionVersion) {
@@ -55,8 +52,7 @@ public class VaultTransitKeyConfiguration {
 	/**
 	 * @return whether key deletion is configured
 	 */
-	@Nullable
-	public Boolean getDeletionAllowed() {
+	public @Nullable Boolean getDeletionAllowed() {
 		return this.deletionAllowed;
 	}
 
@@ -64,8 +60,7 @@ public class VaultTransitKeyConfiguration {
 	 * @return the minimum version of ciphertext allowed to be decrypted.
 	 * @since 1.1
 	 */
-	@Nullable
-	public Integer getMinDecryptionVersion() {
+	public @Nullable Integer getMinDecryptionVersion() {
 		return this.minDecryptionVersion;
 	}
 
@@ -74,8 +69,7 @@ public class VaultTransitKeyConfiguration {
 	 * payloads, or generate HMACs.
 	 * @since 1.1
 	 */
-	@Nullable
-	public Integer getMinEncryptionVersion() {
+	public @Nullable Integer getMinEncryptionVersion() {
 		return this.minEncryptionVersion;
 	}
 
@@ -84,14 +78,11 @@ public class VaultTransitKeyConfiguration {
 	 */
 	public static class VaultTransitKeyConfigurationBuilder {
 
-		@Nullable
-		private Boolean deletionAllowed;
+		private @Nullable Boolean deletionAllowed;
 
-		@Nullable
-		private Integer minDecryptionVersion;
+		private @Nullable Integer minDecryptionVersion;
 
-		@Nullable
-		private Integer minEncryptionVersion;
+		private @Nullable Integer minEncryptionVersion;
 
 		VaultTransitKeyConfigurationBuilder() {
 		}

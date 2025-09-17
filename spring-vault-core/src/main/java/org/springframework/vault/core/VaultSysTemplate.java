@@ -519,8 +519,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private final int serverTimeUtc;
 
-		@Nullable
-		private final String version;
+		private final @Nullable String version;
 
 		VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
@@ -562,8 +561,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return this.serverTimeUtc;
 		}
 
-		@Nullable
-		public String getVersion() {
+		public @Nullable String getVersion() {
 			return this.version;
 		}
 

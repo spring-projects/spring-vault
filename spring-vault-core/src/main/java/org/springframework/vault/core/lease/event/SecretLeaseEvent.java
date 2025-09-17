@@ -37,8 +37,7 @@ public abstract class SecretLeaseEvent extends ApplicationEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
-	@Nullable
-	private final Lease lease;
+	private final @Nullable Lease lease;
 
 	/**
 	 * Create a new {@link SecretLeaseEvent} given {@link RequestedSecret} and
@@ -57,8 +56,7 @@ public abstract class SecretLeaseEvent extends ApplicationEvent {
 		return (RequestedSecret) super.getSource();
 	}
 
-	@Nullable
-	public Lease getLease() {
+	public @Nullable Lease getLease() {
 		return this.lease;
 	}
 

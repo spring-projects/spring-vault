@@ -70,8 +70,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private final RestTemplate sessionTemplate;
 
-	@Nullable
-	private SessionManager sessionManager;
+	private @Nullable SessionManager sessionManager;
 
 	private final boolean dedicatedSessionManager;
 

@@ -295,8 +295,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			this.pathPrefix = getPathInMount(keyspace);
 		}
 
-		@Nullable
-		abstract List<String> list(String pattern);
+		@Nullable abstract List<String> list(String pattern);
 
 		String getPathInMount(String keyspace) {
 
@@ -311,8 +310,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			return this.pathPrefix + "/" + id;
 		}
 
-		@Nullable
-		abstract SecretDocument get(String id);
+		@Nullable abstract SecretDocument get(String id);
 
 		abstract SecretDocument put(SecretDocument secretDocument);
 

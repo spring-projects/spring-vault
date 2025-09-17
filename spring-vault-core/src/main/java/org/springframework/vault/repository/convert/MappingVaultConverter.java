@@ -199,8 +199,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		return instance;
 	}
 
-	@Nullable
-	private Object readIdValue(VaultPersistentProperty idProperty, SecretDocumentAccessor documentAccessor) {
+	private @Nullable Object readIdValue(VaultPersistentProperty idProperty, SecretDocumentAccessor documentAccessor) {
 
 		Object resolvedValue = documentAccessor.get(idProperty);
 
@@ -712,8 +711,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 			this.source = accessor;
 		}
 
-		@Nullable
-		public <T> T getPropertyValue(VaultPersistentProperty property) {
+		public @Nullable <T> T getPropertyValue(VaultPersistentProperty property) {
 
 			Object value = this.source.get(property);
 

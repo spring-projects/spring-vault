@@ -43,8 +43,7 @@ import org.springframework.vault.repository.mapping.VaultMappingContext;
  */
 public class VaultKeyValueTemplate extends KeyValueTemplate {
 
-	@Nullable
-	private ApplicationEventPublisher eventPublisher;
+	private @Nullable ApplicationEventPublisher eventPublisher;
 
 	private boolean publishEvents = true;
 

@@ -411,8 +411,8 @@ class SecretLeaseContainerUnitTests {
 		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
 
 		when(this.vaultOperations.read(this.rotatingGenericSecret.getPath()))
-				.thenReturn(createGenericSecrets(Collections.singletonMap("key", "value")))
-				.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
+			.thenReturn(createGenericSecrets(Collections.singletonMap("key", "value")))
+			.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
 
 		this.secretLeaseContainer.addRequestedSecret(this.rotatingGenericSecret);
 
@@ -494,7 +494,7 @@ class SecretLeaseContainerUnitTests {
 
 		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(first, second);
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
+			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
 
 		this.secretLeaseContainer.requestRotatingSecret("my-secret");
 
@@ -531,7 +531,7 @@ class SecretLeaseContainerUnitTests {
 
 		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(first, second);
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
+			.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
 
 		RequestedSecret secret = RequestedSecret.rotating("my-secret");
 
@@ -564,7 +564,7 @@ class SecretLeaseContainerUnitTests {
 
 		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(first, second);
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-				.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
+			.thenReturn(Lease.of("after_restart", Duration.ofSeconds(1), true));
 
 		RequestedSecret secret = RequestedSecret.rotating("my-secret");
 
@@ -572,7 +572,8 @@ class SecretLeaseContainerUnitTests {
 		this.secretLeaseContainer.addRequestedSecret(secret);
 		this.secretLeaseContainer.start();
 
-		Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler> renewals = (Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler>) ReflectionTestUtils.getField(this.secretLeaseContainer, "renewals");
+		Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler> renewals = (Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler>) ReflectionTestUtils
+			.getField(this.secretLeaseContainer, "renewals");
 
 		SecretLeaseContainer.LeaseRenewalScheduler scheduler = renewals.get(secret);
 		Lease lease = scheduler.getLease();

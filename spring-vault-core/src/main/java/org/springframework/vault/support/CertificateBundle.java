@@ -54,8 +54,7 @@ public class CertificateBundle extends Certificate {
 
 	private final String privateKey;
 
-	@Nullable
-	private final String privateKeyType;
+	private final @Nullable String privateKeyType;
 
 	/**
 	 * Create a new {@link CertificateBundle}.
@@ -159,8 +158,7 @@ public class CertificateBundle extends Certificate {
 	 * @return the private key type, can be {@literal null}.
 	 * @since 2.4
 	 */
-	@Nullable
-	public String getPrivateKeyType() {
+	public @Nullable String getPrivateKeyType() {
 		return this.privateKeyType;
 	}
 

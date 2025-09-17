@@ -58,8 +58,7 @@ public class AppRoleAuthenticationOptions {
 	/**
 	 * Role name used to get roleId and secretID
 	 */
-	@Nullable
-	private final String appRole;
+	private final @Nullable String appRole;
 
 	/**
 	 * Unwrapping endpoint to cater for functionality across various Vault versions.
@@ -108,8 +107,7 @@ public class AppRoleAuthenticationOptions {
 	 * @return the bound AppRole.
 	 * @since 1.1
 	 */
-	@Nullable
-	public String getAppRole() {
+	public @Nullable String getAppRole() {
 		return this.appRole;
 	}
 

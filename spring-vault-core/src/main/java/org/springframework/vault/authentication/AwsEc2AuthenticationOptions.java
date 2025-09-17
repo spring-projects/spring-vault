@@ -69,8 +69,7 @@ public class AwsEc2AuthenticationOptions {
 	/**
 	 * EC2 instance role name. May be {@literal null} if none.
 	 */
-	@Nullable
-	private final String role;
+	private final @Nullable String role;
 
 	/**
 	 * Authentication nonce.
@@ -136,8 +135,7 @@ public class AwsEc2AuthenticationOptions {
 	/**
 	 * @return the role, may be {@literal null} if none.
 	 */
-	@Nullable
-	public String getRole() {
+	public @Nullable String getRole() {
 		return this.role;
 	}
 
@@ -181,8 +179,7 @@ public class AwsEc2AuthenticationOptions {
 
 		private URI identityDocumentUri = DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
 		private Nonce nonce = Nonce.generated();
 

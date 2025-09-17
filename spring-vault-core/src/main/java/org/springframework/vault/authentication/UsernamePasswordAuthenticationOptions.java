@@ -50,8 +50,7 @@ public class UsernamePasswordAuthenticationOptions {
 	/**
 	 * TOTP (one-time-token, optional).
 	 */
-	@Nullable
-	private final CharSequence totp;
+	private final @Nullable CharSequence totp;
 
 	private UsernamePasswordAuthenticationOptions(String path, String username, CharSequence password,
 			@Nullable CharSequence totp) {
@@ -92,8 +91,7 @@ public class UsernamePasswordAuthenticationOptions {
 	/**
 	 * @return the totp (one-time-token). Can be {@code null}.
 	 */
-	@Nullable
-	public CharSequence getTotp() {
+	public @Nullable CharSequence getTotp() {
 		return this.totp;
 	}
 
@@ -104,14 +102,11 @@ public class UsernamePasswordAuthenticationOptions {
 
 		private String path = DEFAULT_USERPASS_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String username;
+		private @Nullable String username;
 
-		@Nullable
-		private CharSequence password;
+		private @Nullable CharSequence password;
 
-		@Nullable
-		private CharSequence totp;
+		private @Nullable CharSequence totp;
 
 		UsernamePasswordAuthenticationBuilder() {
 		}

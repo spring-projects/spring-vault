@@ -138,8 +138,7 @@ public class PemObject {
 	 * Reads the next object from the PEM content.
 	 * @return next object or {@code null} for end of file
 	 */
-	@Nullable
-	static PemObject readNextSection(BufferedReader reader) throws IOException {
+	@Nullable static PemObject readNextSection(BufferedReader reader) throws IOException {
 		String title = null;
 		StringBuilder keyBuilder = null;
 		while (true) {

@@ -36,8 +36,7 @@ public class VaultResponseSupport<T> {
 
 	private Map<String, Object> auth = Collections.emptyMap();
 
-	@Nullable
-	private T data;
+	private @Nullable T data;
 
 	private Map<String, Object> metadata = Collections.emptyMap();
 
@@ -48,12 +47,10 @@ public class VaultResponseSupport<T> {
 	private long leaseDuration;
 
 	@JsonProperty("lease_id")
-	@Nullable
-	private String leaseId;
+	private @Nullable String leaseId;
 
 	@JsonProperty("request_id")
-	@Nullable
-	private String requestId;
+	private @Nullable String requestId;
 
 	private boolean renewable;
 
@@ -93,8 +90,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return secret data.
 	 */
-	@Nullable
-	public T getData() {
+	public @Nullable T getData() {
 		return this.data;
 	}
 
@@ -149,8 +145,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return the lease Id.
 	 */
-	@Nullable
-	public String getLeaseId() {
+	public @Nullable String getLeaseId() {
 		return this.leaseId;
 	}
 
@@ -192,8 +187,7 @@ public class VaultResponseSupport<T> {
 	/**
 	 * @return the request Id.
 	 */
-	@Nullable
-	public String getRequestId() {
+	public @Nullable String getRequestId() {
 		return this.requestId;
 	}
 

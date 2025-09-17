@@ -45,8 +45,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Override
-	@Nullable
-	default Versioned<Map<String, Object>> get(String path) {
+	@Nullable default Versioned<Map<String, Object>> get(String path) {
 		return get(path, Version.unversioned());
 	}
 
@@ -56,8 +55,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @param version must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	<T> Versioned<T> get(String path, Version version);
+	@Nullable <T> Versioned<T> get(String path, Version version);
 
 	/**
 	 * Read the most recent secret at {@code path} and deserialize the secret to the given
@@ -66,8 +64,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	default <T> Versioned<T> get(String path, Class<T> responseType) {
+	@Nullable default <T> Versioned<T> get(String path, Class<T> responseType) {
 		return get(path, Version.unversioned(), responseType);
 	}
 
@@ -79,8 +76,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable
-	<T> Versioned<T> get(String path, Version version, Class<T> responseType);
+	@Nullable <T> Versioned<T> get(String path, Version version, Class<T> responseType);
 
 	/**
 	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body} may be

@@ -73,8 +73,7 @@ public class LeaseAwareVaultPropertySource extends EnumerablePropertySource<Vaul
 
 	private volatile boolean notFound = false;
 
-	@Nullable
-	private volatile Exception loadError;
+	private @Nullable volatile Exception loadError;
 
 	/**
 	 * Create a new {@link LeaseAwareVaultPropertySource} given a

@@ -102,8 +102,7 @@ public class VaultTokenRequest {
 	/**
 	 * @return Id of the client token.
 	 */
-	@Nullable
-	public String getId() {
+	public @Nullable String getId() {
 		return this.id;
 	}
 
@@ -146,16 +145,14 @@ public class VaultTokenRequest {
 	/**
 	 * @return TTL period of the token.
 	 */
-	@Nullable
-	public String getTtl() {
+	public @Nullable String getTtl() {
 		return this.ttl;
 	}
 
 	/**
 	 * @return explicit TTL of the token.
 	 */
-	@Nullable
-	public String getExplicitMaxTtl() {
+	public @Nullable String getExplicitMaxTtl() {
 		return this.explicitMaxTtl;
 	}
 
@@ -187,8 +184,7 @@ public class VaultTokenRequest {
 	 */
 	public static class VaultTokenRequestBuilder {
 
-		@Nullable
-		private String id;
+		private @Nullable String id;
 
 		private List<String> policies = new ArrayList<>();
 
@@ -200,16 +196,13 @@ public class VaultTokenRequest {
 
 		private boolean renewable;
 
-		@Nullable
-		private String ttl;
+		private @Nullable String ttl;
 
-		@Nullable
-		private String explicitMaxTtl;
+		private @Nullable String explicitMaxTtl;
 
 		private String displayName = "";
 
-		@Nullable
-		private String entityAlias;
+		private @Nullable String entityAlias;
 
 		private int numUses;
 

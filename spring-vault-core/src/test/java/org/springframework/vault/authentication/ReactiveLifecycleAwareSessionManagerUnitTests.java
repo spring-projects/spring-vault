@@ -134,8 +134,8 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		when(this.tokenSupplier.getVaultToken()).thenReturn(Mono.error(new VaultLoginException("foo")));
 
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.verifyError();
+			.as(StepVerifier::create) //
+			.verifyError();
 		verifyNoInteractions(this.listener);
 		verify(this.errorListener).onAuthenticationError(any(LoginFailedEvent.class));
 	}
@@ -369,18 +369,20 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				Mono.just(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))),
 				Mono.just(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))));
 		when(this.responseSpec.bodyToMono(VaultResponse.class))
-				.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
+			.thenReturn(Mono.just(fromToken(LoginToken.of("foo".toCharArray(), Duration.ofSeconds(2)))));
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		this.sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
+		this.sessionManager.getSessionToken()
+			.as(StepVerifier::create)
+			.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
+			.verifyComplete();
 
 		verify(this.tokenSupplier, times(2)).getVaultToken();
 		verify(this.listener, times(2)).onAuthenticationEvent(any(AfterLoginEvent.class));
@@ -397,14 +399,16 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		this.sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
+		this.sessionManager.getSessionToken()
+			.as(StepVerifier::create)
+			.expectNext(LoginToken.renewable("bar".toCharArray(), Duration.ofSeconds(5)))
+			.verifyComplete();
 
 		verify(this.tokenSupplier, times(2)).getVaultToken();
 	}
@@ -420,14 +424,16 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
 		this.sessionManager.getSessionToken() //
-				.as(StepVerifier::create) //
-				.expectNextCount(1) //
-				.verifyComplete();
+			.as(StepVerifier::create) //
+			.expectNextCount(1) //
+			.verifyComplete();
 		verify(this.taskScheduler).schedule(runnableCaptor.capture(), any(Trigger.class));
 		runnableCaptor.getValue().run();
 
-		this.sessionManager.getSessionToken().as(StepVerifier::create)
-				.expectNext(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5))).verifyComplete();
+		this.sessionManager.getSessionToken()
+			.as(StepVerifier::create)
+			.expectNext(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)))
+			.verifyComplete();
 
 		verify(this.tokenSupplier).getVaultToken();
 	}

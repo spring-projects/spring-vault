@@ -102,8 +102,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	@Nullable
-	public RawTransitKey exportKey(String keyName, TransitKeyType type) {
+	public @Nullable RawTransitKey exportKey(String keyName, TransitKeyType type) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(type, "Key type must not be null");
@@ -115,8 +114,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	@Nullable
-	public VaultTransitKey getKey(String keyName) {
+	public @Nullable VaultTransitKey getKey(String keyName) {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
@@ -576,12 +574,10 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	@SuppressWarnings("NullAway")
 	static class VaultTransitKeyImpl implements VaultTransitKey {
 
-		@Nullable
-		private String name;
+		private @Nullable String name;
 
 		@JsonProperty("type")
-		@Nullable
-		private String type;
+		private @Nullable String type;
 
 		@JsonProperty("allow_plaintext_backup")
 		private boolean allowPlaintextBackup;

@@ -100,11 +100,9 @@ public class KubernetesAuthenticationOptions {
 
 		private String path = DEFAULT_KUBERNETES_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private Supplier<String> jwtSupplier;
+		private @Nullable Supplier<String> jwtSupplier;
 
 		/**
 		 * Configure the mount path.

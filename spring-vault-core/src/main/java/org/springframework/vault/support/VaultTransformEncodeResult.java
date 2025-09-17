@@ -61,8 +61,7 @@ public class VaultTransformEncodeResult extends AbstractResult<TransformCipherte
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
-	@Nullable
-	public String getAsString() {
+	public @Nullable String getAsString() {
 
 		TransformCiphertext ciphertext = get();
 		return ciphertext == null ? null : ciphertext.getCiphertext();

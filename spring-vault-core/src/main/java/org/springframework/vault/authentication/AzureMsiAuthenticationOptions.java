@@ -67,8 +67,7 @@ public class AzureMsiAuthenticationOptions {
 	/**
 	 * Optional {@link AzureVmEnvironment}.
 	 */
-	@Nullable
-	private final AzureVmEnvironment vmEnvironment;
+	private final @Nullable AzureVmEnvironment vmEnvironment;
 
 	private AzureMsiAuthenticationOptions(String path, String role, URI instanceMetadataServiceUri,
 			URI identityTokenServiceUri, @Nullable AzureVmEnvironment vmEnvironment) {
@@ -106,8 +105,7 @@ public class AzureMsiAuthenticationOptions {
 	 * retrieved from the {@link #getInstanceMetadataServiceUri() VM instance metadata
 	 * service}.
 	 */
-	@Nullable
-	public AzureVmEnvironment getVmEnvironment() {
+	public @Nullable AzureVmEnvironment getVmEnvironment() {
 		return this.vmEnvironment;
 	}
 
@@ -132,11 +130,9 @@ public class AzureMsiAuthenticationOptions {
 
 		private String path = DEFAULT_AZURE_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private AzureVmEnvironment vmEnvironment;
+		private @Nullable AzureVmEnvironment vmEnvironment;
 
 		private URI instanceMetadataServiceUri = DEFAULT_INSTANCE_METADATA_SERVICE_URI;
 

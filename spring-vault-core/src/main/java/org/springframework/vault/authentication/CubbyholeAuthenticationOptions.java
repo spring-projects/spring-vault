@@ -122,11 +122,9 @@ public class CubbyholeAuthenticationOptions {
 	 */
 	public static class CubbyholeAuthenticationOptionsBuilder {
 
-		@Nullable
-		private VaultToken initialToken;
+		private @Nullable VaultToken initialToken;
 
-		@Nullable
-		private String path;
+		private @Nullable String path;
 
 		private UnwrappingEndpoints endpoints = UnwrappingEndpoints.SysWrapping;
 

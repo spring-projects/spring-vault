@@ -140,8 +140,7 @@ public class SecretDocument {
 	 * @return the version number, may be {@code null} if absent.
 	 * @since 2.4
 	 */
-	@Nullable
-	public Integer getVersion() {
+	public @Nullable Integer getVersion() {
 		return version;
 	}
 
@@ -165,8 +164,7 @@ public class SecretDocument {
 	 * @param key must not be {@literal null}.
 	 * @return the value or {@literal null}, if the value is not present.
 	 */
-	@Nullable
-	public Object get(String key) {
+	public @Nullable Object get(String key) {
 		return this.body.get(key);
 	}
 

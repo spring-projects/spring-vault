@@ -96,8 +96,7 @@ public class VaultSignatureVerificationRequest {
 	 * @return signature resulting of a sign operation, can be {@literal null} if HMAC is
 	 * used.
 	 */
-	@Nullable
-	public Signature getSignature() {
+	public @Nullable Signature getSignature() {
 		return this.signature;
 	}
 
@@ -105,8 +104,7 @@ public class VaultSignatureVerificationRequest {
 	 * @return digest resulting of a Hmac operation, can be {@literal null} if Signature
 	 * is used.
 	 */
-	@Nullable
-	public Hmac getHmac() {
+	public @Nullable Hmac getHmac() {
 		return this.hmac;
 	}
 
@@ -115,8 +113,7 @@ public class VaultSignatureVerificationRequest {
 	 * the default algorithm.
 	 * @since 2.4
 	 */
-	@Nullable
-	public String getHashAlgorithm() {
+	public @Nullable String getHashAlgorithm() {
 		return this.hashAlgorithm;
 	}
 
@@ -125,8 +122,7 @@ public class VaultSignatureVerificationRequest {
 	 * or {@literal null} to use the default algorithm.
 	 * @since 2.4
 	 */
-	@Nullable
-	public String getSignatureAlgorithm() {
+	public @Nullable String getSignatureAlgorithm() {
 		return this.signatureAlgorithm;
 	}
 

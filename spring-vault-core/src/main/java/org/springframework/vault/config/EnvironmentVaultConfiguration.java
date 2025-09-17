@@ -398,8 +398,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return Arrays.stream(val.split(",")).map(String::trim).collect(Collectors.toList());
 	}
 
-	@Nullable
-	private String getProperty(String key) {
+	private @Nullable String getProperty(String key) {
 		return getEnvironment().getProperty(key);
 	}
 
@@ -411,8 +410,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		return getEnvironment().getProperty(key, URI.class, defaultValue);
 	}
 
-	@Nullable
-	private Resource getResource(String key) {
+	private @Nullable Resource getResource(String key) {
 
 		String value = getProperty(key);
 		return value != null && this.applicationContext != null ? this.applicationContext.getResource(value) : null;

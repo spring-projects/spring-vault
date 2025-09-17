@@ -45,8 +45,7 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Override
-	@Nullable
-	VaultResponse get(String path);
+	@Nullable VaultResponse get(String path);
 
 	/**
 	 * Read the secret at {@code path}.

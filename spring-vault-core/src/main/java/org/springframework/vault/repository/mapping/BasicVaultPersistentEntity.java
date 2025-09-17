@@ -87,8 +87,7 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 	 * @param potentialExpression can be {@literal null}
 	 * @return
 	 */
-	@Nullable
-	private static ValueExpression detectExpression(String potentialExpression) {
+	private @Nullable static ValueExpression detectExpression(String potentialExpression) {
 		ValueExpression expression = PARSER.parse(potentialExpression);
 		return expression.isLiteral() ? null : expression;
 	}

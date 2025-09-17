@@ -293,17 +293,13 @@ public class AuthenticationSteps {
 
 		HttpMethod method;
 
-		@Nullable
-		URI uri;
+		@Nullable URI uri;
 
-		@Nullable
-		String uriTemplate;
+		@Nullable String uriTemplate;
 
-		@Nullable
-		String[] urlVariables = new String[0];
+		@Nullable String[] urlVariables = new String[0];
 
-		@Nullable
-		HttpEntity<?> entity;
+		@Nullable HttpEntity<?> entity;
 
 		/**
 		 * Builder entry point to {@code GET} from {@code uriTemplate}.
@@ -443,16 +439,13 @@ public class AuthenticationSteps {
 
 		final HttpMethod method;
 
-		@Nullable
-		final URI uri;
+		@Nullable final URI uri;
 
-		@Nullable
-		final String uriTemplate;
+		@Nullable final String uriTemplate;
 
 		final @Nullable String[] urlVariables;
 
-		@Nullable
-		final HttpEntity<?> entity;
+		@Nullable final HttpEntity<?> entity;
 
 		final Class<T> responseType;
 
@@ -475,23 +468,19 @@ public class AuthenticationSteps {
 			return this.method;
 		}
 
-		@Nullable
-		URI getUri() {
+		@Nullable URI getUri() {
 			return this.uri;
 		}
 
-		@Nullable
-		String getUriTemplate() {
+		@Nullable String getUriTemplate() {
 			return this.uriTemplate;
 		}
 
-		@Nullable
-		String[] getUrlVariables() {
+		@Nullable String[] getUrlVariables() {
 			return this.urlVariables;
 		}
 
-		@Nullable
-		HttpEntity<?> getEntity() {
+		@Nullable HttpEntity<?> getEntity() {
 			return this.entity;
 		}
 

@@ -38,11 +38,9 @@ public class LoginToken extends VaultToken {
 	 */
 	private final Duration leaseDuration;
 
-	@Nullable
-	private final String accessor;
+	private final @Nullable String accessor;
 
-	@Nullable
-	private final String type;
+	private final @Nullable String type;
 
 	private LoginToken(char[] token, Duration duration, boolean renewable, @Nullable String accessor,
 			@Nullable String type) {
@@ -156,8 +154,7 @@ public class LoginToken extends VaultToken {
 	 * @return the token accessor.
 	 * @since 3.0.2
 	 */
-	@Nullable
-	public String getAccessor() {
+	public @Nullable String getAccessor() {
 		return accessor;
 	}
 
@@ -167,8 +164,7 @@ public class LoginToken extends VaultToken {
 	 * @see #isBatchToken()
 	 * @see #isServiceToken())
 	 */
-	@Nullable
-	public String getType() {
+	public @Nullable String getType() {
 		return type;
 	}
 
@@ -215,11 +211,9 @@ public class LoginToken extends VaultToken {
 		 */
 		private Duration leaseDuration = Duration.ZERO;
 
-		@Nullable
-		private String accessor;
+		private @Nullable String accessor;
 
-		@Nullable
-		private String type;
+		private @Nullable String type;
 
 		private LoginTokenBuilder() {
 		}

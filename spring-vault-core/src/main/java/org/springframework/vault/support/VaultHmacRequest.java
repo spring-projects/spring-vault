@@ -70,16 +70,14 @@ public class VaultHmacRequest {
 	 * @return algorithm used for creating the digest or {@literal null} to use the
 	 * default algorithm.
 	 */
-	@Nullable
-	public String getAlgorithm() {
+	public @Nullable String getAlgorithm() {
 		return this.algorithm;
 	}
 
 	/**
 	 * @return version of the key used or {@literal null} to use the the latest version.
 	 */
-	@Nullable
-	public Integer getKeyVersion() {
+	public @Nullable Integer getKeyVersion() {
 		return this.keyVersion;
 	}
 

@@ -50,8 +50,7 @@ public class JwtAuthenticationOptions {
 	 * <a href="https://developer.hashicorp.com/vault/api-docs/auth/jwt#configure">Vault
 	 * JWT configuration</a>
 	 */
-	@Nullable
-	private final String role;
+	private final @Nullable String role;
 
 	/**
 	 * Supplier instance to obtain a service account JSON Web Tokens.
@@ -76,8 +75,7 @@ public class JwtAuthenticationOptions {
 	 * @return name of the role against which the login is being attempted. Can be
 	 * {@literal null} if not configured.
 	 */
-	@Nullable
-	public String getRole() {
+	public @Nullable String getRole() {
 		return this.role;
 	}
 
@@ -102,11 +100,9 @@ public class JwtAuthenticationOptions {
 
 		private String path = DEFAULT_JWT_AUTHENTICATION_PATH;
 
-		@Nullable
-		private String role;
+		private @Nullable String role;
 
-		@Nullable
-		private Supplier<String> jwtSupplier;
+		private @Nullable Supplier<String> jwtSupplier;
 
 		/**
 		 * Configure the mount path.

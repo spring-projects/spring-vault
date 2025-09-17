@@ -211,8 +211,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		 * the trigger won't fire anymore.
 		 * @since 3.1
 		 */
-		@Nullable
-		Instant nextExecution(LoginToken loginToken);
+		@Nullable Instant nextExecution(LoginToken loginToken);
 
 		/**
 		 * Returns the minimum TTL duration to consider a token valid after renewal.

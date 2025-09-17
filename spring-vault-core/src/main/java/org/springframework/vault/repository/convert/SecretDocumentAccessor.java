@@ -122,8 +122,7 @@ public class SecretDocumentAccessor {
 	 * @param property must not be {@literal null}.
 	 * @return
 	 */
-	@Nullable
-	Object get(VaultPersistentProperty property) {
+	@Nullable Object get(VaultPersistentProperty property) {
 
 		String fieldName = property.getName();
 

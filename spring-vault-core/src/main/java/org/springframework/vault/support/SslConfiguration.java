@@ -440,8 +440,7 @@ public class SslConfiguration {
 		return new SslConfiguration(this.keyStoreConfiguration, this.keyConfiguration, configuration);
 	}
 
-	@Nullable
-	private static String stringOrNull(char @Nullable [] storePassword) {
+	private @Nullable static String stringOrNull(char @Nullable [] storePassword) {
 		return storePassword != null ? new String(storePassword) : null;
 	}
 
@@ -646,8 +645,7 @@ public class SslConfiguration {
 		/**
 		 * @return key alias to use.
 		 */
-		@Nullable
-		public String getKeyAlias() {
+		public @Nullable String getKeyAlias() {
 			return this.keyAlias;
 		}
 

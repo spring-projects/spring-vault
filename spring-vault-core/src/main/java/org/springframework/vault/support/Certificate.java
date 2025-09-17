@@ -51,8 +51,7 @@ public class Certificate {
 
 	private final List<String> caChain;
 
-	@Nullable
-	private final Instant revocationTime;
+	private final @Nullable Instant revocationTime;
 
 	Certificate(@JsonProperty("serial_number") String serialNumber, @JsonProperty("certificate") String certificate,
 			@JsonProperty("issuing_ca") String issuingCaCertificate, @JsonProperty("ca_chain") List<String> caChain,
@@ -254,8 +253,7 @@ public class Certificate {
 		return certificates;
 	}
 
-	@Nullable
-	public Instant getRevocationTime() {
+	public @Nullable Instant getRevocationTime() {
 		return this.revocationTime;
 	}
 

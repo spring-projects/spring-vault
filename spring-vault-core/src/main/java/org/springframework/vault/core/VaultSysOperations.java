@@ -142,8 +142,7 @@ public interface VaultSysOperations {
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
 	 * /sys/policy/{name}</a>
 	 */
-	@Nullable
-	Policy getPolicy(String name) throws VaultException;
+	@Nullable Policy getPolicy(String name) throws VaultException;
 
 	/**
 	 * Create or update a {@link Policy}.

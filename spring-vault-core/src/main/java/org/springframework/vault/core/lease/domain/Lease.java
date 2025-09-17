@@ -31,8 +31,7 @@ public class Lease {
 
 	private static final Lease NONE = new Lease(null, Duration.ZERO, false);
 
-	@Nullable
-	private final String leaseId;
+	private final @Nullable String leaseId;
 
 	private final Duration leaseDuration;
 

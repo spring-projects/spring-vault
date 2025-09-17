@@ -66,8 +66,7 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 	 * @return the result value.
 	 * @throws VaultException if the operation completed with an error.
 	 */
-	@Nullable
-	public String getAsString() {
+	public @Nullable String getAsString() {
 
 		Plaintext plaintext = get();
 		return plaintext == null ? null : plaintext.asString();

@@ -174,8 +174,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private LeaseStrategy leaseStrategy = LeaseStrategy.dropOnError();
 
-	@Nullable
-	private TaskScheduler taskScheduler;
+	private @Nullable TaskScheduler taskScheduler;
 
 	private boolean manageTaskScheduler;
 
@@ -731,8 +730,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * {@code path}.
 	 * @return the response.
 	 */
-	@Nullable
-	protected VaultResponseSupport<Map<String, Object>> doGetSecrets(RequestedSecret requestedSecret) {
+	@Nullable protected VaultResponseSupport<Map<String, Object>> doGetSecrets(RequestedSecret requestedSecret) {
 
 		try {
 			VaultResponseSupport<Map<String, Object>> secrets;
@@ -812,8 +810,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		return isExpired == null ? isExpiredFallback.test(lease) : isExpired.test(lease);
 	}
 
-	@Nullable
-	private HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(RuntimeException e) {
+	private @Nullable HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(RuntimeException e) {
 
 		if (e instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e;
@@ -920,11 +917,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 		private final TaskScheduler taskScheduler;
 
-		@Nullable
-		volatile Lease currentLeaseRef;
+		@Nullable volatile Lease currentLeaseRef;
 
-		@Nullable
-		volatile Lease previousLeaseRef;
+		@Nullable volatile Lease previousLeaseRef;
 
 		final Map<Lease, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
 
@@ -1061,13 +1056,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			return false;
 		}
 
-		@Nullable
-		public Lease getLease() {
+		public @Nullable Lease getLease() {
 			return CURRENT_UPDATER.get(this);
 		}
 
-		@Nullable
-		public Lease getPreviousLease() {
+		public @Nullable Lease getPreviousLease() {
 			return this.previousLeaseRef;
 		}
 
