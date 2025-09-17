@@ -25,7 +25,6 @@ import java.time.Duration;
  *
  * @author Mark Paluch
  * @since 2.3.2
- * @see GcpIamAuthenticationOptions
  * @see GcpIamCredentialsAuthenticationOptions
  */
 public abstract class GcpIamAuthenticationSupport {
