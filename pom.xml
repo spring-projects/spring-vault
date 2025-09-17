@@ -22,34 +22,34 @@
 	<properties>
 		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 		<antora.version>0.0.4</antora.version>
-		<assertj-core.version>3.27.3</assertj-core.version>
-		<aws-java-sdk.version>2.31.29</aws-java-sdk.version>
-		<bcpkix-jdk18on.version>1.80</bcpkix-jdk18on.version>
-		<errorprone.version>2.36.0</errorprone.version>
+		<assertj-core.version>3.27.4</assertj-core.version>
+		<aws-java-sdk.version>2.33.11</aws-java-sdk.version>
+		<bcpkix-jdk18on.version>1.81</bcpkix-jdk18on.version>
+		<errorprone.version>2.41.0</errorprone.version>
 		<google-api-services-iam.version>v1-rev20221013-2.0.0
 		</google-api-services-iam.version>
-		<google-cloud-iamcredentials.version>2.60.0</google-cloud-iamcredentials.version>
-		<google-auth-library-oauth2-http.version>1.33.1
+		<google-cloud-iamcredentials.version>2.74.0</google-cloud-iamcredentials.version>
+		<google-auth-library-oauth2-http.version>1.39.0
 		</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.5</httpclient5.version>
-		<httpcore5.version>5.3.4</httpcore5.version>
+		<httpcore5.version>5.3.5</httpcore5.version>
 		<jackson-annotations.version>3.0-rc5</jackson-annotations.version>
-		<jackson-core.version>3.0.0-rc5</jackson-core.version>
-		<jackson-databind.version>3.0.0-rc5</jackson-databind.version>
+		<jackson-core.version>3.0.0-rc9</jackson-core.version>
+		<jackson-databind.version>3.0.0-rc9</jackson-databind.version>
 		<jackson2-databind.version>2.19.0</jackson2-databind.version>
-		<jetty-reactive-httpclient.version>4.0.10</jetty-reactive-httpclient.version>
+		<jetty-reactive-httpclient.version>4.0.11</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
-		<junit.version>5.12.2</junit.version>
-		<kotlin.version>2.2.0</kotlin.version>
+		<junit.version>6.0.0-RC3</junit.version>
+		<kotlin.version>2.2.20</kotlin.version>
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
-		<mockk.version>1.13.17</mockk.version>
-		<mockito-core.version>5.17.0</mockito-core.version>
-		<netty.version>4.2.3.Final</netty.version>
-		<nullaway.version>0.12.3</nullaway.version>
+		<mockk.version>1.14.5</mockk.version>
+		<mockito-core.version>5.19.0</mockito-core.version>
+		<netty.version>4.2.6.Final</netty.version>
+		<nullaway.version>0.12.10</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.0-M9</spring.version>
 		<spring-data-bom.version>2025.1.0-M6</spring-data-bom.version>
-		<spring-security-bom.version>6.5.0</spring-security-bom.version>
+		<spring-security-bom.version>7.0.0-M3</spring-security-bom.version>
 		<reactor.version>2025.0.0-M5</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

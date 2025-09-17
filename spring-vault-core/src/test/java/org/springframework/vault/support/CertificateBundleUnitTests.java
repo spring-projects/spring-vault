@@ -15,6 +15,8 @@
  */
 package org.springframework.vault.support;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.security.KeyFactory;
 import java.security.KeyStore;
@@ -25,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.ObjectMapper;
+
+import org.springframework.util.StreamUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -159,9 +163,19 @@ class CertificateBundleUnitTests {
 
 	CertificateBundle loadCertificateBundle(String path) {
 
-		URL resource = getClass().getClassLoader().getResource(path);
+		InputStream resource = getClass().getClassLoader().getResourceAsStream(path);
 		assertThat(resource).as("Resource " + path).isNotNull();
-		return this.OBJECT_MAPPER.readValue(resource, CertificateBundle.class);
+		try {
+			return this.OBJECT_MAPPER.readValue(resource, CertificateBundle.class);
+		}
+		finally {
+			try {
+				resource.close();
+			}
+			catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 
 }

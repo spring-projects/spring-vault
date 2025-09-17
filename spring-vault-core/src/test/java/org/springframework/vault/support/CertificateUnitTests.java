@@ -40,7 +40,8 @@ class CertificateUnitTests {
 	@SuppressWarnings("unchecked")
 	@BeforeEach
 	void before() throws Exception {
-		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResource("/certificate.json"), Map.class);
+		Map<String, String> data = this.OBJECT_MAPPER.readValue(getClass().getResourceAsStream("/certificate.json"),
+				Map.class);
 
 		this.certificate = Certificate.of(data.get("serial_number"), data.get("certificate"), data.get("issuing_ca"),
 				List.of(), 0L);
