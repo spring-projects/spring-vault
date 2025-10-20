@@ -249,7 +249,14 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 
 		@Override
 		public VaultToken getSessionToken() {
-			return this.sessionManager.getSessionToken().block(Duration.ofSeconds(30));
+
+			VaultToken token = this.sessionManager.getSessionToken().block(Duration.ofSeconds(30));
+
+			if (token == null) {
+				throw new IllegalStateException("Failed to obtain VaultToken from ReactiveSessionManager");
+			}
+
+			return token;
 		}
 
 	}
