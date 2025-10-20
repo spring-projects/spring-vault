@@ -19,10 +19,10 @@ pipeline {
 	stages {
 		stage("Docker images") {
 			parallel {
-				stage('Publish JDK 17 + Vault Docker image') {
+				stage('Publish JDK 25 + Vault Docker image') {
 					when {
 						anyOf {
-							changeset "ci/openjdk17-vault/Dockerfile"
+							changeset "ci/openjdk25-vault/Dockerfile"
 							changeset "src/test/bash/install_vault.sh"
 							changeset "ci/pipeline.properties"
 						}
@@ -32,7 +32,7 @@ pipeline {
 
 					steps {
 						script {
-							def image = docker.build("${p['docker.build.image.name']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk17-vault/Dockerfile .")
+							def image = docker.build("${p['docker.build.image.name']}", "--build-arg BASE=${p['docker.java.main.image']} --build-arg VAULT=${p['docker.vault.version']} -f ci/openjdk25-vault/Dockerfile .")
 							docker.withRegistry(p['docker.registry'], p['docker.credentials']) {
 								image.push()
 							}
@@ -42,7 +42,7 @@ pipeline {
 			}
 		}
 
-		stage("test: baseline (Java 17)") {
+		stage("test: baseline (Java 25)") {
 			when {
 				beforeAgent(true)
 				anyOf {
