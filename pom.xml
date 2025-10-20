@@ -39,7 +39,7 @@
 		<jackson2-databind.version>2.20.0</jackson2-databind.version>
 		<jetty-reactive-httpclient.version>4.0.11</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
-		<junit.version>6.0.0-RC3</junit.version>
+		<junit.version>6.0.0</junit.version>
 		<kotlin.version>2.2.20</kotlin.version>
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
 		<mockk.version>1.14.5</mockk.version>
