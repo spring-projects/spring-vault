@@ -33,10 +33,10 @@
 		</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.5</httpclient5.version>
 		<httpcore5.version>5.3.5</httpcore5.version>
-		<jackson-annotations.version>3.0-rc5</jackson-annotations.version>
-		<jackson-core.version>3.0.0-rc9</jackson-core.version>
-		<jackson-databind.version>3.0.0-rc9</jackson-databind.version>
-		<jackson2-databind.version>2.19.0</jackson2-databind.version>
+		<jackson-annotations.version>2.20</jackson-annotations.version>
+		<jackson-core.version>3.0.0</jackson-core.version>
+		<jackson-databind.version>3.0.0</jackson-databind.version>
+		<jackson2-databind.version>2.20.0</jackson2-databind.version>
 		<jetty-reactive-httpclient.version>4.0.11</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>6.0.0-RC3</junit.version>
