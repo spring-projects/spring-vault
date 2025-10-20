@@ -22,6 +22,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -39,6 +40,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -46,7 +48,7 @@ import org.springframework.web.client.RestOperations;
  */
 public class VaultWrappingTemplate implements VaultWrappingOperations {
 
-	private final VaultOperations vaultOperations;
+	private final VaultTemplate vaultOperations;
 
 	/**
 	 * Create a new {@link VaultWrappingTemplate} given {@link VaultOperations}.
@@ -56,7 +58,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
-		this.vaultOperations = vaultOperations;
+		this.vaultOperations = VaultTemplate.from(vaultOperations);
 	}
 
 	@Nullable
@@ -90,9 +92,8 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@Override
 	public VaultResponse read(VaultToken token) {
 
-		return doUnwrap(token, (restOperations, entity) -> {
-			return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST, entity, VaultResponse.class)
-				.getBody();
+		return doUnwrap(token, (client, headers) -> {
+			return client.post().uri("sys/wrapping/unwrap").headers(headers).retrieve().body(VaultResponse.class);
 		});
 	}
 
@@ -102,19 +103,19 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
-		return doUnwrap(token, (restOperations, entity) -> {
-			return restOperations.exchange("sys/wrapping/unwrap", HttpMethod.POST, entity, ref).getBody();
+		return doUnwrap(token, (client, headers) -> {
+			return client.post().uri("sys/wrapping/unwrap").headers(headers).retrieve().body(ref);
 		});
 	}
 
 	@SuppressWarnings("NullAway")
 	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
-			BiFunction<RestOperations, HttpEntity<?>, @Nullable T> requestFunction) {
+			BiFunction<RestClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
 
-		return this.vaultOperations.doWithVault((RestOperationsCallback<@Nullable T>) restOperations -> {
+		return this.vaultOperations.doWithVaultClient((RestClientCallback<@Nullable T>) client -> {
 
 			try {
-				return requestFunction.apply(restOperations, new HttpEntity<>(VaultHttpHeaders.from(token)));
+				return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -153,14 +154,14 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		Assert.notNull(body, "Body must not be null");
 		Assert.notNull(duration, "TTL duration must not be null");
 
-		VaultResponse response = this.vaultOperations.doWithSession(restOperations -> {
+		VaultResponse response = this.vaultOperations.doWithSessionClient(client -> {
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("X-Vault-Wrap-TTL", Long.toString(duration.getSeconds()));
-
-			return restOperations
-				.exchange("sys/wrapping/wrap", HttpMethod.POST, new HttpEntity<>(body, headers), VaultResponse.class)
-				.getBody();
+			return client.post()
+				.uri("sys/wrapping/wrap")
+				.body(body)
+				.header("X-Vault-Wrap-TTL", Long.toString(duration.getSeconds()))
+				.retrieve()
+				.body(VaultResponse.class);
 		});
 
 		Map<String, String> wrapInfo = response.getWrapInfo();

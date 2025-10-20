@@ -45,7 +45,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 public class VaultPkiTemplate implements VaultPkiOperations {
 
-	private final VaultOperations vaultOperations;
+	private final VaultTemplate vaultOperations;
 
 	private final String path;
 
@@ -60,7 +60,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations = vaultOperations;
+		this.vaultOperations = VaultTemplate.from(vaultOperations);
 		this.path = path;
 	}
 
@@ -95,10 +95,10 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		request.putIfAbsent("format", "der");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSessionClient(client -> {
 
 			try {
-				return restOperations.postForObject(requestPath, request, responseType, this.path, roleName);
+				return client.post().uri(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -112,13 +112,15 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
 
-		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
+		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
 
 			try {
-				restOperations.postForObject("{path}/revoke", Collections.singletonMap("serial_number", serialNumber),
-						Map.class, this.path);
-
-				return null;
+				return client.post()
+					.uri("{path}/revoke", this.path)
+					.body(Collections.singletonMap("serial_number", serialNumber))
+					.retrieve()
+					.toBodilessEntity()
+					.getBody();
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -132,11 +134,14 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.notNull(encoding, "Encoding must not be null");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable InputStream>) client -> {
 
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {
-				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path);
+				ResponseEntity<byte[]> response = client.get()
+					.uri(requestPath, this.path)
+					.retrieve()
+					.toEntity(byte[].class);
 
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());
@@ -156,11 +161,13 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.hasText(issuer, "Issuer must not be empty");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSessionClient(client -> {
 
 			try {
-				return restOperations.getForObject("{path}/issuer/{issuer}/json",
-						VaultIssuerCertificateRequestResponse.class, this.path, issuer);
+				return client.get()
+					.uri("{path}/issuer/{issuer}/json", this.path, issuer)
+					.retrieve()
+					.body(VaultIssuerCertificateRequestResponse.class);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -175,13 +182,15 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Assert.hasText(issuer, "Issuer must not be empty");
 		Assert.notNull(encoding, "Encoding must not be null");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSessionClient(client -> {
 
 			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
 
 			try {
-				ResponseEntity<byte[]> response = restOperations.getForEntity(requestPath, byte[].class, this.path,
-						issuer);
+				ResponseEntity<byte[]> response = client.get()
+					.uri(requestPath, this.path, issuer)
+					.retrieve()
+					.toEntity(byte[].class);
 
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());

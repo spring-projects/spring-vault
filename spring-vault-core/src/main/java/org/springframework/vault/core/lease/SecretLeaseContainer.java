@@ -824,8 +824,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	private Lease doRenew(Lease lease) {
-
-		return this.operations.doWithSession(restOperations -> this.leaseEndpoints.renew(lease, restOperations));
+		return this.operations.doWithSession(operations -> this.leaseEndpoints.renew(lease, operations));
 	}
 
 	/**
@@ -872,8 +871,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			onBeforeLeaseRevocation(requestedSecret, lease);
 
-			this.operations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
-				this.leaseEndpoints.revoke(lease, restOperations);
+			this.operations.doWithSession((RestOperationsCallback<@Nullable Void>) operations -> {
+				this.leaseEndpoints.revoke(lease, operations);
 				return null;
 			});
 

@@ -27,6 +27,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationUtil.*;
@@ -52,8 +53,14 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 
 	private final UsernamePasswordAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
+	/**
+	 * Create a {@link UsernamePasswordAuthentication} using
+	 * {@link UsernamePasswordAuthenticationOptions} and {@link RestOperations}.
+	 * @param options must not be {@literal null}.
+	 * @param restOperations must not be {@literal null}.
+	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options,
 			RestOperations restOperations) {
 
@@ -61,7 +68,23 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a {@link UsernamePasswordAuthentication} using
+	 * {@link UsernamePasswordAuthenticationOptions} and {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -94,7 +117,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 
 		try {
-			VaultResponse response = restOperations.postForObject(
+			VaultResponse response = adapter.postForObject(
 					"%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()), createLoginBody(options),
 					VaultResponse.class);
 

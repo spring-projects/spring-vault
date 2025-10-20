@@ -34,6 +34,7 @@ import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -94,11 +95,52 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	 */
 	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options,
 			RestOperations restOperations, TransportChannelProvider transportChannelProvider) {
+		this(options, ClientAdapter.from(restOperations), transportChannelProvider);
+	}
 
-		super(restOperations);
+	/**
+	 * Create a new instance of {@link GcpIamCredentialsAuthentication} given
+	 * {@link GcpIamCredentialsAuthenticationOptions} and {@link RestClient}. This
+	 * constructor initializes {@link InstantiatingGrpcChannelProvider} for Google API
+	 * usage.
+	 * @param options must not be {@literal null}.
+	 * @param client HTTP client for Vault login, must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options, RestClient client) {
+		this(options, client, IamCredentialsStubSettings.defaultGrpcTransportProviderBuilder().build());
+	}
+
+	/**
+	 * Create a new instance of {@link GcpIamCredentialsAuthentication} given
+	 * {@link GcpIamCredentialsAuthenticationOptions}, {@link RestOperations} and
+	 * {@link TransportChannelProvider}.
+	 * @param options must not be {@literal null}.
+	 * @param restClient HTTP client for Vault login, must not be {@literal null}.
+	 * @param transportChannelProvider Provider for transport channel Google API use, must
+	 * not be {@literal null}.
+	 * @since 4.0
+	 */
+	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options, RestClient restClient,
+			TransportChannelProvider transportChannelProvider) {
+		this(options, ClientAdapter.from(restClient), transportChannelProvider);
+	}
+
+	/**
+	 * Create a new instance of {@link GcpIamCredentialsAuthentication} given
+	 * {@link GcpIamCredentialsAuthenticationOptions}, {@link RestOperations} and
+	 * {@link TransportChannelProvider}.
+	 * @param options must not be {@literal null}.
+	 * @param adapter HTTP client for Vault login, must not be {@literal null}.
+	 * @param transportChannelProvider Provider for transport channel Google API use, must
+	 * not be {@literal null}.
+	 */
+	GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options, ClientAdapter adapter,
+			TransportChannelProvider transportChannelProvider) {
+
+		super(adapter);
 
 		Assert.notNull(options, "GcpAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
 		Assert.notNull(transportChannelProvider, "TransportChannelProvider must not be null");
 
 		this.options = options;

@@ -24,6 +24,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -44,7 +45,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 	private final GitHubAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a {@link GitHubAuthentication} using {@link GitHubAuthenticationOptions} and
@@ -58,7 +59,23 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a {@link GitHubAuthentication} using {@link GitHubAuthenticationOptions} and
+	 * {@link RestOperations}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public GitHubAuthentication(GitHubAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "GithubAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -88,8 +105,8 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 		try {
 
-			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
+					login, VaultResponse.class);
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using GitHub authentication");

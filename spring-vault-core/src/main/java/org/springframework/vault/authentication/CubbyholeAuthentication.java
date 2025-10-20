@@ -29,6 +29,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -136,7 +137,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private final CubbyholeAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
@@ -150,7 +151,23 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a new {@link CubbyholeAuthentication} given
+	 * {@link CubbyholeAuthenticationOptions} and {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -187,7 +204,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
-			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.restOperations);
+			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.adapter);
 			tokenToUse = adapter.login();
 		}
 
@@ -205,7 +222,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
 			HttpEntity<Object> requestEntity = getRequestEntity(this.options);
-			ResponseEntity<VaultResponse> entity = this.restOperations.exchange(url, unwrapMethod, requestEntity,
+			ResponseEntity<VaultResponse> entity = this.adapter.exchange(url, unwrapMethod, requestEntity,
 					VaultResponse.class);
 
 			return ResponseUtil.getRequiredBody(entity);

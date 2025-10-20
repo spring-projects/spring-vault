@@ -160,7 +160,7 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 	<T> Mono<T> doRead(Function<WebClient, RequestHeadersSpec<?>> callback,
 			Function<ClientResponse, Mono<T>> responseFunction) {
 		return this.reactiveVaultOperations
-			.doWithSession((restOperations) -> callback.apply(restOperations).exchangeToMono(responseFunction));
+			.doWithSession((webClient) -> callback.apply(webClient).exchangeToMono(responseFunction));
 	}
 
 	/**

@@ -30,6 +30,7 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -39,7 +40,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 public class VaultTokenTemplate implements VaultTokenOperations {
 
-	private final VaultOperations vaultOperations;
+	private final VaultTemplate vaultOperations;
 
 	/**
 	 * Create a new {@link VaultTokenTemplate} with the given {@link VaultOperations}.
@@ -49,7 +50,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
-		this.vaultOperations = vaultOperations;
+		this.vaultOperations = VaultTemplate.from(vaultOperations);
 	}
 
 	@Override
@@ -107,12 +108,15 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return this.vaultOperations.doWithSession(restOperations -> {
+		return this.vaultOperations.doWithSessionClient(client -> {
 			try {
-				ResponseEntity<T> exchange = restOperations.exchange(path, HttpMethod.POST,
-						body == null ? HttpEntity.EMPTY : new HttpEntity<>(body), responseType);
+				RestClient.RequestBodySpec spec = client.post().uri(path);
 
-				return exchange.getBody();
+				if (body != null) {
+					spec = spec.body(body);
+				}
+
+				return spec.retrieve().body(responseType);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e, path);
@@ -125,12 +129,14 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
+		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
 
 			try {
-				restOperations.exchange(path, HttpMethod.POST,
-						new HttpEntity<>(Collections.singletonMap("token", token.getToken())), responseType);
-
+				client.post()
+					.uri(path)
+					.body(Collections.singletonMap("token", token.getToken()))
+					.retrieve()
+					.toEntity(responseType);
 				return null;
 			}
 			catch (HttpStatusCodeException e) {

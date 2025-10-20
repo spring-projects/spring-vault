@@ -36,6 +36,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestB
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -64,9 +65,9 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	private final AwsEc2AuthenticationOptions options;
 
-	private final RestOperations vaultRestOperations;
+	private final ClientAdapter vaultAdapter;
 
-	private final RestOperations awsMetadataRestOperations;
+	private final ClientAdapter awsMetadataAdapter;
 
 	private final AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
 
@@ -94,8 +95,38 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(awsMetadataRestOperations, "AWS Metadata RestOperations must not be null");
 
 		this.options = options;
-		this.vaultRestOperations = vaultRestOperations;
-		this.awsMetadataRestOperations = awsMetadataRestOperations;
+		this.vaultAdapter = ClientAdapter.from(vaultRestOperations);
+		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataRestOperations);
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public AwsEc2Authentication(RestClient vaultClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient);
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication} specifying
+	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
+	 * {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param awsMetadataClient must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestClient vaultClient,
+			RestClient awsMetadataClient) {
+
+		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
+		Assert.notNull(vaultClient, "Vault RestClient must not be null");
+		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
+
+		this.options = options;
+		this.vaultAdapter = ClientAdapter.from(vaultClient);
+		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataClient);
 	}
 
 	/**
@@ -179,7 +210,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 		try {
 
-			VaultResponse response = this.vaultRestOperations
+			VaultResponse response = this.vaultAdapter
 				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
@@ -225,8 +256,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		try {
 
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
-			ResponseEntity<String> exchange = this.awsMetadataRestOperations
-				.exchange(this.options.getIdentityDocumentUri(), HttpMethod.GET, entity, String.class);
+			ResponseEntity<String> exchange = this.awsMetadataAdapter.exchange(this.options.getIdentityDocumentUri(),
+					HttpMethod.GET, entity, String.class);
 			if (!exchange.getStatusCode().is2xxSuccessful()) {
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
@@ -250,7 +281,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 			HttpEntity<Object> entity = new HttpEntity<>(createTokenRequestHeaders(this.options));
 
-			ResponseEntity<String> exchange = this.awsMetadataRestOperations
+			ResponseEntity<String> exchange = this.awsMetadataAdapter
 				.exchange(this.options.getMetadataTokenRequestUri(), HttpMethod.PUT, entity, String.class);
 			if (!exchange.getStatusCode().is2xxSuccessful()) {
 				throw new HttpClientErrorException(exchange.getStatusCode());

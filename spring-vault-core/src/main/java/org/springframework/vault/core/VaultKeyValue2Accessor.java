@@ -52,10 +52,11 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	@SuppressWarnings("unchecked")
 	public @Nullable List<String> list(String path) {
 
-		VaultListResponse read = doRead(restOperations -> {
-			return restOperations.exchange(
-					"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
-					HttpMethod.GET, null, VaultListResponse.class);
+		VaultListResponse read = doRead(client -> {
+			return client.get()
+				.uri("%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+				.retrieve()
+				.toEntity(VaultListResponse.class);
 		});
 
 		if (read == null) {

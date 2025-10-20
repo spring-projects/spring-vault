@@ -37,6 +37,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -53,7 +54,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private final AuthenticationSteps chain;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
@@ -67,7 +68,22 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.chain = steps;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
+	 * and {@link RestOperations}.
+	 * @param steps must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 */
+	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client) {
+
+		Assert.notNull(steps, "AuthenticationSteps must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.chain = steps;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	@Override
@@ -152,8 +168,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		if (definition.getUriTemplate() != null) {
 
-			ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUriTemplate(),
-					definition.getMethod(), getEntity(definition.getEntity(), state), definition.getResponseType(),
+			ResponseEntity<?> exchange = this.adapter.exchange(definition.getUriTemplate(), definition.getMethod(),
+					getEntity(definition.getEntity(), state), definition.getResponseType(),
 					(Object[]) definition.getUrlVariables());
 
 			return exchange.getBody();
@@ -161,7 +177,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		if (definition.getUri() != null) {
 
-			ResponseEntity<?> exchange = this.restOperations.exchange(definition.getUri(), definition.getMethod(),
+			ResponseEntity<?> exchange = this.adapter.exchange(definition.getUri(), definition.getMethod(),
 					getEntity(definition.getEntity(), state), definition.getResponseType());
 
 			return exchange.getBody();

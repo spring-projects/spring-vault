@@ -32,6 +32,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestB
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -67,9 +68,9 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 	private final AzureMsiAuthenticationOptions options;
 
-	private final RestOperations vaultRestOperations;
+	private final ClientAdapter vaultAdapter;
 
-	private final RestOperations azureMetadataRestOperations;
+	private final ClientAdapter azureMetadataAdapter;
 
 	/**
 	 * Create a new {@link AzureMsiAuthentication}.
@@ -96,8 +97,38 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		Assert.notNull(azureMetadataRestOperations, "Azure Instance Metadata RestOperations must not be null");
 
 		this.options = options;
-		this.vaultRestOperations = vaultRestOperations;
-		this.azureMetadataRestOperations = azureMetadataRestOperations;
+		this.vaultAdapter = ClientAdapter.from(vaultRestOperations);
+		this.azureMetadataAdapter = ClientAdapter.from(azureMetadataRestOperations);
+	}
+
+	/**
+	 * Create a new {@link AzureMsiAuthentication}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient client) {
+		this(options, client, client);
+	}
+
+	/**
+	 * Create a new {@link AzureMsiAuthentication} specifying
+	 * {@link AzureMsiAuthenticationOptions}, a Vault and an Azure-Metadata-specific
+	 * {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param azureMetadataClient must not be {@literal null}.
+	 */
+	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient vaultClient,
+			RestClient azureMetadataClient) {
+
+		Assert.notNull(options, "AzureAuthenticationOptions must not be null");
+		Assert.notNull(vaultClient, "Vault RestOperations must not be null");
+		Assert.notNull(azureMetadataClient, "Azure Instance Metadata RestOperations must not be null");
+
+		this.options = options;
+		this.vaultAdapter = ClientAdapter.from(vaultClient);
+		this.azureMetadataAdapter = ClientAdapter.from(azureMetadataClient);
 	}
 
 	/**
@@ -156,7 +187,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		try {
 
-			VaultResponse response = this.vaultRestOperations
+			VaultResponse response = this.vaultAdapter
 				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 
 			Assert.state(response != null, "Auth field must not be null");
@@ -188,8 +219,8 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	@SuppressWarnings({ "NullAway", "rawtypes" })
 	private String getAccessToken() {
 
-		ResponseEntity<Map> response = this.azureMetadataRestOperations
-			.exchange(this.options.getIdentityTokenServiceUri(), HttpMethod.GET, METADATA_HEADERS, Map.class);
+		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getIdentityTokenServiceUri(),
+				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
 		return (String) ResponseUtil.getRequiredBody(response).get("access_token");
 	}
@@ -204,8 +235,8 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private AzureVmEnvironment fetchAzureVmEnvironment() {
 
-		ResponseEntity<Map> response = this.azureMetadataRestOperations
-			.exchange(this.options.getInstanceMetadataServiceUri(), HttpMethod.GET, METADATA_HEADERS, Map.class);
+		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getInstanceMetadataServiceUri(),
+				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
 		return toAzureVmEnvironment(ResponseUtil.getRequiredBody(response));
 	}

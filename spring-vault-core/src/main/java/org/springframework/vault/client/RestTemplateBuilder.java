@@ -34,6 +34,7 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.AbstractClientHttpRequestFactoryWrapper;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
@@ -46,7 +47,7 @@ import org.springframework.web.client.RestTemplate;
  * ClientHttpRequestFactory}, {@link #errorHandler(ResponseErrorHandler) error handlers}
  * and {@link #defaultHeader(String, String) default headers}.
  *
- * By default the built {@link RestTemplate} will attempt to use the most suitable
+ * By default, the built {@link RestTemplate} will attempt to use the most suitable
  * {@link ClientHttpRequestFactory} using {@link ClientHttpRequestFactoryFactory#create}.
  *
  * @author Mark Paluch
@@ -67,9 +68,16 @@ public class RestTemplateBuilder {
 
 	private final List<RestTemplateCustomizer> customizers = new ArrayList<>();
 
-	private final Set<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers = new LinkedHashSet<>();
+	private final Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>();
 
 	private RestTemplateBuilder() {
+	}
+
+	RestTemplateBuilder(@Nullable VaultEndpointProvider endpointProvider,
+			Supplier<ClientHttpRequestFactory> requestFactory, @Nullable ResponseErrorHandler errorHandler) {
+		this.endpointProvider = endpointProvider;
+		this.requestFactory = requestFactory;
+		this.errorHandler = errorHandler;
 	}
 
 	/**
@@ -78,6 +86,22 @@ public class RestTemplateBuilder {
 	 */
 	public static RestTemplateBuilder builder() {
 		return new RestTemplateBuilder();
+	}
+
+	/**
+	 * Create a new {@link RestTemplateBuilder} initialized from
+	 * {@link RestClientBuilder}.
+	 * @return a new {@link RestTemplateBuilder}.
+	 * @since 4.0
+	 */
+	public static RestTemplateBuilder builder(RestClientBuilder restClientBuilder) {
+
+		RestTemplateBuilder builder = new RestTemplateBuilder(restClientBuilder.endpointProvider,
+				restClientBuilder.requestFactory, restClientBuilder.errorHandler);
+		builder.defaultHeaders.putAll(restClientBuilder.defaultHeaders);
+		builder.requestCustomizers.addAll(restClientBuilder.requestInitializers);
+
+		return builder;
 	}
 
 	/**
@@ -171,7 +195,6 @@ public class RestTemplateBuilder {
 	public RestTemplateBuilder customizers(RestTemplateCustomizer... customizer) {
 
 		this.customizers.addAll(Arrays.asList(customizer));
-
 		return this;
 	}
 
@@ -182,12 +205,11 @@ public class RestTemplateBuilder {
 	 * @param requestCustomizers the request customizers to add.
 	 * @return {@code this} {@link RestTemplateBuilder}.
 	 */
-	@SuppressWarnings("unchecked")
 	public RestTemplateBuilder requestCustomizers(RestTemplateRequestCustomizer<?>... requestCustomizers) {
 
 		Assert.notNull(requestCustomizers, "RequestCustomizers must not be null");
 
-		this.requestCustomizers.addAll((List) Arrays.asList(requestCustomizers));
+		this.requestCustomizers.addAll(Arrays.asList(requestCustomizers));
 		return this;
 	}
 
@@ -224,8 +246,7 @@ public class RestTemplateBuilder {
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
 
 		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
-		LinkedHashSet<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers = new LinkedHashSet<>(
-				this.requestCustomizers);
+		LinkedHashSet<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>(this.requestCustomizers);
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate(this.endpointProvider,
 				new RestTemplateBuilderClientHttpRequestFactoryWrapper(requestFactory, requestCustomizers));
@@ -247,22 +268,31 @@ public class RestTemplateBuilder {
 
 	static class RestTemplateBuilderClientHttpRequestFactoryWrapper extends AbstractClientHttpRequestFactoryWrapper {
 
-		private final Set<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers;
+		private final Set<ClientHttpRequestInitializer> requestCustomizers;
 
 		RestTemplateBuilderClientHttpRequestFactoryWrapper(ClientHttpRequestFactory requestFactory,
-				Set<RestTemplateRequestCustomizer<ClientHttpRequest>> requestCustomizers) {
+				Set<ClientHttpRequestInitializer> requestCustomizers) {
 
 			super(requestFactory);
 			this.requestCustomizers = requestCustomizers;
 		}
 
 		@Override
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod,
 				ClientHttpRequestFactory requestFactory) throws IOException {
 
 			ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
 
-			this.requestCustomizers.forEach(it -> it.customize(request));
+			this.requestCustomizers.forEach(it -> {
+
+				if (it instanceof RestTemplateRequestCustomizer customizer) {
+					customizer.customize(request);
+				}
+				else {
+					it.initialize(request);
+				}
+			});
 
 			return request;
 		}

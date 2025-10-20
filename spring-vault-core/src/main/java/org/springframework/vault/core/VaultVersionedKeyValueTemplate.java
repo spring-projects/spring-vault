@@ -45,7 +45,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  */
 public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor implements VaultVersionedKeyValueOperations {
 
-	private final VaultOperations vaultOperations;
+	private final VaultTemplate vaultOperations;
 
 	private final String path;
 
@@ -59,7 +59,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 
 		super(vaultOperations, path);
 
-		this.vaultOperations = vaultOperations;
+		this.vaultOperations = VaultTemplate.from(vaultOperations);
 		this.path = path;
 	}
 
@@ -101,10 +101,10 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		VaultResponseSupport<VaultResponseSupport<Object>> response = this.vaultOperations
-			.doWithSession((RestOperationsCallback<@Nullable VaultResponseSupport>) restOperations -> {
+			.doWithSessionClient((RestClientCallback<@Nullable VaultResponseSupport>) client -> {
 
 				try {
-					return restOperations.exchange(secretPath, HttpMethod.GET, null, responseTypeToUse).getBody();
+					return client.get().uri(secretPath).retrieve().body(responseTypeToUse);
 				}
 				catch (HttpStatusCodeException e) {
 

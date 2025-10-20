@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -41,7 +42,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private final ClientCertificateAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
@@ -63,7 +64,30 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+		this.options = options;
+	}
+
+	/**
+	 * Create a {@link ClientCertificateAuthentication} using {@link RestClient}.
+	 * @param client must not be {@literal null}.
+	 */
+	public ClientCertificateAuthentication(RestClient client) {
+		this(ClientCertificateAuthenticationOptions.builder().build(), client);
+	}
+
+	/**
+	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 2.3
+	 */
+	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestOperations must not be null");
+
+		this.adapter = ClientAdapter.from(client);
 		this.options = options;
 	}
 
@@ -105,8 +129,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 		try {
 			Map<String, Object> request = getRequestBody(this.options);
-			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), request, VaultResponse.class);
+			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
+					request, VaultResponse.class);
 
 			Assert.state(response != null, "Response must not be null");
 			Assert.state(response.getAuth() != null, "Auth field must not be null");

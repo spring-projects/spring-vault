@@ -25,6 +25,7 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -48,7 +49,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 
 	private final KubernetesAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a {@link KubernetesAuthentication} using
@@ -62,7 +63,23 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a {@link KubernetesAuthentication} using
+	 * {@link KubernetesAuthenticationOptions} and {@link RestOperations}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -86,8 +103,8 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 		Map<String, String> login = getKubernetesLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
 		try {
-			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
+					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

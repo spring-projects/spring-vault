@@ -37,6 +37,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.support.PemObject;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -63,7 +64,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 	private final PcfAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
@@ -77,7 +78,23 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
+	 * {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public PcfAuthentication(PcfAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -106,8 +123,8 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 				this.options.getInstanceCertSupplier().get(), this.options.getInstanceKeySupplier().get());
 
 		try {
-			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
+			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
+					login, VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

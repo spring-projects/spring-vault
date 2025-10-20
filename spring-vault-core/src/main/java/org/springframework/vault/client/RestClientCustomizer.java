@@ -15,26 +15,23 @@
  */
 package org.springframework.vault.client;
 
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpRequestInitializer;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClient;
 
 /**
- * Callback interface that can be used to customize the {@link ClientHttpRequest} sent
- * from a {@link RestTemplate}.
+ * Callback interface that can be used to customize a {@link RestClient.Builder}. Beans
+ * implementing this interface are applied to {@link RestClientBuilder}.
  *
- * @param <T> the {@link ClientHttpRequest} type.
- * @since 2.2
- * @see RestTemplateBuilder
+ * @author Mark Paluch
+ * @since 4.0
+ * @see RestClientBuilder#customizers(RestClientCustomizer...)
  */
-public interface RestTemplateRequestCustomizer<T extends ClientHttpRequest> extends ClientHttpRequestInitializer {
+@FunctionalInterface
+public interface RestClientCustomizer {
 
 	/**
-	 * Customize the specified {@link ClientHttpRequest}.
-	 * @param request the request to customize.
+	 * Callback to customize a {@link RestClient.Builder} instance.
+	 * @param builder the template to customize.
 	 */
-	default void customize(T request) {
-		initialize(request);
-	}
+	void customize(RestClient.Builder builder);
 
 }

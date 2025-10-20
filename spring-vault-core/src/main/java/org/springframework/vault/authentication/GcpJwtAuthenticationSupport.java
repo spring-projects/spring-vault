@@ -37,13 +37,13 @@ public abstract class GcpJwtAuthenticationSupport {
 
 	private static final Log logger = LogFactory.getLog(GcpJwtAuthenticationSupport.class);
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
-	GcpJwtAuthenticationSupport(RestOperations restOperations) {
+	GcpJwtAuthenticationSupport(ClientAdapter adapter) {
 
-		Assert.notNull(restOperations, "Vault RestOperations must not be null");
+		Assert.notNull(adapter, "Vault ClientAdapter must not be null");
 
-		this.restOperations = restOperations;
+		this.adapter = adapter;
 	}
 
 	/**
@@ -60,7 +60,7 @@ public abstract class GcpJwtAuthenticationSupport {
 
 		try {
 
-			VaultResponse response = this.restOperations.postForObject(AuthenticationUtil.getLoginPath(path), login,
+			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(path), login,
 					VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");

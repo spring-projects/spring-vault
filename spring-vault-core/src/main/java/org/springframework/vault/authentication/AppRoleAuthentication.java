@@ -40,6 +40,7 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
@@ -67,7 +68,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 	private final AppRoleAuthenticationOptions options;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
@@ -81,7 +82,23 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
+	 * and {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestClient client) {
+
+		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.options = options;
+		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
@@ -186,7 +203,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		Map<String, String> login = getAppRoleLoginBody(this.options.getRoleId(), this.options.getSecretId());
 
 		try {
-			VaultResponse response = this.restOperations.postForObject(getLoginPath(this.options.getPath()), login,
+			VaultResponse response = this.adapter.postForObject(getLoginPath(this.options.getPath()), login,
 					VaultResponse.class);
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
@@ -212,7 +229,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 			try {
 
-				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(getRoleIdIdPath(this.options),
+				ResponseEntity<VaultResponse> entity = this.adapter.exchange(getRoleIdIdPath(this.options),
 						HttpMethod.GET, createHttpEntity(token), VaultResponse.class);
 				return (String) ResponseUtil.getRequiredValue(entity, "role_id");
 			}
@@ -228,7 +245,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 			try {
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(unwrappingEndpoints.getPath(),
+				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
 						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
 
 				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
@@ -256,7 +273,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			VaultToken token = ((Pull) secretId).getInitialToken();
 
 			try {
-				VaultResponse response = this.restOperations.postForObject(getSecretIdPath(this.options),
+				VaultResponse response = this.adapter.postForObject(getSecretIdPath(this.options),
 						createHttpEntity(token), VaultResponse.class);
 				return (String) ResponseUtil.getRequiredData(response).get("secret_id");
 			}
@@ -273,7 +290,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			try {
 
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.restOperations.exchange(unwrappingEndpoints.getPath(),
+				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
 						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
 
 				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));

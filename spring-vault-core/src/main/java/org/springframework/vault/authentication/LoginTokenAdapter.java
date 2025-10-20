@@ -45,7 +45,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 	private final ClientAuthentication delegate;
 
-	private final RestOperations restOperations;
+	private final ClientAdapter adapter;
 
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
@@ -59,7 +59,22 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.delegate = delegate;
-		this.restOperations = restOperations;
+		this.adapter = ClientAdapter.from(restOperations);
+	}
+
+	/**
+	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
+	 * decorate and {@link ClientAdapter}.
+	 * @param delegate must not be {@literal null}.
+	 * @param adapter must not be {@literal null}.
+	 */
+	LoginTokenAdapter(ClientAuthentication delegate, ClientAdapter adapter) {
+
+		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
+		Assert.notNull(adapter, "ClientAdapter must not be null");
+
+		this.delegate = delegate;
+		this.adapter = adapter;
 	}
 
 	@Override
@@ -68,20 +83,20 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
-		return augmentWithSelfLookup(this.restOperations, token);
+		return augmentWithSelfLookup(this.adapter, token);
 	}
 
-	static LoginToken augmentWithSelfLookup(RestOperations restOperations, VaultToken token) {
+	static LoginToken augmentWithSelfLookup(ClientAdapter adapter, VaultToken token) {
 
-		Map<String, Object> data = lookupSelf(restOperations, token);
+		Map<String, Object> data = lookupSelf(adapter, token);
 
 		return LoginTokenUtil.from(token.toCharArray(), data);
 	}
 
-	private static Map<String, Object> lookupSelf(RestOperations restOperations, VaultToken token) {
+	private static Map<String, Object> lookupSelf(ClientAdapter adapter, VaultToken token) {
 
 		try {
-			ResponseEntity<VaultResponse> entity = restOperations.exchange("auth/token/lookup-self", HttpMethod.GET,
+			ResponseEntity<VaultResponse> entity = adapter.exchange("auth/token/lookup-self", HttpMethod.GET,
 					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
 
 			Assert.state(entity.getBody() != null && entity.getBody().getData() != null, "Token response is null");

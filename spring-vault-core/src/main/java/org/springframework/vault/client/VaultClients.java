@@ -18,6 +18,7 @@ package org.springframework.vault.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -27,10 +28,9 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriBuilder;
@@ -39,8 +39,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Vault Client factory to create {@link RestTemplate} configured to the needs of
- * accessing Vault.
+ * Vault Client factory to create {@link RestTemplate} / {@link RestClient} configured to
+ * the needs of accessing Vault.
  *
  * @author Mark Paluch
  * @see VaultEndpoint
@@ -58,11 +58,10 @@ public class VaultClients {
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * Requires Jackson for Object-to-JSON mapping.
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
-	 * @see MappingJackson2HttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
 		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint), requestFactory);
@@ -78,11 +77,10 @@ public class VaultClients {
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * Requires Jackson for Object-to-JSON mapping.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
-	 * @see MappingJackson2HttpMessageConverter
 	 * @since 1.1
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
@@ -97,6 +95,41 @@ public class VaultClients {
 	}
 
 	/**
+	 * Create a {@link org.springframework.web.client.RestClient} configured with
+	 * {@link VaultEndpointProvider} and {@link ClientHttpRequestFactory}. The client
+	 * accepts relative URIs without a leading slash that are expanded to use
+	 * {@link VaultEndpoint}. {@link RestClient} is configured to enforce serialization to
+	 * a byte array prior continuing the request. Eager serialization leads to a known
+	 * request body size that is required to send a
+	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
+	 * Otherwise, Vault will deny body processing.
+	 * <p>
+	 * Requires Jackson for Object-to-JSON mapping.
+	 * @param endpointProvider must not be {@literal null}.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestTemplate}.
+	 * @since 4.0
+	 */
+	public static RestClient createRestClient(VaultEndpointProvider endpointProvider,
+			ClientHttpRequestFactory requestFactory, Consumer<RestClient.Builder> builderCustomizer) {
+
+		RestClient.Builder builder = RestClient.builder()
+			.requestFactory(requestFactory)
+			.bufferContent((uri, httpMethod) -> true)
+			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
+			.configureMessageConverters(clientBuilder -> {
+
+				clientBuilder.customMessageConverter(new ByteArrayHttpMessageConverter());
+				clientBuilder.customMessageConverter(new StringHttpMessageConverter());
+				clientBuilder.jsonMessageConverter(JacksonCompat.instance().createHttpMessageConverter());
+			});
+
+		builderCustomizer.accept(builder);
+
+		return builder.build();
+	}
+
+	/**
 	 * Create a {@link RestTemplate} for Vault interaction. {@link RestTemplate} is
 	 * configured with a {@link ClientHttpRequestInterceptor} to enforce serialization to
 	 * a byte array prior continuing the request. Eager serialization leads to a known
@@ -104,9 +137,8 @@ public class VaultClients {
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * Requires Jackson for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
-	 * @see JacksonJsonHttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate() {
 

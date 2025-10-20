@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,7 +32,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
@@ -50,8 +50,8 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Default implementation of {@link VaultSysOperations}.
@@ -70,7 +70,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static final Health HEALTH = new Health();
 
-	private final VaultOperations vaultOperations;
+	private final VaultTemplate vaultOperations;
 
 	/**
 	 * Create a new {@link VaultSysTemplate} with the given {@link VaultOperations}.
@@ -80,19 +80,21 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 
-		this.vaultOperations = vaultOperations;
-
+		this.vaultOperations = VaultTemplate.from(vaultOperations);
 	}
 
 	@Override
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean isInitialized() {
 
-		return requireResponse(this.vaultOperations.doWithSession(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithSessionClient(client -> {
 
 			try {
-				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) restOperations.exchange("sys/init",
-						HttpMethod.GET, emptyNamespace(null), Map.class);
+				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) client.get()
+					.uri("sys/init")
+					.headers(emptyNamespace())
+					.retrieve()
+					.toEntity(Map.class);
 
 				Assert.state(body.getBody() != null, "Initialization response must not be null");
 
@@ -110,12 +112,15 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 
-		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
 
 			try {
-				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations.exchange("sys/init",
-						HttpMethod.PUT, emptyNamespace(vaultInitializationRequest),
-						VaultInitializationResponseImpl.class);
+				ResponseEntity<VaultInitializationResponseImpl> exchange = client.put()
+					.uri("sys/init")
+					.headers(emptyNamespace())
+					.body(vaultInitializationRequest)
+					.retrieve()
+					.toEntity(VaultInitializationResponseImpl.class);
 
 				Assert.state(exchange.getBody() != null, "Initialization response must not be null");
 
@@ -129,16 +134,19 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void seal() {
-		this.vaultOperations.doWithSession(SEAL);
+		this.vaultOperations.doWithSessionClient(SEAL);
 	}
 
 	@Override
 	public VaultUnsealStatus unseal(String keyShare) {
 
-		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
+		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
 
-			ResponseEntity<VaultUnsealStatusImpl> response = restOperations.exchange("sys/unseal", HttpMethod.PUT,
-					new HttpEntity<Object>(Collections.singletonMap("key", keyShare)), VaultUnsealStatusImpl.class);
+			ResponseEntity<VaultUnsealStatusImpl> response = client.put()
+				.uri("sys/unseal")
+				.body(Collections.singletonMap("key", keyShare))
+				.retrieve()
+				.toEntity(VaultUnsealStatusImpl.class);
 
 			Assert.state(response.getBody() != null, "Unseal response must not be null");
 
@@ -148,7 +156,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultUnsealStatus getUnsealStatus() {
-		return requireResponse(this.vaultOperations.doWithVault(GET_UNSEAL_STATUS));
+		return requireResponse(this.vaultOperations.doWithVaultClient(GET_UNSEAL_STATUS));
 	}
 
 	@Override
@@ -162,7 +170,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getMounts() {
-		return requireResponse(this.vaultOperations.doWithSession(GET_MOUNTS));
+		return requireResponse(this.vaultOperations.doWithSessionClient(GET_MOUNTS));
 	}
 
 	@Override
@@ -184,7 +192,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public Map<String, VaultMount> getAuthMounts() throws VaultException {
-		return requireResponse(this.vaultOperations.doWithSession(GET_AUTH_MOUNTS));
+		return requireResponse(this.vaultOperations.doWithSessionClient(GET_AUTH_MOUNTS));
 	}
 
 	@Override
@@ -208,12 +216,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		return this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Policy>) restOperations -> {
+		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Policy>) client -> {
 
 			ResponseEntity<VaultResponse> response;
 
 			try {
-				response = restOperations.getForEntity("sys/policy/{name}", VaultResponse.class, name);
+				response = client.get().uri("sys/policy/{name}", name).retrieve().toEntity(VaultResponse.class);
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -255,11 +263,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		rules = JacksonCompat.instance().getPrettyPrintObjectMapperAccessor().writeValueAsString(policy);
 
-		this.vaultOperations.doWithSession((RestOperationsCallback<@Nullable Void>) restOperations -> {
-
-			restOperations.exchange("sys/policy/{name}", HttpMethod.PUT,
-					new HttpEntity<>(Collections.singletonMap("rules", rules)), VaultResponse.class, name);
-
+		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) restOperations -> {
+			restOperations.put()
+				.uri("sys/policy/{name}", name)
+				.body(Collections.singletonMap("rules", rules))
+				.retrieve()
+				.toEntity(VaultResponse.class);
 			return null;
 		});
 	}
@@ -274,7 +283,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultHealth health() {
-		return requireResponse(this.vaultOperations.doWithVault(HEALTH));
+		return requireResponse(this.vaultOperations.doWithVaultClient(HEALTH));
 	}
 
 	private static <T> T requireResponse(@Nullable T response) {
@@ -284,35 +293,36 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return response;
 	}
 
-	private static class GetUnsealStatus implements RestOperationsCallback<VaultUnsealStatus> {
+	private static class GetUnsealStatus implements RestClientCallback<VaultUnsealStatus> {
 
 		@Override
-		public VaultUnsealStatus doWithRestOperations(RestOperations restOperations) {
-			return requireResponse(restOperations.getForObject("sys/seal-status", VaultUnsealStatusImpl.class));
+		public VaultUnsealStatus doWithRestClient(RestClient client) {
+			return requireResponse(client.get().uri("sys/seal-status").retrieve().body(VaultUnsealStatusImpl.class));
 		}
 
 	}
 
-	private static class Seal implements RestOperationsCallback<@Nullable Void> {
+	private static class Seal implements RestClientCallback<@Nullable Void> {
 
 		@Override
-		public Void doWithRestOperations(RestOperations restOperations) {
-			restOperations.put("sys/seal", null);
-			return null;
+		public Void doWithRestClient(RestClient client) {
+			return client.put().uri("sys/seal").retrieve().toBodilessEntity().getBody();
 		}
 
 	}
 
-	private record GetMounts(String path) implements RestOperationsCallback<Map<String, VaultMount>> {
+	private record GetMounts(String path) implements RestClientCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
 
 		@Override
-		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
+		public Map<String, VaultMount> doWithRestClient(RestClient client) {
 
-			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(this.path, HttpMethod.GET, null,
-					MOUNT_TYPE_REF, Collections.emptyMap());
+			ResponseEntity<VaultMountsResponse> exchange = client.get()
+				.uri(this.path)
+				.retrieve()
+				.toEntity(MOUNT_TYPE_REF);
 
 			VaultMountsResponse body = exchange.getBody();
 
@@ -371,14 +381,21 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return new HttpEntity<>(body, headers);
 	}
 
-	private static class Health implements RestOperationsCallback<VaultHealth> {
+	private static Consumer<HttpHeaders> emptyNamespace() {
+		return it -> it.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
+	}
+
+	private static class Health implements RestClientCallback<VaultHealth> {
 
 		@Override
-		public VaultHealth doWithRestOperations(RestOperations restOperations) {
+		public VaultHealth doWithRestClient(RestClient client) {
 
 			try {
-				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange("sys/health", HttpMethod.GET,
-						emptyNamespace(null), VaultHealthImpl.class);
+				ResponseEntity<VaultHealthImpl> healthResponse = client.get()
+					.uri("sys/health")
+					.headers(emptyNamespace())
+					.retrieve()
+					.toEntity(VaultHealthImpl.class);
 				return requireResponse(healthResponse.getBody());
 			}
 			catch (RestClientResponseException responseError) {

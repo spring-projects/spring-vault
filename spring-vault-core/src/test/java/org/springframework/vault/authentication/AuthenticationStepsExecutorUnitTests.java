@@ -25,12 +25,16 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
+import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -46,18 +50,18 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  */
 class AuthenticationStepsExecutorUnitTests {
 
-	RestTemplate restTemplate;
+	RestClient restClient;
 
 	MockRestServiceServer mockRest;
 
 	@BeforeEach
 	void before() {
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
+		RestClient.Builder builder = RestClient.builder();
+		builder.uriBuilderFactory(new VaultClients.PrefixAwareUriBuilderFactory());
 
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.mockRest = MockRestServiceServer.bindTo(builder).build();
+		this.restClient = builder.build();
 	}
 
 	@Test
@@ -130,7 +134,7 @@ class AuthenticationStepsExecutorUnitTests {
 	@Test
 	void initialRequestWithMapShouldLogin() {
 
-		this.mockRest.expect(requestTo("somewhere/else"))
+		this.mockRest.expect(requestTo("/somewhere/else"))
 			.andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("foo"));
 
@@ -153,7 +157,7 @@ class AuthenticationStepsExecutorUnitTests {
 	@Test
 	void requestWithHeadersShouldLogin() {
 
-		this.mockRest.expect(requestTo("somewhere/else")) //
+		this.mockRest.expect(requestTo("/somewhere/else")) //
 			.andExpect(header("foo", "bar")) //
 			.andExpect(method(HttpMethod.GET)) //
 			.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("foo"));
@@ -198,7 +202,7 @@ class AuthenticationStepsExecutorUnitTests {
 	}
 
 	private VaultToken login(AuthenticationSteps steps) {
-		return new AuthenticationStepsExecutor(steps, this.restTemplate).login();
+		return new AuthenticationStepsExecutor(steps, this.restClient).login();
 	}
 
 }
