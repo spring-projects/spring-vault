@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.repository.mapping;
 
+import org.springframework.data.core.TypeInformation;
 import org.springframework.data.keyvalue.core.mapping.context.KeyValueMappingContext;
 import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
-import org.springframework.data.util.TypeInformation;
 
 /**
  * Mapping context for {@link VaultPersistentEntity Vault-specific entities}.

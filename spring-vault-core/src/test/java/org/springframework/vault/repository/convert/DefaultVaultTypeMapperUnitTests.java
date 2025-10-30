@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.data.convert.ConfigurableTypeInformationMapper;
 import org.springframework.data.convert.SimpleTypeInformationMapper;
-import org.springframework.data.util.TypeInformation;
+import org.springframework.data.core.TypeInformation;
 
 import static org.assertj.core.api.Assertions.*;
 
