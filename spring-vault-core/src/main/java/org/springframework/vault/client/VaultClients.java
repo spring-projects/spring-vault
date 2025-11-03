@@ -121,7 +121,9 @@ public class VaultClients {
 
 				clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
 				clientBuilder.addCustomConverter(new StringHttpMessageConverter());
-				clientBuilder.withJsonConverter(JacksonCompat.instance().createHttpMessageConverter());
+				JacksonCompat instance = JacksonCompat.instance();
+				clientBuilder.addCustomConverter(instance.createHttpMessageConverter());
+				clientBuilder.withJsonConverter(instance.createHttpMessageConverter());
 			});
 
 		builderCustomizer.accept(builder);
