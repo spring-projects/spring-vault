@@ -1,5 +1,5 @@
 name: Deploy Docs Dispatch
-run-name: ${{ format('{0} for {1}', github.workflow, github.event.push.head_commit.message) }}
+run-name: ${{ format('{0} for {1}', github.workflow, github.event.head_commit.message) }}
 
 on:
   push:
