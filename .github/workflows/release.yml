@@ -1,0 +1,39 @@
+name: Release to Maven Central
+run-name: "${{ format('{0} for: {1}', github.workflow, github.event.head_commit.message) }}"
+
+on:
+  push:
+    branches: [ release ]
+
+permissions: read-all
+
+jobs:
+  build:
+    name: Release project
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-vault' }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        java-version: '25'
+        distribution: temurin
+        cache: maven
+    - name: Cache Vault
+      uses: actions/cache@v4.3.0
+      with:
+        path: |
+          download
+          vault
+        key: ${{ runner.os }}-${{ hashFiles('src/test/bash/**') }}
+    - name: Install GPG key
+      run: |
+        echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
+        echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
+    - name: Release to Maven Central
+      env:
+          ARTIFACTORY_USR: ${{ secrets.ARTIFACTORY_USERNAME }}
+          ARTIFACTORY_PSW: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      run: ci/release-to-maven-central.sh
