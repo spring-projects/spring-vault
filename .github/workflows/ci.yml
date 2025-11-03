@@ -1,0 +1,54 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main, 3.2.x, 3.1.x, gha ]
+
+jobs:
+  build:
+    name: Build project
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        java-version: '25'
+        distribution: temurin
+        cache: maven
+    - name: Cache Vault
+      uses: actions/cache@v4.3.0
+      with:
+        path: |
+          download
+          vault
+        key: ${{ runner.os }}-${{ hashFiles('src/test/bash/**') }}
+    - name: Setup Vault
+      run:  src/test/bash/start.sh
+    - name: Build
+      run: ./mvnw -B -U clean verify
+  deploy-snapshots:
+    name: Deploy Snapshots
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'spring-projects/spring-vault' }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        java-version: '25'
+        distribution: temurin
+        cache: maven
+    - name: Cache Vault
+      uses: actions/cache@v4.3.0
+      with:
+        path: |
+          download
+          vault
+        key: ${{ runner.os }}-${{ hashFiles('src/test/bash/**') }}
+    - name: Deploy to Artifactory
+      env:
+        ARTIFACTORY_USERNAME: ${{ secrets.ARTIFACTORY_USERNAME }}
+        ARTIFACTORY_PASSWORD: ${{ secrets.ARTIFACTORY_PASSWORD }}
+        BUILD_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      run: ci/snapshot.sh
