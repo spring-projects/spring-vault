@@ -1,4 +1,6 @@
 name: Deploy Docs Dispatch
+run-name: "${{ format('{0} Trigger', github.workflow) }}"
+
 on:
   push:
     branches-ignore: [ gh-pages ]

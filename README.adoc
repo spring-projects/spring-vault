@@ -1,4 +1,4 @@
-= Spring Vault
+= Spring Vault link:https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml[image:https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml/badge.svg[CI Build]]
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
 With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to manage external secret data for applications across all environments.
