@@ -106,7 +106,7 @@ pipeline {
 					RELEASE_TYPE = 'snapshot'
 
 					if (PROJECT_VERSION.matches(/.*-RC[0-9]+$/) || PROJECT_VERSION.matches(/.*-M[0-9]+$/)) {
-						RELEASE_TYPE = "milestone"
+						RELEASE_TYPE = "release"
 					} else if (PROJECT_VERSION.endsWith('SNAPSHOT')) {
 						RELEASE_TYPE = 'snapshot'
 					} else if (PROJECT_VERSION.matches(/.*\.[0-9]+$/)) {
