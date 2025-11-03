@@ -34,4 +34,4 @@ jobs:
         ARTIFACTORY_PSW: ${{ secrets.ARTIFACTORY_PASSWORD }}
         BUILD_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         BUILD_NUMBER: "${{ github.run_id }}"
-      run: ci/snapshot.sh
+      run: ci/deploy-artifactory.sh
