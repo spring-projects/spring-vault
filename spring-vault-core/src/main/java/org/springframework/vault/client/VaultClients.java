@@ -25,6 +25,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -119,9 +120,12 @@ public class VaultClients {
 			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
 			.configureMessageConverters(clientBuilder -> {
 
-				clientBuilder.customMessageConverter(new ByteArrayHttpMessageConverter());
-				clientBuilder.customMessageConverter(new StringHttpMessageConverter());
-				clientBuilder.jsonMessageConverter(JacksonCompat.instance().createHttpMessageConverter());
+				AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance().createHttpMessageConverter();
+
+				clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
+				clientBuilder.addCustomConverter(new StringHttpMessageConverter());
+				clientBuilder.addCustomConverter(converter);
+				clientBuilder.withJsonConverter(converter);
 			});
 
 		builderCustomizer.accept(builder);
