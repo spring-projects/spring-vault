@@ -119,9 +119,9 @@ public class VaultClients {
 			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
 			.configureMessageConverters(clientBuilder -> {
 
-				clientBuilder.customMessageConverter(new ByteArrayHttpMessageConverter());
-				clientBuilder.customMessageConverter(new StringHttpMessageConverter());
-				clientBuilder.jsonMessageConverter(JacksonCompat.instance().createHttpMessageConverter());
+				clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
+				clientBuilder.addCustomConverter(new StringHttpMessageConverter());
+				clientBuilder.withJsonConverter(JacksonCompat.instance().createHttpMessageConverter());
 			});
 
 		builderCustomizer.accept(builder);
