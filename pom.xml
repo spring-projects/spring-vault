@@ -749,19 +749,6 @@
 
 		<profile>
 
-			<id>snapshot</id>
-
-			<distributionManagement>
-				<repository>
-					<id>spring-libs-snapshot</id>
-					<name>Spring Snapshot Repository</name>
-					<url>https://repo.spring.io/libs-snapshot-local</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-
-		<profile>
-
 			<id>release</id>
 
 			<build>
@@ -1009,5 +996,15 @@
 			</build>
 		</profile>
 	</profiles>
+
+	<repositories>
+		<repository>
+			<id>spring-snapshot</id>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
 
 </project>
