@@ -20,20 +20,13 @@ jobs:
         java-version: '25'
         distribution: temurin
         cache: maven
-    - name: Cache Vault
-      uses: actions/cache@v4.3.0
-      with:
-        path: |
-          download
-          vault
-        key: ${{ runner.os }}-${{ hashFiles('src/test/bash/**') }}
     - name: Install GPG key
       run: |
         echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
         echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
     - name: Release to Maven Central
       env:
-          ARTIFACTORY_USR: ${{ secrets.ARTIFACTORY_USERNAME }}
-          ARTIFACTORY_PSW: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          CENTRAL_TOKEN_USR: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
+          CENTRAL_TOKEN_PSW: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: ci/release-to-maven-central.sh
+      run: ci/deploy-maven-central.sh
