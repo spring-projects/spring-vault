@@ -36,4 +36,4 @@ jobs:
           ARTIFACTORY_USR: ${{ secrets.ARTIFACTORY_USERNAME }}
           ARTIFACTORY_PSW: ${{ secrets.ARTIFACTORY_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: ci/release-to-maven-central.sh
+      run: ci/deploy-maven-central.sh
