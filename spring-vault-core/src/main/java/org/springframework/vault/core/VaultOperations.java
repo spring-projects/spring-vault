@@ -32,8 +32,8 @@ import org.springframework.web.client.RestClientException;
  * interact with Vault in an authenticated and unauthenticated context.
  * <p>
  * {@link VaultOperations} allows execution of callback methods. Callbacks can execute
- * requests within a {@link #doWithSession(RestClientCallback) session context} and the
- * {@link #doWithVault(RestClientCallback) without a session}.
+ * requests within a {@link #doWithSession(RestOperationsCallback) session context} and the
+ * {@link #doWithVault(RestOperationsCallback) without a session}.
  * <p>
  * Paths used in this interface (and interfaces accessible from here) are considered
  * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
@@ -42,8 +42,6 @@ import org.springframework.web.client.RestClientException;
  *
  * @author Mark Paluch
  * @author Lauren Voswinkel
- * @see #doWithSession(RestClientCallback)
- * @see #doWithVault(RestClientCallback)
  * @see org.springframework.web.client.RestClient
  * @see org.springframework.vault.core.VaultTemplate
  * @see org.springframework.vault.core.VaultTokenOperations
