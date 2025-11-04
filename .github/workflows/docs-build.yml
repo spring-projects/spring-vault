@@ -4,8 +4,7 @@ run-name: "${{ format('{0} Trigger', github.workflow) }}"
 on:
   push:
     branches: [ main ]
-    branches-ignore: [ gh-pages, release ]
-    tags: [ * ]
+    tags: [ '*' ]
   repository_dispatch:
     types: request-build-reference # legacy
   #schedule:
