@@ -67,7 +67,7 @@ Now let's look at examples of how to work with Vault in the context of the Sprin
 
 Using Spring Vault does not require a Spring Context. However, instances of
 javadoc:org.springframework.vault.core.ReactiveVaultTemplate[] and `VaultTokenSupplier` registered inside a managed context will participate
-in {spring-framework-docs}core.html#beans-factory-nature[lifecycle events]
+in {spring-framework-docs}/core/beans/factory-nature.html[lifecycle events]
 provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
 application shutdown. You also benefit from reusing the same javadoc:org.springframework.vault.core.ReactiveVaultTemplate[]
 instance across your application.
