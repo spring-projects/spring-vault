@@ -2,7 +2,8 @@
 = Client Support
 
 Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Vault uses
-{spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestTemplate`] as primary interface accessing Vault.
+javadoc:org.springframework.vault.client.VaultClient[`VaultClient`] as primary interface accessing Vault.
+`VaultClient` is designed to be extensible and allows to plug in different HTTP clients based on a design similar to {spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestClient`].
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
 

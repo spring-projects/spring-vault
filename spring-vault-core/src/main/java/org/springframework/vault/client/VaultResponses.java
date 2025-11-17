@@ -24,6 +24,8 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -73,7 +75,7 @@ public abstract class VaultResponses {
 	 * @param path must not be {@literal null}.
 	 * @return the {@link VaultException}.
 	 */
-	public static VaultException buildException(HttpStatusCodeException e, String path) {
+	public static VaultException buildException(HttpStatusCodeException e, @Nullable String path) {
 
 		Assert.notNull(e, "HttpStatusCodeException must not be null");
 

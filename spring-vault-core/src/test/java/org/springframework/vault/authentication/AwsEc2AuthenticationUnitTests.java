@@ -31,6 +31,8 @@ import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Inst
 import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.Nonce;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
+import org.springframework.vault.util.TestVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -44,18 +46,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class AwsEc2AuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = TestVaultClient.mock();
 	}
 
 	@Test
@@ -65,11 +60,12 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.client,
+				this.client.getRestClient());
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
 	}
@@ -77,17 +73,17 @@ class AwsEc2AuthenticationUnitTests {
 	@Test
 	void shouldObtainIdentityDocument() {
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/api/token")) //
 				.andExpect(method(HttpMethod.PUT)) //
 				.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
 				.andRespond(withSuccess().body("my-token"));
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(this.client, this.client.getRestClient());
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world").containsKey("nonce").hasSize(2);
 	}
@@ -99,24 +95,25 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V2)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/api/token")) //
 				.andExpect(method(HttpMethod.PUT)) //
 				.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
 				.andRespond(withSuccess().body("my-token"));
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
+		this.client.expect(requestTo("auth/aws-ec2/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("Hello, world"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AuthenticationSteps steps = AwsEc2Authentication.createAuthenticationSteps(options);
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.client,
+				this.client.getRestClient());
 
 		assertThat(executor.login()).isEqualTo(LoginToken.of("my-token"));
 	}
@@ -128,11 +125,12 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, \r\r\n\nworld"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.client,
+				this.client.getRestClient());
 
 		assertThat(authentication.getEc2Login()).containsEntry("pkcs7", "Hello, world");
 	}
@@ -145,11 +143,12 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("Hello, world"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.client,
+				this.client.getRestClient());
 
 		assertThat(authentication.getEc2Login()) //
 				.containsEntry("pkcs7", "Hello, world") //
@@ -168,19 +167,19 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("value"));
 
-		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
+		this.client.expect(requestTo("auth/aws-ec2/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("value"))
 				.andExpect(jsonPath("$.nonce").value("foo"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
-		AwsEc2Authentication authentication = new AwsEc2Authentication(authenticationOptions, this.restTemplate,
-				this.restTemplate);
+		AwsEc2Authentication authentication = new AwsEc2Authentication(authenticationOptions, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 
@@ -200,11 +199,11 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andExpect(method(HttpMethod.GET)) //
 				.andRespond(withSuccess().body("value"));
 
-		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
+		this.client.expect(requestTo("auth/aws-ec2/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.pkcs7").value("value"))
 				.andExpect(jsonPath("$.nonce").value("foo"))
@@ -212,7 +211,7 @@ class AwsEc2AuthenticationUnitTests {
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AwsEc2Authentication.createAuthenticationSteps(options), this.restTemplate);
+				AwsEc2Authentication.createAuthenticationSteps(options), this.client, client.getRestClient());
 		VaultToken login = executor.login();
 
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -228,11 +227,11 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
+		this.client.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
 				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate).login());
+				.isThrownBy(() -> new AwsEc2Authentication(options, this.client, this.client.getRestClient()).login());
 	}
 
 	@Test
@@ -242,11 +241,11 @@ class AwsEc2AuthenticationUnitTests {
 				.version(InstanceMetadataServiceVersion.V1)
 				.build();
 
-		this.mockRest.expect(requestTo("/auth/aws-ec2/login")) //
+		this.client.expect(requestTo("auth/aws-ec2/login")) //
 				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate) {
+				.isThrownBy(() -> new AwsEc2Authentication(options, this.client, this.client.getRestClient()) {
 
 					@Override
 					protected Map<String, String> getEc2Login() {

@@ -34,7 +34,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
@@ -50,7 +51,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @see AwsEc2AuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth
  * Backend: aws-ec2</a>
  */
@@ -67,7 +68,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	private final AwsEc2AuthenticationOptions options;
 
-	private final ClientAdapter vaultAdapter;
+	private final VaultLoginClient loginClient;
 
 	private final ClientAdapter awsMetadataAdapter;
 
@@ -77,7 +78,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	/**
 	 * Create a new {@code AwsEc2Authentication}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(RestOperations vaultRestOperations) {
 		this(AwsEc2AuthenticationOptions.DEFAULT, vaultRestOperations, vaultRestOperations);
 	}
@@ -89,43 +94,91 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param awsMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations awsMetadataRestOperations) {
-		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
-		Assert.notNull(awsMetadataRestOperations, "AWS Metadata RestOperations must not be null");
-		this.options = options;
-		this.vaultAdapter = ClientAdapter.from(vaultRestOperations);
-		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataRestOperations);
+		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
+				ClientAdapter.from(awsMetadataRestOperations));
 	}
 
 	/**
 	 * Create a new {@code AwsEc2Authentication}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
-	public AwsEc2Authentication(RestClient vaultClient) {
-		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient);
+	@Deprecated(since = "4.1")
+	public AwsEc2Authentication(RestClient restClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, restClient, restClient);
 	}
 
 	/**
 	 * Create a new {@code AwsEc2Authentication} specifying
-	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
-	 * {@link RestClient}.
+	 * {@link AwsEc2AuthenticationOptions}, {@link VaultClient} and a
+	 * AWS-Metadata-specific {@link RestClient}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param awsMetadataClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestClient vaultClient,
 			RestClient awsMetadataClient) {
+		this(options, ClientAdapter.from(vaultClient).vaultClient(), awsMetadataClient);
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsEc2Authentication(VaultClient vaultClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, ClientAdapter.from(RestClient.create()));
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and an
+	 * AWS-Metadata-specific {@link RestClient}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param awsMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsEc2Authentication(VaultClient vaultClient, RestClient awsMetadataClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, ClientAdapter.from(awsMetadataClient));
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication} specifying
+	 * {@link AwsEc2AuthenticationOptions}, a {@link VaultClient} and an
+	 * AWS-Metadata-specific {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param awsMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
+			RestClient awsMetadataClient) {
+		this(options, vaultClient, ClientAdapter.from(awsMetadataClient));
+	}
+
+	AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
+			ClientAdapter awsMetadataClient) {
+
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "Vault RestClient must not be null");
+		Assert.notNull(vaultClient, "VaultClient must not be null");
 		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
 		this.options = options;
-		this.vaultAdapter = ClientAdapter.from(vaultClient);
-		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataClient);
+		this.loginClient = VaultLoginClient.create(vaultClient, "AWS-EC2");
+		this.awsMetadataAdapter = awsMetadataClient;
 	}
 
 	/**
@@ -179,7 +232,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 					login.put("pkcs7", pkcs7);
 					return login;
 				})
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 
@@ -196,23 +249,19 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsEc2() {
 		Map<String, String> login = getEc2Login();
-		try {
-			VaultResponse response = this.vaultAdapter
-					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-			if (logger.isDebugEnabled()) {
-				if (response.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug("Login successful using AWS-EC2 authentication for instance %s, AMI %s"
-							.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
-				} else {
-					logger.debug("Login successful using AWS-EC2 authentication");
-				}
+		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
+			.using(login)
+			.retrieve()
+			.body();
+		if (logger.isDebugEnabled()) {
+
+			if (token.getAuth().get("metadata") instanceof Map) {
+				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
+				logger.debug("Using AWS-EC2 authentication for instance %s, AMI %s"
+					.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
 			}
-			return LoginTokenUtil.from(response.getAuth());
-		} catch (RestClientException e) {
-			throw VaultLoginException.create("AWS-EC2", e);
 		}
+		return token.getRequiredData();
 	}
 
 	protected Map<String, String> getEc2Login() {
@@ -256,7 +305,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 			if (!exchange.getStatusCode().is2xxSuccessful()) {
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
-			return ResponseUtil.getRequiredBody(exchange);
+			return AuthenticationUtil.getRequiredBody(exchange);
 		} catch (RestClientException e) {
 			throw new VaultLoginException(
 					"Cannot obtain IMDSv2 Token from %s".formatted(this.options.getMetadataTokenRequestUri()), e);

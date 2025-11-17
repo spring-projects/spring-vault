@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
@@ -68,7 +69,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * and Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations) {
 		this(options, vaultRestOperations, vaultRestOperations);
 	}
@@ -80,10 +85,14 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param googleMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations googleMetadataRestOperations) {
-		super(ClientAdapter.from(vaultRestOperations));
+		super(ClientAdapter.from(vaultRestOperations).loginClient("GCP-GCE"));
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataRestOperations, "Google Metadata RestOperations must not be null");
 		this.options = options;
@@ -97,7 +106,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -110,10 +123,40 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param vaultClient must not be {@literal null}.
 	 * @param googleMetadataClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
-		super(ClientAdapter.from(vaultClient));
+		this(options, ClientAdapter.from(vaultClient).vaultClient(), googleMetadataClient);
+	}
+
+	/**
+	 * Create a new {@link GcpComputeAuthentication} instance given
+	 * {@link GcpComputeAuthenticationOptions} and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient) {
+		this(options, vaultClient, RestClient.create());
+	}
+
+	/**
+	 * Create a new {@link GcpComputeAuthentication} instance given
+	 * {@link GcpComputeAuthenticationOptions}, {@link VaultClient} and Google API
+	 * {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param googleMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient,
+			RestClient googleMetadataClient) {
+
+		super(VaultLoginClient.create(vaultClient, "GCP-GCE"));
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataClient, "Google Metadata RestOperations must not be null");
 		this.options = options;
@@ -136,7 +179,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 				//
 				.map(jwt -> createRequestBody(options.getRole(), jwt))
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override
@@ -160,7 +203,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
 			ResponseEntity<String> response = this.googleMetadataAdapter.exchange(COMPUTE_METADATA_URL_TEMPLATE,
 					HttpMethod.GET, entity, String.class, urlParameters);
-			return ResponseUtil.getRequiredBody(response);
+			return AuthenticationUtil.getRequiredBody(response);
 		} catch (HttpStatusCodeException e) {
 			throw new VaultLoginException("Cannot obtain signed identity", e);
 		}

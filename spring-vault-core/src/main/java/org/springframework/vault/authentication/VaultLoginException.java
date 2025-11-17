@@ -16,6 +16,8 @@
 
 package org.springframework.vault.authentication;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.web.client.RestClientResponseException;
@@ -43,7 +45,7 @@ public class VaultLoginException extends VaultException {
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
-	public VaultLoginException(String msg, Throwable cause) {
+	public VaultLoginException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 
@@ -54,7 +56,7 @@ public class VaultLoginException extends VaultException {
 	 * @param cause must not be {@literal null}.
 	 * @return the {@link VaultLoginException}.
 	 */
-	public static VaultLoginException create(String authMethod, Throwable cause) {
+	public static VaultLoginException create(String authMethod, @Nullable Throwable cause) {
 		if (cause instanceof RestClientResponseException) {
 			String response = ((RestClientResponseException) cause).getResponseBodyAsString();
 			return new VaultLoginException(

@@ -36,7 +36,7 @@ class LoginTokenUtilUnitTests {
 		Map<String, ? extends Serializable> response = Map.of("type", "service", "ttl", 100, "accessor",
 				"B6oixijqmeR4bsLOJH88Ska9");
 
-		LoginToken loginToken = LoginTokenUtil.from("foo".toCharArray(), response);
+		LoginToken loginToken = LoginToken.from("foo".toCharArray(), response);
 
 		assertThat(loginToken.isServiceToken()).isTrue();
 		assertThat(loginToken.getAccessor()).isEqualTo("B6oixijqmeR4bsLOJH88Ska9");
@@ -48,7 +48,7 @@ class LoginTokenUtilUnitTests {
 		Map<String, ? extends Serializable> response = Map.of("type", "batch", "ttl", 100, "accessor",
 				"B6oixijqmeR4bsLOJH88Ska9");
 
-		LoginToken loginToken = LoginTokenUtil.from("foo".toCharArray(), response);
+		LoginToken loginToken = LoginToken.from("foo".toCharArray(), response);
 
 		assertThat(loginToken.isBatchToken()).isTrue();
 		assertThat(loginToken.getAccessor()).isEqualTo("B6oixijqmeR4bsLOJH88Ska9");

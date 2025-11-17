@@ -28,15 +28,26 @@ import org.springframework.vault.support.VaultToken;
 public abstract class VaultHttpHeaders {
 
 	/**
+	 * The HTTP {@code X-Vault-Namespace} header field name.
+	 * @since 2.2
+	 */
+	public static final String VAULT_NAMESPACE = "X-Vault-Namespace";
+
+	/**
+	 * The HTTP {@code X-Vault-MFA} MFA credentials header.
+	 */
+	public static final String VAULT_MFA_TOKEN = "X-Vault-MFA";
+
+	/**
 	 * The HTTP {@code X-Vault-Token} header field name.
 	 */
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	/**
-	 * The HTTP {@code X-Vault-Namespace} header field name.
-	 * @since 2.2
+	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a unwrapping
+	 * token instead of the actual response.
 	 */
-	public static final String VAULT_NAMESPACE = "X-Vault-Namespace";
+	public static final String VAULT_WRAP_TTL = "X-Vault-Wrap-TTL";
 
 	private VaultHttpHeaders() {
 	}

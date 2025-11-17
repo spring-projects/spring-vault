@@ -44,7 +44,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(RoleId.provided(roleId))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -57,7 +57,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.roleId(RoleId.pull(Settings.token()))
 				.secretId(SecretId.pull(Settings.token()))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -70,7 +70,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.appRole("with-secret-id")
 				.secretId(SecretId.pull(Settings.token()))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -88,7 +88,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.roleId(RoleId.provided(roleId))
 				.secretId(SecretId.provided(secretId))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -105,7 +105,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.build();
 
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -122,7 +122,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.build();
 
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 	}
@@ -139,7 +139,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.unwrappingEndpoints(getUnwrappingEndpoints())
 				.build();
 
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(authentication::login);
 	}
@@ -152,7 +152,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
 				.roleId(RoleId.provided(roleId))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(authentication::login);
 	}
@@ -166,7 +166,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.roleId(RoleId.provided(roleId))
 				.secretId(SecretId.provided("this-is-a-wrong-secret-id"))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(authentication::login);
 	}
@@ -184,7 +184,7 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				.roleId(RoleId.provided(roleId))
 				.secretId(SecretId.provided(secretId))
 				.build();
-		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
+		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getVaultClient());
 
 		assertThat(authentication.login()).isNotNull();
 

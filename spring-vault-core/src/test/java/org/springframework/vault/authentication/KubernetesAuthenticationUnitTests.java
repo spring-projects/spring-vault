@@ -27,6 +27,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -40,18 +41,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class KubernetesAuthenticationUnitTests {
 
-	private RestTemplate restTemplate;
-
-	private MockRestServiceServer mockRest;
+	private MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
@@ -62,14 +56,14 @@ class KubernetesAuthenticationUnitTests {
 				.jwtSupplier(() -> "my-jwt-token")
 				.build();
 
-		this.mockRest.expect(requestTo("/auth/kubernetes/login"))
+		this.client.expect(requestTo("auth/kubernetes/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("hello"))
 				.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -84,11 +78,11 @@ class KubernetesAuthenticationUnitTests {
 				.jwtSupplier(() -> "my-jwt-token")
 				.build();
 
-		this.mockRest.expect(requestTo("/auth/kubernetes/login")) //
+		this.client.expect(requestTo("auth/kubernetes/login")) //
 				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new KubernetesAuthentication(options, this.restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, this.client).login());
 	}
 
 	@Test
@@ -102,14 +96,14 @@ class KubernetesAuthenticationUnitTests {
 
 		token.set("bar");
 
-		this.mockRest.expect(requestTo("/auth/kubernetes/login"))
+		this.client.expect(requestTo("auth/kubernetes/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("hello"))
 				.andExpect(jsonPath("$.jwt").value("foo"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.client);
 
 		authentication.login();
 	}

@@ -107,7 +107,7 @@ public class AuthenticationSteps {
 	 */
 	public static AuthenticationSteps just(HttpRequest<VaultResponse> request) {
 		Assert.notNull(request, "HttpRequest must not be null");
-		return new AuthenticationSteps(new HttpRequestNode<>(request, AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(new HttpRequestNode<>(request, false, AuthenticationSteps.HEAD));
 	}
 
 	/**
@@ -142,7 +142,19 @@ public class AuthenticationSteps {
 	 */
 	public static <T> Node<T> fromHttpRequest(HttpRequest<T> request) {
 		Assert.notNull(request, "HttpRequest must not be null");
-		return new HttpRequestNode<>(request, AuthenticationSteps.HEAD);
+		return new HttpRequestNode<>(request, false, AuthenticationSteps.HEAD);
+	}
+
+	/**
+	 * Start flow composition from a {@link HttpRequest}.
+	 * @param request the HTTP request definition, must not be {@literal null}.
+	 * @return the first {@link Node}.
+	 */
+	public static <T> Node<T> fromVaultRequest(HttpRequest<T> request) {
+
+		Assert.notNull(request, "HttpRequest must not be null");
+
+		return new HttpRequestNode<>(request, true, AuthenticationSteps.HEAD);
 	}
 
 	/**
@@ -216,7 +228,25 @@ public class AuthenticationSteps {
 		 */
 		public <R> Node<R> request(HttpRequest<R> request) {
 			Assert.notNull(request, "HttpRequest must not be null");
-			return new HttpRequestNode<>(request, this);
+			return new HttpRequestNode<>(request, false, this);
+		}
+
+		/**
+		 * Terminal operation requesting a {@link VaultToken token} from Vault by logging
+		 * into Vault sending the current state to the Vault {@code authMount}. The actual
+		 * request path is derived from {@code authMount} using the pattern
+		 * {@code auth/%s/login}. If the request path needs to be customized, use
+		 * {@link #login(String, String...)} instead.
+		 * @param authMount the name of the authentication mount, must not be
+		 * {@literal null} or empty.
+		 * @return the {@link AuthenticationSteps}.
+		 * @since 4.1
+		 */
+		public AuthenticationSteps loginAt(String authMount) {
+
+			Assert.hasText(authMount, "Auth mount must not be null or empty");
+
+			return login(AuthenticationUtil.getLoginPath(authMount));
 		}
 
 		/**
@@ -256,7 +286,7 @@ public class AuthenticationSteps {
 		 */
 		public AuthenticationSteps login(HttpRequest<VaultResponse> request) {
 			Assert.notNull(request, "HttpRequest must not be null");
-			return new AuthenticationSteps(new HttpRequestNode<>(request, this));
+			return new AuthenticationSteps(new HttpRequestNode<>(request, true, this));
 		}
 
 		/**
@@ -494,14 +524,21 @@ public class AuthenticationSteps {
 
 		private final HttpRequest<T> definition;
 
+		private final boolean vault;
+
 		private final Node<?> previous;
 
 
-		HttpRequestNode(HttpRequest<T> definition, Node<?> previous) {
+		HttpRequestNode(HttpRequest<T> definition, boolean vault, Node<?> previous) {
 			this.definition = definition;
+			this.vault = vault;
 			this.previous = previous;
 		}
 
+
+		public boolean isVault() {
+			return vault;
+		}
 
 		@Override
 		public String toString() {
@@ -522,12 +559,13 @@ public class AuthenticationSteps {
 				return true;
 			if (!(o instanceof HttpRequestNode<?> that))
 				return false;
-			return this.definition.equals(that.definition) && this.previous.equals(that.previous);
+			return this.definition.equals(that.definition) && this.previous.equals(that.previous)
+					&& this.vault == that.vault;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.definition, this.previous);
+			return Objects.hash(this.definition, this.previous, this.vault);
 		}
 
 	}

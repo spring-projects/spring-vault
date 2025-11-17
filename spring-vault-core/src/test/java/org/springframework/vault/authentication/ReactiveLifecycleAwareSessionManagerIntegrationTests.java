@@ -163,9 +163,10 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			} catch (HttpStatusCodeException e) {
+			} catch (VaultException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(((HttpStatusCodeException) e.getCause()).getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;
@@ -192,9 +193,10 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			} catch (HttpStatusCodeException e) {
+			} catch (VaultException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(((HttpStatusCodeException) e.getCause()).getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;

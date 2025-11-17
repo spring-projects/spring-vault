@@ -22,13 +22,13 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClient;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -92,32 +92,27 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 			Class<T> responseType) {
 		Assert.hasText(path, "Path must not be empty");
 		return this.vaultOperations.doWithSessionClient(client -> {
-			try {
-				RestClient.RequestBodySpec spec = client.post().uri(path);
-				if (body != null) {
-					spec = spec.body(body);
-				}
-				return spec.retrieve().body(responseType);
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, path);
+			VaultClient.RequestBodySpec spec = client.post().path(path);
+
+			if (body != null) {
+				spec = spec.body(body);
 			}
+
+			return spec.retrieve().body(responseType);
 		});
 	}
 
 	@SuppressWarnings("NullAway")
 	private void writeToken(String path, VaultToken token, Class<?> responseType) {
 		Assert.hasText(path, "Path must not be empty");
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
-			try {
-				client.post()
-						.uri(path)
-						.body(Collections.singletonMap("token", token.getToken()))
-						.retrieve()
-						.toEntity(responseType);
-				return null;
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, path);
-			}
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
+
+			client.post()
+				.path(path)
+				.body(Collections.singletonMap("token", token.getToken()))
+				.retrieve()
+				.toEntity(responseType);
+			return null;
 		});
 	}
 

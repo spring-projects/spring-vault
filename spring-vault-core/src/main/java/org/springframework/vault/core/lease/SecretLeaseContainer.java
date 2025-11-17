@@ -721,13 +721,18 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		return isExpired == null ? isExpiredFallback.test(lease) : isExpired.test(lease);
 	}
 
-	private @Nullable HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(RuntimeException e) {
+	private @Nullable HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(Throwable e) {
 		if (e instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e;
 		}
 		if (e.getCause() instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e.getCause();
 		}
+
+		if (e instanceof VaultException && e.getCause() != null) {
+			return potentiallyUnwrapHttpStatusCodeException(e.getCause());
+		}
+
 		return null;
 	}
 

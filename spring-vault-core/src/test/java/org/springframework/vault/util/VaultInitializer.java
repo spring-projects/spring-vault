@@ -26,7 +26,6 @@ import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -71,13 +70,11 @@ public class VaultInitializer {
 	public VaultInitializer(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
-		RestTemplate restTemplate = TestRestTemplateFactory.create(sslConfiguration);
+		TestVaultClient client = TestVaultClient.create();
 		WebClient webClient = TestWebClientFactory.create(sslConfiguration);
-		VaultTemplate vaultTemplate = new VaultTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				restTemplate.getRequestFactory(), new PreparingSessionManager());
+		VaultTemplate vaultTemplate = new VaultTemplate(client, new PreparingSessionManager());
 		this.token = Settings.token();
-		this.prepareVault = new PrepareVault(webClient, TestRestTemplateFactory.create(sslConfiguration),
-				vaultTemplate);
+		this.prepareVault = new PrepareVault(client, webClient, vaultTemplate);
 		this.vaultEndpoint = vaultEndpoint;
 	}
 

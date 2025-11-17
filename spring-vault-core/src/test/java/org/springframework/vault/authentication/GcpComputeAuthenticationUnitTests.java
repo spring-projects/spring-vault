@@ -24,7 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -38,27 +40,21 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class GcpComputeAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = new RestTemplate();
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	private void setupMocks() {
 
-		this.mockRest.expect(requestTo(
-				"http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=https://localhost:8200/vault/dev-role&format=full"))
+		this.client.expect(requestTo(
+				"http://metadata/computeMetadata/v1/instance/service-accounts/default/identity?audience=https%3A%2F%2Flocalhost%3A8200%2Fvault%2Fdev-role&format=full"))
 				.andExpect(method(HttpMethod.GET))
 				.andRespond(withSuccess().contentType(MediaType.TEXT_PLAIN).body("my-jwt"));
 
-		this.mockRest.expect(requestTo("/auth/gcp/login"))
+		this.client.expect(requestTo("auth/gcp/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role"))
 				.andExpect(jsonPath("$.jwt").value("my-jwt"))
@@ -75,7 +71,8 @@ class GcpComputeAuthenticationUnitTests {
 
 		GcpComputeAuthenticationOptions options = GcpComputeAuthenticationOptions.builder().role("dev-role").build();
 
-		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options, this.restTemplate);
+		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 
@@ -94,10 +91,11 @@ class GcpComputeAuthenticationUnitTests {
 
 		GcpComputeAuthenticationOptions options = GcpComputeAuthenticationOptions.builder().role("dev-role").build();
 
-		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options, this.restTemplate);
+		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options, this.client,
+				this.client.getRestClient());
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(authentication.getAuthenticationSteps(),
-				this.restTemplate);
+				this.client, this.client.getRestClient());
 
 		VaultToken login = executor.login();
 

@@ -18,12 +18,9 @@ package org.springframework.vault.authentication;
 
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -46,7 +43,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 	private final ClientAuthentication delegate;
 
-	private final ClientAdapter adapter;
+	private final VaultClient client;
 
 
 	/**
@@ -54,25 +51,29 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	 * decorate and {@link RestOperations}.
 	 * @param delegate must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #LoginTokenAdapter(ClientAuthentication, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public LoginTokenAdapter(ClientAuthentication delegate, RestOperations restOperations) {
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 		this.delegate = delegate;
-		this.adapter = ClientAdapter.from(restOperations);
+		this.client = ClientAdapter.from(restOperations).vaultClient();
 	}
 
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
 	 * decorate and {@link ClientAdapter}.
 	 * @param delegate must not be {@literal null}.
-	 * @param adapter must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
 	 */
-	LoginTokenAdapter(ClientAuthentication delegate, ClientAdapter adapter) {
+	public LoginTokenAdapter(ClientAuthentication delegate, VaultClient client) {
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
-		Assert.notNull(adapter, "ClientAdapter must not be null");
+		Assert.notNull(client, "ClientAdapter must not be null");
 		this.delegate = delegate;
-		this.adapter = adapter;
+		this.client = client;
 	}
 
 	@Override
@@ -81,24 +82,33 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
-		return augmentWithSelfLookup(this.adapter, token);
+		return augmentWithSelfLookup(this.client, token);
 	}
 
-	static LoginToken augmentWithSelfLookup(ClientAdapter adapter, VaultToken token) {
+	static LoginToken augmentWithSelfLookup(VaultClient client, VaultToken token) {
 
-		Map<String, Object> data = lookupSelf(adapter, token);
+		Map<String, Object> data = lookupSelf(client, token);
 
-		return LoginTokenUtil.from(token.toCharArray(), data);
+		return LoginToken.from(token.toCharArray(), data);
 	}
 
-	private static Map<String, Object> lookupSelf(ClientAdapter adapter, VaultToken token) {
+	private static Map<String, Object> lookupSelf(VaultClient client, VaultToken token) {
 		try {
-			ResponseEntity<VaultResponse> entity = adapter.exchange("auth/token/lookup-self", HttpMethod.GET,
-					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
+			VaultResponse response = client.get().path("auth/token/lookup-self").token(token).retrieve().requiredBody();
 
-			Assert.state(entity.getBody() != null && entity.getBody().getData() != null, "Token response is null");
+			return response.getRequiredData();
+		}
+		catch (VaultException e) {
 
-			return entity.getBody().getData();
+			if (e.getCause() instanceof HttpStatusCodeException hse) {
+				throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(hse.getStatusCode(),
+						VaultResponses.getError(hse.getResponseBodyAsString())), e);
+			}
+
+			if (e.getCause() instanceof RestClientException rce) {
+				throw new VaultTokenLookupException("Token self-lookup failed", rce);
+			}
+			throw e;
 		} catch (HttpStatusCodeException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())), e);

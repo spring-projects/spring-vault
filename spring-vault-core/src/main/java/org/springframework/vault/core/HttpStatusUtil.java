@@ -18,6 +18,7 @@ package org.springframework.vault.core;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.web.client.RestClient;
 
 /**
  * Utility class for HTTP status codes.
@@ -31,6 +32,11 @@ class HttpStatusUtil {
 
 	public static boolean isBadRequest(HttpStatusCode status) {
 		return status.value() == HttpStatus.BAD_REQUEST.value();
+	}
+
+	public static RestClient.ResponseSpec.ErrorHandler proceed() {
+		return (request, response) -> {
+		};
 	}
 
 }

@@ -21,12 +21,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -45,11 +43,10 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod());
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
+		TestVaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				ClientCertificateAuthentication.createAuthenticationSteps(), restTemplate);
+		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
+			.create(ClientCertificateAuthentication.createAuthenticationSteps(), client);
 
 		VaultToken login = executor.login();
 
@@ -63,13 +60,11 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				Settings.createSslConfiguration());
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
+		TestVaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 
-		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
-				() -> new AuthenticationStepsExecutor(ClientCertificateAuthentication.createAuthenticationSteps(),
-						restTemplate)
-								.login());
+		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() -> TestAuthenticationStepsExecutor
+			.create(ClientCertificateAuthentication.createAuthenticationSteps(), client)
+			.login());
 	}
 
 }

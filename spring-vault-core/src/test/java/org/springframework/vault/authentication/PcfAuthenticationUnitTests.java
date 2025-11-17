@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,9 +42,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class PcfAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	String instanceKey = "-----BEGIN RSA PRIVATE KEY-----\n"
 			+ "MIIEpAIBAAKCAQEAzhDAw7m5EuCcQkT7cesJF9J/0FWeSICLg4F/3R8EpkjPfZSW\n"
@@ -76,12 +75,7 @@ class PcfAuthenticationUnitTests {
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
@@ -94,7 +88,7 @@ class PcfAuthenticationUnitTests {
 				.clock(this.clock) //
 				.build();
 
-		PcfAuthentication authentication = new PcfAuthentication(options, this.restTemplate);
+		PcfAuthentication authentication = new PcfAuthentication(options, this.client);
 
 		expectLoginRequest();
 
@@ -115,8 +109,8 @@ class PcfAuthenticationUnitTests {
 
 		expectLoginRequest();
 
-		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
-				PcfAuthentication.createAuthenticationSteps(options), this.restTemplate);
+		AuthenticationStepsExecutor authentication = TestAuthenticationStepsExecutor
+			.create(PcfAuthentication.createAuthenticationSteps(options), this.client);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -125,7 +119,7 @@ class PcfAuthenticationUnitTests {
 
 	private void expectLoginRequest() {
 
-		this.mockRest.expect(requestTo("/auth/pcf/login"))
+		this.client.expect(requestTo("auth/pcf/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role"))
 				.andExpect(jsonPath("$.signature").exists())

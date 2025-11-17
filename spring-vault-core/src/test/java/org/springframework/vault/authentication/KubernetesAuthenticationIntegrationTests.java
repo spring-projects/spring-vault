@@ -22,10 +22,9 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.util.Settings.*;
@@ -47,9 +46,9 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		VaultClient client = TestVaultClient.create();
 
-		KubernetesAuthentication authentication = new KubernetesAuthentication(options, restTemplate);
+		KubernetesAuthentication authentication = new KubernetesAuthentication(options, client);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -65,10 +64,10 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		VaultClient client = TestVaultClient.create();
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, client).login());
 	}
 
 	@Test
@@ -81,10 +80,10 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenResource))
 				.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		VaultClient client = TestVaultClient.create();
 
 		assertThatExceptionOfType(VaultException.class)
-				.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, client).login());
 	}
 
 }

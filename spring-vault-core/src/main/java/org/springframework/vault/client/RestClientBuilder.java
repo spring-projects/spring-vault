@@ -73,12 +73,35 @@ public class RestClientBuilder {
 	private RestClientBuilder() {
 	}
 
+	private RestClientBuilder(@Nullable VaultEndpointProvider endpointProvider,
+			Supplier<ClientHttpRequestFactory> requestFactory, @Nullable ResponseErrorHandler errorHandler) {
+		this.endpointProvider = endpointProvider;
+		this.requestFactory = requestFactory;
+		this.errorHandler = errorHandler;
+	}
+
 	/**
 	 * Create a new {@code RestClientBuilder}.
 	 * @return a new {@code RestClientBuilder}.
 	 */
 	public static RestClientBuilder builder() {
 		return new RestClientBuilder();
+	}
+
+	/**
+	 * Create a new {@link RestClientBuilder} initialized from
+	 * {@link RestTemplateBuilder}.
+	 * @return a new {@link RestClientBuilder}.
+	 * @since 4.1
+	 */
+	public static RestClientBuilder builder(RestTemplateBuilder restTemplateBuilder) {
+
+		RestClientBuilder builder = new RestClientBuilder(restTemplateBuilder.endpointProvider,
+				restTemplateBuilder.requestFactory, restTemplateBuilder.errorHandler);
+		builder.defaultHeaders.putAll(restTemplateBuilder.defaultHeaders);
+		builder.requestInitializers.addAll(restTemplateBuilder.requestCustomizers);
+
+		return builder;
 	}
 
 	/**

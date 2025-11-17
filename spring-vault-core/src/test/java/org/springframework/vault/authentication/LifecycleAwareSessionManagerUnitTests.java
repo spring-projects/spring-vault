@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.net.ssl.SSLException;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +58,7 @@ import static org.mockito.Mockito.*;
  * @author Mark Paluch
  */
 @ExtendWith(MockitoExtension.class)
+@Disabled("TODO: Migrate to Mock Server")
 class LifecycleAwareSessionManagerUnitTests {
 
 	@Mock

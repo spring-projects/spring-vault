@@ -16,16 +16,9 @@
 
 package org.springframework.vault.util;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
 import org.springframework.vault.client.VaultClients;
-import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestTemplate;
 
@@ -39,11 +32,6 @@ import org.springframework.web.client.RestTemplate;
  */
 public class TestRestTemplateFactory {
 
-	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
-
-	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
-
-
 	/**
 	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The
 	 * underlying {@link ClientHttpRequestFactory} is cached. See
@@ -56,12 +44,7 @@ public class TestRestTemplateFactory {
 
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
 
-		try {
-			initializeClientHttpRequestFactory(sslConfiguration);
-			return create(factoryCache.get());
-		} catch (Exception e) {
-			throw new IllegalStateException(e);
-		}
+		return create(TestVaultClient.getClientHttpRequestFactory(() -> sslConfiguration));
 	}
 
 	/**
@@ -75,32 +58,7 @@ public class TestRestTemplateFactory {
 	 */
 	private static RestTemplate create(ClientHttpRequestFactory requestFactory) {
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
-		return VaultClients.createRestTemplate(TEST_VAULT_ENDPOINT, requestFactory);
-	}
-
-	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {
-		if (factoryCache.get() != null) {
-			return;
-		}
-		final ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-				.create(new ClientOptions(), sslConfiguration);
-		if (factoryCache.compareAndSet(null, clientHttpRequestFactory)) {
-			if (clientHttpRequestFactory instanceof InitializingBean) {
-				((InitializingBean) clientHttpRequestFactory).afterPropertiesSet();
-			}
-			if (clientHttpRequestFactory instanceof DisposableBean) {
-				Runtime.getRuntime().addShutdownHook(new Thread("ClientHttpRequestFactory Shutdown Hook") {
-					@Override
-					public void run() {
-						try {
-							((DisposableBean) clientHttpRequestFactory).destroy();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				});
-			}
-		}
+		return VaultClients.createRestTemplate(Settings.TEST_VAULT_ENDPOINT, requestFactory);
 	}
 
 }

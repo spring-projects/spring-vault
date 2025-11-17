@@ -30,6 +30,7 @@ import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -45,18 +46,11 @@ class CubbyholeAuthenticationUnitTests {
 
 	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
@@ -66,7 +60,7 @@ class CubbyholeAuthenticationUnitTests {
 				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\"," + "\"lease_duration\":0,"
 				+ "\"accessor\":\"46b6aebb-187f-932a-26d7-4f3d86a68319\"} }";
 
-		this.mockRest.expect(requestTo("/cubbyhole/response"))
+		this.client.expect(requestTo("cubbyhole/response"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -79,7 +73,7 @@ class CubbyholeAuthenticationUnitTests {
 				.wrapped()
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 
@@ -98,7 +92,7 @@ class CubbyholeAuthenticationUnitTests {
 				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\"," + "\"lease_duration\":0,"
 				+ "\"accessor\":\"46b6aebb-187f-932a-26d7-4f3d86a68319\"} }";
 
-		this.mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+		this.client.expect(requestTo("sys/wrapping/unwrap"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(wrappedResponse));
@@ -109,7 +103,7 @@ class CubbyholeAuthenticationUnitTests {
 				.wrapped()
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 
@@ -128,12 +122,12 @@ class CubbyholeAuthenticationUnitTests {
 				+ "\"auth\":{\"client_token\":\"5e6332cf-f003-6369-8cba-5bce2330f6cc\"," + "\"lease_duration\":10,"
 				+ "\"accessor\":\"46b6aebb-187f-932a-26d7-4f3d86a68319\"} }";
 
-		this.mockRest.expect(requestTo("/sys/wrapping/unwrap"))
+		this.client.expect(requestTo("sys/wrapping/unwrap"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body(wrappedResponse));
 
-		this.mockRest.expect(requestTo("/auth/token/lookup-self"))
+		this.client.expect(requestTo("auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "5e6332cf-f003-6369-8cba-5bce2330f6cc"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +139,7 @@ class CubbyholeAuthenticationUnitTests {
 				.wrapped()
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 
@@ -160,7 +154,7 @@ class CubbyholeAuthenticationUnitTests {
 	@Test
 	void shouldLoginUsingStoredLogin() {
 
-		this.mockRest.expect(requestTo("/cubbyhole/token"))
+		this.client.expect(requestTo("cubbyhole/token"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +166,7 @@ class CubbyholeAuthenticationUnitTests {
 				.selfLookup(false)
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 
@@ -183,13 +177,13 @@ class CubbyholeAuthenticationUnitTests {
 	@Test
 	void shouldRetrieveRenewabilityUsingStoredLogin() {
 
-		this.mockRest.expect(requestTo("/cubbyhole/token"))
+		this.client.expect(requestTo("cubbyhole/token"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 						.body("{\"data\":{\"mytoken\":\"058222ef-9ab9-ff39-f087-9d5bee64e46d\"} }"));
 
-		this.mockRest.expect(requestTo("/auth/token/lookup-self"))
+		this.client.expect(requestTo("auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "058222ef-9ab9-ff39-f087-9d5bee64e46d"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -201,7 +195,7 @@ class CubbyholeAuthenticationUnitTests {
 				.path("cubbyhole/token")
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		VaultToken login = authentication.login();
 
@@ -216,7 +210,7 @@ class CubbyholeAuthenticationUnitTests {
 	@Test
 	void shouldFailUsingStoredLoginNoData() {
 
-		this.mockRest.expect(requestTo("/cubbyhole/token"))
+		this.client.expect(requestTo("cubbyhole/token"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON).body("{\"data\":{} }"));
@@ -226,7 +220,7 @@ class CubbyholeAuthenticationUnitTests {
 				.path("cubbyhole/token")
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		try {
 			authentication.login();
@@ -239,7 +233,7 @@ class CubbyholeAuthenticationUnitTests {
 	@Test
 	void shouldFailUsingStoredMultipleEntries() {
 
-		this.mockRest.expect(requestTo("/cubbyhole/token"))
+		this.client.expect(requestTo("cubbyhole/token"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "hello"))
 				.andRespond(
@@ -251,7 +245,7 @@ class CubbyholeAuthenticationUnitTests {
 				.path("cubbyhole/token")
 				.build();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
 		try {
 			authentication.login();

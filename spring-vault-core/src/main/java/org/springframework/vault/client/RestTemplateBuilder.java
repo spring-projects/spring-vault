@@ -60,18 +60,18 @@ import org.springframework.web.client.RestTemplate;
  */
 public class RestTemplateBuilder {
 
-	private @Nullable VaultEndpointProvider endpointProvider;
+	@Nullable VaultEndpointProvider endpointProvider;
 
-	private Supplier<ClientHttpRequestFactory> requestFactory = () -> ClientHttpRequestFactoryFactory
+	Supplier<ClientHttpRequestFactory> requestFactory = () -> ClientHttpRequestFactoryFactory
 			.create(new ClientOptions(), SslConfiguration.unconfigured());
 
-	private @Nullable ResponseErrorHandler errorHandler;
+	@Nullable ResponseErrorHandler errorHandler;
 
-	private final Map<String, String> defaultHeaders = new LinkedHashMap<>();
+	final Map<String, String> defaultHeaders = new LinkedHashMap<>();
 
-	private final List<RestTemplateCustomizer> customizers = new ArrayList<>();
+	final List<RestTemplateCustomizer> customizers = new ArrayList<>();
 
-	private final Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>();
+	final Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>();
 
 
 	private RestTemplateBuilder() {

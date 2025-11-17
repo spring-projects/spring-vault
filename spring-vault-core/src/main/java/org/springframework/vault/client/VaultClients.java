@@ -29,6 +29,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
@@ -64,7 +65,9 @@ public class VaultClients {
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
 		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint), requestFactory);
 	}
@@ -84,7 +87,9 @@ public class VaultClients {
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @since 1.1
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 		RestTemplate restTemplate = createRestTemplate();
@@ -105,7 +110,7 @@ public class VaultClients {
 	 * <p>Requires Jackson for Object-to-JSON mapping.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
-	 * @return the {@link RestTemplate}.
+	 * @return the {@link RestClient}.
 	 * @since 4.0
 	 */
 	public static RestClient createRestClient(VaultEndpointProvider endpointProvider,
@@ -114,16 +119,49 @@ public class VaultClients {
 				.requestFactory(requestFactory)
 				.bufferContent((uri, httpMethod) -> true)
 				.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
-				.configureMessageConverters(clientBuilder -> {
-					AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
-							.createHttpMessageConverter();
-					clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
-					clientBuilder.addCustomConverter(new StringHttpMessageConverter());
-					clientBuilder.addCustomConverter(converter);
-					clientBuilder.withJsonConverter(converter);
-				});
+				.configureMessageConverters(VaultClients::configureConverters);
+
 		builderCustomizer.accept(builder);
+
 		return builder.build();
+	}
+
+	/**
+	 * Create a {@link org.springframework.web.client.RestClient} configured with
+	 * {@link ClientHttpRequestFactory}. In contrast to
+	 * {@link #createRestClient(VaultEndpointProvider, ClientHttpRequestFactory, Consumer)},
+	 * the client does <b>not</b> accept relative URIs for Vault access.
+	 * {@link RestClient} is configured to enforce serialization to a byte array prior
+	 * continuing the request. Eager serialization leads to a known request body size that
+	 * is required to send a {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH}
+	 * request header.
+	 * <p>
+	 * Requires Jackson for Object-to-JSON mapping.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestClient}.
+	 * @since 4.1
+	 */
+	public static RestClient createRestClient(ClientHttpRequestFactory requestFactory,
+			Consumer<RestClient.Builder> builderCustomizer) {
+
+		RestClient.Builder builder = RestClient.builder()
+			.requestFactory(requestFactory)
+			.bufferContent((uri, httpMethod) -> true)
+			.configureMessageConverters(VaultClients::configureConverters);
+
+		builderCustomizer.accept(builder);
+
+		return builder.build();
+	}
+
+	static void configureConverters(HttpMessageConverters.ClientBuilder clientBuilder) {
+
+		AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance().createHttpMessageConverter();
+
+		clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
+		clientBuilder.addCustomConverter(new StringHttpMessageConverter());
+		clientBuilder.addCustomConverter(converter);
+		clientBuilder.withJsonConverter(converter);
 	}
 
 	/**
@@ -135,7 +173,9 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>Requires Jackson for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate() {
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(3);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
@@ -155,7 +195,11 @@ public class VaultClients {
 	 * {@link RestTemplate}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
 	 * @since 2.2
+	 * @deprecated since 4.1 in favor of
+	 * {@link VaultClient.Builder#defaultNamespace(String)} and
+	 * {@link org.springframework.vault.client.VaultClient.RequestHeadersSpec#namespace(String)}.
 	 */
+	@Deprecated(since = "4.1")
 	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");
 		return (request, body, execution) -> {
@@ -168,7 +212,12 @@ public class VaultClients {
 	}
 
 	public static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider) {
-		return new PrefixAwareUriBuilderFactory(endpointProvider);
+		return new PrefixAwareUriBuilderFactory(endpointProvider, true);
+	}
+
+	static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider,
+			boolean allowAbsolutePath) {
+		return new PrefixAwareUriBuilderFactory(endpointProvider, allowAbsolutePath);
 	}
 
 	/**
@@ -178,29 +227,55 @@ public class VaultClients {
 
 		private final @Nullable VaultEndpointProvider endpointProvider;
 
+		private final boolean allowAbsolutePath;
+
 		public PrefixAwareUriBuilderFactory() {
 			this.endpointProvider = null;
+			this.allowAbsolutePath = true;
 		}
 
 		public PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider) {
+			this(endpointProvider, true);
+		}
+
+		PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider, boolean allowAbsolutePath) {
 			this.endpointProvider = endpointProvider;
+			this.allowAbsolutePath = allowAbsolutePath;
 		}
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
-			if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
-				return UriComponentsBuilder.fromUriString(uriTemplate);
-			}
-			if (endpointProvider != null) {
-				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 
-				String baseUri = toBaseUri(endpoint);
-				UriComponents uriComponents = UriComponentsBuilder
+			if (allowAbsolutePath || endpointProvider == null) {
+				if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
+					return UriComponentsBuilder.fromUriString(uriTemplate);
+
+			}
+				if (endpointProvider != null) {
+					VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+
+					String baseUri = toBaseUri(endpoint);
+					UriComponents uriComponents = UriComponentsBuilder
 						.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
 						.build();
-				return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+
+					return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+				}
 			}
-			return UriComponentsBuilder.fromUriString(uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate);
+			String normalizedUriTemplate = uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate;
+
+			if (endpointProvider != null) {
+
+				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+
+				UriComponents uriComponents = UriComponentsBuilder.fromUriString(toBaseUri(endpoint))
+					.path(normalizedUriTemplate)
+					.build();
+
+				return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
+			}
+
+			return UriComponentsBuilder.fromUriString(normalizedUriTemplate);
 		}
 
 	}

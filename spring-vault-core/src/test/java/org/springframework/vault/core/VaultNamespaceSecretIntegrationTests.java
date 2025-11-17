@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.authentication.ClientAuthentication;
@@ -36,10 +37,9 @@ import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.ClientHttpConnectorFactory;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.client.RestTemplateBuilder;
-import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.client.VaultEndpoint;
-import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.config.AbstractVaultConfiguration;
@@ -51,7 +51,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -68,13 +67,13 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 					Policy.BuiltinCapabilities.UPDATE)
 			.build());
 
-	RestTemplateBuilder devRestTemplate;
+	VaultClient devClient;
 
-	RestTemplateBuilder marketingRestTemplate;
+	VaultClient marketingClient;
 
 	WebClientBuilder marketingWebClientBuilder = WebClientBuilder.builder()
 			.httpConnector(ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-			.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
+			.endpoint(Settings.TEST_VAULT_ENDPOINT)
 			.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
 
 	String devToken;
@@ -93,22 +92,17 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		for (String namespace : namespaces) {
 			prepare().getVaultOperations().write("sys/namespaces/" + namespace.replaceAll("/", ""));
 		}
+		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
+				Settings.createSslConfiguration());
 
-		this.devRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.customizers(
-						restTemplate -> restTemplate.getInterceptors()
-								.add(VaultClients.createNamespaceInterceptor("dev")));
+		this.devClient = VaultClient.builder().endpoint(Settings.TEST_VAULT_ENDPOINT).defaultNamespace("dev").build();
 
-		this.marketingRestTemplate = RestTemplateBuilder.builder()
-				.requestFactory(
-						ClientHttpRequestFactoryFactory.create(new ClientOptions(), Settings.createSslConfiguration()))
-				.endpoint(TestRestTemplateFactory.TEST_VAULT_ENDPOINT)
-				.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+		this.marketingClient = VaultClient.builder()
+				.endpoint(Settings.TEST_VAULT_ENDPOINT)
+				.defaultNamespace("marketing")
+			.build();
 
-		VaultTemplate dev = new VaultTemplate(this.devRestTemplate,
+		VaultTemplate dev = new VaultTemplate(this.devClient,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(dev, "dev-secrets");
@@ -118,7 +112,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 				.getToken()
 				.getToken();
 
-		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingClient,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));
 
 		mountKv(marketing, "marketing-secrets");
@@ -144,9 +138,9 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void namespaceSecretsAreIsolated() {
 
-		VaultTemplate dev = new VaultTemplate(this.devRestTemplate,
+		VaultTemplate dev = new VaultTemplate(this.devClient,
 				new SimpleSessionManager(new TokenAuthentication(this.devToken)));
-		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingClient,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		dev.write("dev-secrets/my-secret", Collections.singletonMap("key", "dev"));
@@ -172,7 +166,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void reactiveNamespaceSecretsAreIsolated() {
 
-		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingClient,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		ReactiveVaultTemplate reactiveMarketing = new ReactiveVaultTemplate(this.marketingWebClientBuilder,
@@ -190,7 +184,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReportInitialized() {
 
-		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingClient,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		assertThat(marketing.opsForSys().isInitialized()).isTrue();
@@ -199,7 +193,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 	@Test
 	void shouldReportHealth() {
 
-		VaultTemplate marketing = new VaultTemplate(this.marketingRestTemplate,
+		VaultTemplate marketing = new VaultTemplate(this.marketingClient,
 				new SimpleSessionManager(new TokenAuthentication(this.marketingToken)));
 
 		assertThat(marketing.opsForSys().health().isInitialized()).isTrue();
@@ -227,7 +221,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 
 		@Override
 		public VaultEndpoint vaultEndpoint() {
-			return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
+			return Settings.TEST_VAULT_ENDPOINT;
 		}
 
 		@Override
@@ -240,11 +234,9 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 			return Settings.createSslConfiguration();
 		}
 
-		@Override
-		protected RestTemplateBuilder restTemplateBuilder(VaultEndpointProvider endpointProvider,
-				ClientHttpRequestFactory requestFactory) {
-			return super.restTemplateBuilder(endpointProvider, requestFactory)
-					.defaultHeader(VaultHttpHeaders.VAULT_NAMESPACE, "marketing");
+		@Bean
+		VaultClientCustomizer vaultClientCustomizer() {
+			return builder -> builder.defaultNamespace("marketing");
 		}
 
 	}

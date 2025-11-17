@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
 
@@ -128,6 +129,66 @@ public class LoginToken extends VaultToken {
 		Assert.notNull(leaseDuration, "Lease duration must not be null");
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
 		return new LoginToken(token, leaseDuration, true, null, null);
+	}
+
+	/**
+	 * Construct a {@link LoginToken} from an auth response.
+	 * @param auth {@link Map} holding a login response.
+	 * @return the {@link LoginToken}
+	 */
+	static LoginToken from(Map<String, Object> auth) {
+
+		Assert.notNull(auth, "Authentication must not be null");
+		String token = (String) auth.get("client_token");
+		Assert.notNull(token, "Authentication must contain 'client_token' key");
+
+		return from(token.toCharArray(), auth);
+	}
+
+	/**
+	 * Construct a {@link LoginToken} from an auth response.
+	 * @param auth {@link Map} holding a login response.
+	 * @return the {@link LoginToken}
+	 * @since 2.0
+	 */
+	@SuppressWarnings("NullAway")
+	static LoginToken from(char[] token, Map<String, ?> auth) {
+
+		Assert.notNull(auth, "Authentication must not be null");
+
+		Boolean renewable = (Boolean) auth.get("renewable");
+		Number leaseDuration = (Number) auth.get("lease_duration");
+		String accessor = (String) auth.get("accessor");
+		String type = (String) auth.get("type");
+
+		if (leaseDuration == null) {
+			leaseDuration = (Number) auth.get("ttl");
+		}
+
+		if (type == null) {
+			type = (String) auth.get("token_type");
+		}
+
+		LoginToken.LoginTokenBuilder builder = LoginToken.builder();
+		builder.token(token);
+
+		if (StringUtils.hasText(accessor)) {
+			builder.accessor(accessor);
+		}
+
+		if (leaseDuration != null) {
+			builder.leaseDuration(Duration.ofSeconds(leaseDuration.longValue()));
+		}
+
+		if (renewable != null) {
+			builder.renewable(renewable);
+		}
+
+		if (StringUtils.hasText(type)) {
+			builder.type(type);
+		}
+
+		return builder.build();
 	}
 
 	static boolean hasAccessor(VaultToken token) {

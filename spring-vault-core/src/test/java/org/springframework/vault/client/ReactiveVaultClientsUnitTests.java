@@ -40,7 +40,7 @@ class ReactiveVaultClientsUnitTests {
 	@Test
 	void shouldApplyNamespace() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/foo");
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
@@ -51,7 +51,7 @@ class ReactiveVaultClientsUnitTests {
 				.build();
 
 		webClient.get()
-				.uri("/auth/foo")
+				.uri("auth/foo")
 				.retrieve()
 				.bodyToMono(String.class)
 				.as(StepVerifier::create) //
@@ -63,7 +63,7 @@ class ReactiveVaultClientsUnitTests {
 	@Test
 	void shouldAllowNamespaceOverride() {
 
-		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "/auth/foo");
+		ClientHttpRequest request = new MockClientHttpRequest(HttpMethod.POST, "auth/foo");
 		MockClientHttpResponse response = new MockClientHttpResponse(HttpStatus.OK);
 
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
@@ -74,7 +74,7 @@ class ReactiveVaultClientsUnitTests {
 				.build();
 
 		webClient.get()
-				.uri("/auth/foo")
+				.uri("auth/foo")
 				.header(VaultHttpHeaders.VAULT_NAMESPACE, "baz")
 				.retrieve()
 				.bodyToMono(String.class) //

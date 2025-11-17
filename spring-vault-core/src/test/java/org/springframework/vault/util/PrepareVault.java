@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
 import org.springframework.vault.support.VaultHealth;
@@ -43,7 +44,7 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class PrepareVault {
 
-	private final RestTemplate restTemplate;
+	private final TestVaultClient vaultClient;
 
 	private final VaultOperations vaultOperations;
 
@@ -54,13 +55,14 @@ public class PrepareVault {
 
 	/**
 	 * Create a new {@link PrepareVault} object.
+	 * @param vaultClient must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
-	 * @param restTemplate must not be {@literal null}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
-	public PrepareVault(WebClient webClient, RestTemplate restTemplate, VaultOperations vaultOperations) {
+	public PrepareVault(TestVaultClient vaultClient, WebClient webClient, VaultOperations vaultOperations) {
+
+		this.vaultClient = vaultClient;
 		this.webClient = webClient;
-		this.restTemplate = restTemplate;
 		this.vaultOperations = vaultOperations;
 		this.adminOperations = vaultOperations.opsForSys();
 	}
@@ -194,8 +196,8 @@ public class PrepareVault {
 		return this.vaultOperations;
 	}
 
-	public RestTemplate getRestTemplate() {
-		return this.restTemplate;
+	public TestVaultClient getVaultClient() {
+		return this.vaultClient;
 	}
 
 	public WebClient getWebClient() {

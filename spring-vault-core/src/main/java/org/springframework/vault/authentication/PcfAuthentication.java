@@ -35,11 +35,10 @@ import org.bouncycastle.crypto.signers.PSSSigner;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.PemObject;
-import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -50,13 +49,11 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @since 2.2
  * @see PcfAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/pcf.html">Auth Backend:
  * PCF</a>
  */
 public class PcfAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
-
-	private static final Log logger = LogFactory.getLog(PcfAuthentication.class);
 
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -66,19 +63,19 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 	private final PcfAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
 	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #PcfAuthentication(PcfAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public PcfAuthentication(PcfAuthenticationOptions options, RestOperations restOperations) {
-		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -87,12 +84,27 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #PcfAuthentication(PcfAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public PcfAuthentication(PcfAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
+	 * {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public PcfAuthentication(PcfAuthenticationOptions options, VaultClient client) {
+
 		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(client, "PCF");
 	}
 
 	/**
@@ -108,7 +120,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 		return cert.zipWith(key)
 				.map(credentials -> getPcfLogin(options.getRole(), options.getClock(), credentials.getLeft(),
 						credentials.getRight()))
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 
@@ -116,15 +128,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	public VaultToken login() throws VaultException {
 		Map<String, String> login = getPcfLogin(this.options.getRole(), this.options.getClock(),
 				this.options.getInstanceCertSupplier().get(), this.options.getInstanceKeySupplier().get());
-		try {
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					login, VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-			logger.debug("Login successful using PCF authentication");
-			return LoginTokenUtil.from(response.getAuth());
-		} catch (RestClientException e) {
-			throw VaultLoginException.create("PCF", e);
-		}
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	@Override

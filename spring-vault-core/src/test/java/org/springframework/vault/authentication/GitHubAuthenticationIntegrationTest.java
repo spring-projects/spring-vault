@@ -27,11 +27,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -75,11 +74,11 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
 				.tokenSupplier(() -> "TOKEN")
 				.build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		TestVaultClient client = TestVaultClient.create();
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
 				gitHubTeamResponse(organizationId));
 
-		GitHubAuthentication authentication = new GitHubAuthentication(options, restTemplate);
+		GitHubAuthentication authentication = new GitHubAuthentication(options, client);
 		VaultToken loginToken = authentication.login();
 
 		assertThat(loginToken.getToken()).isNotNull();
@@ -91,13 +90,13 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
 				.tokenSupplier(() -> "TOKEN")
 				.build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		TestVaultClient client = TestVaultClient.create();
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
 				gitHubTeamResponse(organizationId));
 
 		AuthenticationSteps steps = GitHubAuthentication.createAuthenticationSteps(options);
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, restTemplate);
+		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor.create(steps, client);
 		VaultToken loginToken = executor.login();
 
 		assertThat(loginToken.getToken()).isNotNull();
@@ -106,7 +105,7 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 	@Test
 	void shouldFailIfOrganizationIsNotTheSame() {
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		VaultClient client = TestVaultClient.create();
 
 		int wrongOrganizationId = organizationId + 1;
 
@@ -114,7 +113,7 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 				gitHubTeamResponse(wrongOrganizationId));
 
 		GitHubAuthentication authentication = new GitHubAuthentication(
-				GitHubAuthenticationOptions.builder().tokenSupplier(() -> "TOKEN2").build(), restTemplate);
+				GitHubAuthenticationOptions.builder().tokenSupplier(() -> "TOKEN2").build(), client);
 
 		assertThatThrownBy(authentication::login).isInstanceOf(VaultLoginException.class)
 				.hasMessageContaining("Cannot login using GitHub: user is not part of required org");

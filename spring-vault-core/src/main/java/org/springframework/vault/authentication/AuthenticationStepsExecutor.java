@@ -34,6 +34,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.Pair;
 import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -58,18 +59,21 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private final ClientAdapter adapter;
 
+	private final VaultLoginClient loginClient;
+
 
 	/**
 	 * Create a new {@code AuthenticationStepsExecutor} given
 	 * {@link AuthenticationSteps} and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AuthenticationStepsExecutor(AuthenticationSteps, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
-		Assert.notNull(steps, "AuthenticationSteps must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-		this.chain = steps;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(steps, ClientAdapter.from(restOperations));
 	}
 
 	/**
@@ -77,12 +81,35 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * {@link AuthenticationSteps} and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param client must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AuthenticationStepsExecutor(AuthenticationSteps, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client) {
-		Assert.notNull(steps, "AuthenticationSteps must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		this(steps, ClientAdapter.from(client));
+	}
+
+	/**
+	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
+	 * and {@link VaultClient}.
+	 * @param steps must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param restClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AuthenticationStepsExecutor(AuthenticationSteps steps, VaultClient vaultClient, RestClient restClient) {
+		this(steps, vaultClient, ClientAdapter.from(restClient));
+	}
+
+	private AuthenticationStepsExecutor(AuthenticationSteps steps, ClientAdapter adapter) {
+		this(steps, adapter.vaultClient(), adapter);
+	}
+
+	private AuthenticationStepsExecutor(AuthenticationSteps steps, VaultClient vaultClient, ClientAdapter adapter) {
 		this.chain = steps;
-		this.adapter = ClientAdapter.from(client);
+		this.adapter = adapter;
+		this.loginClient = VaultLoginClient.create(vaultClient, "Authentication Steps");
 	}
 
 	@Override
@@ -95,7 +122,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		if (state instanceof VaultResponse response) {
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
-			return LoginTokenUtil.from(response.getAuth());
+			return LoginToken.from(response.getAuth());
 		}
 		throw new IllegalStateException(
 				"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(state));

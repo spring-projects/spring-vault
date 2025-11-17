@@ -40,11 +40,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.JacksonCompat;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -65,7 +65,7 @@ import org.springframework.web.client.RestOperations;
  * @since 1.1
  * @see AwsIamAuthenticationOptions
  * @see software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Backend:
  * aws (IAM)</a>
  * @see <a href=
@@ -84,7 +84,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	private final AwsIamAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 
 	/**
@@ -92,12 +92,12 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestOperations vaultRestOperations) {
-		Assert.notNull(options, "AwsIamAuthenticationOptions must not be null");
-		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
-		this.options = options;
-		this.adapter = ClientAdapter.from(vaultRestOperations);
+		this(options, ClientAdapter.from(vaultRestOperations).vaultClient());
 	}
 
 	/**
@@ -105,12 +105,26 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link RestClient}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestClient vaultClient) {
+		this(options, ClientAdapter.from(vaultClient).vaultClient());
+	}
+
+	/**
+	 * Create a new {@link AwsIamAuthentication} specifying
+	 * {@link AwsIamAuthenticationOptions} and a Vault {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsIamAuthentication(AwsIamAuthenticationOptions options, VaultClient vaultClient) {
 		Assert.notNull(options, "AwsIamAuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "Vault RestOperations must not be null");
+		Assert.notNull(vaultClient, "VaultClient must not be null");
 		this.options = options;
-		this.adapter = ClientAdapter.from(vaultClient);
+		this.loginClient = VaultLoginClient.create(vaultClient, "AWS-IAM");
 	}
 
 	/**
@@ -132,7 +146,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	protected static AuthenticationSteps createAuthenticationSteps(AwsIamAuthenticationOptions options,
 			AwsCredentials credentials, Region region) {
 		return AuthenticationSteps.fromSupplier(() -> createRequestBody(options, credentials, region)) //
-				.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override
@@ -150,23 +164,22 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	private VaultToken createTokenUsingAwsIam() {
 
 		Map<String, String> login = createRequestBody(this.options);
-		try {
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					login, VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-			if (logger.isDebugEnabled()) {
-				if (response.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug("Login successful using AWS-IAM authentication for user id %s, ARN %s"
-							.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
-				} else {
-					logger.debug("Login successful using AWS-IAM authentication");
-				}
+
+		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
+			.using(login)
+			.retrieve()
+			.body();
+
+		if (logger.isDebugEnabled()) {
+
+			if (token.getAuth().get("metadata") instanceof Map) {
+				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
+				logger.debug("Using AWS-IAM authentication for user id %s, ARN %s"
+					.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
 			}
-			return LoginTokenUtil.from(response.getAuth());
-		} catch (RestClientException e) {
-			throw VaultLoginException.create("AWS-IAM", e);
 		}
+
+		return token.getRequiredData();
 	}
 
 	/**

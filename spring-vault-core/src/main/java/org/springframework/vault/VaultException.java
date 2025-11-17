@@ -16,6 +16,8 @@
 
 package org.springframework.vault;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.NestedRuntimeException;
 
 /**
@@ -40,7 +42,7 @@ public class VaultException extends NestedRuntimeException {
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
-	public VaultException(String msg, Throwable cause) {
+	public VaultException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
 

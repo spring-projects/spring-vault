@@ -130,4 +130,23 @@ class KeyValueUtilities {
 		return path.equals("/") ? "" : path.endsWith("/") ? path : path + "/";
 	}
 
+	static String relativePath(String path) {
+
+		Assert.notNull(path, "Path must not be null");
+
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+
+		if (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		if (path.equals("/")) {
+			return "";
+		}
+
+		return path;
+	}
+
 }

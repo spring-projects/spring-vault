@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 the original author or authors.
+ * Copyright 2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,27 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.vault.authentication;
 
-package org.springframework.vault.core;
-
-import org.jspecify.annotations.Nullable;
-
-import org.springframework.web.client.RestClient;
+import org.springframework.vault.util.TestVaultClient;
 
 /**
- * A callback for executing arbitrary operations on {@link RestClient}.
+ * Utility to create {@link AuthenticationStepsExecutor} instances for testing.
  *
  * @author Mark Paluch
- * @since 4.0
  */
-@FunctionalInterface
-interface RestClientCallback<T extends @Nullable Object> {
+public class TestAuthenticationStepsExecutor {
 
-	/**
-	 * Callback method.
-	 * @param client client to be used.
-	 * @return a result object or null if none.
-	 */
-	T doWithRestClient(RestClient client);
+	public static AuthenticationStepsExecutor create(AuthenticationSteps steps, TestVaultClient client) {
+		return new AuthenticationStepsExecutor(steps, client, client.getRestClient());
+	}
 
 }

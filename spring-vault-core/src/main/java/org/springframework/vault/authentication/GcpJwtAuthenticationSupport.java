@@ -23,7 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
 
@@ -38,11 +39,10 @@ public abstract class GcpJwtAuthenticationSupport {
 	private static final Log logger = LogFactory.getLog(GcpJwtAuthenticationSupport.class);
 
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
-	GcpJwtAuthenticationSupport(ClientAdapter adapter) {
-		Assert.notNull(adapter, "Vault ClientAdapter must not be null");
-		this.adapter = adapter;
+	GcpJwtAuthenticationSupport(VaultLoginClient loginClient) {
+		this.loginClient = loginClient;
 	}
 
 
@@ -56,25 +56,19 @@ public abstract class GcpJwtAuthenticationSupport {
 	 */
 	VaultToken doLogin(String authenticationName, String signedJwt, String path, String role) {
 		Map<String, String> login = createRequestBody(role, signedJwt);
-		try {
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(path), login,
-					VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
+		VaultResponseSupport<LoginToken> response = this.loginClient.loginAt(path).using(login).retrieve().body();
 
-			if (logger.isDebugEnabled()) {
-				if (response.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug("Login successful using %s authentication for user id %s".formatted(authenticationName,
-							metadata.get("service_account_email")));
-				} else {
-					logger.debug("Login successful using " + authenticationName + " authentication");
-				}
+		if (logger.isDebugEnabled()) {
+
+			if (response.getAuth().get("metadata") instanceof Map) {
+
+				Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
+				logger.debug("Using %s authentication for user id %s".formatted(authenticationName,
+						metadata.get("service_account_email")));
 			}
-
-			return LoginTokenUtil.from(response.getAuth());
-		} catch (RestClientException e) {
-			throw VaultLoginException.create(authenticationName, e);
 		}
+
+		return response.getRequiredData();
 	}
 
 	static Map<String, String> createRequestBody(String role, String signedJwt) {

@@ -25,6 +25,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -38,24 +39,17 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class LoginTokenAdapterUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
 	void shouldSelfLookupToken() throws Exception {
 
-		this.mockRest.expect(requestTo("/auth/token/lookup-self"))
+		this.client.expect(requestTo("auth/token/lookup-self"))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header(VaultHttpHeaders.VAULT_TOKEN, "5e6332cf-f003-6369-8cba-5bce2330f6cc"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -63,7 +57,7 @@ class LoginTokenAdapterUnitTests {
 								+ "    \"ttl\": 456} }"));
 
 		LoginTokenAdapter adapter = new LoginTokenAdapter(
-				new TokenAuthentication("5e6332cf-f003-6369-8cba-5bce2330f6cc"), this.restTemplate);
+				new TokenAuthentication("5e6332cf-f003-6369-8cba-5bce2330f6cc"), this.client);
 
 		VaultToken login = adapter.login();
 

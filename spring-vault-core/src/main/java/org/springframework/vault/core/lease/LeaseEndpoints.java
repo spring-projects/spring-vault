@@ -24,6 +24,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.web.client.RestOperations;
 
@@ -51,6 +52,11 @@ public enum LeaseEndpoints {
 		}
 
 		@Override
+		void revoke(Lease lease, VaultClient client) {
+			client.put().path("sys/revoke").body(getLeaseRevocationBody(lease)).retrieve().toBodilessEntity();
+		}
+
+		@Override
 		public Lease renew(Lease lease, RestOperations operations) {
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
 			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/renew");
@@ -58,6 +64,14 @@ public enum LeaseEndpoints {
 			return toLease(entity.getBody());
 		}
 
+		@Override
+		Lease renew(Lease lease, VaultClient client) {
+			return toLease(client.put()
+				.path("sys/renew")
+				.body(getLeaseRevocationBody(lease))
+				.retrieve()
+				.requiredBody(Map.class));
+		}
 	},
 
 	/**
@@ -69,8 +83,13 @@ public enum LeaseEndpoints {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
-			operations.exchange("sys/leases/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease),
-					Map.class, lease.getRequiredLeaseId());
+			operations.exchange("sys/leases/revoke", HttpMethod.PUT, getLeaseRevocationBody(lease), Map.class,
+					lease.getRequiredLeaseId());
+		}
+
+		@Override
+		void revoke(Lease lease, VaultClient client) {
+			client.put().path("sys/leases/revoke").body(getLeaseRevocationBody(lease)).retrieve().toBodilessEntity();
 		}
 
 		@Override
@@ -81,6 +100,14 @@ public enum LeaseEndpoints {
 			return toLease(entity.getBody());
 		}
 
+		@Override
+		Lease renew(Lease lease, VaultClient client) {
+			return toLease(client.put()
+				.path("sys/leases/renew")
+				.body(getLeaseRenewalBody(lease))
+				.retrieve()
+				.requiredBody(Map.class));
+		}
 	},
 
 	/**
@@ -98,11 +125,18 @@ public enum LeaseEndpoints {
 		}
 
 		@Override
+		void revoke(Lease lease, VaultClient client) {
+			client.put().path("sys/leases/revoke-prefix/" + lease.getRequiredLeaseId()).retrieve().toBodilessEntity();
+		}
+
+		@Override
 		public Lease renew(Lease lease, RestOperations operations) {
-			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
-			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/leases/renew");
-			Assert.state(entity.getBody() != null, "Renew response must not be null");
-			return toLease(entity.getBody());
+			return LeaseEndpoints.Leases.renew(lease, operations);
+		}
+
+		@Override
+		Lease renew(Lease lease, VaultClient client) {
+			return LeaseEndpoints.Leases.renew(lease, client);
 		}
 
 	};
@@ -115,12 +149,29 @@ public enum LeaseEndpoints {
 	abstract void revoke(Lease lease, RestOperations operations);
 
 	/**
+	 * Revoke a {@link Lease}.
+	 * @param lease must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	abstract void revoke(Lease lease, VaultClient client);
+
+	/**
 	 * Renew a {@link Lease} and return the renewed {@link Lease}.
 	 * @param lease must not be {@literal null}.
 	 * @param operations must not be {@literal null}.
 	 * @return the renewed {@link Lease}.
 	 */
 	abstract Lease renew(Lease lease, RestOperations operations);
+
+	/**
+	 * Renew a {@link Lease} and return the renewed {@link Lease}.
+	 * @param lease must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @return the renewed {@link Lease}.
+	 * @since 4.1
+	 */
+	abstract Lease renew(Lease lease, VaultClient client);
 
 	@SuppressWarnings("NullAway")
 	private static Lease toLease(Map<String, Object> body) {

@@ -100,7 +100,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 			if (stateObject instanceof VaultResponse response) {
 				Assert.state(response.getAuth() != null, "Auth field must not be null");
-				return LoginTokenUtil.from(response.getAuth());
+				return LoginToken.from(response.getAuth());
 			}
 			throw new IllegalStateException(
 					"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(stateObject));

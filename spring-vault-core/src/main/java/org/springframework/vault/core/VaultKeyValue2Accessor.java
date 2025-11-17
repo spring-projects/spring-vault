@@ -53,9 +53,10 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	public @Nullable List<String> list(String path) {
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-					.uri("%s?list=true"
-							.formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+					.path("%s?list=true"
+							.formatted(createBackendPath("metadata", path)))
 					.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
 					.toEntity(VaultListResponse.class);
 		});
 		if (read == null) {
@@ -80,7 +81,8 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createBackendPath(String segment, String path) {
-		return "%s/%s/%s".formatted(this.path, segment, path);
+		return "%s/%s/%s".formatted(KeyValueUtilities.relativePath(this.path), KeyValueUtilities.relativePath(segment),
+				KeyValueUtilities.relativePath(path));
 	}
 
 }

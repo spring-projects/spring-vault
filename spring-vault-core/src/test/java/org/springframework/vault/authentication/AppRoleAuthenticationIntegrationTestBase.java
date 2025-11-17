@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -126,8 +127,8 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 	private HttpEntity<String> getWrappingHeaders() {
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("X-Vault-Wrap-Ttl", "3600");
-		headers.set("X-Vault-Token", Settings.token().getToken());
+		headers.set(VaultHttpHeaders.VAULT_WRAP_TTL, "3600");
+		headers.set(VaultHttpHeaders.VAULT_TOKEN, Settings.token().getToken());
 		return new HttpEntity<>(null, headers);
 	}
 

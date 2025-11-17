@@ -24,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -38,18 +39,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class AzureMsiAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
@@ -63,7 +57,8 @@ class AzureMsiAuthenticationUnitTests {
 		expectIdentityTokenRequest();
 		expectVmLoginRequest();
 
-		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
+		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -81,7 +76,8 @@ class AzureMsiAuthenticationUnitTests {
 		expectIdentityTokenRequest();
 		expectVmLoginRequest();
 
-		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
+		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -100,7 +96,7 @@ class AzureMsiAuthenticationUnitTests {
 		expectVmLoginRequest();
 
 		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
-				AzureMsiAuthentication.createAuthenticationSteps(options), this.restTemplate);
+				AzureMsiAuthentication.createAuthenticationSteps(options), this.client, this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -119,7 +115,7 @@ class AzureMsiAuthenticationUnitTests {
 		expectVmLoginRequest();
 
 		AuthenticationStepsExecutor authentication = new AuthenticationStepsExecutor(
-				AzureMsiAuthentication.createAuthenticationSteps(options), this.restTemplate);
+				AzureMsiAuthentication.createAuthenticationSteps(options), this.client, this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -137,7 +133,8 @@ class AzureMsiAuthenticationUnitTests {
 		expectIdentityTokenRequest();
 		expectVmssLoginRequest();
 
-		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.restTemplate);
+		AzureMsiAuthentication authentication = new AzureMsiAuthentication(options, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -146,7 +143,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmMetadataRequest() {
 
-		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
+		this.client.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -157,7 +154,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmssMetadataRequest() {
 
-		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
+		this.client.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_INSTANCE_METADATA_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header("Metadata", "true"))
 				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +167,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectIdentityTokenRequest() {
 
-		this.mockRest.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI))
+		this.client.expect(requestTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI))
 				.andExpect(method(HttpMethod.GET))
 				.andExpect(header("Metadata", "true"))
 				.andRespond(
@@ -181,7 +178,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmLoginRequest() {
 
-		this.mockRest.expect(requestTo("/auth/azure/login"))
+		this.client.expect(requestTo("auth/azure/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role"))
 				.andExpect(jsonPath("$.jwt").value("my-token"))
@@ -195,7 +192,7 @@ class AzureMsiAuthenticationUnitTests {
 
 	private void expectVmssLoginRequest() {
 
-		this.mockRest.expect(requestTo("/auth/azure/login"))
+		this.client.expect(requestTo("auth/azure/login"))
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(jsonPath("$.role").value("dev-role"))
 				.andExpect(jsonPath("$.jwt").value("my-token"))

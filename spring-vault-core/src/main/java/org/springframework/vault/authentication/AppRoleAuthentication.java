@@ -23,12 +23,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.authentication.AppRoleTokens.AbsentSecretId;
@@ -37,17 +36,14 @@ import org.springframework.vault.authentication.AppRoleTokens.Pull;
 import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId
@@ -60,17 +56,15 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  * @author Vincent Le Nair
  * @author Christophe Tafani-Dereeper
  * @see AppRoleAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth
  * Backend: AppRole</a>
  */
 public class AppRoleAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory.getLog(AppRoleAuthentication.class);
-
 	private final AppRoleAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 
 	/**
@@ -78,12 +72,12 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	 * {@link AppRoleAuthenticationOptions} and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated use
+	 * {@link #AppRoleAuthentication(AppRoleAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestOperations restOperations) {
-		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -92,12 +86,26 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated use constructor accepting {@link VaultClient} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link AppRoleAuthentication} using {@link AppRoleAuthenticationOptions}
+	 * and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AppRoleAuthentication(AppRoleAuthenticationOptions options, VaultClient client) {
+
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(client, "AppRole");
 	}
 
 	/**
@@ -111,7 +119,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		Assert.notNull(options, "AppRoleAuthenticationOptions must not be null");
 		RoleId roleId = options.getRoleId();
 		SecretId secretId = options.getSecretId();
-		return getAuthenticationSteps(options, roleId, secretId).login(getLoginPath(options.getPath()));
+		return getAuthenticationSteps(options, roleId, secretId).loginAt(options.getPath());
 	}
 
 	private static Node<Map<String, String>> getAuthenticationSteps(AppRoleAuthenticationOptions options, RoleId roleId,
@@ -132,7 +140,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		if (roleId instanceof Pull) {
 			HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
 			return AuthenticationSteps
-					.fromHttpRequest(get(getRoleIdIdPath(options)).with(headers).as(VaultResponse.class))
+					.fromVaultRequest(get(getRoleIdIdPath(options)).with(headers).as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("role_id"));
 		}
 
@@ -152,7 +160,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		if (secretId instanceof Pull) {
 			HttpHeaders headers = createHttpHeaders(((Pull) secretId).getInitialToken());
 			return AuthenticationSteps
-					.fromHttpRequest(post(getSecretIdPath(options)).with(headers).as(VaultResponse.class))
+					.fromVaultRequest(post(getSecretIdPath(options)).with(headers).as(VaultResponse.class))
 					.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("secret_id"));
 		}
 
@@ -188,18 +196,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 		Map<String, String> login = getAppRoleLoginBody(this.options.getRoleId(), this.options.getSecretId());
 
-		try {
-			VaultResponse response = this.adapter.postForObject(getLoginPath(this.options.getPath()), login,
-					VaultResponse.class);
-
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-
-			logger.debug("Login successful using AppRole authentication");
-
-			return LoginTokenUtil.from(response.getAuth());
-		} catch (RestClientException e) {
-			throw VaultLoginException.create("AppRole", e);
-		}
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private String getRoleId(RoleId roleId) throws VaultLoginException {
@@ -210,12 +207,15 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		if (roleId instanceof Pull) {
 			VaultToken token = ((Pull) roleId).getInitialToken();
 			try {
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(getRoleIdIdPath(this.options),
-						HttpMethod.GET, createHttpEntity(token), VaultResponse.class);
-				return (String) ResponseUtil.getRequiredValue(entity, "role_id");
-			} catch (HttpStatusCodeException e) {
-				throw new VaultLoginException("Cannot get Role id using AppRole: %s"
-						.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
+				ResponseEntity<VaultResponse> entity = this.loginClient.get()
+					.path(getRoleIdIdPath(this.options))
+					.headers(createHttpHeaders(token))
+					.retrieve()
+					.toEntity();
+				return (String) AuthenticationUtil.getRequiredValue(entity, "role_id");
+			} catch (VaultException e) {
+				throw new VaultLoginException("Cannot get Role id using AppRole: %s".formatted(e.getMessage()),
+						e.getCause());
 			}
 		}
 
@@ -223,13 +223,18 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			VaultToken token = ((Wrapped) roleId).getInitialToken();
 			try {
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
-						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
-				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
-				return (String) ResponseUtil.getRequiredValue(response, "role_id");
-			} catch (HttpStatusCodeException e) {
-				throw new VaultLoginException("Cannot unwrap Role id using AppRole: %s"
-						.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
+
+				ResponseEntity<VaultResponse> entity = this.loginClient
+					.method(unwrappingEndpoints.getUnwrapRequestMethod())
+					.path(unwrappingEndpoints.getPath())
+					.headers(createHttpHeaders(token))
+					.retrieve()
+					.toEntity();
+				VaultResponse response = unwrappingEndpoints.unwrap(AuthenticationUtil.getRequiredBody(entity));
+				return (String) AuthenticationUtil.getRequiredValue(response, "role_id");
+			} catch (VaultException e) {
+				throw new VaultLoginException("Cannot unwrap Role id using AppRole: %s".formatted(e.getMessage()),
+						e.getCause());
 			}
 		}
 		throw new IllegalArgumentException("Unknown RoleId configuration: " + roleId);
@@ -244,12 +249,17 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		if (secretId instanceof Pull) {
 			VaultToken token = ((Pull) secretId).getInitialToken();
 			try {
-				VaultResponse response = this.adapter.postForObject(getSecretIdPath(this.options),
-						createHttpEntity(token), VaultResponse.class);
-				return (String) ResponseUtil.getRequiredData(response).get("secret_id");
-			} catch (HttpStatusCodeException e) {
-				throw new VaultLoginException("Cannot get Secret id using AppRole: %s"
-						.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
+
+				VaultResponse response = this.loginClient.post()
+					.path(getSecretIdPath(this.options))
+					.headers(createHttpHeaders(token))
+					.retrieve()
+					.requiredBody();
+
+				return (String) AuthenticationUtil.getRequiredData(response).get("secret_id");
+			} catch (VaultException e) {
+				throw new VaultLoginException("Cannot get Secret id using AppRole: %s".formatted(e.getMessage()),
+						e.getCause());
 			}
 		}
 
@@ -257,13 +267,18 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			VaultToken token = ((Wrapped) secretId).getInitialToken();
 			try {
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
-						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
-				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
+
+				ResponseEntity<VaultResponse> entity = this.loginClient
+					.method(unwrappingEndpoints.getUnwrapRequestMethod())
+					.path(unwrappingEndpoints.getPath())
+					.headers(createHttpHeaders(token))
+					.retrieve()
+					.toEntity();
+				VaultResponse response = unwrappingEndpoints.unwrap(AuthenticationUtil.getRequiredBody(entity));
 				return (String) response.getRequiredData().get("secret_id");
-			} catch (HttpStatusCodeException e) {
-				throw new VaultLoginException("Cannot unwrap Secret id using AppRole: %s"
-						.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
+			} catch (VaultException e) {
+				throw new VaultLoginException("Cannot unwrap Secret id using AppRole: %s".formatted(e.getMessage()),
+						e.getCause());
 			}
 		}
 		throw new IllegalArgumentException("Unknown SecretId configuration: " + secretId);
@@ -271,10 +286,6 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 	private static HttpHeaders createHttpHeaders(VaultToken token) {
 		return VaultHttpHeaders.from(token);
-	}
-
-	private static HttpEntity<String> createHttpEntity(VaultToken token) {
-		return new HttpEntity<>(null, createHttpHeaders(token));
 	}
 
 	private Map<String, String> getAppRoleLoginBody(RoleId roleId, SecretId secretId) {

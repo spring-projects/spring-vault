@@ -35,9 +35,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.IntegrationTestSupport;
-import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.authentication.JwtAuthentication.*;
@@ -110,10 +108,10 @@ class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 	void shouldLoginSuccessfully() throws Exception {
 
 		String jwt = createToken("Administrator");
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		TestVaultClient client = TestVaultClient.create();
 
 		JwtAuthentication authentication = new JwtAuthentication(
-				JwtAuthenticationOptions.builder().jwtSupplier(() -> jwt).role("my-role").build(), restTemplate);
+				JwtAuthenticationOptions.builder().jwtSupplier(() -> jwt).role("my-role").build(), client);
 		VaultToken loginToken = authentication.login();
 
 		assertThat(loginToken.getToken()).isNotNull();
@@ -128,9 +126,9 @@ class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 		// Different user claim with signature of token1 makes an invalid token
 		String jwt = token2.substring(0, token2.lastIndexOf('.') + 1) + token1.substring(token1.lastIndexOf('.') + 1);
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		TestVaultClient client = TestVaultClient.create();
 		JwtAuthentication authentication = new JwtAuthentication(
-				JwtAuthenticationOptions.builder().jwtSupplier(() -> jwt).role("my-role").build(), restTemplate);
+				JwtAuthenticationOptions.builder().jwtSupplier(() -> jwt).role("my-role").build(), client);
 
 		assertThatThrownBy(authentication::login).isInstanceOf(VaultLoginException.class)
 				.hasMessageContaining("Cannot login using JWT", "error validating token",

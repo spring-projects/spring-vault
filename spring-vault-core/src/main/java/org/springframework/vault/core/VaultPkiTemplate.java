@@ -90,11 +90,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			Class<T> responseType) {
 		request.putIfAbsent("format", "der");
 		return this.vaultOperations.doWithSessionClient(client -> {
-			try {
-				return client.post().uri(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+			return client.post().path(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
 		});
 	}
 
@@ -102,17 +98,14 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@SuppressWarnings("NullAway")
 	public void revoke(String serialNumber) throws VaultException {
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
-			try {
-				return client.post()
-						.uri("{path}/revoke", this.path)
-						.body(Collections.singletonMap("serial_number", serialNumber))
-						.retrieve()
-						.toBodilessEntity()
-						.getBody();
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
+
+			return client.post()
+				.path("{path}/revoke", this.path)
+				.body(Collections.singletonMap("serial_number", serialNumber))
+				.retrieve()
+				.toBodilessEntity()
+				.getBody();
 		});
 	}
 
@@ -120,21 +113,18 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	public InputStream getCrl(Encoding encoding) throws VaultException {
 		Assert.notNull(encoding, "Encoding must not be null");
-		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable InputStream>) client -> {
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable InputStream>) client -> {
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
-			try {
-				ResponseEntity<byte[]> response = client.get()
-						.uri(requestPath, this.path)
-						.retrieve()
-						.toEntity(byte[].class);
+			ResponseEntity<byte[]> response = client.get()
+				.path(requestPath, this.path)
+				.retrieve()
+				.toEntity(byte[].class);
 
-				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-					return new ByteArrayInputStream(response.getBody());
-				}
-				return null;
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
+			if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+				return new ByteArrayInputStream(response.getBody());
 			}
+
+			return null;
 		});
 	}
 
@@ -143,14 +133,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
 		Assert.hasText(issuer, "Issuer must not be empty");
 		return this.vaultOperations.doWithSessionClient(client -> {
-			try {
-				return client.get()
-						.uri("{path}/issuer/{issuer}/json", this.path, issuer)
-						.retrieve()
-						.body(VaultIssuerCertificateRequestResponse.class);
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+
+			return client.get()
+				.path("{path}/issuer/{issuer}/json", this.path, issuer)
+				.retrieve()
+				.body(VaultIssuerCertificateRequestResponse.class);
 		});
 	}
 
@@ -161,18 +148,17 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		Assert.notNull(encoding, "Encoding must not be null");
 		return this.vaultOperations.doWithSessionClient(client -> {
 			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
-			try {
-				ResponseEntity<byte[]> response = client.get()
-						.uri(requestPath, this.path, issuer)
-						.retrieve()
-						.toEntity(byte[].class);
-				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-					return new ByteArrayInputStream(response.getBody());
+
+			ResponseEntity<byte[]> response = client.get()
+				.path(requestPath, this.path, issuer)
+				.retrieve()
+				.toEntity(byte[].class);
+
+			if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+				return new ByteArrayInputStream(response.getBody());
+
 				}
-				return null;
-			} catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+			return null;
 		});
 	}
 
