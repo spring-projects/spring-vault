@@ -12,7 +12,7 @@
 	<description>Builds Spring Vault Docs</description>
 
 	<properties>
-		<maven.antora-version>1.0.0-alpha.4</maven.antora-version>
+		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 	</properties>
 
 	<build>
