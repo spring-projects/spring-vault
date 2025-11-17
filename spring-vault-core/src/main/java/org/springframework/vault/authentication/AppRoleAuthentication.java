@@ -22,9 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -143,7 +141,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			HttpHeaders headers = createHttpHeaders(((Pull) roleId).getInitialToken());
 
 			return AuthenticationSteps
-				.fromHttpRequest(get(getRoleIdIdPath(options)).with(headers).as(VaultResponse.class))
+				.fromVaultRequest(get(getRoleIdIdPath(options)).with(headers).as(VaultResponse.class))
 				.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("role_id"));
 		}
 
@@ -165,7 +163,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			HttpHeaders headers = createHttpHeaders(((Pull) secretId).getInitialToken());
 
 			return AuthenticationSteps
-				.fromHttpRequest(post(getSecretIdPath(options)).with(headers).as(VaultResponse.class))
+				.fromVaultRequest(post(getSecretIdPath(options)).with(headers).as(VaultResponse.class))
 				.map(vaultResponse -> (String) vaultResponse.getRequiredData().get("secret_id"));
 		}
 
@@ -203,10 +201,11 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		Map<String, String> login = getAppRoleLoginBody(this.options.getRoleId(), this.options.getSecretId());
 
 		try {
-			VaultResponse response = this.adapter.postForObject(getLoginPath(this.options.getPath()), login,
-					VaultResponse.class);
+			VaultResponse response = this.adapter.vaultClient().post()
+					.path(getLoginPath(this.options.getPath()))
+					.body(login).retrieve().requiredBody();
 
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
+			Assert.state(response.getAuth() != null, "Auth field must not be null");
 
 			logger.debug("Login successful using AppRole authentication");
 
@@ -229,8 +228,9 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 			try {
 
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(getRoleIdIdPath(this.options),
-						HttpMethod.GET, createHttpEntity(token), VaultResponse.class);
+				ResponseEntity<VaultResponse> entity = this.adapter.vaultClient().get()
+						.path(getRoleIdIdPath(this.options))
+						.headers(createHttpHeaders(token)).retrieve().toEntity();
 				return (String) ResponseUtil.getRequiredValue(entity, "role_id");
 			}
 			catch (HttpStatusCodeException e) {
@@ -245,8 +245,11 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 
 			try {
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
-						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
+
+				ResponseEntity<VaultResponse> entity = this.adapter.vaultClient()
+						.method(unwrappingEndpoints.getUnwrapRequestMethod())
+						.path(unwrappingEndpoints.getPath())
+						.headers(createHttpHeaders(token)).retrieve().toEntity();
 
 				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
 
@@ -273,8 +276,11 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			VaultToken token = ((Pull) secretId).getInitialToken();
 
 			try {
-				VaultResponse response = this.adapter.postForObject(getSecretIdPath(this.options),
-						createHttpEntity(token), VaultResponse.class);
+
+				VaultResponse response = this.adapter.vaultClient().post()
+						.path(getSecretIdPath(this.options))
+						.headers(createHttpHeaders(token)).retrieve().requiredBody();
+
 				return (String) ResponseUtil.getRequiredData(response).get("secret_id");
 			}
 			catch (HttpStatusCodeException e) {
@@ -290,8 +296,11 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 			try {
 
 				UnwrappingEndpoints unwrappingEndpoints = this.options.getUnwrappingEndpoints();
-				ResponseEntity<VaultResponse> entity = this.adapter.exchange(unwrappingEndpoints.getPath(),
-						unwrappingEndpoints.getUnwrapRequestMethod(), createHttpEntity(token), VaultResponse.class);
+
+				ResponseEntity<VaultResponse> entity = this.adapter.vaultClient()
+						.method(unwrappingEndpoints.getUnwrapRequestMethod())
+						.path(unwrappingEndpoints.getPath())
+						.headers(createHttpHeaders(token)).retrieve().toEntity();
 
 				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
 
@@ -312,10 +321,6 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 		headers.set(VaultHttpHeaders.VAULT_TOKEN, token.getToken());
 
 		return headers;
-	}
-
-	private static HttpEntity<String> createHttpEntity(VaultToken token) {
-		return new HttpEntity<>(null, createHttpHeaders(token));
 	}
 
 	private Map<String, String> getAppRoleLoginBody(RoleId roleId, SecretId secretId) {

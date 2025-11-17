@@ -22,18 +22,16 @@ import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Base class for {@link VaultVersionedKeyValueTemplate} and
@@ -75,8 +73,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) (client -> {
-			return client.delete().uri(createDataPath(path)).retrieve().toBodilessEntity().getBody();
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) (client -> {
+			return client.delete().path(createDataPath(path)).retrieve().toBodilessEntity().getBody();
 		}));
 	}
 
@@ -119,7 +117,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @return mapped value.
 	 */
 	<T> @Nullable T doRead(String path, ParameterizedTypeReference<T> typeReference) {
-		return doRead((client) -> client.get().uri(path).retrieve().toEntity(typeReference));
+		return doRead((client) -> client.get().path(path).retrieve().toEntity(typeReference));
 	}
 
 	/**
@@ -140,9 +138,9 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @return can be {@literal null}.
 	 */
 	@SuppressWarnings("NullAway")
-	<T extends @Nullable Object> @Nullable T doRead(Function<RestClient, ResponseEntity<T>> callback) {
+	<T extends @Nullable Object> @Nullable T doRead(Function<VaultClient, ResponseEntity<T>> callback) {
 
-		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable T>) (client) -> {
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable T>) (client) -> {
 
 			try {
 				return callback.apply(client).getBody();
@@ -171,8 +169,8 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		Assert.hasText(path, "Path must not be empty");
 
 		try {
-			return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable VaultResponse>) (client) -> {
-				return client.post().uri(path).body(body).retrieve().body(VaultResponse.class);
+			return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable VaultResponse>) (client) -> {
+				return client.post().path(path).body(body).retrieve().body(VaultResponse.class);
 			});
 		}
 		catch (HttpStatusCodeException e) {

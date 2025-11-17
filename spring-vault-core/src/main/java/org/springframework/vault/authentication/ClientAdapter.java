@@ -23,6 +23,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
@@ -42,10 +43,27 @@ abstract class ClientAdapter {
 	}
 
 	/**
+	 * Factory method creating a ClientAdapter delegating to {@link RestOperations}.
+	 */
+	public static ClientAdapter from(RestOperations restOperations, String auth) {
+
+		VaultClient vaultClient;
+
+		VaultLoginClient.builder(vaultClient).mechanism(auth);
+
+		return new RestOperationsAdapter(restOperations);
+	}
+
+	/**
 	 * Factory method creating a ClientAdapter delegating to {@link RestClient}.
 	 */
 	public static ClientAdapter from(RestClient client) {
 		return new RestClientAdapter(client);
+	}
+
+
+	public VaultLoginClient vaultClient() {
+		return null;
 	}
 
 	/**

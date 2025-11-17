@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -190,7 +191,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 			.with(requestEntity) //
 			.as(VaultResponse.class);
 
-		return AuthenticationSteps.fromHttpRequest(initialRequest) //
+		return AuthenticationSteps.fromVaultRequest(initialRequest) //
 			.login(it -> getToken(options, it, url));
 	}
 
@@ -221,9 +222,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
-			HttpEntity<Object> requestEntity = getRequestEntity(this.options);
-			ResponseEntity<VaultResponse> entity = this.adapter.exchange(url, unwrapMethod, requestEntity,
-					VaultResponse.class);
+			ResponseEntity<VaultResponse> entity = this.adapter.vaultClient().method(unwrapMethod).path(url).headers(getRequestHeaders(options)).retrieve().toEntity();
 
 			return ResponseUtil.getRequiredBody(entity);
 		}
@@ -249,7 +248,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	}
 
 	private static HttpEntity<Object> getRequestEntity(CubbyholeAuthenticationOptions options) {
-		return new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken()));
+		return new HttpEntity<>(getRequestHeaders(options));
+	}
+
+	private static HttpHeaders getRequestHeaders(CubbyholeAuthenticationOptions options) {
+		return VaultHttpHeaders.from(options.getInitialToken());
 	}
 
 	private static HttpMethod getRequestMethod(CubbyholeAuthenticationOptions options) {

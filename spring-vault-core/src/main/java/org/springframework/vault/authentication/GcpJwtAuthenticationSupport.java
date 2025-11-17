@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestOperations;
 
 /**
  * Base class for GCP JWT-based authentication. Used by framework components.
@@ -60,8 +59,7 @@ public abstract class GcpJwtAuthenticationSupport {
 
 		try {
 
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(path), login,
-					VaultResponse.class);
+			VaultResponse response = this.adapter.vaultClient().post().path(AuthenticationUtil.getLoginPath(path)).body(login).retrieve().requiredBody();
 
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 

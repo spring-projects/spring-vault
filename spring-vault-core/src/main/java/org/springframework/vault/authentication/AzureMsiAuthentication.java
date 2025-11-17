@@ -30,10 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
-import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -97,7 +95,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		Assert.notNull(azureMetadataRestOperations, "Azure Instance Metadata RestOperations must not be null");
 
 		this.options = options;
-		this.vaultAdapter = ClientAdapter.from(vaultRestOperations);
+		this.vaultAdapter = ClientAdapter.from(vaultRestOperations, "Azure");
 		this.azureMetadataAdapter = ClientAdapter.from(azureMetadataRestOperations);
 	}
 
@@ -185,22 +183,8 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		Map<String, String> login = getAzureLogin(this.options.getRole(), getVmEnvironment(), getAccessToken());
 
-		try {
-
-			VaultResponse response = this.vaultAdapter
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
-
-			Assert.state(response != null, "Auth field must not be null");
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Login successful using Azure authentication");
-			}
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("Azure", e);
-		}
+		return this.vaultAdapter.vaultClient().login(this.options.getPath())
+				.using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getAzureLogin(String role, AzureVmEnvironment vmEnvironment, String jwt) {

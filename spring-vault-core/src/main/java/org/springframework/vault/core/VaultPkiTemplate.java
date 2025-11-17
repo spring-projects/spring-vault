@@ -112,7 +112,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
 
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
 			try {
 				return client.post()
@@ -134,7 +134,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		Assert.notNull(encoding, "Encoding must not be null");
 
-		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable InputStream>) client -> {
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable InputStream>) client -> {
 
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {

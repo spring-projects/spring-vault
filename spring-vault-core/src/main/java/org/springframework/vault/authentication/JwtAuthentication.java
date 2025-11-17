@@ -25,10 +25,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -65,7 +63,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this.adapter = ClientAdapter.from(restOperations, "JWT");
 	}
 
 	/**
@@ -96,19 +94,8 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
-		try {
-
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					login, VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-
-			logger.debug("Login successful using JWT authentication");
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("JWT", e);
-		}
+		return this.adapter.vaultClient().login(this.options.getPath()).using(login)
+				.retrieve().loginToken();
 	}
 
 	private static Map<String, String> getJwtLogin(@Nullable String role, String jwt) {

@@ -19,9 +19,6 @@ import java.util.Collections;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultResponses;
@@ -129,7 +126,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
 			try {
 				client.post()

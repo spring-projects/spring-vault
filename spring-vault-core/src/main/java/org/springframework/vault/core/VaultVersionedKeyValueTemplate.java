@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.JacksonCompat;
@@ -101,7 +100,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		VaultResponseSupport<VaultResponseSupport<Object>> response = this.vaultOperations
-			.doWithSessionClient((RestClientCallback<@Nullable VaultResponseSupport>) client -> {
+			.doWithSessionClient((VaultClientCallback<@Nullable VaultResponseSupport>) client -> {
 
 				try {
 					return client.get().uri(secretPath).retrieve().body(responseTypeToUse);

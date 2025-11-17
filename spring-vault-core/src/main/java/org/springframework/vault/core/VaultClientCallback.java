@@ -17,22 +17,22 @@ package org.springframework.vault.core;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.web.client.RestClient;
+import org.springframework.vault.client.VaultClient;
 
 /**
- * A callback for executing arbitrary operations on {@link RestClient}.
+ * A callback for executing arbitrary operations on {@link VaultClient}.
  *
  * @author Mark Paluch
  * @since 4.0
  */
 @FunctionalInterface
-interface RestClientCallback<T extends @Nullable Object> {
+interface VaultClientCallback<T extends @Nullable Object> {
 
 	/**
 	 * Callback method.
 	 * @param client client to be used.
 	 * @return a result object or null if none.
 	 */
-	T doWithRestClient(RestClient client);
+	T doWithVaultClient(VaultClient client);
 
 }

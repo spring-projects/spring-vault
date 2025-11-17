@@ -27,9 +27,7 @@ import java.util.function.Consumer;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -41,7 +39,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestOperations;
 
 /**
  * @author Mark Paluch
@@ -112,7 +109,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
 			BiFunction<RestClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
 
-		return this.vaultOperations.doWithVaultClient((RestClientCallback<@Nullable T>) client -> {
+		return this.vaultOperations.doWithVaultClient((VaultClientCallback<@Nullable T>) client -> {
 
 			try {
 				return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));

@@ -35,6 +35,7 @@ import org.springframework.vault.authentication.SimpleSessionManager;
 import org.springframework.vault.client.RestClientBuilder;
 import org.springframework.vault.client.RestTemplateBuilder;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -71,11 +72,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private final RestOperations statelessTemplate;
 
-	private final RestClient statelessClient;
+	private final VaultClient statelessClient;
 
 	private final RestOperations sessionTemplate;
 
-	private final RestClient sessionClient;
+	private final VaultClient sessionClient;
 
 	private @Nullable SessionManager sessionManager;
 
@@ -510,7 +511,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		return doWithSessionClient(client -> {
 
 			try {
-				ResponseEntity<VaultResponseSupport<T>> exchange = client.get().uri(path).retrieve().toEntity(ref);
+				ResponseEntity<VaultResponseSupport<T>> exchange = client.get().path(path).retrieve().toEntity(ref);
 
 				return exchange.getBody();
 			}
@@ -565,10 +566,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.hasText(path, "Path must not be empty");
 
-		doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
+		doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
 			try {
-				client.delete().uri(path).retrieve().toBodilessEntity();
+				client.delete().path(path).retrieve().toBodilessEntity();
 			}
 			catch (HttpStatusCodeException e) {
 
@@ -596,13 +597,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 	}
 
-	<T extends @Nullable Object> T doWithVaultClient(RestClientCallback<T> clientCallback)
+	<T extends @Nullable Object> T doWithVaultClient(VaultClientCallback<T> clientCallback)
 			throws VaultException, RestClientException {
 
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
 		try {
-			return clientCallback.doWithRestClient(this.statelessClient);
+			return clientCallback.doWithVaultClient(this.statelessClient);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
@@ -622,13 +623,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 	}
 
-	<T extends @Nullable Object> T doWithSessionClient(RestClientCallback<T> sessionCallback)
+	<T extends @Nullable Object> T doWithSessionClient(VaultClientCallback<T> sessionCallback)
 			throws VaultException, RestClientException {
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
 		try {
-			return sessionCallback.doWithRestClient(this.sessionClient);
+			return sessionCallback.doWithVaultClient(this.sessionClient);
 		}
 		catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
@@ -641,7 +642,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		return doWithSessionClient((client) -> {
 
 			try {
-				return client.get().uri(path).retrieve().toEntity(responseType).getBody();
+				return client.get().path(path).retrieve().toEntity(responseType).getBody();
 			}
 			catch (HttpStatusCodeException e) {
 

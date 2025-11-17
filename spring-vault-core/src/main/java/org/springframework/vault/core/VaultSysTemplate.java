@@ -216,7 +216,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		Assert.hasText(name, "Name must not be null or empty");
 
-		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Policy>) client -> {
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Policy>) client -> {
 
 			ResponseEntity<VaultResponse> response;
 
@@ -263,7 +263,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		rules = JacksonCompat.instance().getPrettyPrintObjectMapperAccessor().writeValueAsString(policy);
 
-		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) restOperations -> {
+		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) restOperations -> {
 			restOperations.put()
 				.uri("sys/policy/{name}", name)
 				.body(Collections.singletonMap("rules", rules))
@@ -293,7 +293,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return response;
 	}
 
-	private static class GetUnsealStatus implements RestClientCallback<VaultUnsealStatus> {
+	private static class GetUnsealStatus implements VaultClientCallback<VaultUnsealStatus> {
 
 		@Override
 		public VaultUnsealStatus doWithRestClient(RestClient client) {
@@ -302,7 +302,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static class Seal implements RestClientCallback<@Nullable Void> {
+	private static class Seal implements VaultClientCallback<@Nullable Void> {
 
 		@Override
 		public Void doWithRestClient(RestClient client) {
@@ -311,7 +311,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private record GetMounts(String path) implements RestClientCallback<Map<String, VaultMount>> {
+	private record GetMounts(String path) implements VaultClientCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
 		};
@@ -385,7 +385,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return it -> it.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
 	}
 
-	private static class Health implements RestClientCallback<VaultHealth> {
+	private static class Health implements VaultClientCallback<VaultHealth> {
 
 		@Override
 		public VaultHealth doWithRestClient(RestClient client) {

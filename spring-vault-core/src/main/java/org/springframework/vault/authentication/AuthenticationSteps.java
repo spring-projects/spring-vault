@@ -104,7 +104,7 @@ public class AuthenticationSteps {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 
-		return new AuthenticationSteps(new HttpRequestNode<>(request, AuthenticationSteps.HEAD));
+		return new AuthenticationSteps(new HttpRequestNode<>(request, false, AuthenticationSteps.HEAD));
 	}
 
 	/**
@@ -145,7 +145,20 @@ public class AuthenticationSteps {
 
 		Assert.notNull(request, "HttpRequest must not be null");
 
-		return new HttpRequestNode<>(request, AuthenticationSteps.HEAD);
+		return new HttpRequestNode<>(request, false, AuthenticationSteps.HEAD);
+	}
+
+	/**
+	 * Start flow composition from a {@link HttpRequest}.
+	 *
+	 * @param request the HTTP request definition, must not be {@literal null}.
+	 * @return the first {@link Node}.
+	 */
+	public static <T> Node<T> fromVaultRequest(HttpRequest<T> request) {
+
+		Assert.notNull(request, "HttpRequest must not be null");
+
+		return new HttpRequestNode<>(request, true, AuthenticationSteps.HEAD);
 	}
 
 	AuthenticationSteps(PathAware pathAware) {
@@ -239,7 +252,7 @@ public class AuthenticationSteps {
 
 			Assert.notNull(request, "HttpRequest must not be null");
 
-			return new HttpRequestNode<>(request, this);
+			return new HttpRequestNode<>(request,false , this);
 		}
 
 		/**
@@ -267,7 +280,7 @@ public class AuthenticationSteps {
 
 			Assert.notNull(request, "HttpRequest must not be null");
 
-			return new AuthenticationSteps(new HttpRequestNode<>(request, this));
+			return new AuthenticationSteps(new HttpRequestNode<>(request,true , this));
 		}
 
 		/**
@@ -494,11 +507,18 @@ public class AuthenticationSteps {
 
 		private final HttpRequest<T> definition;
 
+		private final boolean vault;
+
 		private final Node<?> previous;
 
-		HttpRequestNode(HttpRequest<T> definition, Node<?> previous) {
+		HttpRequestNode(HttpRequest<T> definition, boolean vault, Node<?> previous) {
 			this.definition = definition;
+			this.vault = vault;
 			this.previous = previous;
+		}
+
+		public boolean isVault() {
+			return vault;
 		}
 
 		@Override
@@ -520,12 +540,12 @@ public class AuthenticationSteps {
 				return true;
 			if (!(o instanceof HttpRequestNode<?> that))
 				return false;
-			return this.definition.equals(that.definition) && this.previous.equals(that.previous);
+			return this.definition.equals(that.definition) && this.previous.equals(that.previous) && this.vault == that.vault;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(this.definition, this.previous);
+			return Objects.hash(this.definition, this.previous, this.vault);
 		}
 
 	}
