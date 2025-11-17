@@ -50,7 +50,7 @@
 		<spring.version>7.0.0</spring.version>
 		<spring-data-bom.version>2025.1.0</spring-data-bom.version>
 		<spring-security-bom.version>7.0.0-M3</spring-security-bom.version>
-		<reactor.version>2025.0.0-RC1</reactor.version>
+		<reactor.version>2025.0.0</reactor.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
