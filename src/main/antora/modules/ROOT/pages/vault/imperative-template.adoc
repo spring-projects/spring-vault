@@ -10,7 +10,7 @@ NOTE: Once configured, javadoc:org.springframework.vault.core.VaultTemplate[] is
 multiple instances.
 
 The mapping between Vault documents and domain classes is done by delegating to
-`RestTemplate`. Spring Web support provides the mapping infrastructure.
+`RestClient`. Spring Web support provides the mapping infrastructure.
 
 The javadoc:org.springframework.vault.core.VaultTemplate[] class implements the interface
 javadoc:org.springframework.vault.core.VaultOperations[].
@@ -35,7 +35,7 @@ While there are many convenience methods on `VaultTemplate` to help you easily
 perform common tasks if you should need to access the Vault API directly to access
 functionality not explicitly exposed by the `VaultTemplate` you can use one of
 several execute callback methods to access underlying APIs. The execute callbacks
-will give you a reference to a `RestOperations` object.
+will give you a reference to a `VaultClient` object.
 Please see the section <<vault.core.executioncallback,Execution Callbacks>> for more information.
 
 Now let's look at a examples of how to work with Vault in the context of the Spring container.

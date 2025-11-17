@@ -76,7 +76,7 @@ public class TokenAuthentication implements ClientAuthentication, Authentication
 				.as(VaultResponse.class);
 
 			return AuthenticationSteps.fromHttpRequest(httpRequest)
-				.login(response -> LoginTokenUtil.from(token.toCharArray(), response.getRequiredData()));
+				.login(response -> LoginToken.from(token.toCharArray(), response.getRequiredData()));
 		}
 
 		return AuthenticationSteps.just(token);

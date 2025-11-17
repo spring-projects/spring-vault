@@ -24,6 +24,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -83,7 +84,7 @@ class VaultClientsUnitTests {
 	}
 
 	@Test
-	void shouldApplyNamespace() {
+	void shouldApplyNamespaceWithRestTemplate() {
 
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
@@ -96,7 +97,21 @@ class VaultClientsUnitTests {
 			.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
 			.andRespond(withSuccess());
 
-		restTemplate.getForEntity("/auth/foo", String.class);
+		restTemplate.getForEntity("auth/foo", String.class);
+	}
+
+	@Test
+	void shouldApplyNamespace() {
+
+		MockVaultClient client = MockVaultClient.create(it -> it.defaultNamespace("foo/bar")
+			.configureRestClient(rcb -> rcb.uriBuilderFactory(new PrefixAwareUriBuilderFactory())));
+
+		client.expect(requestTo("/auth/foo"))
+			.andExpect(method(HttpMethod.GET))
+			.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
+			.andRespond(withSuccess());
+
+		client.get().path("auth/foo").retrieve().body();
 	}
 
 	@Test
@@ -116,7 +131,7 @@ class VaultClientsUnitTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "baz");
 
-		restTemplate.exchange("/auth/foo", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+		restTemplate.exchange("auth/foo", HttpMethod.GET, new HttpEntity<>(headers), String.class);
 	}
 
 }

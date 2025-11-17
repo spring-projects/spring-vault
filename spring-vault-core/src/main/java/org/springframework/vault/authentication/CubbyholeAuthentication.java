@@ -21,11 +21,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -105,7 +106,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * 		.initialToken(VaultToken.of("895cb88b-aef4-0e33-ba65-d50007290780"))
  * 		.path("cubbyhole/token")
  * 		.build();
- *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restOperations);
+ *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
  * </code> </pre>
  *
  * <strong>Remaining TTL/Renewability</strong>
@@ -123,7 +124,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  * @see <a href="https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
  * Secret Backend</a>
@@ -137,21 +138,20 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private final CubbyholeAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
 	 * {@link CubbyholeAuthenticationOptions} and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #CubbyholeAuthentication(CubbyholeAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestOperations restOperations) {
-
-		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -160,14 +160,29 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #CubbyholeAuthentication(CubbyholeAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a new {@link CubbyholeAuthentication} given
+	 * {@link CubbyholeAuthenticationOptions} and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, VaultClient client) {
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(client, "Cubbyhole");
 	}
 
 	/**
@@ -190,7 +205,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 			.with(requestEntity) //
 			.as(VaultResponse.class);
 
-		return AuthenticationSteps.fromHttpRequest(initialRequest) //
+		return AuthenticationSteps.fromVaultRequest(initialRequest) //
 			.login(it -> getToken(options, it, url));
 	}
 
@@ -204,7 +219,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
-			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.adapter);
+			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.loginClient);
 			tokenToUse = adapter.login();
 		}
 
@@ -221,13 +236,18 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
-			HttpEntity<Object> requestEntity = getRequestEntity(this.options);
-			ResponseEntity<VaultResponse> entity = this.adapter.exchange(url, unwrapMethod, requestEntity,
-					VaultResponse.class);
-
-			return ResponseUtil.getRequiredBody(entity);
+			return this.loginClient.method(unwrapMethod)
+				.path(url)
+				.headers(getRequestHeaders(options))
+				.retrieve()
+				.requiredBody();
 		}
-		catch (RestClientException e) {
+		catch (VaultException e) {
+
+			if (e.getCause() instanceof RestClientException rce) {
+				throw VaultLoginException.create("Cubbyhole", rce);
+			}
+
 			throw VaultLoginException.create("Cubbyhole", e);
 		}
 	}
@@ -249,7 +269,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	}
 
 	private static HttpEntity<Object> getRequestEntity(CubbyholeAuthenticationOptions options) {
-		return new HttpEntity<>(VaultHttpHeaders.from(options.getInitialToken()));
+		return new HttpEntity<>(getRequestHeaders(options));
+	}
+
+	private static HttpHeaders getRequestHeaders(CubbyholeAuthenticationOptions options) {
+		return VaultHttpHeaders.from(options.getInitialToken());
 	}
 
 	private static HttpMethod getRequestMethod(CubbyholeAuthenticationOptions options) {
@@ -278,7 +302,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 			Assert.state(responseToUse.getAuth() != null, "Auth field must not be null");
 
-			return LoginTokenUtil.from(responseToUse.getAuth());
+			return LoginToken.from(responseToUse.getAuth());
 		}
 
 		Map<String, Object> data = response.getData();

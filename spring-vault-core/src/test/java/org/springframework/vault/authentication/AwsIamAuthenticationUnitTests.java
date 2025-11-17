@@ -27,6 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -40,24 +41,17 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class AwsIamAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
 	void shouldAuthenticate() {
 
-		this.mockRest.expect(requestTo("/auth/aws/login"))
+		this.client.expect(requestTo("auth/aws/login"))
 			.andExpect(method(HttpMethod.POST))
 			.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
 			.andExpect(jsonPath("$.iam_request_url").exists())
@@ -73,7 +67,7 @@ class AwsIamAuthenticationUnitTests {
 			.regionProvider(() -> Region.US_WEST_1)
 			.credentials(AwsBasicCredentials.create("foo", "bar"))
 			.build();
-		AwsIamAuthentication sut = new AwsIamAuthentication(options, this.restTemplate);
+		AwsIamAuthentication sut = new AwsIamAuthentication(options, this.client);
 
 		VaultToken login = sut.login();
 
@@ -86,7 +80,7 @@ class AwsIamAuthenticationUnitTests {
 	@Test
 	void shouldUsingAuthenticationSteps() {
 
-		this.mockRest.expect(requestTo("/auth/aws/login"))
+		this.client.expect(requestTo("auth/aws/login"))
 			.andExpect(method(HttpMethod.POST))
 			.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
 			.andExpect(jsonPath("$.iam_request_url").exists())
@@ -104,7 +98,8 @@ class AwsIamAuthenticationUnitTests {
 			.build();
 
 		AuthenticationSteps steps = AwsIamAuthentication.createAuthenticationSteps(options);
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.client,
+				this.client.getRestClient());
 
 		VaultToken login = executor.login();
 

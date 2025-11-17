@@ -31,7 +31,6 @@ import org.springframework.vault.config.AbstractVaultConfiguration.TaskScheduler
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -99,7 +98,7 @@ class AbstractVaultConfigurationUnitTests {
 
 		@Override
 		public VaultEndpoint vaultEndpoint() {
-			return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
+			return Settings.TEST_VAULT_ENDPOINT;
 		}
 
 		@Override

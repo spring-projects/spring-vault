@@ -45,8 +45,8 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.roleId(RoleId.provided(roleId))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
+			.create(AppRoleAuthentication.createAuthenticationSteps(options), prepare().getVaultClient());
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -63,8 +63,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.unwrappingEndpoints(getUnwrappingEndpoints())
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -85,8 +84,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.unwrappingEndpoints(getUnwrappingEndpoints())
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -100,8 +98,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.secretId(SecretId.pull(Settings.token()))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -117,8 +114,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.roleId(RoleId.provided(roleId))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -137,8 +133,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.roleId(RoleId.pull(Settings.token()))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 	}
@@ -153,8 +148,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.secretId(SecretId.provided("this-is-a-wrong-secret-id"))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(executor::login);
 	}
@@ -173,8 +167,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.secretId(SecretId.provided(secretId))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
 
@@ -193,10 +186,14 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 			.secretId(SecretId.pull(Settings.token()))
 			.build();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				AppRoleAuthentication.createAuthenticationSteps(options), prepare().getRestTemplate());
+		AuthenticationStepsExecutor executor = getExecutor(options);
 
 		assertThat(executor.login()).isNotNull();
+	}
+
+	private AuthenticationStepsExecutor getExecutor(AppRoleAuthenticationOptions options) {
+		return TestAuthenticationStepsExecutor.create(AppRoleAuthentication.createAuthenticationSteps(options),
+				prepare().getVaultClient());
 	}
 
 }

@@ -24,7 +24,6 @@ import reactor.test.StepVerifier;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.util.IntegrationTestSupport;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.assertj.core.api.Assertions.*;
@@ -45,7 +44,7 @@ class ReactiveVaultClientsIntegrationTests extends IntegrationTestSupport {
 
 			return Mono.fromSupplier(() -> {
 				resolver.set(Thread.currentThread());
-				return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
+				return Settings.TEST_VAULT_ENDPOINT;
 			});
 		}, ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()));
 

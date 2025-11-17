@@ -21,13 +21,12 @@ import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
-import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -81,7 +80,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	/**
 	 * HTTP client.
 	 */
-	private final ClientAdapter adapter;
+	private final VaultClient client;
 
 	private final ReentrantLock lock = new ReentrantLock();
 
@@ -102,14 +101,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations) {
 
-		super(taskScheduler);
-
-		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.clientAuthentication = clientAuthentication;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(clientAuthentication, taskScheduler, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -123,16 +115,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations, RefreshTrigger refreshTrigger) {
-
-		super(taskScheduler, refreshTrigger);
-
-		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
-
-		this.clientAuthentication = clientAuthentication;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(clientAuthentication, taskScheduler, ClientAdapter.from(restOperations).vaultClient(), refreshTrigger);
 	}
 
 	/**
@@ -140,20 +123,47 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * {@link TaskScheduler} and {@link RestClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.0
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
-			RestClient vaultClient) {
+			RestClient client) {
+		this(clientAuthentication, taskScheduler, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
+	 * {@link TaskScheduler} and {@link RestClient}.
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @param refreshTrigger must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
+			RestClient client, RefreshTrigger refreshTrigger) {
+		this(clientAuthentication, taskScheduler, ClientAdapter.from(client).vaultClient(), refreshTrigger);
+	}
+
+	/**
+	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
+	 * {@link TaskScheduler} and {@link RestClient}.
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.0
+	 */
+	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
+			VaultClient client) {
 
 		super(taskScheduler);
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(vaultClient, "RestClient must not be null");
+		Assert.notNull(client, "RestClient must not be null");
 
 		this.clientAuthentication = clientAuthentication;
-		this.adapter = ClientAdapter.from(vaultClient);
+		this.client = client;
 	}
 
 	/**
@@ -161,22 +171,22 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * {@link TaskScheduler} and {@link RestClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
 	 * @since 4.0
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
-			RestClient vaultClient, RefreshTrigger refreshTrigger) {
+			VaultClient client, RefreshTrigger refreshTrigger) {
 
 		super(taskScheduler, refreshTrigger);
 
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(vaultClient, "RestClient must not be null");
+		Assert.notNull(client, "RestClient must not be null");
 		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
 
 		this.clientAuthentication = clientAuthentication;
-		this.adapter = ClientAdapter.from(vaultClient);
+		this.client = client;
 	}
 
 	/**
@@ -215,8 +225,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		try {
 			multicastEvent(new BeforeLoginTokenRevocationEvent(token));
-			this.adapter.postForObject("auth/token/revoke-self", new HttpEntity<>(VaultHttpHeaders.from(token)),
-					Map.class);
+			this.client.post().path("auth/token/revoke-self").token(token).retrieve().body(Map.class);
 			multicastEvent(new AfterLoginTokenRevocationEvent(token));
 		}
 		catch (RuntimeException e) {
@@ -281,12 +290,15 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	private RenewOutcome doRenew(TokenWrapper wrapper) {
 
 		multicastEvent(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
-		VaultResponse vaultResponse = this.adapter.postForObject("auth/token/renew-self",
-				new HttpEntity<>(VaultHttpHeaders.from(wrapper.token)), VaultResponse.class);
+		VaultResponse vaultResponse = this.client.post()
+			.path("auth/token/renew-self")
+			.token(wrapper.token)
+			.retrieve()
+			.body();
 
 		Assert.notNull(vaultResponse, "VaultResponse must not be null");
 
-		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getAuth());
+		LoginToken renewed = LoginToken.from(vaultResponse.getAuth());
 
 		if (isExpired(renewed)) {
 
@@ -346,7 +358,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		if (isTokenSelfLookupEnabled() && !ClassUtils.isAssignableValue(LoginToken.class, token)) {
 			try {
-				token = LoginTokenAdapter.augmentWithSelfLookup(this.adapter, token);
+				token = LoginTokenAdapter.augmentWithSelfLookup(this.client, token);
 				wrapper = new TokenWrapper(token, false);
 			}
 			catch (VaultTokenLookupException e) {

@@ -26,6 +26,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -39,24 +40,17 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 class ClientCertificateAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	@BeforeEach
 	void before() {
-
-		RestTemplate restTemplate = VaultClients.createRestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
-
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 	}
 
 	@Test
 	void loginShouldObtainToken() {
 
-		this.mockRest.expect(requestTo("/auth/my/path/login"))
+		this.client.expect(requestTo("auth/my/path/login"))
 			.andExpect(method(HttpMethod.POST))
 			.andExpect(content().json("{\"name\": \"my-default-role\"}"))
 			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
@@ -68,7 +62,7 @@ class ClientCertificateAuthenticationUnitTests {
 			.path("my/path")
 			.build();
 
-		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);
+		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.client);
 
 		VaultToken login = sut.login();
 
@@ -81,11 +75,11 @@ class ClientCertificateAuthenticationUnitTests {
 	@Test
 	void loginShouldFail() {
 
-		this.mockRest.expect(requestTo("/auth/cert/login")) //
+		this.client.expect(requestTo("auth/cert/login")) //
 			.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
+			.isThrownBy(() -> new ClientCertificateAuthentication(this.client).login());
 	}
 
 }

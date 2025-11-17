@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.core.VaultTokenOperations;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
@@ -60,7 +61,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -84,7 +85,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate()) {
+				this.taskScheduler, prepare().getVaultClient()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -106,7 +107,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		sessionManager.getSessionToken();
 		sessionManager.revoke();
@@ -117,9 +118,10 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
 			}
-			catch (HttpStatusCodeException e) {
+			catch (VaultException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(((HttpStatusCodeException) e.getCause()).getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;
@@ -133,7 +135,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();
@@ -144,9 +146,10 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
 			}
-			catch (HttpStatusCodeException e) {
+			catch (VaultException e) {
 				// Compatibility across Vault versions.
-				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
+				assertThat(((HttpStatusCodeException) e.getCause()).getStatusCode()).isIn(HttpStatus.BAD_REQUEST,
+						HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
 
 			return null;

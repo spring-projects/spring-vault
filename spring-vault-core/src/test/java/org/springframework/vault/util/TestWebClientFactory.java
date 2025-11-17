@@ -29,8 +29,6 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class TestWebClientFactory {
 
-	private static final VaultEndpoint TEST_VAULT_ENDPOINT = TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
-
 	/**
 	 * Create a new {@link WebClient} using the {@link SslConfiguration}. See
 	 * {@link ReactiveVaultClients#createWebClient(VaultEndpoint, ClientHttpConnector)} to
@@ -44,7 +42,7 @@ public class TestWebClientFactory {
 
 		try {
 			ClientHttpConnector connector = ClientHttpConnectorFactory.create(new ClientOptions(), sslConfiguration);
-			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT, connector);
+			return ReactiveVaultClients.createWebClient(Settings.TEST_VAULT_ENDPOINT, connector);
 		}
 		catch (Exception e) {
 			throw new IllegalStateException(e);

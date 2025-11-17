@@ -24,16 +24,14 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Default implementation of {@link VaultVersionedKeyValueOperations}.
@@ -101,23 +99,25 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		}
 
 		VaultResponseSupport<VaultResponseSupport<Object>> response = this.vaultOperations
-			.doWithSessionClient((RestClientCallback<@Nullable VaultResponseSupport>) client -> {
+			.doWithSessionClient((VaultClientCallback<@Nullable VaultResponseSupport>) client -> {
 
-				try {
-					return client.get().uri(secretPath).retrieve().body(responseTypeToUse);
-				}
-				catch (HttpStatusCodeException e) {
+				ResponseEntity<? extends VaultResponseSupport> entity = client.get()
+					.path(secretPath)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity(responseTypeToUse);
 
-					if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-						if (e.getResponseBodyAsString().contains("deletion_time")) {
-							return VaultResponses.unwrap(e.getResponseBodyAsString(), responseTypeToUse);
-						}
+				VaultResponseSupport body = entity.getBody();
+				if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
 
-						return null;
+					if (body != null && body.getData() instanceof VaultResponseSupport<?>) {
+						return body;
 					}
 
-					throw VaultResponses.buildException(e, path);
+					return null;
 				}
+
+				return body;
 			});
 
 		if (response == null) {

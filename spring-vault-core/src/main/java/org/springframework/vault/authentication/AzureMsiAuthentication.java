@@ -18,8 +18,6 @@ package org.springframework.vault.authentication;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpEntity;
@@ -30,10 +28,9 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -47,15 +44,13 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @since 2.1
  * @see AzureMsiAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/azure.html">Auth Backend: azure</a>
  * @link <a href=
  * "https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service"
  * >Azure Instance Metadata service</a>
  */
 public class AzureMsiAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
-
-	private static final Log logger = LogFactory.getLog(AzureMsiAuthentication.class);
 
 	private static final HttpEntity<Void> METADATA_HEADERS;
 
@@ -68,7 +63,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 	private final AzureMsiAuthenticationOptions options;
 
-	private final ClientAdapter vaultAdapter;
+	private final VaultLoginClient loginClient;
 
 	private final ClientAdapter azureMetadataAdapter;
 
@@ -76,7 +71,11 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * Create a new {@link AzureMsiAuthentication}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations restOperations) {
 		this(options, restOperations, restOperations);
 	}
@@ -88,17 +87,15 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param azureMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations azureMetadataRestOperations) {
-
-		Assert.notNull(options, "AzureAuthenticationOptions must not be null");
-		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
-		Assert.notNull(azureMetadataRestOperations, "Azure Instance Metadata RestOperations must not be null");
-
-		this.options = options;
-		this.vaultAdapter = ClientAdapter.from(vaultRestOperations);
-		this.azureMetadataAdapter = ClientAdapter.from(azureMetadataRestOperations);
+		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
+				ClientAdapter.from(azureMetadataRestOperations));
 	}
 
 	/**
@@ -106,7 +103,11 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -118,17 +119,52 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param azureMetadataClient must not be {@literal null}.
+	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient vaultClient,
 			RestClient azureMetadataClient) {
+		this(options, ClientAdapter.from(vaultClient).vaultClient(), ClientAdapter.from(azureMetadataClient));
+	}
+
+	/**
+	 * Create a new {@link AzureMsiAuthentication} specifying
+	 * {@link AzureMsiAuthenticationOptions} and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, VaultClient vaultClient) {
+		this(options, vaultClient, ClientAdapter.from(RestClient.create()));
+	}
+
+	/**
+	 * Create a new {@link AzureMsiAuthentication} specifying
+	 * {@link AzureMsiAuthenticationOptions}, {@link VaultClient} and an
+	 * Azure-Metadata-specific {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param azureMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, VaultClient vaultClient,
+			RestClient azureMetadataClient) {
+		this(options, vaultClient, ClientAdapter.from(azureMetadataClient));
+	}
+
+	AzureMsiAuthentication(AzureMsiAuthenticationOptions options, VaultClient vaultClient,
+			ClientAdapter azureMetadataClient) {
 
 		Assert.notNull(options, "AzureAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "Vault RestOperations must not be null");
 		Assert.notNull(azureMetadataClient, "Azure Instance Metadata RestOperations must not be null");
 
 		this.options = options;
-		this.vaultAdapter = ClientAdapter.from(vaultClient);
-		this.azureMetadataAdapter = ClientAdapter.from(azureMetadataClient);
+		this.loginClient = VaultLoginClient.create(vaultClient, "Azure");
+		this.azureMetadataAdapter = azureMetadataClient;
 	}
 
 	/**
@@ -168,7 +204,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		return environmentSteps.zipWith(msiToken)
 			.map(tuple -> getAzureLogin(options.getRole(), tuple.getLeft(), tuple.getRight())) //
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+			.loginAt(options.getPath());
 	}
 
 	@Override
@@ -185,22 +221,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		Map<String, String> login = getAzureLogin(this.options.getRole(), getVmEnvironment(), getAccessToken());
 
-		try {
-
-			VaultResponse response = this.vaultAdapter
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
-
-			Assert.state(response != null, "Auth field must not be null");
-
-			if (logger.isDebugEnabled()) {
-				logger.debug("Login successful using Azure authentication");
-			}
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("Azure", e);
-		}
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getAzureLogin(String role, AzureVmEnvironment vmEnvironment, String jwt) {
@@ -222,7 +243,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getIdentityTokenServiceUri(),
 				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return (String) ResponseUtil.getRequiredBody(response).get("access_token");
+		return (String) AuthenticationUtil.getRequiredBody(response).get("access_token");
 	}
 
 	private AzureVmEnvironment getVmEnvironment() {
@@ -238,7 +259,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getInstanceMetadataServiceUri(),
 				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return toAzureVmEnvironment(ResponseUtil.getRequiredBody(response));
+		return toAzureVmEnvironment(AuthenticationUtil.getRequiredBody(response));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

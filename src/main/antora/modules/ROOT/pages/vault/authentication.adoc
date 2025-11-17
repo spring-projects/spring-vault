@@ -107,7 +107,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .secretId(SecretId.wrapped(VaultToken.of("…")))
                 .build();
 
-        return new AppRoleAuthentication(options, restOperations());
+        return new AppRoleAuthentication(options, vaultClient());
     }
 
     // …
@@ -137,7 +137,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .secretId(SecretId.pull(initialToken))
                 .build();
 
-        return new AppRoleAuthentication(options, restOperations());
+        return new AppRoleAuthentication(options, vaultClient());
     }
 
     // …
@@ -170,7 +170,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
     @Override
     public ClientAuthentication clientAuthentication() {
-        return new AwsEc2Authentication(restOperations());
+        return new AwsEc2Authentication(vaultClient());
     }
 
     // …
@@ -229,7 +229,7 @@ class AppConfig extends AbstractVaultConfiguration {
         AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
                 .credentials(new BasicAWSCredentials(…)).build();
 
-        return new AwsIamAuthentication(options, restOperations());
+        return new AwsIamAuthentication(options, vaultClient());
     }
 
     // …
@@ -252,7 +252,7 @@ class AppConfig extends AbstractVaultConfiguration {
         AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
                 .credentialsProvider(InstanceProfileCredentialsProvider.getInstance()).build();
 
-        return new AwsIamAuthentication(options, restOperations());
+        return new AwsIamAuthentication(options, vaultClient());
     }
 
     // …
@@ -297,7 +297,7 @@ class AppConfig extends AbstractVaultConfiguration {
         AzureMsiAuthenticationOptions options = AzureMsiAuthenticationOptions.builder()
                     .role(…).build();
 
-        return new AzureMsiAuthentication(options, restOperations());
+        return new AzureMsiAuthentication(options, vaultClient());
     }
 
     // …
@@ -351,7 +351,7 @@ class AppConfig extends AbstractVaultConfiguration {
 				.role(…).build();
 
 		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options,
-				restOperations());
+				vaultClient());
     }
 
     // …
@@ -396,7 +396,7 @@ class AppConfig extends AbstractVaultConfiguration {
 				.role(…).credential(GoogleCredentials.getApplicationDefault()).build();
 
 		GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options,
-				restOperations());
+				vaultClient());
     }
 
     // …
@@ -448,7 +448,7 @@ class AppConfig extends AbstractVaultConfiguration {
         GitHubAuthentication options = GitHubAuthentication.builder()
                     .token(…).build();
 
-        return new GitHubAuthentication(options, restOperations());
+        return new GitHubAuthentication(options, vaultClient());
     }
 
     // …
@@ -488,7 +488,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .role(…).build();
 
         PcfAuthentication authentication = new PcfAuthentication(options,
-                restOperations());
+                vaultClient());
     }
 
     // …
@@ -532,7 +532,7 @@ class AppConfig extends AbstractVaultConfiguration {
         ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
                 .path(…).build();
 
-        return new ClientCertificateAuthentication(options, restOperations());
+        return new ClientCertificateAuthentication(options, vaultClient());
     }
 
     // …
@@ -588,7 +588,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .wrapped()
                 .build();
 
-        return new CubbyholeAuthentication(options, restOperations());
+        return new CubbyholeAuthentication(options, vaultClient());
     }
 
     // …
@@ -643,7 +643,7 @@ class AppConfig extends AbstractVaultConfiguration {
                 .path("cubbyhole/token")
                 .build();
 
-        return new CubbyholeAuthentication(options, restOperations());
+        return new CubbyholeAuthentication(options, vaultClient());
     }
 
     // …
@@ -692,7 +692,7 @@ class AppConfig extends AbstractVaultConfiguration {
         JwtAuthenticationOptions options = JwtAuthenticationOptions.builder()
                 .role(…).jwt(…).path(…).build();
 
-        return new JwtAuthentication(options, restOperations());
+        return new JwtAuthentication(options, vaultClient());
     }
 
     // …
@@ -730,7 +730,7 @@ class AppConfig extends AbstractVaultConfiguration {
         KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
                 .role(…).jwtSupplier(…).build();
 
-        return new KubernetesAuthentication(options, restOperations());
+        return new KubernetesAuthentication(options, vaultClient());
     }
 
     // …
@@ -774,7 +774,7 @@ class AppConfig extends AbstractVaultConfiguration {
         UserPasswordAuthenticationOptions options = UserPasswordAuthenticationOptions.builder()
                 .username(…).password(…).build();
 
-        return new UserPasswordAuthentication(options, restOperations());
+        return new UserPasswordAuthentication(options, vaultClient());
     }
 
     // …
@@ -849,11 +849,11 @@ for their authentication-specific options:
 [source,java]
 ----
 CubbyholeAuthenticationOptions options = …
-RestOperations restOperations = …
+RestOperations vaultClient = …
 
 AuthenticationSteps steps = CubbyholeAuthentication.createAuthenticationSteps(options);
 
-AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, restOperations);
+AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, vaultClient);
 
 VaultToken token = executor.login();
 ----

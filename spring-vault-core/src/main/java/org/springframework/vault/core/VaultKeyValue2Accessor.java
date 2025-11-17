@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -54,8 +53,9 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-				.uri("%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+				.path("%s?list=true".formatted(createBackendPath("metadata", path)))
 				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
 				.toEntity(VaultListResponse.class);
 		});
 
@@ -82,7 +82,8 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createBackendPath(String segment, String path) {
-		return "%s/%s/%s".formatted(this.path, segment, path);
+		return "%s/%s/%s".formatted(KeyValueUtilities.relativePath(this.path), KeyValueUtilities.relativePath(segment),
+				KeyValueUtilities.relativePath(path));
 	}
 
 }
