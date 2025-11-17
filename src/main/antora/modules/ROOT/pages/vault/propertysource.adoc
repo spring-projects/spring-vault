@@ -3,7 +3,7 @@
 
 Vault can be used in many different ways. One specific use-case is using
 Vault to store encrypted properties. Spring Vault supports Vault as property
-source to obtain configuration properties using Spring's {spring-framework-docs}core.html#beans-property-source-abstraction[PropertySource abstraction].
+source to obtain configuration properties using Spring's {spring-framework-docs}/core/beans/environment.html#beans-property-source-abstraction[PropertySource abstraction].
 
 NOTE: You can reference properties stored inside Vault in other property sources or use value injection with `@Value(…)`. Special attention is required when bootstrapping beans that require data stored inside of Vault. A javadoc:org.springframework.vault.core.env.VaultPropertySource[] must be initialized at that time to retrieve properties from Vault.
 
@@ -103,7 +103,7 @@ NOTE: Secrets obtained from `generic` secret backends are associated with a TTL 
 
 NOTE: You can use `@VaultPropertySource` to obtain the newest secret version from the versioned Key-Value backend. Make sure to not include the `data/` segment in the path.
 
-Any `${…​}` placeholders present in a `@VaultPropertySource` path are resolved against the set of property sources already registered against the environment, as the following example shows:
+Any `${…}` placeholders present in a `@VaultPropertySource` path are resolved against the set of property sources already registered against the environment, as the following example shows:
 
 .Declaring a `@VaultPropertySource` path using placeholders
 ====
