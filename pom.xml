@@ -47,7 +47,7 @@
 		<netty.version>4.2.7.Final</netty.version>
 		<nullaway.version>0.12.10</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
-		<spring.version>7.0.0-SNAPSHOT</spring.version>
+		<spring.version>7.0.0</spring.version>
 		<spring-data-bom.version>2025.1.0-RC2</spring-data-bom.version>
 		<spring-security-bom.version>7.0.0-M3</spring-security-bom.version>
 		<reactor.version>2025.0.0-RC1</reactor.version>
@@ -996,15 +996,5 @@
 			</build>
 		</profile>
 	</profiles>
-
-	<repositories>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 
 </project>
