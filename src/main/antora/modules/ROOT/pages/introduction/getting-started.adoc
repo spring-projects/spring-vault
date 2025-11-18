@@ -32,23 +32,6 @@ Then add the following to `pom.xml` dependencies section.
 ----
 ====
 
-If you are using a milestone or release candidate, you will also need to add the location of the Spring Milestone repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
-
-====
-[source,xml]
-----
-<repositories>
-  <repository>
-    <id>spring-milestone</id>
-    <name>Spring Maven MILESTONE Repository</name>
-    <url>https://repo.spring.io/milestone</url>
-  </repository>
-</repositories>
-----
-====
-
-The repository is also https://repo.spring.io/milestone/org/springframework/vault/[browseable here].
-
 If you are using a SNAPSHOT, you will also need to add the location of the Spring Snapshot repository to your maven `pom.xml` which is at the same level of your `<dependencies/>` element.
 
 ====
