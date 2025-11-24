@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.annotation.Import;
+import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
@@ -112,6 +113,12 @@ public @interface VaultPropertySource {
 	 * Configure lease renewal/rotation.
 	 */
 	Renewal renewal() default Renewal.OFF;
+
+    /**
+     * Specify additional property transformer classes
+     * {@link org.springframework.vault.core.util.PropertyTransformer}.
+     */
+    Class<? extends PropertyTransformer>[] propertyTransformers() default {};
 
 	enum Renewal {
 
