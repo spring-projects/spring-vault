@@ -40,10 +40,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.JacksonCompat;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -83,7 +82,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	private final AwsIamAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a new {@link AwsIamAuthentication} specifying
@@ -97,7 +96,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(vaultRestOperations);
+		this.loginClient = ClientAdapter.from(vaultRestOperations, "AWS-IAM")
+				.vaultClient();
 	}
 
 	/**
@@ -112,7 +112,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(vaultClient, "Vault RestOperations must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(vaultClient);
+		this.loginClient = ClientAdapter.from(vaultClient, "AWS-IAM")
+				.vaultClient();
 	}
 
 	/**
@@ -157,30 +158,20 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 		Map<String, String> login = createRequestBody(this.options);
 
-		try {
-
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					login, VaultResponse.class);
-
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
+		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
+				.using(login).retrieve().body();
 
 			if (logger.isDebugEnabled()) {
 
-				if (response.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
-					logger.debug("Login successful using AWS-IAM authentication for user id %s, ARN %s"
+				if (token.getAuth().get("metadata") instanceof Map) {
+					Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth()
+							.get("metadata");
+					logger.debug("Using AWS-IAM authentication for user id %s, ARN %s"
 						.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
-				}
-				else {
-					logger.debug("Login successful using AWS-IAM authentication");
 				}
 			}
 
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("AWS-IAM", e);
-		}
+		return token.getRequiredData();
 	}
 
 	/**

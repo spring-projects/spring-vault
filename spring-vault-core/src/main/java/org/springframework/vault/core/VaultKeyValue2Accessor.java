@@ -54,7 +54,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-				.uri("%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+				.path("%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
 				.retrieve()
 				.toEntity(VaultListResponse.class);
 		});

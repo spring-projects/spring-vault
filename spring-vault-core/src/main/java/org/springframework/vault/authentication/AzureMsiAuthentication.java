@@ -183,7 +183,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		Map<String, String> login = getAzureLogin(this.options.getRole(), getVmEnvironment(), getAccessToken());
 
-		return this.vaultAdapter.vaultClient().login(this.options.getPath())
+		return this.vaultAdapter.vaultClient().loginAt(this.options.getPath())
 				.using(login).retrieve().loginToken();
 	}
 

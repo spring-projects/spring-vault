@@ -33,6 +33,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.Pair;
 import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -56,6 +57,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private final ClientAdapter adapter;
 
+	private final VaultLoginClient loginClient;
+
 	/**
 	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
 	 * and {@link RestOperations}.
@@ -69,6 +72,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		this.chain = steps;
 		this.adapter = ClientAdapter.from(restOperations);
+		this.loginClient = this.adapter.vaultClient();
 	}
 
 	/**
@@ -84,6 +88,24 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 		this.chain = steps;
 		this.adapter = ClientAdapter.from(client);
+		this.loginClient = this.adapter.vaultClient();
+	}
+
+	/**
+	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
+	 * and {@link RestOperations}.
+	 *
+	 * @param steps  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 */
+	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client, VaultClient vaultClient) {
+
+		Assert.notNull(steps, "AuthenticationSteps must not be null");
+		Assert.notNull(client, "RestClient must not be null");
+
+		this.chain = steps;
+		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(vaultClient, "Authentication Steps");
 	}
 
 	@Override

@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
@@ -28,15 +29,13 @@ import org.springframework.web.client.RestTemplate;
 /**
  * @author Mark Paluch
  */
-public interface VaultLoginClient  extends VaultClient  {
-
+public interface VaultLoginClient extends VaultClient {
 
 	/**
 	 * Start building an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
-	LoginBodyPathSpec login(String path);
-
+	LoginBodyPathSpec loginAt(String path);
 
 	/**
 	 * Obtain a {@code RestClient} builder based on the configuration of the
@@ -57,7 +56,11 @@ public interface VaultLoginClient  extends VaultClient  {
 	 * configuration
 	 */
 	static Builder builder(VaultClient vaultClient) {
-		return new DefaultRestClientBuilder(restTemplate);
+		return new DefaultVaultLoginClientBuilder(vaultClient);
+	}
+
+	static VaultLoginClient create(VaultClient vaultClient, String authenticationMechanism) {
+		return builder(vaultClient).mechanism(authenticationMechanism).build();
 	}
 
 
@@ -80,7 +83,7 @@ public interface VaultLoginClient  extends VaultClient  {
 	 *
 	 * @param <S> a self reference to the spec type
 	 */
-	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> extends VaultClient.RequestHeadersSpec<S> {
+	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
 
 
 		/**
@@ -147,7 +150,7 @@ public interface VaultLoginClient  extends VaultClient  {
 	/**
 	 * Contract for specifying response operations following the exchange.
 	 */
-	interface LoginResponseSpec extends ResponseSpec {
+	interface LoginResponseSpec {
 
 		/**
 		 * Extract the body as an object of the given type.
@@ -159,7 +162,9 @@ public interface VaultLoginClient  extends VaultClient  {
 		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
 		 * handling.
 		 */
-		<T> LoginToken loginToken();
+		LoginToken loginToken();
+
+		VaultResponseSupport<LoginToken> body();
 
 	}
 

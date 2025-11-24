@@ -25,7 +25,6 @@ import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
@@ -42,7 +41,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private final ClientCertificateAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
@@ -64,7 +63,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
-		this.adapter = ClientAdapter.from(restOperations);
+		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
 		this.options = options;
 	}
 
@@ -87,7 +86,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(client, "RestOperations must not be null");
 
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = ClientAdapter.from(client).vaultClient();
 		this.options = options;
 	}
 
@@ -126,22 +125,9 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	private VaultToken createTokenUsingTlsCertAuthentication() {
-
-		try {
-			Map<String, Object> request = getRequestBody(this.options);
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					request, VaultResponse.class);
-
-			Assert.state(response != null, "Response must not be null");
-			Assert.state(response.getAuth() != null, "Auth field must not be null");
-
-			logger.debug("Login successful using TLS certificates");
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("TLS Certificates", e);
-		}
+		Map<String, Object> request = getRequestBody(this.options);
+		return this.loginClient.loginAt(this.options.getPath()).using(request).retrieve()
+				.loginToken();
 	}
 
 	private static Map<String, Object> getRequestBody(ClientCertificateAuthenticationOptions options) {

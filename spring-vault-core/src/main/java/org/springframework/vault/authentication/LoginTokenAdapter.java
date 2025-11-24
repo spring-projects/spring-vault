@@ -17,12 +17,9 @@ package org.springframework.vault.authentication;
 
 import java.util.Map;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -83,25 +80,24 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
-		return augmentWithSelfLookup(this.adapter, token);
+		return augmentWithSelfLookup(this.adapter.vaultClient(), token);
 	}
 
-	static LoginToken augmentWithSelfLookup(ClientAdapter adapter, VaultToken token) {
+	static LoginToken augmentWithSelfLookup(VaultClient client, VaultToken token) {
 
-		Map<String, Object> data = lookupSelf(adapter, token);
+		Map<String, Object> data = lookupSelf(client, token);
 
 		return LoginTokenUtil.from(token.toCharArray(), data);
 	}
 
-	private static Map<String, Object> lookupSelf(ClientAdapter adapter, VaultToken token) {
+	private static Map<String, Object> lookupSelf(VaultClient client, VaultToken token) {
 
 		try {
-			ResponseEntity<VaultResponse> entity = adapter.exchange("auth/token/lookup-self", HttpMethod.GET,
-					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
+			VaultResponse response = client.get()
+					.path("auth/token/lookup-self").token(token).retrieve()
+					.requiredBody();
 
-			Assert.state(entity.getBody() != null && entity.getBody().getData() != null, "Token response is null");
-
-			return entity.getBody().getData();
+			return response.getRequiredData();
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(e.getStatusCode(),

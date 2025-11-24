@@ -138,7 +138,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private final CubbyholeAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
@@ -152,7 +152,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		Assert.notNull(client, "RestClient must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = ClientAdapter.from(client).vaultClient();
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
 
-			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.adapter);
+			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.loginClient);
 			tokenToUse = adapter.login();
 		}
 
@@ -222,7 +222,8 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
-			ResponseEntity<VaultResponse> entity = this.adapter.vaultClient().method(unwrapMethod).path(url).headers(getRequestHeaders(options)).retrieve().toEntity();
+			ResponseEntity<VaultResponse> entity = this.loginClient.method(unwrapMethod)
+					.path(url).headers(getRequestHeaders(options)).retrieve().toEntity();
 
 			return ResponseUtil.getRequiredBody(entity);
 		}

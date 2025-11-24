@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -82,7 +83,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			return null;
 		}
 
-		return getWrappedMetadata(response.getRequiredData(), token);
+		return WrappedMetadata.from(response.getRequiredData(), token);
 	}
 
 	@Nullable
@@ -90,7 +91,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	public VaultResponse read(VaultToken token) {
 
 		return doUnwrap(token, (client, headers) -> {
-			return client.post().uri("sys/wrapping/unwrap").headers(headers).retrieve().body(VaultResponse.class);
+			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body(VaultResponse.class);
 		});
 	}
 
@@ -101,13 +102,13 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
 		return doUnwrap(token, (client, headers) -> {
-			return client.post().uri("sys/wrapping/unwrap").headers(headers).retrieve().body(ref);
+			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body(ref);
 		});
 	}
 
 	@SuppressWarnings("NullAway")
 	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
-			BiFunction<RestClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
+			BiFunction<VaultClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
 
 		return this.vaultOperations.doWithVaultClient((VaultClientCallback<@Nullable T>) client -> {
 
@@ -139,9 +140,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		VaultResponse response = this.vaultOperations.invoke("sys/wrapping/rewrap",
 				Collections.singletonMap("token", token.getToken()));
 
-		Map<String, String> wrapInfo = response.getWrapInfo();
-
-		return getWrappedMetadata(wrapInfo, VaultToken.of(wrapInfo.get("token")));
+		return WrappedMetadata.from(response);
 	}
 
 	@Override
@@ -151,59 +150,14 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 		Assert.notNull(body, "Body must not be null");
 		Assert.notNull(duration, "TTL duration must not be null");
 
-		VaultResponse response = this.vaultOperations.doWithSessionClient(client -> {
+		return this.vaultOperations.doWithSessionClient(client -> {
 
 			return client.post()
-				.uri("sys/wrapping/wrap")
+				.path("sys/wrapping/wrap")
 				.body(body)
-				.header("X-Vault-Wrap-TTL", Long.toString(duration.getSeconds()))
 				.retrieve()
-				.body(VaultResponse.class);
+				.wrap(duration);
 		});
-
-		Map<String, String> wrapInfo = response.getWrapInfo();
-
-		return getWrappedMetadata(wrapInfo, VaultToken.of(wrapInfo.get("token")));
-	}
-
-	private static WrappedMetadata getWrappedMetadata(Map<String, ?> wrapInfo, VaultToken token) {
-
-		TemporalAccessor creation_time = getDate(wrapInfo, "creation_time");
-		String path = (String) wrapInfo.get("creation_path");
-		Duration ttl = getTtl(wrapInfo);
-
-		return new WrappedMetadata(token, ttl, Instant.from(creation_time), path);
-	}
-
-	private static TemporalAccessor getDate(Map<String, ?> responseMetadata, String key) {
-
-		String date = (String) ((Map) responseMetadata).getOrDefault(key, "");
-
-		if (StringUtils.hasText(date)) {
-			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
-		}
-
-		throw new IllegalArgumentException("Cannot obtain date");
-	}
-
-	private static Duration getTtl(Map<String, ?> wrapInfo) {
-
-		Object creationTtl = wrapInfo.get("ttl");
-
-		if (creationTtl == null) {
-			creationTtl = wrapInfo.get("creation_ttl");
-		}
-
-		if (creationTtl instanceof String) {
-			creationTtl = Integer.parseInt((String) creationTtl);
-		}
-
-		if (creationTtl instanceof Integer) {
-			return Duration.ofSeconds((Integer) creationTtl);
-
-		}
-
-		throw new IllegalArgumentException("Cannot obtain TTL");
 	}
 
 }

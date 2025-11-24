@@ -94,7 +94,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
-		return this.adapter.vaultClient().login(this.options.getPath()).using(login)
+		return this.adapter.vaultClient().loginAt(this.options.getPath()).using(login)
 				.retrieve().loginToken();
 	}
 

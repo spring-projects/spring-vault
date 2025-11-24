@@ -21,13 +21,13 @@ import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClient;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -107,7 +107,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		return this.vaultOperations.doWithSessionClient(client -> {
 			try {
-				RestClient.RequestBodySpec spec = client.post().uri(path);
+				VaultClient.RequestBodySpec spec = client.post().path(path);
 
 				if (body != null) {
 					spec = spec.body(body);
@@ -130,7 +130,7 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 			try {
 				client.post()
-					.uri(path)
+						.path(path)
 					.body(Collections.singletonMap("token", token.getToken()))
 					.retrieve()
 					.toEntity(responseType);

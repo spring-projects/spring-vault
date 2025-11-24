@@ -98,7 +98,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		return this.vaultOperations.doWithSessionClient(client -> {
 
 			try {
-				return client.post().uri(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
+				return client.post().path(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
 			}
 			catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
@@ -116,7 +116,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 			try {
 				return client.post()
-					.uri("{path}/revoke", this.path)
+					.path("{path}/revoke", this.path)
 					.body(Collections.singletonMap("serial_number", serialNumber))
 					.retrieve()
 					.toBodilessEntity()
@@ -139,7 +139,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {
 				ResponseEntity<byte[]> response = client.get()
-					.uri(requestPath, this.path)
+					.path(requestPath, this.path)
 					.retrieve()
 					.toEntity(byte[].class);
 
@@ -165,7 +165,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 			try {
 				return client.get()
-					.uri("{path}/issuer/{issuer}/json", this.path, issuer)
+					.path("{path}/issuer/{issuer}/json", this.path, issuer)
 					.retrieve()
 					.body(VaultIssuerCertificateRequestResponse.class);
 			}
@@ -188,7 +188,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 			try {
 				ResponseEntity<byte[]> response = client.get()
-					.uri(requestPath, this.path, issuer)
+					.path(requestPath, this.path, issuer)
 					.retrieve()
 					.toEntity(byte[].class);
 

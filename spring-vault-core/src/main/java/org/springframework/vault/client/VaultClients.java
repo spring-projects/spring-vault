@@ -28,6 +28,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
@@ -118,19 +119,22 @@ public class VaultClients {
 			.requestFactory(requestFactory)
 			.bufferContent((uri, httpMethod) -> true)
 			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
-			.configureMessageConverters(clientBuilder -> {
-
-				AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance().createHttpMessageConverter();
-
-				clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
-				clientBuilder.addCustomConverter(new StringHttpMessageConverter());
-				clientBuilder.addCustomConverter(converter);
-				clientBuilder.withJsonConverter(converter);
-			});
+			.configureMessageConverters(VaultClients::configureConverters);
 
 		builderCustomizer.accept(builder);
 
 		return builder.build();
+	}
+
+	static void configureConverters(HttpMessageConverters.ClientBuilder clientBuilder) {
+
+		AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
+				.createHttpMessageConverter();
+
+		clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
+		clientBuilder.addCustomConverter(new StringHttpMessageConverter());
+		clientBuilder.addCustomConverter(converter);
+		clientBuilder.withJsonConverter(converter);
 	}
 
 	/**

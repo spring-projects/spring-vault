@@ -103,7 +103,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 			.doWithSessionClient((VaultClientCallback<@Nullable VaultResponseSupport>) client -> {
 
 				try {
-					return client.get().uri(secretPath).retrieve().body(responseTypeToUse);
+					return client.get().path(secretPath).retrieve().body(responseTypeToUse);
 				}
 				catch (HttpStatusCodeException e) {
 

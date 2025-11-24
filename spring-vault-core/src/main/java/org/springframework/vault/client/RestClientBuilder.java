@@ -26,15 +26,18 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInitializer;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Builder that can be used to configure and create a {@link RestClient}. Provides

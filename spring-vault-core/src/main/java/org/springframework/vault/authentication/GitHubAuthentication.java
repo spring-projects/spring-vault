@@ -22,10 +22,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -45,7 +44,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 	private final GitHubAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a {@link GitHubAuthentication} using {@link GitHubAuthenticationOptions} and
@@ -59,7 +58,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
 	}
 
 	/**
@@ -75,7 +74,24 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(client, "RestClient must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = ClientAdapter.from(client).vaultClient();
+	}
+
+	/**
+	 * Create a {@link GitHubAuthentication} using {@link GitHubAuthenticationOptions} and
+	 * {@link VaultClient}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param client  must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public GitHubAuthentication(GitHubAuthenticationOptions options, VaultClient client) {
+
+		Assert.notNull(options, "GithubAuthenticationOptions must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
+
+		this.options = options;
+		this.loginClient = VaultLoginClient.create(client, "GitHub");
 	}
 
 	/**
@@ -103,19 +119,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 		Map<String, String> login = getGitHubLogin(this.options.getTokenSupplier().get());
 
-		try {
-
-			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
-					login, VaultResponse.class);
-			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-
-			logger.debug("Login successful using GitHub authentication");
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("GitHub", e);
-		}
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getGitHubLogin(String token) {
