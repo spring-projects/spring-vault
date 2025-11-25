@@ -23,9 +23,11 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Simple adapter to unify {@link RestOperations} and {@link RestClient} usage.
@@ -39,18 +41,7 @@ abstract class ClientAdapter {
 	 * Factory method creating a ClientAdapter delegating to {@link RestOperations}.
 	 */
 	public static ClientAdapter from(RestOperations restOperations) {
-		return new RestOperationsAdapter(restOperations);
-	}
-
-	/**
-	 * Factory method creating a ClientAdapter delegating to {@link RestOperations}.
-	 */
-	public static ClientAdapter from(RestOperations restOperations, String auth) {
-
-		VaultClient vaultClient;
-
-		VaultLoginClient.builder(vaultClient).mechanism(auth);
-
+		Assert.notNull(restOperations, "RestOperations must not be null");
 		return new RestOperationsAdapter(restOperations);
 	}
 
@@ -58,13 +49,15 @@ abstract class ClientAdapter {
 	 * Factory method creating a ClientAdapter delegating to {@link RestClient}.
 	 */
 	public static ClientAdapter from(RestClient client) {
+		Assert.notNull(client, "RestClient must not be null");
 		return new RestClientAdapter(client);
 	}
 
-
-	public VaultLoginClient vaultClient() {
-		return null;
+	public VaultLoginClient loginClient(String authenticationMechanism) {
+		return VaultLoginClient.create(vaultClient(), authenticationMechanism);
 	}
+
+	public abstract VaultClient vaultClient();
 
 	/**
 	 * Create a new resource by POSTing the given object to the URI template, and return
@@ -168,9 +161,17 @@ abstract class ClientAdapter {
 	static class RestOperationsAdapter extends ClientAdapter {
 
 		private final RestOperations restOperations;
+		private final VaultClient vaultClient;
 
 		RestOperationsAdapter(RestOperations restOperations) {
 			this.restOperations = restOperations;
+			this.vaultClient = VaultClient.builder((RestTemplate) restOperations)
+					.allowAbsolutePath(true).build();
+		}
+
+		@Override
+		public VaultClient vaultClient() {
+			return vaultClient;
 		}
 
 		@Override
@@ -211,9 +212,17 @@ abstract class ClientAdapter {
 	static class RestClientAdapter extends ClientAdapter {
 
 		private final RestClient client;
+		private final VaultClient vaultClient;
 
 		RestClientAdapter(RestClient client) {
 			this.client = client;
+			this.vaultClient = VaultClient.builder(client)
+					.allowAbsolutePath(true).build();
+		}
+
+		@Override
+		public VaultClient vaultClient() {
+			return vaultClient;
 		}
 
 		@Override

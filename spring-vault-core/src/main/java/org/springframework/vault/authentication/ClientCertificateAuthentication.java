@@ -22,22 +22,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * TLS Client Certificate {@link ClientAuthentication}.
  *
  * @author Mark Paluch
  * @author Andy Lintner
+ * @see VaultClient
  */
 public class ClientCertificateAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
-
-	private static final Log logger = LogFactory.getLog(ClientCertificateAuthentication.class);
 
 	private final ClientCertificateAuthenticationOptions options;
 
@@ -59,12 +56,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 */
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options,
 			RestOperations restOperations) {
-
-		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
-		this.options = options;
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -82,12 +74,33 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 * @since 2.3
 	 */
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link ClientCertificateAuthentication} using {@link VaultClient}.
+	 *
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public ClientCertificateAuthentication(VaultClient client) {
+		this(ClientCertificateAuthenticationOptions.builder().build(), client);
+	}
+
+	/**
+	 * Create a {@link ClientCertificateAuthentication} using {@link VaultClient}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param client  must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, VaultClient client) {
 
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(client, "RestOperations must not be null");
 
-		this.loginClient = ClientAdapter.from(client).vaultClient();
 		this.options = options;
+		this.loginClient = VaultLoginClient.create(client, "TLS Certificates");
 	}
 
 	/**
@@ -111,7 +124,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		Map<String, Object> body = getRequestBody(options);
 
 		return AuthenticationSteps.fromSupplier(() -> body)
-			.login(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
+				.loginAt(options.getPath());
 	}
 
 	@Override

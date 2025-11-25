@@ -18,9 +18,6 @@ package org.springframework.vault.authentication;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
@@ -38,7 +35,7 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @since 2.0
  * @see KubernetesAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
  * Kubernetes</a>
  */
@@ -55,12 +52,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestOperations restOperations) {
-
-		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -71,12 +63,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	 * @since 4.0
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestClient client) {
-
-		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
-
-		this.options = options;
-		this.loginClient = ClientAdapter.from(client).vaultClient();
+		this(options, ClientAdapter.from(client).vaultClient());
 	}
 
 	/**
@@ -108,7 +95,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getKubernetesLogin(options.getRole(), token))
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override

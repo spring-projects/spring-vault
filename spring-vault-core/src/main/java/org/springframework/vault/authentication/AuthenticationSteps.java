@@ -54,7 +54,7 @@ import org.springframework.vault.support.VaultToken;
  * 			login.put(&quot;pkcs7&quot;, pkcs7);
  *
  * 			return login;
- * 		}).login(AuthenticationUtil.getLoginPath(options.getPath()));
+ * 		}).loginAt(options.getPath());
  * </pre>
  *
  * <p>
@@ -256,10 +256,28 @@ public class AuthenticationSteps {
 		}
 
 		/**
+		 * Terminal operation requesting a {@link VaultToken token} from Vault by logging into Vault
+		 * sending the current state to the Vault {@code authMount}. The actual request path
+		 * is derived from {@code authMount} using the pattern {@code auth/%s/login}.
+		 * If the request path needs to be customized, use {@link #login(String, String...)} instead.
+		 * @param authMount the name of the authentication mount, must not be {@literal null}
+		 * or empty.
+		 * @return the {@link AuthenticationSteps}.
+		 * @since 4.1
+		 */
+		public AuthenticationSteps loginAt(String authMount) {
+
+			Assert.hasText(authMount, "Auth mount must not be null or empty");
+
+			return login(AuthenticationUtil.getLoginPath(authMount));
+		}
+
+		/**
 		 * Terminal operation requesting a {@link VaultToken token} from Vault by posting
 		 * the current state to Vaults {@code uriTemplate}.
-		 * @param uriTemplate Vault authentication endpoint, must not be {@literal null}
-		 * or empty.
+		 *
+		 * @param uriTemplate  Vault authentication endpoint, must not be {@literal null}
+		 *                     or empty.
 		 * @param uriVariables URI variables for URI template expansion.
 		 * @return the {@link AuthenticationSteps}.
 		 */

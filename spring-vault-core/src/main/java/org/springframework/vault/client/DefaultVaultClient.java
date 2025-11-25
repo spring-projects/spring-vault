@@ -32,6 +32,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.WrappedMetadata;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponents;
@@ -82,6 +83,11 @@ public class DefaultVaultClient implements VaultClient {
 
 	private RequestBodyPathSpec methodInternal(HttpMethod httpMethod) {
 		return new DefaultRequestBodyUriSpec(httpMethod, client.method(httpMethod));
+	}
+
+	@Override
+	public RestClient getRestClient() {
+		return this.client;
 	}
 
 	@Override
@@ -203,13 +209,23 @@ public class DefaultVaultClient implements VaultClient {
 		@Override
 		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(Class<T> bodyType) {
-			return retrieve.body(bodyType);
+			try {
+				return retrieve.body(bodyType);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			}
 		}
 
 		@Override
 		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
 		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
-			return retrieve.body(bodyType);
+			try {
+				return retrieve.body(bodyType);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			}
 		}
 
 		@Override
@@ -236,12 +252,22 @@ public class DefaultVaultClient implements VaultClient {
 
 		@Override
 		public <T> ResponseEntity<T> toEntity(Class<T> bodyType) {
-			return retrieve.toEntity(bodyType);
+			try {
+				return retrieve.toEntity(bodyType);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			}
 		}
 
 		@Override
 		public <T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> bodyType) {
-			return retrieve.toEntity(bodyType);
+			try {
+				return retrieve.toEntity(bodyType);
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			}
 		}
 
 		@Override
@@ -251,7 +277,12 @@ public class DefaultVaultClient implements VaultClient {
 
 		@Override
 		public ResponseEntity<Void> toBodilessEntity() {
-			return retrieve.toBodilessEntity();
+			try {
+				return retrieve.toBodilessEntity();
+			}
+			catch (HttpStatusCodeException e) {
+				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			}
 		}
 
 	}

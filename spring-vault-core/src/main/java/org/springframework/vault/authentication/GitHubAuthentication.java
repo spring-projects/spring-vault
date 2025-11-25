@@ -35,12 +35,10 @@ import org.springframework.web.client.RestOperations;
  * @author Mark Paluch
  * @since 3.2
  * @see GitHubAuthentication
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/api-docs/auth/github">GitHub Auth Backend</a>
  */
 public class GitHubAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
-
-	private static final Log logger = LogFactory.getLog(GitHubAuthentication.class);
 
 	private final GitHubAuthenticationOptions options;
 
@@ -53,12 +51,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public GitHubAuthentication(GitHubAuthenticationOptions options, RestOperations restOperations) {
-
-		Assert.notNull(options, "GithubAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -69,12 +62,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 	 * @since 4.0
 	 */
 	public GitHubAuthentication(GitHubAuthenticationOptions options, RestClient client) {
-
-		Assert.notNull(options, "GithubAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
-
-		this.options = options;
-		this.loginClient = ClientAdapter.from(client).vaultClient();
+		this(options, ClientAdapter.from(client).vaultClient());
 	}
 
 	/**
@@ -106,7 +94,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 		return AuthenticationSteps.fromSupplier(options.getTokenSupplier())
 			.map(GitHubAuthentication::getGitHubLogin)
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override

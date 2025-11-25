@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
@@ -82,7 +83,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations googleMetadataRestOperations) {
 
-		super(ClientAdapter.from(vaultRestOperations));
+		super(ClientAdapter.from(vaultRestOperations).loginClient("GCP-GCE"));
 
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataRestOperations, "Google Metadata RestOperations must not be null");
@@ -115,7 +116,24 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
 
-		super(ClientAdapter.from(vaultClient));
+		this(options, ClientAdapter.from(vaultClient)
+				.vaultClient(), googleMetadataClient);
+	}
+
+	/**
+	 * Create a new {@link GcpComputeAuthentication} instance given
+	 * {@link GcpComputeAuthenticationOptions}, {@link VaultClient} and Google
+	 * API {@link RestClient}.
+	 *
+	 * @param options              must not be {@literal null}.
+	 * @param vaultClient          must not be {@literal null}.
+	 * @param googleMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient,
+			RestClient googleMetadataClient) {
+
+		super(VaultLoginClient.create(vaultClient, "GCP-GCE"));
 
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataClient, "Google Metadata RestOperations must not be null");
@@ -144,7 +162,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 			//
 			.map(jwt -> createRequestBody(options.getRole(), jwt))
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override

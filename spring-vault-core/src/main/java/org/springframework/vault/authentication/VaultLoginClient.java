@@ -15,16 +15,20 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Map;
 import java.util.function.Predicate;
+
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * @author Mark Paluch
@@ -32,28 +36,25 @@ import org.springframework.web.client.RestTemplate;
 public interface VaultLoginClient extends VaultClient {
 
 	/**
+	 * Start building an HTTP POST request and accept the authentication mount.
+	 * The request path is derived from the authentication mount using the formatting pattern {@code auth/%s/login}.
+	 *
+	 * @param authMount name of the authentication mount.
+	 * @return a spec for specifying the target URL
+	 */
+	LoginBodyRequestSpec loginAt(String authMount);
+
+	/**
 	 * Start building an HTTP POST request.
 	 * @return a spec for specifying the target URL
 	 */
-	LoginBodyPathSpec loginAt(String path);
+	LoginBodyPathSpec login();
 
 	/**
-	 * Obtain a {@code RestClient} builder based on the configuration of the
-	 * given {@code RestTemplate}.
-	 * <p>The returned builder is configured with the following attributes of
-	 * the template.
-	 * <ul>
-	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory}</li>
-	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters}</li>
-	 * <li>{@link RestTemplate#getInterceptors() ClientHttpRequestInterceptors}</li>
-	 * <li>{@link RestTemplate#getClientHttpRequestInitializers() ClientHttpRequestInitializers}</li>
-	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}</li>
-	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}</li>
-	 * </ul>
-	 * @param restTemplate the rest template to base the returned builder's
-	 * configuration on
-	 * @return a {@code RestClient} builder initialized with {@code restTemplate}'s
-	 * configuration
+	 * Obtain a {@code VaultLoginClient} builder based on the configuration of the
+	 * given {@code VaultClient}.
+	 * @return a {@code VaultLoginClient} builder initialized with {@code vaultClient}'s
+	 * configuration.
 	 */
 	static Builder builder(VaultClient vaultClient) {
 		return new DefaultVaultLoginClientBuilder(vaultClient);
@@ -62,7 +63,6 @@ public interface VaultLoginClient extends VaultClient {
 	static VaultLoginClient create(VaultClient vaultClient, String authenticationMechanism) {
 		return builder(vaultClient).mechanism(authenticationMechanism).build();
 	}
-
 
 	/**
 	 * A mutable builder for creating a {@link RestClient}.
@@ -77,75 +77,77 @@ public interface VaultLoginClient extends VaultClient {
 		VaultLoginClient build();
 	}
 
-
 	/**
-	 * Contract for specifying request headers leading up to the exchange.
+	 * Contract for specifying the path for a request.
 	 *
 	 * @param <S> a self reference to the spec type
 	 */
-	interface RequestHeadersSpec<S extends RequestHeadersSpec<S>> {
-
+	interface PathSpec<S extends LoginBodySpec<S>> {
 
 		/**
-		 * Enter the retrieve workflow and use the returned {@link ResponseSpec}
+		 * Specify the path for the request using a URI template and URI variables.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured for the client (for example,
+		 * with a base URI) it will be used to expand the URI template.
+		 */
+		S path(String path, @Nullable Object... pathVariables);
+
+		/**
+		 * Specify the path for the request using a URI template and URI variables.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured for the client (for example,
+		 * with a base URI) it will be used to expand the URI template.
+		 */
+		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
+
+	}
+
+	/**
+	 * Contract for specifying request leading up to the exchange.
+	 */
+	interface RequestSpec {
+
+		/**
+		 * Enter the retrieve workflow and use the returned {@link LoginResponseSpec}
 		 * to select from a number of built-in options to extract the response.
 		 * For example:
 		 *
 		 * <pre class="code">
-		 * ResponseEntity&lt;Person&gt; entity = client.get()
-		 *     .uri("/persons/1")
-		 *     .accept(MediaType.APPLICATION_JSON)
+		 * LoginToken token = client.loginAt("cert")
 		 *     .retrieve()
-		 *     .toEntity(Person.class);
-		 * </pre>
-		 * <p>Or if interested only in the body:
-		 * <pre class="code">
-		 * Person person = client.get()
-		 *     .uri("/persons/1")
-		 *     .accept(MediaType.APPLICATION_JSON)
-		 *     .retrieve()
-		 *     .body(Person.class);
+		 *     .loginToken();
 		 * </pre>
 		 * Note that this method does not actually execute the request until you
-		 * call one of the returned {@link ResponseSpec}. Use the
-		 * {@link #exchange(ExchangeFunction)} variants if you need to separate
-		 * request execution from response extraction.
-		 * <p>By default, 4xx response code result in a
-		 * {@link HttpClientErrorException} and 5xx response codes in a
-		 * {@link HttpServerErrorException}. To customize error handling, use
-		 * {@link ResponseSpec#onStatus(Predicate, ResponseSpec.ErrorHandler) onStatus} handlers.
-		 * @return {@code ResponseSpec} to specify how to decode the body
+		 * call one of the returned {@link LoginResponseSpec}.
+		 * <p>4xx and 5xx response codes result in a {@link VaultLoginException}, 4xx response code result in a
+		 * {@link HttpClientErrorException} cause and 5xx response codes in a
+		 * {@link HttpServerErrorException} cause.
 		 */
 		@CheckReturnValue
 		LoginResponseSpec retrieve();
 
 	}
 
-
 	/**
 	 * Contract for specifying login body leading up to the exchange.
 	 */
-	interface LoginBodySpec extends RequestHeadersSpec<LoginBodySpec> {
+	interface LoginBodySpec<S extends LoginBodySpec<S>> extends RequestSpec {
 
 		/**
 		 * Set the body of the request to the given {@code Object}.
 		 * For example:
 		 * <pre class="code">
 		 * Person person = ... ;
-		 * ResponseEntity&lt;Void&gt; response = client.post()
-		 *     .uri("/persons/{id}", id)
-		 *     .contentType(MediaType.APPLICATION_JSON)
-		 *     .body(person)
+		 * LoginToken loginToken = client.login()
+		 *     .path("/persons/{id}", id)
+		 *     .using(person)
 		 *     .retrieve()
-		 *     .toBodilessEntity();
+		 *     .loginToken();
 		 * </pre>
 		 * @param body the body of the request
-		 * @return this builder
+		 * @return this builder.
 		 */
-		LoginBodySpec using(Object body);
+		S using(Object body);
 
 	}
-
 
 	/**
 	 * Contract for specifying response operations following the exchange.
@@ -153,14 +155,11 @@ public interface VaultLoginClient extends VaultClient {
 	interface LoginResponseSpec {
 
 		/**
-		 * Extract the body as an object of the given type.
-		 * @param bodyType the type of return value
-		 * @param <T> the body type
-		 * @return the body, or {@code null} if no response body was available
-		 * @throws RestClientResponseException by default when receiving a
-		 * response with a status code of 4xx or 5xx. Use
-		 * {@link #onStatus(Predicate, ErrorHandler)} to customize error response
-		 * handling.
+		 * Extract the body as {@link LoginToken}.
+		 *
+		 * @return the body
+		 * @throws VaultLoginException when receiving a
+		 *                                     response with a status code of 4xx or 5xx.
 		 */
 		LoginToken loginToken();
 
@@ -168,12 +167,18 @@ public interface VaultLoginClient extends VaultClient {
 
 	}
 
+	/**
+	 * Contract for specifying request body for a request.
+	 */
+	interface LoginBodyRequestSpec extends RequestSpec, LoginBodySpec<LoginBodyRequestSpec> {
 
+	}
 
 	/**
-	 * Contract for specifying request headers, body and URI for a request.
+	 * Contract for specifying request path for a request.
 	 */
-	interface LoginBodyPathSpec extends LoginBodySpec, RequestHeadersSpec<LoginBodySpec> {
+	interface LoginBodyPathSpec extends PathSpec<LoginBodyRequestSpec> {
+
 	}
 
 }

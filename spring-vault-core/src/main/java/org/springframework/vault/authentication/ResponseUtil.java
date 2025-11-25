@@ -38,7 +38,6 @@ class ResponseUtil {
 		}
 
 		return body;
-
 	}
 
 	public static <T, R extends VaultResponseSupport<T>> T getRequiredData(ResponseEntity<R> entity) {

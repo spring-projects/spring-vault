@@ -89,7 +89,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		return requireResponse(this.vaultOperations.doWithSessionClient(client -> {
 
-			try {
 				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) client.get()
 						.path("sys/init")
 					.headers(emptyNamespace())
@@ -100,10 +99,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 				Boolean initialized = body.getBody().get("initialized");
 				return initialized != null && initialized.booleanValue();
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
 		}));
 	}
 
@@ -114,21 +109,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
 
-			try {
-				ResponseEntity<VaultInitializationResponseImpl> exchange = client.put()
-						.path("sys/init")
-					.headers(emptyNamespace())
-					.body(vaultInitializationRequest)
-					.retrieve()
-					.toEntity(VaultInitializationResponseImpl.class);
+			ResponseEntity<VaultInitializationResponseImpl> exchange = client.put()
+					.path("sys/init")
+				.headers(emptyNamespace())
+				.body(vaultInitializationRequest)
+				.retrieve()
+				.toEntity(VaultInitializationResponseImpl.class);
 
-				Assert.state(exchange.getBody() != null, "Initialization response must not be null");
+			Assert.state(exchange.getBody() != null, "Initialization response must not be null");
 
-				return exchange.getBody();
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+			return exchange.getBody();
 		}));
 	}
 

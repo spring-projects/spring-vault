@@ -15,7 +15,6 @@
  */
 package org.springframework.vault.client;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -26,19 +25,15 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.lang.CheckReturnValue;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -47,26 +42,20 @@ import org.springframework.web.util.UriBuilderFactory;
  * underlying {@link RestClient}.
  *
  * <p>Use static factory methods {@link #create()}, {@link #create(String)},
- * or {@link RestClient#builder()} to prepare an instance. To use the same
- * configuration as a {@link RestTemplate}, use {@link #create(RestTemplate)} or
- * {@link #builder(RestTemplate)}.
+ * or {@link VaultClient#builder()} to prepare an instance. To use the same
+ * configuration as a {@link RestTemplate}, use {@link #builder(RestTemplate)} or
+ * {@link #builder(RestClient)} respectively.
  *
  * <p>For examples with a response body see:
  * <ul>
  * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
- * <li>{@link RequestHeadersSpec#exchange(RequestHeadersSpec.ExchangeFunction) exchange(Function&lt;ClientHttpRequest, T&gt;)}
  * </ul>
  *
  * <p>For examples with a request body see:
  * <ul>
  * <li>{@link RequestBodySpec#body(Object) body(Object)}
  * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference) body(Object, ParameterizedTypeReference)}
- * <li>{@link RequestBodySpec#body(StreamingHttpOutputMessage.Body) body(Consumer&lt;OutputStream&gt;)}
  * </ul>
- *
- * @author Arjen Poutsma
- * @author Sebastien Deleuze
- * @since 4.1
  */
 public interface VaultClient {
 
@@ -199,7 +188,7 @@ public interface VaultClient {
 	 * given {@link RestClient}.
 	 *
 	 * @param restClient the {@link RestClient} to base the returned builder's
-	 *                     configuration on
+	 *                   configuration on
 	 * @return a {@code VaultClient} builder initialized with {@code restClient}'s
 	 * configuration
 	 */
@@ -435,47 +424,12 @@ public interface VaultClient {
 	interface ResponseSpec {
 
 		/**
-		 * Provide a function to map specific error status codes to an error handler.
-		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
-		 * <p>Note that {@link IOException IOExceptions},
-		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
-		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
-		 * thrown from {@code errorHandler} will be wrapped in a
-		 * {@link RestClientException}.
-		 *
-		 * @param statusPredicate to match responses with.
-		 * @param errorHandler    handler that typically, though not necessarily,
-		 *                        throws an exception.
-		 * @return this builder.
-		 */
-		VaultClient.ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
-				RestClient.ResponseSpec.ErrorHandler errorHandler);
-
-		/**
-		 * Provide a function to map specific error status codes to an error handler.
-		 * <p>By default, if there are no matching status handlers, responses with
-		 * status codes &gt;= 400 will throw a {@link RestClientResponseException}.
-		 * <p>Note that {@link IOException IOExceptions},
-		 * {@link java.io.UncheckedIOException UncheckedIOExceptions}, and
-		 * {@link org.springframework.http.converter.HttpMessageNotReadableException HttpMessageNotReadableExceptions}
-		 * thrown from {@code errorHandler} will be wrapped in a
-		 * {@link RestClientException}.
-		 *
-		 * @param errorHandler the error handler.
-		 * @return this builder.
-		 */
-		VaultClient.ResponseSpec onStatus(ResponseErrorHandler errorHandler);
-
-		/**
 		 * Wrap the response in a cubbyhole token with the requested TTL.
 		 *
 		 * @param ttl the time to live for the wrapped response.
 		 * @return the cubbyhole {@link WrappedMetadata} providing a token and metadata for the wrapped response.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException        when receiving a
+		 *                               response with a status code of 4xx or 5xx.
 		 * @throws IllegalStateException if no response body was available.
 		 */
 		WrappedMetadata wrap(Duration ttl);
@@ -484,10 +438,8 @@ public interface VaultClient {
 		 * Extract the body as an object of the given type.
 		 *
 		 * @return the body or {@link IllegalStateException} if no response body was available.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException        when receiving a
+		 *                               response with a status code of 4xx or 5xx.
 		 * @throws IllegalStateException if no response body was available.
 		 */
 		VaultResponse requiredBody();
@@ -496,10 +448,8 @@ public interface VaultClient {
 		 * Extract the body as an object of the given type.
 		 *
 		 * @return the body, or {@code null} if no response body was available.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		@Nullable VaultResponse body();
 
@@ -509,10 +459,8 @@ public interface VaultClient {
 		 * @param bodyType the type of return value.
 		 * @param <T>      the body type.
 		 * @return the body, or {@code null} if no response body was available
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		<T> @Nullable T body(Class<T> bodyType);
 
@@ -522,10 +470,8 @@ public interface VaultClient {
 		 * @param bodyType the type of return value.
 		 * @param <T>      the body type.
 		 * @return the body, or {@code null} if no response body was available.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
 
@@ -533,10 +479,8 @@ public interface VaultClient {
 		 * Return a {@code ResponseEntity} with the body decoded to VaultResponse.
 		 *
 		 * @return the {@code ResponseEntity} with the decoded body.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		default ResponseEntity<VaultResponse> toEntity() {
 			return toEntity(VaultResponse.class);
@@ -549,10 +493,8 @@ public interface VaultClient {
 		 * @param bodyType the expected response body type.
 		 * @param <T>      response body type.
 		 * @return the {@code ResponseEntity} with the decoded body
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		<T> ResponseEntity<T> toEntity(Class<T> bodyType);
 
@@ -563,10 +505,8 @@ public interface VaultClient {
 		 * @param bodyType the expected response body type.
 		 * @param <T>      response body type.
 		 * @return the {@code ResponseEntity} with the decoded body.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		<T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> bodyType);
 
@@ -574,25 +514,23 @@ public interface VaultClient {
 		 * Return a {@code ResponseEntity} without a body.
 		 *
 		 * @return the {@code ResponseEntity}.
-		 * @throws RestClientResponseException by default when receiving a
-		 *                                     response with a status code of 4xx or 5xx. Use
-		 *                                     {@link #onStatus(Predicate, RestClient.ResponseSpec.ErrorHandler)} to customize error response
-		 *                                     handling.
+		 * @throws VaultException when receiving a
+		 *                        response with a status code of 4xx or 5xx.
 		 */
 		ResponseEntity<Void> toBodilessEntity();
 
 	}
 
 	/**
-	 * Contract for specifying request headers and URI for a request.
+	 * Contract for specifying request headers and path for a request.
 	 *
-	 * @param <S> a self reference to the spec type
+	 * @param <S> a self reference to the spec type.
 	 */
 	interface RequestHeadersPathSpec<S extends VaultClient.RequestHeadersSpec<S>> extends PathSpec<S>, VaultClient.RequestHeadersSpec<S> {
 	}
 
 	/**
-	 * Contract for specifying request headers, body and URI for a request.
+	 * Contract for specifying request headers, body and path for a request.
 	 */
 	interface RequestBodyPathSpec extends VaultClient.RequestBodySpec, RequestHeadersPathSpec<RequestBodySpec> {
 	}

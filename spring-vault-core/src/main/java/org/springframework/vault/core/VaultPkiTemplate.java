@@ -96,13 +96,7 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		request.putIfAbsent("format", "der");
 
 		return this.vaultOperations.doWithSessionClient(client -> {
-
-			try {
-				return client.post().path(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
+			return client.post().path(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
 		});
 	}
 
@@ -114,17 +108,12 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
-			try {
-				return client.post()
+			return client.post()
 					.path("{path}/revoke", this.path)
 					.body(Collections.singletonMap("serial_number", serialNumber))
 					.retrieve()
 					.toBodilessEntity()
 					.getBody();
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
 		});
 	}
 
@@ -137,7 +126,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable InputStream>) client -> {
 
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
-			try {
 				ResponseEntity<byte[]> response = client.get()
 					.path(requestPath, this.path)
 					.retrieve()
@@ -148,10 +136,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 				}
 
 				return null;
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
 		});
 	}
 
@@ -163,15 +147,10 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		return this.vaultOperations.doWithSessionClient(client -> {
 
-			try {
 				return client.get()
 					.path("{path}/issuer/{issuer}/json", this.path, issuer)
 					.retrieve()
 					.body(VaultIssuerCertificateRequestResponse.class);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
 		});
 	}
 
@@ -186,7 +165,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
 
-			try {
 				ResponseEntity<byte[]> response = client.get()
 					.path(requestPath, this.path, issuer)
 					.retrieve()
@@ -197,10 +175,6 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 				}
 
 				return null;
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e);
-			}
 		});
 	}
 

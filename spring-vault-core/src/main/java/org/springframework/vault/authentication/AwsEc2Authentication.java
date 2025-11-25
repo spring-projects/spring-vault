@@ -50,7 +50,7 @@ import org.springframework.web.client.RestOperations;
  *
  * @author Mark Paluch
  * @see AwsEc2AuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
  * aws-ec2</a>
  */
@@ -90,28 +90,22 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations awsMetadataRestOperations) {
-
-		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-		Assert.notNull(vaultRestOperations, "Vault RestOperations must not be null");
-		Assert.notNull(awsMetadataRestOperations, "AWS Metadata RestOperations must not be null");
-
-		this.options = options;
-		this.vaultClient = ClientAdapter.from(vaultRestOperations).vaultClient();
-		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataRestOperations);
+		this(options, ClientAdapter.from(vaultRestOperations)
+				.vaultClient(), ClientAdapter.from(awsMetadataRestOperations));
 	}
 
 	/**
 	 * Create a new {@link AwsEc2Authentication}.
-	 * @param vaultClient must not be {@literal null}.
+	 * @param restClient must not be {@literal null}.
 	 * @since 4.0
 	 */
-	public AwsEc2Authentication(RestClient vaultClient) {
-		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, vaultClient);
+	public AwsEc2Authentication(RestClient restClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, restClient, restClient);
 	}
 
 	/**
 	 * Create a new {@link AwsEc2Authentication} specifying
-	 * {@link AwsEc2AuthenticationOptions}, a Vault and an AWS-Metadata-specific
+	 * {@link AwsEc2AuthenticationOptions}, {@link VaultClient} and a AWS-Metadata-specific
 	 * {@link RestClient}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
@@ -120,14 +114,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestClient vaultClient,
 			RestClient awsMetadataClient) {
-
-		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-		Assert.notNull(vaultClient, "Vault RestClient must not be null");
-		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
-
-		this.options = options;
-		this.vaultClient = ClientAdapter.from(vaultClient).vaultClient();
-		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataClient);
+		this(options, ClientAdapter.from(vaultClient)
+				.vaultClient(), awsMetadataClient);
 	}
 
 	/**
@@ -142,6 +130,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 */
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
 			RestClient awsMetadataClient) {
+		this(options, vaultClient, ClientAdapter.from(awsMetadataClient));
+	}
+
+	AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
+			ClientAdapter awsMetadataClient) {
 
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");
@@ -149,7 +142,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 		this.options = options;
 		this.vaultClient = VaultLoginClient.create(vaultClient, "AWS-EC2");
-		this.awsMetadataAdapter = ClientAdapter.from(awsMetadataClient);
+		this.awsMetadataAdapter = awsMetadataClient;
 	}
 
 	/**
@@ -213,7 +206,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 				return login;
 			})
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override

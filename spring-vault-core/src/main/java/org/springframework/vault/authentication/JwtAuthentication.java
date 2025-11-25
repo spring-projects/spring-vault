@@ -18,13 +18,12 @@ package org.springframework.vault.authentication;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
@@ -37,7 +36,7 @@ import org.springframework.web.client.RestOperations;
  * @author Nanne Baars
  * @since 3.1
  * @see JwtAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/api-docs/auth/jwt">Vault Auth Backend:
  * JWT</a>
  */
@@ -45,11 +44,9 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 
 	public static final String DEFAULT_JWT_AUTHENTICATION_PATH = "jwt";
 
-	private static final Log logger = LogFactory.getLog(JwtAuthentication.class);
-
 	private final JwtAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a {@link JwtAuthentication} using {@link JwtAuthenticationOptions} and
@@ -58,12 +55,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, RestOperations restOperations) {
-
-		Assert.notNull(options, "JwtAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations, "JWT");
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -74,19 +66,31 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @since 4.0
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link JwtAuthentication} using {@link JwtAuthenticationOptions} and
+	 * {@link VaultClient}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param client  must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public JwtAuthentication(JwtAuthenticationOptions options, VaultClient client) {
 
 		Assert.notNull(options, "JwtAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(client, "JWT");
 	}
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getJwtLogin(options.getRole(), token))
-			.login(AuthenticationUtil.getLoginPath(this.options.getPath()));
+				.loginAt(options.getPath());
 	}
 
 	@Override
@@ -94,7 +98,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
-		return this.adapter.vaultClient().loginAt(this.options.getPath()).using(login)
+		return this.loginClient.loginAt(this.options.getPath()).using(login)
 				.retrieve().loginToken();
 	}
 

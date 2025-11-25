@@ -23,10 +23,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultResponses;
-import org.springframework.vault.support.VaultResponse;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
@@ -40,7 +38,7 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  * @author Mikhael Sokolov
  * @author Mark Paluch
  * @see UsernamePasswordAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/userpass">Username and password</a>
  * @see <a href="https://www.vaultproject.io/docs/auth/ldap">LDAP authentication</a>
  * @see <a href="https://www.vaultproject.io/docs/auth/okta">Okta authentication</a>
@@ -49,11 +47,9 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  */
 public class UsernamePasswordAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory.getLog(UsernamePasswordAuthentication.class);
-
 	private final UsernamePasswordAuthenticationOptions options;
 
-	private final ClientAdapter adapter;
+	private final VaultLoginClient loginClient;
 
 	/**
 	 * Create a {@link UsernamePasswordAuthentication} using
@@ -63,12 +59,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options,
 			RestOperations restOperations) {
-
-		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.adapter = ClientAdapter.from(restOperations);
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -79,12 +70,24 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @since 4.0
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a {@link UsernamePasswordAuthentication} using
+	 * {@link UsernamePasswordAuthenticationOptions} and {@link VaultClient}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param client  must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, VaultClient client) {
 
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 
 		this.options = options;
-		this.adapter = ClientAdapter.from(client);
+		this.loginClient = VaultLoginClient.create(client, "Username and Password (" + options.getPath()+")");
 	}
 
 	/**
@@ -116,19 +119,9 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	@SuppressWarnings("NullAway")
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 
-		try {
-			VaultResponse response = adapter.postForObject(
-					"%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()), createLoginBody(options),
-					VaultResponse.class);
-
-			logger.debug("Login successful using username and password credentials");
-
-			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (HttpStatusCodeException e) {
-			throw new VaultException("Cannot login using username and password: %s"
-				.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
-		}
+		return loginClient.login()
+				.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
+				.using(createLoginBody(options)).retrieve().loginToken();
 	}
 
 	private static Map<String, Object> createLoginBody(UsernamePasswordAuthenticationOptions options) {

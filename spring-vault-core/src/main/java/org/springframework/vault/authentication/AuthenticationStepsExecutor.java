@@ -66,13 +66,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
-
-		Assert.notNull(steps, "AuthenticationSteps must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.chain = steps;
-		this.adapter = ClientAdapter.from(restOperations);
-		this.loginClient = this.adapter.vaultClient();
+		this(steps, ClientAdapter.from(restOperations));
 	}
 
 	/**
@@ -82,29 +76,29 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * @param client must not be {@literal null}.
 	 */
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client) {
-
-		Assert.notNull(steps, "AuthenticationSteps must not be null");
-		Assert.notNull(client, "RestClient must not be null");
-
-		this.chain = steps;
-		this.adapter = ClientAdapter.from(client);
-		this.loginClient = this.adapter.vaultClient();
+		this(steps, ClientAdapter.from(client));
 	}
 
 	/**
 	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
-	 * and {@link RestOperations}.
+	 * and {@link VaultClient}.
 	 *
-	 * @param steps  must not be {@literal null}.
-	 * @param client must not be {@literal null}.
+	 * @param steps       must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param restClient  must not be {@literal null}.
+	 * @since 4.1
 	 */
-	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client, VaultClient vaultClient) {
+	public AuthenticationStepsExecutor(AuthenticationSteps steps, VaultClient vaultClient, RestClient restClient) {
+		this(steps, vaultClient, ClientAdapter.from(restClient));
+	}
 
-		Assert.notNull(steps, "AuthenticationSteps must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+	private AuthenticationStepsExecutor(AuthenticationSteps steps, ClientAdapter adapter) {
+		this(steps, adapter.vaultClient(), adapter);
+	}
 
+	private AuthenticationStepsExecutor(AuthenticationSteps steps, VaultClient vaultClient, ClientAdapter adapter) {
 		this.chain = steps;
-		this.adapter = ClientAdapter.from(client);
+		this.adapter = adapter;
 		this.loginClient = VaultLoginClient.create(vaultClient, "Authentication Steps");
 	}
 

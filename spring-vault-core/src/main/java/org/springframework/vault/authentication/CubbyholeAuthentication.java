@@ -23,15 +23,14 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
@@ -106,7 +105,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * 		.initialToken(VaultToken.of("895cb88b-aef4-0e33-ba65-d50007290780"))
  * 		.path("cubbyhole/token")
  * 		.build();
- *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restOperations);
+ *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, vaultClient);
  * </code> </pre>
  *
  * <strong>Remaining TTL/Renewability</strong>
@@ -124,7 +123,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
- * @see RestOperations
+ * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
  * @see <a href="https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
  * Secret Backend</a>
@@ -147,12 +146,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestOperations restOperations) {
-
-		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-		Assert.notNull(restOperations, "RestOperations must not be null");
-
-		this.options = options;
-		this.loginClient = ClientAdapter.from(restOperations).vaultClient();
+		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
 
 	/**
@@ -163,12 +157,24 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @since 4.0
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestClient client) {
+		this(options, ClientAdapter.from(client).vaultClient());
+	}
+
+	/**
+	 * Create a new {@link CubbyholeAuthentication} given
+	 * {@link CubbyholeAuthenticationOptions} and {@link VaultClient}.
+	 *
+	 * @param options must not be {@literal null}.
+	 * @param client  must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, VaultClient client) {
 
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-		Assert.notNull(client, "RestClient must not be null");
+		Assert.notNull(client, "VaultClient must not be null");
 
 		this.options = options;
-		this.loginClient = ClientAdapter.from(client).vaultClient();
+		this.loginClient = VaultLoginClient.create(client, "Cubbyhole");
 	}
 
 	/**
@@ -220,16 +226,9 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private VaultResponse lookupToken(String url) {
 
-		try {
-			HttpMethod unwrapMethod = getRequestMethod(this.options);
-			ResponseEntity<VaultResponse> entity = this.loginClient.method(unwrapMethod)
-					.path(url).headers(getRequestHeaders(options)).retrieve().toEntity();
-
-			return ResponseUtil.getRequiredBody(entity);
-		}
-		catch (RestClientException e) {
-			throw VaultLoginException.create("Cubbyhole", e);
-		}
+		HttpMethod unwrapMethod = getRequestMethod(this.options);
+		return this.loginClient.method(unwrapMethod)
+				.path(url).headers(getRequestHeaders(options)).retrieve().requiredBody();
 	}
 
 	private boolean shouldEnhanceTokenWithSelfLookup(VaultToken token) {

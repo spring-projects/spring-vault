@@ -15,15 +15,19 @@
  */
 package org.springframework.vault.authentication;
 
+import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestClient;
 
 /**
  * @author Mark Paluch
@@ -42,8 +46,18 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 	}
 
 	@Override
-	public LoginBodyPathSpec loginAt(String path) {
-		return new DefaultLoginBodyPathSpec(path);
+	public LoginBodyRequestSpec loginAt(String authMount) {
+		return new DefaultLoginBodySpec(authMount);
+	}
+
+	@Override
+	public LoginBodyPathSpec login() {
+		return new DefaultLoginBodyPathSpec();
+	}
+
+	@Override
+	public RestClient getRestClient() {
+		return vaultClient.getRestClient();
 	}
 
 	@Override
@@ -76,18 +90,20 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 		return vaultClient.mutate();
 	}
 
-	class DefaultLoginBodyPathSpec implements LoginBodyPathSpec {
+	class DefaultLoginBodySpec implements LoginBodyRequestSpec {
 
-		private final String path;
 		private final RequestBodySpec spec;
 
-		public DefaultLoginBodyPathSpec(String path) {
-			this.path = path;
+		public DefaultLoginBodySpec(String path) {
 			this.spec = vaultClient.post().path(AuthenticationUtil.getLoginPath(path));
 		}
 
+		public DefaultLoginBodySpec(RequestBodySpec spec) {
+			this.spec = spec;
+		}
+
 		@Override
-		public LoginBodySpec using(Object body) {
+		public LoginBodyRequestSpec using(Object body) {
 			spec.body(body);
 			return this;
 		}
@@ -95,6 +111,23 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 		@Override
 		public LoginResponseSpec retrieve() {
 			return new DefaultLoginResponseSpec(spec.retrieve());
+		}
+
+	}
+
+	class DefaultLoginBodyPathSpec implements LoginBodyPathSpec {
+
+		public DefaultLoginBodyPathSpec() {
+		}
+
+		@Override
+		public LoginBodyRequestSpec path(String path, @Nullable Object... pathVariables) {
+			return new DefaultLoginBodySpec(vaultClient.post().path(path, pathVariables));
+		}
+
+		@Override
+		public LoginBodyRequestSpec path(String path, Map<String, ?> pathVariables) {
+			return new DefaultLoginBodySpec(vaultClient.post().path(path, pathVariables));
 		}
 
 	}
@@ -120,8 +153,8 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 				return token;
 			}
-			catch (RestClientException e) {
-				throw VaultLoginException.create(authenticationMechanism, e);
+			catch (VaultException e) {
+				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}
 
@@ -150,8 +183,8 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 				return tokenResponse;
 			}
-			catch (RestClientException e) {
-				throw VaultLoginException.create(authenticationMechanism, e);
+			catch (VaultException e) {
+				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}
 	}

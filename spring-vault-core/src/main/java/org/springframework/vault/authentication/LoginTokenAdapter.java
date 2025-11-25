@@ -20,6 +20,7 @@ import java.util.Map;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -42,7 +43,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 	private final ClientAuthentication delegate;
 
-	private final ClientAdapter adapter;
+	private final VaultClient client;
 
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
@@ -56,22 +57,22 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		Assert.notNull(restOperations, "RestOperations must not be null");
 
 		this.delegate = delegate;
-		this.adapter = ClientAdapter.from(restOperations);
+		this.client = ClientAdapter.from(restOperations).vaultClient();
 	}
 
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
 	 * decorate and {@link ClientAdapter}.
 	 * @param delegate must not be {@literal null}.
-	 * @param adapter must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 */
-	LoginTokenAdapter(ClientAuthentication delegate, ClientAdapter adapter) {
+	LoginTokenAdapter(ClientAuthentication delegate, VaultClient client) {
 
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
-		Assert.notNull(adapter, "ClientAdapter must not be null");
+		Assert.notNull(client, "ClientAdapter must not be null");
 
 		this.delegate = delegate;
-		this.adapter = adapter;
+		this.client = client;
 	}
 
 	@Override
@@ -80,7 +81,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private LoginToken augmentWithSelfLookup(VaultToken token) {
-		return augmentWithSelfLookup(this.adapter.vaultClient(), token);
+		return augmentWithSelfLookup(this.client, token);
 	}
 
 	static LoginToken augmentWithSelfLookup(VaultClient client, VaultToken token) {
