@@ -31,6 +31,7 @@ import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
@@ -163,9 +164,8 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
 	 * {@link CubbyholeAuthenticationOptions} and {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, VaultClient client) {
@@ -226,9 +226,22 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private VaultResponse lookupToken(String url) {
 
-		HttpMethod unwrapMethod = getRequestMethod(this.options);
-		return this.loginClient.method(unwrapMethod)
-				.path(url).headers(getRequestHeaders(options)).retrieve().requiredBody();
+		try {
+			HttpMethod unwrapMethod = getRequestMethod(this.options);
+			return this.loginClient.method(unwrapMethod)
+					.path(url)
+					.headers(getRequestHeaders(options))
+					.retrieve()
+					.requiredBody();
+		}
+		catch (VaultException e) {
+
+			if (e.getCause() instanceof RestClientException rce) {
+				throw VaultLoginException.create("Cubbyhole", rce);
+			}
+
+			throw VaultLoginException.create("Cubbyhole", e);
+		}
 	}
 
 	private boolean shouldEnhanceTokenWithSelfLookup(VaultToken token) {

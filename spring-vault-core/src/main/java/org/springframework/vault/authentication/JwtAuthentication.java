@@ -72,9 +72,8 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	/**
 	 * Create a {@link JwtAuthentication} using {@link JwtAuthenticationOptions} and
 	 * {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, VaultClient client) {
@@ -90,7 +89,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	public AuthenticationSteps getAuthenticationSteps() {
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getJwtLogin(options.getRole(), token))
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override
@@ -98,8 +97,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
-		return this.loginClient.loginAt(this.options.getPath()).using(login)
-				.retrieve().loginToken();
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getJwtLogin(@Nullable String role, String jwt) {

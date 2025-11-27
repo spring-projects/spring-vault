@@ -79,7 +79,6 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link VaultClient}.
-	 *
 	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -89,9 +88,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, VaultClient client) {
@@ -123,8 +121,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 		Map<String, Object> body = getRequestBody(options);
 
-		return AuthenticationSteps.fromSupplier(() -> body)
-				.loginAt(options.getPath());
+		return AuthenticationSteps.fromSupplier(() -> body).loginAt(options.getPath());
 	}
 
 	@Override
@@ -139,8 +136,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private VaultToken createTokenUsingTlsCertAuthentication() {
 		Map<String, Object> request = getRequestBody(this.options);
-		return this.loginClient.loginAt(this.options.getPath()).using(request).retrieve()
-				.loginToken();
+		return this.loginClient.loginAt(this.options.getPath()).using(request).retrieve().loginToken();
 	}
 
 	private static Map<String, Object> getRequestBody(ClientCertificateAuthenticationOptions options) {

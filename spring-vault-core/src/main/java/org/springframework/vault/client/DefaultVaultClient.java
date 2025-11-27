@@ -28,30 +28,35 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
+ * /** The default implementation of {@link VaultClient}, as created by the static factory
+ * methods.
+ *
  * @author Mark Paluch
+ * @since 4.1
+ * @see VaultClient#create()
+ * @see VaultClient#create(String)
+ * @see VaultClient#builder()
  */
-public class DefaultVaultClient implements VaultClient {
+class DefaultVaultClient implements VaultClient {
 
 	private final RestClient client;
 
-	private final boolean allowAbsolutePath;
+	private final @Nullable UriBuilderFactory uriBuilderFactory;
 
 	private final Builder builder;
 
-	DefaultVaultClient(RestClient client, boolean allowAbsolutePath, VaultClient.Builder builder) {
+	DefaultVaultClient(RestClient client, @Nullable UriBuilderFactory uriBuilderFactory, VaultClient.Builder builder) {
 		this.client = client;
-		this.allowAbsolutePath = allowAbsolutePath;
+		this.uriBuilderFactory = uriBuilderFactory;
 		this.builder = builder;
 	}
 
@@ -95,6 +100,7 @@ public class DefaultVaultClient implements VaultClient {
 		return builder;
 	}
 
+	@SuppressWarnings("NullAway")
 	private class DefaultRequestBodyUriSpec implements RequestBodyPathSpec {
 
 		private final RestClient.RequestBodyUriSpec spec;
@@ -112,31 +118,17 @@ public class DefaultVaultClient implements VaultClient {
 
 		@Override
 		public RequestBodySpec path(String path, @Nullable Object... pathVariables) {
-			assertPath(path);
 			this.path = path;
-			this.uriSpec = this.spec.uri(path, pathVariables);
+			this.uriSpec = uriBuilderFactory != null ? this.spec.uri(uriBuilderFactory.expand(path, pathVariables))
+					: this.spec.uri(path, pathVariables);
 			return this;
-		}
-
-		private void assertPath(String path) {
-
-			if (allowAbsolutePath) {
-				return;
-			}
-
-			UriComponents components = UriComponentsBuilder.fromUriString(path)
-					.build();
-
-			if (StringUtils.hasText(components.getScheme()) || StringUtils.hasText(components.getHost())) {
-				throw new IllegalArgumentException("Absolute URIs are not allowed");
-			}
 		}
 
 		@Override
 		public RequestBodySpec path(String path, Map<String, ?> pathVariables) {
-			assertPath(path);
 			this.path = path;
-			this.uriSpec = this.spec.uri(path, pathVariables);
+			this.uriSpec = uriBuilderFactory != null ? this.spec.uri(uriBuilderFactory.expand(path, pathVariables))
+					: this.spec.uri(path, pathVariables);
 			return this;
 		}
 
@@ -180,8 +172,8 @@ public class DefaultVaultClient implements VaultClient {
 	private class DefaultResponseSpec implements ResponseSpec {
 
 		private final DefaultRequestBodyUriSpec requestHeadersSpec;
-		private final RestClient.ResponseSpec retrieve;
 
+		private final RestClient.ResponseSpec retrieve;
 
 		DefaultResponseSpec(DefaultRequestBodyUriSpec requestHeadersSpec, RestClient.ResponseSpec retrieve) {
 			this.requestHeadersSpec = requestHeadersSpec;
@@ -189,14 +181,14 @@ public class DefaultVaultClient implements VaultClient {
 		}
 
 		@Override
-		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate, RestClient.ResponseSpec.ErrorHandler errorHandler) {
+		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
+				RestClient.ResponseSpec.ErrorHandler errorHandler) {
 			retrieve.onStatus(statusPredicate, errorHandler);
 			return this;
 		}
 
 		@Override
 		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
-			retrieve.onStatus(errorHandler);
 			return this;
 		}
 
@@ -234,12 +226,14 @@ public class DefaultVaultClient implements VaultClient {
 		}
 
 		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
+		@Override
 		public <T> T requiredBody(Class<T> bodyType) {
 
 			T body = body(bodyType);
 
 			if (body == null) {
-				throw new VaultException("No body returned from Vault; %s %s".formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
+				throw new VaultException("No body returned from Vault; %s %s"
+					.formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
 			}
 
 			return body;
@@ -286,4 +280,5 @@ public class DefaultVaultClient implements VaultClient {
 		}
 
 	}
+
 }

@@ -50,7 +50,8 @@ import org.springframework.web.client.RestTemplate;
  * Compatibility layer for Jackson 2 and Jackson 3. This class auto-detects whether
  * Jackson 3 or Jackson 2 are available prefering Jackson 3. Note that Jackson 2 support
  * will be removed in future versions.
- * <p>This class is intened for internal use only and will be removed in future versions.
+ * <p>
+ * This class is intened for internal use only and will be removed in future versions.
  *
  * @author Mark Paluch
  * @since 4.0

@@ -82,10 +82,9 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	/**
 	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
 	 * and {@link VaultClient}.
-	 *
-	 * @param steps       must not be {@literal null}.
+	 * @param steps must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
-	 * @param restClient  must not be {@literal null}.
+	 * @param restClient must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, VaultClient vaultClient, RestClient restClient) {

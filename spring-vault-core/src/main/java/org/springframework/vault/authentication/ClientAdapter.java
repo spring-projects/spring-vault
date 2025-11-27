@@ -161,12 +161,12 @@ abstract class ClientAdapter {
 	static class RestOperationsAdapter extends ClientAdapter {
 
 		private final RestOperations restOperations;
+
 		private final VaultClient vaultClient;
 
 		RestOperationsAdapter(RestOperations restOperations) {
 			this.restOperations = restOperations;
-			this.vaultClient = VaultClient.builder((RestTemplate) restOperations)
-					.allowAbsolutePath(true).build();
+			this.vaultClient = VaultClient.builder((RestTemplate) restOperations).build();
 		}
 
 		@Override
@@ -212,12 +212,12 @@ abstract class ClientAdapter {
 	static class RestClientAdapter extends ClientAdapter {
 
 		private final RestClient client;
+
 		private final VaultClient vaultClient;
 
 		RestClientAdapter(RestClient client) {
 			this.client = client;
-			this.vaultClient = VaultClient.builder(client)
-					.allowAbsolutePath(true).build();
+			this.vaultClient = VaultClient.builder(client).build();
 		}
 
 		@Override

@@ -68,9 +68,8 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 	/**
 	 * Create a {@link GitHubAuthentication} using {@link GitHubAuthenticationOptions} and
 	 * {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public GitHubAuthentication(GitHubAuthenticationOptions options, VaultClient client) {
@@ -94,7 +93,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 
 		return AuthenticationSteps.fromSupplier(options.getTokenSupplier())
 			.map(GitHubAuthentication::getGitHubLogin)
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override

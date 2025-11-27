@@ -145,7 +145,6 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 		this(clientAuthentication, taskScheduler, ClientAdapter.from(client).vaultClient(), refreshTrigger);
 	}
 
-
 	/**
 	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
 	 * {@link TaskScheduler} and {@link RestClient}.
@@ -291,7 +290,11 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	private RenewOutcome doRenew(TokenWrapper wrapper) {
 
 		multicastEvent(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
-		VaultResponse vaultResponse = this.client.post().path("auth/token/renew-self").token(wrapper.token).retrieve().body();
+		VaultResponse vaultResponse = this.client.post()
+			.path("auth/token/renew-self")
+			.token(wrapper.token)
+			.retrieve()
+			.body();
 
 		Assert.notNull(vaultResponse, "VaultResponse must not be null");
 

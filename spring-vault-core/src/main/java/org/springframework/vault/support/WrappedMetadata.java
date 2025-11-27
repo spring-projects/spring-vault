@@ -62,8 +62,7 @@ public class WrappedMetadata {
 	}
 
 	public static WrappedMetadata from(VaultResponseSupport<? extends Map<String, Object>> response) {
-		return from(response.getWrapInfo(), VaultToken.of(response.getWrapInfo()
-				.get("token")));
+		return from(response.getWrapInfo(), VaultToken.of(response.getWrapInfo().get("token")));
 	}
 
 	public static WrappedMetadata from(Map<String, ?> wrapInfo, VaultToken token) {

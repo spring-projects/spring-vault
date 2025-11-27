@@ -16,7 +16,6 @@
 package org.springframework.vault.authentication;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
 
@@ -27,32 +26,35 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
+ * Extension to {@link VaultClient} to perform Vault HTTP login requests, exposing a
+ * fluent, synchronous API over * underlying {@link RestClient}.
+ *
  * @author Mark Paluch
+ * @since 4.1
  */
-public interface VaultLoginClient extends VaultClient {
+interface VaultLoginClient extends VaultClient {
 
 	/**
-	 * Start building an HTTP POST request and accept the authentication mount.
-	 * The request path is derived from the authentication mount using the formatting pattern {@code auth/%s/login}.
-	 *
+	 * Start building an HTTP POST request and accept the authentication mount. The
+	 * request path is derived from the authentication mount using the formatting pattern
+	 * {@code auth/%s/login}.
 	 * @param authMount name of the authentication mount.
-	 * @return a spec for specifying the target URL
+	 * @return a spec for specifying the target path.
 	 */
 	LoginBodyRequestSpec loginAt(String authMount);
 
 	/**
 	 * Start building an HTTP POST request.
-	 * @return a spec for specifying the target URL
+	 * @return a spec for specifying the target path.
 	 */
 	LoginBodyPathSpec login();
 
 	/**
-	 * Obtain a {@code VaultLoginClient} builder based on the configuration of the
-	 * given {@code VaultClient}.
+	 * Obtain a {@code VaultLoginClient} builder based on the configuration of the given
+	 * {@code VaultClient}.
 	 * @return a {@code VaultLoginClient} builder initialized with {@code vaultClient}'s
 	 * configuration.
 	 */
@@ -60,6 +62,11 @@ public interface VaultLoginClient extends VaultClient {
 		return new DefaultVaultLoginClientBuilder(vaultClient);
 	}
 
+	/**
+	 * Obtain a {@code VaultLoginClient} based on the configuration of the given
+	 * {@code VaultClient} using {@code authenticationMechanism}.
+	 * @return a {@code VaultLoginClient} using {@code vaultClient}'s configuration.
+	 */
 	static VaultLoginClient create(VaultClient vaultClient, String authenticationMechanism) {
 		return builder(vaultClient).mechanism(authenticationMechanism).build();
 	}
@@ -72,29 +79,34 @@ public interface VaultLoginClient extends VaultClient {
 		Builder mechanism(String authenticationMechanism);
 
 		/**
-		 * Build the {@link RestClient} instance.
+		 * Build the {@link VaultLoginClient} instance.
 		 */
 		VaultLoginClient build();
+
 	}
 
 	/**
 	 * Contract for specifying the path for a request.
 	 *
-	 * @param <S> a self reference to the spec type
+	 * @param <S> a self reference to the spec type.
 	 */
 	interface PathSpec<S extends LoginBodySpec<S>> {
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured for the client (for example,
-		 * with a base URI) it will be used to expand the URI template.
+		 * <p>
+		 * If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) it will be used to expand the URI
+		 * template.
 		 */
 		S path(String path, @Nullable Object... pathVariables);
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured for the client (for example,
-		 * with a base URI) it will be used to expand the URI template.
+		 * <p>
+		 * If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) it will be used to expand the URI
+		 * template.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
 
@@ -106,20 +118,19 @@ public interface VaultLoginClient extends VaultClient {
 	interface RequestSpec {
 
 		/**
-		 * Enter the retrieve workflow and use the returned {@link LoginResponseSpec}
-		 * to select from a number of built-in options to extract the response.
-		 * For example:
+		 * Enter the retrieve workflow and use the returned {@link LoginResponseSpec} to
+		 * select from a number of built-in options to extract the response. For example:
 		 *
 		 * <pre class="code">
 		 * LoginToken token = client.loginAt("cert")
 		 *     .retrieve()
 		 *     .loginToken();
-		 * </pre>
-		 * Note that this method does not actually execute the request until you
+		 * </pre> Note that this method does not actually execute the request until you
 		 * call one of the returned {@link LoginResponseSpec}.
-		 * <p>4xx and 5xx response codes result in a {@link VaultLoginException}, 4xx response code result in a
-		 * {@link HttpClientErrorException} cause and 5xx response codes in a
-		 * {@link HttpServerErrorException} cause.
+		 * <p>
+		 * 4xx and 5xx response codes result in a {@link VaultLoginException}, 4xx
+		 * response code result in a {@link HttpClientErrorException} cause and 5xx
+		 * response codes in a {@link HttpServerErrorException} cause.
 		 */
 		@CheckReturnValue
 		LoginResponseSpec retrieve();
@@ -132,17 +143,16 @@ public interface VaultLoginClient extends VaultClient {
 	interface LoginBodySpec<S extends LoginBodySpec<S>> extends RequestSpec {
 
 		/**
-		 * Set the body of the request to the given {@code Object}.
-		 * For example:
+		 * Set the body of the request to the given {@code Object}. For example:
 		 * <pre class="code">
-		 * Person person = ... ;
+		 * Map&lt;String, Object&gt; body = ... ;
 		 * LoginToken loginToken = client.login()
-		 *     .path("/persons/{id}", id)
+		 *     .path("/auth/userpass/login/{userid}", userid)
 		 *     .using(person)
 		 *     .retrieve()
 		 *     .loginToken();
 		 * </pre>
-		 * @param body the body of the request
+		 * @param body the body of the request.
 		 * @return this builder.
 		 */
 		S using(Object body);
@@ -156,13 +166,18 @@ public interface VaultLoginClient extends VaultClient {
 
 		/**
 		 * Extract the body as {@link LoginToken}.
-		 *
-		 * @return the body
-		 * @throws VaultLoginException when receiving a
-		 *                                     response with a status code of 4xx or 5xx.
+		 * @return the body.
+		 * @throws VaultLoginException when receiving a response with a status code of 4xx
+		 * or 5xx.
 		 */
 		LoginToken loginToken();
 
+		/**
+		 * Extract the body as {@link VaultResponseSupport}.
+		 * @return the {@code VaultResponseSupport} with the decoded body.
+		 * @throws VaultLoginException by default when receiving a response with a status
+		 * code of 4xx or 5xx.
+		 */
 		VaultResponseSupport<LoginToken> body();
 
 	}

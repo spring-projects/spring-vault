@@ -116,17 +116,15 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
 
-		this(options, ClientAdapter.from(vaultClient)
-				.vaultClient(), googleMetadataClient);
+		this(options, ClientAdapter.from(vaultClient).vaultClient(), googleMetadataClient);
 	}
 
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
-	 * {@link GcpComputeAuthenticationOptions}, {@link VaultClient} and Google
-	 * API {@link RestClient}.
-	 *
-	 * @param options              must not be {@literal null}.
-	 * @param vaultClient          must not be {@literal null}.
+	 * {@link GcpComputeAuthenticationOptions}, {@link VaultClient} and Google API
+	 * {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 * @param googleMetadataClient must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -162,7 +160,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
 			//
 			.map(jwt -> createRequestBody(options.getRole(), jwt))
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override

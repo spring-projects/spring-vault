@@ -108,8 +108,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	/**
 	 * Create a new {@link AwsIamAuthentication} specifying
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link VaultClient}.
-	 *
-	 * @param options     must not be {@literal null}.
+	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -145,7 +144,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			AwsCredentials credentials, Region region) {
 
 		return AuthenticationSteps.fromSupplier(() -> createRequestBody(options, credentials, region)) //
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override
@@ -165,17 +164,18 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Map<String, String> login = createRequestBody(this.options);
 
 		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
-				.using(login).retrieve().body();
+			.using(login)
+			.retrieve()
+			.body();
 
-			if (logger.isDebugEnabled()) {
+		if (logger.isDebugEnabled()) {
 
-				if (token.getAuth().get("metadata") instanceof Map) {
-					Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth()
-							.get("metadata");
-					logger.debug("Using AWS-IAM authentication for user id %s, ARN %s"
-						.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
-				}
+			if (token.getAuth().get("metadata") instanceof Map) {
+				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
+				logger.debug("Using AWS-IAM authentication for user id %s, ARN %s"
+					.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
 			}
+		}
 
 		return token.getRequiredData();
 	}

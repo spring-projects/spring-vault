@@ -109,11 +109,11 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
 			return client.post()
-					.path("{path}/revoke", this.path)
-					.body(Collections.singletonMap("serial_number", serialNumber))
-					.retrieve()
-					.toBodilessEntity()
-					.getBody();
+				.path("{path}/revoke", this.path)
+				.body(Collections.singletonMap("serial_number", serialNumber))
+				.retrieve()
+				.toBodilessEntity()
+				.getBody();
 		});
 	}
 
@@ -126,16 +126,16 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable InputStream>) client -> {
 
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
-				ResponseEntity<byte[]> response = client.get()
-					.path(requestPath, this.path)
-					.retrieve()
-					.toEntity(byte[].class);
+			ResponseEntity<byte[]> response = client.get()
+				.path(requestPath, this.path)
+				.retrieve()
+				.toEntity(byte[].class);
 
-				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-					return new ByteArrayInputStream(response.getBody());
-				}
+			if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+				return new ByteArrayInputStream(response.getBody());
+			}
 
-				return null;
+			return null;
 		});
 	}
 
@@ -147,10 +147,10 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 		return this.vaultOperations.doWithSessionClient(client -> {
 
-				return client.get()
-					.path("{path}/issuer/{issuer}/json", this.path, issuer)
-					.retrieve()
-					.body(VaultIssuerCertificateRequestResponse.class);
+			return client.get()
+				.path("{path}/issuer/{issuer}/json", this.path, issuer)
+				.retrieve()
+				.body(VaultIssuerCertificateRequestResponse.class);
 		});
 	}
 
@@ -165,16 +165,16 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
 
-				ResponseEntity<byte[]> response = client.get()
-					.path(requestPath, this.path, issuer)
-					.retrieve()
-					.toEntity(byte[].class);
+			ResponseEntity<byte[]> response = client.get()
+				.path(requestPath, this.path, issuer)
+				.retrieve()
+				.toEntity(byte[].class);
 
-				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
-					return new ByteArrayInputStream(response.getBody());
-				}
+			if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
+				return new ByteArrayInputStream(response.getBody());
+			}
 
-				return null;
+			return null;
 		});
 	}
 

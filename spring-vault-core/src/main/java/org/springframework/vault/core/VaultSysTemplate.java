@@ -50,7 +50,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
@@ -89,16 +88,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		return requireResponse(this.vaultOperations.doWithSessionClient(client -> {
 
-				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) client.get()
-						.path("sys/init")
-					.headers(emptyNamespace())
-					.retrieve()
-					.toEntity(Map.class);
+			ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) client.get()
+				.path("sys/init")
+				.headers(emptyNamespace())
+				.retrieve()
+				.toEntity(Map.class);
 
-				Assert.state(body.getBody() != null, "Initialization response must not be null");
+			Assert.state(body.getBody() != null, "Initialization response must not be null");
 
-				Boolean initialized = body.getBody().get("initialized");
-				return initialized != null && initialized.booleanValue();
+			Boolean initialized = body.getBody().get("initialized");
+			return initialized != null && initialized.booleanValue();
 		}));
 	}
 
@@ -110,7 +109,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
 
 			ResponseEntity<VaultInitializationResponseImpl> exchange = client.put()
-					.path("sys/init")
+				.path("sys/init")
 				.headers(emptyNamespace())
 				.body(vaultInitializationRequest)
 				.retrieve()
@@ -133,7 +132,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
 
 			ResponseEntity<VaultUnsealStatusImpl> response = client.put()
-					.path("sys/unseal")
+				.path("sys/unseal")
 				.body(Collections.singletonMap("key", keyShare))
 				.retrieve()
 				.toEntity(VaultUnsealStatusImpl.class);
@@ -208,19 +207,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Policy>) client -> {
 
-			ResponseEntity<VaultResponse> response;
+			ResponseEntity<VaultResponse> response = client.get()
+				.path("sys/policy/{name}", name)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toEntity(VaultResponse.class);
 
-			try {
-				response = client.get().path("sys/policy/{name}", name).retrieve()
-						.toEntity(VaultResponse.class);
-			}
-			catch (HttpStatusCodeException e) {
-
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
-				}
-
-				throw e;
+			if (HttpStatusUtil.isNotFound(response.getStatusCode())) {
+				return null;
 			}
 
 			VaultResponse body = response.getBody();
@@ -256,7 +250,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) restOperations -> {
 			restOperations.put()
-					.path("sys/policy/{name}", name)
+				.path("sys/policy/{name}", name)
 				.body(Collections.singletonMap("rules", rules))
 				.retrieve()
 				.toBodilessEntity();
@@ -288,8 +282,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		@Override
 		public VaultUnsealStatus doWithVaultClient(VaultClient client) {
-			return requireResponse(client.get().path("sys/seal-status").retrieve()
-					.body(VaultUnsealStatusImpl.class));
+			return requireResponse(client.get().path("sys/seal-status").retrieve().body(VaultUnsealStatusImpl.class));
 		}
 
 	}
@@ -312,7 +305,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		public Map<String, VaultMount> doWithVaultClient(VaultClient client) {
 
 			ResponseEntity<VaultMountsResponse> exchange = client.get()
-					.path(this.path)
+				.path(this.path)
 				.retrieve()
 				.toEntity(MOUNT_TYPE_REF);
 
@@ -384,7 +377,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 			try {
 				ResponseEntity<VaultHealthImpl> healthResponse = client.get()
-						.path("sys/health")
+					.path("sys/health")
 					.headers(emptyNamespace())
 					.retrieve()
 					.toEntity(VaultHealthImpl.class);

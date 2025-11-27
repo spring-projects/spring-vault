@@ -69,9 +69,8 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	/**
 	 * Create a {@link KubernetesAuthentication} using
 	 * {@link KubernetesAuthenticationOptions} and {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, VaultClient client) {
@@ -95,17 +94,15 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
 			.map(token -> getKubernetesLogin(options.getRole(), token))
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
-		Map<String, String> login = getKubernetesLogin(this.options.getRole(), this.options.getJwtSupplier()
-				.get());
+		Map<String, String> login = getKubernetesLogin(this.options.getRole(), this.options.getJwtSupplier().get());
 
-		return this.loginClient.loginAt(this.options.getPath())
-				.using(login).retrieve().loginToken();
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	@Override

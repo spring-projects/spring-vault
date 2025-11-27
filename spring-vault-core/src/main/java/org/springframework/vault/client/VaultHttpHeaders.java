@@ -44,7 +44,8 @@ public abstract class VaultHttpHeaders {
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	/**
-	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a unwrapping token instead of the actual response.
+	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a unwrapping
+	 * token instead of the actual response.
 	 */
 	public static final String VAULT_WRAP_TTL = "X-Vault-Wrap-TTL";
 

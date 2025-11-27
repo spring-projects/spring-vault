@@ -74,7 +74,12 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		Assert.hasText(path, "Path must not be empty");
 
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) (client -> {
-			return client.delete().path(createDataPath(path)).retrieve().toBodilessEntity().getBody();
+			return client.delete()
+				.path(createDataPath(path))
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toBodilessEntity()
+				.getBody();
 		}));
 	}
 
@@ -117,7 +122,11 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 * @return mapped value.
 	 */
 	<T> @Nullable T doRead(String path, ParameterizedTypeReference<T> typeReference) {
-		return doRead((client) -> client.get().path(path).retrieve().toEntity(typeReference));
+		return doRead((client) -> client.get()
+			.path(path)
+			.retrieve()
+			.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+			.toEntity(typeReference));
 	}
 
 	/**
@@ -142,17 +151,13 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable T>) (client) -> {
 
-			try {
-				return callback.apply(client).getBody();
-			}
-			catch (HttpStatusCodeException e) {
+			ResponseEntity<T> entity = callback.apply(client);
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, this.path);
+			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
+				return null;
 			}
+
+			return entity.getBody();
 		});
 	}
 
@@ -168,14 +173,9 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		try {
-			return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable VaultResponse>) (client) -> {
-				return client.post().path(path).body(body).retrieve().body(VaultResponse.class);
-			});
-		}
-		catch (HttpStatusCodeException e) {
-			throw VaultResponses.buildException(e, path);
-		}
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable VaultResponse>) (client) -> {
+			return client.post().path(path).body(body).retrieve().body(VaultResponse.class);
+		});
 	}
 
 	/**

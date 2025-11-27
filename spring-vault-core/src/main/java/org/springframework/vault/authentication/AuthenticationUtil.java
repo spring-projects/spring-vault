@@ -13,7 +13,7 @@ abstract class AuthenticationUtil {
 	 * @return
 	 */
 	static String getLoginPath(String authMount) {
-		return "auth/%s/login".formatted(authMount);
+		return "/auth/%s/login".formatted(authMount);
 	}
 
 	private AuthenticationUtil() {

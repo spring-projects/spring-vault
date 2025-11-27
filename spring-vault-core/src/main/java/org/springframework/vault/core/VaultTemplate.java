@@ -120,7 +120,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultClient}.
-	 *
 	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -140,8 +139,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultClient} and
 	 * {@link SessionManager}.
-	 *
-	 * @param client         must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -347,11 +345,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private static VaultClient createVaultClient(RestOperations restOperations) {
 
 		if (restOperations instanceof RestClientOperationsWrapper wrapper) {
-			return VaultClient.builder(wrapper.getRestClient()).allowAbsolutePath(true)
-					.build();
+			return VaultClient.builder(wrapper.getRestClient()).build();
 		}
 
-		return VaultClient.builder((RestTemplate) restOperations).allowAbsolutePath(true).build();
+		return VaultClient.builder((RestTemplate) restOperations).build();
 	}
 
 	/**
@@ -456,8 +453,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 			if (!headers.containsHeader(VaultHttpHeaders.VAULT_TOKEN)) {
 				Assert.notNull(this.sessionManager, "SessionManager must not be null");
-				headers.add(VaultHttpHeaders.VAULT_TOKEN, this.sessionManager.getSessionToken()
-						.getToken());
+				headers.add(VaultHttpHeaders.VAULT_TOKEN, this.sessionManager.getSessionToken().getToken());
 			}
 
 			return execution.execute(request, body);
@@ -564,19 +560,17 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		return doWithSessionClient(client -> {
 
-			try {
-				ResponseEntity<VaultResponseSupport<T>> exchange = client.get().path(path).retrieve().toEntity(ref);
+			ResponseEntity<VaultResponseSupport<T>> entity = client.get()
+				.path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toEntity(ref);
 
-				return exchange.getBody();
+			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
+				return null;
 			}
-			catch (HttpStatusCodeException e) {
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, path);
-			}
+			return entity.getBody();
 		});
 	}
 
@@ -622,17 +616,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
-			try {
-				client.delete().path(path).retrieve().toBodilessEntity();
-			}
-			catch (HttpStatusCodeException e) {
-
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, path);
-			}
+			client.delete()
+				.path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toBodilessEntity();
 
 			return null;
 		});
@@ -695,17 +683,17 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		return doWithSessionClient((client) -> {
 
-			try {
-				return client.get().path(path).retrieve().toEntity(responseType).getBody();
-			}
-			catch (HttpStatusCodeException e) {
+			ResponseEntity<T> entity = client.get()
+				.path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toEntity(responseType);
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, path);
+			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
+				return null;
 			}
+
+			return entity.getBody();
 		});
 	}
 

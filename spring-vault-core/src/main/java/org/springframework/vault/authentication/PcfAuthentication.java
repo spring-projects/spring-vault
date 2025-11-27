@@ -87,9 +87,8 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	/**
 	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
 	 * {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public PcfAuthentication(PcfAuthenticationOptions options, VaultClient client) {
@@ -117,19 +116,16 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 		return cert.zipWith(key)
 			.map(credentials -> getPcfLogin(options.getRole(), options.getClock(), credentials.getLeft(),
 					credentials.getRight()))
-				.loginAt(options.getPath());
+			.loginAt(options.getPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
 
 		Map<String, String> login = getPcfLogin(this.options.getRole(), this.options.getClock(),
-				this.options.getInstanceCertSupplier()
-						.get(), this.options.getInstanceKeySupplier()
-						.get());
+				this.options.getInstanceCertSupplier().get(), this.options.getInstanceKeySupplier().get());
 
-		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve()
-				.loginToken();
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	@Override

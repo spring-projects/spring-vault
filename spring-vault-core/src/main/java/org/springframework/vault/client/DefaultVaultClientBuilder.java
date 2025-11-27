@@ -25,17 +25,21 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriBuilderFactory;
 
 /**
+ * Default implementation of {@link VaultClient.Builder}.
+ *
  * @author Mark Paluch
+ * @since 4.1
  */
 class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	private final RestClient.Builder restClientBuilder;
 
-	private boolean allowAbsolutePath = false;
-
 	private @Nullable VaultEndpointProvider endpointProvider;
+
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
 	DefaultVaultClientBuilder(RestTemplate restTemplate) {
 		this.restClientBuilder = RestClient.builder(restTemplate);
@@ -45,17 +49,12 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 		this.restClientBuilder = restClient.mutate();
 	}
 
-	DefaultVaultClientBuilder(ClientHttpRequestFactory requestFactory) {
-		this(RestClient.builder().requestFactory(requestFactory));
-	}
-
 	DefaultVaultClientBuilder() {
 		this(new ClientOptions(), SslConfiguration.unconfigured());
 	}
 
 	DefaultVaultClientBuilder(ClientOptions options, SslConfiguration sslConfiguration) {
-		this(RestClient.builder()
-				.requestFactory(ClientHttpRequestFactoryFactory.create(options, sslConfiguration)));
+		this(RestClient.builder().requestFactory(ClientHttpRequestFactoryFactory.create(options, sslConfiguration)));
 	}
 
 	DefaultVaultClientBuilder(RestClient.Builder builder) {
@@ -64,13 +63,13 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	private DefaultVaultClientBuilder(DefaultVaultClientBuilder other) {
 		this.restClientBuilder = other.restClientBuilder.clone();
-		this.allowAbsolutePath = other.allowAbsolutePath;
 		this.endpointProvider = other.endpointProvider;
+		this.uriBuilderFactory = other.uriBuilderFactory;
 	}
 
 	@Override
-	public VaultClient.Builder allowAbsolutePath(boolean allowAbsolutePath) {
-		this.allowAbsolutePath = allowAbsolutePath;
+	public VaultClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
+		this.uriBuilderFactory = uriBuilderFactory;
 		return this;
 	}
 
@@ -89,7 +88,13 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 	public VaultClient.Builder endpoint(VaultEndpointProvider endpointProvider) {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider not be null");
 		this.endpointProvider = endpointProvider;
-		this.restClientBuilder.uriBuilderFactory(VaultClients.createUriBuilderFactory(endpointProvider));
+		this.restClientBuilder.uriBuilderFactory(VaultClients.createUriBuilderFactory(endpointProvider, false));
+		return this;
+	}
+
+	@Override
+	public VaultClient.Builder requestFactory(ClientHttpRequestFactory requestFactory) {
+		this.restClientBuilder.requestFactory(requestFactory);
 		return this;
 	}
 
@@ -112,7 +117,7 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	@Override
 	public VaultClient build() {
-		return new DefaultVaultClient(this.restClientBuilder.build(), allowAbsolutePath, this);
+		return new DefaultVaultClient(this.restClientBuilder.build(), this.uriBuilderFactory, this);
 	}
 
 }

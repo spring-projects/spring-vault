@@ -25,6 +25,7 @@ import org.springframework.vault.client.VaultClient;
 class DefaultVaultLoginClientBuilder implements VaultLoginClient.Builder {
 
 	private final VaultClient vaultClient;
+
 	private @Nullable String authenticationMechanism;
 
 	public DefaultVaultLoginClientBuilder(VaultClient vaultClient) {
@@ -42,4 +43,5 @@ class DefaultVaultLoginClientBuilder implements VaultLoginClient.Builder {
 		return new DefaultVaultLoginClient(vaultClient,
 				authenticationMechanism != null ? authenticationMechanism : "unknown");
 	}
+
 }

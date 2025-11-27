@@ -145,7 +145,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 			try {
 				VaultResponse response = spec.requiredBody();
-				LoginToken token = LoginTokenUtil.from(response.getRequiredData());
+				LoginToken token = LoginTokenUtil.from(response.getAuth());
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
@@ -162,10 +162,8 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 		public VaultResponseSupport<LoginToken> body() {
 
 			try {
-				VaultResponse response = spec.body();
-
-				Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-				LoginToken token = LoginTokenUtil.from(response.getRequiredData());
+				VaultResponse response = spec.requiredBody();
+				LoginToken token = LoginTokenUtil.from(response.getAuth());
 
 				VaultResponseSupport<LoginToken> tokenResponse = new VaultResponseSupport<>();
 				tokenResponse.setAuth(response.getAuth());
@@ -187,6 +185,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}
+
 	}
 
 }

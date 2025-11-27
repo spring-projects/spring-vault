@@ -88,8 +88,8 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 */
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations azureMetadataRestOperations) {
-		this(options, ClientAdapter.from(vaultRestOperations)
-				.vaultClient(), ClientAdapter.from(azureMetadataRestOperations));
+		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
+				ClientAdapter.from(azureMetadataRestOperations));
 	}
 
 	/**
@@ -112,17 +112,15 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 */
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient vaultClient,
 			RestClient azureMetadataClient) {
-		this(options, ClientAdapter.from(vaultClient)
-				.vaultClient(), ClientAdapter.from(azureMetadataClient));
+		this(options, ClientAdapter.from(vaultClient).vaultClient(), ClientAdapter.from(azureMetadataClient));
 	}
 
 	/**
 	 * Create a new {@link AzureMsiAuthentication} specifying
-	 * {@link AzureMsiAuthenticationOptions}, {@link VaultClient} and an Azure-Metadata-specific
-	 * {@link RestClient}.
-	 *
-	 * @param options             must not be {@literal null}.
-	 * @param vaultClient         must not be {@literal null}.
+	 * {@link AzureMsiAuthenticationOptions}, {@link VaultClient} and an
+	 * Azure-Metadata-specific {@link RestClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
 	 * @param azureMetadataClient must not be {@literal null}.
 	 * @since 4.1
 	 */
@@ -197,8 +195,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 		Map<String, String> login = getAzureLogin(this.options.getRole(), getVmEnvironment(), getAccessToken());
 
-		return this.loginClient.loginAt(this.options.getPath())
-				.using(login).retrieve().loginToken();
+		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getAzureLogin(String role, AzureVmEnvironment vmEnvironment, String jwt) {

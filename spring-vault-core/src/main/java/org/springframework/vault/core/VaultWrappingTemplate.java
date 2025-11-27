@@ -16,11 +16,7 @@
 package org.springframework.vault.core;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAccessor;
 import java.util.Collections;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -29,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -39,7 +34,6 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClient;
 
 /**
  * @author Mark Paluch
@@ -91,7 +85,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	public VaultResponse read(VaultToken token) {
 
 		return doUnwrap(token, (client, headers) -> {
-			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body(VaultResponse.class);
+			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body();
 		});
 	}
 
@@ -115,18 +109,23 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 			try {
 				return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
 			}
-			catch (HttpStatusCodeException e) {
+			catch (VaultException e) {
 
-				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
-					return null;
+				if (e.getCause() instanceof HttpStatusCodeException hse) {
+
+					if (HttpStatusUtil.isNotFound(hse.getStatusCode())) {
+						return null;
+					}
+
+					if (HttpStatusUtil.isBadRequest(hse.getStatusCode())
+							&& hse.getResponseBodyAsString().contains("does not exist")) {
+						return null;
+					}
+
+					throw VaultResponses.buildException(hse, "sys/wrapping/unwrap");
 				}
 
-				if (HttpStatusUtil.isBadRequest(e.getStatusCode())
-						&& e.getResponseBodyAsString().contains("does not exist")) {
-					return null;
-				}
-
-				throw VaultResponses.buildException(e, "sys/wrapping/unwrap");
+				throw e;
 			}
 		});
 	}
@@ -152,11 +151,7 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 		return this.vaultOperations.doWithSessionClient(client -> {
 
-			return client.post()
-				.path("sys/wrapping/wrap")
-				.body(body)
-				.retrieve()
-				.wrap(duration);
+			return client.post().path("sys/wrapping/wrap").body(body).retrieve().wrap(duration);
 		});
 	}
 

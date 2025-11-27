@@ -54,15 +54,13 @@ public abstract class GcpJwtAuthenticationSupport {
 
 		Map<String, String> login = createRequestBody(role, signedJwt);
 
-		VaultResponseSupport<LoginToken> response = this.loginClient.loginAt(path)
-				.using(login).retrieve().body();
+		VaultResponseSupport<LoginToken> response = this.loginClient.loginAt(path).using(login).retrieve().body();
 
 		if (logger.isDebugEnabled()) {
 
 			if (response.getAuth().get("metadata") instanceof Map) {
 
-				Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth()
-						.get("metadata");
+				Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
 				logger.debug("Using %s authentication for user id %s".formatted(authenticationName,
 						metadata.get("service_account_email")));
 			}

@@ -94,11 +94,16 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	private static Map<String, Object> lookupSelf(VaultClient client, VaultToken token) {
 
 		try {
-			VaultResponse response = client.get()
-					.path("auth/token/lookup-self").token(token).retrieve()
-					.requiredBody();
+			VaultResponse response = client.get().path("auth/token/lookup-self").token(token).retrieve().requiredBody();
 
 			return response.getRequiredData();
+		}
+		catch (VaultException e) {
+			if (e.getCause() instanceof HttpStatusCodeException hse) {
+				throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(hse.getStatusCode(),
+						VaultResponses.getError(hse.getResponseBodyAsString())), e);
+			}
+			throw e;
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(e.getStatusCode(),

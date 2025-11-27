@@ -106,18 +106,13 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		Assert.hasText(path, "Path must not be empty");
 
 		return this.vaultOperations.doWithSessionClient(client -> {
-			try {
-				VaultClient.RequestBodySpec spec = client.post().path(path);
+			VaultClient.RequestBodySpec spec = client.post().path(path);
 
-				if (body != null) {
-					spec = spec.body(body);
-				}
+			if (body != null) {
+				spec = spec.body(body);
+			}
 
-				return spec.retrieve().body(responseType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, path);
-			}
+			return spec.retrieve().body(responseType);
 		});
 	}
 
@@ -128,17 +123,12 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
 
-			try {
-				client.post()
-						.path(path)
-					.body(Collections.singletonMap("token", token.getToken()))
-					.retrieve()
-					.toEntity(responseType);
-				return null;
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, path);
-			}
+			client.post()
+				.path(path)
+				.body(Collections.singletonMap("token", token.getToken()))
+				.retrieve()
+				.toEntity(responseType);
+			return null;
 		});
 	}
 

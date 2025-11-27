@@ -76,9 +76,8 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	/**
 	 * Create a {@link UsernamePasswordAuthentication} using
 	 * {@link UsernamePasswordAuthenticationOptions} and {@link VaultClient}.
-	 *
 	 * @param options must not be {@literal null}.
-	 * @param client  must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @since 4.1
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, VaultClient client) {
@@ -87,7 +86,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Assert.notNull(client, "VaultClient must not be null");
 
 		this.options = options;
-		this.loginClient = VaultLoginClient.create(client, "Username and Password (" + options.getPath()+")");
+		this.loginClient = VaultLoginClient.create(client, "Username and Password (" + options.getPath() + ")");
 	}
 
 	/**
@@ -120,8 +119,10 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 
 		return loginClient.login()
-				.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
-				.using(createLoginBody(options)).retrieve().loginToken();
+			.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
+			.using(createLoginBody(options))
+			.retrieve()
+			.loginToken();
 	}
 
 	private static Map<String, Object> createLoginBody(UsernamePasswordAuthenticationOptions options) {

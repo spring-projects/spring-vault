@@ -128,8 +128,7 @@ public class VaultClients {
 
 	static void configureConverters(HttpMessageConverters.ClientBuilder clientBuilder) {
 
-		AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
-				.createHttpMessageConverter();
+		AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance().createHttpMessageConverter();
 
 		clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
 		clientBuilder.addCustomConverter(new StringHttpMessageConverter());
@@ -188,7 +187,12 @@ public class VaultClients {
 	}
 
 	public static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider) {
-		return new PrefixAwareUriBuilderFactory(endpointProvider);
+		return new PrefixAwareUriBuilderFactory(endpointProvider, true);
+	}
+
+	static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider,
+			boolean allowAbsolutePath) {
+		return new PrefixAwareUriBuilderFactory(endpointProvider, allowAbsolutePath);
 	}
 
 	/**
@@ -198,19 +202,29 @@ public class VaultClients {
 
 		private final @Nullable VaultEndpointProvider endpointProvider;
 
+		private final boolean allowAbsolutePath;
+
 		public PrefixAwareUriBuilderFactory() {
 			this.endpointProvider = null;
+			this.allowAbsolutePath = true;
 		}
 
 		public PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider) {
+			this(endpointProvider, true);
+		}
+
+		PrefixAwareUriBuilderFactory(VaultEndpointProvider endpointProvider, boolean allowAbsolutePath) {
 			this.endpointProvider = endpointProvider;
+			this.allowAbsolutePath = allowAbsolutePath;
 		}
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
 
-			if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
-				return UriComponentsBuilder.fromUriString(uriTemplate);
+			if (allowAbsolutePath) {
+				if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
+					return UriComponentsBuilder.fromUriString(uriTemplate);
+				}
 			}
 
 			if (endpointProvider != null) {

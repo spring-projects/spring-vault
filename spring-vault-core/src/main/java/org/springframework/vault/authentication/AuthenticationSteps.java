@@ -150,7 +150,6 @@ public class AuthenticationSteps {
 
 	/**
 	 * Start flow composition from a {@link HttpRequest}.
-	 *
 	 * @param request the HTTP request definition, must not be {@literal null}.
 	 * @return the first {@link Node}.
 	 */
@@ -252,16 +251,17 @@ public class AuthenticationSteps {
 
 			Assert.notNull(request, "HttpRequest must not be null");
 
-			return new HttpRequestNode<>(request,false , this);
+			return new HttpRequestNode<>(request, false, this);
 		}
 
 		/**
-		 * Terminal operation requesting a {@link VaultToken token} from Vault by logging into Vault
-		 * sending the current state to the Vault {@code authMount}. The actual request path
-		 * is derived from {@code authMount} using the pattern {@code auth/%s/login}.
-		 * If the request path needs to be customized, use {@link #login(String, String...)} instead.
-		 * @param authMount the name of the authentication mount, must not be {@literal null}
-		 * or empty.
+		 * Terminal operation requesting a {@link VaultToken token} from Vault by logging
+		 * into Vault sending the current state to the Vault {@code authMount}. The actual
+		 * request path is derived from {@code authMount} using the pattern
+		 * {@code auth/%s/login}. If the request path needs to be customized, use
+		 * {@link #login(String, String...)} instead.
+		 * @param authMount the name of the authentication mount, must not be
+		 * {@literal null} or empty.
 		 * @return the {@link AuthenticationSteps}.
 		 * @since 4.1
 		 */
@@ -275,9 +275,8 @@ public class AuthenticationSteps {
 		/**
 		 * Terminal operation requesting a {@link VaultToken token} from Vault by posting
 		 * the current state to Vaults {@code uriTemplate}.
-		 *
-		 * @param uriTemplate  Vault authentication endpoint, must not be {@literal null}
-		 *                     or empty.
+		 * @param uriTemplate Vault authentication endpoint, must not be {@literal null}
+		 * or empty.
 		 * @param uriVariables URI variables for URI template expansion.
 		 * @return the {@link AuthenticationSteps}.
 		 */
@@ -298,7 +297,7 @@ public class AuthenticationSteps {
 
 			Assert.notNull(request, "HttpRequest must not be null");
 
-			return new AuthenticationSteps(new HttpRequestNode<>(request,true , this));
+			return new AuthenticationSteps(new HttpRequestNode<>(request, true, this));
 		}
 
 		/**
@@ -558,7 +557,8 @@ public class AuthenticationSteps {
 				return true;
 			if (!(o instanceof HttpRequestNode<?> that))
 				return false;
-			return this.definition.equals(that.definition) && this.previous.equals(that.previous) && this.vault == that.vault;
+			return this.definition.equals(that.definition) && this.previous.equals(that.previous)
+					&& this.vault == that.vault;
 		}
 
 		@Override
