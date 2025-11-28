@@ -68,12 +68,12 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 	}
 
 	@Override
-	public RequestBodyPathSpec post() {
+	public RequestHeadersBodyPathSpec post() {
 		return vaultClient.post();
 	}
 
 	@Override
-	public RequestBodyPathSpec put() {
+	public RequestHeadersBodyPathSpec put() {
 		return vaultClient.put();
 	}
 
@@ -83,7 +83,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 	}
 
 	@Override
-	public RequestBodyPathSpec method(HttpMethod method) {
+	public RequestHeadersBodyPathSpec method(HttpMethod method) {
 		return vaultClient.method(method);
 	}
 

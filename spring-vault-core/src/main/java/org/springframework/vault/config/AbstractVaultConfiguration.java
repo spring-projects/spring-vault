@@ -112,7 +112,6 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	/**
 	 * Create a {@link VaultClient} initialized with {@link #vaultEndpointProvider()} and
 	 * {@link #getClientFactoryWrapper()}. May be overridden by subclasses.
-	 *
 	 * @return the {@link VaultClient}.
 	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
@@ -122,9 +121,11 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	protected VaultClient vaultClient() {
 
 		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
-				.getBeanProvider(VaultClientCustomizer.class);
+			.getBeanProvider(VaultClientCustomizer.class);
 
-		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(), clientHttpRequestFactoryWrapper().getClientHttpRequestFactory()).build();
+		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
+				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory())
+			.build();
 		VaultClient.Builder builder = VaultClient.builder(restTemplate);
 
 		customizers.forEach(it -> it.customize(builder));

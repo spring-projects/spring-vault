@@ -35,17 +35,10 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 @SuppressWarnings("NullAway")
-class RestClientOperationsWrapper implements RestOperations {
+record RestClientOperationsWrapper(RestClient restClient) implements RestOperations {
 
-	private final RestClient restClient;
-
-	public RestClientOperationsWrapper(RestClient restClient) {
+	RestClientOperationsWrapper {
 		Assert.notNull(restClient, "RestClient must not be null");
-		this.restClient = restClient;
-	}
-
-	public RestClient getRestClient() {
-		return restClient;
 	}
 
 	@Override
@@ -100,27 +93,24 @@ class RestClientOperationsWrapper implements RestOperations {
 	@Override
 	public <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
 			@Nullable Object... uriVariables) throws RestClientException {
-		return restClient.post().uri(url, uriVariables).body(request).retrieve().body(responseType);
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve().body(responseType);
 	}
 
 	@Override
 	public <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException {
-		return restClient.post().uri(url, uriVariables).body(request).retrieve().body(responseType);
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve().body(responseType);
 	}
 
 	@Override
-	public <T> T postForObject(URI url, Object request, Class<T> responseType) throws RestClientException {
-		return restClient.post().uri(url).body(request).retrieve().body(responseType);
+	public <T> T postForObject(URI url, @Nullable Object request, Class<T> responseType) throws RestClientException {
+		return withBody(restClient.post().uri(url), request).retrieve().body(responseType);
 	}
 
 	@Override
 	public @Nullable URI postForLocation(String url, @Nullable Object request, @Nullable Object... uriVariables)
 			throws RestClientException {
-		return restClient.post()
-			.uri(url, uriVariables)
-			.body(request)
-			.retrieve()
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve()
 			.toBodilessEntity()
 			.getHeaders()
 			.getLocation();
@@ -129,10 +119,7 @@ class RestClientOperationsWrapper implements RestOperations {
 	@Override
 	public @Nullable URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables)
 			throws RestClientException {
-		return restClient.post()
-			.uri(url, uriVariables)
-			.body(request)
-			.retrieve()
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve()
 			.toBodilessEntity()
 			.getHeaders()
 			.getLocation();
@@ -140,44 +127,44 @@ class RestClientOperationsWrapper implements RestOperations {
 
 	@Override
 	public @Nullable URI postForLocation(URI url, @Nullable Object request) throws RestClientException {
-		return restClient.post().uri(url).body(request).retrieve().toBodilessEntity().getHeaders().getLocation();
+		return withBody(restClient.post().uri(url), request).retrieve().toBodilessEntity().getHeaders().getLocation();
 	}
 
 	@Override
-	public <T> ResponseEntity<T> postForEntity(String url, Object request, Class<T> responseType,
+	public <T> ResponseEntity<T> postForEntity(String url, @Nullable Object request, Class<T> responseType,
 			@Nullable Object... uriVariables) throws RestClientException {
-		return restClient.post().uri(url, uriVariables).body(request).retrieve().toEntity(responseType);
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve().toEntity(responseType);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> postForEntity(String url, @Nullable Object request, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException {
-		return restClient.post().uri(url, uriVariables).body(request).retrieve().toEntity(responseType);
+		return withBody(restClient.post().uri(url, uriVariables), request).retrieve().toEntity(responseType);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> postForEntity(URI url, @Nullable Object request, Class<T> responseType)
 			throws RestClientException {
-		return restClient.post().uri(url).body(request).retrieve().toEntity(responseType);
+		return withBody(restClient.post().uri(url), request).retrieve().toEntity(responseType);
 	}
 
 	@Override
-	public void put(String url, Object request, @Nullable Object... uriVariables) throws RestClientException {
-		restClient.put().uri(url, uriVariables).body(request).retrieve().toBodilessEntity();
+	public void put(String url, @Nullable Object request, @Nullable Object... uriVariables) throws RestClientException {
+		withBody(restClient.put().uri(url, uriVariables), request).retrieve().toBodilessEntity();
 	}
 
 	@Override
-	public void put(String url, Object request, Map<String, ?> uriVariables) throws RestClientException {
-		restClient.put().uri(url, uriVariables).body(request).retrieve().toBodilessEntity();
+	public void put(String url, @Nullable Object request, Map<String, ?> uriVariables) throws RestClientException {
+		withBody(restClient.put().uri(url, uriVariables), request).retrieve().toBodilessEntity();
 	}
 
 	@Override
-	public void put(URI url, Object request) throws RestClientException {
-		restClient.put().uri(url).body(request).retrieve().toBodilessEntity();
+	public void put(URI url, @Nullable Object request) throws RestClientException {
+		withBody(restClient.put().uri(url), request).retrieve().toBodilessEntity();
 	}
 
 	@Override
-	public void delete(String url, Object... uriVariables) throws RestClientException {
+	public void delete(String url, @Nullable Object... uriVariables) throws RestClientException {
 		restClient.delete().uri(url, uriVariables).retrieve().toBodilessEntity();
 	}
 
@@ -207,96 +194,70 @@ class RestClientOperationsWrapper implements RestOperations {
 	}
 
 	@Override
-	public <T> T patchForObject(String url, Object request, Class<T> responseType, Object... uriVariables)
-			throws RestClientException {
-		return restClient.method(HttpMethod.PATCH).uri(url, uriVariables).body(request).retrieve().body(responseType);
+	public <T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
+			@Nullable Object... uriVariables) throws RestClientException {
+		return withBody(restClient.method(HttpMethod.PATCH).uri(url, uriVariables), request).retrieve()
+			.body(responseType);
 	}
 
 	@Override
-	public <T> T patchForObject(String url, Object request, Class<T> responseType, Map<String, ?> uriVariables)
-			throws RestClientException {
-		return restClient.method(HttpMethod.PATCH).uri(url, uriVariables).body(request).retrieve().body(responseType);
+	public <T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
+			Map<String, ?> uriVariables) throws RestClientException {
+		return withBody(restClient.method(HttpMethod.PATCH).uri(url, uriVariables), request).retrieve()
+			.body(responseType);
 	}
 
 	@Override
-	public <T> T patchForObject(URI url, Object request, Class<T> responseType) throws RestClientException {
-		return restClient.method(HttpMethod.PATCH).uri(url).body(request).retrieve().body(responseType);
+	public <T> T patchForObject(URI url, @Nullable Object request, Class<T> responseType) throws RestClientException {
+		return withBody(restClient.method(HttpMethod.PATCH).uri(url), request).retrieve().body(responseType);
 	}
 
 	// For generic exchange operations
 	@Override
-	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
-			Class<T> responseType, Object... uriVariables) throws RestClientException {
-		return restClient.method(method)
-			.uri(url, uriVariables)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
+			Class<T> responseType, @Nullable Object... uriVariables) throws RestClientException {
+		return withHeadersAndBody(restClient.method(method).uri(url, uriVariables), requestEntity).retrieve()
 			.toEntity(responseType);
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
-		return restClient.method(method)
-			.uri(url, uriVariables)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
+		return withHeadersAndBody(restClient.method(method).uri(url, uriVariables), requestEntity).retrieve()
 			.toEntity(responseType);
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			Class<T> responseType) throws RestClientException {
-		return restClient.method(method)
-			.uri(url)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
+		return withHeadersAndBody(restClient.method(method).uri(url), requestEntity).retrieve().toEntity(responseType);
+	}
+
+	@Override
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
+			ParameterizedTypeReference<T> responseType, @Nullable Object... uriVariables) throws RestClientException {
+		return withHeadersAndBody(restClient.method(method).uri(url, uriVariables), requestEntity).retrieve()
 			.toEntity(responseType);
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
-			ParameterizedTypeReference<T> responseType, Object... uriVariables) throws RestClientException {
-		return restClient.method(method)
-			.uri(url, uriVariables)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
-			.toEntity(responseType);
-	}
-
-	@Override
-	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, HttpEntity<?> requestEntity,
+	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
-		return restClient.method(method)
-			.uri(url, uriVariables)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
+		return withHeadersAndBody(restClient.method(method).uri(url, uriVariables), requestEntity).retrieve()
 			.toEntity(responseType);
 	}
 
 	@Override
-	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, HttpEntity<?> requestEntity,
+	public <T> ResponseEntity<T> exchange(URI url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			ParameterizedTypeReference<T> responseType) throws RestClientException {
-		return restClient.method(method)
-			.uri(url)
-			.headers(headers -> headers.putAll(requestEntity.getHeaders()))
-			.body(requestEntity.getBody())
-			.retrieve()
-			.toEntity(responseType);
+		return withHeadersAndBody(restClient.method(method).uri(url), requestEntity).retrieve().toEntity(responseType);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, Class<T> responseType)
 			throws RestClientException {
-		return restClient.method(requestEntity.getMethod())
-			.uri(requestEntity.getUrl())
-			.body(requestEntity.getBody())
-			.headers(it -> it.putAll(requestEntity.getHeaders()))
+		return withHeadersAndBody(restClient.method(requestEntity.getMethod()).uri(requestEntity.getUrl()),
+				requestEntity)
 			.retrieve()
 			.toEntity(responseType);
 	}
@@ -304,10 +265,8 @@ class RestClientOperationsWrapper implements RestOperations {
 	@Override
 	public <T> ResponseEntity<T> exchange(RequestEntity<?> requestEntity, ParameterizedTypeReference<T> responseType)
 			throws RestClientException {
-		return restClient.method(requestEntity.getMethod())
-			.uri(requestEntity.getUrl())
-			.body(requestEntity.getBody())
-			.headers(it -> it.putAll(requestEntity.getHeaders()))
+		return withHeadersAndBody(restClient.method(requestEntity.getMethod()).uri(requestEntity.getUrl()),
+				requestEntity)
 			.retrieve()
 			.toEntity(responseType);
 	}
@@ -329,6 +288,28 @@ class RestClientOperationsWrapper implements RestOperations {
 	public <T> @Nullable T execute(URI url, HttpMethod method, @Nullable RequestCallback requestCallback,
 			@Nullable ResponseExtractor<T> responseExtractor) throws RestClientException {
 		return null;
+	}
+
+	private <S extends RestClient.RequestBodySpec> S withBody(S spec, @Nullable Object body) {
+
+		if (body != null) {
+			spec.body(body);
+		}
+
+		return spec;
+	}
+
+	private <S extends RestClient.RequestBodySpec> S withHeadersAndBody(S spec, @Nullable HttpEntity<?> requestEntity) {
+
+		if (requestEntity != null) {
+			spec.headers(headers -> headers.putAll(requestEntity.getHeaders()));
+
+			if (requestEntity.getBody() != null) {
+				spec.body(requestEntity.getBody());
+			}
+		}
+
+		return spec;
 	}
 
 }

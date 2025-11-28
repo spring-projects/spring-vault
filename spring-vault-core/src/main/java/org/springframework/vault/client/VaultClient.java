@@ -80,13 +80,13 @@ public interface VaultClient {
 	 * Start building an HTTP POST request.
 	 * @return a spec for specifying the target path.
 	 */
-	RequestBodyPathSpec post();
+	RequestHeadersBodyPathSpec post();
 
 	/**
 	 * Start building an HTTP PUT request.
 	 * @return a spec for specifying the target path.
 	 */
-	RequestBodyPathSpec put();
+	RequestHeadersBodyPathSpec put();
 
 	/**
 	 * Start building an HTTP DELETE request.
@@ -98,7 +98,7 @@ public interface VaultClient {
 	 * Start building a request for the given {@code HttpMethod}.
 	 * @return a spec for specifying the target path.
 	 */
-	RequestBodyPathSpec method(HttpMethod method);
+	RequestHeadersBodyPathSpec method(HttpMethod method);
 
 	/**
 	 * Return a builder to create a new {@code VaultClient} whose settings are replicated
@@ -589,7 +589,7 @@ public interface VaultClient {
 	/**
 	 * Contract for specifying request headers, body and path for a request.
 	 */
-	interface RequestBodyPathSpec extends VaultClient.RequestBodySpec, RequestHeadersPathSpec<RequestBodySpec> {
+	interface RequestHeadersBodyPathSpec extends VaultClient.RequestBodySpec, RequestHeadersPathSpec<RequestBodySpec> {
 
 	}
 

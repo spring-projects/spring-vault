@@ -17,6 +17,8 @@ package org.springframework.vault.core;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -332,7 +334,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private static VaultClient createVaultClient(RestOperations restOperations) {
 
 		if (restOperations instanceof RestClientOperationsWrapper wrapper) {
-			return VaultClient.builder(wrapper.getRestClient()).build();
+			return VaultClient.builder(wrapper.restClient()).build();
 		}
 
 		return VaultClient.builder((RestTemplate) restOperations).build();
@@ -697,27 +699,27 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 				return statelessClient.get();
 			}
 
-			return (RequestHeadersPathSpec<?>) statelessClient.get().token(sessionManager.getSessionToken());
+			return new SessionRequestHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.get());
 		}
 
 		@Override
-		public RequestBodyPathSpec post() {
+		public RequestHeadersBodyPathSpec post() {
 
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.post();
 			}
 
-			return (RequestBodyPathSpec) statelessClient.post().token(sessionManager.getSessionToken());
+			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.post());
 		}
 
 		@Override
-		public RequestBodyPathSpec put() {
+		public RequestHeadersBodyPathSpec put() {
 
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.put();
 			}
 
-			return (RequestBodyPathSpec) statelessClient.put().token(sessionManager.getSessionToken());
+			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.put());
 		}
 
 		@Override
@@ -727,17 +729,18 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 				return statelessClient.delete();
 			}
 
-			return (RequestHeadersPathSpec<?>) statelessClient.delete().token(sessionManager.getSessionToken());
+			return new SessionRequestHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.delete());
 		}
 
 		@Override
-		public RequestBodyPathSpec method(HttpMethod method) {
+		public RequestHeadersBodyPathSpec method(HttpMethod method) {
 
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.method(method);
 			}
 
-			return (RequestBodyPathSpec) statelessClient.method(method).token(sessionManager.getSessionToken());
+			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(),
+					statelessClient.method(method));
 		}
 
 		@Override
@@ -748,6 +751,117 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		@Override
 		public RestClient getRestClient() {
 			return statelessClient.getRestClient();
+		}
+
+	}
+
+	static class SessionRequestHeadersPathSpec
+			implements VaultClient.RequestHeadersPathSpec<SessionRequestHeadersPathSpec> {
+
+		private final VaultToken token;
+
+		private final VaultClient.RequestHeadersPathSpec<?> spec;
+
+		SessionRequestHeadersPathSpec(VaultToken token, VaultClient.RequestHeadersPathSpec<?> spec) {
+			this.token = token;
+			this.spec = spec;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec path(String path, @Nullable Object... pathVariables) {
+			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec path(String path, Map<String, ?> pathVariables) {
+			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec header(String headerName, String... headerValues) {
+			spec.header(headerName, headerValues);
+			return this;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec headers(HttpHeaders httpHeaders) {
+			spec.headers(httpHeaders);
+			return this;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec headers(Consumer<HttpHeaders> headersConsumer) {
+			spec.headers(headersConsumer);
+			return this;
+		}
+
+		@Override
+		public VaultClient.ResponseSpec retrieve() {
+			spec.token(token);
+			return spec.retrieve();
+		}
+
+	}
+
+	static class SessionRequestBodyHeadersPathSpec implements VaultClient.RequestHeadersBodyPathSpec {
+
+		private final VaultToken token;
+
+		private final VaultClient.RequestHeadersBodyPathSpec spec;
+
+		SessionRequestBodyHeadersPathSpec(VaultToken token, VaultClient.RequestHeadersBodyPathSpec spec) {
+			this.token = token;
+			this.spec = spec;
+		}
+
+		@Override
+		public SessionRequestBodyHeadersPathSpec path(String path, @Nullable Object... pathVariables) {
+			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public SessionRequestBodyHeadersPathSpec path(String path, Map<String, ?> pathVariables) {
+			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public SessionRequestBodyHeadersPathSpec header(String headerName, String... headerValues) {
+			spec.header(headerName, headerValues);
+			return this;
+		}
+
+		@Override
+		public SessionRequestBodyHeadersPathSpec headers(HttpHeaders httpHeaders) {
+			spec.headers(httpHeaders);
+			return this;
+		}
+
+		@Override
+		public SessionRequestBodyHeadersPathSpec headers(Consumer<HttpHeaders> headersConsumer) {
+			spec.headers(headersConsumer);
+			return this;
+		}
+
+		@Override
+		public VaultClient.RequestBodySpec body(Object body) {
+			spec.body(body);
+			return this;
+		}
+
+		@Override
+		public <T> VaultClient.RequestBodySpec body(T body, ParameterizedTypeReference<T> bodyType) {
+			spec.body(body, bodyType);
+			return this;
+		}
+
+		@Override
+		public VaultClient.ResponseSpec retrieve() {
+			spec.token(token);
+			return spec.retrieve();
 		}
 
 	}

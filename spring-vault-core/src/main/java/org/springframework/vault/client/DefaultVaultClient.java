@@ -66,12 +66,12 @@ class DefaultVaultClient implements VaultClient {
 	}
 
 	@Override
-	public RequestBodyPathSpec post() {
+	public RequestHeadersBodyPathSpec post() {
 		return method(HttpMethod.POST);
 	}
 
 	@Override
-	public RequestBodyPathSpec put() {
+	public RequestHeadersBodyPathSpec put() {
 		return method(HttpMethod.PUT);
 	}
 
@@ -81,13 +81,13 @@ class DefaultVaultClient implements VaultClient {
 	}
 
 	@Override
-	public RequestBodyPathSpec method(HttpMethod method) {
+	public RequestHeadersBodyPathSpec method(HttpMethod method) {
 		Assert.notNull(method, "HttpMethod must not be null");
 		return methodInternal(method);
 	}
 
-	private RequestBodyPathSpec methodInternal(HttpMethod httpMethod) {
-		return new DefaultRequestBodyUriSpec(httpMethod, client.method(httpMethod));
+	private RequestHeadersBodyPathSpec methodInternal(HttpMethod httpMethod) {
+		return new DefaultRequestHeadersBodyUriSpec(httpMethod, client.method(httpMethod));
 	}
 
 	@Override
@@ -101,7 +101,7 @@ class DefaultVaultClient implements VaultClient {
 	}
 
 	@SuppressWarnings("NullAway")
-	private class DefaultRequestBodyUriSpec implements RequestBodyPathSpec {
+	private class DefaultRequestHeadersBodyUriSpec implements RequestHeadersBodyPathSpec {
 
 		private final RestClient.RequestBodyUriSpec spec;
 
@@ -111,7 +111,7 @@ class DefaultVaultClient implements VaultClient {
 
 		private RestClient.@Nullable RequestBodySpec uriSpec;
 
-		public DefaultRequestBodyUriSpec(HttpMethod httpMethod, RestClient.RequestBodyUriSpec spec) {
+		public DefaultRequestHeadersBodyUriSpec(HttpMethod httpMethod, RestClient.RequestBodyUriSpec spec) {
 			this.httpMethod = httpMethod;
 			this.spec = spec;
 		}
@@ -171,11 +171,11 @@ class DefaultVaultClient implements VaultClient {
 
 	private class DefaultResponseSpec implements ResponseSpec {
 
-		private final DefaultRequestBodyUriSpec requestHeadersSpec;
+		private final DefaultRequestHeadersBodyUriSpec requestHeadersSpec;
 
 		private final RestClient.ResponseSpec retrieve;
 
-		DefaultResponseSpec(DefaultRequestBodyUriSpec requestHeadersSpec, RestClient.ResponseSpec retrieve) {
+		DefaultResponseSpec(DefaultRequestHeadersBodyUriSpec requestHeadersSpec, RestClient.ResponseSpec retrieve) {
 			this.requestHeadersSpec = requestHeadersSpec;
 			this.retrieve = retrieve;
 		}
