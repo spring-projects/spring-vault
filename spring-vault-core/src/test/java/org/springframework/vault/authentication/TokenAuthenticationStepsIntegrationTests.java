@@ -47,8 +47,8 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
-		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), this.client, this.client.getRestClient());
+		AuthenticationStepsExecutor operator = TestAuthenticationStepsExecutor
+			.create(TokenAuthentication.createAuthenticationSteps(token, true), this.client);
 
 		VaultToken login = operator.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -70,8 +70,8 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
-		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), this.client, this.client.getRestClient());
+		AuthenticationStepsExecutor operator = TestAuthenticationStepsExecutor
+			.create(TokenAuthentication.createAuthenticationSteps(token, true), this.client);
 
 		operator.login();
 		assertThatExceptionOfType(VaultException.class).isThrownBy(operator::login);

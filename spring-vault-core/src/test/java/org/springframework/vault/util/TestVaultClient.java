@@ -25,9 +25,12 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
+import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.web.client.RestClient;
 
 /**
  * Utility to create {@link VaultClient} instances for testing.
@@ -37,6 +40,12 @@ import org.springframework.vault.support.SslConfiguration;
 public interface TestVaultClient extends VaultClient {
 
 	AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<>();
+
+	/**
+	 * Return the underlying {@link RestClient}.
+	 * @return the underlying {@link RestClient}.
+	 */
+	RestClient getRestClient();
 
 	/**
 	 * Create a {@link MockVaultClient} bound to {@link MockRestServiceServer}.
@@ -111,7 +120,12 @@ public interface TestVaultClient extends VaultClient {
 			.requestFactory(clientHttpRequestFactory)
 			.endpoint(Settings.TEST_VAULT_ENDPOINT);
 		builderConsumer.accept(builder);
-		return new DefaultTestVaultClient(builder.build());
+
+		RestClient restClient = VaultClients.createRestClient(
+				SimpleVaultEndpointProvider.of(Settings.TEST_VAULT_ENDPOINT), clientHttpRequestFactory, rbc -> {
+				});
+
+		return new DefaultTestVaultClient(builder.build(), restClient);
 	}
 
 	/**

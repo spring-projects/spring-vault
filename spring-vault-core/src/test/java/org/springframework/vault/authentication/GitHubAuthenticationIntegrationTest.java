@@ -95,7 +95,7 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 
 		AuthenticationSteps steps = GitHubAuthentication.createAuthenticationSteps(options);
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, client, client.getRestClient());
+		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor.create(steps, client);
 		VaultToken loginToken = executor.login();
 
 		assertThat(loginToken.getToken()).isNotNull();

@@ -34,10 +34,13 @@ public class MockVaultClient implements TestVaultClient {
 
 	private final VaultClient client;
 
+	private final RestClient restClient;
+
 	private final MockRestServiceServer mockRest;
 
-	private MockVaultClient(VaultClient client, MockRestServiceServer mockRest) {
+	private MockVaultClient(VaultClient client, RestClient restClient, MockRestServiceServer mockRest) {
 		this.client = client;
+		this.restClient = restClient;
 		this.mockRest = mockRest;
 	}
 
@@ -60,13 +63,15 @@ public class MockVaultClient implements TestVaultClient {
 	public static MockVaultClient create(Consumer<VaultClient.Builder> builderConsumer) {
 
 		AtomicReference<MockRestServiceServer> serverRef = new AtomicReference<>();
+		AtomicReference<RestClient> restClientRef = new AtomicReference<>();
 		Builder builder = VaultClient.builder().configureRestClient(it -> {
 			serverRef.set(MockRestServiceServer.bindTo(it).build());
+			restClientRef.set(it.build());
 		});
 		builderConsumer.accept(builder);
 		VaultClient client = builder.build();
 
-		return new MockVaultClient(client, serverRef.get());
+		return new MockVaultClient(client, restClientRef.get(), serverRef.get());
 	}
 
 	@Override
@@ -99,13 +104,8 @@ public class MockVaultClient implements TestVaultClient {
 		return client.mutate();
 	}
 
-	@Override
 	public RestClient getRestClient() {
-		return client.getRestClient();
-	}
-
-	public MockRestServiceServer mockRest() {
-		return mockRest;
+		return restClient;
 	}
 
 	public ResponseActions expect(RequestMatcher requestMatcher) {

@@ -23,8 +23,11 @@ class DefaultTestVaultClient implements TestVaultClient {
 
 	private final VaultClient vaultClient;
 
-	DefaultTestVaultClient(VaultClient vaultClient) {
+	private final RestClient restClient;
+
+	DefaultTestVaultClient(VaultClient vaultClient, RestClient restClient) {
 		this.vaultClient = vaultClient;
+		this.restClient = restClient;
 	}
 
 	@Override
@@ -57,9 +60,8 @@ class DefaultTestVaultClient implements TestVaultClient {
 		return vaultClient.mutate();
 	}
 
-	@Override
 	public RestClient getRestClient() {
-		return vaultClient.getRestClient();
+		return restClient;
 	}
 
 }

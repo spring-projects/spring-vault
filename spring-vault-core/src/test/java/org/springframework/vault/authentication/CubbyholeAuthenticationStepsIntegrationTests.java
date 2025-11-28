@@ -48,8 +48,8 @@ class CubbyholeAuthenticationStepsIntegrationTests extends CubbyholeAuthenticati
 
 		TestVaultClient client = TestVaultClient.create();
 
-		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				CubbyholeAuthentication.createAuthenticationSteps(options), client, client.getRestClient());
+		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
+			.create(CubbyholeAuthentication.createAuthenticationSteps(options), client);
 
 		VaultToken login = executor.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());

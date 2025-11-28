@@ -58,11 +58,6 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 	}
 
 	@Override
-	public RestClient getRestClient() {
-		return vaultClient.getRestClient();
-	}
-
-	@Override
 	public RequestHeadersPathSpec<?> get() {
 		return vaultClient.get();
 	}

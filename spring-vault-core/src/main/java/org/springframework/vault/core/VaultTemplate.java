@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.core;
 
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		this.dedicatedSessionManager = true;
 
-		this.statelessTemplate = new RestClientOperationsWrapper(client.getRestClient());
+		this.statelessTemplate = new RestClientOperationsWrapper(client);
 		this.statelessClient = client;
 		this.sessionTemplate = this.statelessTemplate;
 	}
@@ -152,10 +153,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
 
-		this.statelessTemplate = new RestClientOperationsWrapper(client.getRestClient());
+		this.statelessTemplate = new RestClientOperationsWrapper(client);
 		this.statelessClient = client;
-		this.sessionTemplate = new RestClientOperationsWrapper(
-				this.sessionClient.getRestClient().mutate().requestInterceptor(getSessionInterceptor()).build());
+		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient);
 	}
 
 	/**
@@ -342,7 +342,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private static VaultClient createVaultClient(RestOperations restOperations) {
 
 		if (restOperations instanceof RestClientOperationsWrapper wrapper) {
-			return VaultClient.builder(wrapper.restClient()).build();
+			return wrapper.vaultClient();
 		}
 
 		return VaultClient.builder((RestTemplate) restOperations).build();
@@ -756,11 +756,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			return statelessClient.mutate();
 		}
 
-		@Override
-		public RestClient getRestClient() {
-			return statelessClient.getRestClient();
-		}
-
 	}
 
 	static class SessionRequestHeadersPathSpec
@@ -784,6 +779,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		@Override
 		public SessionRequestHeadersPathSpec path(String path, Map<String, ?> pathVariables) {
 			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public SessionRequestHeadersPathSpec uri(URI uri) {
+			spec.uri(uri);
 			return this;
 		}
 
@@ -833,6 +834,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		@Override
 		public SessionRequestBodyHeadersPathSpec path(String path, Map<String, ?> pathVariables) {
 			spec.path(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public VaultClient.RequestBodySpec uri(URI uri) {
+			spec.uri(uri);
 			return this;
 		}
 

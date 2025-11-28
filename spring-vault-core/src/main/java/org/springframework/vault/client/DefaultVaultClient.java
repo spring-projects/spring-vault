@@ -15,6 +15,7 @@
  */
 package org.springframework.vault.client;
 
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -91,11 +92,6 @@ class DefaultVaultClient implements VaultClient {
 	}
 
 	@Override
-	public RestClient getRestClient() {
-		return this.client;
-	}
-
-	@Override
 	public Builder mutate() {
 		return builder;
 	}
@@ -129,6 +125,21 @@ class DefaultVaultClient implements VaultClient {
 			this.path = path;
 			this.uriSpec = uriBuilderFactory != null ? this.spec.uri(uriBuilderFactory.expand(path, pathVariables))
 					: this.spec.uri(path, pathVariables);
+			return this;
+		}
+
+		@Override
+		public RequestBodySpec uri(URI uri) {
+			this.path = uri.toString();
+
+			if (uri.isAbsolute() || uriBuilderFactory == null) {
+				this.uriSpec = this.spec.uri(uri);
+			}
+			else {
+				URI baseUri = uriBuilderFactory.expand("");
+				this.uriSpec = this.spec.uri(baseUri.resolve(uri));
+			}
+
 			return this;
 		}
 
@@ -189,6 +200,7 @@ class DefaultVaultClient implements VaultClient {
 
 		@Override
 		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
+			retrieve.onStatus(errorHandler);
 			return this;
 		}
 

@@ -16,6 +16,7 @@
 package org.springframework.vault.client;
 
 import java.io.IOException;
+import java.net.URI;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -109,14 +110,6 @@ public interface VaultClient {
 	 * from this {@code VaultClient}.
 	 */
 	VaultClient.Builder mutate();
-
-	/**
-	 * Obtain the underlying {@link RestClient}. Use the underlying client for low-level
-	 * operations only and use it with caution with regard to URL expansion and request
-	 * interceptors.
-	 * @return the underlying rest client.
-	 */
-	RestClient getRestClient();
 
 	// Static factory methods
 
@@ -327,6 +320,16 @@ public interface VaultClient {
 		 * template.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
+
+		/**
+		 * Specify the URI using a fully constructed {@link URI}.
+		 * <p>
+		 * If the given URI is absolute, it is used as given. If it is a relative URI, the
+		 * {@link UriBuilderFactory} configured for the client (for example, with a base
+		 * URI) will be used to {@linkplain URI#resolve(URI) resolve} the given URI
+		 * against.
+		 */
+		S uri(URI uri);
 
 	}
 
