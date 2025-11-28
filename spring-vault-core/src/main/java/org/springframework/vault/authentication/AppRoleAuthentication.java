@@ -69,7 +69,10 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	 * and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated use
+	 * {@link #AppRoleAuthentication(AppRoleAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestOperations restOperations) {
 		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
@@ -80,7 +83,9 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated use constructor accepting {@link VaultClient} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

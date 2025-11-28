@@ -18,8 +18,6 @@ package org.springframework.vault.authentication;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpEntity;
@@ -73,7 +71,11 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * Create a new {@link AzureMsiAuthentication}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations restOperations) {
 		this(options, restOperations, restOperations);
 	}
@@ -85,7 +87,11 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param azureMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations azureMetadataRestOperations) {
 		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
@@ -97,7 +103,11 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -109,7 +119,12 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param azureMetadataClient must not be {@literal null}.
+	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient vaultClient,
 			RestClient azureMetadataClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), ClientAdapter.from(azureMetadataClient));

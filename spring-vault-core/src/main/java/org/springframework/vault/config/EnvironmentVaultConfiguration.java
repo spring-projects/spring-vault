@@ -41,10 +41,12 @@ import org.springframework.vault.authentication.AwsEc2AuthenticationOptions.AwsE
 import org.springframework.vault.authentication.AzureMsiAuthenticationOptions.AzureMsiAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.CubbyholeAuthenticationOptions.CubbyholeAuthenticationOptionsBuilder;
 import org.springframework.vault.authentication.KubernetesAuthenticationOptions.KubernetesAuthenticationOptionsBuilder;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -176,8 +178,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	private @Nullable RestOperations cachedRestOperations;
 
+	private @Nullable RestClient cachedRestClient;
+
+	private @Nullable VaultClient cachedVaultClient;
+
 	private @Nullable ApplicationContext applicationContext;
 
+	/*
+	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 */
+	@Deprecated(since = "4.1")
 	@Override
 	public RestOperations restOperations() {
 
@@ -187,6 +197,16 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 		this.cachedRestOperations = super.restOperations();
 		return this.cachedRestOperations;
+	}
+
+	RestClient restClient() {
+
+		if (this.cachedRestClient != null) {
+			return this.cachedRestClient;
+		}
+
+		this.cachedRestClient = RestClient.create(getRestTemplateFactory().create());
+		return this.cachedRestClient;
 	}
 
 	@Override
@@ -256,7 +276,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			case AWS_EC2 -> awsEc2Authentication();
 			case AWS_IAM -> awsIamAuthentication();
 			case AZURE -> azureMsiAuthentication();
-			case CERT -> new ClientCertificateAuthentication(restOperations());
+			case CERT -> new ClientCertificateAuthentication(vaultClient());
 			case CUBBYHOLE -> cubbyholeAuthentication();
 			case KUBERNETES -> kubeAuthentication();
 		};
@@ -291,7 +311,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			builder = builder.secretId(SecretId.provided(secretId));
 		}
 
-		return new AppRoleAuthentication(builder.build(), restOperations());
+		return new AppRoleAuthentication(builder.build(), vaultClient());
 	}
 
 	protected ClientAuthentication awsEc2Authentication() {
@@ -323,7 +343,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			builder.identityDocumentUri(URI.create(identityDocument));
 		}
 
-		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
+		return new AwsEc2Authentication(builder.build(), vaultClient(), restClient());
 	}
 
 	protected ClientAuthentication awsIamAuthentication() {
@@ -332,7 +352,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		Assert.isTrue(StringUtils.hasText(role),
 				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
 
-		return AwsIam.doCreateIamAuthentication(role, restOperations());
+		return AwsIam.doCreateIamAuthentication(role, vaultClient());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
@@ -352,7 +372,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			.instanceMetadataUri(metadataServiceUri)
 			.identityTokenServiceUri(identityTokenServiceUri);
 
-		return new AzureMsiAuthentication(builder.build(), restOperations());
+		return new AzureMsiAuthentication(builder.build(), vaultClient(), restClient());
 	}
 
 	protected ClientAuthentication cubbyholeAuthentication() {
@@ -364,7 +384,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			.wrapped()
 			.initialToken(VaultToken.of(token));
 
-		return new CubbyholeAuthentication(builder.build(), restOperations());
+		return new CubbyholeAuthentication(builder.build(), vaultClient());
 	}
 
 	protected ClientAuthentication kubeAuthentication() {
@@ -384,7 +404,7 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 			.jwtSupplier(jwtSupplier)
 			.path(path);
 
-		return new KubernetesAuthentication(builder.build(), restOperations());
+		return new KubernetesAuthentication(builder.build(), vaultClient());
 	}
 
 	private List<String> getPropertyAsList(String key) {
@@ -424,14 +444,14 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	static class AwsIam {
 
-		static ClientAuthentication doCreateIamAuthentication(String role, RestOperations restOperations) {
+		static ClientAuthentication doCreateIamAuthentication(String role, VaultClient vaultClient) {
 
 			AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
 				.builder()
 				.role(role)
 				.credentialsProvider(DefaultCredentialsProvider.create());
 
-			return new AwsIamAuthentication(builder.build(), restOperations);
+			return new AwsIamAuthentication(builder.build(), vaultClient);
 		}
 
 	}

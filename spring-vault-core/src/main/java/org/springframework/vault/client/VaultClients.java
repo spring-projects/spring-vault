@@ -64,7 +64,9 @@ public class VaultClients {
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
 		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint), requestFactory);
 	}
@@ -84,7 +86,9 @@ public class VaultClients {
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @since 1.1
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
@@ -109,7 +113,7 @@ public class VaultClients {
 	 * Requires Jackson for Object-to-JSON mapping.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
-	 * @return the {@link RestTemplate}.
+	 * @return the {@link RestClient}.
 	 * @since 4.0
 	 */
 	public static RestClient createRestClient(VaultEndpointProvider endpointProvider,
@@ -119,6 +123,34 @@ public class VaultClients {
 			.requestFactory(requestFactory)
 			.bufferContent((uri, httpMethod) -> true)
 			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
+			.configureMessageConverters(VaultClients::configureConverters);
+
+		builderCustomizer.accept(builder);
+
+		return builder.build();
+	}
+
+	/**
+	 * Create a {@link org.springframework.web.client.RestClient} configured with
+	 * {@link ClientHttpRequestFactory}. In contrast to
+	 * {@link #createRestClient(VaultEndpointProvider, ClientHttpRequestFactory, Consumer)},
+	 * the client does <b>not</b> accept relative URIs for Vault access.
+	 * {@link RestClient} is configured to enforce serialization to a byte array prior
+	 * continuing the request. Eager serialization leads to a known request body size that
+	 * is required to send a {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH}
+	 * request header.
+	 * <p>
+	 * Requires Jackson for Object-to-JSON mapping.
+	 * @param requestFactory must not be {@literal null}.
+	 * @return the {@link RestClient}.
+	 * @since 4.1
+	 */
+	public static RestClient createRestClient(ClientHttpRequestFactory requestFactory,
+			Consumer<RestClient.Builder> builderCustomizer) {
+
+		RestClient.Builder builder = RestClient.builder()
+			.requestFactory(requestFactory)
+			.bufferContent((uri, httpMethod) -> true)
 			.configureMessageConverters(VaultClients::configureConverters);
 
 		builderCustomizer.accept(builder);
@@ -146,7 +178,9 @@ public class VaultClients {
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
+	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
+	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate() {
 
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(3);
@@ -169,7 +203,11 @@ public class VaultClients {
 	 * {@link RestTemplate}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
 	 * @since 2.2
+	 * @deprecated since 4.1 in favor of
+	 * {@link VaultClient.Builder#defaultNamespace(String)} and
+	 * {@link org.springframework.vault.client.VaultClient.RequestHeadersSpec#namespace(String)}.
 	 */
+	@Deprecated(since = "4.1")
 	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
 
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");

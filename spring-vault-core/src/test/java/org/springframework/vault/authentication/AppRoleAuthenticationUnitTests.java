@@ -27,6 +27,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
@@ -47,7 +48,7 @@ class AppRoleAuthenticationUnitTests {
 
 	ObjectMapper OBJECT_MAPPER = ObjectMapperSupplier.get();
 
-	RestTemplate restTemplate;
+	VaultClient client;
 
 	MockRestServiceServer mockRest;
 
@@ -58,7 +59,7 @@ class AppRoleAuthenticationUnitTests {
 		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
 		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = VaultClient.builder(restTemplate).build();
 	}
 
 	@Test
@@ -76,7 +77,7 @@ class AppRoleAuthenticationUnitTests {
 			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.client);
 
 		VaultToken login = sut.login();
 
@@ -112,7 +113,7 @@ class AppRoleAuthenticationUnitTests {
 			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.client);
 
 		VaultToken login = sut.login();
 
@@ -146,7 +147,7 @@ class AppRoleAuthenticationUnitTests {
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
 						+ "}"));
 
-		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.restTemplate);
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, this.client);
 
 		VaultToken login = sut.login();
 
@@ -167,7 +168,7 @@ class AppRoleAuthenticationUnitTests {
 			.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new AppRoleAuthentication(options, this.restTemplate).login());
+			.isThrownBy(() -> new AppRoleAuthentication(options, this.client).login());
 	}
 
 	@Test
@@ -200,7 +201,7 @@ class AppRoleAuthenticationUnitTests {
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
 						+ "}"));
 
-		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.restTemplate);
+		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.client);
 
 		VaultToken login = auth.login();
 
@@ -238,7 +239,7 @@ class AppRoleAuthenticationUnitTests {
 				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\": 10, \"renewable\": true}"
 						+ "}"));
 
-		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.restTemplate);
+		AppRoleAuthentication auth = new AppRoleAuthentication(options, this.client);
 
 		VaultToken login = auth.login();
 

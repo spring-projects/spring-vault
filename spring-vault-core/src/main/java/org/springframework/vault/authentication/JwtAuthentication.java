@@ -53,7 +53,10 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #JwtAuthentication(JwtAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public JwtAuthentication(JwtAuthenticationOptions options, RestOperations restOperations) {
 		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
@@ -64,7 +67,10 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #JwtAuthentication(JwtAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public JwtAuthentication(JwtAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

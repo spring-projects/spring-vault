@@ -20,7 +20,6 @@ import java.util.Map;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -50,7 +49,10 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	 * decorate and {@link RestOperations}.
 	 * @param delegate must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #LoginTokenAdapter(ClientAuthentication, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public LoginTokenAdapter(ClientAuthentication delegate, RestOperations restOperations) {
 
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
@@ -65,8 +67,9 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	 * decorate and {@link ClientAdapter}.
 	 * @param delegate must not be {@literal null}.
 	 * @param client must not be {@literal null}.
+	 * @since 4.1
 	 */
-	LoginTokenAdapter(ClientAuthentication delegate, VaultClient client) {
+	public LoginTokenAdapter(ClientAuthentication delegate, VaultClient client) {
 
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
 		Assert.notNull(client, "ClientAdapter must not be null");
@@ -99,9 +102,14 @@ public class LoginTokenAdapter implements ClientAuthentication {
 			return response.getRequiredData();
 		}
 		catch (VaultException e) {
+
 			if (e.getCause() instanceof HttpStatusCodeException hse) {
 				throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(hse.getStatusCode(),
 						VaultResponses.getError(hse.getResponseBodyAsString())), e);
+			}
+
+			if (e.getCause() instanceof RestClientException rce) {
+				throw new VaultTokenLookupException("Token self-lookup failed", rce);
 			}
 			throw e;
 		}

@@ -18,9 +18,6 @@ package org.springframework.vault.authentication;
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
@@ -43,7 +40,10 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use {@link #ClientCertificateAuthentication(VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(RestOperations restOperations) {
 		this(ClientCertificateAuthenticationOptions.builder().build(), restOperations);
 	}
@@ -53,7 +53,11 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 2.3
+	 * @deprecated since 4.1, use
+	 * {@link #ClientCertificateAuthentication(ClientCertificateAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options,
 			RestOperations restOperations) {
 		this(options, ClientAdapter.from(restOperations).vaultClient());
@@ -62,7 +66,10 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestClient}.
 	 * @param client must not be {@literal null}.
+	 * @deprecated since 4.1, use {@link #ClientCertificateAuthentication(VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(RestClient client) {
 		this(ClientCertificateAuthenticationOptions.builder().build(), client);
 	}
@@ -72,7 +79,11 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 2.3
+	 * @deprecated since 4.1, use
+	 * {@link #ClientCertificateAuthentication(ClientCertificateAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

@@ -66,7 +66,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	private final AwsEc2AuthenticationOptions options;
 
-	private final VaultLoginClient vaultClient;
+	private final VaultLoginClient loginClient;
 
 	private final ClientAdapter awsMetadataAdapter;
 
@@ -75,7 +75,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	/**
 	 * Create a new {@link AwsEc2Authentication}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(RestOperations vaultRestOperations) {
 		this(AwsEc2AuthenticationOptions.DEFAULT, vaultRestOperations, vaultRestOperations);
 	}
@@ -87,7 +91,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param awsMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations awsMetadataRestOperations) {
 		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
@@ -98,7 +106,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * Create a new {@link AwsEc2Authentication}.
 	 * @param restClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(RestClient restClient) {
 		this(AwsEc2AuthenticationOptions.DEFAULT, restClient, restClient);
 	}
@@ -111,7 +123,11 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * @param vaultClient must not be {@literal null}.
 	 * @param awsMetadataClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestClient vaultClient,
 			RestClient awsMetadataClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), awsMetadataClient);
@@ -139,7 +155,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
 
 		this.options = options;
-		this.vaultClient = VaultLoginClient.create(vaultClient, "AWS-EC2");
+		this.loginClient = VaultLoginClient.create(vaultClient, "AWS-EC2");
 		this.awsMetadataAdapter = awsMetadataClient;
 	}
 
@@ -222,7 +238,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 		Map<String, String> login = getEc2Login();
 
-		VaultResponseSupport<LoginToken> token = this.vaultClient.loginAt(this.options.getPath())
+		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
 			.using(login)
 			.retrieve()
 			.body();

@@ -64,7 +64,11 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AuthenticationStepsExecutor(AuthenticationSteps, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
 		this(steps, ClientAdapter.from(restOperations));
 	}
@@ -74,7 +78,11 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param client must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AuthenticationStepsExecutor(AuthenticationSteps, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client) {
 		this(steps, ClientAdapter.from(client));
 	}

@@ -18,9 +18,6 @@ package org.springframework.vault.authentication;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
@@ -56,7 +53,11 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * {@link UsernamePasswordAuthenticationOptions} and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options,
 			RestOperations restOperations) {
 		this(options, ClientAdapter.from(restOperations).vaultClient());
@@ -68,7 +69,11 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

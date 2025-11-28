@@ -30,7 +30,7 @@ import org.springframework.web.util.UriBuilderFactory;
 
 /**
  * Extension to {@link VaultClient} to perform Vault HTTP login requests, exposing a
- * fluent, synchronous API over * underlying {@link RestClient}.
+ * fluent, synchronous API.
  *
  * @author Mark Paluch
  * @since 4.1

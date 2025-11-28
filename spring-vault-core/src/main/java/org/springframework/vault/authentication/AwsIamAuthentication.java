@@ -90,7 +90,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestOperations vaultRestOperations) {
 		this(options, ClientAdapter.from(vaultRestOperations).vaultClient());
 	}
@@ -100,7 +103,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link RestClient}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestClient vaultClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient());
 	}

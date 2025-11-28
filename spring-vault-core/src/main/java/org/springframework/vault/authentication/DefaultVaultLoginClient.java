@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpMethod;
-import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponse;
@@ -30,7 +29,10 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.RestClient;
 
 /**
+ * Default implementation of {@link VaultLoginClient}.
+ *
  * @author Mark Paluch
+ * @since 4.1
  */
 class DefaultVaultLoginClient implements VaultLoginClient {
 

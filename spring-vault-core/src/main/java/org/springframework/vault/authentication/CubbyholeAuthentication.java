@@ -145,7 +145,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * {@link CubbyholeAuthenticationOptions} and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #CubbyholeAuthentication(CubbyholeAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestOperations restOperations) {
 		this(options, ClientAdapter.from(restOperations).vaultClient());
 	}
@@ -156,7 +160,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #CubbyholeAuthentication(CubbyholeAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}
@@ -229,10 +237,10 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
 			return this.loginClient.method(unwrapMethod)
-					.path(url)
-					.headers(getRequestHeaders(options))
-					.retrieve()
-					.requiredBody();
+				.path(url)
+				.headers(getRequestHeaders(options))
+				.retrieve()
+				.requiredBody();
 		}
 		catch (VaultException e) {
 

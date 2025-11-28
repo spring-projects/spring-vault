@@ -20,7 +20,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.vault.client.VaultClient;
 
 /**
+ * Default implementation of {@link VaultLoginClient.Builder}.
+ *
  * @author Mark Paluch
+ * @since 4.1
  */
 class DefaultVaultLoginClientBuilder implements VaultLoginClient.Builder {
 

@@ -67,7 +67,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations) {
 		this(options, vaultRestOperations, vaultRestOperations);
 	}
@@ -79,7 +83,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param googleMetadataRestOperations must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations googleMetadataRestOperations) {
 
@@ -99,7 +107,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -112,7 +124,11 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param vaultClient must not be {@literal null}.
 	 * @param googleMetadataClient must not be {@literal null}.
 	 * @since 4.0
+	 * @deprecated since 4.1, use
+	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
 

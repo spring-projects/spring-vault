@@ -24,9 +24,11 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
@@ -77,9 +79,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private final RestOperations sessionTemplate;
 
-	private final VaultClient sessionClient;
+	private final VaultClient sessionClient = new SessionVaultClient();
 
-	private @Nullable SessionManager sessionManager;
+	private SessionManager sessionManager = NoSessionManager.INSTANCE;
 
 	private final boolean dedicatedSessionManager;
 
@@ -92,7 +94,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 2.2.1
 	 */
 	public VaultTemplate(VaultEndpoint vaultEndpoint) {
-		this(SimpleVaultEndpointProvider.of(vaultEndpoint), new SimpleClientHttpRequestFactory());
+		this(SimpleVaultEndpointProvider.of(vaultEndpoint), new JdkClientHttpRequestFactory());
 	}
 
 	/**
@@ -115,7 +117,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 		this.statelessClient = createVaultClient(this.statelessTemplate);
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
-		this.sessionClient = createVaultClient(this.sessionTemplate);
 	}
 
 	/**
@@ -127,13 +128,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.notNull(client, "VaultClient must not be null");
 
-		this.sessionManager = NoSessionManager.INSTANCE;
 		this.dedicatedSessionManager = true;
 
 		this.statelessTemplate = new RestClientOperationsWrapper(client.getRestClient());
 		this.statelessClient = client;
 		this.sessionTemplate = this.statelessTemplate;
-		this.sessionClient = client;
 	}
 
 	/**
@@ -153,10 +152,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		this.statelessTemplate = new RestClientOperationsWrapper(client.getRestClient());
 		this.statelessClient = client;
-		this.sessionClient = client.mutate().configureRestClient(builder -> {
-			builder.requestInterceptor(getSessionInterceptor());
-		}).build();
-		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient.getRestClient());
+		this.sessionTemplate = new RestClientOperationsWrapper(
+				this.sessionClient.getRestClient().mutate().requestInterceptor(getSessionInterceptor()).build());
 	}
 
 	/**
@@ -207,7 +204,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.statelessTemplate = restTemplate;
 		this.statelessClient = VaultClient.builder(restTemplate).build();
 		this.sessionTemplate = restTemplate;
-		this.sessionClient = statelessClient;
 	}
 
 	/**
@@ -231,7 +227,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 		this.statelessClient = createVaultClient(this.statelessTemplate);
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
-		this.sessionClient = createVaultClient(this.sessionTemplate);
 	}
 
 	/**
@@ -248,12 +243,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		RestTemplate restTemplate = restTemplateBuilder.build();
 
-		this.sessionManager = NoSessionManager.INSTANCE;
 		this.dedicatedSessionManager = false;
 		this.statelessTemplate = restTemplate;
 		this.sessionTemplate = restTemplate;
 		this.statelessClient = createVaultClient(restTemplate);
-		this.sessionClient = this.statelessClient;
 	}
 
 	/**
@@ -270,12 +263,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		RestTemplate restTemplate = RestTemplateBuilder.builder(restClientBuilder).build();
 
-		this.sessionManager = NoSessionManager.INSTANCE;
 		this.dedicatedSessionManager = false;
 		this.statelessTemplate = restTemplate;
 		this.sessionTemplate = restTemplate;
 		this.statelessClient = VaultClient.builder(restTemplate).build();
-		this.sessionClient = this.statelessClient;
 	}
 
 	/**
@@ -300,7 +291,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		RestTemplate sessionTemplate = restTemplateBuilder.build();
 		sessionTemplate.getInterceptors().add(getSessionInterceptor());
 		this.sessionTemplate = sessionTemplate;
-		this.sessionClient = createVaultClient(sessionTemplate);
 	}
 
 	/**
@@ -329,17 +319,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			restTemplate.getInterceptors().add(sessionInterceptor);
 		}).build();
 
-		this.sessionClient = createVaultClient(this.sessionTemplate);
 	}
 
 	private VaultTemplate(RestTemplate statelessTemplate, RestTemplate sessionTemplate) {
 
-		this.sessionManager = NoSessionManager.INSTANCE;
 		this.dedicatedSessionManager = false;
 		this.statelessTemplate = statelessTemplate;
 		this.statelessClient = createVaultClient(statelessTemplate);
 		this.sessionTemplate = sessionTemplate;
-		this.sessionClient = createVaultClient(sessionTemplate);
 	}
 
 	private static VaultClient createVaultClient(RestOperations restOperations) {
@@ -644,12 +631,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.notNull(clientCallback, "Client callback must not be null");
 
-		try {
-			return clientCallback.doWithVaultClient(this.statelessClient);
-		}
-		catch (HttpStatusCodeException e) {
-			throw VaultResponses.buildException(e);
-		}
+		return clientCallback.doWithVaultClient(this.statelessClient);
 	}
 
 	@Override
@@ -670,16 +652,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");
 
-		try {
-			return sessionCallback.doWithVaultClient(this.sessionClient);
-		}
-		catch (HttpStatusCodeException e) {
-			throw VaultResponses.buildException(e);
-		}
+		return sessionCallback.doWithVaultClient(this.sessionClient);
 	}
 
 	@SuppressWarnings("NullAway")
-	private <T extends @Nullable Object> T doRead(String path, Class<T> responseType) {
+	private <T> @Nullable T doRead(String path, Class<T> responseType) {
 
 		return doWithSessionClient((client) -> {
 
@@ -704,6 +681,73 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		@Override
 		public VaultToken getSessionToken() {
 			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	/**
+	 * Session-bound {@link VaultClient} implementation.
+	 */
+	class SessionVaultClient implements VaultClient {
+
+		@Override
+		public RequestHeadersPathSpec<?> get() {
+
+			if (sessionManager == NoSessionManager.INSTANCE) {
+				return statelessClient.get();
+			}
+
+			return (RequestHeadersPathSpec<?>) statelessClient.get().token(sessionManager.getSessionToken());
+		}
+
+		@Override
+		public RequestBodyPathSpec post() {
+
+			if (sessionManager == NoSessionManager.INSTANCE) {
+				return statelessClient.post();
+			}
+
+			return (RequestBodyPathSpec) statelessClient.post().token(sessionManager.getSessionToken());
+		}
+
+		@Override
+		public RequestBodyPathSpec put() {
+
+			if (sessionManager == NoSessionManager.INSTANCE) {
+				return statelessClient.put();
+			}
+
+			return (RequestBodyPathSpec) statelessClient.put().token(sessionManager.getSessionToken());
+		}
+
+		@Override
+		public RequestHeadersPathSpec<?> delete() {
+
+			if (sessionManager == NoSessionManager.INSTANCE) {
+				return statelessClient.delete();
+			}
+
+			return (RequestHeadersPathSpec<?>) statelessClient.delete().token(sessionManager.getSessionToken());
+		}
+
+		@Override
+		public RequestBodyPathSpec method(HttpMethod method) {
+
+			if (sessionManager == NoSessionManager.INSTANCE) {
+				return statelessClient.method(method);
+			}
+
+			return (RequestBodyPathSpec) statelessClient.method(method).token(sessionManager.getSessionToken());
+		}
+
+		@Override
+		public Builder mutate() {
+			return statelessClient.mutate();
+		}
+
+		@Override
+		public RestClient getRestClient() {
+			return statelessClient.getRestClient();
 		}
 
 	}

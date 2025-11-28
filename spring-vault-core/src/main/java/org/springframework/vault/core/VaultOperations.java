@@ -42,7 +42,7 @@ import org.springframework.web.client.RestClientException;
  *
  * @author Mark Paluch
  * @author Lauren Voswinkel
- * @see org.springframework.web.client.RestClient
+ * @see org.springframework.vault.client.VaultClient
  * @see org.springframework.vault.core.VaultTemplate
  * @see org.springframework.vault.core.VaultTokenOperations
  * @see org.springframework.vault.authentication.SessionManager
@@ -174,7 +174,7 @@ public interface VaultOperations {
 
 		VaultResponseSupport<T> response = read(path, responseType);
 
-		if (response == null) {
+		if (response == null || response.getData() == null) {
 			throw new SecretNotFoundException("No data found at '%s'".formatted(path), path);
 		}
 
@@ -249,7 +249,9 @@ public interface VaultOperations {
 
 	/**
 	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
-	 * an authenticated session.
+	 * an authenticated session. Operations without a session manager or
+	 * {@code ClientAuthentication} do not attach a session token and behave like
+	 * {@link #doWithVault(RestOperationsCallback)}.
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
