@@ -18,9 +18,7 @@ package org.springframework.vault.authentication;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.support.VaultToken;
-import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -31,7 +29,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAuthenticationIntegrationTestBase {
 
-	RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+	TestVaultClient client = TestVaultClient.create();
 
 	@Test
 	void shouldLoginSuccessfully() {
@@ -41,7 +39,7 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 			.password(password)
 			.build();
 
-		UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, restTemplate);
+		UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, client);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -56,7 +54,7 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 			.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
-				UsernamePasswordAuthentication.createAuthenticationSteps(options), restTemplate);
+				UsernamePasswordAuthentication.createAuthenticationSteps(options), client, client.getRestClient());
 		VaultToken login = executor.login();
 
 		assertThat(login.getToken()).isNotEmpty();

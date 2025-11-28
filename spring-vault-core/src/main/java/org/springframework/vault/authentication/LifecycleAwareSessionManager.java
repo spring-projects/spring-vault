@@ -298,7 +298,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 
 		Assert.notNull(vaultResponse, "VaultResponse must not be null");
 
-		LoginToken renewed = LoginTokenUtil.from(vaultResponse.getAuth());
+		LoginToken renewed = LoginToken.from(vaultResponse.getAuth());
 
 		if (isExpired(renewed)) {
 

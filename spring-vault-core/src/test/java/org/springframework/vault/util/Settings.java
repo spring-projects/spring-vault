@@ -18,6 +18,7 @@ package org.springframework.vault.util;
 import java.io.File;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 
@@ -27,6 +28,8 @@ import org.springframework.vault.support.VaultToken;
  * @author Mark Paluch
  */
 public class Settings {
+
+	public static final VaultEndpoint TEST_VAULT_ENDPOINT = new VaultEndpoint();
 
 	/**
 	 * @return the vault properties.

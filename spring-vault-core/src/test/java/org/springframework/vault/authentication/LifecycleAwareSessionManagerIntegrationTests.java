@@ -60,7 +60,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		assertThat(sessionManager.getSessionToken()).isSameAs(loginToken);
 	}
@@ -84,7 +84,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate()) {
+				this.taskScheduler, prepare().getVaultClient()) {
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -106,7 +106,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		sessionManager.getSessionToken();
 		sessionManager.revoke();
@@ -133,7 +133,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		TokenAuthentication tokenAuthentication = new TokenAuthentication(loginToken);
 
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
-				this.taskScheduler, prepare().getRestTemplate());
+				this.taskScheduler, prepare().getVaultClient());
 
 		sessionManager.getSessionToken();
 		sessionManager.destroy();

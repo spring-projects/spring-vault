@@ -48,6 +48,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
 import static io.grpc.stub.ServerCalls.*;
@@ -60,12 +61,11 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Unit tests for {@link GcpIamCredentialsAuthentication}.
  *
  * @author Andreas Gebauer
+ * @author Mark Paluch
  */
 class GcpIamCredentialsAuthenticationUnitTests {
 
-	RestTemplate restTemplate;
-
-	MockRestServiceServer mockRest;
+	MockVaultClient client;
 
 	Server server;
 
@@ -76,11 +76,10 @@ class GcpIamCredentialsAuthenticationUnitTests {
 	@BeforeEach
 	void before() throws IOException {
 
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
+		RestTemplate client = new RestTemplate();
+		client.setUriTemplateHandler(new VaultClients.PrefixAwareUriBuilderFactory());
 
-		this.mockRest = MockRestServiceServer.createServer(restTemplate);
-		this.restTemplate = restTemplate;
+		this.client = MockVaultClient.create();
 
 		String serverName = InProcessServerBuilder.generateName();
 		this.server = InProcessServerBuilder.forName(serverName)
@@ -116,7 +115,7 @@ class GcpIamCredentialsAuthenticationUnitTests {
 			responseObserver.onCompleted();
 		});
 
-		this.mockRest.expect(requestTo("/auth/gcp/login"))
+		this.client.expect(requestTo("auth/gcp/login"))
 			.andExpect(method(HttpMethod.POST))
 			.andExpect(jsonPath("$.role").value("dev-role"))
 			.andExpect(jsonPath("$.jwt").value("my-jwt"))
@@ -140,7 +139,7 @@ class GcpIamCredentialsAuthenticationUnitTests {
 			.role("dev-role")
 			.credentials(credential)
 			.build();
-		GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options, this.restTemplate,
+		GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options, this.client,
 				FixedTransportChannelProvider.create(GrpcTransportChannel.create(managedChannel)));
 
 		VaultToken login = authentication.login();
@@ -170,7 +169,7 @@ class GcpIamCredentialsAuthenticationUnitTests {
 			.credentials(credential)
 			.build();
 
-		new GcpIamCredentialsAuthentication(options, this.restTemplate);
+		new GcpIamCredentialsAuthentication(options, this.client);
 	}
 
 }

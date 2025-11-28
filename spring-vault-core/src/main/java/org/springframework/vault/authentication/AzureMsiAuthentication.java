@@ -132,6 +132,17 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 	/**
 	 * Create a new {@link AzureMsiAuthentication} specifying
+	 * {@link AzureMsiAuthenticationOptions} and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, VaultClient vaultClient) {
+		this(options, vaultClient, ClientAdapter.from(RestClient.create()));
+	}
+
+	/**
+	 * Create a new {@link AzureMsiAuthentication} specifying
 	 * {@link AzureMsiAuthenticationOptions}, {@link VaultClient} and an
 	 * Azure-Metadata-specific {@link RestClient}.
 	 * @param options must not be {@literal null}.
@@ -232,7 +243,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getIdentityTokenServiceUri(),
 				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return (String) ResponseUtil.getRequiredBody(response).get("access_token");
+		return (String) AuthenticationUtil.getRequiredBody(response).get("access_token");
 	}
 
 	private AzureVmEnvironment getVmEnvironment() {
@@ -248,7 +259,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		ResponseEntity<Map> response = this.azureMetadataAdapter.exchange(this.options.getInstanceMetadataServiceUri(),
 				HttpMethod.GET, METADATA_HEADERS, Map.class);
 
-		return toAzureVmEnvironment(ResponseUtil.getRequiredBody(response));
+		return toAzureVmEnvironment(AuthenticationUtil.getRequiredBody(response));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

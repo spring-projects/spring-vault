@@ -11,4 +11,6 @@ Includes integrated object mapping between Vault responses and POJOs.
 * xref:vault/propertysource.adoc[`@VaultPropertySource`] support to mount Vault secret backends as property sources.
 * xref:vault/vault-repositories.adoc[Vault repositories] to interact with Vault as data source using Spring Data repositories.
 
-For most tasks, you will find yourself using `VaultTemplate` that leverages the rich communication functionality. `VaultTemplate` is the place to look for accessing functionality such as reading data from Vault or issuing administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to get a hold of the low-level API artifacts such as `RestTemplate`/`RestClient` to communicate directly with Vault.
+For most tasks, you will find yourself using `VaultTemplate` that leverages the rich communication functionality. `VaultTemplate` is the place to look for accessing functionality such as reading data from Vault or issuing administrative commands. `VaultTemplate` also provides callback methods so that it is easy for you to get a hold of the low-level API artifacts such as `RestTemplate` to communicate directly with Vault.
+
+`VaultTemplate` is built on top of javadoc:org.springframework.vault.client.VaultClient[] as low-level HTTP interface (internally using `RestClient`) providing a tailored fluent API towards Vault's functionality. `VaultClient` can be configured with javadoc:org.springframework.vault.client.VaultEndpoint[] for convenient usage with relative paths along with namespace support.

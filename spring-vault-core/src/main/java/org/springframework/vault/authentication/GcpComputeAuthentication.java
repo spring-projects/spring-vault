@@ -137,6 +137,17 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
+	 * {@link GcpComputeAuthenticationOptions} and {@link VaultClient}.
+	 * @param options must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient) {
+		this(options, vaultClient, RestClient.create());
+	}
+
+	/**
+	 * Create a new {@link GcpComputeAuthentication} instance given
 	 * {@link GcpComputeAuthenticationOptions}, {@link VaultClient} and Google API
 	 * {@link RestClient}.
 	 * @param options must not be {@literal null}.
@@ -206,7 +217,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 			ResponseEntity<String> response = this.googleMetadataAdapter.exchange(COMPUTE_METADATA_URL_TEMPLATE,
 					HttpMethod.GET, entity, String.class, urlParameters);
 
-			return ResponseUtil.getRequiredBody(response);
+			return AuthenticationUtil.getRequiredBody(response);
 		}
 		catch (HttpStatusCodeException e) {
 			throw new VaultLoginException("Cannot obtain signed identity", e);

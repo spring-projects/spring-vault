@@ -60,54 +60,6 @@ abstract class ClientAdapter {
 	public abstract VaultClient vaultClient();
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template, and return
-	 * the representation found in the response.
-	 * <p>
-	 * URI Template variables are expanded using the given URI variables, if any.
-	 * <p>
-	 * The {@code request} parameter can be a {@link HttpEntity} in order to add
-	 * additional HTTP headers to the request.
-	 * <p>
-	 * The body of the entity, or {@code request} itself, can be a
-	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a multipart
-	 * request. The values in the {@code MultiValueMap} can be any Object representing the
-	 * body of the part, or an {@link org.springframework.http.HttpEntity HttpEntity}
-	 * representing a part with body and headers.
-	 * @param url the URL
-	 * @param request the Object to be POSTed (may be {@code null})
-	 * @param responseType the type of the return value
-	 * @param uriVariables the variables to expand the template
-	 * @return the converted object
-	 * @see HttpEntity
-	 */
-	abstract <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-			@Nullable Object... uriVariables);
-
-	/**
-	 * Create a new resource by POSTing the given object to the URI template, and return
-	 * the representation found in the response.
-	 * <p>
-	 * URI Template variables are expanded using the given map.
-	 * <p>
-	 * The {@code request} parameter can be a {@link HttpEntity} in order to add
-	 * additional HTTP headers to the request.
-	 * <p>
-	 * The body of the entity, or {@code request} itself, can be a
-	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a multipart
-	 * request. The values in the {@code MultiValueMap} can be any Object representing the
-	 * body of the part, or an {@link org.springframework.http.HttpEntity HttpEntity}
-	 * representing a part with body and headers.
-	 * @param url the URL
-	 * @param request the Object to be POSTed (may be {@code null})
-	 * @param responseType the type of the return value
-	 * @param uriVariables the variables to expand the template
-	 * @return the converted object
-	 * @see HttpEntity
-	 */
-	abstract <T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-			Map<String, ? extends @Nullable Object> uriVariables);
-
-	/**
 	 * Execute the HTTP method to the given URI template, writing the given request entity
 	 * to the request, and return the response as {@link ResponseEntity}.
 	 * <p>
@@ -175,18 +127,6 @@ abstract class ClientAdapter {
 		}
 
 		@Override
-		<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-				@Nullable Object... uriVariables) {
-			return restOperations.postForObject(url, request, responseType, uriVariables);
-		}
-
-		@Override
-		<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-				Map<String, ?> uriVariables) {
-			return restOperations.postForObject(url, request, responseType, uriVariables);
-		}
-
-		@Override
 		<T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 				Class<T> responseType, @Nullable Object... uriVariables) {
 			return restOperations.exchange(url, method, requestEntity, responseType, uriVariables);
@@ -223,18 +163,6 @@ abstract class ClientAdapter {
 		@Override
 		public VaultClient vaultClient() {
 			return vaultClient;
-		}
-
-		@Override
-		<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-				@Nullable Object... uriVariables) {
-			return retrieve(client.post().uri(url, uriVariables), request, responseType).getBody();
-		}
-
-		@Override
-		<T> @Nullable T postForObject(String url, @Nullable Object request, Class<T> responseType,
-				Map<String, ?> uriVariables) {
-			return retrieve(client.post().uri(url, uriVariables), request, responseType).getBody();
 		}
 
 		@Override

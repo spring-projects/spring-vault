@@ -91,7 +91,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 		Map<String, Object> data = lookupSelf(client, token);
 
-		return LoginTokenUtil.from(token.toCharArray(), data);
+		return LoginToken.from(token.toCharArray(), data);
 	}
 
 	private static Map<String, Object> lookupSelf(VaultClient client, VaultToken token) {

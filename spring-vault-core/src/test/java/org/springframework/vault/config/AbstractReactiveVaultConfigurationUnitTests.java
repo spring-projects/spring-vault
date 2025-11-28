@@ -29,7 +29,6 @@ import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -71,7 +70,7 @@ class AbstractReactiveVaultConfigurationUnitTests {
 
 		@Override
 		public VaultEndpoint vaultEndpoint() {
-			return TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
+			return Settings.TEST_VAULT_ENDPOINT;
 		}
 
 		@Override

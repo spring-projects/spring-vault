@@ -123,7 +123,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		if (state instanceof VaultResponse response) {
 
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
-			return LoginTokenUtil.from(response.getAuth());
+			return LoginToken.from(response.getAuth());
 		}
 
 		throw new IllegalStateException(

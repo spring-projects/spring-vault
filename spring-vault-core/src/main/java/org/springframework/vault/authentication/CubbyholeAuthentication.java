@@ -302,7 +302,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 			Assert.state(responseToUse.getAuth() != null, "Auth field must not be null");
 
-			return LoginTokenUtil.from(responseToUse.getAuth());
+			return LoginToken.from(responseToUse.getAuth());
 		}
 
 		Map<String, Object> data = response.getData();

@@ -20,13 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.vault.client.ClientHttpRequestFactoryFactory;
-import org.springframework.vault.client.VaultClients;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -44,9 +43,8 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod());
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(restTemplate);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				TestVaultClient.create(clientHttpRequestFactory));
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -58,9 +56,8 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("changeit".toCharArray(), "1")));
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(restTemplate);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
+				TestVaultClient.create(clientHttpRequestFactory));
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -72,9 +69,8 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("changeit".toCharArray(), "2")));
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
-		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(restTemplate);
+		VaultClient client = TestVaultClient.create(clientHttpRequestFactory);
+		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(client);
 
 		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(authentication::login);
 	}
@@ -91,10 +87,9 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod());
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
+		VaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().role("my-default-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-default-role").build(), client);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -107,10 +102,9 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				prepareCertAuthenticationMethod());
 
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
+		VaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 		ClientCertificateAuthentication authentication = new ClientCertificateAuthentication(
-				ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build(), restTemplate);
+				ClientCertificateAuthenticationOptions.builder().role("my-alternate-role").build(), client);
 		VaultToken login = authentication.login();
 
 		assertThat(login.getToken()).isNotEmpty();
@@ -125,11 +119,10 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 
 		ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory.create(new ClientOptions(),
 				Settings.createSslConfiguration());
-		RestTemplate restTemplate = VaultClients.createRestTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
-				clientHttpRequestFactory);
+		VaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 
 		assertThatExceptionOfType(NestedRuntimeException.class)
-			.isThrownBy(() -> new ClientCertificateAuthentication(restTemplate).login());
+			.isThrownBy(() -> new ClientCertificateAuthentication(client).login());
 	}
 
 }

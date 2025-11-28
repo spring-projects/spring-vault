@@ -147,7 +147,7 @@ interface VaultLoginClient extends VaultClient {
 		 * <pre class="code">
 		 * Map&lt;String, Object&gt; body = ... ;
 		 * LoginToken loginToken = client.login()
-		 *     .path("/auth/userpass/login/{userid}", userid)
+		 *     .path("auth/userpass/login/{userid}", userid)
 		 *     .using(person)
 		 *     .retrieve()
 		 *     .loginToken();

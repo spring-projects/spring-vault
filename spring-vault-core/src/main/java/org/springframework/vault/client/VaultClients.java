@@ -259,24 +259,37 @@ public class VaultClients {
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
 
-			if (allowAbsolutePath) {
+			if (allowAbsolutePath || endpointProvider == null) {
 				if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
 					return UriComponentsBuilder.fromUriString(uriTemplate);
 				}
+
+				if (endpointProvider != null) {
+					VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+
+					String baseUri = toBaseUri(endpoint);
+					UriComponents uriComponents = UriComponentsBuilder
+						.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+						.build();
+
+					return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+				}
 			}
+
+			String normalizedUriTemplate = uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate;
 
 			if (endpointProvider != null) {
+
 				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 
-				String baseUri = toBaseUri(endpoint);
-				UriComponents uriComponents = UriComponentsBuilder
-					.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+				UriComponents uriComponents = UriComponentsBuilder.fromUriString(toBaseUri(endpoint))
+					.path(normalizedUriTemplate)
 					.build();
 
-				return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
+				return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
 			}
 
-			return UriComponentsBuilder.fromUriString(uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate);
+			return UriComponentsBuilder.fromUriString(normalizedUriTemplate);
 		}
 
 	}

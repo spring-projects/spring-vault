@@ -104,7 +104,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 				Assert.state(response.getAuth() != null, "Auth field must not be null");
 
-				return LoginTokenUtil.from(response.getAuth());
+				return LoginToken.from(response.getAuth());
 			}
 
 			throw new IllegalStateException(

@@ -134,6 +134,26 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsEc2Authentication(VaultClient vaultClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, ClientAdapter.from(RestClient.create()));
+	}
+
+	/**
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and an
+	 * AWS-Metadata-specific {@link RestClient}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param awsMetadataClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AwsEc2Authentication(VaultClient vaultClient, RestClient awsMetadataClient) {
+		this(AwsEc2AuthenticationOptions.DEFAULT, vaultClient, ClientAdapter.from(awsMetadataClient));
+	}
+
+	/**
 	 * Create a new {@link AwsEc2Authentication} specifying
 	 * {@link AwsEc2AuthenticationOptions}, a {@link VaultClient} and an
 	 * AWS-Metadata-specific {@link RestClient}.
@@ -308,7 +328,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
 
-			return ResponseUtil.getRequiredBody(exchange);
+			return AuthenticationUtil.getRequiredBody(exchange);
 		}
 		catch (RestClientException e) {
 			throw new VaultLoginException(

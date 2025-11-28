@@ -147,7 +147,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 			try {
 				VaultResponse response = spec.requiredBody();
-				LoginToken token = LoginTokenUtil.from(response.getAuth());
+				LoginToken token = LoginToken.from(response.getAuth());
 
 				if (logger.isDebugEnabled()) {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
@@ -165,7 +165,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 			try {
 				VaultResponse response = spec.requiredBody();
-				LoginToken token = LoginTokenUtil.from(response.getAuth());
+				LoginToken token = LoginToken.from(response.getAuth());
 
 				VaultResponseSupport<LoginToken> tokenResponse = new VaultResponseSupport<>();
 				tokenResponse.setAuth(response.getAuth());

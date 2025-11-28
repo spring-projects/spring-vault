@@ -22,9 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
-import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -36,7 +34,7 @@ import static org.assertj.core.api.Assertions.*;
  */
 class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegrationTestBase {
 
-	RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+	TestVaultClient client = TestVaultClient.create();
 
 	@Test
 	void shouldSelfLookup() {
@@ -50,7 +48,7 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), this.restTemplate);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.client, this.client.getRestClient());
 
 		VaultToken login = operator.login();
 		assertThat(login).isInstanceOf(LoginToken.class);
@@ -73,7 +71,7 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
 		AuthenticationStepsExecutor operator = new AuthenticationStepsExecutor(
-				TokenAuthentication.createAuthenticationSteps(token, true), this.restTemplate);
+				TokenAuthentication.createAuthenticationSteps(token, true), this.client, this.client.getRestClient());
 
 		operator.login();
 		assertThatExceptionOfType(VaultException.class).isThrownBy(operator::login);

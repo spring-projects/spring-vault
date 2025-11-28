@@ -50,6 +50,10 @@ import org.springframework.web.util.UriBuilderFactory;
  * {@link VaultClient#builder()} to prepare an instance. To use the same configuration as
  * a {@link RestClient}, use {@link #builder(RestClient)} or
  * {@link #builder(RestTemplate)} respectively.
+ * <p>
+ * {@code VaultClient} is intended to be used with relative paths requiring a
+ * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint) configured}. Without
+ * an endpoint, callers must provide the absolute URL for each request.
  *
  * <p>
  * For examples with a response body see:
@@ -107,7 +111,9 @@ public interface VaultClient {
 	VaultClient.Builder mutate();
 
 	/**
-	 * Obtain the underlying {@link RestClient}.
+	 * Obtain the underlying {@link RestClient}. Use the underlying client for low-level
+	 * operations only and use it with caution with regard to URL expansion and request
+	 * interceptors.
 	 * @return the underlying rest client.
 	 */
 	RestClient getRestClient();

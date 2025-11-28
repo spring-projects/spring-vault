@@ -227,7 +227,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 					.headers(createHttpHeaders(token))
 					.retrieve()
 					.toEntity();
-				return (String) ResponseUtil.getRequiredValue(entity, "role_id");
+				return (String) AuthenticationUtil.getRequiredValue(entity, "role_id");
 			}
 			catch (VaultException e) {
 				throw new VaultLoginException("Cannot get Role id using AppRole: %s".formatted(e.getMessage()),
@@ -249,9 +249,9 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 					.retrieve()
 					.toEntity();
 
-				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
+				VaultResponse response = unwrappingEndpoints.unwrap(AuthenticationUtil.getRequiredBody(entity));
 
-				return (String) ResponseUtil.getRequiredValue(response, "role_id");
+				return (String) AuthenticationUtil.getRequiredValue(response, "role_id");
 			}
 			catch (VaultException e) {
 				throw new VaultLoginException("Cannot unwrap Role id using AppRole: %s".formatted(e.getMessage()),
@@ -281,7 +281,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 					.retrieve()
 					.requiredBody();
 
-				return (String) ResponseUtil.getRequiredData(response).get("secret_id");
+				return (String) AuthenticationUtil.getRequiredData(response).get("secret_id");
 			}
 			catch (VaultException e) {
 				throw new VaultLoginException("Cannot get Secret id using AppRole: %s".formatted(e.getMessage()),
@@ -304,7 +304,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 					.retrieve()
 					.toEntity();
 
-				VaultResponse response = unwrappingEndpoints.unwrap(ResponseUtil.getRequiredBody(entity));
+				VaultResponse response = unwrappingEndpoints.unwrap(AuthenticationUtil.getRequiredBody(entity));
 
 				return (String) response.getRequiredData().get("secret_id");
 			}

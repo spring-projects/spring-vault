@@ -272,7 +272,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 			.doOnSubscribe(ignore -> multicastEvent(new BeforeLoginTokenRenewedEvent(tokenWrapper.getToken())))
 			.handle((response, sink) -> {
 
-				LoginToken renewed = LoginTokenUtil.from(response.getAuth());
+				LoginToken renewed = LoginToken.from(response.getAuth());
 
 				if (!isExpired(renewed)) {
 					sink.next(new TokenWrapper(renewed, tokenWrapper.revocable));
@@ -406,7 +406,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 		Mono<Map<String, Object>> data = lookupSelf(webClient, token);
 
-		return data.map(it -> LoginTokenUtil.from(token.toCharArray(), it));
+		return data.map(it -> LoginToken.from(token.toCharArray(), it));
 	}
 
 	private static Mono<Map<String, Object>> lookupSelf(WebClient webClient, VaultToken token) {

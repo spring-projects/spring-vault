@@ -140,7 +140,7 @@ class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport 
 			return new UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions.builder()
 				.username("token-expiry")
 				.password("token-expiry")
-				.build(), getRestTemplateFactory().create());
+				.build(), vaultClient());
 		}
 
 	}

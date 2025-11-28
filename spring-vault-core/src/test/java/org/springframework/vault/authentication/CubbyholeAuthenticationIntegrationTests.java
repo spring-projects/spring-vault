@@ -20,10 +20,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.Settings;
-import org.springframework.vault.util.TestRestTemplateFactory;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -46,9 +46,9 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 			.initialToken(VaultToken.of(initialToken))
 			.wrapped()
 			.build();
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
+		VaultClient client = TestVaultClient.create();
 
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, client);
 		VaultToken login = authentication.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());
 	}
@@ -62,8 +62,8 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 			.wrapped()
 			.build();
 
-		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
-		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
+		VaultClient client = TestVaultClient.create();
+		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, client);
 
 		try {
 			authentication.login();

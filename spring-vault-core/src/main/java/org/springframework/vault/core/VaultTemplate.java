@@ -167,7 +167,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @since 2.2.1
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory);
 	}
@@ -178,7 +180,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory,
 			SessionManager sessionManager) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), clientHttpRequestFactory, sessionManager);
@@ -193,7 +197,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @since 2.2.1
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
@@ -215,7 +221,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 1.1
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory,
 			SessionManager sessionManager) {
 
