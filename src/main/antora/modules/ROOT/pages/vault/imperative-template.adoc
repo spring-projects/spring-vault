@@ -268,7 +268,7 @@ vaultOperations.doWithVault(new RestOperationsCallback<VaultInitializationRespon
   public VaultInitializationResponse doWithRestOperations(RestOperations restOperations) {
 
     ResponseEntity<VaultInitializationResponse> exchange = restOperations
-                       .exchange("/sys/init", HttpMethod.PUT,
+                       .exchange("sys/init", HttpMethod.PUT,
                                  new HttpEntity<Object>(request),
                                  VaultInitializationResponse.class);
 
