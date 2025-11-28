@@ -151,7 +151,7 @@ Here is an example that uses the callback to initialize Vault:
 reactiveVaultOperations.doWithVault(webClient -> {
 
     return webClient.put()
-                    .uri("/sys/init")
+                    .uri("sys/init")
                     .syncBody(request)
                     .retrieve()
                     .toEntity(VaultInitializationResponse.class);

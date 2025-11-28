@@ -3,10 +3,10 @@ prerelease: ${antora-component.prerelease}
 
 asciidoc:
   attributes:
-    version: ${project.version}
+    version: '${project.version}'
     copyright-year: ${current.year}
-    springversionshort: ${spring.version.short}
-    springversion: ${spring.version}
+    springversionshort: '${spring.version.short}'
+    springversion: '${spring.version}'
     attribute-missing: 'warn'
     spring-framework-docs: https://docs.spring.io/spring-framework/reference/{springversionshort}
-    springDataVersion: ${spring-data-bom.version}
+    springDataVersion: '${spring-data-bom.version}'
