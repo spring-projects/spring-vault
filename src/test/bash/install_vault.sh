@@ -8,8 +8,8 @@
 set -o errexit
 
 EDITION="${EDITION:-oss}"
-VAULT_OSS="${VAULT_OSS:-1.15.1}"
-VAULT_ENT="${VAULT_ENT:-1.15.1}"
+VAULT_OSS="${VAULT_OSS:-1.21.1}"
+VAULT_ENT="${VAULT_ENT:-1.21.1}"
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
 VAULT_DIRECTORY=vault
@@ -110,7 +110,7 @@ function download() {
     if [[ ${VERBOSE} == true ]]; then
       wget "${VAULT_URL}" -O "${VAULT_FILE}"
     else
-      wget "${VAULT_URL}" -q -O "${VAULT_FILE}"
+      wget "${VAULT_URL}" -q --show-progress -O "${VAULT_FILE}"
     fi
 
     if [[ $? != 0 ]]; then
