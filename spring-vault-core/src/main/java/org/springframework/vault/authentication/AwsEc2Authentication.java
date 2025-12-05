@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,6 +33,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
@@ -43,16 +43,16 @@ import org.springframework.web.client.RestOperations;
 
 /**
  * AWS-EC2 login implementation.
- * <p>
- * AWS-EC2 login uses the EC2 identity document and a nonce to login into Vault. AWS-EC2
- * login obtains the PKCS#7 signed EC2 identity document and generates a
- * {@link #createNonce() nonce}. Instances of this class are immutable once constructed.
+ * <p>AWS-EC2 login uses the EC2 identity document and a nonce to login into
+ * Vault. AWS-EC2 login obtains the PKCS#7 signed EC2 identity document and
+ * generates a {@link #createNonce() nonce}. Instances of this class are
+ * immutable once constructed.
  *
  * @author Mark Paluch
  * @see AwsEc2AuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth Backend:
- * aws-ec2</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth
+ * Backend: aws-ec2</a>
  */
 public class AwsEc2Authentication implements ClientAuthentication, AuthenticationStepsFactory {
 
@@ -64,6 +64,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	private static final String METADATA_TOKEN_HEADER = "X-aws-ec2-metadata-token";
 
+
 	private final AwsEc2AuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
@@ -71,6 +72,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	private final ClientAdapter awsMetadataAdapter;
 
 	private final AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
+
 
 	/**
 	 * Create a new {@link AwsEc2Authentication}.
@@ -143,8 +145,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
-	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and an
-	 * AWS-Metadata-specific {@link RestClient}.
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and
+	 * an AWS-Metadata-specific {@link RestClient}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param awsMetadataClient must not be {@literal null}.
 	 * @since 4.1
@@ -169,7 +171,6 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
 			ClientAdapter awsMetadataClient) {
-
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");
 		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
@@ -179,19 +180,17 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		this.awsMetadataAdapter = awsMetadataClient;
 	}
 
+
 	/**
-	 * Creates a {@link AuthenticationSteps} for AWS-EC2 authentication given
+	 * Create a {@link AuthenticationSteps} for AWS-EC2 authentication given
 	 * {@link AwsEc2AuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for AWS-EC2 authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(AwsEc2AuthenticationOptions options) {
-
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-
 		AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
-
 		return createAuthenticationSteps(options, nonce, () -> doCreateNonce(options));
 	}
 
@@ -199,49 +198,41 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 			AtomicReference<char[]> nonce, Supplier<char[]> nonceSupplier) {
 
 		AuthenticationSteps.HttpRequest<String> identityRequest = HttpRequestBuilder
-			.get(options.getIdentityDocumentUri().toString())
-			.as(String.class);
+				.get(options.getIdentityDocumentUri().toString())
+				.as(String.class);
 		AuthenticationSteps.Node<String> identity;
 
 		if (options.getVersion() == AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2) {
-
 			identity = AuthenticationSteps
-				.fromHttpRequest(HttpRequestBuilder.put(options.getMetadataTokenRequestUri())
-					.with(createTokenRequestHeaders(options))
-					.as(String.class))
-				.map(it -> {
-					HttpHeaders headers = new HttpHeaders();
-					headers.add(METADATA_TOKEN_HEADER, it);
-					return headers;
-				})
-				.request(identityRequest);
-		}
-		else {
+					.fromHttpRequest(HttpRequestBuilder.put(options.getMetadataTokenRequestUri())
+							.with(createTokenRequestHeaders(options))
+							.as(String.class))
+					.map(it -> {
+						return VaultHttpHeaders.singleton(METADATA_TOKEN_HEADER, it);
+					})
+					.request(identityRequest);
+		} else {
 			identity = AuthenticationSteps.fromHttpRequest(identityRequest);
 		}
 
 		return identity //
-			.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
-			.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
-			.map(pkcs7 -> {
-
-				Map<String, String> login = new LinkedHashMap<>();
-
-				if (StringUtils.hasText(options.getRole())) {
-					login.put("role", options.getRole());
-				}
-
-				if (Objects.equals(nonce.get(), EMPTY)) {
-					nonce.compareAndSet(EMPTY, nonceSupplier.get());
-				}
-
-				login.put("nonce", new String(nonce.get()));
-				login.put("pkcs7", pkcs7);
-
-				return login;
-			})
-			.loginAt(options.getPath());
+				.map(pkcs7 -> pkcs7.replaceAll("\\r", "")) //
+				.map(pkcs7 -> pkcs7.replaceAll("\\n", "")) //
+				.map(pkcs7 -> {
+					Map<String, String> login = new LinkedHashMap<>();
+					if (StringUtils.hasText(options.getRole())) {
+						login.put("role", options.getRole());
+					}
+					if (Objects.equals(nonce.get(), EMPTY)) {
+						nonce.compareAndSet(EMPTY, nonceSupplier.get());
+					}
+					login.put("nonce", new String(nonce.get()));
+					login.put("pkcs7", pkcs7);
+					return login;
+				})
+				.loginAt(options.getPath());
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
@@ -255,82 +246,65 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsEc2() {
-
 		Map<String, String> login = getEc2Login();
-
 		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
-			.using(login)
-			.retrieve()
-			.body();
+				.using(login)
+				.retrieve()
+				.body();
 
 		if (logger.isDebugEnabled()) {
-
 			if (token.getAuth().get("metadata") instanceof Map) {
 				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
 				logger.debug("Using AWS-EC2 authentication for instance %s, AMI %s"
-					.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
+						.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
 			}
 		}
-
 		return token.getRequiredData();
 	}
 
 	protected Map<String, String> getEc2Login() {
-
 		Map<String, String> login = new HashMap<>();
 		HttpHeaders headers = new HttpHeaders();
-
 		if (options.getVersion() == AwsEc2AuthenticationOptions.InstanceMetadataServiceVersion.V2) {
 			headers.add(METADATA_TOKEN_HEADER, createIMDSv2Token());
 		}
-
 		if (StringUtils.hasText(this.options.getRole())) {
 			login.put("role", this.options.getRole());
 		}
-
 		if (Objects.equals(this.nonce.get(), EMPTY)) {
 			this.nonce.compareAndSet(EMPTY, createNonce());
 		}
-
 		login.put("nonce", new String(this.nonce.get()));
 
 		try {
-
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
 			ResponseEntity<String> exchange = this.awsMetadataAdapter.exchange(this.options.getIdentityDocumentUri(),
 					HttpMethod.GET, entity, String.class);
 			if (!exchange.getStatusCode().is2xxSuccessful()) {
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
-
 			String pkcs7 = exchange.getBody();
 			if (StringUtils.hasText(pkcs7)) {
 				login.put("pkcs7", pkcs7.replaceAll("\\r", "").replaceAll("\\n", ""));
 			}
 
 			return login;
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw new VaultLoginException(
 					"Cannot obtain Identity Document from %s".formatted(this.options.getIdentityDocumentUri()), e);
 		}
 	}
 
 	private String createIMDSv2Token() {
-
 		try {
-
 			HttpEntity<Object> entity = new HttpEntity<>(createTokenRequestHeaders(this.options));
-
 			ResponseEntity<String> exchange = this.awsMetadataAdapter
-				.exchange(this.options.getMetadataTokenRequestUri(), HttpMethod.PUT, entity, String.class);
+					.exchange(this.options.getMetadataTokenRequestUri(), HttpMethod.PUT, entity, String.class);
 			if (!exchange.getStatusCode().is2xxSuccessful()) {
 				throw new HttpClientErrorException(exchange.getStatusCode());
 			}
-
 			return AuthenticationUtil.getRequiredBody(exchange);
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw new VaultLoginException(
 					"Cannot obtain IMDSv2 Token from %s".formatted(this.options.getMetadataTokenRequestUri()), e);
 		}
@@ -345,9 +319,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	private static HttpHeaders createTokenRequestHeaders(AwsEc2AuthenticationOptions options) {
-		HttpHeaders tokenRequestHeaders = new HttpHeaders();
-		tokenRequestHeaders.add(METADATA_TOKEN_TTL_HEADER, String.valueOf(options.getMetadataTokenTtl().toSeconds()));
-		return tokenRequestHeaders;
+		return VaultHttpHeaders.singleton(METADATA_TOKEN_TTL_HEADER, String.valueOf(options.getMetadataTokenTtl().toSeconds()));
 	}
 
 }

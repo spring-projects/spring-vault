@@ -27,7 +27,6 @@ import org.springframework.vault.core.VaultTemplate;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.vault.annotation.VaultPropertySource.Renewal.*;
 

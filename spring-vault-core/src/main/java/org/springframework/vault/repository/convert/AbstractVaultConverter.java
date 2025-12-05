@@ -37,7 +37,7 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 	protected EntityInstantiators instantiators = new EntityInstantiators();
 
 	/**
-	 * Creates a new {@link AbstractVaultConverter} using the given
+	 * Create a new {@code AbstractVaultConverter} using the given
 	 * {@link GenericConversionService}.
 	 * @param conversionService must not be {@literal null}.
 	 */

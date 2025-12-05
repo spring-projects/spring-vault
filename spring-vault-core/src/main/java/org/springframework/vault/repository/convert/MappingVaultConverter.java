@@ -670,7 +670,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Returns given object as {@link Collection}. Will return the {@link Collection} as
+	 * Return given object as {@link Collection}. Will return the {@link Collection} as
 	 * is if the source is a {@link Collection} already, will convert an array into a
 	 * {@link Collection} or simply create a single element collection for everything
 	 * else.

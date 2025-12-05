@@ -42,7 +42,7 @@ public class SecretDocumentAccessor {
 	private final Map<String, Object> body;
 
 	/**
-	 * Creates a new {@link SecretDocumentAccessor} for the given {@link SecretDocument}.
+	 * Create a new {@code SecretDocumentAccessor} for the given {@link SecretDocument}.
 	 * @param document must be a {@link SecretDocument} effectively, must not be
 	 * {@literal null}.
 	 */
@@ -55,7 +55,7 @@ public class SecretDocumentAccessor {
 	}
 
 	/**
-	 * Creates a new {@link SecretDocumentAccessor} for the given {@link SecretDocument}
+	 * Create a new {@code SecretDocumentAccessor} for the given {@link SecretDocument}
 	 * and {@link Map body}.
 	 * @param document must be a {@link SecretDocument} effectively, must not be
 	 * {@literal null}
@@ -115,7 +115,7 @@ public class SecretDocumentAccessor {
 	}
 
 	/**
-	 * Returns the value the given {@link VaultPersistentProperty} refers to. By default
+	 * Return the value the given {@link VaultPersistentProperty} refers to. By default
 	 * this will be a direct field but the method will also transparently resolve nested
 	 * values the {@link VaultPersistentProperty} might refer to through a path expression
 	 * in the field name metadata.
@@ -155,7 +155,7 @@ public class SecretDocumentAccessor {
 	}
 
 	/**
-	 * Returns whether the underlying {@link SecretDocument} has a value ({@literal null}
+	 * Return whether the underlying {@link SecretDocument} has a value ({@literal null}
 	 * or non-{@literal null}) for the given {@link VaultPersistentProperty}.
 	 * @param property must not be {@literal null}.
 	 * @return
@@ -197,7 +197,7 @@ public class SecretDocumentAccessor {
 	}
 
 	/**
-	 * Returns the given source object as map, i.e. maps as is or {@literal null}
+	 * Return the given source object as map, i.e. maps as is or {@literal null}
 	 * otherwise.
 	 * @param source can be {@literal null}.
 	 * @return
@@ -213,7 +213,7 @@ public class SecretDocumentAccessor {
 	}
 
 	/**
-	 * Returns the {@link Map} which either already exists in the given source under the
+	 * Return the {@link Map} which either already exists in the given source under the
 	 * given key, or creates a new nested one, registers it with the source and returns
 	 * it.
 	 * @param key must not be {@literal null} or empty.

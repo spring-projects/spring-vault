@@ -23,7 +23,6 @@ import java.util.function.Supplier;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
@@ -34,11 +33,10 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.RestClientResponseException;
 
 /**
- * Key-Value utility to retrieve secrets from a versioned key-value backend. For internal
- * use within the framework.
- * <p/>
- * Uses Vault's internal API {@code sys/internal/ui/mounts} to determine mount
- * information.
+ * Key-Value utility to retrieve secrets from a versioned key-value backend. For
+ * internal use within the framework.
+ * <p>Uses Vault's internal API {@code sys/internal/ui/mounts} to determine
+ * mount information.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -64,15 +62,16 @@ public class KeyValueDelegate {
 	/**
 	 * Determine whether the {@code path} belongs to a versioned Key-Value mount.
 	 * @param path the path to inspect.
-	 * @return {@literal true} if the {@code path} belongs to a versioned Key-Value mount.
+	 * @return {@literal true} if the {@code path} belongs to a versioned Key-Value
+	 * mount.
 	 */
 	public boolean isVersioned(String path) {
 		return getMountInfo(path).isKeyValue(KeyValueBackend.versioned());
 	}
 
 	/**
-	 * Read a secret from a key-value backend. Considers the backend type and whether the
-	 * backend is a versioned key-value backend.
+	 * Read a secret from a key-value backend. Considers the backend type and
+	 * whether the backend is a versioned key-value backend.
 	 * @param path the path to fetch the secret from.
 	 * @return the secret, can be {@literal null}.
 	 */
@@ -112,7 +111,7 @@ public class KeyValueDelegate {
 		response.setData(nested);
 	}
 
-	@SuppressWarnings({ "unchecked", "NullAway" })
+	@SuppressWarnings({"unchecked", "NullAway"})
 	private MountInfo doGetMountInfo(String path) {
 
 		VaultResponse response = this.operations.read("sys/internal/ui/mounts/%s".formatted(path));
@@ -132,16 +131,15 @@ public class KeyValueDelegate {
 		if (mountInfo == null) {
 			try {
 				mountInfo = doGetMountInfo(path);
-			}
-			catch (RuntimeException e) {
+			} catch (RuntimeException e) {
 
 				if (e.getCause() instanceof RestClientResponseException rcx
 						&& rcx.getStatusCode().value() == HttpStatus.FORBIDDEN.value()) {
 
 					if (logger.isDebugEnabled()) {
 						logger
-							.debug("Unable to determine mount information for [%s]. Returning unavailable MountInfo: %s"
-								.formatted(path, e.getMessage()), e);
+								.debug("Unable to determine mount information for [%s]. Returning unavailable MountInfo: %s"
+										.formatted(path, e.getMessage()), e);
 					}
 
 					return MountInfo.unavailable();
@@ -173,18 +171,19 @@ public class KeyValueDelegate {
 		}
 
 		/**
-		 * Creates a new {@link MountInfo} representing an absent {@link MountInfo}.
-		 * @return a new {@link MountInfo} representing an absent {@link MountInfo}.
+		 * Create a new {@code MountInfo} representing an absent {@code MountInfo}.
+		 * @return a new {@code MountInfo} representing an absent {@code MountInfo}.
 		 */
 		static MountInfo unavailable() {
 			return UNAVAILABLE;
 		}
 
 		/**
-		 * Creates a new {@link MountInfo} given {@code path} and {@link Map options map}.
+		 * Create a new {@code MountInfo} given {@code path} and {@link Map options
+		 * map}.
 		 * @param path
 		 * @param options
-		 * @return a new {@link MountInfo} for {@code path} and {@link Map options map}.
+		 * @return a new {@code MountInfo} for {@code path} and {@link Map options map}.
 		 */
 		static MountInfo from(String path, @Nullable Map<String, Object> options) {
 			return new MountInfo(path, options, true);

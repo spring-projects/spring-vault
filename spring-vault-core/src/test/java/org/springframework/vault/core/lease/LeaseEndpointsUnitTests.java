@@ -35,7 +35,6 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**

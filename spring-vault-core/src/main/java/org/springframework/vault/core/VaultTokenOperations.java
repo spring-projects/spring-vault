@@ -25,7 +25,8 @@ import org.springframework.vault.support.VaultTokenResponse;
  *
  * @author Mark Paluch
  * @author Nanne Baars
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * Token</a>
  */
 public interface VaultTokenOperations {
 

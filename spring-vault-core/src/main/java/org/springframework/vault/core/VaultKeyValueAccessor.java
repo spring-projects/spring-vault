@@ -20,7 +20,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,10 +34,10 @@ import org.springframework.web.client.RestClient;
 
 /**
  * Base class for {@link VaultVersionedKeyValueTemplate} and
- * {@link VaultKeyValue2Template} and other Vault KV-accessing helpers, defining common
- * <p/>
- * Not intended to be used directly. See {@link VaultVersionedKeyValueTemplate} and
- * {@link VaultKeyValue2Template}.
+ * {@link VaultKeyValue2Template} and other Vault KV-accessing helpers, defining
+ * common
+ * <p>Not intended to be used directly. See
+ * {@link VaultVersionedKeyValueTemplate} and {@link VaultKeyValue2Template}.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -51,82 +50,74 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	private final JacksonCompat.ObjectMapperAccessor mapper;
 
+
 	/**
-	 * Create a new {@link VaultKeyValueAccessor} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValueAccessor} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	VaultKeyValueAccessor(VaultOperations vaultOperations, String path) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations = VaultTemplate.from(vaultOperations);
 		this.path = path;
 		this.mapper = JacksonCompat.ObjectMapperAccessor.from(vaultOperations);
 	}
 
+
 	@Override
 	@SuppressWarnings("NullAway")
 	public void delete(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) (client -> {
 			return client.delete()
-				.path(createDataPath(path))
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toBodilessEntity()
-				.getBody();
+					.path(createDataPath(path))
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toBodilessEntity()
+					.getBody();
 		}));
 	}
 
 	/**
-	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
-	 * given {@link Class type}.
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to
+	 * the given {@link Class type}.
 	 * @param path must not be {@literal null}.
 	 * @param deserializeAs must not be {@literal null}.
-	 * @param mappingFunction Mapping function to convert from the intermediate to the
-	 * target data type. Must not be {@literal null}.
+	 * @param mappingFunction Mapping function to convert from the intermediate to
+	 * the target data type. Must not be {@literal null}.
 	 * @param <I> intermediate data type for {@literal data} deserialization.
 	 * @param <T> return type. Value is created by the {@code mappingFunction}.
 	 * @return mapped value.
 	 */
 	<I, T> @Nullable T doRead(String path, Class<I> deserializeAs,
 			BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
-
 		ParameterizedTypeReference<VaultResponseSupport<Object>> ref = VaultResponses
-			.getTypeReference(JacksonCompat.instance().getJsonNodeClass());
-
+				.getTypeReference(JacksonCompat.instance().getJsonNodeClass());
 		VaultResponseSupport<Object> response = doRead(createDataPath(path), ref);
-
-		if (response != null) {
-
-			Object jsonNode = getJsonNode(response);
-			Object jsonMeta = JacksonCompat.instance().getAt(response.getRequiredData(), "/metadata");
-			response.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
-
-			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
+		if (response == null) {
+			return null;
 		}
-
-		return null;
+		Object jsonNode = getJsonNode(response);
+		Object jsonMeta = JacksonCompat.instance().getAt(response.getRequiredData(), "/metadata");
+		response.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
+		return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 	}
 
 	/**
-	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
-	 * given {@link ParameterizedTypeReference type}.
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to
+	 * the given {@link ParameterizedTypeReference type}.
 	 * @param path must not be {@literal null} or empty.
 	 * @param typeReference must not be {@literal null}
 	 * @return mapped value.
 	 */
 	<T> @Nullable T doRead(String path, ParameterizedTypeReference<T> typeReference) {
 		return doRead((client) -> client.get()
-			.path(path)
-			.retrieve()
-			.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-			.toEntity(typeReference));
+				.path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toEntity(typeReference));
 	}
 
 	/**
@@ -148,15 +139,11 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 */
 	@SuppressWarnings("NullAway")
 	<T extends @Nullable Object> @Nullable T doRead(Function<VaultClient, ResponseEntity<T>> callback) {
-
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable T>) (client) -> {
-
 			ResponseEntity<T> entity = callback.apply(client);
-
 			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
 				return null;
 			}
-
 			return entity.getBody();
 		});
 	}
@@ -170,9 +157,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	@Nullable
 	@SuppressWarnings("NullAway")
 	VaultResponse doWrite(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable VaultResponse>) (client) -> {
 			return client.post().path(path).body(body).retrieve().body(VaultResponse.class);
 		});

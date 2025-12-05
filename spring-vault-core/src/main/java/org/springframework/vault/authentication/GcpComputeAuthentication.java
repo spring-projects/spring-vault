@@ -25,28 +25,27 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
-
 /**
- * GCP GCE (Google Compute Engine)-based login implementation using GCE's metadata service
- * to create signed JSON Web Token.
- * <p/>
- * This authentication method uses Googles GCE's metadata service in combination with the
- * default/specified service account to obtain an identity document as JWT using a HTTP
- * client. Credentials and authenticity are implied from the runtime itself and are not
- * required to be configured.
+ * GCP GCE (Google Compute Engine)-based login implementation using GCE's
+ * metadata service to create signed JSON Web Token.
+ * <p>This authentication method uses Googles GCE's metadata service in
+ * combination with the default/specified service account to obtain an identity
+ * document as JWT using a HTTP client. Credentials and authenticity are implied
+ * from the runtime itself and are not required to be configured.
  *
  * @author Mark Paluch
  * @since 2.1
  * @see GcpComputeAuthenticationOptions
- * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend: gcp
- * (IAM)</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend:
+ * gcp (IAM)</a>
  * @see <a href=
  * "https://cloud.google.com/compute/docs/instances/verifying-instance-identity">Google
  * Compute Engine: Verifying the Identity of Instances</a>
@@ -57,14 +56,16 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	public static final String COMPUTE_METADATA_URL_TEMPLATE = "http://metadata/computeMetadata/v1/instance/service-accounts/{serviceAccount}/identity"
 			+ "?audience={audience}&format={format}";
 
+
 	private final GcpComputeAuthenticationOptions options;
 
 	private final ClientAdapter googleMetadataAdapter;
 
+
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
-	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault and
-	 * Google API use.
+	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault
+	 * and Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @deprecated since 4.1, use
@@ -78,8 +79,8 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
-	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault and
-	 * Google API use.
+	 * {@link GcpComputeAuthenticationOptions} and {@link RestOperations} for Vault
+	 * and Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param googleMetadataRestOperations must not be {@literal null}.
@@ -90,20 +91,17 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations googleMetadataRestOperations) {
-
 		super(ClientAdapter.from(vaultRestOperations).loginClient("GCP-GCE"));
-
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataRestOperations, "Google Metadata RestOperations must not be null");
-
 		this.options = options;
 		this.googleMetadataAdapter = ClientAdapter.from(googleMetadataRestOperations);
 	}
 
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
-	 * {@link GcpComputeAuthenticationOptions} and {@link RestClient} for Vault and Google
-	 * API use.
+	 * {@link GcpComputeAuthenticationOptions} and {@link RestClient} for Vault and
+	 * Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
@@ -118,8 +116,8 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 
 	/**
 	 * Create a new {@link GcpComputeAuthentication} instance given
-	 * {@link GcpComputeAuthenticationOptions} and {@link RestClient} for Vault and Google
-	 * API use.
+	 * {@link GcpComputeAuthenticationOptions} and {@link RestClient} for Vault and
+	 * Google API use.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param googleMetadataClient must not be {@literal null}.
@@ -131,7 +129,6 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
-
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), googleMetadataClient);
 	}
 
@@ -157,44 +154,37 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 */
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient,
 			RestClient googleMetadataClient) {
-
 		super(VaultLoginClient.create(vaultClient, "GCP-GCE"));
-
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataClient, "Google Metadata RestOperations must not be null");
-
 		this.options = options;
 		this.googleMetadataAdapter = ClientAdapter.from(googleMetadataClient);
 	}
 
+
 	/**
-	 * Creates a {@link AuthenticationSteps} for GCE authentication given
+	 * Create a {@link AuthenticationSteps} for GCE authentication given
 	 * {@link GcpComputeAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for cubbyhole authentication.
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(GcpComputeAuthenticationOptions options) {
-
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-
 		String serviceAccount = options.getServiceAccount();
 		String audience = getAudience(options.getRole());
-
 		HttpRequest<String> jwtRequest = get(COMPUTE_METADATA_URL_TEMPLATE, serviceAccount, audience, "full") //
-			.with(getMetadataHttpHeaders()) //
-			.as(String.class);
-
+				.with(getMetadataHttpHeaders()) //
+				.as(String.class);
 		return AuthenticationSteps.fromHttpRequest(jwtRequest)
-			//
-			.map(jwt -> createRequestBody(options.getRole(), jwt))
-			.loginAt(options.getPath());
+				//
+				.map(jwt -> createRequestBody(options.getRole(), jwt))
+				.loginAt(options.getPath());
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
-
 		String signedJwt = signJwt();
-
 		return doLogin("GCP-GCE", signedJwt, this.options.getPath(), this.options.getRole());
 	}
 
@@ -204,33 +194,23 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	}
 
 	protected String signJwt() {
-
 		try {
 			Map<String, String> urlParameters = new LinkedHashMap<>();
 			urlParameters.put("serviceAccount", this.options.getServiceAccount());
 			urlParameters.put("audience", getAudience(this.options.getRole()));
 			urlParameters.put("format", "full");
-
 			HttpHeaders headers = getMetadataHttpHeaders();
 			HttpEntity<Object> entity = new HttpEntity<>(headers);
-
 			ResponseEntity<String> response = this.googleMetadataAdapter.exchange(COMPUTE_METADATA_URL_TEMPLATE,
 					HttpMethod.GET, entity, String.class, urlParameters);
-
 			return AuthenticationUtil.getRequiredBody(response);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw new VaultLoginException("Cannot obtain signed identity", e);
 		}
 	}
 
 	private static HttpHeaders getMetadataHttpHeaders() {
-
-		HttpHeaders headers = new HttpHeaders();
-
-		headers.set("Metadata-Flavor", "Google");
-
-		return headers;
+		return VaultHttpHeaders.singleton("Metadata-Flavor", "Google");
 	}
 
 	private static String getAudience(String role) {

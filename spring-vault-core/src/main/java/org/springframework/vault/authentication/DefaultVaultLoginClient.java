@@ -20,13 +20,11 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.client.RestClient;
 
 /**
  * Default implementation of {@link VaultLoginClient}.
@@ -38,14 +36,17 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 	private static final Log logger = LogFactory.getLog(DefaultVaultLoginClient.class);
 
+
 	private final VaultClient vaultClient;
 
 	private final String authenticationMechanism;
+
 
 	DefaultVaultLoginClient(VaultClient vaultClient, String authenticationMechanism) {
 		this.vaultClient = vaultClient;
 		this.authenticationMechanism = authenticationMechanism;
 	}
+
 
 	@Override
 	public LoginBodyRequestSpec loginAt(String authMount) {
@@ -87,9 +88,11 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 		return vaultClient.mutate();
 	}
 
+
 	class DefaultLoginBodySpec implements LoginBodyRequestSpec {
 
 		private final RequestBodySpec spec;
+
 
 		public DefaultLoginBodySpec(String path) {
 			this.spec = vaultClient.post().path(AuthenticationUtil.getLoginPath(path));
@@ -98,6 +101,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 		public DefaultLoginBodySpec(RequestBodySpec spec) {
 			this.spec = spec;
 		}
+
 
 		@Override
 		public LoginBodyRequestSpec using(Object body) {
@@ -114,9 +118,6 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 	class DefaultLoginBodyPathSpec implements LoginBodyPathSpec {
 
-		public DefaultLoginBodyPathSpec() {
-		}
-
 		@Override
 		public LoginBodyRequestSpec path(String path, @Nullable Object... pathVariables) {
 			return new DefaultLoginBodySpec(vaultClient.post().path(path, pathVariables));
@@ -129,56 +130,44 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 
 	}
 
+
 	class DefaultLoginResponseSpec implements LoginResponseSpec {
 
 		private final ResponseSpec spec;
+
 
 		DefaultLoginResponseSpec(ResponseSpec spec) {
 			this.spec = spec;
 		}
 
+
 		@Override
 		public LoginToken loginToken() {
-
 			try {
 				VaultResponse response = spec.requiredBody();
 				LoginToken token = LoginToken.from(response.getAuth());
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
 				}
-
 				return token;
-			}
-			catch (VaultException e) {
+			} catch (VaultException e) {
 				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}
 
 		@Override
 		public VaultResponseSupport<LoginToken> body() {
-
 			try {
 				VaultResponse response = spec.requiredBody();
 				LoginToken token = LoginToken.from(response.getAuth());
-
 				VaultResponseSupport<LoginToken> tokenResponse = new VaultResponseSupport<>();
-				tokenResponse.setAuth(response.getAuth());
-				tokenResponse.setLeaseDuration(response.getLeaseDuration());
-				tokenResponse.setRenewable(response.isRenewable());
-				tokenResponse.setMetadata(response.getMetadata());
-				tokenResponse.setWarnings(response.getWarnings());
-				tokenResponse.setWrapInfo(response.getWrapInfo());
-				tokenResponse.setRequestId(response.getRequestId());
+				tokenResponse.applyMetadata(response);
 				tokenResponse.setData(token);
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
 				}
-
 				return tokenResponse;
-			}
-			catch (VaultException e) {
+			} catch (VaultException e) {
 				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}

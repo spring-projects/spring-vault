@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
 /**
+ * Utility class for HTTP status codes.
  * @author Mark Paluch
  */
 class HttpStatusUtil {

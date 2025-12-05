@@ -18,8 +18,9 @@ package org.springframework.vault.client;
 import org.springframework.web.client.RestClient;
 
 /**
- * Callback interface that can be used to customize a {@link RestClient.Builder}. Beans
- * implementing this interface are applied to {@link RestClientBuilder}.
+ * Callback interface that can be used to customize a
+ * {@link RestClient.Builder}. Beans implementing this interface are applied to
+ * {@link RestClientBuilder}.
  *
  * @author Mark Paluch
  * @since 4.0

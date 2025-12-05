@@ -33,8 +33,8 @@ import org.springframework.vault.util.MockVaultClient;
 import org.springframework.vault.util.TestVaultClient;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 

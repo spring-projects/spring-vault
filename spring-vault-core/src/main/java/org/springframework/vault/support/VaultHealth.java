@@ -33,8 +33,8 @@ public interface VaultHealth {
 	boolean isInitialized();
 
 	/**
-	 * @return {@literal true} if the Vault instance is sealed, otherwise {@literal false}
-	 * if the Vault instance is unsealed.
+	 * @return {@literal true} if the Vault instance is sealed, otherwise
+	 * {@literal false} if the Vault instance is unsealed.
 	 */
 	boolean isSealed();
 
@@ -52,8 +52,8 @@ public interface VaultHealth {
 	boolean isPerformanceStandby();
 
 	/**
-	 * @return {@literal true} if the Vault instance is a secondary node in data recovery
-	 * replication mode, otherwise {@literal false}.
+	 * @return {@literal true} if the Vault instance is a secondary node in data
+	 * recovery replication mode, otherwise {@literal false}.
 	 * @since 2.2
 	 */
 	boolean isRecoveryReplicationSecondary();
@@ -66,6 +66,7 @@ public interface VaultHealth {
 	/**
 	 * @return the Vault version.
 	 */
-	@Nullable String getVersion();
+	@Nullable
+	String getVersion();
 
 }

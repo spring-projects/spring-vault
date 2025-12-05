@@ -29,7 +29,7 @@ import org.springframework.data.convert.TypeMapper;
 public interface VaultTypeMapper extends TypeMapper<Map<String, Object>> {
 
 	/**
-	 * Returns whether the given {@code key} is the type key.
+	 * Return whether the given {@code key} is the type key.
 	 * @return {@literal true} if the {@code key} is the type key.
 	 */
 	boolean isTypeKey(String key);

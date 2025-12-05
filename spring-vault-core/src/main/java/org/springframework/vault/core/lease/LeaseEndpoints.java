@@ -28,8 +28,8 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Version-specific endpoint implementations that use either legacy or sys/leases
- * endpoints.
+ * Version-specific endpoint implementations that use either legacy or
+ * sys/leases endpoints.
  *
  * @author Mark Paluch
  * @author Thomas Kåsene
@@ -39,13 +39,13 @@ import org.springframework.web.client.RestOperations;
 public enum LeaseEndpoints {
 
 	/**
-	 * Legacy endpoints prior to Vault 0.8 ({@literal /sys/renew},{@literal /sys/revoke}).
+	 * Legacy endpoints prior to Vault 0.8
+	 * ({@literal /sys/renew},{@literal /sys/revoke}).
 	 */
 	Legacy {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
-
 			operations.exchange("sys/revoke", HttpMethod.PUT, LeaseEndpoints.getLeaseRevocationBody(lease), Map.class,
 					lease.getRequiredLeaseId());
 		}
@@ -57,35 +57,32 @@ public enum LeaseEndpoints {
 
 		@Override
 		public Lease renew(Lease lease, RestOperations operations) {
-
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
 			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/renew");
-
 			Assert.state(entity.getBody() != null, "Renew response must not be null");
-
 			return toLease(entity.getBody());
 		}
 
 		@Override
 		Lease renew(Lease lease, VaultClient client) {
 			return toLease(client.put()
-				.path("sys/renew")
-				.body(getLeaseRevocationBody(lease))
-				.retrieve()
-				.requiredBody(Map.class));
+					.path("sys/renew")
+					.body(getLeaseRevocationBody(lease))
+					.retrieve()
+					.requiredBody(Map.class));
 		}
+
 	},
 
 	/**
-	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
-	 * the {@literal /sys/leases/revoke} endpoint when revoking leases.
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that
+	 * uses the {@literal /sys/leases/revoke} endpoint when revoking leases.
 	 * @since 2.3
 	 */
 	Leases {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
-
 			operations.exchange("sys/leases/revoke", HttpMethod.PUT, getLeaseRevocationBody(lease), Map.class,
 					lease.getRequiredLeaseId());
 		}
@@ -97,35 +94,33 @@ public enum LeaseEndpoints {
 
 		@Override
 		public Lease renew(Lease lease, RestOperations operations) {
-
 			HttpEntity<Object> leaseRenewalEntity = getLeaseRenewalBody(lease);
 			ResponseEntity<Map<String, Object>> entity = put(operations, leaseRenewalEntity, "sys/leases/renew");
-
 			Assert.state(entity.getBody() != null, "Renew response must not be null");
-
 			return toLease(entity.getBody());
 		}
 
 		@Override
 		Lease renew(Lease lease, VaultClient client) {
 			return toLease(client.put()
-				.path("sys/leases/renew")
-				.body(getLeaseRenewalBody(lease))
-				.retrieve()
-				.requiredBody(Map.class));
+					.path("sys/leases/renew")
+					.body(getLeaseRenewalBody(lease))
+					.retrieve()
+					.requiredBody(Map.class));
 		}
+
 	},
 
 	/**
-	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that uses
-	 * the {@literal /sys/leases/revoke-prefix/…} endpoint when revoking leases.
+	 * Sys/lease endpoints for Vault 0.8 and higher ({@literal /sys/leases/…}) that
+	 * uses the {@literal /sys/leases/revoke-prefix/…} endpoint when revoking
+	 * leases.
 	 * @since 2.3
 	 */
 	LeasesRevokedByPrefix {
 
 		@Override
 		public void revoke(Lease lease, RestOperations operations) {
-
 			String endpoint = "sys/leases/revoke-prefix/" + lease.getRequiredLeaseId();
 			operations.put(endpoint, null);
 		}
@@ -144,7 +139,9 @@ public enum LeaseEndpoints {
 		Lease renew(Lease lease, VaultClient client) {
 			return LeaseEndpoints.Leases.renew(lease, client);
 		}
+
 	};
+
 
 	/**
 	 * Revoke a {@link Lease}.
@@ -180,32 +177,26 @@ public enum LeaseEndpoints {
 
 	@SuppressWarnings("NullAway")
 	private static Lease toLease(Map<String, Object> body) {
-
 		String leaseId = (String) body.get("lease_id");
 		Number leaseDuration = (Number) body.get("lease_duration");
 		boolean renewable = (Boolean) body.get("renewable");
-
 		return Lease.of(leaseId, Duration.ofSeconds(leaseDuration != null ? leaseDuration.longValue() : 0), renewable);
 	}
 
 	private static HttpEntity<Object> getLeaseRenewalBody(Lease lease) {
-
 		Map<String, String> leaseRenewalData = new HashMap<>();
 		leaseRenewalData.put("lease_id", lease.getRequiredLeaseId());
 		leaseRenewalData.put("increment", Long.toString(lease.getLeaseDuration().getSeconds()));
-
 		return new HttpEntity<>(leaseRenewalData);
 	}
 
 	private static HttpEntity<Object> getLeaseRevocationBody(Lease lease) {
-
 		Map<String, String> leaseRenewalData = new HashMap<>();
 		leaseRenewalData.put("lease_id", lease.getRequiredLeaseId());
-
 		return new HttpEntity<>(leaseRenewalData);
 	}
 
-	@SuppressWarnings({ "unchecked", "RedundantClassCall" })
+	@SuppressWarnings({"unchecked", "RedundantClassCall"})
 	private static ResponseEntity<Map<String, Object>> put(RestOperations operations, HttpEntity<Object> entity,
 			String url) {
 		return ResponseEntity.class.cast(operations.exchange(url, HttpMethod.PUT, entity, Map.class));

@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.core;
 
-import java.util.Map;
-
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultMetadataRequest;
@@ -37,18 +37,15 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 
 	private final String path;
 
+
 	ReactiveVaultKeyValueMetadataTemplate(ReactiveVaultOperations vaultOperations, String path) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
-
 		this.vaultOperations = vaultOperations;
 		this.path = path;
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public Mono<VaultMetadataResponse> get(String path) {
-
 		return vaultOperations.read(getMetadataPath(path), Map.class)
 				.mapNotNull(VaultResponseSupport::getData)
 				.map(KeyValueUtilities::fromMap);
@@ -56,9 +53,7 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 
 	@Override
 	public Mono<Void> put(String path, VaultMetadataRequest body) {
-
 		Assert.notNull(body, "Body must not be null");
-
 		return vaultOperations.write(getMetadataPath(path), body).then();
 	}
 
@@ -68,9 +63,7 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	}
 
 	private String getMetadataPath(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return this.path + "/metadata/" + path;
 	}
 

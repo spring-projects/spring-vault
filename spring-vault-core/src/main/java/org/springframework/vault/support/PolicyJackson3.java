@@ -15,12 +15,6 @@
  */
 package org.springframework.vault.support;
 
-import java.time.Duration;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.core.JsonParser;
 import tools.jackson.core.JsonToken;
@@ -31,6 +25,12 @@ import tools.jackson.databind.ValueDeserializer;
 import tools.jackson.databind.ValueSerializer;
 import tools.jackson.databind.type.TypeFactory;
 import tools.jackson.databind.util.Converter;
+
+import java.time.Duration;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -46,69 +46,54 @@ class PolicyJackson3 {
 
 		@Override
 		public void serialize(Policy value, JsonGenerator gen, SerializationContext serializers) {
-
 			gen.writeStartObject();
-
 			gen.writeName("path");
 			gen.writeStartObject();
-
 			for (Policy.Rule rule : value.getRules()) {
 				gen.writePOJOProperty(rule.getPath(), rule);
 			}
-
 			gen.writeEndObject();
 			gen.writeEndObject();
 		}
 
 	}
+
 
 	static class PolicyDeserializer extends ValueDeserializer<Policy> {
 
 		@Override
 		public Policy deserialize(JsonParser p, DeserializationContext ctxt) {
-
 			Assert.isTrue(p.currentToken() == JsonToken.START_OBJECT,
 					"Expected START_OBJECT, got: " + p.currentToken());
-
 			String fieldName = p.nextName();
-
 			Set<Policy.Rule> rules = new LinkedHashSet<>();
-
 			if ("path".equals(fieldName)) {
-
 				p.nextToken();
 				Assert.isTrue(p.currentToken() == JsonToken.START_OBJECT,
 						"Expected START_OBJECT, got: " + p.currentToken());
-
 				p.nextToken();
-
 				while (p.currentToken() == JsonToken.PROPERTY_NAME) {
-
 					String path = p.currentName();
 					p.nextToken();
-
 					Assert.isTrue(p.currentToken() == JsonToken.START_OBJECT,
 							"Expected START_OBJECT, got: " + p.currentToken());
-
 					Policy.Rule rule = p.objectReadContext().readValue(p, Policy.Rule.class);
 					rules.add(rule.withPath(path));
-
 					JsonToken jsonToken = p.nextToken();
 					if (jsonToken == JsonToken.END_OBJECT) {
 						break;
 					}
 				}
-
 				Assert.isTrue(p.currentToken() == JsonToken.END_OBJECT,
 						"Expected END_OBJECT, got: " + p.currentToken());
 				p.nextToken();
 			}
-
 			Assert.isTrue(p.currentToken() == JsonToken.END_OBJECT, "Expected END_OBJECT, got: " + p.currentToken());
 			return Policy.of(rules);
 		}
 
 	}
+
 
 	static class CapabilityToStringConverter implements Converter<Policy.Capability, String> {
 
@@ -134,6 +119,7 @@ class PolicyJackson3 {
 
 	}
 
+
 	static class StringToCapabilityConverter implements Converter<String, Policy.Capability> {
 
 		@Override
@@ -147,9 +133,7 @@ class PolicyJackson3 {
 		}
 
 		public Policy.Capability convert(String value) {
-
 			Policy.Capability capability = Policy.BuiltinCapabilities.find(value);
-
 			return capability != null ? capability : () -> value;
 		}
 
@@ -164,6 +148,7 @@ class PolicyJackson3 {
 		}
 
 	}
+
 
 	static class DurationToStringConverter implements Converter<Duration, String> {
 
@@ -193,6 +178,7 @@ class PolicyJackson3 {
 
 	}
 
+
 	static class StringToDurationConverter implements Converter<String, Duration> {
 
 		static Pattern SECONDS = Pattern.compile("(\\d+)s");
@@ -200,6 +186,7 @@ class PolicyJackson3 {
 		static Pattern MINUTES = Pattern.compile("(\\d+)m");
 
 		static Pattern HOURS = Pattern.compile("(\\d+)h");
+
 
 		@Override
 		public Duration convert(DeserializationContext ctxt, String value) {
@@ -215,24 +202,19 @@ class PolicyJackson3 {
 
 			try {
 				return Duration.ofSeconds(Long.parseLong(value));
-			}
-			catch (NumberFormatException e) {
-
+			} catch (NumberFormatException e) {
 				Matcher matcher = SECONDS.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofSeconds(Long.parseLong(matcher.group(1)));
 				}
-
 				matcher = MINUTES.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofMinutes(Long.parseLong(matcher.group(1)));
 				}
-
 				matcher = HOURS.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofHours(Long.parseLong(matcher.group(1)));
 				}
-
 				throw new IllegalArgumentException("Unsupported duration value: " + value);
 			}
 		}

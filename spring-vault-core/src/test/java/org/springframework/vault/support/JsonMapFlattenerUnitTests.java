@@ -18,8 +18,8 @@ package org.springframework.vault.support;
 import java.util.Collections;
 import java.util.Map;
 
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.*;
 

@@ -26,7 +26,9 @@ public enum TransitKeyType {
 
 	ENCRYPTION_KEY("encryption-key"), SIGNING_KEY("signing-key"), HMAC_KEY("hmac-key");
 
+
 	final String value;
+
 
 	TransitKeyType(String value) {
 		this.value = value;

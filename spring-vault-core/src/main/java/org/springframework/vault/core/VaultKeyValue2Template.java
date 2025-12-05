@@ -19,15 +19,14 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Default implementation of {@link VaultKeyValueOperations} for the key-value backend
- * version 2.
+ * Default implementation of {@link VaultKeyValueOperations} for the key-value
+ * backend version 2.
  *
  * @author Mark Paluch
  * @author Younghwan Jang
@@ -37,9 +36,10 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link VaultKeyValue2Template} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValue2Template} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -48,30 +48,24 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 		this.path = path;
 	}
 
+
 	@Override
 	public @Nullable VaultResponse get(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doRead(path, Map.class, (response, data) -> {
-
 			VaultResponse vaultResponse = new VaultResponse();
 			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(data);
-
 			return vaultResponse;
 		});
 	}
 
 	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public <T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");
-
 		return doRead(path, responseType, (response, data) -> {
-
 			VaultResponseSupport result = response;
 			result.setData(data);
 			return result;
@@ -80,10 +74,8 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 
 	@Override
 	public boolean patch(String path, Map<String, ?> patch) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(patch, "Patch body must not be null");
-
 		// To do patch operation, we need to do a read operation first
 		VaultResponse readResponse = get(path);
 		if (readResponse == null || readResponse.getData() == null) {
@@ -91,34 +83,26 @@ class VaultKeyValue2Template extends VaultKeyValue2Accessor implements VaultKeyV
 					"No data found at '%s'; patch only works on existing data".formatted(createDataPath(path)),
 					"%s/%s".formatted(this.path, path));
 		}
-
 		if (readResponse.getMetadata() == null) {
 			throw new VaultException("Metadata must not be null");
 		}
-
 		Map<String, Object> body = KeyValueUtilities.createPatchRequest(patch, readResponse.getRequiredData(),
 				readResponse.getMetadata());
-
 		try {
 			doWrite(createDataPath(path), body);
 			return true;
-		}
-		catch (VaultException e) {
-
+		} catch (VaultException e) {
 			if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
 					|| e.getMessage().contains("did not match the current version"))) {
 				return false;
 			}
-
 			throw e;
 		}
 	}
 
 	@Override
 	public void put(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		doWrite(createDataPath(path), Collections.singletonMap("data", body));
 	}
 

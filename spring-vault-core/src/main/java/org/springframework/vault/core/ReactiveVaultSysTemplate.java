@@ -15,9 +15,9 @@
  */
 package org.springframework.vault.core;
 
-import java.util.Map;
-
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.util.Assert;
@@ -33,47 +33,43 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 
 	private final ReactiveVaultTemplate vaultOperations;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultSysTemplate} with the given
 	 * {@link ReactiveVaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public ReactiveVaultSysTemplate(ReactiveVaultTemplate vaultOperations) {
-
 		Assert.notNull(vaultOperations, "ReactiveVaultOperations must not be null");
-
 		this.vaultOperations = vaultOperations;
-
 	}
+
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public Mono<Boolean> isInitialized() {
-
 		return this.vaultOperations.doWithSessionClient(client -> {
 			return client.get()
-				.path("sys/init")
-				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.retrieve()
-				.toEntity(Map.class)
-				.filter(HttpEntity::hasBody)
-				.map(it -> (Boolean) it.getBody().get("initialized"));
+					.path("sys/init")
+					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
+					.retrieve()
+					.toEntity(Map.class)
+					.filter(HttpEntity::hasBody)
+					.map(it -> (Boolean) it.getBody().get("initialized"));
 		});
 	}
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public Mono<VaultHealth> health() {
-
 		return this.vaultOperations.doWithVaultClient(client -> {
-
 			return client.get()
-				.path("sys/health")
-				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.retrieve()
-				.toEntity(VaultSysTemplate.VaultHealthImpl.class)
-				.filter(HttpEntity::hasBody)
-				.map(HttpEntity::getBody);
+					.path("sys/health")
+					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
+					.retrieve()
+					.toEntity(VaultSysTemplate.VaultHealthImpl.class)
+					.filter(HttpEntity::hasBody)
+					.map(HttpEntity::getBody);
 		});
 	}
 

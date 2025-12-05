@@ -36,6 +36,7 @@ class AppRoleTokens {
 
 	}
 
+
 	/**
 	 * Wrapped roleId/secretId via Cubbyhole.
 	 */
@@ -53,6 +54,7 @@ class AppRoleTokens {
 
 	}
 
+
 	/**
 	 * Pull-mode.
 	 */
@@ -69,6 +71,7 @@ class AppRoleTokens {
 		}
 
 	}
+
 
 	/**
 	 * Static, provided roleId/secretId.

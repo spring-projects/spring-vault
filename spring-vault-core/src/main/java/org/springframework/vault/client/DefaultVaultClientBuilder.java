@@ -18,7 +18,6 @@ package org.springframework.vault.client;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.ClientOptions;
@@ -35,18 +34,19 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultVaultClientBuilder implements VaultClient.Builder {
 
-	private final RestClient.Builder restClientBuilder;
+	private final RestClient.Builder builder;
 
 	private @Nullable VaultEndpointProvider endpointProvider;
 
 	private @Nullable UriBuilderFactory uriBuilderFactory;
 
+
 	DefaultVaultClientBuilder(RestTemplate restTemplate) {
-		this.restClientBuilder = RestClient.builder(restTemplate);
+		this.builder = RestClient.builder(restTemplate);
 	}
 
 	DefaultVaultClientBuilder(RestClient restClient) {
-		this.restClientBuilder = restClient.mutate();
+		this.builder = restClient.mutate();
 	}
 
 	DefaultVaultClientBuilder() {
@@ -54,18 +54,16 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 	}
 
 	DefaultVaultClientBuilder(ClientOptions options, SslConfiguration sslConfiguration) {
-		this(RestClient.builder().requestFactory(ClientHttpRequestFactoryFactory.create(options, sslConfiguration)));
-	}
-
-	DefaultVaultClientBuilder(RestClient.Builder builder) {
-		this.restClientBuilder = builder.configureMessageConverters(VaultClients::configureConverters);
+		this.builder = RestClient.builder().requestFactory(ClientHttpRequestFactoryFactory.create(options, sslConfiguration));
+		this.builder.configureMessageConverters(VaultClients::configureConverters);
 	}
 
 	private DefaultVaultClientBuilder(DefaultVaultClientBuilder other) {
-		this.restClientBuilder = other.restClientBuilder.clone();
+		this.builder = other.builder.clone();
 		this.endpointProvider = other.endpointProvider;
 		this.uriBuilderFactory = other.uriBuilderFactory;
 	}
+
 
 	@Override
 	public VaultClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
@@ -75,7 +73,7 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	@Override
 	public VaultClient.Builder defaultHeader(String header, String... values) {
-		restClientBuilder.defaultHeader(header, values);
+		builder.defaultHeader(header, values);
 		return this;
 	}
 
@@ -88,21 +86,20 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 	public VaultClient.Builder endpoint(VaultEndpointProvider endpointProvider) {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider not be null");
 		this.endpointProvider = endpointProvider;
-
-		//TODO
-		this.restClientBuilder.uriBuilderFactory(VaultClients.createUriBuilderFactory(endpointProvider, false));
+		uriBuilderFactory(VaultClients
+				.createUriBuilderFactory(endpointProvider, false));
 		return this;
 	}
 
 	@Override
 	public VaultClient.Builder requestFactory(ClientHttpRequestFactory requestFactory) {
-		this.restClientBuilder.requestFactory(requestFactory);
+		this.builder.requestFactory(requestFactory);
 		return this;
 	}
 
 	@Override
 	public VaultClient.Builder configureRestClient(Consumer<RestClient.Builder> restClientBuilderConsumer) {
-		restClientBuilderConsumer.accept(restClientBuilder);
+		restClientBuilderConsumer.accept(builder);
 		return this;
 	}
 
@@ -119,7 +116,7 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	@Override
 	public VaultClient build() {
-		return new DefaultVaultClient(this.restClientBuilder.build(), this.uriBuilderFactory, this);
+		return new DefaultVaultClient(this.builder.build(), this.uriBuilderFactory, this);
 	}
 
 }

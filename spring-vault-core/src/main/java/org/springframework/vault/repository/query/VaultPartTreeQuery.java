@@ -37,7 +37,7 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 
 	/**
-	 * Creates a new {@link VaultPartTreeQuery} for the given {@link QueryMethod},
+	 * Create a new {@code VaultPartTreeQuery} for the given {@link QueryMethod},
 	 * {@link EvaluationContextProvider}, {@link KeyValueOperations} and query creator
 	 * type.
 	 * @param queryMethod must not be {@literal null}.

@@ -16,7 +16,6 @@
 package org.springframework.vault.core;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.vault.client.VaultClient;
 
 /**

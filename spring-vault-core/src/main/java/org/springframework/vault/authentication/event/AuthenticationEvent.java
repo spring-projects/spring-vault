@@ -32,14 +32,16 @@ public abstract class AuthenticationEvent extends ApplicationEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	/**
-	 * Create a new {@link AuthenticationEvent} given {@link VaultToken}.
+	 * Create a new {@code AuthenticationEvent} given {@link VaultToken}.
 	 * @param source the {@link VaultToken} associated with this event, must not be
 	 * {@literal null}.
 	 */
 	protected AuthenticationEvent(VaultToken source) {
 		super(source);
 	}
+
 
 	@Override
 	public VaultToken getSource() {

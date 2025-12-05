@@ -29,31 +29,35 @@ public class SignatureValidation {
 
 	private static final SignatureValidation INVALID = new SignatureValidation(false);
 
+
 	private final boolean state;
+
 
 	private SignatureValidation(boolean state) {
 		this.state = state;
 	}
 
+
 	/**
 	 * Factory method to create a {@link SignatureValidation} object representing a
 	 * successfully validated signature.
-	 * @return a {@link SignatureValidation} object representing a successfully validated
-	 * signature.
+	 * @return a {@link SignatureValidation} object representing a successfully
+	 * validated signature.
 	 */
 	public static SignatureValidation valid() {
 		return VALID;
 	}
 
 	/**
-	 * Factory method to create a {@link SignatureValidation} object representing a failed
-	 * signature validation.
+	 * Factory method to create a {@link SignatureValidation} object representing a
+	 * failed signature validation.
 	 * @return a {@link SignatureValidation} object representing a failed signature
 	 * validation.
 	 */
 	public static SignatureValidation invalid() {
 		return INVALID;
 	}
+
 
 	public boolean isValid() {
 		return this.state;

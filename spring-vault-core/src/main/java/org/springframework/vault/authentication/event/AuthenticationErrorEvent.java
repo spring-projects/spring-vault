@@ -20,8 +20,8 @@ import java.io.Serial;
 import org.springframework.context.ApplicationEvent;
 
 /**
- * Generic event class for authentication error events. These can be generic failures or
- * specific ones such as renewal or login errors.
+ * Generic event class for authentication error events. These can be generic
+ * failures or specific ones such as renewal or login errors.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -35,10 +35,12 @@ public class AuthenticationErrorEvent extends ApplicationEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	private final Throwable exception;
 
+
 	/**
-	 * Create a new {@link AuthenticationErrorEvent} given {@code source} and
+	 * Create a new {@code AuthenticationErrorEvent} given {@code source} and
 	 * {@link Exception}.
 	 * @param source must not be {@literal null}.
 	 * @param exception must not be {@literal null}.

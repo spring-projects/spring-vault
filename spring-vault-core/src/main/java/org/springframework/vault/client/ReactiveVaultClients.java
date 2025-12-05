@@ -22,10 +22,16 @@ import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -105,70 +111,62 @@ public class ReactiveVaultClients {
 	 */
 	static WebClient.Builder createWebClientBuilder(ReactiveVaultEndpointProvider endpointProvider,
 			ClientHttpConnector connector) {
-
 		Assert.notNull(endpointProvider, "ReactiveVaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
-
-		ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(configurer -> {
-			configureCodecs(configurer);
-		}).build();
-
-		WebClient.Builder builder = WebClient.builder().exchangeStrategies(strategies).clientConnector(connector);
-
+		WebClient.Builder builder = WebClient.builder().codecs(ReactiveVaultClients::configureCodecs).clientConnector(connector);
 		boolean simpleSource = false;
 		if (endpointProvider instanceof VaultEndpointProviderAdapter) {
-
 			if (((VaultEndpointProviderAdapter) endpointProvider).source instanceof SimpleVaultEndpointProvider) {
 				simpleSource = true;
-
 				UriBuilderFactory uriBuilderFactory = VaultClients
 					.createUriBuilderFactory(((VaultEndpointProviderAdapter) endpointProvider).source);
 				builder.uriBuilderFactory(uriBuilderFactory);
 			}
 		}
-
 		if (!simpleSource) {
 			builder.filter((request, next) -> {
 				return redirectVaultEndpoint(endpointProvider, request, next);
 			});
 		}
-
 		return builder;
 	}
 
-	private static Mono<ClientResponse> redirectVaultEndpoint(ReactiveVaultEndpointProvider endpointProvider, ClientRequest request, ExchangeFunction next) {
+	private static Mono<ClientResponse> redirectVaultEndpoint(ReactiveVaultEndpointProvider endpointProvider,
+			ClientRequest request, ExchangeFunction next) {
 		URI uri = request.url();
-
-		if (!uri.isAbsolute()) {
-
-			return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
-
-				UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
-						.scheme(endpoint.getScheme())
-						.host(endpoint.getHost())
-						.port(endpoint.getPort())
-						.replacePath(endpoint.getPath())
-						.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
-						.build();
-
-				ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
-
-				return next.exchange(requestToSend);
-			});
-
+		if (uri.isAbsolute()) {
+			return next.exchange(request);
 		}
-		return next.exchange(request);
+
+		return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
+			UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
+				.scheme(endpoint.getScheme())
+				.host(endpoint.getHost())
+				.port(endpoint.getPort())
+				.replacePath(endpoint.getPath())
+				.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
+				.build();
+			ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
+			return next.exchange(requestToSend);
+		});
 	}
 
-	static void configureCodecs(ClientCodecConfigurer configurer) {
-
+	/**
+	 * Configure {@link Encoder} and {@link Decoder}s for Vault interaction.
+	 The used converters are:
+	 * <ul>
+	 * <li>{@link ByteArrayDecoder} and {@link ByteArrayEncoder}</li>
+	 * <li>{@link StringDecoder} for all mime types</li>
+	 * <li>If Jackson 3 is on the class path: {@link JacksonJsonEncoder} and {@link JacksonJsonDecoder}</li>
+	 * <li>Alternatively, if Jackson 2 is on the class path: {@link Jackson2JsonEncoder} and {@link Jackson2JsonDecoder}</li>
+	 * </ul>
+	 * @since 4.1
+	 */
+	public static void configureCodecs(ClientCodecConfigurer configurer) {
 		CustomCodecs cc = configurer.customCodecs();
-
 		cc.register(new ByteArrayDecoder());
 		cc.register(StringDecoder.allMimeTypes());
-
 		cc.register(new ByteArrayEncoder());
-
 		JacksonCompat.instance().registerCodecs(cc::register);
 	}
 
@@ -181,15 +179,10 @@ public class ReactiveVaultClients {
 	 * @since 2.2
 	 */
 	public static ExchangeFilterFunction namespace(String namespace) {
-
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");
-
 		return ExchangeFilterFunction.ofRequestProcessor(request -> {
-
 			return Mono.fromSupplier(() -> {
-
 				return ClientRequest.from(request).headers(headers -> {
-
 					if (!headers.containsHeader(VaultHttpHeaders.VAULT_NAMESPACE)) {
 						headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
 					}
@@ -208,11 +201,10 @@ public class ReactiveVaultClients {
 	 * @since 2.3
 	 */
 	public static ReactiveVaultEndpointProvider wrap(VaultEndpointProvider endpointProvider) {
-
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
-
 		return new VaultEndpointProviderAdapter(endpointProvider);
 	}
+
 
 	static class VaultEndpointProviderAdapter implements ReactiveVaultEndpointProvider {
 
@@ -220,11 +212,12 @@ public class ReactiveVaultClients {
 
 		private final Mono<VaultEndpoint> mono;
 
-		VaultEndpointProviderAdapter(VaultEndpointProvider provider) {
 
+		VaultEndpointProviderAdapter(VaultEndpointProvider provider) {
 			this.source = provider;
 			this.mono = Mono.fromSupplier(provider::getVaultEndpoint).subscribeOn(Schedulers.boundedElastic());
 		}
+
 
 		public VaultEndpointProvider getSource() {
 			return source;

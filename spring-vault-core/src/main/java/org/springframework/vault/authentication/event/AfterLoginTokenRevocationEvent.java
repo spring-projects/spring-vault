@@ -32,8 +32,9 @@ public class AfterLoginTokenRevocationEvent extends AuthenticationEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	/**
-	 * Create a new {@link AfterLoginTokenRevocationEvent} given {@link VaultToken}.
+	 * Create a new {@code AfterLoginTokenRevocationEvent} given {@link VaultToken}.
 	 * @param source the {@link VaultToken} associated with this event, must not be
 	 * {@literal null}.
 	 */

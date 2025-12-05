@@ -21,9 +21,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 
 /**
- * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
- * backend. Paths used in this operations interface are relative and outgoing requests
- * prepend paths with the according operation-specific prefix.
+ * Interface that specifies a basic set of Vault operations using Vault's
+ * Key/Value secret backend. Paths used in this operations interface are
+ * relative and outgoing requests prepend paths with the according
+ * operation-specific prefix.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch

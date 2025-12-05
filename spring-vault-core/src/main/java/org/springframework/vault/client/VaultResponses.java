@@ -47,6 +47,7 @@ public abstract class VaultResponses {
 	private static final AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
 		.createHttpMessageConverter();
 
+
 	/**
 	 * Build a {@link VaultException} given {@link HttpStatusCodeException}.
 	 * @param e must not be {@literal null}.
@@ -96,6 +97,7 @@ public abstract class VaultResponses {
 
 		return new VaultException("Status %s [%s]".formatted(renderStatus(statusCode), path));
 	}
+
 
 	/**
 	 * Create a {@link ParameterizedTypeReference} for {@code responseType}.
