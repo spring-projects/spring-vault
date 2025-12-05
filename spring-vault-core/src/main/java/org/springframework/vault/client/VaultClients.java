@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
@@ -61,7 +60,8 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
-	 * @param endpoint must not be {@literal null}.
+	 *
+	 * @param endpoint       must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @deprecated since 4.1 in favor of {@link VaultClient}.
@@ -82,15 +82,16 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
+	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param requestFactory must not be {@literal null}.
+	 * @param requestFactory   must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @since 1.1
 	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
 	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
-			ClientHttpRequestFactory requestFactory) {
+												  ClientHttpRequestFactory requestFactory) {
 
 		RestTemplate restTemplate = createRestTemplate();
 
@@ -111,19 +112,20 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
+	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param requestFactory must not be {@literal null}.
+	 * @param requestFactory   must not be {@literal null}.
 	 * @return the {@link RestClient}.
 	 * @since 4.0
 	 */
 	public static RestClient createRestClient(VaultEndpointProvider endpointProvider,
-			ClientHttpRequestFactory requestFactory, Consumer<RestClient.Builder> builderCustomizer) {
+											  ClientHttpRequestFactory requestFactory, Consumer<RestClient.Builder> builderCustomizer) {
 
 		RestClient.Builder builder = RestClient.builder()
-			.requestFactory(requestFactory)
-			.bufferContent((uri, httpMethod) -> true)
-			.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
-			.configureMessageConverters(VaultClients::configureConverters);
+				.requestFactory(requestFactory)
+				.bufferContent((uri, httpMethod) -> true)
+				.uriBuilderFactory(createUriBuilderFactory(endpointProvider))
+				.configureMessageConverters(VaultClients::configureConverters);
 
 		builderCustomizer.accept(builder);
 
@@ -141,17 +143,18 @@ public class VaultClients {
 	 * request header.
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
+	 *
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestClient}.
 	 * @since 4.1
 	 */
 	public static RestClient createRestClient(ClientHttpRequestFactory requestFactory,
-			Consumer<RestClient.Builder> builderCustomizer) {
+											  Consumer<RestClient.Builder> builderCustomizer) {
 
 		RestClient.Builder builder = RestClient.builder()
-			.requestFactory(requestFactory)
-			.bufferContent((uri, httpMethod) -> true)
-			.configureMessageConverters(VaultClients::configureConverters);
+				.requestFactory(requestFactory)
+				.bufferContent((uri, httpMethod) -> true)
+				.configureMessageConverters(VaultClients::configureConverters);
 
 		builderCustomizer.accept(builder);
 
@@ -177,6 +180,7 @@ public class VaultClients {
 	 * Otherwise, Vault will deny body processing.
 	 * <p>
 	 * Requires Jackson for Object-to-JSON mapping.
+	 *
 	 * @return the {@link RestTemplate}.
 	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
@@ -198,6 +202,7 @@ public class VaultClients {
 	/**
 	 * Create a {@link ClientHttpRequestInterceptor} that associates each request with a
 	 * {@code X-Vault-Namespace} header if the header is not present.
+	 *
 	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
 	 * @return the {@link ClientHttpRequestInterceptor} to register with
 	 * {@link RestTemplate}.
@@ -229,7 +234,7 @@ public class VaultClients {
 	}
 
 	static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider,
-			boolean allowAbsolutePath) {
+													 boolean allowAbsolutePath) {
 		return new PrefixAwareUriBuilderFactory(endpointProvider, allowAbsolutePath);
 	}
 
@@ -269,29 +274,31 @@ public class VaultClients {
 
 					String baseUri = toBaseUri(endpoint);
 					UriComponents uriComponents = UriComponentsBuilder
-						.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
-						.build();
+							.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+							.build();
 
 					return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
 				}
 			}
 
-			String normalizedUriTemplate = uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate;
+			return getUriComponents(endpointProvider != null ? endpointProvider.getVaultEndpoint() : null, uriTemplate);
+		}
+	}
 
-			if (endpointProvider != null) {
+	static UriComponentsBuilder getUriComponents(@Nullable VaultEndpoint endpoint, String uriTemplate) {
 
-				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+		String normalizedUriTemplate = uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate;
 
-				UriComponents uriComponents = UriComponentsBuilder.fromUriString(toBaseUri(endpoint))
+		if (endpoint != null) {
+
+			UriComponents uriComponents = UriComponentsBuilder.fromUriString(toBaseUri(endpoint))
 					.path(normalizedUriTemplate)
 					.build();
 
-				return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
-			}
-
-			return UriComponentsBuilder.fromUriString(normalizedUriTemplate);
+			return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
 		}
 
+		return UriComponentsBuilder.fromUriString(normalizedUriTemplate);
 	}
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
@@ -303,6 +310,7 @@ public class VaultClients {
 	/**
 	 * Strip/add leading slashes from {@code uriTemplate} depending on whether the base
 	 * url has a trailing slash.
+	 *
 	 * @param uriTemplate
 	 * @return
 	 */
@@ -322,8 +330,7 @@ public class VaultClients {
 			if (uri.getHost() != null) {
 				return uriTemplate;
 			}
-		}
-		catch (IllegalArgumentException ignored) {
+		} catch (IllegalArgumentException ignored) {
 		}
 
 		if (!uriTemplate.startsWith("/")) {
@@ -335,6 +342,7 @@ public class VaultClients {
 
 	/**
 	 * Normalize the URI {@code path} so that it can be combined with {@code prefix}.
+	 *
 	 * @param prefix
 	 * @param path
 	 * @return
@@ -351,5 +359,4 @@ public class VaultClients {
 
 		return path;
 	}
-
 }

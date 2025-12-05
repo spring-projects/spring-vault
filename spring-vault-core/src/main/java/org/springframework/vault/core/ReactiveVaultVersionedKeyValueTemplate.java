@@ -15,19 +15,18 @@
  */
 package org.springframework.vault.core;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import reactor.core.publisher.Mono;
-
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
@@ -48,20 +47,21 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 	/**
 	 * Create a new {@link ReactiveVaultVersionedKeyValueTemplate} given
-	 * {@link ReactiveVaultOperations} and the mount {@code path}.
+	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
+	 *
 	 * @param reactiveVaultOperations must not be {@literal null}.
-	 * @param path must not be empty or {@literal null}.
+	 * @param path                    must not be empty or {@literal null}.
 	 */
-	public ReactiveVaultVersionedKeyValueTemplate(ReactiveVaultOperations reactiveVaultOperations, String path) {
+	public ReactiveVaultVersionedKeyValueTemplate(ReactiveVaultTemplate reactiveVaultOperations, String path) {
 		super(reactiveVaultOperations, path);
 		this.path = path;
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
 		return Arrays.stream(versionsToDelete)
-			.filter(Version::isVersioned)
-			.map(Version::getVersion)
-			.collect(Collectors.toList());
+				.filter(Version::isVersioned)
+				.map(Version::getVersion)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.notNull(version, "Version must not be null");
 
 		return doRead(path, version, Map.class)
-			.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getRequiredMetadata()));
+				.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getRequiredMetadata()));
 	}
 
 	@Override
@@ -94,8 +94,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Class<? extends VaultResponseSupport> responseTypeToUse;
 		if (JacksonCompat.instance().isJackson3()) {
 			responseTypeToUse = VersionedResponse.class;
-		}
-		else {
+		} else {
 			responseTypeToUse = VersionedJackson2Response.class;
 		}
 
@@ -127,15 +126,14 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			data.put("options", requestOptions);
 
 			requestOptions.put("cas", versioned.getVersion().getVersion());
-		}
-		else {
+		} else {
 			data.put("data", body);
 		}
 
 		return doWrite(createDataPath(path), data).map(VaultResponseSupport::getRequiredData)
-			.map(KeyValueUtilities::getMetadata)
-			.switchIfEmpty(Mono.error(new IllegalStateException(
-					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
+				.map(KeyValueUtilities::getMetadata)
+				.switchIfEmpty(Mono.error(new IllegalStateException(
+						"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
 	}
 
 	@Override
@@ -182,31 +180,16 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 	/**
 	 * Read a secret at {@code path} and read it into {@link VersionedResponse}.
+	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @return mapped value.
 	 */
 	<T> Mono<T> doReadVersioned(String path, Class<T> responseType) {
 
-		Function<ClientResponse, Mono<ResponseEntity<T>>> toEntity = cr -> cr.toEntity(responseType);
-		ResponseFunction<T> defaults = new ResponseFunction<>(toEntity);
-		Function<ClientResponse, Mono<T>> responseFunction = clientResponse -> {
-
-			if (HttpStatusUtil.isNotFound(clientResponse.statusCode())) {
-
-				return clientResponse.bodyToMono(String.class).flatMap(it -> {
-
-					if (it.contains("deletion_time")) {
-						return Mono.justOrEmpty(VaultResponses.unwrap(it, responseType));
-					}
-
-					return Mono.empty();
-				});
-			}
-
-			return defaults.apply(clientResponse);
-		};
-
-		return doRead((webClient) -> webClient.get().uri(path), responseFunction);
+		return reactiveVaultOperations.doWithSessionClient((client) -> client.get().path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, response -> (Mono) response.bodyToMono(responseType))
+				.onStatus(Predicate.not(HttpStatusCode::is2xxSuccessful), ClientResponse::createError)
+				.bodyToMono(responseType));
 	}
-
 }

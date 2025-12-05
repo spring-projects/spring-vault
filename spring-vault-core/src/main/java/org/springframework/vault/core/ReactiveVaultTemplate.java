@@ -15,14 +15,15 @@
  */
 package org.springframework.vault.core;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -30,6 +31,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.SessionManager;
 import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClient.RequestBodySpec;
 import org.springframework.vault.client.SimpleVaultEndpointProvider;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
@@ -45,12 +48,9 @@ import org.springframework.web.reactive.function.BodyExtractors;
 import org.springframework.web.reactive.function.client.ClientRequest;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
-import org.springframework.web.reactive.function.client.WebClientException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
  * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
@@ -78,7 +78,11 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private final WebClient statelessClient;
 
+	private final ReactiveVaultClient vaultClient;
+
 	private final WebClient sessionClient;
+
+	private final ReactiveVaultClient sessionVaultClient;
 
 	private final VaultTokenSupplier vaultTokenSupplier;
 
@@ -88,8 +92,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
 	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
 	 * authentication token header}.
+	 *
 	 * @param vaultEndpoint must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 * @param connector     must not be {@literal null}.
 	 * @since 2.2.1
 	 */
 	public ReactiveVaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpConnector connector) {
@@ -99,12 +104,13 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpConnector} and {@link VaultTokenSupplier}.
-	 * @param vaultEndpoint must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 *
+	 * @param vaultEndpoint      must not be {@literal null}.
+	 * @param connector          must not be {@literal null}.
 	 * @param vaultTokenSupplier must not be {@literal null}.
 	 */
 	public ReactiveVaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpConnector connector,
-			VaultTokenSupplier vaultTokenSupplier) {
+								 VaultTokenSupplier vaultTokenSupplier) {
 		this(SimpleVaultEndpointProvider.of(vaultEndpoint), connector, vaultTokenSupplier);
 	}
 
@@ -114,8 +120,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
 	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
 	 * authentication token header}.
+	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 * @param connector        must not be {@literal null}.
 	 * @since 2.2.1
 	 */
 	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
@@ -127,18 +134,76 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
 		this.statelessClient = webClient;
+		this.vaultClient = ReactiveVaultClient.builder(webClient).build();
 		this.sessionClient = webClient;
+		this.sessionVaultClient = this.vaultClient;
+	}
+
+	/**
+	 * Create a new {@code ReactiveVaultTemplate} with a {@link ReactiveVaultClient}.
+	 *
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public ReactiveVaultTemplate(ReactiveVaultClient client) {
+
+		Assert.notNull(client, "VaultClient must not be null");
+
+		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
+		this.statelessClient = getWebClient(client);
+		this.vaultClient = client;
+		this.sessionClient = this.statelessClient;
+		this.sessionVaultClient = client;
+	}
+
+	/**
+	 * Create a new {@code ReactiveVaultTemplate} with a {@link ReactiveVaultClient} and
+	 * {@link VaultTokenSupplier}.
+	 *
+	 * @param client             must not be {@literal null}.
+	 * @param vaultTokenSupplier must not be {@literal null}.
+	 * @since 4.1
+	 */
+	@SuppressWarnings("NullAway")
+	public ReactiveVaultTemplate(ReactiveVaultClient client, VaultTokenSupplier vaultTokenSupplier) {
+
+		Assert.notNull(client, "VaultEndpoint must not be null");
+		Assert.notNull(vaultTokenSupplier, "VaultTokenSupplier must not be null");
+
+		this.vaultTokenSupplier = vaultTokenSupplier;
+
+		this.statelessClient = getWebClient(client);
+		this.vaultClient = client;
+
+		AtomicReference<WebClient> clientRef = new AtomicReference<>();
+		client.mutate().configureWebClient(it -> {
+			it.filter(getSessionFilter());
+			clientRef.set(it.build());
+		});
+
+		this.sessionClient = clientRef.get();
+		this.sessionVaultClient = client;
+	}
+
+	@SuppressWarnings("NullAway")
+	private static WebClient getWebClient(ReactiveVaultClient client) {
+		AtomicReference<WebClient> clientRef = new AtomicReference<>();
+		client.mutate().configureWebClient(it -> {
+			clientRef.set(it.build());
+		});
+		return clientRef.get();
 	}
 
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpointProvider},
 	 * {@link ClientHttpConnector} and {@link VaultTokenSupplier}.
-	 * @param endpointProvider must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 *
+	 * @param endpointProvider   must not be {@literal null}.
+	 * @param connector          must not be {@literal null}.
 	 * @param vaultTokenSupplier must not be {@literal null}.
 	 */
 	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpConnector connector,
-			VaultTokenSupplier vaultTokenSupplier) {
+								 VaultTokenSupplier vaultTokenSupplier) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
@@ -146,7 +211,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = doCreateWebClient(endpointProvider, connector);
+		this.vaultClient = ReactiveVaultClient.builder(this.statelessClient).build();
 		this.sessionClient = doCreateSessionWebClient(endpointProvider, connector);
+		this.sessionVaultClient = ReactiveVaultClient.builder(this.sessionClient).build();
 	}
 
 	/**
@@ -154,6 +221,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 * constructor does not use a {@link VaultTokenSupplier}. It is intended for usage
 	 * with Vault Agent to inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
+	 *
 	 * @param webClientBuilder must not be {@literal null}.
 	 * @since 2.2.1
 	 */
@@ -165,13 +233,16 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
 		this.statelessClient = webClient;
+		this.vaultClient = ReactiveVaultClient.builder(this.statelessClient).build();
 		this.sessionClient = webClient;
+		this.sessionVaultClient = this.vaultClient;
 	}
 
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} through a {@link WebClientBuilder}, and
 	 * {@link VaultTokenSupplier}.
-	 * @param webClientBuilder must not be {@literal null}.
+	 *
+	 * @param webClientBuilder   must not be {@literal null}.
 	 * @param vaultTokenSupplier must not be {@literal null}
 	 * @since 2.2
 	 */
@@ -182,7 +253,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = webClientBuilder.build();
+		this.vaultClient = ReactiveVaultClient.builder(this.statelessClient).build();
 		this.sessionClient = webClientBuilder.build().mutate().filter(getSessionFilter()).build();
+		this.sessionVaultClient = ReactiveVaultClient.builder(this.sessionClient).build();
 	}
 
 	/**
@@ -191,8 +264,9 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 * {@link VaultEndpointProvider} is used to contribute host and port details for
 	 * relative URLs typically used by the Template API. Subclasses may override this
 	 * method to customize the {@link WebClient}.
+	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 * @param connector        must not be {@literal null}.
 	 * @return the {@link WebClient} used for Vault communication.
 	 * @since 2.1
 	 */
@@ -211,13 +285,14 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 * {@link VaultEndpointProvider} is used to contribute host and port details for
 	 * relative URLs typically used by the Template API. Subclasses may override this
 	 * method to customize the {@link WebClient}.
+	 *
 	 * @param endpointProvider must not be {@literal null}.
-	 * @param connector must not be {@literal null}.
+	 * @param connector        must not be {@literal null}.
 	 * @return the {@link WebClient} used for Vault communication.
 	 * @since 2.1
 	 */
 	protected WebClient doCreateSessionWebClient(VaultEndpointProvider endpointProvider,
-			ClientHttpConnector connector) {
+												 ClientHttpConnector connector) {
 
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
@@ -225,10 +300,10 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		ExchangeFilterFunction filter = getSessionFilter();
 
 		return WebClientBuilder.builder()
-			.httpConnector(connector)
-			.endpointProvider(endpointProvider)
-			.filter(filter)
-			.build();
+				.httpConnector(connector)
+				.endpointProvider(endpointProvider)
+				.filter(filter)
+				.build();
 	}
 
 	private ExchangeFilterFunction getSessionFilter() {
@@ -274,21 +349,21 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doRead(path, VaultResponse.class).onErrorResume(WebClientResponseException.NotFound.class,
-				e -> Mono.empty());
+		return doRead(path, VaultResponse.class);
 	}
 
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType) {
 
-		return doWithSession(webClient -> {
+		return doWithSessionClient(client -> {
 
 			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 
-			return webClient.get()
-				.uri(path)
-				.exchangeToMono(mapResponse(ref, path, HttpMethod.GET))
-				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
+			return client.get()
+					.path(path)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, clientResponse -> clientResponse.releaseBody().then(Mono.empty()))
+					.bodyToMono(ref);
 		});
 	}
 
@@ -299,9 +374,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		Assert.hasText(path, "Path must not be empty");
 
 		return doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")), VaultListResponse.class)
-			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-			.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
-			.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
+				.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
+				.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
 	}
 
 	@Override
@@ -309,15 +383,15 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doWithSession(webClient -> {
+		return doWithSessionClient(client -> {
 
-			RequestBodySpec uri = webClient.post().uri(path);
+			RequestBodySpec spec = client.post().path(path);
 
 			if (body != null) {
-				return uri.bodyValue(body).exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
+				spec.bodyValue(body);
 			}
 
-			return uri.exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
+			return spec.retrieve().body();
 		});
 	}
 
@@ -326,9 +400,10 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		Assert.hasText(path, "Path must not be empty");
 
-		return doWithSession(webClient -> webClient.delete()
-			.uri(path)
-			.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
+		return doWithSessionClient(client -> client.delete()
+				.path(path)
+				.retrieve()
+				.toBodilessEntity()).then();
 	}
 
 	@Override
@@ -339,10 +414,17 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 		try {
 			return clientCallback.apply(this.statelessClient);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
 		}
+	}
+
+	<V, T extends Publisher<V>> T doWithVaultClient(Function<ReactiveVaultClient, ? extends T> clientCallback)
+			throws VaultException, WebClientException {
+
+		Assert.notNull(clientCallback, "Client callback must not be null");
+
+		return clientCallback.apply(this.vaultClient);
 	}
 
 	@Override
@@ -350,20 +432,31 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 			throws VaultException, WebClientException {
 
 		Assert.notNull(sessionCallback, "Session callback must not be null");
-
 		try {
 			return sessionCallback.apply(this.sessionClient);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
 		}
 	}
 
+	<V, T extends Publisher<V>> T doWithSessionClient(Function<ReactiveVaultClient, ? extends T> sessionCallback)
+			throws VaultException, WebClientException {
+
+		Assert.notNull(sessionCallback, "Session callback must not be null");
+
+		if (vaultTokenSupplier == NoTokenSupplier.INSTANCE) {
+			return doWithVaultClient(sessionCallback);
+		}
+
+		return sessionCallback.apply(this.sessionVaultClient);
+	}
+
 	private <T> Mono<T> doRead(String path, Class<T> responseType) {
 
-		return doWithSession(client -> client.get() //
-			.uri(path)
-			.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
+		return doWithSessionClient(client -> client.get().path(path) //
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, clientResponse -> clientResponse.releaseBody().then(Mono.empty()))
+				.bodyToMono(responseType));
 	}
 
 	static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path, HttpMethod method) {
@@ -371,7 +464,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	static <T> Function<ClientResponse, Mono<T>> mapResponse(ParameterizedTypeReference<T> typeReference, String path,
-			HttpMethod method) {
+															 HttpMethod method) {
 
 		return response -> isSuccess(response) ? response.body(BodyExtractors.toMono(typeReference))
 				: mapOtherwise(response, path, method);
@@ -403,7 +496,5 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		public Mono<VaultToken> getVaultToken() {
 			return Mono.error(new UnsupportedOperationException("Token retrieval disabled"));
 		}
-
 	}
-
 }

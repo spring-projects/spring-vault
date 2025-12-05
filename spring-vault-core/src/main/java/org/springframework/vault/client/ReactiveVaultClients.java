@@ -24,11 +24,14 @@ import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.client.reactive.ClientHttpConnector;
+import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.reactive.function.client.ClientRequest;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
+import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilderFactory;
@@ -107,15 +110,7 @@ public class ReactiveVaultClients {
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 
 		ExchangeStrategies strategies = ExchangeStrategies.builder().codecs(configurer -> {
-
-			CustomCodecs cc = configurer.customCodecs();
-
-			cc.register(new ByteArrayDecoder());
-			cc.register(StringDecoder.allMimeTypes());
-
-			cc.register(new ByteArrayEncoder());
-
-			JacksonCompat.instance().registerCodecs(cc::register);
+			configureCodecs(configurer);
 		}).build();
 
 		WebClient.Builder builder = WebClient.builder().exchangeStrategies(strategies).clientConnector(connector);
@@ -134,32 +129,47 @@ public class ReactiveVaultClients {
 
 		if (!simpleSource) {
 			builder.filter((request, next) -> {
-
-				URI uri = request.url();
-
-				if (!uri.isAbsolute()) {
-
-					return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
-
-						UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
-							.scheme(endpoint.getScheme())
-							.host(endpoint.getHost())
-							.port(endpoint.getPort())
-							.replacePath(endpoint.getPath())
-							.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
-							.build();
-
-						ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
-
-						return next.exchange(requestToSend);
-					});
-
-				}
-				return next.exchange(request);
+				return redirectVaultEndpoint(endpointProvider, request, next);
 			});
 		}
 
 		return builder;
+	}
+
+	private static Mono<ClientResponse> redirectVaultEndpoint(ReactiveVaultEndpointProvider endpointProvider, ClientRequest request, ExchangeFunction next) {
+		URI uri = request.url();
+
+		if (!uri.isAbsolute()) {
+
+			return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
+
+				UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
+						.scheme(endpoint.getScheme())
+						.host(endpoint.getHost())
+						.port(endpoint.getPort())
+						.replacePath(endpoint.getPath())
+						.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
+						.build();
+
+				ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
+
+				return next.exchange(requestToSend);
+			});
+
+		}
+		return next.exchange(request);
+	}
+
+	static void configureCodecs(ClientCodecConfigurer configurer) {
+
+		CustomCodecs cc = configurer.customCodecs();
+
+		cc.register(new ByteArrayDecoder());
+		cc.register(StringDecoder.allMimeTypes());
+
+		cc.register(new ByteArrayEncoder());
+
+		JacksonCompat.instance().registerCodecs(cc::register);
 	}
 
 	/**
@@ -204,7 +214,7 @@ public class ReactiveVaultClients {
 		return new VaultEndpointProviderAdapter(endpointProvider);
 	}
 
-	private static class VaultEndpointProviderAdapter implements ReactiveVaultEndpointProvider {
+	static class VaultEndpointProviderAdapter implements ReactiveVaultEndpointProvider {
 
 		private final VaultEndpointProvider source;
 
@@ -214,6 +224,10 @@ public class ReactiveVaultClients {
 
 			this.source = provider;
 			this.mono = Mono.fromSupplier(provider::getVaultEndpoint).subscribeOn(Schedulers.boundedElastic());
+		}
+
+		public VaultEndpointProvider getSource() {
+			return source;
 		}
 
 		@Override
