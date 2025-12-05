@@ -45,7 +45,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
-	public ReactiveVaultKeyValue1Template(ReactiveVaultOperations vaultOperations, String path) {
+	public ReactiveVaultKeyValue1Template(ReactiveVaultTemplate vaultOperations, String path) {
 		super(vaultOperations, path);
 		this.path = path;
 	}

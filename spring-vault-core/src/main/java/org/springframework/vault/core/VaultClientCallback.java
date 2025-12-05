@@ -24,7 +24,7 @@ import org.springframework.vault.client.VaultClient;
  * A callback for executing arbitrary operations on {@link VaultClient}.
  *
  * @author Mark Paluch
- * @since 4.0
+ * @since 4.1
  */
 @FunctionalInterface
 interface VaultClientCallback<T extends @Nullable Object> {

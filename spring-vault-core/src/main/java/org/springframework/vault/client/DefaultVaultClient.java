@@ -16,36 +16,39 @@
 package org.springframework.vault.client;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.WrappedMetadata;
 import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * /** The default implementation of {@link VaultClient}, as created by the static factory
+ * The default implementation of {@link VaultClient}, as created by the static factory
  * methods.
  *
  * @author Mark Paluch
- * @since 4.1
  * @see VaultClient#create()
  * @see VaultClient#create(String)
  * @see VaultClient#builder()
+ * @since 4.1
  */
 class DefaultVaultClient implements VaultClient {
 
@@ -134,8 +137,7 @@ class DefaultVaultClient implements VaultClient {
 
 			if (uri.isAbsolute() || uriBuilderFactory == null) {
 				this.uriSpec = this.spec.uri(uri);
-			}
-			else {
+			} else {
 				URI baseUri = uriBuilderFactory.expand("");
 				this.uriSpec = this.spec.uri(baseUri.resolve(uri));
 			}
@@ -177,7 +179,6 @@ class DefaultVaultClient implements VaultClient {
 		public ResponseSpec retrieve() {
 			return new DefaultResponseSpec(this, this.uriSpec.retrieve());
 		}
-
 	}
 
 	private class DefaultResponseSpec implements ResponseSpec {
@@ -193,14 +194,8 @@ class DefaultVaultClient implements VaultClient {
 
 		@Override
 		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
-				RestClient.ResponseSpec.ErrorHandler errorHandler) {
+									 RestClient.ResponseSpec.ErrorHandler errorHandler) {
 			retrieve.onStatus(statusPredicate, errorHandler);
-			return this;
-		}
-
-		@Override
-		public ResponseSpec onStatus(ResponseErrorHandler errorHandler) {
-			retrieve.onStatus(errorHandler);
 			return this;
 		}
 
@@ -215,9 +210,8 @@ class DefaultVaultClient implements VaultClient {
 		public <T> @Nullable T body(Class<T> bodyType) {
 			try {
 				return retrieve.body(bodyType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			} catch (HttpStatusCodeException e) {
+				throw buildException(e, requestHeadersSpec.path);
 			}
 		}
 
@@ -226,9 +220,8 @@ class DefaultVaultClient implements VaultClient {
 		public <T> @Nullable T body(ParameterizedTypeReference<T> bodyType) {
 			try {
 				return retrieve.body(bodyType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			} catch (HttpStatusCodeException e) {
+				throw buildException(e, requestHeadersSpec.path);
 			}
 		}
 
@@ -245,7 +238,7 @@ class DefaultVaultClient implements VaultClient {
 
 			if (body == null) {
 				throw new VaultException("No body returned from Vault; %s %s"
-					.formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
+						.formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
 			}
 
 			return body;
@@ -260,9 +253,8 @@ class DefaultVaultClient implements VaultClient {
 		public <T> ResponseEntity<T> toEntity(Class<T> bodyType) {
 			try {
 				return retrieve.toEntity(bodyType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			} catch (HttpStatusCodeException e) {
+				throw buildException(e, requestHeadersSpec.path);
 			}
 		}
 
@@ -270,9 +262,8 @@ class DefaultVaultClient implements VaultClient {
 		public <T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> bodyType) {
 			try {
 				return retrieve.toEntity(bodyType);
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			} catch (HttpStatusCodeException e) {
+				throw buildException(e, requestHeadersSpec.path);
 			}
 		}
 
@@ -285,12 +276,85 @@ class DefaultVaultClient implements VaultClient {
 		public ResponseEntity<Void> toBodilessEntity() {
 			try {
 				return retrieve.toBodilessEntity();
-			}
-			catch (HttpStatusCodeException e) {
-				throw VaultResponses.buildException(e, requestHeadersSpec.path);
+			} catch (HttpStatusCodeException e) {
+				throw buildException(e, requestHeadersSpec.path);
 			}
 		}
 
+
+		/**
+		 * Build a {@link VaultException} given {@link HttpStatusCodeException} and request
+		 * {@code path}.
+		 *
+		 * @param e    must not be {@literal null}.
+		 * @param path must not be {@literal null}.
+		 * @return the {@link VaultException}.
+		 */
+		public static VaultClientResponseException buildException(HttpStatusCodeException e, @Nullable String path) {
+
+			Assert.notNull(e, "HttpStatusCodeException must not be null");
+
+			String message = VaultResponses.getError(e.getResponseBodyAsString());
+
+			if (StringUtils.hasText(message)) {
+				return new VaultRestClientResponseException("Status %s %s [%s]: %s".formatted(VaultResponses.renderStatus(e.getStatusCode()),
+						e.getStatusText(), path, message), e);
+			}
+
+			return new VaultRestClientResponseException(
+					"Status %s %s [%s]".formatted(VaultResponses.renderStatus(e.getStatusCode()), e.getStatusText(), path), e);
+		}
+
+		public static VaultException buildException(HttpStatusCode statusCode, String path, String message) {
+
+			if (StringUtils.hasText(message)) {
+				return new VaultException("Status %s [%s]: %s".formatted(VaultResponses.renderStatus(statusCode), path, message));
+			}
+
+			return new VaultException("Status %s [%s]".formatted(VaultResponses.renderStatus(statusCode), path));
+		}
 	}
 
+	static class VaultRestClientResponseException extends VaultClientResponseException {
+
+		public VaultRestClientResponseException(String msg, RestClientResponseException cause) {
+			super(msg, cause);
+		}
+
+		@Override
+		@SuppressWarnings("NullAway")
+		public synchronized RestClientResponseException getCause() {
+			return (RestClientResponseException) super.getCause();
+		}
+
+		@Override
+		public HttpStatusCode getStatusCode() {
+			return getCause().getStatusCode();
+		}
+
+		@Override
+		public String getStatusText() {
+			return getCause().getStatusText();
+		}
+
+		@Override
+		public byte[] getResponseBodyAsByteArray() {
+			return getCause().getResponseBodyAsByteArray();
+		}
+
+		@Override
+		public String getResponseBodyAsString(Charset fallbackCharset) {
+			return getCause().getResponseBodyAsString(fallbackCharset);
+		}
+
+		@Override
+		public <E> @Nullable E getResponseBodyAs(Class<E> targetType) {
+			return getCause().getResponseBodyAs(targetType);
+		}
+
+		@Override
+		public <E> @Nullable E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+			return getCause().getResponseBodyAs(targetType);
+		}
+	}
 }

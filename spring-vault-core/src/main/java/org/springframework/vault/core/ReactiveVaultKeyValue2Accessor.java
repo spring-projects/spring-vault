@@ -40,11 +40,11 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue2Accessor} given
-	 * {@link VaultOperations} and the mount {@code path}.
+	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
 	 * @param reactiveVaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
-	ReactiveVaultKeyValue2Accessor(ReactiveVaultOperations reactiveVaultOperations, String path) {
+	ReactiveVaultKeyValue2Accessor(ReactiveVaultTemplate reactiveVaultOperations, String path) {
 		super(reactiveVaultOperations, path);
 		this.path = path;
 	}

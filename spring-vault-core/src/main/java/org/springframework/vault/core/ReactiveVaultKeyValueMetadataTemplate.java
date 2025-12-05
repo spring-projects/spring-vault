@@ -23,6 +23,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
+import org.springframework.vault.support.VaultResponseSupport;
 
 /**
  * Default implementation of {@link ReactiveVaultKeyValueMetadataOperations}.
@@ -47,13 +48,9 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	@Override
 	@SuppressWarnings("rawtypes")
 	public Mono<VaultMetadataResponse> get(String path) {
-		return vaultOperations.read(getMetadataPath(path), Map.class).flatMap(response -> {
-			Map data = response.getData();
-			if (null == data) {
-				return Mono.empty();
-			}
-			return Mono.just(data);
-		}).map(KeyValueUtilities::fromMap);
+		return vaultOperations.read(getMetadataPath(path), Map.class)
+				.mapNotNull(VaultResponseSupport::getData)
+				.map(KeyValueUtilities::fromMap);
 	}
 
 	@Override

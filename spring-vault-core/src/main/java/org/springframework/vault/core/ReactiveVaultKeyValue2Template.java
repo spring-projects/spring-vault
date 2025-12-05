@@ -45,7 +45,7 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
-	public ReactiveVaultKeyValue2Template(ReactiveVaultOperations vaultOperations, String path) {
+	public ReactiveVaultKeyValue2Template(ReactiveVaultTemplate vaultOperations, String path) {
 		super(vaultOperations, path);
 		this.path = path;
 	}
