@@ -189,7 +189,7 @@ public abstract class VaultResponses {
 		}
 	}
 
-	private static int renderStatus(HttpStatusCode s) {
+	static int renderStatus(HttpStatusCode s) {
 		return s.value();
 	}
 

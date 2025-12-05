@@ -31,14 +31,14 @@ import org.springframework.vault.support.VaultHealth;
  */
 public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 
-	private final ReactiveVaultOperations vaultOperations;
+	private final ReactiveVaultTemplate vaultOperations;
 
 	/**
 	 * Create a new {@link ReactiveVaultSysTemplate} with the given
 	 * {@link ReactiveVaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
-	public ReactiveVaultSysTemplate(ReactiveVaultOperations vaultOperations) {
+	public ReactiveVaultSysTemplate(ReactiveVaultTemplate vaultOperations) {
 
 		Assert.notNull(vaultOperations, "ReactiveVaultOperations must not be null");
 
@@ -50,11 +50,12 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 	@SuppressWarnings("NullAway")
 	public Mono<Boolean> isInitialized() {
 
-		return this.vaultOperations.doWithSession(webClient -> {
-			return webClient.get()
-				.uri("sys/init")
+		return this.vaultOperations.doWithSessionClient(client -> {
+			return client.get()
+				.path("sys/init")
 				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(Map.class))
+				.retrieve()
+				.toEntity(Map.class)
 				.filter(HttpEntity::hasBody)
 				.map(it -> (Boolean) it.getBody().get("initialized"));
 		});
@@ -64,16 +65,15 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 	@SuppressWarnings("NullAway")
 	public Mono<VaultHealth> health() {
 
-		return this.vaultOperations.doWithVault(webClient -> {
+		return this.vaultOperations.doWithVaultClient(client -> {
 
-			return webClient.get()
-				.uri("sys/health")
+			return client.get()
+				.path("sys/health")
 				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.exchangeToMono(clientResponse -> {
-					return clientResponse.toEntity(VaultSysTemplate.VaultHealthImpl.class)
-						.filter(HttpEntity::hasBody)
-						.map(HttpEntity::getBody);
-				});
+				.retrieve()
+				.toEntity(VaultSysTemplate.VaultHealthImpl.class)
+				.filter(HttpEntity::hasBody)
+				.map(HttpEntity::getBody);
 		});
 	}
 

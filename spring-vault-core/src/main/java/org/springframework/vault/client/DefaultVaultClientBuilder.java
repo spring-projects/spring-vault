@@ -88,6 +88,8 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 	public VaultClient.Builder endpoint(VaultEndpointProvider endpointProvider) {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider not be null");
 		this.endpointProvider = endpointProvider;
+
+		//TODO
 		this.restClientBuilder.uriBuilderFactory(VaultClients.createUriBuilderFactory(endpointProvider, false));
 		return this;
 	}

@@ -23,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -39,6 +38,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClient.ResponseSpec.ErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilderFactory;
 
@@ -77,30 +77,35 @@ public interface VaultClient {
 
 	/**
 	 * Start building an HTTP GET request.
+	 *
 	 * @return a spec for specifying the target path.
 	 */
 	RequestHeadersPathSpec<?> get();
 
 	/**
 	 * Start building an HTTP POST request.
+	 *
 	 * @return a spec for specifying the target path.
 	 */
 	RequestHeadersBodyPathSpec post();
 
 	/**
 	 * Start building an HTTP PUT request.
+	 *
 	 * @return a spec for specifying the target path.
 	 */
 	RequestHeadersBodyPathSpec put();
 
 	/**
 	 * Start building an HTTP DELETE request.
+	 *
 	 * @return a spec for specifying the target path.
 	 */
 	RequestHeadersPathSpec<?> delete();
 
 	/**
 	 * Start building a request for the given {@code HttpMethod}.
+	 *
 	 * @return a spec for specifying the target path.
 	 */
 	RequestHeadersBodyPathSpec method(HttpMethod method);
@@ -126,6 +131,7 @@ public interface VaultClient {
 	/**
 	 * Variant of {@link #create()} that accepts a default base URL. For more details see
 	 * {@link VaultClient.Builder#endpoint(VaultEndpoint)}.
+	 *
 	 * @param baseUrl the base URI for all requests.
 	 * @see #builder()
 	 */
@@ -136,6 +142,7 @@ public interface VaultClient {
 	/**
 	 * Variant of {@link #create()} that accepts a default {@code VaultEndpoint}. For more
 	 * details see {@link VaultClient.Builder#endpoint(VaultEndpoint)}.
+	 *
 	 * @param endpoint the Vault Endpoint for all relative path requests.
 	 * @see #builder()
 	 */
@@ -146,6 +153,7 @@ public interface VaultClient {
 	/**
 	 * Variant of {@link #create()} that accepts a default {@code VaultEndpointProvider}.
 	 * For more details see {@link VaultClient.Builder#endpoint(VaultEndpointProvider)}.
+	 *
 	 * @param endpointProvider the endpoint provider for all relative path requests.
 	 * @see #builder()
 	 */
@@ -174,10 +182,12 @@ public interface VaultClient {
 	 * <li>{@link RestTemplate#getUriTemplateHandler() UriBuilderFactory}</li>
 	 * <li>{@linkplain RestTemplate#getErrorHandler() error handler}</li>
 	 * </ul>
+	 *
 	 * @param restTemplate the rest template to base the returned builder's configuration
-	 * on
+	 *                     on.
 	 * @return a {@code VaultClient} builder initialized with {@code restTemplate}'s
-	 * configuration
+	 * configuration.
+	 * @see RestClient#builder(RestTemplate)
 	 */
 	static VaultClient.Builder builder(RestTemplate restTemplate) {
 		return new DefaultVaultClientBuilder(restTemplate);
@@ -186,10 +196,11 @@ public interface VaultClient {
 	/**
 	 * Obtain a {@code VaultClient} builder based on the configuration of the given
 	 * {@link RestClient}.
+	 *
 	 * @param restClient the {@link RestClient} to base the returned builder's
-	 * configuration on
+	 *                   configuration on
 	 * @return a {@code VaultClient} builder initialized with {@code restClient}'s
-	 * configuration
+	 * configuration.
 	 */
 	static VaultClient.Builder builder(RestClient restClient) {
 		return new DefaultVaultClientBuilder(restClient);
@@ -202,6 +213,7 @@ public interface VaultClient {
 
 		/**
 		 * Set the Vault endpoint to use.
+		 *
 		 * @param endpoint the vault endpoint to use.
 		 * @return this builder.
 		 */
@@ -209,6 +221,7 @@ public interface VaultClient {
 
 		/**
 		 * Set the Vault endpoint provider to use.
+		 *
 		 * @param endpointProvider the vault endpoint provider to use.
 		 * @return this builder.
 		 */
@@ -221,6 +234,7 @@ public interface VaultClient {
 		 * <li>{@link #endpoint(VaultEndpoint)}}
 		 * <li>{@link #endpoint(VaultEndpointProvider)}}.
 		 * </ul>
+		 *
 		 * @param uriBuilderFactory the URI builder factory to use.
 		 * @return this builder.
 		 * @see #endpoint(VaultEndpoint)
@@ -232,6 +246,7 @@ public interface VaultClient {
 		/**
 		 * Global option to specify a namespace header to be added to every request, if
 		 * the request does not already contain such a header.
+		 *
 		 * @param namespace the namespace header value.
 		 * @return this builder.
 		 */
@@ -242,6 +257,7 @@ public interface VaultClient {
 		/**
 		 * Global option to specify a header to be added to every request, if the request
 		 * does not already contain such a header.
+		 *
 		 * @param header the header name.
 		 * @param values the header values.
 		 * @return this builder.
@@ -262,6 +278,7 @@ public interface VaultClient {
 		 * HttpClient} if the {@code java.net.http} module is loaded, or to a
 		 * {@linkplain org.springframework.http.client.SimpleClientHttpRequestFactory
 		 * simple default} otherwise.
+		 *
 		 * @param requestFactory the request factory to use.
 		 * @return this builder.
 		 */
@@ -270,6 +287,7 @@ public interface VaultClient {
 		/**
 		 * Provide a consumer to access {@link RestClient.Builder} with the possibility to
 		 * override or augment its configuration.
+		 *
 		 * @param restClientBuilderConsumer the consumer.
 		 * @return this builder.
 		 */
@@ -279,6 +297,7 @@ public interface VaultClient {
 		 * Apply the given {@code Consumer} to this builder instance.
 		 * <p>
 		 * This can be useful for applying pre-packaged customizations.
+		 *
 		 * @param builderConsumer the consumer to apply
 		 * @return this builder
 		 */
@@ -293,7 +312,6 @@ public interface VaultClient {
 		 * Build the {@code VaultClient} instance.
 		 */
 		VaultClient build();
-
 	}
 
 	/**
@@ -330,7 +348,6 @@ public interface VaultClient {
 		 * against.
 		 */
 		S uri(URI uri);
-
 	}
 
 	/**
@@ -342,6 +359,7 @@ public interface VaultClient {
 
 		/**
 		 * Set the namespace for this request.
+		 *
 		 * @param namespace the namespace value.
 		 * @return this builder.
 		 */
@@ -351,6 +369,7 @@ public interface VaultClient {
 
 		/**
 		 * Set the authentication token for this request.
+		 *
 		 * @param token the Vault token.
 		 * @return this builder.
 		 */
@@ -360,7 +379,8 @@ public interface VaultClient {
 
 		/**
 		 * Add the given, single header value under the given name.
-		 * @param headerName the header name.
+		 *
+		 * @param headerName   the header name.
 		 * @param headerValues the header value(s).
 		 * @return this builder
 		 */
@@ -368,6 +388,7 @@ public interface VaultClient {
 
 		/**
 		 * Add or replace the given headers.
+		 *
 		 * @param httpHeaders the headers to be applied.
 		 * @return this builder.
 		 */
@@ -376,6 +397,7 @@ public interface VaultClient {
 		/**
 		 * Provides access to every header declared so far with the possibility to add,
 		 * replace, or remove values.
+		 *
 		 * @param headersConsumer the consumer to provide access to.
 		 * @return this builder.
 		 */
@@ -403,14 +425,13 @@ public interface VaultClient {
 		 * <p>
 		 * By default, 4xx response code result in a {@link HttpClientErrorException} and
 		 * 5xx response codes in a {@link HttpServerErrorException}. To customize error
-		 * handling, use *
-		 * {@link ResponseSpec#onStatus(Predicate, ResponseSpec.ErrorHandler) onStatus}
-		 * handlers. * @return {@code ResponseSpec} to specify how to decode the body
+		 * handling, use
+		 * {@link ResponseSpec#onStatus(Predicate, ErrorHandler)} onStatus}
+		 * handlers.
 		 * @return {@code ResponseSpec} to specify how to decode the body.
 		 */
 		@CheckReturnValue
 		VaultClient.ResponseSpec retrieve();
-
 	}
 
 	/**
@@ -428,6 +449,7 @@ public interface VaultClient {
 		 *     .retrieve()
 		 *     .toBodilessEntity();
 		 * </pre>
+		 *
 		 * @param body the body of the request.
 		 * @return this builder.
 		 */
@@ -436,12 +458,12 @@ public interface VaultClient {
 		/**
 		 * Set the body of the request to the given {@code Object}. The parameter
 		 * {@code bodyType} is used to capture the generic type.
-		 * @param body the body of the request.
+		 *
+		 * @param body     the body of the request.
 		 * @param bodyType the type of the body, used to capture the generic type.
 		 * @return this builder.
 		 */
 		<T> VaultClient.RequestBodySpec body(T body, ParameterizedTypeReference<T> bodyType);
-
 	}
 
 	/**
@@ -453,101 +475,93 @@ public interface VaultClient {
 		 * Provide a function to map specific error status codes to an error handler.
 		 * <p>
 		 * By default, if there are no matching status handlers, responses with status
-		 * codes &gt;= 400 will throw a {@link VaultException}.
+		 * codes &gt;= 400 will throw a {@link VaultClientResponseException}.
 		 * <p>
 		 * Note that {@link IOException IOExceptions}, {@link java.io.UncheckedIOException
 		 * UncheckedIOExceptions}, and
 		 * {@link org.springframework.http.converter.HttpMessageNotReadableException
 		 * HttpMessageNotReadableExceptions} thrown from {@code errorHandler} will be
-		 * wrapped in a {@link VaultException}.
+		 * wrapped in a {@link org.springframework.web.client.RestClientException}.
+		 *
 		 * @param statusPredicate to match responses with
-		 * @param errorHandler handler that typically, though not necessarily, throws an
-		 * exception
+		 * @param errorHandler    handler that typically, though not necessarily, throws an
+		 *                        exception
 		 * @return this builder
 		 */
 		ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
-				RestClient.ResponseSpec.ErrorHandler errorHandler);
-
-		/**
-		 * Provide a function to map specific error status codes to an error handler.
-		 * <p>
-		 * By default, if there are no matching status handlers, responses with status
-		 * codes &gt;= 400 will throw a {@link VaultException}.
-		 * <p>
-		 * Note that {@link IOException IOExceptions}, {@link java.io.UncheckedIOException
-		 * UncheckedIOExceptions}, and
-		 * {@link org.springframework.http.converter.HttpMessageNotReadableException
-		 * HttpMessageNotReadableExceptions} thrown from {@code errorHandler} will be
-		 * wrapped in a {@link VaultException}.
-		 * @param errorHandler the error handler
-		 * @return this builder
-		 */
-		ResponseSpec onStatus(ResponseErrorHandler errorHandler);
+							  RestClient.ResponseSpec.ErrorHandler errorHandler);
 
 		/**
 		 * Wrap the response in a cubbyhole token with the requested TTL.
+		 *
 		 * @param ttl the time to live for the wrapped response.
 		 * @return the cubbyhole {@link WrappedMetadata} providing a token and metadata
 		 * for the wrapped response.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException        when receiving a response with a status code of 4xx or
+		 *                               5xx.
 		 * @throws IllegalStateException if no response body was available.
 		 */
 		WrappedMetadata wrap(Duration ttl);
 
 		/**
 		 * Extract the required body as an object of the given type.
+		 *
 		 * @return the body or {@link IllegalStateException} if no response body was
 		 * available.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException        when receiving a response with a status code of 4xx or
+		 *                               5xx.
 		 * @throws IllegalStateException if no response body was available.
 		 */
 		VaultResponse requiredBody();
 
 		/**
 		 * Extract the body as an object of the given type.
+		 *
 		 * @return the body, or {@code null} if no response body was available.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		@Nullable VaultResponse body();
 
 		/**
 		 * Extract the required body as an object of the given type.
+		 *
 		 * @return the body or {@link IllegalStateException} if no response body was
 		 * available.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException        when receiving a response with a status code of 4xx or
+		 *                               5xx.
 		 * @throws IllegalStateException if no response body was available.
 		 */
 		<T> T requiredBody(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
+		 *
 		 * @param bodyType the type of return value.
-		 * @param <T> the body type.
+		 * @param <T>      the body type.
 		 * @return the body, or {@code null} if no response body was available
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		<T> @Nullable T body(Class<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
+		 *
 		 * @param bodyType the type of return value.
-		 * @param <T> the body type.
+		 * @param <T>      the body type.
 		 * @return the body, or {@code null} if no response body was available.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		<T> @Nullable T body(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to VaultResponse.
+		 *
 		 * @return the {@code ResponseEntity} with the decoded body.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		default ResponseEntity<VaultResponse> toEntity() {
 			return toEntity(VaultResponse.class);
@@ -556,33 +570,35 @@ public interface VaultClient {
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of the given
 		 * type.
+		 *
 		 * @param bodyType the expected response body type.
-		 * @param <T> response body type.
+		 * @param <T>      response body type.
 		 * @return the {@code ResponseEntity} with the decoded body
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		<T> ResponseEntity<T> toEntity(Class<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to an Object of the given
 		 * type.
+		 *
 		 * @param bodyType the expected response body type.
-		 * @param <T> response body type.
+		 * @param <T>      response body type.
 		 * @return the {@code ResponseEntity} with the decoded body.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		<T> ResponseEntity<T> toEntity(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Return a {@code ResponseEntity} without a body.
+		 *
 		 * @return the {@code ResponseEntity}.
-		 * @throws VaultException when receiving a response with a status code of 4xx or
-		 * 5xx.
+		 * @throws VaultClientResponseException when receiving a response with a status code of 4xx or
+		 *                        5xx.
 		 */
 		ResponseEntity<Void> toBodilessEntity();
-
 	}
 
 	/**
@@ -601,5 +617,4 @@ public interface VaultClient {
 	interface RequestHeadersBodyPathSpec extends VaultClient.RequestBodySpec, RequestHeadersPathSpec<RequestBodySpec> {
 
 	}
-
 }
