@@ -95,6 +95,14 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
+	 * @return {@literal true} if {@code data} is not null; {@literal false} otherwise.
+	 * @since 4.1
+	 */
+	public boolean hasData() {
+		return this.data != null;
+	}
+
+	/**
 	 * @return the required secret data.
 	 * @throws IllegalStateException if {@code data} is null.
 	 */

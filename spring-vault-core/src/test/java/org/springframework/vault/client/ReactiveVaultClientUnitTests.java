@@ -29,27 +29,28 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
 import org.springframework.vault.util.MockVaultClient;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
-
 /**
- * Unit tests for {@link VaultClient}.
+ * Unit tests for {@link ReactiveVaultClient}.
  *
  * @author Mark Paluch
  */
-class VaultClientUnitTests {
+class ReactiveVaultClientUnitTests {
 
 	private final static MockWebServer mockWebServer = new MockWebServer();
 
@@ -70,14 +71,15 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("clients")
-	void shouldExpandPathWithVariables(VaultClient client) throws Exception {
+	void shouldExpandPathWithVariables(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
 		client.get().path(
-				"auth/{foo}", "foo").retrieve().body();
+				"auth/{foo}", "foo").retrieve().body().as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/auth/foo");
@@ -85,14 +87,15 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("clients")
-	void shouldExpandPathWithVariableMap(VaultClient client) throws Exception {
+	void shouldExpandPathWithVariableMap(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
 		client.get().path(
-				"auth/{foo}", Map.of("foo", "foo")).retrieve().body();
+				"auth/{foo}", Map.of("foo", "foo")).retrieve().body().as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/auth/foo");
@@ -100,14 +103,15 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("clients")
-	void shouldUseUri(VaultClient client) throws Exception {
+	void shouldUseUri(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
 		URI uri = mockWebServer.url("/v1/auth/foo").uri();
-		client.get().uri(uri).retrieve().body();
+		client.get().uri(uri).retrieve().body().as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/auth/foo");
@@ -115,13 +119,14 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("clients")
-	void shouldExpandAbsolutePath(VaultClient client) throws InterruptedException {
+	void shouldExpandAbsolutePath(ReactiveVaultClient client) throws InterruptedException {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
-		client.get().path("/auth/foo").retrieve().body();
+		client.get().path("/auth/foo").retrieve().body().as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/auth/foo");
@@ -129,13 +134,14 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("clients")
-	void shouldEscapeAbsolutePath(VaultClient client) throws Exception {
+	void shouldEscapeAbsolutePath(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
-		client.get().path("https://some.other.server:8200/v1/auth/foo").retrieve().body();
+		client.get().path("https://some.other.server:8200/v1/auth/foo").retrieve().body().as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/https:/some.other.server:8200/v1/auth/foo");
@@ -143,13 +149,15 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("safeClients")
-	void shouldEscapeAbsoluteUri(VaultClient client) throws Exception {
+	void shouldEscapeAbsoluteUri(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
-		client.get().uri(URI.create("https://some.other.server:8200/v1/auth/foo")).retrieve().body();
+		client.get().uri(URI.create("https://some.other.server:8200/v1/auth/foo")).retrieve().body()
+				.as(StepVerifier::create)
+				.expectNextCount(1).verifyComplete();
 
 		RecordedRequest recordedRequest = mockWebServer.takeRequest();
 		assertThat(recordedRequest.getPath()).isEqualTo("/v1/https:/some.other.server:8200/v1/auth/foo");
@@ -157,16 +165,15 @@ class VaultClientUnitTests {
 
 	@ParameterizedTest
 	@MethodSource("unsafeClients")
-	void shouldPassThruAbsoluteUri(VaultClient client) throws Exception {
+	void shouldPassthruAbsoluteUri(ReactiveVaultClient client) throws Exception {
 
 		mockWebServer.enqueue(new MockResponse().setResponseCode(200)
 				.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.setBody("{}"));
 
-		VaultClient.ResponseSpec retrieve = client.get()
-				.uri(URI.create("https://some.other.server:8200/v1/auth/foo")).retrieve();
-
-		assertThatExceptionOfType(ResourceAccessException.class).isThrownBy(() -> retrieve.body());
+		client.get().uri(URI.create("https://some.other.server:8200/v1/auth/foo")).retrieve().body()
+				.as(StepVerifier::create)
+				.verifyError(WebClientRequestException.class);
 	}
 
 	@Test
@@ -175,10 +182,8 @@ class VaultClientUnitTests {
 		MockVaultClient client = MockVaultClient.create(it -> it.defaultNamespace("foo/bar")
 				.configureRestClient(rcb -> rcb.uriBuilderFactory(new PrefixAwareUriBuilderFactory())));
 
-		client.expect(requestTo("/auth/foo"))
-				.andExpect(method(HttpMethod.GET))
-				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
-				.andRespond(withSuccess());
+		client.expect(requestTo("/auth/foo")).andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar")).andRespond(withSuccess());
 
 		client.get().path("auth/foo").retrieve().body();
 	}
@@ -194,11 +199,12 @@ class VaultClientUnitTests {
 		UriBuilderFactory extended = VaultClients.createUriBuilderFactory(() -> localhost, false);
 
 		return Stream.of(
-				Arguments.argumentSet("Simple Endpoint", VaultClient.create(localhost)),
-				Arguments.argumentSet("Dynamic Endpoint Provider",
-						VaultClient.create(() -> localhost)),
-				Arguments.argumentSet("URL Simple", VaultClient.builder().uriBuilderFactory(simple).build()),
-				Arguments.argumentSet("URL Extended", VaultClient.builder().uriBuilderFactory(extended).build()));
+				Arguments.argumentSet("Simple Endpoint", ReactiveVaultClient.create(localhost)),
+				Arguments.argumentSet("Reactive Endpoint Provider",
+						ReactiveVaultClient.create(() -> Mono.just(localhost))),
+				Arguments.argumentSet("URL Simple", ReactiveVaultClient.builder().uriBuilderFactory(simple).build()),
+				Arguments.argumentSet("URL Extended",
+						ReactiveVaultClient.builder().uriBuilderFactory(extended).build()));
 	}
 
 	static Stream<Arguments.ArgumentSet> unsafeClients() {
@@ -206,12 +212,12 @@ class VaultClientUnitTests {
 		UriBuilderFactory simple = VaultClients.createUriBuilderFactory(SimpleVaultEndpointProvider.of(localhost),
 				false);
 		UriBuilderFactory extended = VaultClients.createUriBuilderFactory(() -> localhost, false);
-		RestClient simpleClient = RestClient.builder().uriBuilderFactory(simple).build();
-		RestClient extendedClient = RestClient.builder().uriBuilderFactory(extended).build();
+		WebClient simpleClient = WebClient.builder().uriBuilderFactory(simple).build();
+		WebClient extendedClient = WebClient.builder().uriBuilderFactory(extended).build();
 
 		return Stream.of(
-				Arguments.argumentSet("WebClient Simple", VaultClient.builder(simpleClient).build()),
-				Arguments.argumentSet("WebClient Extended", VaultClient.builder(extendedClient).build()));
+				Arguments.argumentSet("WebClient Simple", ReactiveVaultClient.builder(simpleClient).build()),
+				Arguments.argumentSet("WebClient Extended", ReactiveVaultClient.builder(extendedClient).build()));
 	}
 
 }

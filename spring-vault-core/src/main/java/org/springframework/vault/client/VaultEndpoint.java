@@ -123,7 +123,7 @@ public class VaultEndpoint implements Serializable {
 	private @Nullable static String getPath(URI uri) {
 
 		String path = uri.getPath();
-		return path != null && path.startsWith("/") ? path.substring(1) : path;
+		return path != null ? stripSlashes(path) : null;
 	}
 
 	/**
@@ -212,9 +212,17 @@ public class VaultEndpoint implements Serializable {
 	 */
 	public String createUriString(String path) {
 
-		Assert.hasText(path, "Path must not be empty");
+		Assert.notNull(path, "Path must not be null");
 
-		return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), getPath(), path);
+		String apiPath = stripSlashes(getPath());
+
+		if (StringUtils.hasText(apiPath)) {
+			return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), apiPath,
+					stripLeadingSlashes(path));
+		}
+
+		return "%s://%s:%s/%s".formatted(getScheme(), getHost(), getPort(),
+				stripLeadingSlashes(path));
 	}
 
 	@Override
@@ -235,6 +243,35 @@ public class VaultEndpoint implements Serializable {
 	@Override
 	public String toString() {
 		return "%s://%s:%d".formatted(this.scheme, this.host, this.port);
+	}
+
+
+	/**
+	 * Remove slashes from the beginning and the end of the given {@code path}.
+	 */
+	static String stripSlashes(String path) {
+
+		if (path.startsWith("/")) {
+			return stripSlashes(path.substring(1));
+		}
+
+		if (path.endsWith("/")) {
+			return stripSlashes(path.substring(0, path.length() - 1));
+		}
+
+		return path;
+	}
+
+	/**
+	 * Remove slashes from the beginning and the end of the given {@code path}.
+	 */
+	static String stripLeadingSlashes(String path) {
+
+		if (path.startsWith("/")) {
+			return stripLeadingSlashes(path.substring(1));
+		}
+
+		return path;
 	}
 
 }

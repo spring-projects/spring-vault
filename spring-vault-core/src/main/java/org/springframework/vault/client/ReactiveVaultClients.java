@@ -136,7 +136,8 @@ public class ReactiveVaultClients {
 		return builder;
 	}
 
-	private static Mono<ClientResponse> redirectVaultEndpoint(ReactiveVaultEndpointProvider endpointProvider, ClientRequest request, ExchangeFunction next) {
+	private static Mono<ClientResponse> redirectVaultEndpoint(ReactiveVaultEndpointProvider endpointProvider,
+			ClientRequest request, ExchangeFunction next) {
 		URI uri = request.url();
 
 		if (!uri.isAbsolute()) {
@@ -144,12 +145,12 @@ public class ReactiveVaultClients {
 			return endpointProvider.getVaultEndpoint().flatMap(endpoint -> {
 
 				UriComponents uriComponents = UriComponentsBuilder.fromUri(uri)
-						.scheme(endpoint.getScheme())
-						.host(endpoint.getHost())
-						.port(endpoint.getPort())
-						.replacePath(endpoint.getPath())
-						.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
-						.build();
+					.scheme(endpoint.getScheme())
+					.host(endpoint.getHost())
+					.port(endpoint.getPort())
+					.replacePath(endpoint.getPath())
+					.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
+					.build();
 
 				ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
 

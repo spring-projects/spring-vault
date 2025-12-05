@@ -19,7 +19,6 @@ import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import tools.jackson.databind.JsonNode;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;

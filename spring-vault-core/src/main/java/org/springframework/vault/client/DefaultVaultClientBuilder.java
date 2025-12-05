@@ -41,6 +41,7 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	private @Nullable UriBuilderFactory uriBuilderFactory;
 
+
 	DefaultVaultClientBuilder(RestTemplate restTemplate) {
 		this.restClientBuilder = RestClient.builder(restTemplate);
 	}
@@ -67,6 +68,7 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 		this.uriBuilderFactory = other.uriBuilderFactory;
 	}
 
+
 	@Override
 	public VaultClient.Builder uriBuilderFactory(UriBuilderFactory uriBuilderFactory) {
 		this.uriBuilderFactory = uriBuilderFactory;
@@ -88,9 +90,8 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 	public VaultClient.Builder endpoint(VaultEndpointProvider endpointProvider) {
 		Assert.notNull(endpointProvider, "VaultEndpointProvider not be null");
 		this.endpointProvider = endpointProvider;
-
-		//TODO
-		this.restClientBuilder.uriBuilderFactory(VaultClients.createUriBuilderFactory(endpointProvider, false));
+		uriBuilderFactory(VaultClients
+				.createUriBuilderFactory(endpointProvider, false));
 		return this;
 	}
 

@@ -53,13 +53,11 @@ import org.springframework.vault.core.lease.event.SecretLeaseEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
 import org.springframework.vault.core.lease.event.SecretLeaseRotatedEvent;
 import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
-import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**

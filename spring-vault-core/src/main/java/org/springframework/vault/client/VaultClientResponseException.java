@@ -2,11 +2,10 @@ package org.springframework.vault.client;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.vault.VaultException;
@@ -14,13 +13,14 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
 
 /**
- * Abstract base class for exceptions thrown by {@link VaultClient} and {@link ReactiveVaultClient}
- * in case a request fails because of a server error response, a failure to decode
- * the response, or a low level I/O error.
+ * Abstract base class for exceptions thrown by {@link VaultClient} and
+ * {@link ReactiveVaultClient} in case a request fails because of a server error response,
+ * a failure to decode the response, or a low level I/O error.
  *
- * <p>Server error responses are determined by
- * {@link RestClient.ResponseSpec#onStatus status handlers} for {@code RestClient},
- * and by {@link ResponseErrorHandler} for {@code RestTemplate}.
+ * <p>
+ * Server error responses are determined by {@link RestClient.ResponseSpec#onStatus status
+ * handlers} for {@code RestClient}, and by {@link ResponseErrorHandler} for
+ * {@code RestTemplate}.
  *
  * @author Mark Paluch
  * @since 4.1
@@ -60,26 +60,24 @@ public abstract class VaultClientResponseException extends VaultException {
 	public abstract byte[] getResponseBodyAsByteArray();
 
 	/**
-	 * Return the response body converted to String. The charset used is that
-	 * of the response "Content-Type" or otherwise {@code "UTF-8"}.
+	 * Return the response body converted to String. The charset used is that of the
+	 * response "Content-Type" or otherwise {@code "UTF-8"}.
 	 */
 	public String getResponseBodyAsString() {
 		return getResponseBodyAsString(DEFAULT_CHARSET);
 	}
 
 	/**
-	 * Return the response body converted to String. The charset used is that
-	 * of the response "Content-Type" or otherwise the one given.
-	 *
+	 * Return the response body converted to String. The charset used is that of the
+	 * response "Content-Type" or otherwise the one given.
 	 * @param fallbackCharset the charset to use on if the response doesn't specify.
 	 */
 	public abstract String getResponseBodyAsString(Charset fallbackCharset);
 
 	/**
 	 * Convert the error response content to the specified type.
-	 *
 	 * @param targetType the type to convert to.
-	 * @param <E>        the expected target type.
+	 * @param <E> the expected target type.
 	 * @return the converted object, or {@code null} if there is no content.
 	 */
 	public abstract <E> @Nullable E getResponseBodyAs(Class<E> targetType);

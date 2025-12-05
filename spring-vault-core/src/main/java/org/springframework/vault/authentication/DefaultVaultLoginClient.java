@@ -26,7 +26,6 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.web.client.RestClient;
 
 /**
  * Default implementation of {@link VaultLoginClient}.

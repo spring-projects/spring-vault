@@ -24,7 +24,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.keyvalue.core.KeyValueAdapter;
-import org.springframework.data.keyvalue.core.KeyValueCallback;
 import org.springframework.data.keyvalue.core.KeyValueTemplate;
 import org.springframework.data.keyvalue.core.event.KeyValueEvent;
 import org.springframework.data.keyvalue.core.mapping.KeyValuePersistentEntity;

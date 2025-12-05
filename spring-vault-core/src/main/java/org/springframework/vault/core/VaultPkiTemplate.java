@@ -30,12 +30,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Default implementation of {@link VaultPkiOperations}.

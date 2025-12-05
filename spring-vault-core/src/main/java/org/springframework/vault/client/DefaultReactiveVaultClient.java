@@ -1,8 +1,5 @@
 package org.springframework.vault.client;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
@@ -16,6 +13,9 @@ import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,10 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.WrappedMetadata;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,8 +33,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * The default implementation of {@link ReactiveVaultClient}, as created by the static factory
- * methods.
+ * The default implementation of {@link ReactiveVaultClient}, as created by the
+ * static factory methods.
  *
  * @author Mark Paluch
  * @see ReactiveVaultClient#create()
@@ -54,12 +52,15 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 	private final ReactiveVaultClient.Builder builder;
 
-	DefaultReactiveVaultClient(WebClient client, @Nullable ReactiveVaultEndpointProvider endpointProvider, @Nullable UriBuilderFactory uriBuilderFactory, ReactiveVaultClient.Builder builder) {
+
+	DefaultReactiveVaultClient(WebClient client, @Nullable ReactiveVaultEndpointProvider endpointProvider,
+			@Nullable UriBuilderFactory uriBuilderFactory, ReactiveVaultClient.Builder builder) {
 		this.client = client;
 		this.endpointProvider = endpointProvider;
 		this.uriBuilderFactory = uriBuilderFactory;
 		this.builder = builder;
 	}
+
 
 	@Override
 	public RequestHeadersPathSpec<?> get() {
@@ -88,7 +89,7 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 	}
 
 	private RequestHeadersBodyPathSpec methodInternal(HttpMethod httpMethod) {
-		return new DefaultRequestHeadersBodyUriSpec(httpMethod, client.method(httpMethod));
+		return new DefaultRequestHeadersBodyUriSpec(client.method(httpMethod));
 	}
 
 	@Override
@@ -96,19 +97,17 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		return builder;
 	}
 
+
 	@SuppressWarnings("NullAway")
 	private class DefaultRequestHeadersBodyUriSpec implements RequestHeadersBodyPathSpec {
 
 		private final WebClient.RequestBodyUriSpec spec;
 
-		private final HttpMethod httpMethod;
-
 		private @Nullable String path;
 
 		private @Nullable Supplier<Mono<WebClient.RequestHeadersSpec<?>>> responseMono;
 
-		public DefaultRequestHeadersBodyUriSpec(HttpMethod httpMethod, WebClient.RequestBodyUriSpec spec) {
-			this.httpMethod = httpMethod;
+		public DefaultRequestHeadersBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
 			this.spec = spec;
 		}
 
@@ -118,14 +117,14 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(path, pathVariables);
-			} else if (endpointProvider != null) {
+			} else if (uriBuilderFactory != null) {
+				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
+			} else {
 				responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
-						return this.spec.uri(VaultClients.getUriComponents(it, path).build().toUri());
+						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
-			} else {
-				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			}
 
 			return this;
@@ -137,14 +136,14 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(path, pathVariables);
-			} else if (endpointProvider != null) {
+			} else if (uriBuilderFactory != null) {
+				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
+			} else {
 				responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
-						return this.spec.uri(VaultClients.getUriComponents(it, path).build().toUri());
+						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
-			} else {
-				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			}
 
 			return this;
@@ -154,17 +153,16 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		public RequestBodySpec uri(URI uri) {
 			this.path = uri.toString();
 
-			if (uri.isAbsolute() && uriBuilderFactory == null && endpointProvider == null) {
+			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(uri);
-			} else if (endpointProvider != null) {
+			} else if (uriBuilderFactory != null) {
+				this.spec.uri(VaultClients.expandUri(uriBuilderFactory, uri));
+			} else {
 				responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
-						return this.spec.uri(VaultClients.getUriComponents(it, "").uri(uri).build().toUri());
+						return this.spec.uri(VaultClients.expandUri(it, uri));
 					});
 				};
-			} else {
-				URI baseUri = uriBuilderFactory.expand("");
-				this.spec.uri(baseUri.resolve(uri));
 			}
 
 			return this;
@@ -189,7 +187,8 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		}
 
 		@Override
-		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher, ParameterizedTypeReference<T> elementTypeRef) {
+		public <T, P extends Publisher<T>> RequestHeadersSpec<?> body(P publisher,
+				ParameterizedTypeReference<T> elementTypeRef) {
 			this.spec.body(publisher, elementTypeRef);
 			return this;
 		}
@@ -212,7 +211,6 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 			return this;
 		}
 
-
 		@Override
 		public RequestBodySpec header(String headerName, String... headerValues) {
 			this.spec.header(headerName, headerValues);
@@ -233,35 +231,57 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 		@Override
 		public ResponseSpec retrieve() {
-
 			if (this.responseMono == null) {
 				return new DefaultResponseSpec(this, this.spec);
 			}
-
 			return new DefaultResponseSpec(this, this.responseMono.get());
 		}
+
+		@Override
+		public <V> Mono<V> exchangeToMono(Function<ClientResponse, ? extends Mono<V>> responseHandler) {
+			if (this.responseMono == null) {
+				return this.spec.exchangeToMono(responseHandler);
+			}
+			return this.responseMono.get().flatMap(it -> it.exchangeToMono(responseHandler));
+		}
+
+		@Override
+		public <V> Flux<V> exchangeToFlux(Function<ClientResponse, ? extends Flux<V>> responseHandler) {
+			if (this.responseMono == null) {
+				return this.spec.exchangeToFlux(responseHandler);
+			}
+
+			return this.responseMono.get().flatMapMany(it -> it.exchangeToFlux(responseHandler));
+		}
+
 	}
+
 
 	private class DefaultResponseSpec implements ResponseSpec {
 
 		private final DefaultRequestHeadersBodyUriSpec requestHeadersSpec;
 
-		private Mono<WebClient.RequestHeadersSpec<?>> retrieve;
-		private Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlers = new LinkedHashMap<>();
+		private final Mono<WebClient.RequestHeadersSpec<?>> retrieve;
+
+		private final Map<Predicate<HttpStatusCode>, Function<ClientResponse, Mono<? extends Throwable>>> statusHandlers = new LinkedHashMap<>();
 
 
-		DefaultResponseSpec(DefaultRequestHeadersBodyUriSpec requestHeadersSpec, WebClient.RequestHeadersSpec<?> retrieve) {
+		DefaultResponseSpec(DefaultRequestHeadersBodyUriSpec requestHeadersSpec,
+				WebClient.RequestHeadersSpec<?> retrieve) {
 			this.requestHeadersSpec = requestHeadersSpec;
 			this.retrieve = Mono.just(retrieve);
 		}
 
-		DefaultResponseSpec(DefaultRequestHeadersBodyUriSpec requestHeadersSpec, Mono<WebClient.RequestHeadersSpec<?>> retrieve) {
+		DefaultResponseSpec(DefaultRequestHeadersBodyUriSpec requestHeadersSpec,
+				Mono<WebClient.RequestHeadersSpec<?>> retrieve) {
 			this.requestHeadersSpec = requestHeadersSpec;
 			this.retrieve = retrieve;
 		}
 
+
 		@Override
-		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate, Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
+		public ResponseSpec onStatus(Predicate<HttpStatusCode> statusPredicate,
+				Function<ClientResponse, Mono<? extends Throwable>> exceptionFunction) {
 			statusHandlers.put(statusPredicate, exceptionFunction);
 			return this;
 		}
@@ -297,10 +317,6 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 			return toFlux(it -> it.bodyToFlux(elementTypeRef));
 		}
 
-		public Mono<ResponseEntity<VaultResponse>> toEntity() {
-			return toEntity(VaultResponse.class);
-		}
-
 		@Override
 		public <T> Mono<ResponseEntity<T>> toEntity(Class<T> bodyClass) {
 			return toMono(it -> it.toEntity(bodyClass));
@@ -323,66 +339,50 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 		@Override
 		public Mono<ResponseEntity<Void>> toBodilessEntity() {
-			return toMono(ClientResponse::toBodilessEntity);
+			return toMono(WebClient.ResponseSpec::toBodilessEntity);
 		}
 
-		private <T> Mono<T> toMono(Function<ClientResponse, ? extends Mono<T>> bodyExtractor) {
+		private <T> Mono<T> toMono(Function<WebClient.ResponseSpec, ? extends Mono<T>> bodyExtractor) {
 			return retrieve.flatMap(it -> {
-				return it.exchangeToMono(resp -> {
-					for (Predicate<HttpStatusCode> httpStatusCodePredicate : statusHandlers.keySet()) {
-						if (httpStatusCodePredicate.test(resp.statusCode())) {
-							Function<ClientResponse, Mono<? extends Throwable>> f = statusHandlers.get(httpStatusCodePredicate);
-							return f.apply(resp).then(Mono.empty());
-						}
-					}
-					return bodyExtractor.apply(resp);
-				});
+				WebClient.ResponseSpec retrieve = it.retrieve();
+				statusHandlers.forEach(retrieve::onStatus);
+				return bodyExtractor.apply(retrieve);
 			}).onErrorMap(WebClientResponseException.class, it -> buildException(it, requestHeadersSpec.path));
 		}
 
-		private <T> Flux<T> toFlux(Function<ClientResponse, ? extends Flux<T>> bodyExtractor) {
+		private <T> Flux<T> toFlux(Function<WebClient.ResponseSpec, ? extends Flux<T>> bodyExtractor) {
 			return retrieve.flatMapMany(it -> {
-				return it.exchangeToFlux(resp -> {
-					for (Predicate<HttpStatusCode> httpStatusCodePredicate : statusHandlers.keySet()) {
-						if (httpStatusCodePredicate.test(resp.statusCode())) {
-							Function<ClientResponse, Mono<? extends Throwable>> f = statusHandlers.get(httpStatusCodePredicate);
-							return f.apply(resp).thenMany(Mono.empty());
-						}
-					}
-					return bodyExtractor.apply(resp);
-				});
+				WebClient.ResponseSpec retrieve = it.retrieve();
+				statusHandlers.forEach(retrieve::onStatus);
+				return bodyExtractor.apply(retrieve);
 			}).onErrorMap(WebClientResponseException.class, it -> buildException(it, requestHeadersSpec.path));
 		}
 
-		/**
-		 * Build a {@link VaultException} given {@link HttpStatusCodeException} and request
-		 * {@code path}.
-		 *
-		 * @param e    must not be {@literal null}.
-		 * @param path must not be {@literal null}.
-		 * @return the {@link VaultException}.
-		 */
-		private static VaultClientResponseException buildException(WebClientResponseException e, @Nullable String path) {
+		private static VaultClientResponseException buildException(WebClientResponseException e,
+				@Nullable String path) {
 
 			Assert.notNull(e, "HttpStatusCodeException must not be null");
 
 			String message = VaultResponses.getError(e.getResponseBodyAsString());
 
 			if (StringUtils.hasText(message)) {
-				return new VaultReactiveClientResponseException("Status %s %s [%s]: %s".formatted(VaultResponses.renderStatus(e.getStatusCode()),
-						e.getStatusText(), path, message), e);
+				return new VaultReactiveClientResponseException("Status %s %s [%s]: %s".formatted(
+						VaultResponses.renderStatus(e.getStatusCode()), e.getStatusText(), path, message), e);
 			}
 
-			return new VaultReactiveClientResponseException(
-					"Status %s %s [%s]".formatted(VaultResponses.renderStatus(e.getStatusCode()), e.getStatusText(), path), e);
+			return new VaultReactiveClientResponseException("Status %s %s [%s]"
+					.formatted(VaultResponses.renderStatus(e.getStatusCode()), e.getStatusText(), path), e);
 		}
+
 	}
+
 
 	static class VaultReactiveClientResponseException extends VaultClientResponseException {
 
 		public VaultReactiveClientResponseException(String msg, WebClientResponseException cause) {
 			super(msg, cause);
 		}
+
 
 		@Override
 		@SuppressWarnings("NullAway")
@@ -419,5 +419,7 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		public <E> @Nullable E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
 			return getCause().getResponseBodyAs(targetType);
 		}
+
 	}
+
 }

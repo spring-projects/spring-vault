@@ -36,8 +36,8 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	private final String path;
 
 	/**
-	 * Create a new {@link ReactiveVaultKeyValue2Accessor} given {@link ReactiveVaultTemplate}
-	 * and the mount {@code path}.
+	 * Create a new {@link ReactiveVaultKeyValue2Accessor} given
+	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
 	 * @param reactiveVaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */

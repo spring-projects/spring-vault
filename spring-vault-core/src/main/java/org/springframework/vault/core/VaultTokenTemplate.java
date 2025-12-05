@@ -22,12 +22,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.

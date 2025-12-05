@@ -50,8 +50,8 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	public Mono<VaultMetadataResponse> get(String path) {
 
 		return vaultOperations.read(getMetadataPath(path), Map.class)
-				.mapNotNull(VaultResponseSupport::getData)
-				.map(KeyValueUtilities::fromMap);
+			.mapNotNull(VaultResponseSupport::getData)
+			.map(KeyValueUtilities::fromMap);
 	}
 
 	@Override

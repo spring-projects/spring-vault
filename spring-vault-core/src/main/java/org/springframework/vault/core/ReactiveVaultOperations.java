@@ -58,15 +58,11 @@ import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
  */
 public interface ReactiveVaultOperations {
 
-	/*
+	/**
 	 * Return {@link VaultKeyValueOperations}.
-	 *
 	 * @param path the mount path, must not be empty or {@literal null}.
-	 *
 	 * @param apiVersion API version to use, must not be {@literal null}.
-	 *
 	 * @return the operations interface to interact with the Vault Key/Value backend.
-	 *
 	 * @since 3.1
 	 */
 	ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
