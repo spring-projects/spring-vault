@@ -16,6 +16,8 @@
 
 package org.springframework.vault.client;
 
+import java.util.Arrays;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.VaultToken;
@@ -44,13 +46,15 @@ public abstract class VaultHttpHeaders {
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	/**
-	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a unwrapping
-	 * token instead of the actual response.
+	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a
+	 * unwrapping token instead of the actual response.
 	 */
 	public static final String VAULT_WRAP_TTL = "X-Vault-Wrap-TTL";
 
+
 	private VaultHttpHeaders() {
 	}
+
 
 	/**
 	 * Create {@link HttpHeaders} given {@link VaultToken}. The resulting object can
@@ -60,8 +64,20 @@ public abstract class VaultHttpHeaders {
 	 */
 	public static HttpHeaders from(VaultToken vaultToken) {
 		Assert.notNull(vaultToken, "VaultToken must not be null");
+		return singleton(VAULT_TOKEN, vaultToken.getToken());
+	}
+
+	/**
+	 * Create {@link HttpHeaders} containing only the specified header key with its
+	 * values.
+	 * @param header the header name.
+	 * @param values the header values.
+	 * @return {@link HttpHeaders} containing the given header along with its
+	 * values.
+	 */
+	public static HttpHeaders singleton(String header, String... values) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.add(VAULT_TOKEN, vaultToken.getToken());
+		headers.put(header, Arrays.asList(values));
 		return headers;
 	}
 

@@ -100,7 +100,7 @@ class VaultNamespaceSecretIntegrationTests extends IntegrationTestSupport {
 		this.marketingClient = VaultClient.builder()
 				.endpoint(Settings.TEST_VAULT_ENDPOINT)
 				.defaultNamespace("marketing")
-			.build();
+				.build();
 
 		VaultTemplate dev = new VaultTemplate(this.devClient,
 				new SimpleSessionManager(new TokenAuthentication(Settings.token())));

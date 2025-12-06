@@ -74,11 +74,11 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		Assert.hasText(path, "Path must not be empty");
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) (client -> {
 			return client.delete()
-				.path(createDataPath(path))
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toBodilessEntity()
-				.getBody();
+					.path(createDataPath(path))
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toBodilessEntity()
+					.getBody();
 		}));
 	}
 
@@ -98,13 +98,13 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 		ParameterizedTypeReference<VaultResponseSupport<Object>> ref = VaultResponses
 				.getTypeReference(JacksonCompat.instance().getJsonNodeClass());
 		VaultResponseSupport<Object> response = doRead(createDataPath(path), ref);
-		if (response != null) {
-			Object jsonNode = getJsonNode(response);
-			Object jsonMeta = JacksonCompat.instance().getAt(response.getRequiredData(), "/metadata");
-			response.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
-			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
+		if (response == null) {
+			return null;
 		}
-		return null;
+		Object jsonNode = getJsonNode(response);
+		Object jsonMeta = JacksonCompat.instance().getAt(response.getRequiredData(), "/metadata");
+		response.setMetadata(this.mapper.deserialize(jsonMeta, Map.class));
+		return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 	}
 
 	/**
@@ -116,10 +116,10 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 */
 	<T> @Nullable T doRead(String path, ParameterizedTypeReference<T> typeReference) {
 		return doRead((client) -> client.get()
-			.path(path)
-			.retrieve()
-			.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-			.toEntity(typeReference));
+				.path(path)
+				.retrieve()
+				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+				.toEntity(typeReference));
 	}
 
 	/**
@@ -143,11 +143,9 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	<T extends @Nullable Object> @Nullable T doRead(Function<VaultClient, ResponseEntity<T>> callback) {
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable T>) (client) -> {
 			ResponseEntity<T> entity = callback.apply(client);
-
 			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
 				return null;
-
-				}
+			}
 			return entity.getBody();
 		});
 	}
@@ -162,7 +160,6 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	@SuppressWarnings("NullAway")
 	VaultResponse doWrite(String path, Object body) {
 		Assert.hasText(path, "Path must not be empty");
-
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable VaultResponse>) (client) -> {
 			return client.post().path(path).body(body).retrieve().body(VaultResponse.class);
 		});

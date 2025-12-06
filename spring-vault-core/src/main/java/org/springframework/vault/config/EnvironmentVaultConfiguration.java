@@ -189,13 +189,12 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	private @Nullable RestClient cachedRestClient;
 
-	private @Nullable VaultClient cachedVaultClient;
-
 	private @Nullable ApplicationContext applicationContext;
 
 
 	/*
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link
+	 * RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	@Override
@@ -208,11 +207,9 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	}
 
 	RestClient restClient() {
-
 		if (this.cachedRestClient != null) {
 			return this.cachedRestClient;
 		}
-
 		this.cachedRestClient = RestClient.create(getRestTemplateFactory().create());
 		return this.cachedRestClient;
 	}

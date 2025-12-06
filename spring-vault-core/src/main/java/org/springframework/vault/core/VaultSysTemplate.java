@@ -31,22 +31,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.*;
 import org.springframework.vault.support.VaultMount.VaultMountBuilder;
-import org.springframework.vault.support.VaultResponse;
-import org.springframework.vault.support.VaultResponseSupport;
-import org.springframework.vault.support.VaultToken;
-import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.web.client.RestClientResponseException;
 
 /**
  * Default implementation of {@link VaultSysOperations}.
@@ -83,15 +78,12 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public boolean isInitialized() {
 		return requireResponse(this.vaultOperations.doWithSessionClient(client -> {
-
 			ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) client.get()
-				.path("sys/init")
-				.headers(emptyNamespace())
-				.retrieve()
-				.toEntity(Map.class);
-
+					.path("sys/init")
+					.headers(emptyNamespace())
+					.retrieve()
+					.toEntity(Map.class);
 			Assert.state(body.getBody() != null, "Initialization response must not be null");
-
 			Boolean initialized = body.getBody().get("initialized");
 			return initialized != null && initialized.booleanValue();
 		}));
@@ -101,16 +93,13 @@ public class VaultSysTemplate implements VaultSysOperations {
 	public VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) {
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
 		return requireResponse(this.vaultOperations.doWithVaultClient(client -> {
-
 			ResponseEntity<VaultInitializationResponseImpl> exchange = client.put()
-				.path("sys/init")
-				.headers(emptyNamespace())
-				.body(vaultInitializationRequest)
-				.retrieve()
-				.toEntity(VaultInitializationResponseImpl.class);
-
+					.path("sys/init")
+					.headers(emptyNamespace())
+					.body(vaultInitializationRequest)
+					.retrieve()
+					.toEntity(VaultInitializationResponseImpl.class);
 			Assert.state(exchange.getBody() != null, "Initialization response must not be null");
-
 			return exchange.getBody();
 		}));
 	}
@@ -187,11 +176,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 		Assert.hasText(name, "Name must not be null or empty");
 		return this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Policy>) client -> {
 			ResponseEntity<VaultResponse> response = client.get()
-				.path("sys/policy/{name}", name)
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toEntity(VaultResponse.class);
-
+					.path("sys/policy/{name}", name)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity(VaultResponse.class);
 			if (HttpStatusUtil.isNotFound(response.getStatusCode())) {
 				return null;
 			}
@@ -243,6 +231,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 		return response;
 	}
 
+	private static Consumer<HttpHeaders> emptyNamespace() {
+		return it -> it.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
+	}
+
 
 	private static class GetUnsealStatus implements VaultClientCallback<VaultUnsealStatus> {
 
@@ -277,10 +269,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 					.toEntity(MOUNT_TYPE_REF);
 			VaultMountsResponse body = exchange.getBody();
 			Assert.state(body != null, "Get mounts response must not be null");
-			if (body.getData() != null) {
-				return body.getData();
-			}
-			return body.getTopLevelMounts();
+			return body.getData() != null ? body.getData() : body.getTopLevelMounts();
 		}
 
 
@@ -318,15 +307,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
-	private static <T> HttpEntity<T> emptyNamespace(@Nullable T body) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
-		return new HttpEntity<>(body, headers);
-	}
-
-	private static Consumer<HttpHeaders> emptyNamespace() {
-		return it -> it.add(VaultHttpHeaders.VAULT_NAMESPACE, "");
-	}
 
 
 	private static class Health implements VaultClientCallback<VaultHealth> {
@@ -341,7 +321,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 						.retrieve()
 						.toEntity(VaultHealthImpl.class);
 				return requireResponse(healthResponse.getBody());
-			} catch (RestClientResponseException responseError) {
+			} catch (VaultClientResponseException responseError) {
 				try {
 					return JacksonCompat.instance()
 							.getObjectMapperAccessor()

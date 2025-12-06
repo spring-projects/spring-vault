@@ -46,7 +46,7 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 		TestVaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 
 		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
-			.create(ClientCertificateAuthentication.createAuthenticationSteps(), client);
+				.create(ClientCertificateAuthentication.createAuthenticationSteps(), client);
 
 		VaultToken login = executor.login();
 
@@ -63,8 +63,8 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 		TestVaultClient client = TestVaultClient.create(clientHttpRequestFactory);
 
 		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(() -> TestAuthenticationStepsExecutor
-			.create(ClientCertificateAuthentication.createAuthenticationSteps(), client)
-			.login());
+				.create(ClientCertificateAuthentication.createAuthenticationSteps(), client)
+				.login());
 	}
 
 }

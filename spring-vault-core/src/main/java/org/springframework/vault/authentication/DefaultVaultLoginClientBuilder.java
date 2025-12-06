@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.jspecify.annotations.Nullable;
@@ -31,9 +32,11 @@ class DefaultVaultLoginClientBuilder implements VaultLoginClient.Builder {
 
 	private @Nullable String authenticationMechanism;
 
+
 	public DefaultVaultLoginClientBuilder(VaultClient vaultClient) {
 		this.vaultClient = vaultClient;
 	}
+
 
 	@Override
 	public VaultLoginClient.Builder mechanism(String authenticationMechanism) {

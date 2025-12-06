@@ -20,13 +20,13 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponse;
@@ -34,8 +34,6 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
@@ -191,6 +189,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		this.loginClient = VaultLoginClient.create(client, "Cubbyhole");
 	}
 
+
 	/**
 	 * Create {@link AuthenticationSteps} for cubbyhole authentication given
 	 * {@link CubbyholeAuthenticationOptions}.
@@ -233,12 +232,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
 			return this.loginClient.method(unwrapMethod)
-				.path(url)
-				.headers(getRequestHeaders(options))
-				.retrieve()
-				.requiredBody();
+					.path(url)
+					.headers(getRequestHeaders(options))
+					.retrieve()
+					.requiredBody();
 		} catch (VaultException e) {
-
 			if (e.getCause() instanceof RestClientException rce) {
 				throw VaultLoginException.create("Cubbyhole", rce);
 			}

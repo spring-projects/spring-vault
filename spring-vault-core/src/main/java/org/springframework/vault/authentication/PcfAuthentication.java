@@ -25,14 +25,11 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
-
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
@@ -57,6 +54,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 
 	private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
+
 	// SHA256 hash and a salt length of 222
 	private static final int SALT_LENGTH = 222;
 
@@ -64,6 +62,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	private final PcfAuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
+
 
 	/**
 	 * Create a {@link PcfAuthentication} using {@link PcfAuthenticationOptions} and
@@ -100,12 +99,12 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @since 4.1
 	 */
 	public PcfAuthentication(PcfAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "PcfAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "PCF");
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for pcf authentication given

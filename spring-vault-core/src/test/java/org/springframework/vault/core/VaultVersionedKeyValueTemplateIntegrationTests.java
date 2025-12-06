@@ -103,7 +103,7 @@ class VaultVersionedKeyValueTemplateIntegrationTests extends IntegrationTestSupp
 
 		// this should fail
 		assertThatThrownBy(() -> this.versionedOperations.put(key, Versioned.create(secret, Version.unversioned())))
-				.isExactlyInstanceOf(VaultException.class)
+				.isInstanceOf(VaultException.class)
 				.hasMessageContaining("check-and-set parameter did not match the current version");
 	}
 

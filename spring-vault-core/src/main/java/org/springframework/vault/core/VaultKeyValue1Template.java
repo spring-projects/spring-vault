@@ -105,11 +105,9 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 
 	@Override
 	String createDataPath(String path) {
-
 		if (this.path.endsWith("/")) {
 			return this.path + path;
 		}
-
 		return "%s/%s".formatted(this.path, path);
 	}
 

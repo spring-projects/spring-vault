@@ -25,11 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.MockVaultClient;
-import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -110,7 +107,7 @@ class PcfAuthenticationUnitTests {
 		expectLoginRequest();
 
 		AuthenticationStepsExecutor authentication = TestAuthenticationStepsExecutor
-			.create(PcfAuthentication.createAuthenticationSteps(options), this.client);
+				.create(PcfAuthentication.createAuthenticationSteps(options), this.client);
 
 		VaultToken login = authentication.login();
 		assertThat(login).isInstanceOf(LoginToken.class);

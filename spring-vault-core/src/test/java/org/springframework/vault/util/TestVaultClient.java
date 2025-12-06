@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,8 +57,9 @@ public interface TestVaultClient extends VaultClient {
 	}
 
 	/**
-	 * Create a new {@link VaultClient} using {@link Settings#createSslConfiguration()}.
-	 * The underlying {@link ClientHttpRequestFactory} is cached.
+	 * Create a new {@link VaultClient} using
+	 * {@link Settings#createSslConfiguration()}. The underlying
+	 * {@link ClientHttpRequestFactory} is cached.
 	 * @return
 	 */
 	static TestVaultClient create() {
@@ -65,11 +67,11 @@ public interface TestVaultClient extends VaultClient {
 	}
 
 	/**
-	 * Create a new {@link VaultClient} using the {@link SslConfiguration}. The underlying
-	 * {@link ClientHttpRequestFactory} is cached.
-	 * <p>
-	 * The initial request to obtain {@link ClientHttpRequestFactory} considers the SSL
-	 * configuration. Subsequent calls do not obtain a new {@link SslConfiguration}.
+	 * Create a new {@link VaultClient} using the {@link SslConfiguration}. The
+	 * underlying {@link ClientHttpRequestFactory} is cached.
+	 * <p>The initial request to obtain {@link ClientHttpRequestFactory} considers
+	 * the SSL configuration. Subsequent calls do not obtain a new
+	 * {@link SslConfiguration}.
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -82,8 +84,8 @@ public interface TestVaultClient extends VaultClient {
 
 	/**
 	 * Create a new {@link VaultClient} applying the {@code builderConsumer} to
-	 * {@code VaultClient.Builder}. The underlying {@link ClientHttpRequestFactory} is
-	 * cached.
+	 * {@code VaultClient.Builder}. The underlying {@link ClientHttpRequestFactory}
+	 * is cached.
 	 * @param builderConsumer must not be {@literal null}.
 	 * @return
 	 */
@@ -105,8 +107,8 @@ public interface TestVaultClient extends VaultClient {
 	}
 
 	/**
-	 * Create a new {@link VaultClient} using the {@link ClientHttpRequestFactory} and
-	 * applying the {@code builderConsumer} to {@code VaultClient.Builder}.
+	 * Create a new {@link VaultClient} using the {@link ClientHttpRequestFactory}
+	 * and applying the {@code builderConsumer} to {@code VaultClient.Builder}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @param builderConsumer must not be {@literal null}.
 	 * @return the configured {@link TestVaultClient}.
@@ -117,8 +119,8 @@ public interface TestVaultClient extends VaultClient {
 		Assert.notNull(clientHttpRequestFactory, "SslConfiguration must not be null!");
 
 		Builder builder = VaultClient.builder()
-			.requestFactory(clientHttpRequestFactory)
-			.endpoint(Settings.TEST_VAULT_ENDPOINT);
+				.requestFactory(clientHttpRequestFactory)
+				.endpoint(Settings.TEST_VAULT_ENDPOINT);
 		builderConsumer.accept(builder);
 
 		RestClient restClient = VaultClients.createRestClient(
@@ -129,11 +131,11 @@ public interface TestVaultClient extends VaultClient {
 	}
 
 	/**
-	 * Obtain {@link ClientHttpRequestFactory} using the {@link SslConfiguration}. The
-	 * underlying {@link ClientHttpRequestFactory} is cached.
-	 * <p>
-	 * The initial request to obtain {@link ClientHttpRequestFactory} considers the SSL
-	 * configuration. Subsequent calls do not obtain a new {@link SslConfiguration}.
+	 * Obtain {@link ClientHttpRequestFactory} using the {@link SslConfiguration}.
+	 * The underlying {@link ClientHttpRequestFactory} is cached.
+	 * <p>The initial request to obtain {@link ClientHttpRequestFactory} considers
+	 * the SSL configuration. Subsequent calls do not obtain a new
+	 * {@link SslConfiguration}.
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -144,8 +146,7 @@ public interface TestVaultClient extends VaultClient {
 		try {
 			initializeClientHttpRequestFactory(sslConfiguration);
 			return factoryCache.get();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
@@ -158,7 +159,7 @@ public interface TestVaultClient extends VaultClient {
 		}
 
 		final ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-			.create(new ClientOptions(), sslConfiguration.get());
+				.create(new ClientOptions(), sslConfiguration.get());
 
 		if (factoryCache.compareAndSet(null, clientHttpRequestFactory)) {
 
@@ -174,11 +175,11 @@ public interface TestVaultClient extends VaultClient {
 					public void run() {
 						try {
 							((DisposableBean) clientHttpRequestFactory).destroy();
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
+
 				});
 			}
 		}

@@ -57,15 +57,19 @@ import org.springframework.web.client.RestTemplate;
  * @since 2.2
  * @see ClientHttpRequestFactoryFactory
  * @see RestTemplateCustomizer
+ * @deprecated since 4.1, use {@link VaultClientCustomizer} or
+ * {@link RestClientCustomizer} instead.
  */
 public class RestTemplateBuilder {
 
-	@Nullable VaultEndpointProvider endpointProvider;
+	@Nullable
+	VaultEndpointProvider endpointProvider;
 
 	Supplier<ClientHttpRequestFactory> requestFactory = () -> ClientHttpRequestFactoryFactory
 			.create(new ClientOptions(), SslConfiguration.unconfigured());
 
-	@Nullable ResponseErrorHandler errorHandler;
+	@Nullable
+	ResponseErrorHandler errorHandler;
 
 	final Map<String, String> defaultHeaders = new LinkedHashMap<>();
 
@@ -227,8 +231,8 @@ public class RestTemplateBuilder {
 	protected RestTemplate createTemplate() {
 		Assert.notNull(this.endpointProvider, "VaultEndpointProvider must not be null");
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
-		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
-		LinkedHashSet<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>(this.requestCustomizers);
+		Map<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
+		Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>(this.requestCustomizers);
 		RestTemplate restTemplate = VaultClients.createRestTemplate(this.endpointProvider,
 				new RestTemplateBuilderClientHttpRequestFactoryWrapper(requestFactory, requestCustomizers));
 		restTemplate.getInterceptors().add((httpRequest, bytes, clientHttpRequestExecution) -> {

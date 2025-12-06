@@ -35,8 +35,8 @@ import org.springframework.data.mapping.context.MappingContext;
  * Default implementation of {@link VaultTypeMapper} allowing configuration of
  * the key to lookup and store type information in {@link SecretDocument}. The
  * key defaults to {@link #DEFAULT_TYPE_KEY}. Actual type-to-{@link String}
- * conversion and back is done in {@link #readType(Object)} or
- * {@link #getDefaultedTypeToBeUsed(Object)}. respectively.
+ * conversion and back is done in {@link #readType} or
+ * {@link #getDefaultedTypeToBeUsed}. respectively.
  *
  * @author Mark Paluch
  * @since 2.0

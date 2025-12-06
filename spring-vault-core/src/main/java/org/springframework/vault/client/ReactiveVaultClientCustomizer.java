@@ -18,19 +18,19 @@ package org.springframework.vault.client;
 
 /**
  * Callback interface that can be used to customize a
- * {@link VaultClient.Builder}. Beans implementing this interface are applied to
- * the {@link VaultClient} builder.
+ * {@link ReactiveVaultClient.Builder}. Beans implementing this interface are
+ * applied to the {@link ReactiveVaultClient} builder.
  *
  * @author Mark Paluch
  * @since 4.1
  */
 @FunctionalInterface
-public interface VaultClientCustomizer {
+public interface ReactiveVaultClientCustomizer {
 
 	/**
-	 * Callback to customize a {@link VaultClient.Builder} instance.
+	 * Callback to customize a {@link ReactiveVaultClient.Builder} instance.
 	 * @param builder the builder to customize.
 	 */
-	void customize(VaultClient.Builder builder);
+	void customize(ReactiveVaultClient.Builder builder);
 
 }

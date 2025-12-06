@@ -21,14 +21,11 @@ import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import javax.net.ssl.SSLContext;
 
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
-import org.apache.hc.core5.util.Timeout;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -92,6 +89,7 @@ public class ClientHttpConnectorFactory {
 		}
 	}
 
+
 	/**
 	 * {@link ClientHttpConnector} for Reactor Netty.
 	 *
@@ -147,44 +145,26 @@ public class ClientHttpConnectorFactory {
 			HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClientBuilder.create();
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
-			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
-			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
-			ConnectionConfig connectionConfig = ConnectionConfig.custom()
-					.setConnectTimeout(connectTimeout) //
-					.setSocketTimeout(readTimeout) //
-					.build();
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-					.setAuthenticationEnabled(true) //
-					.setRedirectsEnabled(true)
-					.build();
-
 			PoolingAsyncClientConnectionManagerBuilder connectionManagerBuilder = PoolingAsyncClientConnectionManagerBuilder //
 					.create()
-					.setDefaultConnectionConfig(connectionConfig);
-
+					.setDefaultConnectionConfig(ClientConfiguration.HttpComponents.getConnectionConfig(options));
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
-				SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
-				String[] enabledProtocols = !sslConfiguration.getEnabledProtocols().isEmpty()
-						? sslConfiguration.getEnabledProtocols().toArray(new String[0])
-						: null;
-				String[] enabledCipherSuites = !sslConfiguration.getEnabledCipherSuites().isEmpty()
-						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0])
-						: null;
-				BasicClientTlsStrategy tlsStrategy = new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
-					if (enabledProtocols != null) {
-						sslEngine.setEnabledProtocols(enabledProtocols);
-					}
-					if (enabledCipherSuites != null) {
-						sslEngine.setEnabledCipherSuites(enabledCipherSuites);
-					}
-				}, null);
-
+				BasicClientTlsStrategy tlsStrategy = getTlsStrategy(sslConfiguration);
 				connectionManagerBuilder.setTlsStrategy(tlsStrategy);
 			}
-			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+			httpClientBuilder.setDefaultRequestConfig(ClientConfiguration.HttpComponents.getRequestConfig(options));
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 			return httpClientBuilder;
+		}
+
+		public static BasicClientTlsStrategy getTlsStrategy(SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+			SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
+
+			return new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
+				sslConfiguration.enabledProtocols(sslEngine::setEnabledProtocols);
+				sslConfiguration.enabledCipherSuites(sslEngine::setEnabledCipherSuites);
+			}, null);
 		}
 
 	}

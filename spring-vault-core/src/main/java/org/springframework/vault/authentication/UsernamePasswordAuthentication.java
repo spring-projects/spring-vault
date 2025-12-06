@@ -21,12 +21,11 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * Username and password implementation of {@link ClientAuthentication}. Can be
@@ -49,12 +48,10 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  */
 public class UsernamePasswordAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory.getLog(UsernamePasswordAuthentication.class);
-
-
 	private final UsernamePasswordAuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
+
 
 	/**
 	 * Create a {@link UsernamePasswordAuthentication} using
@@ -94,12 +91,12 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @since 4.1
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "Username and Password (" + options.getPath() + ")");
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for username/password authentication
@@ -114,6 +111,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 				.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
 	}
 
+
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingUsernamePasswordAuthentication();
@@ -127,10 +125,10 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	@SuppressWarnings("NullAway")
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 		return loginClient.login()
-			.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
-			.using(createLoginBody(options))
-			.retrieve()
-			.loginToken();
+				.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
+				.using(createLoginBody(options))
+				.retrieve()
+				.loginToken();
 	}
 
 	private static Map<String, Object> createLoginBody(UsernamePasswordAuthenticationOptions options) {

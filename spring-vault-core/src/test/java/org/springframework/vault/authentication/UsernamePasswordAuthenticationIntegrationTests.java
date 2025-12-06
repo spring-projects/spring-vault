@@ -55,7 +55,7 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 				.build();
 
 		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
-			.create(UsernamePasswordAuthentication.createAuthenticationSteps(options), client);
+				.create(UsernamePasswordAuthentication.createAuthenticationSteps(options), client);
 		VaultToken login = executor.login();
 
 		assertThat(login.getToken()).isNotEmpty();

@@ -23,12 +23,10 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenResponse;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
  * Default implementation of {@link VaultTokenOperations}.
@@ -39,6 +37,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 public class VaultTokenTemplate implements VaultTokenOperations {
 
 	private final VaultTemplate vaultOperations;
+
 
 	/**
 	 * Create a new {@link VaultTokenTemplate} with the given
@@ -93,11 +92,9 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 		Assert.hasText(path, "Path must not be empty");
 		return this.vaultOperations.doWithSessionClient(client -> {
 			VaultClient.RequestBodySpec spec = client.post().path(path);
-
 			if (body != null) {
 				spec = spec.body(body);
 			}
-
 			return spec.retrieve().body(responseType);
 		});
 	}
@@ -106,12 +103,11 @@ public class VaultTokenTemplate implements VaultTokenOperations {
 	private void writeToken(String path, VaultToken token, Class<?> responseType) {
 		Assert.hasText(path, "Path must not be empty");
 		this.vaultOperations.doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
-
 			client.post()
-				.path(path)
-				.body(Collections.singletonMap("token", token.getToken()))
-				.retrieve()
-				.toEntity(responseType);
+					.path(path)
+					.body(Collections.singletonMap("token", token.getToken()))
+					.retrieve()
+					.toEntity(responseType);
 			return null;
 		});
 	}

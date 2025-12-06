@@ -99,6 +99,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 1.0.1
+	 * @deprecated since 4.1, use
+	 * {@link #LifecycleAwareSessionManager(ClientAuthentication, TaskScheduler, VaultClient)}
+	 * instead.
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations) {
@@ -114,6 +117,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param restOperations must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
 	 * @since 1.0.1
+	 * @deprecated since 4.1, use
+	 * {@link #LifecycleAwareSessionManager(ClientAuthentication, TaskScheduler, VaultClient, RefreshTrigger)}
+	 * instead.
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations, RefreshTrigger refreshTrigger) {
@@ -121,8 +127,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	}
 
 	/**
-	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
-	 * {@link TaskScheduler} and {@link RestClient}.
+	 * Create a {@link LifecycleAwareSessionManager} given
+	 * {@link ClientAuthentication}, {@link TaskScheduler} and {@link RestClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param client must not be {@literal null}.
@@ -148,8 +154,8 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	}
 
 	/**
-	 * Create a {@link LifecycleAwareSessionManager} given {@link ClientAuthentication},
-	 * {@link TaskScheduler} and {@link RestClient}.
+	 * Create a {@link LifecycleAwareSessionManager} given
+	 * {@link ClientAuthentication}, {@link TaskScheduler} and {@link RestClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param client must not be {@literal null}.
@@ -277,10 +283,10 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	private RenewOutcome doRenew(TokenWrapper wrapper) {
 		multicastEvent(new BeforeLoginTokenRenewedEvent(wrapper.getToken()));
 		VaultResponse vaultResponse = this.client.post()
-			.path("auth/token/renew-self")
-			.token(wrapper.token)
-			.retrieve()
-			.body();
+				.path("auth/token/renew-self")
+				.token(wrapper.token)
+				.retrieve()
+				.body();
 
 		Assert.notNull(vaultResponse, "VaultResponse must not be null");
 		LoginToken renewed = LoginToken.from(vaultResponse.getAuth());

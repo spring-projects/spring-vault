@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,8 +56,8 @@ public class MockVaultClient implements TestVaultClient {
 	}
 
 	/**
-	 * Create a {@link MockVaultClient} with custom {@link RestClient} configuration bound
-	 * to {@link MockRestServiceServer}.
+	 * Create a {@link MockVaultClient} with custom {@link RestClient} configuration
+	 * bound to {@link MockRestServiceServer}.
 	 * @param builderConsumer consumer to configure the {@link VaultClient.Builder}.
 	 * @return the configured {@link VaultClient}.
 	 */

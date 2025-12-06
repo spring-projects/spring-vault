@@ -264,6 +264,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		return this.vaultOperations;
 	}
 
+
 	static abstract class VaultKeyValueKeyspaceAccessor {
 
 		private final KeyValueDelegate.MountInfo mountInfo;
@@ -319,9 +320,9 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			this.operations = operations;
 		}
 
-		@Nullable
+
 		@Override
-		public List<String> list(String pattern) {
+		public @Nullable List<String> list(String pattern) {
 			return operations.list(getPathInMount(pattern));
 		}
 
@@ -365,14 +366,14 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			this.operations = operations;
 		}
 
-		@Nullable
+
 		@Override
-		public List<String> list(String pattern) {
+		public @Nullable List<String> list(String pattern) {
 			return operations.list(getPathInMount(pattern));
 		}
 
-		@Nullable
 		@Override
+		@Nullable
 		SecretDocument get(String id) {
 			Versioned<Map<String, Object>> versioned = operations.get(createPath(id));
 			if (versioned == null || !versioned.hasData()) {

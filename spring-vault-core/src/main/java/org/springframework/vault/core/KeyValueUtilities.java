@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.support.DurationParser;
 import org.springframework.vault.support.VaultMetadataResponse;
@@ -121,32 +120,6 @@ class KeyValueUtilities {
 		body.put("data", result);
 		body.put("options", Collections.singletonMap("cas", metadata.get("version")));
 		return body;
-	}
-
-	static String normalizeListPath(String path) {
-
-		Assert.notNull(path, "Path must not be null");
-
-		return path.equals("/") ? "" : path.endsWith("/") ? path : path + "/";
-	}
-
-	static String relativePath(String path) {
-
-		Assert.notNull(path, "Path must not be null");
-
-		if (path.startsWith("/")) {
-			path = path.substring(1);
-		}
-
-		if (path.endsWith("/")) {
-			path = path.substring(0, path.length() - 1);
-		}
-
-		if (path.equals("/")) {
-			return "";
-		}
-
-		return path;
 	}
 
 }

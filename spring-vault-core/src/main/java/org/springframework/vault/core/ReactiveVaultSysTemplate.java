@@ -54,7 +54,7 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 					.path("sys/init")
 					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
 					.retrieve()
-				.toEntity(Map.class)
+					.toEntity(Map.class)
 					.filter(HttpEntity::hasBody)
 					.map(it -> (Boolean) it.getBody().get("initialized"));
 		});
@@ -68,9 +68,9 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 					.path("sys/health")
 					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
 					.retrieve()
-				.toEntity(VaultSysTemplate.VaultHealthImpl.class)
-				.filter(HttpEntity::hasBody)
-				.map(HttpEntity::getBody);
+					.toEntity(VaultSysTemplate.VaultHealthImpl.class)
+					.filter(HttpEntity::hasBody)
+					.map(HttpEntity::getBody);
 		});
 	}
 

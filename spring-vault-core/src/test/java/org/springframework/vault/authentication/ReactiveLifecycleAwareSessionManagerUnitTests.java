@@ -49,7 +49,6 @@ import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -203,7 +202,17 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.renewToken().as(StepVerifier::create).verifyComplete();
 		assertThat(listener.get().getException()).isInstanceOf(VaultTokenRenewalException.class)
 				.hasCauseInstanceOf(WebClientResponseException.class)
-				.hasMessageContaining("Cannot renew token: Status 500 Some server error");
+				.hasMessageContaining("Cannot renew token: Status 500Some server error");
+
+		@Override
+		public @Nullable <E> E getResponseBodyAs(Class<E> targetType) {
+			return null;
+		}
+
+		@Override
+		public @Nullable <E> E getResponseBodyAs(ParameterizedTypeReference<E> targetType) {
+			return null;
+		}
 
 	}
 

@@ -35,7 +35,6 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Reactive implementation of Lifecycle-aware {@link ReactiveSessionManager
@@ -103,6 +102,33 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 */
 	public ReactiveLifecycleAwareSessionManager(VaultTokenSupplier clientAuthentication, TaskScheduler taskScheduler,
 			WebClient webClient) {
+		this(clientAuthentication, taskScheduler, ReactiveVaultClient.builder(webClient).build());
+	}
+
+	/**
+	 * Create a {@link ReactiveLifecycleAwareSessionManager} given
+	 * {@link VaultTokenSupplier}, {@link TaskScheduler} and {@link WebClient}.
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param webClient must not be {@literal null}.
+	 * @param refreshTrigger must not be {@literal null}.
+	 */
+	public ReactiveLifecycleAwareSessionManager(VaultTokenSupplier clientAuthentication, TaskScheduler taskScheduler,
+			WebClient webClient, RefreshTrigger refreshTrigger) {
+		this(clientAuthentication, taskScheduler, ReactiveVaultClient.builder(webClient).build(), refreshTrigger);
+	}
+
+	/**
+	 * Create a {@link ReactiveLifecycleAwareSessionManager} given
+	 * {@link ClientAuthentication}, {@link TaskScheduler} and
+	 * {@link ReactiveVaultClient}.
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @param taskScheduler must not be {@literal null}.
+	 * @param client must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public ReactiveLifecycleAwareSessionManager(VaultTokenSupplier clientAuthentication, TaskScheduler taskScheduler,
+			ReactiveVaultClient client) {
 		super(taskScheduler);
 		Assert.notNull(clientAuthentication, "VaultTokenSupplier must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
@@ -113,7 +139,8 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 
 	/**
 	 * Create a {@link ReactiveLifecycleAwareSessionManager} given
-	 * {@link VaultTokenSupplier}, {@link TaskScheduler} and {@link WebClient}.
+	 * {@link VaultTokenSupplier}, {@link TaskScheduler} and
+	 * {@link WebClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
@@ -198,10 +225,10 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	}
 
 	/**
-	 * Performs a token refresh. Creates a new token if no token was obtained
-	 * before. If a token was obtained before, it uses self-renewal to renew the
-	 * current token. Client-side errors (like permission denied) indicate the token
-	 * cannot be renewed because it's expired or simply not found.
+	 * Performs a token refresh. Create a new token if no token was obtained before.
+	 * If a token was obtained before, it uses self-renewal to renew the current
+	 * token. Client-side errors (like permission denied) indicate the token cannot
+	 * be renewed because it's expired or simply not found.
 	 * @return the {@link VaultToken} if the refresh was successful or a new token
 	 * was obtained. {@link Mono#empty()} if a new the token expired or
 	 * {@link Mono#error(Throwable)} if refresh failed.

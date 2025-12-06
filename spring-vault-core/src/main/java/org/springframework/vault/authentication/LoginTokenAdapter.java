@@ -76,6 +76,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 		this.client = client;
 	}
 
+
 	@Override
 	public LoginToken login() throws VaultException {
 		return augmentWithSelfLookup(this.delegate.login());
@@ -95,10 +96,8 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	private static Map<String, Object> lookupSelf(VaultClient client, VaultToken token) {
 		try {
 			VaultResponse response = client.get().path("auth/token/lookup-self").token(token).retrieve().requiredBody();
-
 			return response.getRequiredData();
-		}
-		catch (VaultException e) {
+		} catch (VaultException e) {
 
 			if (e.getCause() instanceof HttpStatusCodeException hse) {
 				throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(hse.getStatusCode(),

@@ -16,6 +16,14 @@
 
 package org.springframework.vault.authentication;
 
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.http.ContentStreamProvider;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
+import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
+import software.amazon.awssdk.regions.Region;
+
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.Collections;
@@ -26,14 +34,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.http.ContentStreamProvider;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
-import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
-import software.amazon.awssdk.regions.Region;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -93,7 +93,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @deprecated since 4.1, use
-	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
 	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestOperations vaultRestOperations) {
@@ -106,7 +107,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @deprecated since 4.1, use
-	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)} instead.
+	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)}
+	 * instead.
 	 */
 	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestClient vaultClient) {
@@ -149,6 +151,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 				.loginAt(options.getPath());
 	}
 
+
 	@Override
 	public VaultToken login() throws VaultException {
 		return createTokenUsingAwsIam();
@@ -162,23 +165,19 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	@SuppressWarnings("unchecked")
 	private VaultToken createTokenUsingAwsIam() {
-
 		Map<String, String> login = createRequestBody(this.options);
-
 		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
-			.using(login)
-			.retrieve()
-			.body();
+				.using(login)
+				.retrieve()
+				.body();
 
 		if (logger.isDebugEnabled()) {
-
 			if (token.getAuth().get("metadata") instanceof Map) {
 				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
 				logger.debug("Using AWS-IAM authentication for user id %s, ARN %s"
-					.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
+						.formatted(metadata.get("client_user_id"), metadata.get("canonical_arn")));
 			}
 		}
-
 		return token.getRequiredData();
 	}
 

@@ -47,7 +47,7 @@ class AppRoleAuthenticationStepsIntegrationTests extends AppRoleAuthenticationIn
 				.build();
 
 		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
-			.create(AppRoleAuthentication.createAuthenticationSteps(options), prepare().getVaultClient());
+				.create(AppRoleAuthentication.createAuthenticationSteps(options), prepare().getVaultClient());
 
 		assertThat(executor.login()).isNotNull();
 	}

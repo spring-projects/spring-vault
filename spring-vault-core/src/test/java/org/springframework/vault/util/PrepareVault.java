@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultSysOperations;
 import org.springframework.vault.support.VaultHealth;
@@ -33,7 +32,6 @@ import org.springframework.vault.support.VaultTokenRequest;
 import org.springframework.vault.support.VaultTokenRequest.VaultTokenRequestBuilder;
 import org.springframework.vault.support.VaultTokenResponse;
 import org.springframework.vault.support.VaultUnsealStatus;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**

@@ -39,7 +39,8 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 
 	private final int length;
 
-	private String transitPath;
+	private final String transitPath;
+
 
 	/**
 	 * Create a new {@code VaultBytesKeyGenerator} initialized to generate

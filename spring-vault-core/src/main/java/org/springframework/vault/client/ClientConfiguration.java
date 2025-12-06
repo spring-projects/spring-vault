@@ -36,9 +36,14 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslContextBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hc.client5.http.config.ConnectionConfig;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.util.ssl.SslContextFactory.Client;
 import org.jspecify.annotations.Nullable;
 import reactor.netty.http.client.HttpClient;
 
@@ -166,6 +171,42 @@ class ClientConfiguration {
 				|| sslConfiguration.getKeyStoreConfiguration().isPresent();
 	}
 
+
+	/**
+	 * Client Configuration for Apache HTTP Components.
+	 *
+	 * @author Mark Paluch
+	 */
+	public static class HttpComponents {
+
+		public static ConnectionConfig getConnectionConfig(ClientOptions options) {
+			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
+			return ConnectionConfig.custom()
+					.setConnectTimeout(connectTimeout) //
+					.setSocketTimeout(readTimeout) //
+					.build();
+		}
+
+		public static RequestConfig getRequestConfig(ClientOptions options) {
+			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			return RequestConfig.custom()
+					.setResponseTimeout(readTimeout)
+					.setAuthenticationEnabled(true) //
+					.setRedirectsEnabled(true)
+					.build();
+		}
+
+		public static SocketConfig getSocketConfig(ClientOptions options) {
+			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			return SocketConfig.custom() //
+					.setSoTimeout(readTimeout)
+					.build();
+		}
+
+	}
+
+
 	/**
 	 * {@link ClientHttpConnector} for Reactor Netty.
 	 *
@@ -197,7 +238,7 @@ class ClientConfiguration {
 			return client;
 		}
 
-		private static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
+		public static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
 
 			try {
 				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
@@ -208,9 +249,7 @@ class ClientConfiguration {
 					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
 							sslConfiguration.getKeyConfiguration()));
 				}
-				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-					sslContextBuilder.protocols(sslConfiguration.getEnabledProtocols());
-				}
+				sslConfiguration.enabledProtocols(sslContextBuilder::protocols);
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslContextBuilder.ciphers(sslConfiguration.getEnabledCipherSuites());
 				}
@@ -240,43 +279,39 @@ class ClientConfiguration {
 		public static org.eclipse.jetty.client.HttpClient getHttpClient(SslConfiguration sslConfiguration)
 				throws IOException, GeneralSecurityException {
 			if (hasSslConfiguration(sslConfiguration)) {
-
-				SslContextFactory.Client sslContextFactory = new SslContextFactory.Client();
-				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-					KeyStore keyStore = getKeyStore(sslConfiguration.getKeyStoreConfiguration());
-					sslContextFactory.setKeyStore(keyStore);
-				}
-				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-					KeyStore keyStore = getKeyStore(sslConfiguration.getTrustStoreConfiguration());
-					sslContextFactory.setTrustStore(keyStore);
-				}
-				SslConfiguration.KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
-				if (keyConfiguration.getKeyAlias() != null) {
-					sslContextFactory.setCertAlias(keyConfiguration.getKeyAlias());
-				}
-
-				if (keyConfiguration.getKeyPassword() != null) {
-					sslContextFactory.setKeyManagerPassword(new String(keyConfiguration.getKeyPassword()));
-				}
-
-				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-					sslContextFactory
-							.setIncludeProtocols(sslConfiguration.getEnabledProtocols().toArray(new String[0]));
-				}
-				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-					sslContextFactory
-							.setIncludeCipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
-				}
-
+				Client sslContextFactory = getSslContextFactory(sslConfiguration);
 				ClientConnector connector = new ClientConnector();
 				connector.setSslContextFactory(sslContextFactory);
 				return new org.eclipse.jetty.client.HttpClient(new HttpClientTransportOverHTTP(connector));
 			}
-
 			return new org.eclipse.jetty.client.HttpClient();
 		}
 
+		public static SslContextFactory.Client getSslContextFactory(SslConfiguration sslConfiguration)
+				throws IOException, GeneralSecurityException {
+			Client sslContextFactory = new Client();
+			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
+				KeyStore keyStore = getKeyStore(sslConfiguration.getKeyStoreConfiguration());
+				sslContextFactory.setKeyStore(keyStore);
+			}
+			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
+				KeyStore keyStore = getKeyStore(sslConfiguration.getTrustStoreConfiguration());
+				sslContextFactory.setTrustStore(keyStore);
+			}
+			SslConfiguration.KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
+			if (keyConfiguration.getKeyAlias() != null) {
+				sslContextFactory.setCertAlias(keyConfiguration.getKeyAlias());
+			}
+			if (keyConfiguration.getKeyPassword() != null) {
+				sslContextFactory.setKeyManagerPassword(new String(keyConfiguration.getKeyPassword()));
+			}
+			sslConfiguration.enabledProtocols(sslContextFactory::setIncludeProtocols);
+			sslConfiguration.enabledCipherSuites(sslContextFactory::setIncludeCipherSuites);
+			return sslContextFactory;
+		}
+
 	}
+
 
 	/**
 	 * {@link ClientHttpRequestFactory} using the JDK's HttpClient.
@@ -290,15 +325,9 @@ class ClientConfiguration {
 			java.net.http.HttpClient.Builder builder = java.net.http.HttpClient.newBuilder();
 			if (hasSslConfiguration(sslConfiguration)) {
 				SSLContext sslContext = getSSLContext(sslConfiguration);
-				String[] enabledProtocols = !sslConfiguration.getEnabledProtocols().isEmpty()
-						? sslConfiguration.getEnabledProtocols().toArray(new String[0])
-						: null;
-				String[] enabledCipherSuites = !sslConfiguration.getEnabledCipherSuites().isEmpty()
-						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0])
-						: null;
 				SSLParameters parameters = new SSLParameters();
-				parameters.setProtocols(enabledProtocols);
-				parameters.setCipherSuites(enabledCipherSuites);
+				sslConfiguration.enabledProtocols(parameters::setProtocols);
+				sslConfiguration.enabledCipherSuites(parameters::setCipherSuites);
 				builder.sslContext(sslContext).sslParameters(parameters);
 			}
 			builder.proxy(ProxySelector.getDefault())
@@ -345,6 +374,7 @@ class ClientConfiguration {
 		}
 
 	}
+
 
 	private static class KeySelectingX509KeyManager extends X509ExtendedKeyManager {
 

@@ -29,6 +29,8 @@ import org.springframework.web.client.RestTemplate;
  * @since 2.3
  * @see RestTemplateBuilder
  * @see RestTemplate
+ * @deprecated since 4.1, use {@link VaultClient} or {@link RestClientBuilder}
+ * instead.
  */
 @FunctionalInterface
 public interface RestTemplateFactory {

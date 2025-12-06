@@ -58,8 +58,7 @@ public interface VaultWrappingOperations {
 	 * @param responseType must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
-	@Nullable
-	<T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
+	<T> @Nullable VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
 
 	/**
 	 * Rewraps a response-wrapped token. The new token will use the same creation

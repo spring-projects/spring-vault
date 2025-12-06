@@ -46,7 +46,6 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 	}
 
 	@Override
-	@SuppressWarnings("rawtypes")
 	public Mono<VaultMetadataResponse> get(String path) {
 		return vaultOperations.read(getMetadataPath(path), Map.class)
 				.mapNotNull(VaultResponseSupport::getData)

@@ -151,11 +151,10 @@ public class AuthenticationSteps {
 	 * @return the first {@link Node}.
 	 */
 	public static <T> Node<T> fromVaultRequest(HttpRequest<T> request) {
-
 		Assert.notNull(request, "HttpRequest must not be null");
-
 		return new HttpRequestNode<>(request, true, AuthenticationSteps.HEAD);
 	}
+
 
 	/**
 	 * Return a {@link List} of node given a {@link PathAware} starting point.
@@ -232,24 +231,8 @@ public class AuthenticationSteps {
 		}
 
 		/**
-		 * Terminal operation requesting a {@link VaultToken token} from Vault by logging
-		 * into Vault sending the current state to the Vault {@code authMount}. The actual
-		 * request path is derived from {@code authMount} using the pattern
-		 * {@code auth/%s/login}. If the request path needs to be customized, use
-		 * {@link #login(String, String...)} instead.
-		 * @param authMount the name of the authentication mount, must not be
-		 * {@literal null} or empty.
-		 * @return the {@link AuthenticationSteps}.
-		 * @since 4.1
-		 */
-		public AuthenticationSteps loginAt(String authMount) {
-
-			Assert.hasText(authMount, "Auth mount must not be null or empty");
-
-			return login(AuthenticationUtil.getLoginPath(authMount));
-		}
-
-		/**
+		 * Terminal operation requesting a {@link VaultToken token} from Vault by
+		 * posting the current state to Vaults {@code uriTemplate}.
 		 * Terminal operation requesting a {@link VaultToken token} from Vault by
 		 * logging into Vault sending the current state to the Vault {@code authMount}.
 		 * The actual request path is derived from {@code authMount} using the pattern

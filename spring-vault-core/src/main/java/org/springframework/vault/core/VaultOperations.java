@@ -164,7 +164,7 @@ public interface VaultOperations {
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	<T extends @Nullable Object> VaultResponseSupport<T> read(String path, Class<T> responseType);
+	<T extends @Nullable Object> @Nullable VaultResponseSupport<T> read(String path, Class<T> responseType);
 
 	/**
 	 * Read ({@code GET)} from a secret backend. Reading data using this method is

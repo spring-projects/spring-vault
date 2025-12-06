@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -44,8 +43,6 @@ import org.springframework.web.client.RestOperations;
 public class JwtAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	public static final String DEFAULT_JWT_AUTHENTICATION_PATH = "jwt";
-
-	private static final Log logger = LogFactory.getLog(JwtAuthentication.class);
 
 
 	private final JwtAuthenticationOptions options;
@@ -88,12 +85,12 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @since 4.1
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "JwtAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "JWT");
 	}
+
 
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {

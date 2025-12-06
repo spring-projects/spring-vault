@@ -26,13 +26,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
-
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * GCP GCE (Google Compute Engine)-based login implementation using GCE's
@@ -155,13 +155,13 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 */
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, VaultClient vaultClient,
 			RestClient googleMetadataClient) {
-
 		super(VaultLoginClient.create(vaultClient, "GCP-GCE"));
 		Assert.notNull(options, "GcpGceAuthenticationOptions must not be null");
 		Assert.notNull(googleMetadataClient, "Google Metadata RestOperations must not be null");
 		this.options = options;
 		this.googleMetadataAdapter = ClientAdapter.from(googleMetadataClient);
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for GCE authentication given
@@ -181,6 +181,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 				.map(jwt -> createRequestBody(options.getRole(), jwt))
 				.loginAt(options.getPath());
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
@@ -210,9 +211,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	}
 
 	private static HttpHeaders getMetadataHttpHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.set("Metadata-Flavor", "Google");
-		return headers;
+		return VaultHttpHeaders.singleton("Metadata-Flavor", "Google");
 	}
 
 	private static String getAudience(String role) {

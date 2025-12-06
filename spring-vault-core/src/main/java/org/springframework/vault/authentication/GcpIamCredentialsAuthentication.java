@@ -22,6 +22,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestOperations;
+
 import com.google.api.client.http.HttpTransport;
 import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
@@ -32,20 +39,13 @@ import com.google.cloud.iam.credentials.v1.ServiceAccountName;
 import com.google.cloud.iam.credentials.v1.SignJwtResponse;
 import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
 
-import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestOperations;
-
 /**
  * Google Cloud IAM credentials login implementation using GCP IAM service
  * accounts to legitimate its authenticity via JSON Web Token using the IAM
  * Credentials {@code projects.serviceAccounts.signJwt} method.
  * <p>This authentication method uses Googles IAM Credentials API to obtain a
  * signed token for a specific
- * {@link com.google.api.client.auth.oauth2.Credential}. Service account details
+ * {@link com.google.auth.oauth2.GoogleCredentials}. Service account details
  * are obtained from a {@link GoogleCredentials} that can be retrieved either
  * from a JSON file or the runtime environment (GAE, GCE).
  * <p>{@link GcpIamCredentialsAuthentication} uses Google Java API that uses
@@ -150,8 +150,8 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	/**
 	 * Create a new instance of {@link GcpIamCredentialsAuthentication} given
 	 * {@link GcpIamCredentialsAuthenticationOptions} and {@link VaultClient}. This
-	 * constructor initializes {@link InstantiatingGrpcChannelProvider} for Google API
-	 * usage.
+	 * constructor initializes {@link InstantiatingGrpcChannelProvider} for Google
+	 * API usage.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient client for Vault login, must not be {@literal null}.
 	 * @since 4.1
@@ -179,6 +179,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 		this.transportChannelProvider = transportChannelProvider;
 		this.credentials = options.getCredentialSupplier().get();
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {

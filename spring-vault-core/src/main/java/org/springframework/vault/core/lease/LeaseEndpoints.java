@@ -67,11 +67,12 @@ public enum LeaseEndpoints {
 		@Override
 		Lease renew(Lease lease, VaultClient client) {
 			return toLease(client.put()
-				.path("sys/renew")
-				.body(getLeaseRevocationBody(lease))
-				.retrieve()
-				.requiredBody(Map.class));
+					.path("sys/renew")
+					.body(getLeaseRevocationBody(lease))
+					.retrieve()
+					.requiredBody(Map.class));
 		}
+
 	},
 
 	/**
@@ -103,11 +104,12 @@ public enum LeaseEndpoints {
 		@Override
 		Lease renew(Lease lease, VaultClient client) {
 			return toLease(client.put()
-				.path("sys/leases/renew")
-				.body(getLeaseRenewalBody(lease))
-				.retrieve()
-				.requiredBody(Map.class));
+					.path("sys/leases/renew")
+					.body(getLeaseRenewalBody(lease))
+					.retrieve()
+					.requiredBody(Map.class));
 		}
+
 	},
 
 	/**
@@ -140,6 +142,7 @@ public enum LeaseEndpoints {
 		}
 
 	};
+
 
 	/**
 	 * Revoke a {@link Lease}.

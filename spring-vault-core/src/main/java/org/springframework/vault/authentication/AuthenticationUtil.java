@@ -16,7 +16,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 abstract class AuthenticationUtil {
 
 	/**
-	 * Returns the login path for a {@code authMount}.
+	 * Return the login path for a {@code authMount}.
 	 * @param authMount
 	 * @return
 	 */
@@ -25,9 +25,7 @@ abstract class AuthenticationUtil {
 	}
 
 	public static <T> T getRequiredBody(ResponseEntity<T> entity) {
-
 		T body = entity.getBody();
-
 		if (body == null) {
 			throw new IllegalStateException("Expected non-null response body");
 		}

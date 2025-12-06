@@ -19,7 +19,6 @@ package org.springframework.vault.authentication;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -91,8 +90,8 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	/**
-	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
-	 * and {@link VaultClient}.
+	 * Create a new {@link AuthenticationStepsExecutor} given
+	 * {@link AuthenticationSteps} and {@link VaultClient}.
 	 * @param steps must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param restClient must not be {@literal null}.
@@ -111,6 +110,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 		this.adapter = adapter;
 		this.loginClient = VaultLoginClient.create(vaultClient, "Authentication Steps");
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {

@@ -56,10 +56,10 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 					.path("%s?list=true"
 							.formatted(createBackendPath("metadata", path)))
 					.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
 					.toEntity(VaultListResponse.class);
 		});
-		if (read == null) {
+		if (read == null || !read.hasData()) {
 			return Collections.emptyList();
 		}
 		return (List<String>) read.getRequiredData().get("keys");
@@ -81,8 +81,8 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createBackendPath(String segment, String path) {
-		return "%s/%s/%s".formatted(KeyValueUtilities.relativePath(this.path), KeyValueUtilities.relativePath(segment),
-				KeyValueUtilities.relativePath(path));
+		return "%s/%s/%s".formatted(PathUtil.stripSlashes(this.path), PathUtil.stripSlashes(segment),
+				PathUtil.stripSlashes(path));
 	}
 
 }

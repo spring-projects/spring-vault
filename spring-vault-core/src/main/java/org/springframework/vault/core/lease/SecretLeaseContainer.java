@@ -632,15 +632,17 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private static void logRenewalCandidate(RequestedSecret requestedSecret, Lease lease, String action) {
 		if (logger.isDebugEnabled()) {
-			if (lease.hasLeaseId()) {
-				logger.debug("Secret %s with Lease %s qualified for %s".formatted(requestedSecret.getPath(),
-						lease.getLeaseId(), action));
-			} else {
-				logger.debug(
-						"Secret %s with cache hint is qualified for %s".formatted(requestedSecret.getPath(), action));
-			}
+			return;
+		}
+		if (lease.hasLeaseId()) {
+			logger.debug("Secret %s with Lease %s qualified for %s".formatted(requestedSecret.getPath(),
+					lease.getLeaseId(), action));
+		} else {
+			logger.debug(
+					"Secret %s with cache hint is qualified for %s".formatted(requestedSecret.getPath(), action));
 		}
 	}
+
 
 	// -------------------------------------------------------------------------
 	// Implementation hooks and helper methods
@@ -654,23 +656,18 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 */
 	@Nullable
 	protected VaultResponseSupport<Map<String, Object>> doGetSecrets(RequestedSecret requestedSecret) {
-
 		try {
 			VaultResponseSupport<Map<String, Object>> secrets;
-
 			if (this.keyValueDelegate.isVersioned(requestedSecret.getPath())) {
 				secrets = this.keyValueDelegate.getSecret(requestedSecret.getPath());
 			} else {
 				secrets = this.operations.read(requestedSecret.getPath());
 			}
-
 			if (secrets == null) {
 				onSecretsNotFound(requestedSecret);
 			}
-
 			return secrets;
 		} catch (RuntimeException e) {
-
 			onError(requestedSecret, Lease.none(), e);
 			return null;
 		}
@@ -708,12 +705,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			}
 
 			onError(requestedSecret, lease, exceptionToUse);
-
-			if (expired || this.leaseStrategy.shouldDrop(exceptionToUse)) {
-				return Lease.none();
-			} else {
-				return lease;
-			}
+			return expired || this.leaseStrategy.shouldDrop(exceptionToUse) ? Lease.none() : lease;
 		}
 	}
 
@@ -728,11 +720,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		if (e.getCause() instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e.getCause();
 		}
-
 		if (e instanceof VaultException && e.getCause() != null) {
 			return potentiallyUnwrapHttpStatusCodeException(e.getCause());
 		}
-
 		return null;
 	}
 

@@ -61,27 +61,25 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		this.path = path;
 	}
 
-	@Nullable
+
 	@Override
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	public Versioned<Map<String, Object>> get(String path, Version version) {
+	public @Nullable Versioned<Map<String, Object>> get(String path, Version version) {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
 		return (Versioned) doRead(path, version, Map.class);
 	}
 
-	@Nullable
 	@Override
-	public <T> Versioned<T> get(String path, Version version, Class<T> responseType) {
+	public <T> @Nullable Versioned<T> get(String path, Version version, Class<T> responseType) {
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
 		Assert.notNull(responseType, "Response type must not be null");
 		return doRead(path, version, responseType);
 	}
 
-	@Nullable
 	@SuppressWarnings({"NullAway", "removal"})
-	private <T> Versioned<T> doRead(String path, Version version, Class<T> responseType) {
+	private <T> @Nullable Versioned<T> doRead(String path, Version version, Class<T> responseType) {
 		String secretPath = version.isVersioned()
 				? "%s?version=%d".formatted(createDataPath(path), version.getVersion())
 				: createDataPath(path);
@@ -94,22 +92,19 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		VaultResponseSupport<VaultResponseSupport<Object>> response = this.vaultOperations
 				.doWithSessionClient((VaultClientCallback<@Nullable VaultResponseSupport>) client -> {
 					ResponseEntity<? extends VaultResponseSupport> entity = client.get()
-					.path(secretPath)
-					.retrieve()
-					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-					.toEntity(responseTypeToUse);
+							.path(secretPath)
+							.retrieve()
+							.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+							.toEntity(responseTypeToUse);
 
-				VaultResponseSupport body = entity.getBody();
-				if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
-
-					if (body != null && body.getData() instanceof VaultResponseSupport<?>) {
-						return body;
-					}
-
-					return null;
-
+					VaultResponseSupport body = entity.getBody();
+					if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
+						if (body != null && body.getData() instanceof VaultResponseSupport<?>) {
+							return body;
 						}
-				return body;
+						return null;
+					}
+					return body;
 				});
 
 		if (response == null) {

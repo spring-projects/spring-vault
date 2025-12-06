@@ -54,7 +54,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
 		return doRead(
-				"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+				"%s?list=true".formatted(createBackendPath("metadata", PathUtil.normalizeListPath(path))),
 				VaultListResponse.class)
 						.flatMapMany(response -> {
 							List<String> list = (List<String>) response.getRequiredData().get("keys");

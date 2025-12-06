@@ -17,7 +17,6 @@
 package org.springframework.vault.config;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -94,7 +93,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
 	 * @since 2.3
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	protected RestTemplateBuilder restTemplateBuilder(VaultEndpointProvider endpointProvider,
@@ -106,30 +106,6 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 				.requestFactory(requestFactory);
 		builder.customizers(customizers.stream().toArray(RestTemplateCustomizer[]::new));
 		return builder;
-	}
-
-	/**
-	 * Create a {@link VaultClient} initialized with {@link #vaultEndpointProvider()} and
-	 * {@link #getClientFactoryWrapper()}. May be overridden by subclasses.
-	 * @return the {@link VaultClient}.
-	 * @see #vaultEndpointProvider()
-	 * @see #clientHttpRequestFactoryWrapper()
-	 * @since 4.1
-	 */
-	@Bean
-	protected VaultClient vaultClient() {
-
-		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
-			.getBeanProvider(VaultClientCustomizer.class);
-
-		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory())
-			.build();
-		VaultClient.Builder builder = VaultClient.builder(restTemplate);
-
-		customizers.forEach(it -> it.customize(builder));
-
-		return builder.build();
 	}
 
 	/**
@@ -149,18 +125,37 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
+	 * Create a {@link VaultClient} initialized with
+	 * {@link #vaultEndpointProvider()} and {@link #getClientFactoryWrapper()}
+	 * through {@link #restTemplateBuilder}. The VaultClient builder can be
+	 * customized through {@link VaultClientCustomizer} beans.
+	 * @return the {@link VaultClient}.
+	 * @see #vaultEndpointProvider()
+	 * @see #getClientFactoryWrapper()
+	 * @since 4.1
+	 */
+	@Bean
+	protected VaultClient vaultClient() {
+		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
+				.getBeanProvider(VaultClientCustomizer.class);
+		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
+				getClientFactoryWrapper().getClientHttpRequestFactory())
+						.build();
+		VaultClient.Builder builder = VaultClient.builder(restTemplate);
+		customizers.forEach(it -> it.customize(builder));
+		return builder.build();
+	}
+
+	/**
 	 * Create a {@link VaultTemplate}.
 	 * @return the {@link VaultTemplate}.
-	 * @see #vaultEndpointProvider()
-	 * @see #clientHttpRequestFactoryWrapper()
+	 * @see #vaultClient()
 	 * @see #sessionManager()
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-
 		VaultClient client = vaultClient();
 		SessionManager sessionManager = getBeanFactory().getBean("sessionManager", SessionManager.class);
-
 		return new VaultTemplate(client, sessionManager);
 	}
 
@@ -228,7 +223,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * {@link RestTemplateFactory} bean.
 	 * @return the {@link RestOperations} to be used for Vault access.
 	 * @see #restTemplateFactory(ClientFactoryWrapper)
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	public RestOperations restOperations() {
@@ -291,7 +287,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Return the {@link RestTemplateFactory}.
 	 * @return the {@link RestTemplateFactory} bean.
 	 * @since 2.3
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	protected RestTemplateFactory getRestTemplateFactory() {
@@ -361,6 +358,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		private final boolean acceptAfterPropertiesSet;
 
 		private final boolean acceptDestroy;
+
 
 		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
 			this(taskScheduler, true, true);

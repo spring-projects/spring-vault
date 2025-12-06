@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -127,11 +126,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 4.1
 	 */
 	public VaultTemplate(VaultClient client) {
-
 		Assert.notNull(client, "VaultClient must not be null");
-
 		this.dedicatedSessionManager = true;
-
 		this.statelessTemplate = new RestClientOperationsWrapper(client);
 		this.statelessClient = client;
 		this.sessionTemplate = this.statelessTemplate;
@@ -145,13 +141,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 4.1
 	 */
 	public VaultTemplate(VaultClient client, SessionManager sessionManager) {
-
 		Assert.notNull(client, "VaultEndpoint must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
-
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
-
 		this.statelessTemplate = new RestClientOperationsWrapper(client);
 		this.statelessClient = client;
 		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient);
@@ -166,7 +159,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @since 2.2.1
-	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
 	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory) {
@@ -179,7 +173,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param clientHttpRequestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
-	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
 	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpoint vaultEndpoint, ClientHttpRequestFactory clientHttpRequestFactory,
@@ -196,7 +191,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @since 2.2.1
-	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
 	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory) {
@@ -217,7 +213,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 1.1
-	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based constructor.
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
 	@Deprecated(since = "4.1")
 	public VaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpRequestFactory requestFactory,
@@ -227,7 +224,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 		this.sessionManager = sessionManager;
 		this.dedicatedSessionManager = false;
-
 		this.statelessTemplate = doCreateRestTemplate(endpointProvider, requestFactory);
 		this.statelessClient = createVaultClient(this.statelessTemplate);
 		this.sessionTemplate = doCreateSessionTemplate(endpointProvider, requestFactory);
@@ -304,9 +300,8 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		RestTemplateBuilder templateBuilder = RestTemplateBuilder.builder(restClientBuilder);
 		this.statelessTemplate = templateBuilder.build();
 		this.statelessClient = createVaultClient(this.statelessTemplate);
-		ClientHttpRequestInterceptor sessionInterceptor = getSessionInterceptor();
 		this.sessionTemplate = templateBuilder.customizers(restTemplate -> {
-			restTemplate.getInterceptors().add(sessionInterceptor);
+			restTemplate.getInterceptors().add(getSessionInterceptor());
 		}).build();
 	}
 
@@ -318,13 +313,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	}
 
 	private static VaultClient createVaultClient(RestOperations restOperations) {
-
 		if (restOperations instanceof RestClientOperationsWrapper wrapper) {
 			return wrapper.vaultClient();
 		}
-
 		return VaultClient.builder((RestTemplate) restOperations).build();
 	}
+
 
 	/**
 	 * Create or obtain a {@link VaultTemplate} from {@link VaultOperations}.
@@ -422,9 +416,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	private ClientHttpRequestInterceptor getSessionInterceptor() {
 		return (request, body, execution) -> {
-
 			HttpHeaders headers = request.getHeaders();
-
 			if (!headers.containsHeader(VaultHttpHeaders.VAULT_TOKEN)) {
 				Assert.notNull(this.sessionManager, "SessionManager must not be null");
 				headers.add(VaultHttpHeaders.VAULT_TOKEN, this.sessionManager.getSessionToken().getToken());
@@ -432,6 +424,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 			return execution.execute(request, body);
 		};
 	}
+
 
 	/**
 	 * Set the {@link SessionManager}.
@@ -527,17 +520,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	public <T> @Nullable VaultResponseSupport<T> read(String path, Class<T> responseType) {
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
 		return doWithSessionClient(client -> {
-
 			ResponseEntity<VaultResponseSupport<T>> entity = client.get()
-				.path(path)
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toEntity(ref);
-
+					.path(path)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity(ref);
 			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
 				return null;
-
-				}
+			}
 			return entity.getBody();
 		});
 	}
@@ -546,9 +536,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@SuppressWarnings("unchecked")
 	public @Nullable List<String> list(String path) {
 		Assert.hasText(path, "Path must not be empty");
-		VaultListResponse read = doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")),
+		VaultListResponse read = doRead("%s?list=true".formatted(PathUtil.normalizeListPath(path)),
 				VaultListResponse.class);
-		if (read == null) {
+		if (read == null || !read.hasData()) {
 			return Collections.emptyList();
 		}
 		return (List<String>) read.getRequiredData().get("keys");
@@ -571,15 +561,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	@SuppressWarnings("NullAway")
 	public void delete(String path) {
 		Assert.hasText(path, "Path must not be empty");
-
 		doWithSessionClient((VaultClientCallback<@Nullable Void>) client -> {
-
 			client.delete()
-				.path(path)
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toBodilessEntity();
-
+					.path(path)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toBodilessEntity();
 			return null;
 		});
 	}
@@ -597,7 +584,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	<T extends @Nullable Object> T doWithVaultClient(VaultClientCallback<T> clientCallback)
 			throws VaultException, RestClientException {
 		Assert.notNull(clientCallback, "Client callback must not be null");
-
 		return clientCallback.doWithVaultClient(this.statelessClient);
 	}
 
@@ -614,7 +600,6 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	<T extends @Nullable Object> T doWithSessionClient(VaultClientCallback<T> sessionCallback)
 			throws VaultException, RestClientException {
 		Assert.notNull(sessionCallback, "Session callback must not be null");
-
 		return sessionCallback.doWithVaultClient(this.sessionClient);
 	}
 
@@ -622,15 +607,13 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	private <T> @Nullable T doRead(String path, Class<T> responseType) {
 		return doWithSessionClient((client) -> {
 			ResponseEntity<T> entity = client.get()
-				.path(path)
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toEntity(responseType);
-
+					.path(path)
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity(responseType);
 			if (HttpStatusUtil.isNotFound(entity.getStatusCode())) {
 				return null;
-
-				}
+			}
 			return entity.getBody();
 		});
 	}
@@ -647,6 +630,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	}
 
+
 	/**
 	 * Session-bound {@link VaultClient} implementation.
 	 */
@@ -654,51 +638,41 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		@Override
 		public RequestHeadersPathSpec<?> get() {
-
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.get();
 			}
-
 			return new SessionRequestHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.get());
 		}
 
 		@Override
 		public RequestHeadersBodyPathSpec post() {
-
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.post();
 			}
-
 			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.post());
 		}
 
 		@Override
 		public RequestHeadersBodyPathSpec put() {
-
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.put();
 			}
-
 			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.put());
 		}
 
 		@Override
 		public RequestHeadersPathSpec<?> delete() {
-
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.delete();
 			}
-
 			return new SessionRequestHeadersPathSpec(sessionManager.getSessionToken(), statelessClient.delete());
 		}
 
 		@Override
 		public RequestHeadersBodyPathSpec method(HttpMethod method) {
-
 			if (sessionManager == NoSessionManager.INSTANCE) {
 				return statelessClient.method(method);
 			}
-
 			return new SessionRequestBodyHeadersPathSpec(sessionManager.getSessionToken(),
 					statelessClient.method(method));
 		}
@@ -710,6 +684,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	}
 
+
 	static class SessionRequestHeadersPathSpec
 			implements VaultClient.RequestHeadersPathSpec<SessionRequestHeadersPathSpec> {
 
@@ -717,10 +692,12 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 		private final VaultClient.RequestHeadersPathSpec<?> spec;
 
+
 		SessionRequestHeadersPathSpec(VaultToken token, VaultClient.RequestHeadersPathSpec<?> spec) {
 			this.token = token;
 			this.spec = spec;
 		}
+
 
 		@Override
 		public SessionRequestHeadersPathSpec path(String path, @Nullable Object... pathVariables) {
@@ -766,16 +743,19 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	}
 
+
 	static class SessionRequestBodyHeadersPathSpec implements VaultClient.RequestHeadersBodyPathSpec {
 
 		private final VaultToken token;
 
 		private final VaultClient.RequestHeadersBodyPathSpec spec;
 
+
 		SessionRequestBodyHeadersPathSpec(VaultToken token, VaultClient.RequestHeadersBodyPathSpec spec) {
 			this.token = token;
 			this.spec = spec;
 		}
+
 
 		@Override
 		public SessionRequestBodyHeadersPathSpec path(String path, @Nullable Object... pathVariables) {

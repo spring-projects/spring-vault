@@ -23,11 +23,8 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.servlet.assertj.MvcTestResultAssert;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.MockVaultClient;
-import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;

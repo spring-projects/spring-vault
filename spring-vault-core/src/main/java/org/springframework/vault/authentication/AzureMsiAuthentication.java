@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +29,7 @@ import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
@@ -57,9 +57,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	private static final HttpEntity<Void> METADATA_HEADERS;
 
 	static {
-
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Metadata", "true");
+		HttpHeaders headers = VaultHttpHeaders.singleton("Metadata", "true");
 		METADATA_HEADERS = new HttpEntity<>(headers);
 	}
 
@@ -161,7 +159,6 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 
 	AzureMsiAuthentication(AzureMsiAuthenticationOptions options, VaultClient vaultClient,
 			ClientAdapter azureMetadataClient) {
-
 		Assert.notNull(options, "AzureAuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "Vault RestOperations must not be null");
 		Assert.notNull(azureMetadataClient, "Azure Instance Metadata RestOperations must not be null");
@@ -169,6 +166,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 		this.loginClient = VaultLoginClient.create(vaultClient, "Azure");
 		this.azureMetadataAdapter = azureMetadataClient;
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for Azure authentication given

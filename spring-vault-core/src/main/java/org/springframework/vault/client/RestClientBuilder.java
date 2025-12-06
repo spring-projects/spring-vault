@@ -80,6 +80,7 @@ public class RestClientBuilder {
 		this.errorHandler = errorHandler;
 	}
 
+
 	/**
 	 * Create a new {@code RestClientBuilder}.
 	 * @return a new {@code RestClientBuilder}.
@@ -95,14 +96,13 @@ public class RestClientBuilder {
 	 * @since 4.1
 	 */
 	public static RestClientBuilder builder(RestTemplateBuilder restTemplateBuilder) {
-
 		RestClientBuilder builder = new RestClientBuilder(restTemplateBuilder.endpointProvider,
 				restTemplateBuilder.requestFactory, restTemplateBuilder.errorHandler);
 		builder.defaultHeaders.putAll(restTemplateBuilder.defaultHeaders);
 		builder.requestInitializers.addAll(restTemplateBuilder.requestCustomizers);
-
 		return builder;
 	}
+
 
 	/**
 	 * Set the {@link VaultEndpoint} that should be used with the

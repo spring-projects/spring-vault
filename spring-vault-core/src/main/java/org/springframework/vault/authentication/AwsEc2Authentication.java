@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -35,6 +34,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpClientErrorException;
@@ -146,8 +146,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
-	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and an
-	 * AWS-Metadata-specific {@link RestClient}.
+	 * Create a new {@link AwsEc2Authentication} specifying {@link VaultClient} and
+	 * an AWS-Metadata-specific {@link RestClient}.
 	 * @param vaultClient must not be {@literal null}.
 	 * @param awsMetadataClient must not be {@literal null}.
 	 * @since 4.1
@@ -172,7 +172,6 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 
 	AwsEc2Authentication(AwsEc2AuthenticationOptions options, VaultClient vaultClient,
 			ClientAdapter awsMetadataClient) {
-
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
 		Assert.notNull(vaultClient, "VaultClient must not be null");
 		Assert.notNull(awsMetadataClient, "AWS Metadata RestClient must not be null");
@@ -180,6 +179,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 		this.loginClient = VaultLoginClient.create(vaultClient, "AWS-EC2");
 		this.awsMetadataAdapter = awsMetadataClient;
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for AWS-EC2 authentication given
@@ -208,10 +208,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 							.with(createTokenRequestHeaders(options))
 							.as(String.class))
 					.map(it -> {
-						HttpHeaders headers = new HttpHeaders();
-						headers.add(METADATA_TOKEN_HEADER, it);
-						return headers;
-					})
+						return VaultHttpHeaders.singleton(METADATA_TOKEN_HEADER, it);
+						})
 					.request(identityRequest);
 		} else {
 			identity = AuthenticationSteps.fromHttpRequest(identityRequest);
@@ -250,15 +248,14 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	private VaultToken createTokenUsingAwsEc2() {
 		Map<String, String> login = getEc2Login();
 		VaultResponseSupport<LoginToken> token = this.loginClient.loginAt(this.options.getPath())
-			.using(login)
-			.retrieve()
-			.body();
+				.using(login)
+				.retrieve()
+				.body();
 		if (logger.isDebugEnabled()) {
-
 			if (token.getAuth().get("metadata") instanceof Map) {
 				Map<Object, Object> metadata = (Map<Object, Object>) token.getAuth().get("metadata");
 				logger.debug("Using AWS-EC2 authentication for instance %s, AMI %s"
-					.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
+						.formatted(metadata.get("instance_id"), metadata.get("instance_id")));
 			}
 		}
 		return token.getRequiredData();
@@ -321,9 +318,8 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	private static HttpHeaders createTokenRequestHeaders(AwsEc2AuthenticationOptions options) {
-		HttpHeaders tokenRequestHeaders = new HttpHeaders();
-		tokenRequestHeaders.add(METADATA_TOKEN_TTL_HEADER, String.valueOf(options.getMetadataTokenTtl().toSeconds()));
-		return tokenRequestHeaders;
+		return VaultHttpHeaders.singleton(METADATA_TOKEN_TTL_HEADER,
+				String.valueOf(options.getMetadataTokenTtl().toSeconds()));
 	}
 
 }

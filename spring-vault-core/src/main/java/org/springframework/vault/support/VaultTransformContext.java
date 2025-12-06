@@ -206,7 +206,7 @@ public class VaultTransformContext {
 		 * item of a batch request and, if supported by Vault, echoed in the batch
 		 * results.
 		 * @param reference the correlation identifier; can be or empty.
-		 * @return this builder.
+		 * @return this builder..
 		 * @since 3.2
 		 */
 		public VaultTransformRequestBuilder reference(String reference) {

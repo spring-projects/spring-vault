@@ -48,7 +48,7 @@ class KubernetesAuthenticationStepsIntegrationTests extends KubernetesAuthentica
 		TestVaultClient client = TestVaultClient.create();
 
 		AuthenticationStepsExecutor executor = TestAuthenticationStepsExecutor
-			.create(KubernetesAuthentication.createAuthenticationSteps(options), client);
+				.create(KubernetesAuthentication.createAuthenticationSteps(options), client);
 
 		VaultToken login = executor.login();
 		assertThat(login.getToken()).doesNotContain(Settings.token().getToken());

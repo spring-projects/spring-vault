@@ -16,24 +16,21 @@
 
 package org.springframework.vault.core;
 
-import reactor.core.publisher.Mono;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.springframework.http.HttpStatusCode;
+import reactor.core.publisher.Mono;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.Versioned;
 import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
-import org.springframework.web.reactive.function.client.ClientResponse;
 
 /**
  * Default implementation of {@link ReactiveVaultVersionedKeyValueOperations}.
@@ -50,9 +47,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	/**
 	 * Create a new {@link ReactiveVaultVersionedKeyValueTemplate} given
 	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
-	 *
 	 * @param reactiveVaultOperations must not be {@literal null}.
-	 * @param path                    must not be empty or {@literal null}.
+	 * @param path must not be empty or {@literal null}.
 	 */
 	public ReactiveVaultVersionedKeyValueTemplate(ReactiveVaultTemplate reactiveVaultOperations, String path) {
 		super(reactiveVaultOperations, path);
@@ -108,8 +104,8 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	@Override
 	public Mono<Metadata> put(String path, Object body) {
 		Assert.hasText(path, "Path must not be empty");
-		LinkedHashMap<Object, Object> data = new LinkedHashMap<>();
-		LinkedHashMap<Object, Object> requestOptions = new LinkedHashMap<>();
+		Map<Object, Object> data = new LinkedHashMap<>();
+		Map<Object, Object> requestOptions = new LinkedHashMap<>();
 		if (body instanceof Versioned<?> versioned) {
 			data.put("data", versioned.getData());
 			data.put("options", requestOptions);
@@ -157,15 +153,15 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 	/**
 	 * Read a secret at {@code path} and read it into {@link VersionedResponse}.
-	 *
 	 * @param path must not be {@literal null} or empty.
 	 * @return mapped value.
 	 */
 	<T> Mono<T> doReadVersioned(String path, Class<T> responseType) {
-		return reactiveVaultOperations.doWithSessionClient((client) -> client.get().path(path)
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, response -> (Mono) response.bodyToMono(responseType))
-				.onStatus(Predicate.not(HttpStatusCode::is2xxSuccessful), ClientResponse::createError)
-				.bodyToMono(responseType));
+		return reactiveVaultOperations.doWithSessionClient((client) -> client.get().path(path).exchangeToMono(it -> {
+			if (it.statusCode().is2xxSuccessful() || HttpStatusUtil.isNotFound(it.statusCode())) {
+				return it.bodyToMono(responseType);
+			}
+			return it.createError();
+		}));
 	}
 }

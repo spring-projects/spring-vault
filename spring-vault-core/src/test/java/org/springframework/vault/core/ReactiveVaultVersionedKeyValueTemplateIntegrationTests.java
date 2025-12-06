@@ -104,7 +104,7 @@ class ReactiveVaultVersionedKeyValueTemplateIntegrationTests extends Integration
 		// this should fail
 		reactiveVersionedOperations.put(key, Versioned.create(secret, Version.unversioned()))
 				.as(StepVerifier::create)
-				.verifyErrorSatisfies(throwable -> assertThat(throwable).isExactlyInstanceOf(VaultException.class)
+				.verifyErrorSatisfies(throwable -> assertThat(throwable).isInstanceOf(VaultException.class)
 						.hasMessageContaining("check-and-set parameter did not match the current version"));
 	}
 

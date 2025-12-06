@@ -46,7 +46,6 @@ import org.junit.jupiter.api.Test;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.MockVaultClient;

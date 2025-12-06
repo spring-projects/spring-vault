@@ -21,8 +21,6 @@ import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
 import javax.net.ssl.SSLContext;
 
-import org.apache.hc.client5.http.config.ConnectionConfig;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -30,9 +28,8 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
 import org.apache.hc.client5.http.ssl.HttpsSupport;
-import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
 import org.apache.hc.core5.reactor.ssl.SSLBufferMode;
-import org.apache.hc.core5.util.Timeout;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -152,45 +149,37 @@ public class ClientHttpRequestFactoryFactory {
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
-			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
-			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
-			ConnectionConfig connectionConfig = ConnectionConfig.custom()
-					.setConnectTimeout(connectTimeout) //
-					.setSocketTimeout(readTimeout) //
-					.build();
-			RequestConfig requestConfig = RequestConfig.custom()
-					.setConnectionRequestTimeout(connectTimeout)
-					.setResponseTimeout(readTimeout)
-					.setAuthenticationEnabled(true) //
-					.setRedirectsEnabled(true)
-					.build();
 			PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder //
 					.create()
-					.setDefaultConnectionConfig(connectionConfig) //
-					.setDefaultSocketConfig(SocketConfig.custom() //
-							.setSoTimeout(readTimeout)
-							.build());
-
+					.setDefaultConnectionConfig(ClientConfiguration.HttpComponents.getConnectionConfig(options)) //
+					.setDefaultSocketConfig(ClientConfiguration.HttpComponents.getSocketConfig(options));
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
-				SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
-				String[] enabledProtocols = null;
-				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-					enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
-				}
-				String[] enabledCipherSuites = null;
-				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
-				}
-				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext, enabledProtocols,
-						enabledCipherSuites, SSLBufferMode.STATIC, HttpsSupport.getDefaultHostnameVerifier());
-				connectionManagerBuilder.setTlsSocketStrategy(tlsStrategy);
+				connectionManagerBuilder.setTlsSocketStrategy(getTlsStrategy(sslConfiguration));
 			}
-			httpClientBuilder.setDefaultRequestConfig(requestConfig);
+			httpClientBuilder.setDefaultRequestConfig(ClientConfiguration.HttpComponents.getRequestConfig(options));
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
+
 			return httpClientBuilder;
 		}
 
+		public static TlsSocketStrategy getTlsStrategy(SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+			SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
+			String[] enabledProtocols = null;
+			if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
+				enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
+			}
+			String[] enabledCipherSuites = null;
+			if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
+				enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
+			}
+			return new DefaultClientTlsStrategy(sslContext, enabledProtocols,
+					enabledCipherSuites, SSLBufferMode.STATIC,
+					HttpsSupport.getDefaultHostnameVerifier());
+		}
+
 	}
+
 
 
 	/**

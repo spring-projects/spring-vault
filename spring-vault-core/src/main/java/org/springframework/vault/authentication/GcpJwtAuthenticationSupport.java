@@ -22,8 +22,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.util.Assert;
-import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClientException;
@@ -40,6 +38,7 @@ public abstract class GcpJwtAuthenticationSupport {
 
 
 	private final VaultLoginClient loginClient;
+
 
 	GcpJwtAuthenticationSupport(VaultLoginClient loginClient) {
 		this.loginClient = loginClient;
@@ -59,15 +58,12 @@ public abstract class GcpJwtAuthenticationSupport {
 		VaultResponseSupport<LoginToken> response = this.loginClient.loginAt(path).using(login).retrieve().body();
 
 		if (logger.isDebugEnabled()) {
-
 			if (response.getAuth().get("metadata") instanceof Map) {
-
 				Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
 				logger.debug("Using %s authentication for user id %s".formatted(authenticationName,
 						metadata.get("service_account_email")));
 			}
 		}
-
 		return response.getRequiredData();
 	}
 

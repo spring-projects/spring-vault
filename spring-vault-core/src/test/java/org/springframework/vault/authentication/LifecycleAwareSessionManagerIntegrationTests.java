@@ -87,6 +87,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
 				this.taskScheduler, prepare().getVaultClient()) {
+
 			@Override
 			public VaultToken getSessionToken() {
 

@@ -16,6 +16,9 @@
 
 package org.springframework.vault.authentication;
 
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
@@ -23,9 +26,6 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -89,6 +89,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		this.chain = steps;
 		this.webClient = webClient;
 	}
+
 
 	@Override
 	public Mono<VaultToken> getVaultToken() throws VaultException {
@@ -164,7 +165,6 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.UNDEFINDED)) {
 			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
 		}
-
 		return spec.retrieve().bodyToMono(definition.getResponseType());
 	}
 

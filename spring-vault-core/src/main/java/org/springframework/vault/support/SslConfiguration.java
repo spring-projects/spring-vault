@@ -16,13 +16,13 @@
 
 package org.springframework.vault.support;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
 
@@ -145,11 +145,13 @@ public class SslConfiguration {
 	 * of enabled cipher suites.
 	 * @since 2.3.2
 	 */
-	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration, KeyStoreConfiguration trustStoreConfiguration,
+	public SslConfiguration(KeyStoreConfiguration keyStoreConfiguration,
+			KeyStoreConfiguration trustStoreConfiguration,
 			List<String> enabledProtocols, List<String> enabledCipherSuites) {
-		this(keyStoreConfiguration, KeyConfiguration.unconfigured(), trustStoreConfiguration, enabledProtocols,
-				enabledCipherSuites);
+		this(keyStoreConfiguration, KeyConfiguration.unconfigured(), trustStoreConfiguration,
+				enabledProtocols, enabledCipherSuites);
 	}
+
 
 	/**
 	 * Create a new {@link SslConfiguration} for the given trust store with the
@@ -255,8 +257,8 @@ public class SslConfiguration {
 	 * @return the created {@link SslConfiguration}.
 	 * @see java.security.KeyStore
 	 */
-	public static SslConfiguration create(Resource keyStore, char @Nullable [] keyStorePassword, Resource trustStore,
-			char @Nullable [] trustStorePassword) {
+	public static SslConfiguration create(Resource keyStore, char @Nullable [] keyStorePassword,
+			Resource trustStore, char @Nullable [] trustStorePassword) {
 		Assert.notNull(keyStore, "KeyStore must not be null");
 		Assert.isTrue(keyStore.exists(), () -> "KeyStore %s does not exist".formatted(keyStore));
 		Assert.notNull(trustStore, "TrustStore must not be null");
@@ -274,6 +276,7 @@ public class SslConfiguration {
 		return new SslConfiguration(KeyStoreConfiguration.unconfigured(), KeyStoreConfiguration.unconfigured());
 	}
 
+
 	/**
 	 * The list of SSL protocol versions that must be enabled. A value of
 	 * {@literal null} indicates that the SSL socket factory should use a default
@@ -283,6 +286,17 @@ public class SslConfiguration {
 	 */
 	public List<String> getEnabledProtocols() {
 		return this.enabledProtocols;
+	}
+
+	/**
+	 * If enabled protocols are configured, call the {@code action} the the array of
+	 * enabled protocols.
+	 * @since 4.1
+	 */
+	public void enabledProtocols(Consumer<String[]> action) {
+		if (!this.enabledProtocols.isEmpty()) {
+			action.accept(this.enabledProtocols.toArray(new String[0]));
+		}
 	}
 
 	/**
@@ -307,7 +321,6 @@ public class SslConfiguration {
 	 * @since 2.3.2
 	 */
 	public SslConfiguration withEnabledProtocols(List<String> enabledProtocols) {
-
 		Assert.notNull(enabledProtocols, "Enabled protocols must not be null");
 		return new SslConfiguration(this.keyStoreConfiguration, this.keyConfiguration, this.trustStoreConfiguration,
 				enabledProtocols, this.enabledCipherSuites);
@@ -322,6 +335,17 @@ public class SslConfiguration {
 	 */
 	public List<String> getEnabledCipherSuites() {
 		return this.enabledCipherSuites;
+	}
+
+	/**
+	 * If enabled cipher suites are configured, call the {@code action} the the
+	 * array of enabled cipher suites.
+	 * @since 4.1
+	 */
+	public void enabledCipherSuites(Consumer<String[]> action) {
+		if (!this.enabledCipherSuites.isEmpty()) {
+			action.accept(this.enabledCipherSuites.toArray(new String[0]));
+		}
 	}
 
 	/**
@@ -432,13 +456,6 @@ public class SslConfiguration {
 		return new SslConfiguration(this.keyStoreConfiguration, this.keyConfiguration, configuration);
 	}
 
-	private @Nullable static String stringOrNull(char @Nullable [] storePassword) {
-		return storePassword != null ? new String(storePassword) : null;
-	}
-
-	private static char @Nullable [] charsOrNull(@Nullable String trustStorePassword) {
-		return trustStorePassword != null ? trustStorePassword.toCharArray() : null;
-	}
 
 	/**
 	 * Configuration for a key store/trust store.
@@ -477,12 +494,9 @@ public class SslConfiguration {
 			Assert.notNull(storeType, "Keystore type must not be null");
 			this.resource = resource;
 			this.storeType = storeType;
-			if (storePassword == null) {
-				this.storePassword = null;
-			} else {
-				this.storePassword = Arrays.copyOf(storePassword, storePassword.length);
-			}
+			this.storePassword = storePassword == null ? null : Arrays.copyOf(storePassword, storePassword.length);
 		}
+
 
 		/**
 		 * Create a new {@link KeyStoreConfiguration} given {@link Resource}.
@@ -596,13 +610,10 @@ public class SslConfiguration {
 
 
 		private KeyConfiguration(char @Nullable [] keyPassword, @Nullable String keyAlias) {
-			if (keyPassword == null) {
-				this.keyPassword = null;
-			} else {
-				this.keyPassword = Arrays.copyOf(keyPassword, keyPassword.length);
-			}
+			this.keyPassword = keyPassword == null ? null : Arrays.copyOf(keyPassword, keyPassword.length);
 			this.keyAlias = keyAlias;
 		}
+
 
 		/**
 		 * Create an unconfigured, empty {@link KeyConfiguration}.
@@ -656,7 +667,7 @@ public class SslConfiguration {
 		}
 
 		@Override
-		public InputStream getInputStream() throws IOException {
+		public InputStream getInputStream() {
 			throw new UnsupportedOperationException("Empty resource");
 		}
 

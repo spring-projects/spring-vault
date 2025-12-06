@@ -105,12 +105,12 @@ class VaultClientsUnitTests {
 	void shouldApplyNamespace() {
 
 		MockVaultClient client = MockVaultClient.create(it -> it.defaultNamespace("foo/bar")
-			.configureRestClient(rcb -> rcb.uriBuilderFactory(new PrefixAwareUriBuilderFactory())));
+				.configureRestClient(rcb -> rcb.uriBuilderFactory(new PrefixAwareUriBuilderFactory())));
 
 		client.expect(requestTo("/auth/foo"))
-			.andExpect(method(HttpMethod.GET))
-			.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
-			.andRespond(withSuccess());
+				.andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
+				.andRespond(withSuccess());
 
 		client.get().path("auth/foo").retrieve().body();
 	}

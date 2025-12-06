@@ -42,9 +42,6 @@ import org.springframework.web.client.RestOperations;
  */
 public class KubernetesAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
-	private static final Log logger = LogFactory.getLog(KubernetesAuthentication.class);
-
-
 	private final KubernetesAuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
@@ -87,12 +84,12 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	 * @since 4.1
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "Kubernetes");
 	}
+
 
 	/**
 	 * Create {@link AuthenticationSteps} for kubernetes authentication given
