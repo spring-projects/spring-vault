@@ -20,8 +20,7 @@ import java.time.Duration;
 
 /**
  * Support class for Google Cloud IAM-based Authentication options.
- * <p>
- * Mainly to support implementations within the framework.
+ * <p>Mainly to support implementations within the framework.
  *
  * @author Mark Paluch
  * @since 2.3.2
@@ -36,8 +35,8 @@ public abstract class GcpIamAuthenticationSupport {
 
 	/**
 	 * Name of the role against which the login is being attempted. If role is not
-	 * specified, the friendly name (i.e., role name or username) of the IAM principal
-	 * authenticated. If a matching role is not found, login fails.
+	 * specified, the friendly name (i.e., role name or username) of the IAM
+	 * principal authenticated. If a matching role is not found, login fails.
 	 */
 	private final String role;
 
@@ -51,13 +50,14 @@ public abstract class GcpIamAuthenticationSupport {
 	 */
 	private final Clock clock;
 
-	protected GcpIamAuthenticationSupport(String path, String role, Duration jwtValidity, Clock clock) {
 
+	protected GcpIamAuthenticationSupport(String path, String role, Duration jwtValidity, Clock clock) {
 		this.path = path;
 		this.role = role;
 		this.jwtValidity = jwtValidity;
 		this.clock = clock;
 	}
+
 
 	/**
 	 * @return the path of the gcp authentication backend mount.

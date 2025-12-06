@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 
@@ -34,11 +33,14 @@ public abstract class GcpJwtAuthenticationSupport {
 
 	private static final Log logger = LogFactory.getLog(GcpJwtAuthenticationSupport.class);
 
+
 	private final VaultLoginClient loginClient;
+
 
 	GcpJwtAuthenticationSupport(VaultLoginClient loginClient) {
 		this.loginClient = loginClient;
 	}
+
 
 	/**
 	 * Perform the actual Vault login given {@code signedJwt}.
@@ -49,31 +51,23 @@ public abstract class GcpJwtAuthenticationSupport {
 	 * @return the {@link VaultToken}.
 	 */
 	VaultToken doLogin(String authenticationName, String signedJwt, String path, String role) {
-
 		Map<String, String> login = createRequestBody(role, signedJwt);
-
 		VaultResponseSupport<LoginToken> response = this.loginClient.loginAt(path).using(login).retrieve().body();
 
 		if (logger.isDebugEnabled()) {
-
 			if (response.getAuth().get("metadata") instanceof Map) {
-
 				Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
 				logger.debug("Using %s authentication for user id %s".formatted(authenticationName,
 						metadata.get("service_account_email")));
 			}
 		}
-
 		return response.getRequiredData();
 	}
 
 	static Map<String, String> createRequestBody(String role, String signedJwt) {
-
 		Map<String, String> login = new HashMap<>();
-
 		login.put("role", role);
 		login.put("jwt", signedJwt);
-
 		return login;
 	}
 

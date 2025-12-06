@@ -20,26 +20,29 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
-
 /**
- * Username and password implementation of {@link ClientAuthentication}. Can be used for
- * {@code userpass}, {@code ldap}, {@code okta}, and {@code radius} authentication
- * backends.
+ * Username and password implementation of {@link ClientAuthentication}. Can be
+ * used for {@code userpass}, {@code ldap}, {@code okta}, and {@code radius}
+ * authentication backends.
  *
  * @author Mikhael Sokolov
  * @author Mark Paluch
  * @see UsernamePasswordAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/userpass">Username and password</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/ldap">LDAP authentication</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/okta">Okta authentication</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/radius">RADIUS authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/userpass">Username and
+ * password</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/ldap">LDAP
+ * authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/okta">Okta
+ * authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/radius">RADIUS
+ * authentication</a>
  * @since 2.4
  */
 public class UsernamePasswordAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
@@ -47,6 +50,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	private final UsernamePasswordAuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
+
 
 	/**
 	 * Create a {@link UsernamePasswordAuthentication} using
@@ -86,29 +90,26 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @since 4.1
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
-
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "Username and Password (" + options.getPath() + ")");
 	}
 
+
 	/**
-	 * Create a {@link AuthenticationSteps} for username/password authentication given
-	 * {@link UsernamePasswordAuthenticationOptions}.
+	 * Create a {@link AuthenticationSteps} for username/password authentication
+	 * given {@link UsernamePasswordAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for username/password authentication.
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(UsernamePasswordAuthenticationOptions options) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
-
 		Map<String, Object> body = createLoginBody(options);
-
 		return AuthenticationSteps.fromSupplier(() -> body)
-			.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
+				.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
@@ -122,19 +123,16 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 
 	@SuppressWarnings("NullAway")
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
-
 		return loginClient.login()
-			.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
-			.using(createLoginBody(options))
-			.retrieve()
-			.loginToken();
+				.path("auth/{mount}/login/{username}", options.getPath(), options.getUsername())
+				.using(createLoginBody(options))
+				.retrieve()
+				.loginToken();
 	}
 
 	private static Map<String, Object> createLoginBody(UsernamePasswordAuthenticationOptions options) {
-
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("password", options.getPassword());
-
 		CharSequence totp = options.getTotp();
 		if (totp != null) {
 			body.put("totp", totp);

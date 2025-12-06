@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -29,24 +28,26 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
- * JWT implementation of {@link ClientAuthentication}. {@link JwtAuthentication} uses a
- * JSON Web Token to login into Vault. JWT and Role are sent in the login request to Vault
- * to obtain a {@link VaultToken}.
+ * JWT implementation of {@link ClientAuthentication}. {@link JwtAuthentication}
+ * uses a JSON Web Token to login into Vault. JWT and Role are sent in the login
+ * request to Vault to obtain a {@link VaultToken}.
  *
  * @author Nanne Baars
  * @since 3.1
  * @see JwtAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/api-docs/auth/jwt">Vault Auth Backend:
- * JWT</a>
+ * @see <a href="https://www.vaultproject.io/api-docs/auth/jwt">Vault Auth
+ * Backend: JWT</a>
  */
 public class JwtAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	public static final String DEFAULT_JWT_AUTHENTICATION_PATH = "jwt";
 
+
 	private final JwtAuthenticationOptions options;
 
 	private final VaultLoginClient loginClient;
+
 
 	/**
 	 * Create a {@link JwtAuthentication} using {@link JwtAuthenticationOptions} and
@@ -83,39 +84,32 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @since 4.1
 	 */
 	public JwtAuthentication(JwtAuthenticationOptions options, VaultClient client) {
-
 		Assert.notNull(options, "JwtAuthenticationOptions must not be null");
 		Assert.notNull(client, "VaultClient must not be null");
-
 		this.options = options;
 		this.loginClient = VaultLoginClient.create(client, "JWT");
 	}
 
+
 	@Override
 	public AuthenticationSteps getAuthenticationSteps() {
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
-			.map(token -> getJwtLogin(options.getRole(), token))
-			.loginAt(options.getPath());
+				.map(token -> getJwtLogin(options.getRole(), token))
+				.loginAt(options.getPath());
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
-
 		Map<String, String> login = getJwtLogin(this.options.getRole(), this.options.getJwtSupplier().get());
-
 		return this.loginClient.loginAt(this.options.getPath()).using(login).retrieve().loginToken();
 	}
 
 	private static Map<String, String> getJwtLogin(@Nullable String role, String jwt) {
-
 		Map<String, String> login = new HashMap<>(2);
-
 		login.put("jwt", jwt);
-
 		if (StringUtils.hasText(role)) {
 			login.put("role", role);
 		}
-
 		return login;
 	}
 

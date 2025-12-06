@@ -22,9 +22,8 @@ import org.springframework.core.io.Resource;
 
 /**
  * Mechanism to retrieve a Kubernetes service account token.
- * <p>
- * A file containing a token for a pod's service account is automatically mounted at
- * {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
+ * <p>A file containing a token for a pod's service account is automatically
+ * mounted at {@code /var/run/secrets/kubernetes.io/serviceaccount/token}.
  *
  * @author Michal Budzyn
  * @author Mark Paluch
@@ -38,10 +37,11 @@ public class KubernetesServiceAccountTokenFile extends ResourceCredentialSupplie
 	 */
 	public static final String DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
+
 	/**
 	 * Create a new {@link KubernetesServiceAccountTokenFile} pointing to the
-	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE}. Construction fails with an
-	 * exception if the file does not exist.
+	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE}. Construction fails
+	 * with an exception if the file does not exist.
 	 * @throws IllegalArgumentException if the
 	 * {@link #DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE} does not exist.
 	 */

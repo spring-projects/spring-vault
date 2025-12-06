@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
-import com.google.api.client.json.JsonFactory;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ClassUtils;
+
+import com.google.api.client.json.JsonFactory;
 
 /**
  * Utility to provide JSON-functionality for Google integrations.
@@ -35,20 +35,16 @@ class GoogleJsonUtil {
 	static final String GSON = "com.google.api.client.json.gson.GsonFactory";
 
 	static {
-
 		try {
-
 			if (ClassUtils.isPresent(JACKSON, null)) {
 				JSON_FACTORY = instantiate(JACKSON);
-			}
-			else {
+			} else {
 				JSON_FACTORY = instantiate(GSON);
 			}
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(
 					"No com.google.api.client.json.JsonFactory implementation available. Make sure to include either %s or %s on your classpath."
-						.formatted(JACKSON, GSON),
+							.formatted(JACKSON, GSON),
 					e);
 		}
 	}

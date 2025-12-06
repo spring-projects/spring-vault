@@ -18,8 +18,9 @@ package org.springframework.vault.authentication;
 import com.google.auth.oauth2.GoogleCredentials;
 
 /**
- * Interface to obtain a service account id for GCP IAM credentials authentication.
- * Implementations are used by {@link GcpIamCredentialsAuthentication}.
+ * Interface to obtain a service account id for GCP IAM credentials
+ * authentication. Implementations are used by
+ * {@link GcpIamCredentialsAuthentication}.
  *
  * @author Andreas Gebauer
  * @since 2.3.2

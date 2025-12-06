@@ -20,7 +20,6 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.HttpMethod;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
@@ -36,6 +35,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 class DefaultVaultLoginClient implements VaultLoginClient {
 
 	private static final Log logger = LogFactory.getLog(DefaultVaultLoginClient.class);
+
 
 	private final VaultClient vaultClient;
 
@@ -150,8 +150,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
 				}
 				return token;
-			}
-			catch (VaultException e) {
+			} catch (VaultException e) {
 				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}
@@ -168,8 +167,7 @@ class DefaultVaultLoginClient implements VaultLoginClient {
 					logger.debug("Login successful using %s authentication".formatted(authenticationMechanism));
 				}
 				return tokenResponse;
-			}
-			catch (VaultException e) {
+			} catch (VaultException e) {
 				throw VaultLoginException.create(authenticationMechanism, e.getCause());
 			}
 		}

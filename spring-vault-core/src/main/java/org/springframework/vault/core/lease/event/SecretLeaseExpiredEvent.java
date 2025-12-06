@@ -33,7 +33,7 @@ public class SecretLeaseExpiredEvent extends SecretLeaseEvent {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret}
+	 * Create a new {@code SecretLeaseExpiredEvent} given {@link RequestedSecret}
 	 * and {@link Lease}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.

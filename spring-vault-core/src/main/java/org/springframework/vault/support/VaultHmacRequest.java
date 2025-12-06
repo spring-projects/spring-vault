@@ -116,7 +116,7 @@ public class VaultHmacRequest {
 		 * Supported algorithms are: {@literal sha2-224}, {@literal sha2-256},
 		 * {@literal sha2-384}, {@literal sha2-512}. Defaults to {@literal sha2-256} if
 		 * not set.
-		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultHmacRequestBuilder algorithm(String algorithm) {
 			Assert.hasText(algorithm, "Algorithm must not be null or empty");
@@ -127,7 +127,7 @@ public class VaultHmacRequest {
 		/**
 		 * Configure the key version to be used for the operation.
 		 * @param version key version to be used. If not set, uses the latest version.
-		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultHmacRequestBuilder keyVersion(int version) {
 			this.keyVersion = version;

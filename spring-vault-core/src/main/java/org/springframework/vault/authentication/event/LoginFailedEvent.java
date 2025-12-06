@@ -24,8 +24,7 @@ import org.springframework.vault.support.VaultToken;
 
 /**
  * Event published before renewing a {@link VaultToken login token}.
- * <p>
- * Provides {@link ClientAuthentication} or {@link VaultTokenSupplier} as
+ * <p>Provides {@link ClientAuthentication} or {@link VaultTokenSupplier} as
  * {@link #getSource() source}.
  *
  * @author Mark Paluch
@@ -37,8 +36,9 @@ public class LoginFailedEvent extends AuthenticationErrorEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	/**
-	 * Create a new {@link LoginFailedEvent} given {@link Exception}.
+	 * Create a new {@code LoginFailedEvent} given {@link Exception}.
 	 * @param source the {@link ClientAuthentication} or {@link VaultTokenSupplier}
 	 * associated with this event, must not be {@literal null}.
 	 * @param exception must not be {@literal null}.

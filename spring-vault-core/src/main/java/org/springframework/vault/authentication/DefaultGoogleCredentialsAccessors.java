@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.authentication;
 
+import org.springframework.util.Assert;
+
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link GoogleCredentialsAccountIdAccessor}. Used by
@@ -39,11 +39,9 @@ enum DefaultGoogleCredentialsAccessors implements GoogleCredentialsAccountIdAcce
 	 */
 	@Override
 	public String getServiceAccountId(GoogleCredentials credentials) {
-
 		Assert.notNull(credentials, "GoogleCredentials must not be null");
 		Assert.isInstanceOf(ServiceAccountCredentials.class, credentials,
 				"The configured GoogleCredentials does not represent a service account. Configure the service account id with GcpIamCredentialsAuthenticationOptionsBuilder#serviceAccountId(String).");
-
 		return ((ServiceAccountCredentials) credentials).getAccount();
 	}
 

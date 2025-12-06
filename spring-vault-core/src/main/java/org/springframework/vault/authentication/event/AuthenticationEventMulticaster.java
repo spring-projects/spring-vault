@@ -17,13 +17,14 @@ package org.springframework.vault.authentication.event;
 
 /**
  * Interface to be implemented by objects that can manage a number of
- * {@link AuthenticationEvent} and {@link AuthenticationErrorEvent} objects and publish
- * events to them.
- * <p>
- * An {@link org.springframework.vault.authentication.AuthenticationEventPublisher},
+ * {@link AuthenticationEvent} and {@link AuthenticationErrorEvent} objects and
+ * publish events to them.
+ * <p>An
+ * {@link org.springframework.vault.authentication.AuthenticationEventPublisher},
  * typically a lifecycle-aware
  * {@link org.springframework.vault.authentication.SessionManager}, can use an
- * {@code AuthenticationEventMulticaster} as a delegate for actually publishing events.
+ * {@code AuthenticationEventMulticaster} as a delegate for actually publishing
+ * events.
  *
  * @author Mark Paluch
  * @see AuthenticationListener

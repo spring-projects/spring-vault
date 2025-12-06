@@ -15,18 +15,18 @@
  */
 package org.springframework.vault.authentication;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.jspecify.annotations.NonNull;
-import reactor.core.publisher.Mono;
-
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * Default implementation of {@link VaultTokenSupplier} caching the {@link VaultToken}
- * from a delegate {@link VaultTokenSupplier}.
+ * Default implementation of {@link VaultTokenSupplier} caching the
+ * {@link VaultToken} from a delegate {@link VaultTokenSupplier}.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -37,17 +37,20 @@ public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSe
 
 	private static final Mono<VaultToken> EMPTY = Mono.empty();
 
+
 	private final VaultTokenSupplier clientAuthentication;
 
 	private final AtomicReference<@NonNull Mono<VaultToken>> tokenRef = new AtomicReference<>(EMPTY);
+
 
 	private CachingVaultTokenSupplier(VaultTokenSupplier clientAuthentication) {
 		this.clientAuthentication = clientAuthentication;
 	}
 
+
 	/**
-	 * Create a new {@code CachingVaultTokenSupplier} given a {@link VaultTokenSupplier
-	 * delegate supplier}.
+	 * Create a new {@code CachingVaultTokenSupplier} given a
+	 * {@link VaultTokenSupplier delegate supplier}.
 	 * @param delegate must not be {@literal null}.
 	 * @return the {@code CachingVaultTokenSupplier} for a {@link VaultTokenSupplier
 	 * delegate supplier}.
@@ -56,14 +59,13 @@ public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSe
 		return new CachingVaultTokenSupplier(delegate);
 	}
 
+
 	@Override
 	@SuppressWarnings("NullAway")
 	public Mono<VaultToken> getVaultToken() throws VaultException {
-
 		if (Objects.equals(this.tokenRef.get(), EMPTY)) {
 			this.tokenRef.compareAndSet(EMPTY, this.clientAuthentication.getVaultToken().cache());
 		}
-
 		return this.tokenRef.get();
 	}
 

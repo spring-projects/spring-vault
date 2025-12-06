@@ -95,12 +95,10 @@ public class RestClientBuilder {
 	 * @since 4.1
 	 */
 	public static RestClientBuilder builder(RestTemplateBuilder restTemplateBuilder) {
-
 		RestClientBuilder builder = new RestClientBuilder(restTemplateBuilder.endpointProvider,
 				restTemplateBuilder.requestFactory, restTemplateBuilder.errorHandler);
 		builder.defaultHeaders.putAll(restTemplateBuilder.defaultHeaders);
 		builder.requestInitializers.addAll(restTemplateBuilder.requestCustomizers);
-
 		return builder;
 	}
 
@@ -109,7 +107,7 @@ public class RestClientBuilder {
 	 * Set the {@link VaultEndpoint} that should be used with the
 	 * {@link RestClient}.
 	 * @param endpoint the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder endpoint(VaultEndpoint endpoint) {
 		return endpointProvider(SimpleVaultEndpointProvider.of(endpoint));
@@ -119,14 +117,11 @@ public class RestClientBuilder {
 	 * Set the {@link VaultEndpointProvider} that should be used with the
 	 * {@link RestClient}.
 	 * @param provider the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder endpointProvider(VaultEndpointProvider provider) {
-
 		Assert.notNull(provider, "VaultEndpointProvider must not be null");
-
 		this.endpointProvider = provider;
-
 		return this;
 	}
 
@@ -134,7 +129,7 @@ public class RestClientBuilder {
 	 * Set the {@link ClientHttpRequestFactory} that should be used with the
 	 * {@link RestClient}.
 	 * @param requestFactory the request factory.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder requestFactory(ClientHttpRequestFactory requestFactory) {
 
@@ -147,12 +142,10 @@ public class RestClientBuilder {
 	 * Set the {@link Supplier} of {@link ClientHttpRequestFactory} that should be
 	 * called each time we {@link #build()} a new {@link RestClient} instance.
 	 * @param requestFactory the supplier for the request factory.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder requestFactory(Supplier<ClientHttpRequestFactory> requestFactory) {
-
 		Assert.notNull(requestFactory, "Supplier of ClientHttpRequestFactory must not be null");
-
 		this.requestFactory = requestFactory;
 		return this;
 	}
@@ -161,12 +154,10 @@ public class RestClientBuilder {
 	 * Set the {@link ResponseErrorHandler} that should be used with the
 	 * {@link RestClient}.
 	 * @param errorHandler the error handler to use.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder errorHandler(ResponseErrorHandler errorHandler) {
-
 		Assert.notNull(errorHandler, "ErrorHandler must not be null");
-
 		this.errorHandler = errorHandler;
 		return this;
 	}
@@ -176,14 +167,11 @@ public class RestClientBuilder {
 	 * {@link HttpRequest}.
 	 * @param name the name of the header.
 	 * @param value the header value.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder defaultHeader(String name, String value) {
-
 		Assert.hasText(name, "Header name must not be null or empty");
-
 		this.defaultHeaders.put(name, value);
-
 		return this;
 	}
 
@@ -192,12 +180,10 @@ public class RestClientBuilder {
 	 * applied to the {@link RestClient}. Customizers are applied in the order that
 	 * they were added.
 	 * @param customizer the template customizers to add.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder customizers(RestClientCustomizer... customizer) {
-
 		this.customizers.addAll(Arrays.asList(customizer));
-
 		return this;
 	}
 
@@ -206,12 +192,10 @@ public class RestClientBuilder {
 	 * that should be applied to {@link ClientHttpRequest} initialization.
 	 * Customizers are applied in the order that they were added.
 	 * @param requestInitializer the request initializers to add.
-	 * @return {@code this} {@code RestClientBuilder}.
+	 * @return this builder.
 	 */
 	public RestClientBuilder requestInitializers(ClientHttpRequestInitializer... requestInitializer) {
-
 		Assert.notNull(requestInitializer, "RequestCustomizers must not be null");
-
 		this.requestInitializers.addAll(Arrays.asList(requestInitializer));
 		return this;
 	}
@@ -223,9 +207,7 @@ public class RestClientBuilder {
 	 * @return a new {@link RestClient}.
 	 */
 	public RestClient build() {
-
 		Assert.state(this.endpointProvider != null, "VaultEndpointProvider must not be null");
-
 		return createClient();
 	}
 
@@ -234,31 +216,22 @@ public class RestClientBuilder {
 	 * @return the {@link RestClient} to use.
 	 */
 	protected RestClient createClient() {
-
 		Assert.notNull(this.endpointProvider, "VaultEndpointProvider must not be null");
-
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
-
 		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
-
 		return VaultClients.createRestClient(this.endpointProvider, requestFactory, builder -> {
-
 			builder.defaultHeaders(headers -> {
-
 				defaultHeaders.forEach((key, value) -> {
 					if (!headers.containsHeader(key)) {
 						headers.add(key, value);
 					}
 				});
 			});
-
 			builder.requestInitializers(
 					clientHttpRequestInitializers -> clientHttpRequestInitializers.addAll(requestInitializers));
-
 			if (this.errorHandler != null) {
 				builder.defaultStatusHandler(this.errorHandler);
 			}
-
 			this.customizers.forEach(customizer -> customizer.customize(builder));
 		});
 	}

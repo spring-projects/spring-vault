@@ -97,12 +97,10 @@ public class RestTemplateBuilder {
 	 * @since 4.0
 	 */
 	public static RestTemplateBuilder builder(RestClientBuilder restClientBuilder) {
-
 		RestTemplateBuilder builder = new RestTemplateBuilder(restClientBuilder.endpointProvider,
 				restClientBuilder.requestFactory, restClientBuilder.errorHandler);
 		builder.defaultHeaders.putAll(restClientBuilder.defaultHeaders);
 		builder.requestCustomizers.addAll(restClientBuilder.requestInitializers);
-
 		return builder;
 	}
 
@@ -110,7 +108,7 @@ public class RestTemplateBuilder {
 	/**
 	 * Set the {@link VaultEndpoint} that should be used with the {@link RestTemplate}.
 	 * @param endpoint the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder endpoint(VaultEndpoint endpoint) {
 		return endpointProvider(SimpleVaultEndpointProvider.of(endpoint));
@@ -120,14 +118,11 @@ public class RestTemplateBuilder {
 	 * Set the {@link VaultEndpointProvider} that should be used with the
 	 * {@link RestTemplate}.
 	 * @param provider the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder endpointProvider(VaultEndpointProvider provider) {
-
 		Assert.notNull(provider, "VaultEndpointProvider must not be null");
-
 		this.endpointProvider = provider;
-
 		return this;
 	}
 
@@ -135,12 +130,10 @@ public class RestTemplateBuilder {
 	 * Set the {@link ClientHttpRequestFactory} that should be used with the
 	 * {@link RestTemplate}.
 	 * @param requestFactory the request factory.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder requestFactory(ClientHttpRequestFactory requestFactory) {
-
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null");
-
 		return requestFactory(() -> requestFactory);
 	}
 
@@ -148,12 +141,10 @@ public class RestTemplateBuilder {
 	 * Set the {@link Supplier} of {@link ClientHttpRequestFactory} that should be called
 	 * each time we {@link #build()} a new {@link RestTemplate} instance.
 	 * @param requestFactory the supplier for the request factory.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder requestFactory(Supplier<ClientHttpRequestFactory> requestFactory) {
-
 		Assert.notNull(requestFactory, "Supplier of ClientHttpRequestFactory must not be null");
-
 		this.requestFactory = requestFactory;
 		return this;
 	}
@@ -162,12 +153,10 @@ public class RestTemplateBuilder {
 	 * Set the {@link ResponseErrorHandler} that should be used with the
 	 * {@link RestTemplate}.
 	 * @param errorHandler the error handler to use.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder errorHandler(ResponseErrorHandler errorHandler) {
-
 		Assert.notNull(errorHandler, "ErrorHandler must not be null");
-
 		this.errorHandler = errorHandler;
 		return this;
 	}
@@ -177,14 +166,11 @@ public class RestTemplateBuilder {
 	 * {@link HttpRequest}.
 	 * @param name the name of the header.
 	 * @param value the header value.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder defaultHeader(String name, String value) {
-
 		Assert.hasText(name, "Header name must not be null or empty");
-
 		this.defaultHeaders.put(name, value);
-
 		return this;
 	}
 
@@ -193,10 +179,9 @@ public class RestTemplateBuilder {
 	 * applied to the {@link RestTemplate}. Customizers are applied in the order that they
 	 * were added.
 	 * @param customizer the template customizers to add.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder customizers(RestTemplateCustomizer... customizer) {
-
 		this.customizers.addAll(Arrays.asList(customizer));
 		return this;
 	}
@@ -206,12 +191,10 @@ public class RestTemplateBuilder {
 	 * should be applied to the {@link ClientHttpRequest}. Customizers are applied in the
 	 * order that they were added.
 	 * @param requestCustomizers the request customizers to add.
-	 * @return {@code this} {@link RestTemplateBuilder}.
+	 * @return this builder.
 	 */
 	public RestTemplateBuilder requestCustomizers(RestTemplateRequestCustomizer<?>... requestCustomizers) {
-
 		Assert.notNull(requestCustomizers, "RequestCustomizers must not be null");
-
 		this.requestCustomizers.addAll(Arrays.asList(requestCustomizers));
 		return this;
 	}
@@ -224,17 +207,12 @@ public class RestTemplateBuilder {
 	 * @return a new {@link RestTemplate}.
 	 */
 	public RestTemplate build() {
-
 		Assert.state(this.endpointProvider != null, "VaultEndpointProvider must not be null");
-
 		RestTemplate restTemplate = createTemplate();
-
 		if (this.errorHandler != null) {
 			restTemplate.setErrorHandler(this.errorHandler);
 		}
-
 		this.customizers.forEach(customizer -> customizer.customize(restTemplate));
-
 		return restTemplate;
 	}
 
@@ -243,26 +221,19 @@ public class RestTemplateBuilder {
 	 * @return the {@link RestTemplate} to use.
 	 */
 	protected RestTemplate createTemplate() {
-
 		Assert.notNull(this.endpointProvider, "VaultEndpointProvider must not be null");
-
 		ClientHttpRequestFactory requestFactory = this.requestFactory.get();
-
-		LinkedHashMap<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
-		LinkedHashSet<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>(this.requestCustomizers);
-
+		Map<String, String> defaultHeaders = new LinkedHashMap<>(this.defaultHeaders);
+		Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>(this.requestCustomizers);
 		RestTemplate restTemplate = VaultClients.createRestTemplate(this.endpointProvider,
 				new RestTemplateBuilderClientHttpRequestFactoryWrapper(requestFactory, requestCustomizers));
-
 		restTemplate.getInterceptors().add((httpRequest, bytes, clientHttpRequestExecution) -> {
-
 			HttpHeaders headers = httpRequest.getHeaders();
 			defaultHeaders.forEach((key, value) -> {
 				if (!headers.containsHeader(key)) {
 					headers.add(key, value);
 				}
 			});
-
 			return clientHttpRequestExecution.execute(httpRequest, bytes);
 		});
 
@@ -274,22 +245,20 @@ public class RestTemplateBuilder {
 
 		private final Set<ClientHttpRequestInitializer> requestCustomizers;
 
+
 		RestTemplateBuilderClientHttpRequestFactoryWrapper(ClientHttpRequestFactory requestFactory,
 				Set<ClientHttpRequestInitializer> requestCustomizers) {
-
 			super(requestFactory);
 			this.requestCustomizers = requestCustomizers;
 		}
+
 
 		@Override
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		protected ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod,
 				ClientHttpRequestFactory requestFactory) throws IOException {
-
 			ClientHttpRequest request = requestFactory.createRequest(uri, httpMethod);
-
 			this.requestCustomizers.forEach(it -> {
-
 				if (it instanceof RestTemplateRequestCustomizer customizer) {
 					customizer.customize(request);
 				}

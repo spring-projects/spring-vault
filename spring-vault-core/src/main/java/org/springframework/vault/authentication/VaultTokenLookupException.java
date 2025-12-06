@@ -18,7 +18,8 @@ package org.springframework.vault.authentication;
 import org.springframework.vault.VaultException;
 
 /**
- * Exception thrown if a token self-lookup fails via {@code auth/token/lookup-self}.
+ * Exception thrown if a token self-lookup fails via
+ * {@code auth/token/lookup-self}.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -34,8 +35,8 @@ public class VaultTokenLookupException extends VaultException {
 	}
 
 	/**
-	 * Create a {@code VaultTokenLookupException} with the specified detail message and
-	 * nested exception.
+	 * Create a {@code VaultTokenLookupException} with the specified detail message
+	 * and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 * @since 2.1

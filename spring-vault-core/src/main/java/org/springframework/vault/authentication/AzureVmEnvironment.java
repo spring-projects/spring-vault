@@ -18,8 +18,8 @@ package org.springframework.vault.authentication;
 import org.springframework.util.Assert;
 
 /**
- * Value object representing a VM environment consisting of the subscription Id, the
- * resource group name and the VM name.
+ * Value object representing a VM environment consisting of the subscription Id,
+ * the resource group name and the VM name.
  *
  * @author Mark Paluch
  * @author Willi Schönborn
@@ -40,6 +40,7 @@ public class AzureVmEnvironment {
 
 	private final String vmScaleSetName;
 
+
 	/**
 	 * Create a new {@code AzureVmEnvironment}.
 	 * @param subscriptionId must not be {@literal null}.
@@ -59,17 +60,16 @@ public class AzureVmEnvironment {
 	 * @since 2.4
 	 */
 	public AzureVmEnvironment(String subscriptionId, String resourceGroupName, String vmName, String vmScaleSetName) {
-
 		Assert.notNull(subscriptionId, "SubscriptionId must not be null");
 		Assert.notNull(resourceGroupName, "Resource group name must not be null");
 		Assert.notNull(vmName, "VM name must not be null");
 		Assert.notNull(vmScaleSetName, "VM Scale Set name must not be null");
-
 		this.subscriptionId = subscriptionId;
 		this.resourceGroupName = resourceGroupName;
 		this.vmName = vmName;
 		this.vmScaleSetName = vmScaleSetName;
 	}
+
 
 	public String getSubscriptionId() {
 		return this.subscriptionId;

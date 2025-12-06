@@ -37,7 +37,7 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 
 
 	/**
-	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret},
+	 * Create a new {@code SecretLeaseExpiredEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@link Throwable}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease can be {@literal null}.

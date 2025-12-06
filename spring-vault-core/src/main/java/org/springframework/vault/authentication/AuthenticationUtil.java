@@ -3,7 +3,6 @@ package org.springframework.vault.authentication;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -25,9 +24,7 @@ abstract class AuthenticationUtil {
 	}
 
 	public static <T> T getRequiredBody(ResponseEntity<T> entity) {
-
 		T body = entity.getBody();
-
 		if (body == null) {
 			throw new IllegalStateException("Expected non-null response body");
 		}

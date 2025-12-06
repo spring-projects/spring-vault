@@ -41,7 +41,7 @@ public abstract class SecretLeaseEvent extends ApplicationEvent {
 
 
 	/**
-	 * Create a new {@link SecretLeaseEvent} given {@link RequestedSecret} and
+	 * Create a new {@code SecretLeaseEvent} given {@link RequestedSecret} and
 	 * {@link Lease}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease can be {@literal null}.

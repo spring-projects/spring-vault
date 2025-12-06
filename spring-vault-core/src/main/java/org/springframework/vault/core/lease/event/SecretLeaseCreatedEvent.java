@@ -39,7 +39,7 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 
 
 	/**
-	 * Create a new {@link SecretLeaseCreatedEvent} given {@link RequestedSecret},
+	 * Create a new {@code SecretLeaseCreatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.

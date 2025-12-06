@@ -16,8 +16,8 @@
 package org.springframework.vault.authentication;
 
 /**
- * Interface to obtain a Kubernetes Service Account Token for Kubernetes authentication.
- * Implementations are used by {@link KubernetesAuthentication}.
+ * Interface to obtain a Kubernetes Service Account Token for Kubernetes
+ * authentication. Implementations are used by {@link KubernetesAuthentication}.
  *
  * @author Michal Budzyn
  * @author Mark Paluch

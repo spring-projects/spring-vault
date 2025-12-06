@@ -32,7 +32,7 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 
 
 	/**
-	 * Create a new {@link SecretLeaseRotatedEvent} given {@link RequestedSecret},
+	 * Create a new {@code SecretLeaseRotatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param previousLease must not be {@literal null}.

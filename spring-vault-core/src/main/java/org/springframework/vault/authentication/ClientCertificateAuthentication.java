@@ -37,11 +37,13 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private final VaultLoginClient loginClient;
 
+
 	/**
-	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using
+	 * {@link RestOperations}.
 	 * @param restOperations must not be {@literal null}.
-	 * @deprecated since 4.1, use {@link #ClientCertificateAuthentication(VaultClient)}
-	 * instead.
+	 * @deprecated since 4.1, use
+	 * {@link #ClientCertificateAuthentication(VaultClient)} instead.
 	 */
 	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(RestOperations restOperations) {
@@ -49,7 +51,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using
+	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 2.3
@@ -66,8 +69,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestClient}.
 	 * @param client must not be {@literal null}.
-	 * @deprecated since 4.1, use {@link #ClientCertificateAuthentication(VaultClient)}
-	 * instead.
+	 * @deprecated since 4.1, use
+	 * {@link #ClientCertificateAuthentication(VaultClient)} instead.
 	 */
 	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(RestClient client) {
@@ -75,7 +78,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using
+	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 2.3
@@ -112,6 +116,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		this.loginClient = VaultLoginClient.create(client, "TLS Certificates");
 	}
 
+
 	/**
 	 * Create a {@link AuthenticationSteps} for client certificate authentication.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
@@ -135,6 +140,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 		return AuthenticationSteps.fromSupplier(() -> body).loginAt(options.getPath());
 	}
 
+
 	@Override
 	public VaultToken login() {
 		return createTokenUsingTlsCertAuthentication();
@@ -152,7 +158,6 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private static Map<String, Object> getRequestBody(ClientCertificateAuthenticationOptions options) {
 		String name = options.getRole();
-
 		return name != null ? Collections.singletonMap("name", name) : Collections.emptyMap();
 	}
 

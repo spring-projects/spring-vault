@@ -16,14 +16,12 @@
 package org.springframework.vault.authentication;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link GcpComputeAuthentication}.
- * <p />
- * Authentication options provide the path, role and an optional service account
- * identifier. Instances of this class are immutable once constructed.
+ * <p />Authentication options provide the path, role and an optional service
+ * account identifier. Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @see GcpComputeAuthentication
@@ -33,6 +31,7 @@ import org.springframework.util.Assert;
 public class GcpComputeAuthenticationOptions {
 
 	public static final String DEFAULT_GCP_AUTHENTICATION_PATH = "gcp";
+
 
 	/**
 	 * Path of the gcp authentication backend mount.
@@ -46,17 +45,18 @@ public class GcpComputeAuthenticationOptions {
 
 	/**
 	 * Name of the role against which the login is being attempted. If role is not
-	 * specified, the friendly name (i.e., role name or username) of the IAM principal
-	 * authenticated. If a matching role is not found, login fails.
+	 * specified, the friendly name (i.e., role name or username) of the IAM
+	 * principal authenticated. If a matching role is not found, login fails.
 	 */
 	private final String role;
 
-	private GcpComputeAuthenticationOptions(String path, String serviceAccount, String role) {
 
+	private GcpComputeAuthenticationOptions(String path, String serviceAccount, String role) {
 		this.path = path;
 		this.serviceAccount = serviceAccount;
 		this.role = role;
 	}
+
 
 	/**
 	 * @return a new {@link GcpComputeAuthenticationOptionsBuilder}.
@@ -64,6 +64,7 @@ public class GcpComputeAuthenticationOptions {
 	public static GcpComputeAuthenticationOptionsBuilder builder() {
 		return new GcpComputeAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the gcp authentication backend mount.
@@ -86,6 +87,7 @@ public class GcpComputeAuthenticationOptions {
 		return this.role;
 	}
 
+
 	/**
 	 * Builder for {@link GcpComputeAuthenticationOptions}.
 	 */
@@ -97,18 +99,18 @@ public class GcpComputeAuthenticationOptions {
 
 		private String serviceAccount = "default";
 
+
 		GcpComputeAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpComputeAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -117,12 +119,10 @@ public class GcpComputeAuthenticationOptions {
 		 * Configure the service account identifier. Uses the {@code default} service
 		 * account if left unconfigured.
 		 * @param serviceAccount must not be empty or {@literal null}.
-		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpComputeAuthenticationOptionsBuilder serviceAccount(String serviceAccount) {
-
 			Assert.hasText(serviceAccount, "Service account must not be null");
-
 			this.serviceAccount = serviceAccount;
 			return this;
 		}
@@ -130,12 +130,10 @@ public class GcpComputeAuthenticationOptions {
 		/**
 		 * Configure the name of the role against which the login is being attempted.
 		 * @param role must not be empty or {@literal null}.
-		 * @return {@code this} {@link GcpComputeAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpComputeAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be null or empty");
-
 			this.role = role;
 			return this;
 		}
@@ -145,9 +143,7 @@ public class GcpComputeAuthenticationOptions {
 		 * @return a new {@link GcpComputeAuthenticationOptions}.
 		 */
 		public GcpComputeAuthenticationOptions build() {
-
 			Assert.notNull(this.role, "Role must not be null");
-
 			return new GcpComputeAuthenticationOptions(this.path, this.serviceAccount, this.role);
 		}
 

@@ -136,7 +136,7 @@ public class VaultMount {
 		/**
 		 * Configure the backend type.
 		 * @param type the backend type, must not be empty or {@literal null}.
-		 * @return {@literal this} {@link VaultMountBuilder}.
+		 * @return this builder.
 		 */
 		@Contract("null -> fail")
 		public VaultMountBuilder type(@Nullable String type) {
@@ -148,7 +148,7 @@ public class VaultMount {
 		/**
 		 * Configure a human-readable description of this mount.
 		 * @param description a human-readable description of this mount.
-		 * @return {@literal this} {@link VaultMountBuilder}.
+		 * @return this builder.
 		 */
 		public VaultMountBuilder description(@Nullable String description) {
 			this.description = description;
@@ -158,7 +158,7 @@ public class VaultMount {
 		/**
 		 * Set additional configuration details for this mount.
 		 * @param config additional configuration details for this mount.
-		 * @return {@literal this} {@link VaultMountBuilder}.
+		 * @return this builder.
 		 */
 		public VaultMountBuilder config(Map<String, Object> config) {
 			Assert.notNull(config, "Configuration map must not be null");
@@ -169,7 +169,7 @@ public class VaultMount {
 		/**
 		 * Set mount type specific options for this mount.
 		 * @param options mount type specific options for this mount.
-		 * @return {@literal this} {@link VaultMountBuilder}.
+		 * @return this builder.
 		 * @since 2.2
 		 */
 		public VaultMountBuilder options(Map<String, String> options) {
