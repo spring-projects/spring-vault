@@ -46,10 +46,10 @@ public class CachingVaultTokenSupplier implements VaultTokenSupplier, ReactiveSe
 	}
 
 	/**
-	 * Creates a new {@link CachingVaultTokenSupplier} given a {@link VaultTokenSupplier
+	 * Create a new {@code CachingVaultTokenSupplier} given a {@link VaultTokenSupplier
 	 * delegate supplier}.
 	 * @param delegate must not be {@literal null}.
-	 * @return the {@link CachingVaultTokenSupplier} for a {@link VaultTokenSupplier
+	 * @return the {@code CachingVaultTokenSupplier} for a {@link VaultTokenSupplier
 	 * delegate supplier}.
 	 */
 	public static CachingVaultTokenSupplier of(VaultTokenSupplier delegate) {

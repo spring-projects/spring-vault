@@ -186,7 +186,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for cubbyhole authentication given
+	 * Create a {@link AuthenticationSteps} for cubbyhole authentication given
 	 * {@link CubbyholeAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for cubbyhole authentication.

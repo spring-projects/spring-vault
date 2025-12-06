@@ -22,7 +22,6 @@ import java.time.temporal.TemporalAccessor;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -42,68 +41,58 @@ public class WrappedMetadata {
 
 	private final Duration ttl;
 
+
 	/**
-	 * Creates a new {@link WrappedMetadata}.
+	 * Create a new {@code WrappedMetadata}.
 	 * @param token must not be {@literal null}.
 	 * @param ttl must not be {@literal null}.
 	 * @param creationTime must not be {@literal null}.
 	 * @param path can be {@literal null}.
 	 */
 	public WrappedMetadata(VaultToken token, Duration ttl, Instant creationTime, @Nullable String path) {
-
 		Assert.notNull(token, "VaultToken must not be null");
 		Assert.notNull(ttl, "TTL duration must not be null");
 		Assert.notNull(creationTime, "Creation time must not be null");
-
 		this.token = token;
 		this.ttl = ttl;
 		this.creationTime = creationTime;
 		this.path = path;
 	}
 
+
 	public static WrappedMetadata from(VaultResponseSupport<? extends Map<String, Object>> response) {
 		return from(response.getWrapInfo(), VaultToken.of(response.getWrapInfo().get("token")));
 	}
 
 	public static WrappedMetadata from(Map<String, ?> wrapInfo, VaultToken token) {
-
 		TemporalAccessor creation_time = getDate(wrapInfo, "creation_time");
 		String path = (String) wrapInfo.get("creation_path");
 		Duration ttl = getTtl(wrapInfo);
-
 		return new WrappedMetadata(token, ttl, Instant.from(creation_time), path);
 	}
 
 	private static TemporalAccessor getDate(Map<String, ?> responseMetadata, String key) {
-
 		String date = (String) ((Map) responseMetadata).getOrDefault(key, "");
-
 		if (StringUtils.hasText(date)) {
 			return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(date);
 		}
-
 		throw new IllegalArgumentException("Cannot obtain date");
 	}
 
 	private static Duration getTtl(Map<String, ?> wrapInfo) {
-
 		Object creationTtl = wrapInfo.get("ttl");
-
 		if (creationTtl == null) {
 			creationTtl = wrapInfo.get("creation_ttl");
 		}
-
 		if (creationTtl instanceof String) {
 			creationTtl = Integer.parseInt((String) creationTtl);
 		}
-
 		if (creationTtl instanceof Integer) {
 			return Duration.ofSeconds((Integer) creationTtl);
-
 		}
-
 		throw new IllegalArgumentException("Cannot obtain TTL");
 	}
+
 
 	public VaultToken getToken() {
 		return this.token;

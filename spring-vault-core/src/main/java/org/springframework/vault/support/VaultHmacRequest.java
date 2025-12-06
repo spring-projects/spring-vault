@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.support;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Request for a HMAC Digest.
@@ -36,12 +36,13 @@ public class VaultHmacRequest {
 
 	private final @Nullable Integer keyVersion;
 
-	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {
 
+	private VaultHmacRequest(Plaintext plaintext, @Nullable String algorithm, @Nullable Integer keyVersion) {
 		this.algorithm = algorithm;
 		this.plaintext = plaintext;
 		this.keyVersion = keyVersion;
 	}
+
 
 	/**
 	 * @return a new instance of {@link VaultHmacRequestBuilder}.
@@ -51,13 +52,14 @@ public class VaultHmacRequest {
 	}
 
 	/**
-	 * Create a new {@link VaultHmacRequest} given {@link Plaintext}. Uses the default
-	 * signature algorithm.
-	 * @return a new {@link VaultHmacRequest} for the given {@link Plaintext input}.
+	 * Create a new {@code VaultHmacRequest} given {@link Plaintext}. Uses the
+	 * default signature algorithm.
+	 * @return a new {@code VaultHmacRequest} for the given {@link Plaintext input}.
 	 */
 	public static VaultHmacRequest create(Plaintext input) {
 		return builder().plaintext(input).build();
 	}
+
 
 	/**
 	 * @return plain text input used as basis to generate the digest.
@@ -75,14 +77,16 @@ public class VaultHmacRequest {
 	}
 
 	/**
-	 * @return version of the key used or {@literal null} to use the the latest version.
+	 * @return version of the key used or {@literal null} to use the the latest
+	 * version.
 	 */
 	public @Nullable Integer getKeyVersion() {
 		return this.keyVersion;
 	}
 
+
 	/**
-	 * Builder to build a {@link VaultHmacRequest}.
+	 * Builder to build a {@code VaultHmacRequest}.
 	 */
 	public static class VaultHmacRequestBuilder {
 
@@ -92,30 +96,30 @@ public class VaultHmacRequest {
 
 		private @Nullable Integer keyVersion;
 
+		VaultHmacRequestBuilder() {
+		}
+
 		/**
 		 * Configure the input to be used to create the digest.
 		 * @param input base input to create the digest, must not be {@literal null}.
-		 * @return {@code this} {@link VaultHmacRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultHmacRequestBuilder plaintext(Plaintext input) {
-
 			Assert.notNull(input, "Plaintext must not be null");
-
 			this.plaintext = input;
 			return this;
 		}
 
 		/**
 		 * Configure the algorithm to be used for the operation.
-		 * @param algorithm Specify the algorithm to be used for the operation. Supported
-		 * algorithms are: {@literal sha2-224}, {@literal sha2-256}, {@literal sha2-384},
-		 * {@literal sha2-512}. Defaults to {@literal sha2-256} if not set.
+		 * @param algorithm Specify the algorithm to be used for the operation.
+		 * Supported algorithms are: {@literal sha2-224}, {@literal sha2-256},
+		 * {@literal sha2-384}, {@literal sha2-512}. Defaults to {@literal sha2-256} if
+		 * not set.
 		 * @return {@code this} {@link VaultHmacRequestBuilder}.
 		 */
 		public VaultHmacRequestBuilder algorithm(String algorithm) {
-
 			Assert.hasText(algorithm, "Algorithm must not be null or empty");
-
 			this.algorithm = algorithm;
 			return this;
 		}
@@ -126,7 +130,6 @@ public class VaultHmacRequest {
 		 * @return {@code this} {@link VaultHmacRequestBuilder}.
 		 */
 		public VaultHmacRequestBuilder keyVersion(int version) {
-
 			this.keyVersion = version;
 			return this;
 		}
@@ -137,9 +140,7 @@ public class VaultHmacRequest {
 		 * @return a new {@link VaultHmacRequest}.
 		 */
 		public VaultHmacRequest build() {
-
 			Assert.notNull(this.plaintext, "Plaintext input must not be null");
-
 			return new VaultHmacRequest(this.plaintext, this.algorithm, this.keyVersion);
 		}
 

@@ -15,10 +15,10 @@
  */
 package org.springframework.vault.core;
 
-import java.util.Map;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
@@ -26,8 +26,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Default implementation of {@link ReactiveVaultKeyValueOperations} for the Key/Value
- * backend version 1.
+ * Default implementation of {@link ReactiveVaultKeyValueOperations} for the
+ * Key/Value backend version 1.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch
@@ -37,6 +37,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 
 	private final String path;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue1Template} given
 	 * {@link ReactiveVaultOperations} and the mount {@code path}.
@@ -44,10 +45,10 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public ReactiveVaultKeyValue1Template(ReactiveVaultTemplate vaultOperations, String path) {
-
 		super(vaultOperations, path);
 		this.path = path;
 	}
+
 
 	@Override
 	public Flux<String> list(String path) {
@@ -57,26 +58,20 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-
 		return doRead(path, Map.class, (response, map) -> {
-
 			VaultResponse vaultResponse = new VaultResponse();
 			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(map);
-
 			return vaultResponse;
 		});
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");
-
 		return doRead(path, responseType, (response, data) -> {
-
 			VaultResponseSupport result = response;
 			result.setData(data);
 			return result;
@@ -90,9 +85,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 
 	@Override
 	public Mono<Void> put(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doWrite(createDataPath(path), body).then();
 	}
 

@@ -24,15 +24,14 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.function.SingletonSupplier;
 
 /**
- * Mapper to apply property values onto a target considering conversion rules and
- * filtering.
+ * Mapper to apply property values onto a target considering conversion rules
+ * and filtering.
  *
  * @author Mark Paluch
  * @since 2.4
@@ -43,13 +42,23 @@ class PropertyMapper {
 
 	private static final PropertyMapper INSTANCE = new PropertyMapper(null, null);
 
+
 	private final @Nullable PropertyMapper parent;
 
 	private final @Nullable SourceOperator sourceOperator;
 
+
 	private PropertyMapper(@Nullable PropertyMapper parent, @Nullable SourceOperator sourceOperator) {
 		this.parent = parent;
 		this.sourceOperator = sourceOperator;
+	}
+
+	/**
+	 * Return the property mapper.
+	 * @return the property mapper
+	 */
+	public static PropertyMapper get() {
+		return INSTANCE;
 	}
 
 	/**
@@ -77,8 +86,8 @@ class PropertyMapper {
 	}
 
 	/**
-	 * Return a new {@link Source} from the specified value supplier that can be used to
-	 * perform the mapping.
+	 * Return a new {@link Source} from the specified value supplier that can be
+	 * used to perform the mapping.
 	 * @param <T> the source type
 	 * @param supplier the value supplier
 	 * @return a {@link Source} that can be used to complete the mapping
@@ -94,8 +103,8 @@ class PropertyMapper {
 	}
 
 	/**
-	 * Return a new {@link Source} from the specified value that can be used to perform
-	 * the mapping.
+	 * Return a new {@link Source} from the specified value that can be used to
+	 * perform the mapping.
 	 * @param <T> the source type
 	 * @param value the value
 	 * @return a {@link Source} that can be used to complete the mapping
@@ -112,13 +121,6 @@ class PropertyMapper {
 		return new Source<>(SingletonSupplier.of(supplier), (Predicate<T>) ALWAYS);
 	}
 
-	/**
-	 * Return the property mapper.
-	 * @return the property mapper
-	 */
-	public static PropertyMapper get() {
-		return INSTANCE;
-	}
 
 	/**
 	 * An operation that can be applied to a {@link Source}.
@@ -136,6 +138,7 @@ class PropertyMapper {
 
 	}
 
+
 	/**
 	 * A source that is in the process of being mapped.
 	 *
@@ -147,11 +150,13 @@ class PropertyMapper {
 
 		private final Predicate<T> predicate;
 
+
 		private Source(Supplier<T> supplier, Predicate<T> predicate) {
 			Assert.notNull(predicate, "Predicate must not be null");
 			this.supplier = supplier;
 			this.predicate = predicate;
 		}
+
 
 		/**
 		 * Return an adapted version of the source with {@link Integer} type.
@@ -164,7 +169,8 @@ class PropertyMapper {
 		}
 
 		/**
-		 * Return an adapted version of the source changed via the given adapter function.
+		 * Return an adapted version of the source changed via the given adapter
+		 * function.
 		 * @param <R> the resulting type
 		 * @param adapter the adapter to apply
 		 * @return a new adapted source instance
@@ -173,12 +179,7 @@ class PropertyMapper {
 			Assert.notNull(adapter, "Adapter must not be null");
 			Supplier<Boolean> test = () -> this.predicate.test(this.supplier.get());
 			Predicate<R> predicate = (t) -> test.get();
-			Supplier<R> supplier = () -> {
-				if (test.get()) {
-					return adapter.apply(this.supplier.get());
-				}
-				return null;
-			};
+			Supplier<R> supplier = () -> test.get() ? adapter.apply(this.supplier.get()) : null;
 			return new Source<>(supplier, predicate);
 		}
 
@@ -192,8 +193,8 @@ class PropertyMapper {
 		}
 
 		/**
-		 * Return a filtered version of the source that will only map values that are not
-		 * empty.
+		 * Return a filtered version of the source that will only map values that are
+		 * not empty.
 		 * @return a new filtered source instance
 		 */
 		public Source<T> whenNotEmpty() {
@@ -228,8 +229,8 @@ class PropertyMapper {
 		}
 
 		/**
-		 * Return a filtered version of the source that will only map values equal to the
-		 * specified {@code object}.
+		 * Return a filtered version of the source that will only map values equal to
+		 * the specified {@code object}.
 		 * @param object the object to match
 		 * @return a new filtered source instance
 		 */
@@ -260,14 +261,14 @@ class PropertyMapper {
 		}
 
 		/**
-		 * Return a filtered version of the source that won't map values that don't match
-		 * the given predicate.
+		 * Return a filtered version of the source that won't map values that don't
+		 * match the given predicate.
 		 * @param predicate the predicate used to filter values
 		 * @return a new filtered source instance
 		 */
 		public Source<T> when(Predicate<T> predicate) {
 			Assert.notNull(predicate, "Predicate must not be null");
-			return new Source<>(this.supplier, (this.predicate != null) ? this.predicate.and(predicate) : predicate);
+			return new Source<>(this.supplier, this.predicate.and(predicate));
 		}
 
 		/**
@@ -329,6 +330,7 @@ class PropertyMapper {
 
 	}
 
+
 	/**
 	 * Supplier that will catch and ignore any {@link NullPointerException}.
 	 */
@@ -338,8 +340,7 @@ class PropertyMapper {
 		public @Nullable T get() {
 			try {
 				return this.supplier.get();
-			}
-			catch (NullPointerException ex) {
+			} catch (NullPointerException ex) {
 				return null;
 			}
 		}

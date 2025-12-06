@@ -21,8 +21,9 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published before revoking a {@link Lease} for a {@link RequestedSecret}. The
- * secrets associated with {@link Lease} can be valid at the time this event is received.
+ * Event published before revoking a {@link Lease} for a
+ * {@link RequestedSecret}. The secrets associated with {@link Lease} can be
+ * valid at the time this event is received.
  *
  * @author Mark Paluch
  * @see AfterSecretLeaseRevocationEvent
@@ -32,9 +33,10 @@ public class BeforeSecretLeaseRevocationEvent extends SecretLeaseEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	/**
-	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret} and
-	 * {@link Lease}.
+	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret}
+	 * and {@link Lease}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */

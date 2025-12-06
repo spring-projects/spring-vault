@@ -57,7 +57,7 @@ public class VaultCustomConversions extends org.springframework.data.convert.Cus
 	}
 
 	/**
-	 * Creates an empty {@link VaultCustomConversions} object.
+	 * Create an empty {@code VaultCustomConversions} object.
 	 */
 	VaultCustomConversions() {
 		this(Collections.emptyList());

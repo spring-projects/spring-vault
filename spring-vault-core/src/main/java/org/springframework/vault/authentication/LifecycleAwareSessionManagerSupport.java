@@ -104,7 +104,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	}
 
 	/**
-	 * Returns whether token self-lookup is enabled to augment {@link VaultToken} obtained
+	 * Return whether token self-lookup is enabled to augment {@link VaultToken} obtained
 	 * from a {@link ClientAuthentication}. Self-lookup determines whether a token is
 	 * renewable and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup
 	 * requests decrement token usage count by one. Skipped for {@link LoginToken}.
@@ -214,7 +214,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		@Nullable Instant nextExecution(LoginToken loginToken);
 
 		/**
-		 * Returns the minimum TTL duration to consider a token valid after renewal.
+		 * Return the minimum TTL duration to consider a token valid after renewal.
 		 * Tokens with a shorter TTL are revoked and considered expired.
 		 * @param loginToken the login token after renewal.
 		 * @return minimum TTL {@link Duration} to consider a token valid.

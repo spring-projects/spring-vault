@@ -19,12 +19,12 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Support class to build accessor methods for the Vault key-value backend version 2.
+ * Support class to build accessor methods for the Vault key-value backend
+ * version 2.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -34,35 +34,31 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	VaultKeyValue2Accessor(VaultOperations vaultOperations, String path) {
-
 		super(vaultOperations, path);
-
 		this.path = path;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public @Nullable List<String> list(String path) {
-
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-				.path("%s?list=true".formatted(createBackendPath("metadata", path)))
-				.retrieve()
-				.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-				.toEntity(VaultListResponse.class);
+					.path("%s?list=true".formatted(createBackendPath("metadata", path)))
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity(VaultListResponse.class);
 		});
-
-		if (read == null) {
+		if (read == null || !read.hasData()) {
 			return Collections.emptyList();
 		}
-
 		return (List<String>) read.getRequiredData().get("keys");
 	}
 
@@ -82,8 +78,8 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createBackendPath(String segment, String path) {
-		return "%s/%s/%s".formatted(KeyValueUtilities.relativePath(this.path), KeyValueUtilities.relativePath(segment),
-				KeyValueUtilities.relativePath(path));
+		return "%s/%s/%s".formatted(PathUtil.stripSlashes(this.path), PathUtil.stripSlashes(segment),
+				PathUtil.stripSlashes(path));
 	}
 
 }

@@ -20,9 +20,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Value object to bind generic Vault HTTP API responses.
@@ -56,13 +57,13 @@ public class VaultResponseSupport<T> {
 
 	private List<String> warnings = Collections.emptyList();
 
+
 	/**
 	 * Apply metadata such as auth or warnings without copying data.
 	 * @param other
 	 * @since 3.1
 	 */
 	public void applyMetadata(VaultResponseSupport<?> other) {
-
 		this.auth = other.auth;
 		this.metadata = other.metadata;
 		this.wrapInfo = other.wrapInfo;
@@ -95,7 +96,8 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
-	 * @return {@literal true} if {@code data} is not null; {@literal false} otherwise.
+	 * @return {@literal true} if {@code data} is not null; {@literal false}
+	 * otherwise.
 	 * @since 4.1
 	 */
 	public boolean hasData() {
@@ -107,11 +109,9 @@ public class VaultResponseSupport<T> {
 	 * @throws IllegalStateException if {@code data} is null.
 	 */
 	public T getRequiredData() {
-
 		if (this.data != null) {
 			return this.data;
 		}
-
 		throw new IllegalStateException("Data field is empty");
 	}
 

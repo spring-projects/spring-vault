@@ -44,17 +44,19 @@ public abstract class VaultHttpHeaders {
 	public static final String VAULT_TOKEN = "X-Vault-Token";
 
 	/**
-	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a unwrapping
-	 * token instead of the actual response.
+	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a
+	 * unwrapping token instead of the actual response.
 	 */
 	public static final String VAULT_WRAP_TTL = "X-Vault-Wrap-TTL";
+
 
 	private VaultHttpHeaders() {
 	}
 
+
 	/**
-	 * Create {@link HttpHeaders} given {@link VaultToken}. The resulting object can be
-	 * used to authenticate HTTP requests.
+	 * Create {@link HttpHeaders} given {@link VaultToken}. The resulting object can
+	 * be used to authenticate HTTP requests.
 	 * @param vaultToken must not be {@literal null}.
 	 * @return {@link HttpHeaders} containing the {@link VaultToken}.
 	 */

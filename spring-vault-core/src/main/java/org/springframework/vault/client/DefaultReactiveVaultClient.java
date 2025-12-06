@@ -98,7 +98,6 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 	}
 
 
-	@SuppressWarnings("NullAway")
 	private class DefaultRequestHeadersBodyUriSpec implements RequestHeadersBodyPathSpec {
 
 		private final WebClient.RequestBodyUriSpec spec;
@@ -107,64 +106,60 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 
 		private @Nullable Supplier<Mono<WebClient.RequestHeadersSpec<?>>> responseMono;
 
-		public DefaultRequestHeadersBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
+
+		DefaultRequestHeadersBodyUriSpec(WebClient.RequestBodyUriSpec spec) {
 			this.spec = spec;
 		}
+
 
 		@Override
 		public RequestBodySpec path(String path, @Nullable Object... pathVariables) {
 			this.path = path;
-
 			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(path, pathVariables);
 			} else if (uriBuilderFactory != null) {
 				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			} else {
-				responseMono = () -> {
+				this.responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
 			}
-
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec path(String path, Map<String, ?> pathVariables) {
 			this.path = path;
-
 			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(path, pathVariables);
 			} else if (uriBuilderFactory != null) {
 				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			} else {
-				responseMono = () -> {
+				this.responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
 			}
-
 			return this;
 		}
 
 		@Override
 		public RequestBodySpec uri(URI uri) {
 			this.path = uri.toString();
-
 			if (uriBuilderFactory == null && endpointProvider == null) {
 				this.spec.uri(uri);
 			} else if (uriBuilderFactory != null) {
 				this.spec.uri(VaultClients.expandUri(uriBuilderFactory, uri));
 			} else {
-				responseMono = () -> {
+				this.responseMono = () -> {
 					return endpointProvider.getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.expandUri(it, uri));
 					});
 				};
 			}
-
 			return this;
 		}
 
@@ -250,7 +245,6 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 			if (this.responseMono == null) {
 				return this.spec.exchangeToFlux(responseHandler);
 			}
-
 			return this.responseMono.get().flatMapMany(it -> it.exchangeToFlux(responseHandler));
 		}
 

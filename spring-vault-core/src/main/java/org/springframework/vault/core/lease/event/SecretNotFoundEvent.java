@@ -21,7 +21,8 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published after secrets could not be found for a {@link RequestedSecret}.
+ * Event published after secrets could not be found for a
+ * {@link RequestedSecret}.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -30,6 +31,7 @@ public class SecretNotFoundEvent extends SecretLeaseEvent {
 
 	@Serial
 	private static final long serialVersionUID = 1L;
+
 
 	/**
 	 * Create a new {@link SecretNotFoundEvent} given {@link RequestedSecret}

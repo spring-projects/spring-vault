@@ -95,7 +95,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for username/password authentication given
+	 * Create a {@link AuthenticationSteps} for username/password authentication given
 	 * {@link UsernamePasswordAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for username/password authentication.

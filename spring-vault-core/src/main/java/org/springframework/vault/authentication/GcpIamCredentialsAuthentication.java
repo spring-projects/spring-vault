@@ -42,12 +42,12 @@ import org.springframework.web.client.RestOperations;
  * Google Cloud IAM credentials login implementation using GCP IAM service accounts to
  * legitimate its authenticity via JSON Web Token using the IAM Credentials
  * {@code projects.serviceAccounts.signJwt} method.
- * <p/>
+ * <p>
  * This authentication method uses Googles IAM Credentials API to obtain a signed token
  * for a specific {@link com.google.api.client.auth.oauth2.Credential}. Service account
  * details are obtained from a {@link GoogleCredentials} that can be retrieved either from
  * a JSON file or the runtime environment (GAE, GCE).
- * <p/>
+ * <p>
  * {@link GcpIamCredentialsAuthentication} uses Google Java API that uses synchronous API.
  *
  * @author Andreas Gebauer

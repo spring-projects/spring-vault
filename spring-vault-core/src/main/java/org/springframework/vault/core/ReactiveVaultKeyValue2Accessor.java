@@ -15,16 +15,17 @@
  */
 package org.springframework.vault.core;
 
-import java.util.List;
-
 import reactor.core.publisher.Flux;
+
+import java.util.List;
 
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Support class to build accessor methods for the Vault key-value backend version 2.
+ * Support class to build accessor methods for the Vault key-value backend
+ * version 2.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch
@@ -42,24 +43,20 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	 * @param path must not be empty or {@literal null}.
 	 */
 	ReactiveVaultKeyValue2Accessor(ReactiveVaultTemplate reactiveVaultOperations, String path) {
-
 		super(reactiveVaultOperations, path);
-
 		this.path = path;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
-
 		return doRead(
 				"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
 				VaultListResponse.class)
-			.flatMapMany(response -> {
-
-				List<String> list = (List<String>) response.getRequiredData().get("keys");
-				return null == list ? Flux.empty() : Flux.fromIterable(list);
-			});
+						.flatMapMany(response -> {
+							List<String> list = (List<String>) response.getRequiredData().get("keys");
+							return null == list ? Flux.empty() : Flux.fromIterable(list);
+						});
 	}
 
 	@Override

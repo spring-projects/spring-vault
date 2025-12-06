@@ -15,14 +15,14 @@
  */
 package org.springframework.vault.core;
 
+import reactor.core.publisher.Mono;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
@@ -42,6 +42,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 
 	private final String path;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultVersionedKeyValueTemplate} given
 	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
@@ -53,121 +54,94 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		this.path = path;
 	}
 
+
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
 		return Arrays.stream(versionsToDelete)
-			.filter(Version::isVersioned)
-			.map(Version::getVersion)
-			.collect(Collectors.toList());
+				.filter(Version::isVersioned)
+				.map(Version::getVersion)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<Versioned<Map<String, Object>>> get(String path, Version version) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
-
 		return doRead(path, version, Map.class)
-			.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getRequiredMetadata()));
+				.map(m -> Versioned.create((Map<String, Object>) m.getData(), m.getRequiredMetadata()));
 	}
 
 	@Override
 	public <T> Mono<Versioned<T>> get(String path, Version version, Class<T> responseType) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(version, "Version must not be null");
 		Assert.notNull(responseType, "Response type must not be null");
-
 		return doRead(path, version, responseType);
 	}
 
 	@SuppressWarnings("removal")
 	private <T> Mono<Versioned<T>> doRead(String path, Version version, Class<T> responseType) {
-
 		String secretPath = version.isVersioned()
-				? "%s?version=%d".formatted(createDataPath(path), version.getVersion()) : createDataPath(path);
-
+				? "%s?version=%d".formatted(createDataPath(path), version.getVersion())
+				: createDataPath(path);
 		Class<? extends VaultResponseSupport> responseTypeToUse;
 		if (JacksonCompat.instance().isJackson3()) {
 			responseTypeToUse = VersionedResponse.class;
-		}
-		else {
+		} else {
 			responseTypeToUse = VersionedJackson2Response.class;
 		}
-
 		Mono<VaultResponseSupport<VaultResponseSupport<Object>>> versionedResponseMono = (Mono) doReadVersioned(
 				secretPath, responseTypeToUse);
-
 		return versionedResponseMono.map(response -> {
-
 			VaultResponseSupport<Object> data = response.getRequiredData();
 			Metadata metadata = KeyValueUtilities.getMetadata(data.getMetadata());
-
 			T body = deserialize(data.getRequiredData(), responseType);
-
 			return Versioned.create(body, metadata);
 		});
 	}
 
 	@Override
 	public Mono<Metadata> put(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
-		LinkedHashMap<Object, Object> data = new LinkedHashMap<>();
-		LinkedHashMap<Object, Object> requestOptions = new LinkedHashMap<>();
-
+		Map<Object, Object> data = new LinkedHashMap<>();
+		Map<Object, Object> requestOptions = new LinkedHashMap<>();
 		if (body instanceof Versioned<?> versioned) {
-
 			data.put("data", versioned.getData());
 			data.put("options", requestOptions);
-
 			requestOptions.put("cas", versioned.getVersion().getVersion());
-		}
-		else {
+		} else {
 			data.put("data", body);
 		}
-
 		return doWrite(createDataPath(path), data).map(VaultResponseSupport::getRequiredData)
-			.map(KeyValueUtilities::getMetadata)
-			.switchIfEmpty(Mono.error(new IllegalStateException(
-					"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
+				.map(KeyValueUtilities::getMetadata)
+				.switchIfEmpty(Mono.error(new IllegalStateException(
+						"VaultVersionedKeyValueOperations cannot be used with a Key-Value version 1 mount")));
 	}
 
 	@Override
 	public Mono<Void> delete(String path, Version... versionsToDelete) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
-
 		if (versionsToDelete.length == 0) {
 			return delete(path);
 		}
-
 		List<Integer> versions = toVersionList(versionsToDelete);
-
 		return doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions)).then().log();
 	}
 
 	@Override
 	public Mono<Void> undelete(String path, Version... versionsToDelete) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
-
 		List<Integer> versions = toVersionList(versionsToDelete);
-
 		return doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions)).then();
 	}
 
 	@Override
 	public Mono<Void> destroy(String path, Version... versionsToDelete) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
-
 		List<Integer> versions = toVersionList(versionsToDelete);
-
 		return doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions)).then();
 	}
 
@@ -182,12 +156,10 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 	 * @return mapped value.
 	 */
 	<T> Mono<T> doReadVersioned(String path, Class<T> responseType) {
-
 		return reactiveVaultOperations.doWithSessionClient((client) -> client.get().path(path).exchangeToMono(it -> {
-			if (HttpStatusUtil.isNotFound(it.statusCode()) || it.statusCode().is2xxSuccessful()) {
+			if (it.statusCode().is2xxSuccessful() || HttpStatusUtil.isNotFound(it.statusCode())) {
 				return it.bodyToMono(responseType);
 			}
-
 			return it.createError();
 		}));
 	}

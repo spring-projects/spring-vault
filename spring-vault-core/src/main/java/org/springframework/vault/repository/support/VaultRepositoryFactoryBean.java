@@ -37,7 +37,7 @@ public class VaultRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exten
 		extends KeyValueRepositoryFactoryBean<T, S, ID> {
 
 	/**
-	 * Creates a new {@link VaultRepositoryFactoryBean} for the given repository
+	 * Create a new {@code VaultRepositoryFactoryBean} for the given repository
 	 * interface.
 	 * @param repositoryInterface must not be {@literal null}.
 	 */

@@ -44,8 +44,9 @@ import org.springframework.vault.support.SslConfiguration;
 
 /**
  * Factory for {@link ClientHttpConnector} that supports
- * {@link ReactorClientHttpConnector} and {@link JettyClientHttpConnector}. This factory
- * configures a {@link ClientHttpConnector} depending on the available dependencies.
+ * {@link ReactorClientHttpConnector} and {@link JettyClientHttpConnector}. This
+ * factory configures a {@link ClientHttpConnector} depending on the available
+ * dependencies.
  *
  * @author Mark Paluch
  * @author Ryan Gow
@@ -62,11 +63,12 @@ public class ClientHttpConnectorFactory {
 	private static final boolean jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient",
 			ClientHttpConnectorFactory.class.getClassLoader());
 
+
 	/**
 	 * Create a {@link ClientHttpConnector} for the given {@link ClientOptions} and
 	 * {@link SslConfiguration}.
-	 * @param options must not be {@literal null}
-	 * @param sslConfiguration must not be {@literal null}
+	 * @param options must not be {@literal null}.
+	 * @param sslConfiguration must not be {@literal null}.
 	 * @return a new {@link ClientHttpConnector}.
 	 */
 	public static ClientHttpConnector create(ClientOptions options, SslConfiguration sslConfiguration) {
@@ -89,11 +91,11 @@ public class ClientHttpConnectorFactory {
 			}
 
 			return JdkHttpClient.usingJdkHttpClient(options, sslConfiguration);
-		}
-		catch (GeneralSecurityException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 
 	/**
 	 * {@link ClientHttpConnector} for Reactor Netty.
@@ -119,6 +121,7 @@ public class ClientHttpConnectorFactory {
 
 	}
 
+
 	/**
 	 * Utility methods to create {@link ClientHttpRequestFactory} using Apache Http
 	 * Components.
@@ -129,12 +132,12 @@ public class ClientHttpConnectorFactory {
 
 		/**
 		 * Create a {@link ClientHttpConnector} using Apache Http Components.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link HttpComponentsClientHttpConnector}
 		 * instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static HttpComponentsClientHttpConnector usingHttpComponents(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
@@ -156,29 +159,31 @@ public class ClientHttpConnectorFactory {
 			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
 
 			ConnectionConfig connectionConfig = ConnectionConfig.custom()
-				.setConnectTimeout(connectTimeout) //
-				.setSocketTimeout(readTimeout) //
-				.build();
+					.setConnectTimeout(connectTimeout) //
+					.setSocketTimeout(readTimeout) //
+					.build();
 
 			RequestConfig requestConfig = RequestConfig.custom()
-				.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
-				.setAuthenticationEnabled(true) //
-				.setRedirectsEnabled(true)
-				.build();
+					.setResponseTimeout(Timeout.ofMilliseconds(options.getReadTimeout().toMillis()))
+					.setAuthenticationEnabled(true) //
+					.setRedirectsEnabled(true)
+					.build();
 
 			PoolingAsyncClientConnectionManagerBuilder connectionManagerBuilder = PoolingAsyncClientConnectionManagerBuilder //
-				.create()
-				.setDefaultConnectionConfig(connectionConfig);
+					.create()
+					.setDefaultConnectionConfig(connectionConfig);
 
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
 
 				SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
 
 				String[] enabledProtocols = !sslConfiguration.getEnabledProtocols().isEmpty()
-						? sslConfiguration.getEnabledProtocols().toArray(new String[0]) : null;
+						? sslConfiguration.getEnabledProtocols().toArray(new String[0])
+						: null;
 
 				String[] enabledCipherSuites = !sslConfiguration.getEnabledCipherSuites().isEmpty()
-						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0]) : null;
+						? sslConfiguration.getEnabledCipherSuites().toArray(new String[0])
+						: null;
 
 				BasicClientTlsStrategy tlsStrategy = new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
 
@@ -202,8 +207,10 @@ public class ClientHttpConnectorFactory {
 
 	}
 
+
 	/**
-	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty Client.
+	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty
+	 * Client.
 	 *
 	 * @author Mark Paluch
 	 */
@@ -211,11 +218,11 @@ public class ClientHttpConnectorFactory {
 
 		/**
 		 * Create a {@link ClientHttpConnector} using Jetty.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link JettyClientHttpConnector} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static JettyClientHttpConnector usingJetty(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
@@ -234,6 +241,7 @@ public class ClientHttpConnectorFactory {
 
 	}
 
+
 	/**
 	 * {@link ClientHttpRequestFactory} using the JDK's HttpClient.
 	 *
@@ -243,17 +251,15 @@ public class ClientHttpConnectorFactory {
 
 		/**
 		 * Create a {@link JdkClientHttpConnector} using the JDK's HttpClient.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link JdkClientHttpConnector} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static JdkClientHttpConnector usingJdkHttpClient(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
 			java.net.http.HttpClient.Builder builder = getBuilder(options, sslConfiguration);
-
 			return new JdkClientHttpConnector(builder.build());
 		}
 

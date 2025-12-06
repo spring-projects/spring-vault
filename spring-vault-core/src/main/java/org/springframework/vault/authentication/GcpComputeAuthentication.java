@@ -36,7 +36,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 /**
  * GCP GCE (Google Compute Engine)-based login implementation using GCE's metadata service
  * to create signed JSON Web Token.
- * <p/>
+ * <p>
  * This authentication method uses Googles GCE's metadata service in combination with the
  * default/specified service account to obtain an identity document as JWT using a HTTP
  * client. Credentials and authenticity are implied from the runtime itself and are not
@@ -168,7 +168,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for GCE authentication given
+	 * Create a {@link AuthenticationSteps} for GCE authentication given
 	 * {@link GcpComputeAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for cubbyhole authentication.

@@ -128,7 +128,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for AWS-IAM authentication given
+	 * Create a {@link AuthenticationSteps} for AWS-IAM authentication given
 	 * {@link AwsIamAuthenticationOptions}. The resulting {@link AuthenticationSteps}
 	 * reuse eagerly-fetched {@link AwsCredentials} to prevent blocking I/O during
 	 * authentication.

@@ -16,8 +16,9 @@
 package org.springframework.vault.client;
 
 /**
- * Callback interface that can be used to customize a {@link VaultClient.Builder}. Beans
- * implementing this interface are applied to the {@link VaultClient} builder.
+ * Callback interface that can be used to customize a
+ * {@link VaultClient.Builder}. Beans implementing this interface are applied to
+ * the {@link VaultClient} builder.
  *
  * @author Mark Paluch
  * @since 4.1

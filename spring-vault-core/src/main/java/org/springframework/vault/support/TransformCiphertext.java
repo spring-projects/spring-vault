@@ -20,7 +20,8 @@ import java.util.Objects;
 import org.springframework.util.Assert;
 
 /**
- * Value object representing cipher text with an optional {@link VaultTransformContext}.
+ * Value object representing cipher text with an optional
+ * {@link VaultTransformContext}.
  *
  * @author Lauren Voswinkel
  * @since 2.3
@@ -31,24 +32,25 @@ public class TransformCiphertext {
 
 	private final VaultTransformContext context;
 
-	private TransformCiphertext(String ciphertext, VaultTransformContext context) {
 
+	private TransformCiphertext(String ciphertext, VaultTransformContext context) {
 		this.ciphertext = ciphertext;
 		this.context = context;
 	}
 
+
 	/**
 	 * Factory method to create {@link TransformCiphertext} from the given
 	 * {@code ciphertext}.
-	 * @param ciphertext the cipher text to decrypt, must not be {@literal null} or empty.
+	 * @param ciphertext the cipher text to decrypt, must not be {@literal null} or
+	 * empty.
 	 * @return the {@link TransformCiphertext} for {@code ciphertext}.
 	 */
 	public static TransformCiphertext of(String ciphertext) {
-
 		Assert.hasText(ciphertext, "Ciphertext must not be null or empty");
-
 		return new TransformCiphertext(ciphertext, VaultTransformContext.empty());
 	}
+
 
 	public String getCiphertext() {
 		return this.ciphertext;
@@ -59,15 +61,13 @@ public class TransformCiphertext {
 	}
 
 	/**
-	 * Create a new {@link TransformCiphertext} object from this ciphertext associated
-	 * with the given {@link VaultTransformContext}.
+	 * Create a new {@link TransformCiphertext} object from this ciphertext
+	 * associated with the given {@link VaultTransformContext}.
 	 * @param context transit context, must not be {@literal null}.
 	 * @return the new {@link TransformCiphertext} object.
 	 */
 	public TransformCiphertext with(VaultTransformContext context) {
-
 		Assert.notNull(context, "VaultTransitContext must not be null");
-
 		return new TransformCiphertext(getCiphertext(), context);
 	}
 

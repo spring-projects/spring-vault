@@ -189,6 +189,7 @@ class ClientConfiguration {
 				|| sslConfiguration.getKeyStoreConfiguration().isPresent();
 	}
 
+
 	/**
 	 * {@link ClientHttpConnector} for Reactor Netty.
 	 *
@@ -252,6 +253,7 @@ class ClientConfiguration {
 		}
 
 	}
+
 
 	/**
 	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty Client.
@@ -317,6 +319,7 @@ class ClientConfiguration {
 
 	}
 
+
 	/**
 	 * {@link ClientHttpRequestFactory} using the JDK's HttpClient.
 	 *
@@ -354,6 +357,7 @@ class ClientConfiguration {
 
 	}
 
+
 	static class KeySelectingKeyManagerFactory extends KeyManagerFactory {
 
 		KeySelectingKeyManagerFactory(KeyManagerFactory factory, SslConfiguration.KeyConfiguration keyConfiguration) {
@@ -387,6 +391,7 @@ class ClientConfiguration {
 		}
 
 	}
+
 
 	private static class KeySelectingX509KeyManager extends X509ExtendedKeyManager {
 

@@ -211,7 +211,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	}
 
 	/**
-	 * Performs a token refresh. Creates a new token if no token was obtained before. If a
+	 * Performs a token refresh. Create a new token if no token was obtained before. If a
 	 * token was obtained before, it uses self-renewal to renew the current token.
 	 * Client-side errors (like permission denied) indicate the token cannot be renewed
 	 * because it's expired or simply not found.

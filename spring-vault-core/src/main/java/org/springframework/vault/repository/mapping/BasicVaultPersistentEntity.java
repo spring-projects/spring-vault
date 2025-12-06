@@ -44,7 +44,7 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 	private final @Nullable ValueExpression backendExpression;
 
 	/**
-	 * Creates new {@link BasicVaultPersistentEntity}.
+	 * Create new {@code BasicVaultPersistentEntity}.
 	 * @param information must not be {@literal null}.
 	 * @param keySpaceResolver can be {@literal null}.
 	 */
@@ -81,7 +81,7 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 	}
 
 	/**
-	 * Returns a SpEL {@link Expression} if the given {@link String} is actually an
+	 * Return a SpEL {@link Expression} if the given {@link String} is actually an
 	 * expression that does not evaluate to a {@link LiteralExpression} (indicating that
 	 * no subsequent evaluation is necessary).
 	 * @param potentialExpression can be {@literal null}

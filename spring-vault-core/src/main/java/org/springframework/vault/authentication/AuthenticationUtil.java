@@ -16,7 +16,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 abstract class AuthenticationUtil {
 
 	/**
-	 * Returns the login path for a {@code authMount}.
+	 * Return the login path for a {@code authMount}.
 	 * @param authMount
 	 * @return
 	 */

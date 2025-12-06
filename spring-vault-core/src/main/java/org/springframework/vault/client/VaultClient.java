@@ -30,6 +30,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverters.ClientBuilder;
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -164,8 +165,12 @@ public interface VaultClient {
 	/**
 	 * Obtain a {@code VaultClient} builder based on the configuration of the given
 	 * {@code RestTemplate}.
-	 * <p>
-	 * The returned builder is configured with the following attributes of the template.
+	 * <p>The {@link RestTemplate} must be configured with appropriate
+	 * {@link VaultClients#configureConverters(ClientBuilder) HttpMessageConverters}
+	 * to support String, byte[], and JSON conversion. Additionally, if the template is
+	 * configured to use a base URL, the built {@code VaultClient} can be used with
+	 * relative paths.
+	 * The returned builder is configured with the following attributes of the template:
 	 * <ul>
 	 * <li>{@link RestTemplate#getRequestFactory() ClientHttpRequestFactory}</li>
 	 * <li>{@link RestTemplate#getMessageConverters() HttpMessageConverters}</li>
@@ -188,8 +193,13 @@ public interface VaultClient {
 	/**
 	 * Obtain a {@code VaultClient} builder based on the configuration of the given
 	 * {@link RestClient}.
+	 * <p>The {@link RestClient} must be configured with appropriate
+	 * {@link VaultClients#configureConverters(ClientBuilder) HttpMessageConverters}
+	 * to support String, byte[], and JSON conversion. Additionally, if the client is
+	 * configured to use a base URL, the built {@code VaultClient} can be used with
+	 * relative paths.
 	 * @param restClient the {@link RestClient} to base the returned builder's
-	 * configuration on
+	 * configuration on.
 	 * @return a {@code VaultClient} builder initialized with {@code restClient}'s
 	 * configuration.
 	 */

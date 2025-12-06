@@ -168,7 +168,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for Azure authentication given
+	 * Create a {@link AuthenticationSteps} for Azure authentication given
 	 * {@link AzureMsiAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for Azure authentication.

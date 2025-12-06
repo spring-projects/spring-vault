@@ -35,7 +35,7 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 
-	private final WebClient.Builder webClientBuilder;
+	private final WebClient.Builder builder;
 
 	private @Nullable ReactiveVaultEndpointProvider endpointProvider;
 
@@ -43,7 +43,7 @@ class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 
 
 	DefaultReactiveVaultClientBuilder(WebClient webClient) {
-		this.webClientBuilder = webClient.mutate();
+		this.builder = webClient.mutate();
 	}
 
 	DefaultReactiveVaultClientBuilder() {
@@ -51,15 +51,12 @@ class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 	}
 
 	DefaultReactiveVaultClientBuilder(ClientOptions options, SslConfiguration sslConfiguration) {
-		this(WebClient.builder().clientConnector(ClientHttpConnectorFactory.create(options, sslConfiguration)));
-	}
-
-	DefaultReactiveVaultClientBuilder(WebClient.Builder builder) {
-		this.webClientBuilder = builder.codecs(ReactiveVaultClients::configureCodecs);
+		this.builder = WebClient.builder().clientConnector(ClientHttpConnectorFactory.create(options, sslConfiguration));
+		this.builder.codecs(ReactiveVaultClients::configureCodecs);
 	}
 
 	private DefaultReactiveVaultClientBuilder(DefaultReactiveVaultClientBuilder other) {
-		this.webClientBuilder = other.webClientBuilder.clone();
+		this.builder = other.builder.clone();
 		this.endpointProvider = other.endpointProvider;
 		this.uriBuilderFactory = other.uriBuilderFactory;
 	}
@@ -73,7 +70,7 @@ class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 
 	@Override
 	public ReactiveVaultClient.Builder defaultHeader(String header, String... values) {
-		webClientBuilder.defaultHeader(header, values);
+		builder.defaultHeader(header, values);
 		return this;
 	}
 
@@ -112,13 +109,13 @@ class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 
 	@Override
 	public ReactiveVaultClient.Builder clientConnector(ClientHttpConnector connector) {
-		this.webClientBuilder.clientConnector(connector);
+		this.builder.clientConnector(connector);
 		return this;
 	}
 
 	@Override
 	public ReactiveVaultClient.Builder configureWebClient(Consumer<WebClient.Builder> restClientBuilderConsumer) {
-		restClientBuilderConsumer.accept(webClientBuilder);
+		restClientBuilderConsumer.accept(builder);
 		return this;
 	}
 
@@ -135,7 +132,7 @@ class DefaultReactiveVaultClientBuilder implements ReactiveVaultClient.Builder {
 
 	@Override
 	public ReactiveVaultClient build() {
-		return new DefaultReactiveVaultClient(this.webClientBuilder.build(), this.endpointProvider,
+		return new DefaultReactiveVaultClient(this.builder.build(), this.endpointProvider,
 				this.uriBuilderFactory, this);
 	}
 

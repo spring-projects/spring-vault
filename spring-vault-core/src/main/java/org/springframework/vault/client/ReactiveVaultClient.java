@@ -36,6 +36,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.converter.HttpMessageConverters.ClientBuilder;
 import org.springframework.lang.CheckReturnValue;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.support.VaultResponse;
@@ -173,8 +174,13 @@ public interface ReactiveVaultClient {
 	/**
 	 * Obtain a {@code ReactiveVaultClient} builder based on the configuration of
 	 * the given {@link WebClient}.
+	 * <p>The {@link WebClient} must be configured with appropriate
+	 * {@link VaultClients#configureConverters(ClientBuilder) HttpMessageConverters}
+	 * to support String, byte[], and JSON conversion. Additionally, if the client is
+	 * configured to use a base URL, the built {@code ReactiveVaultClient} can be used
+	 * with relative paths.
 	 * @param webClient the {@link WebClient} to base the returned builder's
-	 * configuration on
+	 * configuration on.
 	 * @return a {@code ReactiveVaultClient} builder initialized with
 	 * {@code webClient}'s configuration
 	 */

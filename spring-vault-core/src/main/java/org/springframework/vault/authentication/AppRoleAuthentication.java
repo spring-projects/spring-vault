@@ -105,10 +105,10 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for AppRole authentication given
+	 * Create a {@link AuthenticationSteps} for AppRole authentication given
 	 * {@link AppRoleAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
-	 * @return {@link AuthenticationSteps} for AppRole authentication.
+	 * @return {@code AuthenticationSteps} for AppRole authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(AppRoleAuthenticationOptions options) {

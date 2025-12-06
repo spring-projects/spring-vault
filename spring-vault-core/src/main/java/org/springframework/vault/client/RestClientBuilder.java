@@ -37,13 +37,14 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClient;
 
 /**
- * Builder that can be used to configure and create a {@link RestClient}. Provides
- * convenience methods to configure {@link #requestFactory(ClientHttpRequestFactory)
- * ClientHttpRequestFactory}, {@link #errorHandler(ResponseErrorHandler) error handlers}
- * and {@link #defaultHeader(String, String) default headers}.
- * <p>
- * By default, the built {@link RestClient} will attempt to use the most suitable
- * {@link ClientHttpRequestFactory} using {@link ClientHttpRequestFactoryFactory#create}.
+ * Builder that can be used to configure and create a {@link RestClient}.
+ * Provides convenience methods to configure
+ * {@link #requestFactory(ClientHttpRequestFactory) ClientHttpRequestFactory},
+ * {@link #errorHandler(ResponseErrorHandler) error handlers} and
+ * {@link #defaultHeader(String, String) default headers}.
+ * <p>By default, the built {@link RestClient} will attempt to use the most
+ * suitable {@link ClientHttpRequestFactory} using
+ * {@link ClientHttpRequestFactoryFactory#create}.
  *
  * @author Mark Paluch
  * @see ClientHttpRequestFactoryFactory
@@ -52,18 +53,21 @@ import org.springframework.web.client.RestClient;
  */
 public class RestClientBuilder {
 
-	@Nullable VaultEndpointProvider endpointProvider;
+	@Nullable
+	VaultEndpointProvider endpointProvider;
 
 	Supplier<ClientHttpRequestFactory> requestFactory = () -> ClientHttpRequestFactoryFactory
-		.create(new ClientOptions(), SslConfiguration.unconfigured());
+			.create(new ClientOptions(), SslConfiguration.unconfigured());
 
-	@Nullable ResponseErrorHandler errorHandler;
+	@Nullable
+	ResponseErrorHandler errorHandler;
 
 	final Map<String, String> defaultHeaders = new LinkedHashMap<>();
 
 	final List<RestClientCustomizer> customizers = new ArrayList<>();
 
 	final Set<ClientHttpRequestInitializer> requestInitializers = new LinkedHashSet<>();
+
 
 	private RestClientBuilder() {
 	}
@@ -74,6 +78,7 @@ public class RestClientBuilder {
 		this.requestFactory = requestFactory;
 		this.errorHandler = errorHandler;
 	}
+
 
 	/**
 	 * Create a new {@code RestClientBuilder}.
@@ -99,8 +104,10 @@ public class RestClientBuilder {
 		return builder;
 	}
 
+
 	/**
-	 * Set the {@link VaultEndpoint} that should be used with the {@link RestClient}.
+	 * Set the {@link VaultEndpoint} that should be used with the
+	 * {@link RestClient}.
 	 * @param endpoint the {@link VaultEndpoint} provider.
 	 * @return {@code this} {@code RestClientBuilder}.
 	 */
@@ -137,8 +144,8 @@ public class RestClientBuilder {
 	}
 
 	/**
-	 * Set the {@link Supplier} of {@link ClientHttpRequestFactory} that should be called
-	 * each time we {@link #build()} a new {@link RestClient} instance.
+	 * Set the {@link Supplier} of {@link ClientHttpRequestFactory} that should be
+	 * called each time we {@link #build()} a new {@link RestClient} instance.
 	 * @param requestFactory the supplier for the request factory.
 	 * @return {@code this} {@code RestClientBuilder}.
 	 */
@@ -181,9 +188,9 @@ public class RestClientBuilder {
 	}
 
 	/**
-	 * Add the {@link RestClientCustomizer RestClientCustomizers} that should be applied
-	 * to the {@link RestClient}. Customizers are applied in the order that they were
-	 * added.
+	 * Add the {@link RestClientCustomizer RestClientCustomizers} that should be
+	 * applied to the {@link RestClient}. Customizers are applied in the order that
+	 * they were added.
 	 * @param customizer the template customizers to add.
 	 * @return {@code this} {@code RestClientBuilder}.
 	 */
@@ -195,9 +202,9 @@ public class RestClientBuilder {
 	}
 
 	/**
-	 * Add the {@link ClientHttpRequestInitializer ClientHttpRequestInitializers} that
-	 * should be applied to {@link ClientHttpRequest} initialization. Customizers are
-	 * applied in the order that they were added.
+	 * Add the {@link ClientHttpRequestInitializer ClientHttpRequestInitializers}
+	 * that should be applied to {@link ClientHttpRequest} initialization.
+	 * Customizers are applied in the order that they were added.
 	 * @param requestInitializer the request initializers to add.
 	 * @return {@code this} {@code RestClientBuilder}.
 	 */
@@ -211,9 +218,8 @@ public class RestClientBuilder {
 
 	/**
 	 * Build a new {@link RestClient}. {@link VaultEndpoint} must be set.
-	 * <p>
-	 * Applies also {@link ResponseErrorHandler} and {@link RestTemplateCustomizer} if
-	 * configured.
+	 * <p>Applies also {@link ResponseErrorHandler} and
+	 * {@link RestTemplateCustomizer} if configured.
 	 * @return a new {@link RestClient}.
 	 */
 	public RestClient build() {

@@ -65,9 +65,7 @@ public class VaultClients {
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
-	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
-	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpoint endpoint, ClientHttpRequestFactory requestFactory) {
 		return createRestTemplate(SimpleVaultEndpointProvider.of(endpoint), requestFactory);
 	}
@@ -87,9 +85,7 @@ public class VaultClients {
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
 	 * @since 1.1
-	 * @deprecated since 4.1 in favor of {@link VaultClient}.
 	 */
-	@Deprecated(since = "4.1")
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 
@@ -131,41 +127,23 @@ public class VaultClients {
 	}
 
 	/**
-	 * Create a {@link org.springframework.web.client.RestClient} configured with
-	 * {@link ClientHttpRequestFactory}. In contrast to
-	 * {@link #createRestClient(VaultEndpointProvider, ClientHttpRequestFactory, Consumer)},
-	 * the client does <b>not</b> accept relative URIs for Vault access.
-	 * {@link RestClient} is configured to enforce serialization to a byte array prior
-	 * continuing the request. Eager serialization leads to a known request body size that
-	 * is required to send a {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH}
-	 * request header.
-	 * <p>
-	 * Requires Jackson for Object-to-JSON mapping.
-	 * @param requestFactory must not be {@literal null}.
-	 * @return the {@link RestClient}.
+	 * Configure {@link HttpMessageConverter}s for Vault interaction.
+	 The used converters are:
+	 * <ul>
+	 * <li>{@link ByteArrayHttpMessageConverter}</li>
+	 * <li>{@link StringHttpMessageConverter}</li>
+	 * <li>If Jackson 3 is on the class path: {@link org.springframework.http.converter.json.JacksonJsonHttpMessageConverter}</li>
+	 * <li>Alternatively, if Jackson 2 is on the class path: {@link org.springframework.http.converter.json.MappingJackson2HttpMessageConverter}</li>
+	 * </ul>
 	 * @since 4.1
 	 */
-	public static RestClient createRestClient(ClientHttpRequestFactory requestFactory,
-			Consumer<RestClient.Builder> builderCustomizer) {
-
-		RestClient.Builder builder = RestClient.builder()
-				.requestFactory(requestFactory)
-				.bufferContent((uri, httpMethod) -> true)
-				.configureMessageConverters(VaultClients::configureConverters);
-
-		builderCustomizer.accept(builder);
-
-		return builder.build();
-	}
-
-	static void configureConverters(HttpMessageConverters.ClientBuilder clientBuilder) {
+	public static void configureConverters(HttpMessageConverters.ClientBuilder clientBuilder) {
 
 		AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance().createHttpMessageConverter();
 
 		clientBuilder.addCustomConverter(new ByteArrayHttpMessageConverter());
 		clientBuilder.addCustomConverter(new StringHttpMessageConverter());
 		clientBuilder.addCustomConverter(converter);
-		clientBuilder.withJsonConverter(converter);
 	}
 
 	/**
@@ -232,10 +210,14 @@ public class VaultClients {
 			boolean allowAbsolutePath) {
 
 		if (!allowAbsolutePath && endpointProvider instanceof SimpleVaultEndpointProvider) {
-			return new VaultEndpointUriBuilderFactorySupport(endpointProvider.getVaultEndpoint());
+			return createUriBuilderFactory(endpointProvider.getVaultEndpoint());
 		}
 
 		return new PrefixAwareUriBuilderFactory(endpointProvider, allowAbsolutePath);
+	}
+
+	static UriBuilderFactory createUriBuilderFactory(VaultEndpoint endpoint) {
+		return new VaultEndpointUriBuilderFactorySupport(endpoint);
 	}
 
 	static URI expandUri(UriBuilderFactory factory, URI uri) {

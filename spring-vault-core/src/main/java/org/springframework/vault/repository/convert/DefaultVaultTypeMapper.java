@@ -49,7 +49,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	private final @Nullable String typeKey;
 
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the type key
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the type key
 	 * {@literal _class}.
 	 */
 	public DefaultVaultTypeMapper() {
@@ -57,7 +57,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	}
 
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey}.
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 */
@@ -66,7 +66,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	}
 
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey} and {@link MappingContext}.
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 * @param mappingContext must not be {@literal null} or empty.

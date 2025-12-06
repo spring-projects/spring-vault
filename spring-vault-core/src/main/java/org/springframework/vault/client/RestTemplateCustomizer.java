@@ -18,8 +18,8 @@ package org.springframework.vault.client;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Callback interface that can be used to customize a {@link RestTemplate}. Beans
- * implementing this interface are applied to
+ * Callback interface that can be used to customize a {@link RestTemplate}.
+ * Beans implementing this interface are applied to
  * {@link org.springframework.vault.client.RestTemplateBuilder}.
  *
  * @author Mark Paluch

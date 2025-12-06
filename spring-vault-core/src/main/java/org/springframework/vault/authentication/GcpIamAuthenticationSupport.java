@@ -20,7 +20,7 @@ import java.time.Duration;
 
 /**
  * Support class for Google Cloud IAM-based Authentication options.
- * <p/>
+ * <p>
  * Mainly to support implementations within the framework.
  *
  * @author Mark Paluch

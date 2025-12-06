@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -40,6 +39,7 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	RestClientOperationsWrapper {
 		Assert.notNull(vaultClient, "RestClient must not be null");
 	}
+
 
 	@Override
 	public <T> @Nullable T getForObject(String url, Class<T> responseType, @Nullable Object... uriVariables)
@@ -111,18 +111,18 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	public @Nullable URI postForLocation(String url, @Nullable Object request, @Nullable Object... uriVariables)
 			throws RestClientException {
 		return withBody(vaultClient.post().path(url, uriVariables), request).retrieve()
-			.toBodilessEntity()
-			.getHeaders()
-			.getLocation();
+				.toBodilessEntity()
+				.getHeaders()
+				.getLocation();
 	}
 
 	@Override
 	public @Nullable URI postForLocation(String url, @Nullable Object request, Map<String, ?> uriVariables)
 			throws RestClientException {
 		return withBody(vaultClient.post().path(url, uriVariables), request).retrieve()
-			.toBodilessEntity()
-			.getHeaders()
-			.getLocation();
+				.toBodilessEntity()
+				.getHeaders()
+				.getLocation();
 	}
 
 	@Override
@@ -197,14 +197,14 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	public <T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
 			@Nullable Object... uriVariables) throws RestClientException {
 		return withBody(vaultClient.method(HttpMethod.PATCH).path(url, uriVariables), request).retrieve()
-			.body(responseType);
+				.body(responseType);
 	}
 
 	@Override
 	public <T> T patchForObject(String url, @Nullable Object request, Class<T> responseType,
 			Map<String, ?> uriVariables) throws RestClientException {
 		return withBody(vaultClient.method(HttpMethod.PATCH).path(url, uriVariables), request).retrieve()
-			.body(responseType);
+				.body(responseType);
 	}
 
 	@Override
@@ -217,14 +217,14 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			Class<T> responseType, @Nullable Object... uriVariables) throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(method).path(url, uriVariables), requestEntity).retrieve()
-			.toEntity(responseType);
+				.toEntity(responseType);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			Class<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(method).path(url, uriVariables), requestEntity).retrieve()
-			.toEntity(responseType);
+				.toEntity(responseType);
 	}
 
 	@Override
@@ -237,14 +237,14 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			ParameterizedTypeReference<T> responseType, @Nullable Object... uriVariables) throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(method).path(url, uriVariables), requestEntity).retrieve()
-			.toEntity(responseType);
+				.toEntity(responseType);
 	}
 
 	@Override
 	public <T> ResponseEntity<T> exchange(String url, HttpMethod method, @Nullable HttpEntity<?> requestEntity,
 			ParameterizedTypeReference<T> responseType, Map<String, ?> uriVariables) throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(method).path(url, uriVariables), requestEntity).retrieve()
-			.toEntity(responseType);
+				.toEntity(responseType);
 	}
 
 	@Override
@@ -258,8 +258,8 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 			throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(requestEntity.getMethod()).uri(requestEntity.getUrl()),
 				requestEntity)
-			.retrieve()
-			.toEntity(responseType);
+						.retrieve()
+						.toEntity(responseType);
 	}
 
 	@Override
@@ -267,8 +267,8 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 			throws RestClientException {
 		return withHeadersAndBody(vaultClient.method(requestEntity.getMethod()).uri(requestEntity.getUrl()),
 				requestEntity)
-			.retrieve()
-			.toEntity(responseType);
+						.retrieve()
+						.toEntity(responseType);
 	}
 
 	@Override
@@ -291,25 +291,20 @@ record RestClientOperationsWrapper(VaultClient vaultClient) implements RestOpera
 	}
 
 	private <S extends VaultClient.RequestBodySpec> S withBody(S spec, @Nullable Object body) {
-
 		if (body != null) {
 			spec.body(body);
 		}
-
 		return spec;
 	}
 
 	private <S extends VaultClient.RequestBodySpec> S withHeadersAndBody(S spec,
 			@Nullable HttpEntity<?> requestEntity) {
-
 		if (requestEntity != null) {
 			spec.headers(headers -> headers.putAll(requestEntity.getHeaders()));
-
 			if (requestEntity.getBody() != null) {
 				spec.body(requestEntity.getBody());
 			}
 		}
-
 		return spec;
 	}
 

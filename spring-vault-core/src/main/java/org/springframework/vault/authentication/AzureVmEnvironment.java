@@ -41,7 +41,7 @@ public class AzureVmEnvironment {
 	private final String vmScaleSetName;
 
 	/**
-	 * Creates a new {@link AzureVmEnvironment}.
+	 * Create a new {@code AzureVmEnvironment}.
 	 * @param subscriptionId must not be {@literal null}.
 	 * @param resourceGroupName must not be {@literal null}.
 	 * @param vmName must not be {@literal null}.
@@ -51,7 +51,7 @@ public class AzureVmEnvironment {
 	}
 
 	/**
-	 * Creates a new {@link AzureVmEnvironment}.
+	 * Create a new {@code AzureVmEnvironment}.
 	 * @param subscriptionId must not be {@literal null}.
 	 * @param resourceGroupName must not be {@literal null}.
 	 * @param vmName must not be {@literal null}.

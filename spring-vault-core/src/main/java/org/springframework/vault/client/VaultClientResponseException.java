@@ -14,12 +14,12 @@ import org.springframework.web.client.RestClient;
 
 /**
  * Abstract base class for exceptions thrown by {@link VaultClient} and
- * {@link ReactiveVaultClient} in case a request fails because of a server error response,
- * a failure to decode the response, or a low level I/O error.
+ * {@link ReactiveVaultClient} in case a request fails because of a server error
+ * response, a failure to decode the response, or a low level I/O error.
  *
- * <p>
- * Server error responses are determined by {@link RestClient.ResponseSpec#onStatus status
- * handlers} for {@code RestClient}, and by {@link ResponseErrorHandler} for
+ * <p>Server error responses are determined by
+ * {@link RestClient.ResponseSpec#onStatus status handlers} for
+ * {@code RestClient}, and by {@link ResponseErrorHandler} for
  * {@code RestTemplate}.
  *
  * @author Mark Paluch
@@ -29,13 +29,25 @@ public abstract class VaultClientResponseException extends VaultException {
 
 	private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+
+	/**
+	 * Create a {@code VaultClientResponseException} with the specified detail message.
+	 * @param msg the detail message.
+	 */
 	public VaultClientResponseException(String msg) {
 		super(msg);
 	}
 
+	/**
+	 * Create a {@code VaultClientResponseException} with the specified detail message and nested
+	 * exception.
+	 * @param msg the detail message.
+	 * @param cause the nested exception.
+	 */
 	public VaultClientResponseException(String msg, @Nullable Throwable cause) {
 		super(msg, cause);
 	}
+
 
 	/**
 	 * Return the HTTP status code.

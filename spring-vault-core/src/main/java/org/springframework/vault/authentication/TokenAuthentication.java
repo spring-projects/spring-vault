@@ -57,7 +57,7 @@ public class TokenAuthentication implements ClientAuthentication, Authentication
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for token authentication given
+	 * Create a {@link AuthenticationSteps} for token authentication given
 	 * {@link VaultToken}.
 	 * @param token must not be {@literal null}.
 	 * @param selfLookup {@literal true} to perform a self-lookup using the given

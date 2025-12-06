@@ -70,6 +70,7 @@ public class RestTemplateBuilder {
 
 	final Set<ClientHttpRequestInitializer> requestCustomizers = new LinkedHashSet<>();
 
+
 	private RestTemplateBuilder() {
 	}
 
@@ -79,6 +80,7 @@ public class RestTemplateBuilder {
 		this.requestFactory = requestFactory;
 		this.errorHandler = errorHandler;
 	}
+
 
 	/**
 	 * Create a new {@link RestTemplateBuilder}.
@@ -103,6 +105,7 @@ public class RestTemplateBuilder {
 
 		return builder;
 	}
+
 
 	/**
 	 * Set the {@link VaultEndpoint} that should be used with the {@link RestTemplate}.
@@ -265,6 +268,7 @@ public class RestTemplateBuilder {
 
 		return restTemplate;
 	}
+
 
 	static class RestTemplateBuilderClientHttpRequestFactoryWrapper extends AbstractClientHttpRequestFactoryWrapper {
 

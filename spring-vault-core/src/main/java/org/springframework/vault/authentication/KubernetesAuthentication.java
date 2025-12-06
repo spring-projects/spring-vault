@@ -91,7 +91,7 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for kubernetes authentication given
+	 * Create a {@link AuthenticationSteps} for kubernetes authentication given
 	 * {@link KubernetesAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for kubernetes authentication.

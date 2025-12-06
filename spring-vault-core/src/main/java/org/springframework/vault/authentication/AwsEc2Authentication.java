@@ -180,18 +180,15 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for AWS-EC2 authentication given
+	 * Create a {@link AuthenticationSteps} for AWS-EC2 authentication given
 	 * {@link AwsEc2AuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for AWS-EC2 authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(AwsEc2AuthenticationOptions options) {
-
 		Assert.notNull(options, "AwsEc2AuthenticationOptions must not be null");
-
 		AtomicReference<char[]> nonce = new AtomicReference<>(EMPTY);
-
 		return createAuthenticationSteps(options, nonce, () -> doCreateNonce(options));
 	}
 

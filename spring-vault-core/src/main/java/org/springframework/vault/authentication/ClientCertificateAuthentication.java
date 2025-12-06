@@ -113,7 +113,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 * Create a {@link AuthenticationSteps} for client certificate authentication.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.0
 	 */
@@ -122,7 +122,7 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 * Create a {@link AuthenticationSteps} for client certificate authentication.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.3

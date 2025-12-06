@@ -21,11 +21,10 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
@@ -33,68 +32,56 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.support.WrappedMetadata;
-import org.springframework.web.client.HttpStatusCodeException;
 
 /**
+ * Default implementation of {@link VaultWrappingOperations}.
+ * 
  * @author Mark Paluch
  */
 public class VaultWrappingTemplate implements VaultWrappingOperations {
 
 	private final VaultTemplate vaultOperations;
 
+
 	/**
 	 * Create a new {@link VaultWrappingTemplate} given {@link VaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultWrappingTemplate(VaultOperations vaultOperations) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
-
 		this.vaultOperations = VaultTemplate.from(vaultOperations);
 	}
 
-	@Nullable
+
 	@Override
-	public WrappedMetadata lookup(VaultToken token) {
-
-		Assert.notNull(token, "token VaultToken not be null");
-
-		VaultResponse response = null;
-		try {
-			response = this.vaultOperations.write("sys/wrapping/lookup",
-					Collections.singletonMap("token", token.getToken()));
-		}
-		catch (VaultException e) {
-
-			if (e.getMessage() != null && e.getMessage().contains("does not exist")) {
-				return null;
-			}
-
-			throw e;
-		}
-
-		if (response == null) {
+	public @Nullable WrappedMetadata lookup(VaultToken token) {
+		Assert.notNull(token, "VaultToken not be null");
+		ResponseEntity<VaultResponse> entity = this.vaultOperations.doWithSessionClient(client -> {
+			return client.post().path("sys/wrapping/lookup")
+					.body(Collections.singletonMap("token", token.getToken()))
+					.retrieve()
+					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+					.toEntity();
+		});
+		VaultResponse body = entity.getBody();
+		if (HttpStatusUtil.isNotFound(entity.getStatusCode()) || body == null) {
 			return null;
 		}
-
-		return WrappedMetadata.from(response.getRequiredData(), token);
+		return WrappedMetadata.from(body.getRequiredData(), token);
 	}
 
-	@Nullable
 	@Override
-	public VaultResponse read(VaultToken token) {
-
+	public @Nullable VaultResponse read(VaultToken token) {
+		Assert.notNull(token, "VaultToken not be null");
 		return doUnwrap(token, (client, headers) -> {
 			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body();
 		});
 	}
 
-	@Nullable
 	@Override
-	public <T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType) {
-
+	public <T> @Nullable VaultResponseSupport<T> read(VaultToken token, Class<T> responseType) {
+		Assert.notNull(token, "VaultToken not be null");
 		ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
-
 		return doUnwrap(token, (client, headers) -> {
 			return client.post().path("sys/wrapping/unwrap").headers(headers).retrieve().body(ref);
 		});
@@ -103,54 +90,26 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@SuppressWarnings("NullAway")
 	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
 			BiFunction<VaultClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
-
 		return this.vaultOperations.doWithVaultClient((VaultClientCallback<@Nullable T>) client -> {
-
-			try {
-				return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
-			}
-			catch (VaultException e) {
-
-				if (e.getCause() instanceof HttpStatusCodeException hse) {
-
-					if (HttpStatusUtil.isNotFound(hse.getStatusCode())) {
-						return null;
-					}
-
-					if (HttpStatusUtil.isBadRequest(hse.getStatusCode())
-							&& hse.getResponseBodyAsString().contains("does not exist")) {
-						return null;
-					}
-
-					throw VaultResponses.buildException(hse, "sys/wrapping/unwrap");
-				}
-
-				throw e;
-			}
+			return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
 		});
 	}
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public WrappedMetadata rewrap(VaultToken token) {
-
 		Assert.notNull(token, "token VaultToken not be null");
-
 		VaultResponse response = this.vaultOperations.invoke("sys/wrapping/rewrap",
 				Collections.singletonMap("token", token.getToken()));
-
 		return WrappedMetadata.from(response);
 	}
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public WrappedMetadata wrap(Object body, Duration duration) {
-
 		Assert.notNull(body, "Body must not be null");
 		Assert.notNull(duration, "TTL duration must not be null");
-
-		return this.vaultOperations.doWithSessionClient(client -> {
-
+		return this.vaultOperations.doWithSessionClient((VaultClientCallback<WrappedMetadata>) client -> {
 			return client.post().path("sys/wrapping/wrap").body(body).retrieve().wrap(duration);
 		});
 	}

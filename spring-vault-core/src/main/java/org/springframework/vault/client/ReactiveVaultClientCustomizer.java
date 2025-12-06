@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2025 the original author or authors.
+ * Copyright 2019-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault.repository.convert;
-
-import java.util.Map;
-
-import org.springframework.data.convert.TypeMapper;
+package org.springframework.vault.client;
 
 /**
- * Vault-specific {@link TypeMapper} exposing that {@link SecretDocument}s might contain a
- * type key.
+ * Callback interface that can be used to customize a {@link ReactiveVaultClient.Builder}. Beans
+ * implementing this interface are applied to the {@link ReactiveVaultClient} builder.
  *
  * @author Mark Paluch
- * @since 2.0
+ * @since 4.1
  */
-public interface VaultTypeMapper extends TypeMapper<Map<String, Object>> {
+@FunctionalInterface
+public interface ReactiveVaultClientCustomizer {
 
 	/**
-	 * Return whether the given {@code key} is the type key.
-	 * @return {@literal true} if the {@code key} is the type key.
+	 * Callback to customize a {@link ReactiveVaultClient.Builder} instance.
+	 * @param builder the builder to customize.
 	 */
-	boolean isTypeKey(String key);
+	void customize(ReactiveVaultClient.Builder builder);
 
 }

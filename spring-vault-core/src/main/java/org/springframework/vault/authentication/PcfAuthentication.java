@@ -105,7 +105,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for pcf authentication given
+	 * Create a {@link AuthenticationSteps} for pcf authentication given
 	 * {@link PcfAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for pcf authentication.

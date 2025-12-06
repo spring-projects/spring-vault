@@ -18,13 +18,12 @@ package org.springframework.vault.core.lease.event;
 import java.io.Serial;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published when caught an {@link Exception} during secret retrieval and lease
- * interaction.
+ * Event published when caught an {@link Exception} during secret retrieval and
+ * lease interaction.
  *
  * @author Mark Paluch
  */
@@ -33,7 +32,9 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	private final Throwable exception;
+
 
 	/**
 	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret},
@@ -43,9 +44,7 @@ public class SecretLeaseErrorEvent extends SecretLeaseEvent {
 	 * @param exception must not be {@literal null}.
 	 */
 	public SecretLeaseErrorEvent(RequestedSecret requestedSecret, @Nullable Lease lease, Throwable exception) {
-
 		super(requestedSecret, lease);
-
 		this.exception = exception;
 	}
 

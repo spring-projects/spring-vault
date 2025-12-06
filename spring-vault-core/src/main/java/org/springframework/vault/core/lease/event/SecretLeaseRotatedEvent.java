@@ -30,6 +30,7 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 
 	private final Lease previousLease;
 
+
 	/**
 	 * Create a new {@link SecretLeaseRotatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
@@ -39,10 +40,10 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 	 */
 	public SecretLeaseRotatedEvent(RequestedSecret requestedSecret, Lease previousLease, Lease currentLease,
 			Map<String, Object> secrets) {
-
 		super(requestedSecret, currentLease, secrets);
 		this.previousLease = previousLease;
 	}
+
 
 	public Lease getPreviousLease() {
 		return this.previousLease;

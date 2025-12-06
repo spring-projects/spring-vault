@@ -85,7 +85,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for GitHub authentication given
+	 * Create a {@link AuthenticationSteps} for GitHub authentication given
 	 * {@link GitHubAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for github authentication.

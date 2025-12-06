@@ -26,7 +26,7 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link GcpIamCredentialsAuthentication}.
- * <p/>
+ * <p>
  * Authentication options provide the path, a {@link GoogleCredentialsSupplier}, role and
  * JWT expiry for GCP IAM authentication. Instances of this class are immutable once
  * constructed.

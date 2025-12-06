@@ -22,10 +22,16 @@ import reactor.core.scheduler.Schedulers;
 
 import org.springframework.core.codec.ByteArrayDecoder;
 import org.springframework.core.codec.ByteArrayEncoder;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.StringDecoder;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
 import org.springframework.http.codec.CodecConfigurer.CustomCodecs;
+import org.springframework.http.codec.json.Jackson2JsonDecoder;
+import org.springframework.http.codec.json.Jackson2JsonEncoder;
+import org.springframework.http.codec.json.JacksonJsonDecoder;
+import org.springframework.http.codec.json.JacksonJsonEncoder;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.reactive.function.client.ClientRequest;
@@ -161,7 +167,18 @@ public class ReactiveVaultClients {
 		return next.exchange(request);
 	}
 
-	static void configureCodecs(ClientCodecConfigurer configurer) {
+	/**
+	 * Configure {@link Encoder} and {@link Decoder}s for Vault interaction.
+	 The used converters are:
+	 * <ul>
+	 * <li>{@link ByteArrayDecoder} and {@link ByteArrayEncoder}</li>
+	 * <li>{@link StringDecoder} for all mime types</li>
+	 * <li>If Jackson 3 is on the class path: {@link JacksonJsonEncoder} and {@link JacksonJsonDecoder}</li>
+	 * <li>Alternatively, if Jackson 2 is on the class path: {@link Jackson2JsonEncoder} and {@link Jackson2JsonDecoder}</li>
+	 * </ul>
+	 * @since 4.1
+	 */
+	public static void configureCodecs(ClientCodecConfigurer configurer) {
 
 		CustomCodecs cc = configurer.customCodecs();
 

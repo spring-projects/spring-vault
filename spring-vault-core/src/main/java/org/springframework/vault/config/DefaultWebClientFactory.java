@@ -19,7 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.vault.client.WebClientBuilder;
 import org.springframework.vault.client.WebClientFactory;
@@ -37,21 +36,20 @@ class DefaultWebClientFactory implements WebClientFactory {
 
 	private final Function<ClientHttpConnector, WebClientBuilder> builderFunction;
 
+
 	DefaultWebClientFactory(ClientHttpConnector connector,
 			Function<ClientHttpConnector, WebClientBuilder> builderFunction) {
 		this.connector = connector;
 		this.builderFunction = builderFunction;
 	}
 
+
 	@Override
 	public WebClient create(@Nullable Consumer<WebClientBuilder> customizer) {
-
 		WebClientBuilder builder = this.builderFunction.apply(this.connector);
-
 		if (customizer != null) {
 			customizer.accept(builder);
 		}
-
 		return builder.build();
 	}
 
