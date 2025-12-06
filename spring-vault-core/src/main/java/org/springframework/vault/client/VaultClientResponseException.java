@@ -4,7 +4,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
@@ -31,7 +30,8 @@ public abstract class VaultClientResponseException extends VaultException {
 
 
 	/**
-	 * Create a {@code VaultClientResponseException} with the specified detail message.
+	 * Create a {@code VaultClientResponseException} with the specified detail
+	 * message.
 	 * @param msg the detail message.
 	 */
 	public VaultClientResponseException(String msg) {
@@ -39,8 +39,8 @@ public abstract class VaultClientResponseException extends VaultException {
 	}
 
 	/**
-	 * Create a {@code VaultClientResponseException} with the specified detail message and nested
-	 * exception.
+	 * Create a {@code VaultClientResponseException} with the specified detail
+	 * message and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
@@ -99,5 +99,12 @@ public abstract class VaultClientResponseException extends VaultException {
 	 * {@link ParameterizedTypeReference}.
 	 */
 	public abstract <E> @Nullable E getResponseBodyAs(ParameterizedTypeReference<E> targetType);
+
+	@Override
+	public String toString() {
+		String s = VaultClientResponseException.class.getName();
+		String message = getLocalizedMessage();
+		return (message != null) ? (s + ": " + message) : s;
+	}
 
 }

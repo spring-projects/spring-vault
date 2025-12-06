@@ -36,6 +36,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 
 	private final String path;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultKeyValue2Accessor} given
 	 * {@link ReactiveVaultTemplate} and the mount {@code path}.
@@ -47,11 +48,12 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 		this.path = path;
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
 		return doRead(
-				"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+				"%s?list=true".formatted(createBackendPath("metadata", PathUtil.normalizeListPath(path))),
 				VaultListResponse.class)
 						.flatMapMany(response -> {
 							List<String> list = (List<String>) response.getRequiredData().get("keys");

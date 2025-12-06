@@ -58,7 +58,6 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-
 		this.wrappingOperations = this.vaultOperations.opsForWrapping();
 	}
 

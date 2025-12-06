@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -121,7 +122,7 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			} else {
 				this.responseMono = () -> {
-					return endpointProvider.getVaultEndpoint().map(it -> {
+					return Objects.requireNonNull(endpointProvider).getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
@@ -138,7 +139,7 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 				this.spec.uri(uriBuilderFactory.expand(path, pathVariables));
 			} else {
 				this.responseMono = () -> {
-					return endpointProvider.getVaultEndpoint().map(it -> {
+					return Objects.requireNonNull(endpointProvider).getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.getUriComponents(it, path).build(pathVariables));
 					});
 				};
@@ -155,7 +156,7 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 				this.spec.uri(VaultClients.expandUri(uriBuilderFactory, uri));
 			} else {
 				this.responseMono = () -> {
-					return endpointProvider.getVaultEndpoint().map(it -> {
+					return Objects.requireNonNull(endpointProvider).getVaultEndpoint().map(it -> {
 						return this.spec.uri(VaultClients.expandUri(it, uri));
 					});
 				};

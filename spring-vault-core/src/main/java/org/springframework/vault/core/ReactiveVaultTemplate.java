@@ -165,7 +165,7 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		this.statelessClient = getWebClient(client);
 		this.vaultClient = client;
 		this.sessionClient = getWebClient(client, builder -> builder.filter(getSessionFilter()));
-		this.sessionVaultClient = client;
+		this.sessionVaultClient = client.mutate().configureWebClient(it -> it.filter(getSessionFilter())).build();
 	}
 
 	private static WebClient getWebClient(ReactiveVaultClient client) {

@@ -26,6 +26,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -56,16 +57,25 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@Override
 	public @Nullable WrappedMetadata lookup(VaultToken token) {
 		Assert.notNull(token, "VaultToken not be null");
-		ResponseEntity<VaultResponse> entity = this.vaultOperations.doWithSessionClient(client -> {
-			return client.post().path("sys/wrapping/lookup")
-					.body(Collections.singletonMap("token", token.getToken()))
-					.retrieve()
-					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
-					.toEntity();
-		});
-		VaultResponse body = entity.getBody();
-		if (HttpStatusUtil.isNotFound(entity.getStatusCode()) || body == null) {
-			return null;
+		VaultResponse body = null;
+		try {
+			ResponseEntity<VaultResponse> entity = this.vaultOperations.doWithSessionClient(client -> {
+				return client.post().path("sys/wrapping/lookup")
+						.body(Collections.singletonMap("token", token.getToken()))
+						.retrieve()
+						.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
+						.toEntity();
+			});
+			body = entity.getBody();
+			if (HttpStatusUtil.isNotFound(entity.getStatusCode()) || body == null) {
+				return null;
+			}
+		} catch (VaultClientResponseException e) {
+			if (e.getStatusCode().is4xxClientError() && e.getMessage() != null
+					&& e.getMessage().contains("does not exist")) {
+				return null;
+			}
+			throw e;
 		}
 		return WrappedMetadata.from(body.getRequiredData(), token);
 	}
@@ -90,9 +100,17 @@ public class VaultWrappingTemplate implements VaultWrappingOperations {
 	@SuppressWarnings("NullAway")
 	private <T extends VaultResponseSupport<?>> @Nullable T doUnwrap(VaultToken token,
 			BiFunction<VaultClient, Consumer<HttpHeaders>, @Nullable T> requestFunction) {
-		return this.vaultOperations.doWithVaultClient((VaultClientCallback<@Nullable T>) client -> {
-			return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
-		});
+		try {
+			return this.vaultOperations.doWithVaultClient((VaultClientCallback<@Nullable T>) client -> {
+				return requestFunction.apply(client, httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)));
+			});
+		} catch (VaultClientResponseException e) {
+			if (HttpStatusUtil.isNotFound(e.getStatusCode()) || (HttpStatusUtil.isBadRequest(e.getStatusCode())
+					&& e.getResponseBodyAsString().contains("does not exist"))) {
+				return null;
+			}
+			throw e;
+		}
 	}
 
 	@Override
