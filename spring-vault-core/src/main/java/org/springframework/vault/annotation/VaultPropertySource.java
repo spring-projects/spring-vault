@@ -15,14 +15,14 @@
  */
 package org.springframework.vault.annotation;
 
+import org.springframework.context.annotation.Import;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.context.annotation.Import;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
@@ -112,6 +112,11 @@ public @interface VaultPropertySource {
 	 * Configure lease renewal/rotation.
 	 */
 	Renewal renewal() default Renewal.OFF;
+
+    /**
+     * Specify property names mapping from Vault to Spring environment.
+     */
+    PropertyMapping[] propertyMappings() default {};
 
 	enum Renewal {
 
