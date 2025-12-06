@@ -15,14 +15,7 @@
  */
 package org.springframework.vault.annotation;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -39,12 +32,17 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.annotation.VaultPropertySource.Renewal;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s
@@ -122,7 +120,7 @@ class VaultPropertySourceRegistrar
 			String propertyNamePrefix = propertySource.getString("propertyNamePrefix");
 			Renewal renewal = propertySource.getEnum("renewal");
 			boolean ignoreSecretNotFound = propertySource.getBoolean("ignoreSecretNotFound");
-            Class<?>[] additionalPropertyTransformers = propertySource.getClassArray("propertyTransformers");
+            PropertyMapping[] propertyMappings = propertySource.getAnnotationArray("propertyMappings", PropertyMapping.class);
 
 			Assert.isTrue(paths.length > 0, "At least one @VaultPropertySource(value) location is required");
 
@@ -131,8 +129,8 @@ class VaultPropertySourceRegistrar
 			PropertyTransformer propertyTransformer = StringUtils.hasText(propertyNamePrefix)
 					? PropertyTransformers.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
 
-            if (additionalPropertyTransformers.length != 0) {
-                propertyTransformer = appendPropertyTransformers(propertyTransformer, additionalPropertyTransformers);
+            if (propertyMappings.length != 0) {
+                propertyTransformer = propertyTransformer.andThen(PropertyTransformers.propertyMappingBased(propertyMappings));
             }
 
 			for (String propertyPath : paths) {
@@ -159,22 +157,6 @@ class VaultPropertySourceRegistrar
 			}
 		}
 	}
-
-    private PropertyTransformer appendPropertyTransformers(PropertyTransformer propertyTransformer,
-                                                           Class<?>[] additionalPropertyTransformers) {
-        for (Class<?> propertyTransformerClass : additionalPropertyTransformers) {
-            propertyTransformer = propertyTransformer.andThen(createPropertyTransformer(propertyTransformerClass));
-        }
-        return propertyTransformer;
-    }
-
-    private PropertyTransformer createPropertyTransformer(Class<?> cls) {
-        try {
-            return (PropertyTransformer) ReflectionUtils.accessibleConstructor(cls).newInstance();
-        } catch (Exception e) {
-            throw new IllegalStateException("Could not create property transformer " + cls.getName(), e);
-        }
-    }
 
 	private String potentiallyResolveRequiredPlaceholders(String expression) {
 		return this.environment != null ? this.environment.resolveRequiredPlaceholders(expression) : expression;

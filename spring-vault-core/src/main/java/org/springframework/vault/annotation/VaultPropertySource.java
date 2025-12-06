@@ -15,15 +15,14 @@
  */
 package org.springframework.vault.annotation;
 
+import org.springframework.context.annotation.Import;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import org.springframework.context.annotation.Import;
-import org.springframework.vault.core.util.PropertyTransformer;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
@@ -115,10 +114,9 @@ public @interface VaultPropertySource {
 	Renewal renewal() default Renewal.OFF;
 
     /**
-     * Specify additional property transformer classes
-     * {@link org.springframework.vault.core.util.PropertyTransformer}.
+     * Specify property names mapping from Vault to Spring environment.
      */
-    Class<? extends PropertyTransformer>[] propertyTransformers() default {};
+    PropertyMapping[] propertyMappings() default {};
 
 	enum Renewal {
 

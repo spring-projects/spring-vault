@@ -15,11 +15,14 @@
  */
 package org.springframework.vault.core.util;
 
+import org.springframework.util.Assert;
+import org.springframework.vault.annotation.PropertyMapping;
+
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.springframework.util.Assert;
 
 /**
  * Implementations of {@link PropertyTransformer} that provide various useful property
@@ -52,6 +55,14 @@ public abstract class PropertyTransformers {
 	public static PropertyTransformer propertyNamePrefix(String propertyNamePrefix) {
 		return KeyPrefixPropertyTransformer.forPrefix(propertyNamePrefix);
 	}
+
+    /**
+     * @param mappings the rules to remap property names.
+     * @return {@link PropertyTransformer} to map property names as specified in mappings.
+     */
+    public static PropertyTransformer propertyMappingBased(PropertyMapping[] mappings) {
+        return PropertyMappingBasedPropertyTransformer.forPropertyMappings(mappings);
+    }
 
 	/**
 	 * {@link PropertyTransformer} that passes the given properties through without
@@ -159,4 +170,46 @@ public abstract class PropertyTransformers {
 
 	}
 
+    /**
+     * {@link PropertyTransformer} based on {@link org.springframework.vault.annotation.PropertyMapping} annotaion rules.
+     */
+    public static class PropertyMappingBasedPropertyTransformer implements PropertyTransformer {
+
+        private final Map<String, String> mappingRules;
+
+        private PropertyMappingBasedPropertyTransformer(PropertyMapping[] mappings) {
+
+            Map<String, String> mappingRules = new HashMap<>();
+
+            for (PropertyMapping propertyMapping : mappings) {
+                mappingRules.put(propertyMapping.from(), propertyMapping.to());
+            }
+
+            this.mappingRules = Collections.unmodifiableMap(mappingRules);
+        }
+
+        /**
+         * Create a new {@link PropertyMappingBasedPropertyTransformer} that maps property names as specified in mappings.
+         * @param mappings the property mapping rules.
+         * If key does not exist in input properties, property name will not be remapped
+         * @return a new {@link PropertyMappingBasedPropertyTransformer}.
+         */
+        public static PropertyTransformer forPropertyMappings(PropertyMapping[] mappings) {
+            return new PropertyMappingBasedPropertyTransformer(mappings);
+        }
+
+        @Override
+        public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+
+            Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
+
+            for (Entry<String, ? extends Object> entry : input.entrySet()) {
+                String newKey = this.mappingRules.getOrDefault(entry.getKey(), entry.getKey());
+                target.put(newKey, entry.getValue());
+            }
+
+            return target;
+        }
+
+    }
 }
