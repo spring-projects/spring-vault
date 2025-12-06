@@ -16,7 +16,6 @@
 package org.springframework.vault.config;
 
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -61,6 +60,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 	private @Nullable ApplicationContext applicationContext;
 
+
 	/**
 	 * @return Vault endpoint coordinates for HTTP/HTTPS communication, must not be
 	 * {@literal null}.
@@ -85,52 +85,26 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	public abstract ClientAuthentication clientAuthentication();
 
 	/**
-	 * Create a {@link RestTemplateBuilder} initialized with {@link VaultEndpointProvider}
-	 * and {@link ClientHttpRequestFactory}. May be overridden by subclasses.
+	 * Create a {@link RestTemplateBuilder} initialized with
+	 * {@link VaultEndpointProvider} and {@link ClientHttpRequestFactory}. May be
+	 * overridden by subclasses.
 	 * @return the {@link RestTemplateBuilder}.
 	 * @see #vaultEndpointProvider()
 	 * @see #clientHttpRequestFactoryWrapper()
 	 * @since 2.3
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	protected RestTemplateBuilder restTemplateBuilder(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
-
 		ObjectProvider<RestTemplateCustomizer> customizers = getBeanFactory()
-			.getBeanProvider(RestTemplateCustomizer.class);
-
+				.getBeanProvider(RestTemplateCustomizer.class);
 		RestTemplateBuilder builder = RestTemplateBuilder.builder()
-			.endpointProvider(endpointProvider)
-			.requestFactory(requestFactory);
-
+				.endpointProvider(endpointProvider)
+				.requestFactory(requestFactory);
 		builder.customizers(customizers.stream().toArray(RestTemplateCustomizer[]::new));
-
 		return builder;
-	}
-
-	/**
-	 * Create a {@link VaultClient} initialized with {@link #vaultEndpointProvider()} and
-	 * {@link #getClientFactoryWrapper()}. May be overridden by subclasses.
-	 * @return the {@link VaultClient}.
-	 * @see #vaultEndpointProvider()
-	 * @see #clientHttpRequestFactoryWrapper()
-	 * @since 4.1
-	 */
-	@Bean
-	protected VaultClient vaultClient() {
-
-		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
-			.getBeanProvider(VaultClientCustomizer.class);
-
-		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
-				clientHttpRequestFactoryWrapper().getClientHttpRequestFactory())
-			.build();
-		VaultClient.Builder builder = VaultClient.builder(restTemplate);
-
-		customizers.forEach(it -> it.customize(builder));
-
-		return builder.build();
 	}
 
 	/**
@@ -144,25 +118,42 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	@Bean
 	@Deprecated(since = "4.1")
 	public RestTemplateFactory restTemplateFactory(ClientFactoryWrapper requestFactoryWrapper) {
-
 		return new DefaultRestTemplateFactory(requestFactoryWrapper.getClientHttpRequestFactory(), it -> {
 			return restTemplateBuilder(vaultEndpointProvider(), it);
 		});
 	}
 
 	/**
+	 * Create a {@link VaultClient} initialized with
+	 * {@link #vaultEndpointProvider()} and {@link #getClientFactoryWrapper()}
+	 * through {@link #restTemplateBuilder}. May be overridden by subclasses.
+	 * @return the {@link VaultClient}.
+	 * @see #vaultEndpointProvider()
+	 * @see #getClientFactoryWrapper()
+	 * @since 4.1
+	 */
+	@Bean
+	protected VaultClient vaultClient() {
+		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
+				.getBeanProvider(VaultClientCustomizer.class);
+		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
+				getClientFactoryWrapper().getClientHttpRequestFactory())
+						.build();
+		VaultClient.Builder builder = VaultClient.builder(restTemplate);
+		customizers.forEach(it -> it.customize(builder));
+		return builder.build();
+	}
+
+	/**
 	 * Create a {@link VaultTemplate}.
 	 * @return the {@link VaultTemplate}.
-	 * @see #vaultEndpointProvider()
-	 * @see #clientHttpRequestFactoryWrapper()
+	 * @see #vaultClient()
 	 * @see #sessionManager()
 	 */
 	@Bean
 	public VaultTemplate vaultTemplate() {
-
 		VaultClient client = vaultClient();
 		SessionManager sessionManager = getBeanFactory().getBean("sessionManager", SessionManager.class);
-
 		return new VaultTemplate(client, sessionManager);
 	}
 
@@ -179,11 +170,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 */
 	@Bean
 	public SessionManager sessionManager() {
-
 		ClientAuthentication clientAuthentication = clientAuthentication();
-
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-
 		return new LifecycleAwareSessionManager(clientAuthentication, getVaultThreadPoolTaskScheduler(),
 				getBeanFactory().getBean(VaultClient.class));
 	}
@@ -191,56 +179,50 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	/**
 	 * Construct a {@link SecretLeaseContainer} using {@link #vaultTemplate()} and
 	 * {@link #threadPoolTaskScheduler()}.
-	 * @return the {@link SecretLeaseContainer} to allocate, renew and rotate secrets and
-	 * their leases.
+	 * @return the {@link SecretLeaseContainer} to allocate, renew and rotate
+	 * secrets and their leases.
 	 * @see #vaultTemplate()
 	 * @see #threadPoolTaskScheduler()
 	 */
 	@Bean
 	public SecretLeaseContainer secretLeaseContainer() throws Exception {
-
 		SecretLeaseContainer secretLeaseContainer = new SecretLeaseContainer(
 				getBeanFactory().getBean("vaultTemplate", VaultTemplate.class), getVaultThreadPoolTaskScheduler());
 		SessionManager sessionManager = getBeanFactory().getBean("sessionManager", SessionManager.class);
-
 		secretLeaseContainer.afterPropertiesSet();
-
 		if (sessionManager instanceof AuthenticationEventMulticaster multicaster) {
 			multicaster.addAuthenticationListener(secretLeaseContainer.getAuthenticationListener());
 			multicaster.addErrorListener(secretLeaseContainer.getAuthenticationErrorListener());
 		}
-
 		secretLeaseContainer.start();
-
 		return secretLeaseContainer;
 	}
 
 	/**
-	 * Create a {@link TaskSchedulerWrapper} used by {@link LifecycleAwareSessionManager}
-	 * and {@link org.springframework.vault.core.lease.SecretLeaseContainer} wrapping
-	 * {@link ThreadPoolTaskScheduler}. Subclasses may override this method to reuse a
-	 * different/existing scheduler.
+	 * Create a {@link TaskSchedulerWrapper} used by
+	 * {@link LifecycleAwareSessionManager} and
+	 * {@link org.springframework.vault.core.lease.SecretLeaseContainer} wrapping
+	 * {@link ThreadPoolTaskScheduler}. Subclasses may override this method to reuse
+	 * a different/existing scheduler.
 	 * @return the {@link TaskSchedulerWrapper} to use. Must not be {@literal null}.
 	 * @see TaskSchedulerWrapper#fromInstance(ThreadPoolTaskScheduler)
 	 */
 	@Bean("vaultThreadPoolTaskScheduler")
 	public TaskSchedulerWrapper threadPoolTaskScheduler() {
-
 		ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
-
 		threadPoolTaskScheduler.setThreadNamePrefix("spring-vault-ThreadPoolTaskScheduler-");
 		threadPoolTaskScheduler.setDaemon(true);
-
 		return new TaskSchedulerWrapper(threadPoolTaskScheduler);
 	}
 
 	/**
-	 * Construct a {@link RestOperations} object configured for Vault session management
-	 * and authentication usage. Can be customized by providing a
+	 * Construct a {@link RestOperations} object configured for Vault session
+	 * management and authentication usage. Can be customized by providing a
 	 * {@link RestTemplateFactory} bean.
 	 * @return the {@link RestOperations} to be used for Vault access.
 	 * @see #restTemplateFactory(ClientFactoryWrapper)
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	public RestOperations restOperations() {
@@ -248,13 +230,13 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	/**
-	 * Create a {@link ClientFactoryWrapper} containing a {@link ClientHttpRequestFactory}
-	 * . {@link ClientHttpRequestFactory} is not exposed as root bean because
-	 * {@link ClientHttpRequestFactory} is configured with {@link ClientOptions} and
-	 * {@link SslConfiguration} which are not necessarily applicable for the whole
-	 * application.
-	 * @return the {@link ClientFactoryWrapper} to wrap a {@link ClientHttpRequestFactory}
-	 * instance.
+	 * Create a {@link ClientFactoryWrapper} containing a
+	 * {@link ClientHttpRequestFactory} . {@link ClientHttpRequestFactory} is not
+	 * exposed as root bean because {@link ClientHttpRequestFactory} is configured
+	 * with {@link ClientOptions} and {@link SslConfiguration} which are not
+	 * necessarily applicable for the whole application.
+	 * @return the {@link ClientFactoryWrapper} to wrap a
+	 * {@link ClientHttpRequestFactory} instance.
 	 * @see #clientOptions()
 	 * @see #sslConfiguration()
 	 */
@@ -285,14 +267,12 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Return the {@link Environment} to access property sources during Spring Vault
 	 * bootstrapping. Requires {@link #setApplicationContext(ApplicationContext)
 	 * ApplicationContext} to be set.
-	 * @return the {@link Environment} to access property sources during Spring Vault
-	 * bootstrapping.
+	 * @return the {@link Environment} to access property sources during Spring
+	 * Vault bootstrapping.
 	 */
 	protected Environment getEnvironment() {
-
 		Assert.state(this.applicationContext != null,
 				"ApplicationContext must be set before accessing getEnvironment()");
-
 		return this.applicationContext.getEnvironment();
 	}
 
@@ -305,7 +285,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	 * Return the {@link RestTemplateFactory}.
 	 * @return the {@link RestTemplateFactory} bean.
 	 * @since 2.3
-	 * @deprecated since 4.1, use {@link VaultClient} instead of {@link RestOperations}.
+	 * @deprecated since 4.1, use {@link VaultClient} instead of
+	 * {@link RestOperations}.
 	 */
 	@Deprecated(since = "4.1")
 	protected RestTemplateFactory getRestTemplateFactory() {
@@ -317,16 +298,15 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	}
 
 	protected BeanFactory getBeanFactory() {
-
 		Assert.state(this.applicationContext != null,
 				"ApplicationContext must be set before accessing getBeanFactory()");
-
 		return this.applicationContext;
 	}
 
 	private ClientFactoryWrapper getClientFactoryWrapper() {
 		return getBeanFactory().getBean("clientHttpRequestFactoryWrapper", ClientFactoryWrapper.class);
 	}
+
 
 	/**
 	 * Wrapper for {@link ClientHttpRequestFactory} to not expose the bean globally.
@@ -335,9 +315,11 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 		private final ClientHttpRequestFactory clientHttpRequestFactory;
 
+
 		public ClientFactoryWrapper(ClientHttpRequestFactory clientHttpRequestFactory) {
 			this.clientHttpRequestFactory = clientHttpRequestFactory;
 		}
+
 
 		@Override
 		public void destroy() throws Exception {
@@ -360,9 +342,10 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 	}
 
+
 	/**
-	 * Wrapper to keep {@link ThreadPoolTaskScheduler} local to Spring Vault and to not
-	 * expose the bean globally.
+	 * Wrapper to keep {@link ThreadPoolTaskScheduler} local to Spring Vault and to
+	 * not expose the bean globally.
 	 *
 	 * @since 2.3.1
 	 */
@@ -374,19 +357,19 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 		private final boolean acceptDestroy;
 
+
 		public TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler) {
 			this(taskScheduler, true, true);
 		}
 
 		protected TaskSchedulerWrapper(ThreadPoolTaskScheduler taskScheduler, boolean acceptAfterPropertiesSet,
 				boolean acceptDestroy) {
-
 			Assert.notNull(taskScheduler, "ThreadPoolTaskScheduler must not be null");
-
 			this.taskScheduler = taskScheduler;
 			this.acceptAfterPropertiesSet = acceptAfterPropertiesSet;
 			this.acceptDestroy = acceptDestroy;
 		}
+
 
 		/**
 		 * Factory method to adapt an existing {@link ThreadPoolTaskScheduler} bean
@@ -399,6 +382,7 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		public static TaskSchedulerWrapper fromInstance(ThreadPoolTaskScheduler scheduler) {
 			return new TaskSchedulerWrapper(scheduler, false, false);
 		}
+
 
 		ThreadPoolTaskScheduler getTaskScheduler() {
 			return this.taskScheduler;
@@ -413,7 +397,6 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 
 		@Override
 		public void afterPropertiesSet() {
-
 			if (this.acceptAfterPropertiesSet) {
 				this.taskScheduler.afterPropertiesSet();
 			}
