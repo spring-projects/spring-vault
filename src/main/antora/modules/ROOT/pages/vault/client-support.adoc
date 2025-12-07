@@ -24,15 +24,14 @@ Spring Vault's reactive integration supports the following reactive HTTP clients
 Using a specific client requires the according dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
 
-== Java's builtin `HttpClient`
+== Java's built-in `HttpClient`
 
 Java's builtin `HttpClient` is available out-of-the-box since Java 11 without additional
 dependencies.
 
 == External Clients
 You can use external clients to access Vault's API. Simply add one of the following
-dependencies to your project. You can omit the version number if using
-<<dependencies,Spring Vault's Dependency BOM>>
+dependencies to your project.
 
 
 .Apache Http Components Dependency

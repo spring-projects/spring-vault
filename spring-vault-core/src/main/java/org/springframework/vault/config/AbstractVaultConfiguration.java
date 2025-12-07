@@ -16,6 +16,7 @@
 package org.springframework.vault.config;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -126,7 +127,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	/**
 	 * Create a {@link VaultClient} initialized with
 	 * {@link #vaultEndpointProvider()} and {@link #getClientFactoryWrapper()}
-	 * through {@link #restTemplateBuilder}. May be overridden by subclasses.
+	 * through {@link #restTemplateBuilder}. The VaultClient builder can be customized
+	 * through {@link VaultClientCustomizer} beans.
 	 * @return the {@link VaultClient}.
 	 * @see #vaultEndpointProvider()
 	 * @see #getClientFactoryWrapper()

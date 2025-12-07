@@ -3,6 +3,7 @@
 ** xref:introduction/getting-started.adoc[]
 ** xref:introduction/dependencies.adoc[]
 * xref:vault/vault.adoc[]
+** xref:vault/vault-client.adoc[]
 ** xref:vault/authentication.adoc[]
 ** xref:vault/imperative-template.adoc[]
 ** xref:vault/vault-secret-engines.adoc[]

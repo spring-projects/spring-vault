@@ -23,6 +23,7 @@ import java.util.function.Function;
 import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.ReactiveVaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
 import org.springframework.vault.support.VaultResponse;
@@ -31,19 +32,25 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 /**
- * Interface that specifies a basic set of Vault operations executed on a
- * reactive infrastructure, implemented by
- * {@link org.springframework.vault.core.ReactiveVaultTemplate}. This is the
- * main entry point to interact with Vault in an authenticated and
- * unauthenticated context.
- * <p>{@link ReactiveVaultOperations} allows execution of callback methods.
- * Callbacks can execute requests within a {@link #doWithSession(Function)
- * session context} and the {@link #doWithVault(Function) without a session}.
- * <p>Paths used in this interface (and interfaces accessible from here) are
- * considered relative to the {@link VaultEndpoint}. Paths that are
- * fully-qualified URI's can be used to access Vault cluster members in an
- * authenticated context. To prevent unwanted full URI access, make sure to
- * sanitize paths before passing them to this interface.
+ * Central entrypoint for performing Vault operations on a reactive runtime.
+ *
+ * <p>Implemented by
+ * {@link org.springframework.vault.core.ReactiveVaultTemplate}, this interface
+ * exposes reactive APIs for interacting with Vault backends such as Key/Value,
+ * Transit and {@code sys}. It supports callback-style execution for both
+ * {@link #doWithSession(Function) authenticated doWithSession} and
+ * {@link #doWithVault(Function) unauthenticated doWithVault} access, returning
+ * Reactor {@link Mono} and {@link Flux} types for composition in reactive
+ * applications.
+ *
+ * <p>{@link ReactiveVaultClient.PathSpec#path Paths used} with this and other
+ * Template API interfaces are typically relative to the {@link VaultEndpoint}
+ * of the underlying {@link ReactiveVaultClient}. If the client is configured
+ * without an endpoint, fully-qualified URIs can be used.
+ * <p><b>Note</b> that operations apply authentication and other headers
+ * regardless of using relative or absolute URIs. To prevent unwanted access to
+ * external endpoints using authentication headers, applications should sanitize
+ * paths to avoid unwanted access to external endpoints.
  *
  * @author Mark Paluch
  * @author James Luke
@@ -51,10 +58,11 @@ import org.springframework.web.reactive.function.client.WebClientException;
  * @since 2.0
  * @see #doWithSession(Function)
  * @see #doWithVault(Function)
+ * @see org.springframework.vault.client.ReactiveVaultClient
  * @see org.springframework.web.reactive.function.client.WebClient
  * @see org.springframework.vault.core.ReactiveVaultTemplate
- * @see org.springframework.vault.authentication.VaultTokenSupplier
  */
+
 public interface ReactiveVaultOperations {
 
 	/**
