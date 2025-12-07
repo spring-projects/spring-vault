@@ -170,13 +170,12 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	 * {@link #threadPoolTaskScheduler()}.
 	 * @return the {@link VaultTokenSupplier} for Vault session token management.
 	 * @see VaultTokenSupplier
-	 * @see #clientAuthentication()
+	 * @see #vaultTokenSupplier()
 	 */
 	@Bean
 	public ReactiveSessionManager reactiveSessionManager() {
-		WebClient webClient = getWebClientFactory().create();
 		return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier(), getVaultThreadPoolTaskScheduler(),
-				webClient);
+				reactiveVaultClient());
 	}
 
 	/**
