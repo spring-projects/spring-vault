@@ -37,6 +37,7 @@ public abstract class VaultHttpHeaders {
 
 	/**
 	 * The HTTP {@code X-Vault-MFA} MFA credentials header.
+	 * @since 4.1
 	 */
 	public static final String VAULT_MFA_TOKEN = "X-Vault-MFA";
 
@@ -48,6 +49,7 @@ public abstract class VaultHttpHeaders {
 	/**
 	 * The HTTP {@code X-Vault-Wrap-TTL} header to wrap a response and return a
 	 * unwrapping token instead of the actual response.
+	 * @since 4.1
 	 */
 	public static final String VAULT_WRAP_TTL = "X-Vault-Wrap-TTL";
 

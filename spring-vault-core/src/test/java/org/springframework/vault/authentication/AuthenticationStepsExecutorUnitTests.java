@@ -51,9 +51,12 @@ class AuthenticationStepsExecutorUnitTests {
 
 	MockVaultClient client;
 
+	MockVaultClient restClient;
+
 	@BeforeEach
 	void before() {
 		this.client = TestVaultClient.mock();
+		this.restClient = TestVaultClient.mock();
 	}
 
 	@Test
@@ -173,25 +176,34 @@ class AuthenticationStepsExecutorUnitTests {
 	@Test
 	void zipWithShouldRequestTwoItems() {
 
-		this.client.expect(requestTo("auth/login/left"))
+		this.restClient.expect(requestTo("external/left"))
 				.andExpect(method(HttpMethod.POST))
 				.andRespond(
 						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" + "\"request_id\": \"left\"}"));
 
-		this.client.expect(requestTo("auth/login/right"))
+		this.restClient.expect(requestTo("external/right"))
 				.andExpect(method(HttpMethod.POST))
 				.andRespond(
 						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" + "\"request_id\": \"right\"}"));
 
-		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post("auth/login/left").as(VaultResponse.class));
+		this.client.expect(requestTo("auth/some/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().string("left-right"))
+				.andRespond(
+						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" + "\"auth\": { \"client_token\": \"fine\"} }"));
 
+		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post("external/left").as(VaultResponse.class));
 		Node<VaultResponse> right = AuthenticationSteps
-				.fromHttpRequest(post("auth/login/right").as(VaultResponse.class));
+				.fromHttpRequest(post("external/right").as(VaultResponse.class));
 
 		AuthenticationSteps steps = left.zipWith(right)
-				.login(it -> VaultToken.of(it.getLeft().getRequestId() + "-" + it.getRight().getRequestId()));
+				.map(it -> it.getLeft().getRequestId() + "-" + it.getRight().getRequestId())
+				.loginAt("some");
 
-		assertThat(login(steps)).isEqualTo(VaultToken.of("left-right"));
+		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.client,
+				this.restClient.getRestClient());
+
+		assertThat(executor.login()).isEqualTo(VaultToken.of("fine"));
 	}
 
 	private VaultToken login(AuthenticationSteps steps) {

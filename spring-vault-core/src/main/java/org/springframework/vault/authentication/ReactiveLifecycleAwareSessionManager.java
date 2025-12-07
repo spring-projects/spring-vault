@@ -30,6 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.event.*;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
@@ -84,7 +86,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	/**
 	 * HTTP client.
 	 */
-	private final WebClient webClient;
+	private final ReactiveVaultClient client;
 
 	/**
 	 * The token state: Contains the currently valid token that identifies the Vault
@@ -132,29 +134,30 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		super(taskScheduler);
 		Assert.notNull(clientAuthentication, "VaultTokenSupplier must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(webClient, "RestOperations must not be null");
+		Assert.notNull(client, "ReactiveVaultClient must not be null");
 		this.clientAuthentication = clientAuthentication;
-		this.webClient = webClient;
+		this.client = client;
 	}
 
 	/**
 	 * Create a {@link ReactiveLifecycleAwareSessionManager} given
 	 * {@link VaultTokenSupplier}, {@link TaskScheduler} and
-	 * {@link WebClient}.
+	 * {@link ReactiveVaultClient}.
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
-	 * @param webClient must not be {@literal null}.
+	 * @param client must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
+	 * @since 4.1
 	 */
 	public ReactiveLifecycleAwareSessionManager(VaultTokenSupplier clientAuthentication, TaskScheduler taskScheduler,
-			WebClient webClient, RefreshTrigger refreshTrigger) {
+												ReactiveVaultClient client, RefreshTrigger refreshTrigger) {
 		super(taskScheduler, refreshTrigger);
 		Assert.notNull(clientAuthentication, "VaultTokenSupplier must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-		Assert.notNull(webClient, "WebClient must not be null");
+		Assert.notNull(client, "ReactiveVaultClient must not be null");
 		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
 		this.clientAuthentication = clientAuthentication;
-		this.webClient = webClient;
+		this.client = client;
 	}
 
 	@Override
@@ -201,14 +204,12 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 * @param token the token to revoke, must not be {@literal null}.
 	 */
 	protected Mono<Void> revoke(VaultToken token) {
-		return this.webClient.post().uri("auth/token/revoke-self").headers(httpHeaders -> {
-			httpHeaders.addAll(VaultHttpHeaders.from(token));
-		})
+		return this.client.post().path("auth/token/revoke-self").headers(VaultHttpHeaders.from(token))
 				.retrieve()
 				.bodyToMono(String.class)
 				.doOnSubscribe(ignore -> multicastEvent(new BeforeLoginTokenRevocationEvent(token)))
 				.doOnNext(ignore -> multicastEvent(new AfterLoginTokenRevocationEvent(token)))
-				.onErrorResume(WebClientResponseException.class, e -> onRevokeFailed(token, e))
+				.onErrorResume(VaultClientResponseException.class, e -> onRevokeFailed(token, e))
 				.onErrorResume(Exception.class, e -> onRevokeFailed(token, e))
 				.then();
 	}
@@ -266,9 +267,9 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	}
 
 	private Mono<TokenWrapper> doRenew(TokenWrapper tokenWrapper) {
-		Mono<VaultResponse> exchange = this.webClient.post()
-				.uri("auth/token/renew-self")
-				.headers(httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(tokenWrapper.token)))
+		Mono<VaultResponse> exchange = this.client.post()
+				.path("auth/token/renew-self")
+				.headers(VaultHttpHeaders.from(tokenWrapper.token))
 				.retrieve()
 				.bodyToMono(VaultResponse.class);
 
@@ -329,7 +330,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	private Mono<TokenWrapper> doSelfLookup(VaultToken token) {
 		TokenWrapper wrapper = new TokenWrapper(token, token instanceof LoginToken);
 		if (isTokenSelfLookupEnabled() && !ClassUtils.isAssignableValue(LoginToken.class, token)) {
-			Mono<VaultToken> loginTokenMono = augmentWithSelfLookup(this.webClient, token);
+			Mono<VaultToken> loginTokenMono = augmentWithSelfLookup(this.client, token);
 			return loginTokenMono.onErrorResume(e -> {
 				this.logger.warn("Cannot enhance VaultToken to a LoginToken: %s".formatted(e.getMessage()));
 				multicastEvent(new AuthenticationErrorEvent(token, e));
@@ -379,28 +380,28 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 		return new OneShotTrigger(getRefreshTrigger().nextExecution((LoginToken) token));
 	}
 
-	private static Mono<VaultToken> augmentWithSelfLookup(WebClient webClient, VaultToken token) {
-		Mono<Map<String, Object>> data = lookupSelf(webClient, token);
+	private static Mono<VaultToken> augmentWithSelfLookup(ReactiveVaultClient client, VaultToken token) {
+		Mono<Map<String, Object>> data = lookupSelf(client, token);
 		return data.map(it -> LoginToken.from(token.toCharArray(), it));
 	}
 
-	private static Mono<Map<String, Object>> lookupSelf(WebClient webClient, VaultToken token) {
-		return webClient.get()
-				.uri("auth/token/lookup-self")
-				.headers(httpHeaders -> httpHeaders.putAll(VaultHttpHeaders.from(token)))
+	private static Mono<Map<String, Object>> lookupSelf(ReactiveVaultClient client, VaultToken token) {
+		return client.get()
+				.path("auth/token/lookup-self")
+				.headers(VaultHttpHeaders.from(token))
 				.retrieve()
 				.bodyToMono(VaultResponse.class)
 				.map(it -> {
 					Assert.state(it.getData() != null, "Token response is null");
 					return it.getRequiredData();
 				})
-				.onErrorMap(WebClientResponseException.class, e -> {
+				.onErrorMap(VaultClientResponseException.class, e -> {
 					return new VaultTokenLookupException(format("Token self-lookup", e), e);
 				});
 	}
 
 	private static String format(String message, RuntimeException e) {
-		if (e instanceof WebClientResponseException wce) {
+		if (e instanceof VaultClientResponseException wce) {
 			return "%s: Status %s %s %s".formatted(message, wce.getStatusCode().value(), wce.getStatusText(),
 					VaultResponses.getError(wce.getResponseBodyAsString()));
 		}

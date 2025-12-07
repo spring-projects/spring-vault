@@ -16,12 +16,14 @@
 
 package org.springframework.vault.authentication;
 
+import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,22 +36,27 @@ import org.mockito.quality.Strictness;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.authentication.event.*;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClient.RequestBodySpec;
+import org.springframework.vault.client.ReactiveVaultClient.RequestHeadersBodyPathSpec;
+import org.springframework.vault.client.ReactiveVaultClient.RequestHeadersPathSpec;
+import org.springframework.vault.client.ReactiveVaultClient.RequestHeadersSpec;
+import org.springframework.vault.client.ReactiveVaultClient.ResponseSpec;
+import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersSpec;
-import org.springframework.web.reactive.function.client.WebClient.RequestHeadersUriSpec;
-import org.springframework.web.reactive.function.client.WebClient.ResponseSpec;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Unit tests for {@link ReactiveLifecycleAwareSessionManager}.
@@ -67,16 +74,16 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	TaskScheduler taskScheduler;
 
 	@Mock
-	WebClient webClient;
+	ReactiveVaultClient webClient;
 
 	@Mock
 	RequestHeadersSpec requestHeadersSpec;
 
 	@Mock
-	RequestHeadersUriSpec requestHeadersUriSpec;
+	RequestHeadersPathSpec requestHeadersUriSpec;
 
 	@Mock
-	RequestBodyUriSpec requestBodyUriSpec;
+	RequestHeadersBodyPathSpec requestBodyPathSpec;
 
 	@Mock
 	RequestBodySpec requestBodySpec;
@@ -99,15 +106,15 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	void before() {
 
 		// POST
-		when(this.webClient.post()).thenReturn(this.requestBodyUriSpec);
-		when(this.requestBodyUriSpec.uri(anyString())).thenReturn(this.requestBodySpec);
-		when(this.requestBodySpec.headers(any())).thenReturn(this.requestBodySpec);
+		when(this.webClient.post()).thenReturn(this.requestBodyPathSpec);
+		when(this.requestBodyPathSpec.path(anyString())).thenReturn(this.requestBodySpec);
+		when(this.requestBodySpec.headers((HttpHeaders) any())).thenReturn(this.requestBodySpec);
 		when(this.requestBodySpec.retrieve()).thenReturn(this.responseSpec);
 
 		// GET
 		when(this.webClient.get()).thenReturn(this.requestHeadersUriSpec);
-		when(this.requestHeadersUriSpec.uri(anyString())).thenReturn(this.requestHeadersSpec);
-		when(this.requestHeadersSpec.headers(any())).thenReturn(this.requestHeadersSpec);
+		when(this.requestHeadersUriSpec.path(anyString())).thenReturn(this.requestHeadersSpec);
+		when(this.requestHeadersSpec.headers((HttpHeaders) any())).thenReturn(this.requestHeadersSpec);
 		when(this.requestHeadersSpec.retrieve()).thenReturn(this.responseSpec);
 
 		this.sessionManager = new ReactiveLifecycleAwareSessionManager(this.tokenSupplier, this.taskScheduler,
@@ -157,7 +164,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 			assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
 		}).verifyComplete();
 
-		verify(this.webClient.get()).uri("auth/token/lookup-self");
+		verify(this.webClient.get()).path("auth/token/lookup-self");
 		verify(this.listener).onAuthenticationEvent(this.captor.capture());
 		AfterLoginEvent event = (AfterLoginEvent) this.captor.getValue();
 		assertThat(event.getSource()).isInstanceOf(LoginToken.class);
@@ -192,8 +199,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		mockToken(LoginToken.renewable("foo".toCharArray(), Duration.ofMinutes(1)));
 
 		when(this.responseSpec.bodyToMono((Class) any())).thenReturn(Mono
-				.error(new WebClientResponseException("Some server error", 500, "Some server error", null, null,
-						null)));
+				.error(new MockVaultClientResponseException("Some server error")));
 
 		AtomicReference<AuthenticationErrorEvent> listener = new AtomicReference<>();
 		this.sessionManager.addErrorListener(listener::set);
@@ -201,8 +207,36 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.getVaultToken().as(StepVerifier::create).expectNextCount(1).verifyComplete();
 		this.sessionManager.renewToken().as(StepVerifier::create).verifyComplete();
 		assertThat(listener.get().getException()).isInstanceOf(VaultTokenRenewalException.class)
-				.hasCauseInstanceOf(WebClientResponseException.class)
-				.hasMessageContaining("Cannot renew token: Status 500Some server error");
+				.hasCauseInstanceOf(VaultClientResponseException.class)
+				.hasMessageContaining("Cannot renew token: Status 500");
+
+	}
+
+	static class MockVaultClientResponseException extends VaultClientResponseException{
+
+		public MockVaultClientResponseException(String msg) {
+			super(msg);
+		}
+
+		@Override
+		public HttpStatusCode getStatusCode() {
+			return HttpStatus.INTERNAL_SERVER_ERROR;
+		}
+
+		@Override
+		public String getStatusText() {
+			return "";
+		}
+
+		@Override
+		public byte[] getResponseBodyAsByteArray() {
+			return new byte[0];
+		}
+
+		@Override
+		public String getResponseBodyAsString(Charset fallbackCharset) {
+			return "";
+		}
 
 		@Override
 		public @Nullable <E> E getResponseBodyAs(Class<E> targetType) {
@@ -232,7 +266,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 		this.sessionManager.destroy();
 
-		verify(this.webClient.post()).uri("auth/token/revoke-self");
+		verify(this.webClient.post()).path("auth/token/revoke-self");
 		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRevocationEvent.class));
 		verify(this.listener).onAuthenticationEvent(any(AfterLoginTokenRevocationEvent.class));
 	}
@@ -250,7 +284,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.destroy();
 
 		verify(this.webClient, never()).post();
-		verify(this.webClient.post(), never()).uri("auth/token/revoke-self");
+		verify(this.webClient.post(), never()).path("auth/token/revoke-self");
 		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 		verifyNoMoreInteractions(this.listener);
 	}
@@ -270,7 +304,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		this.sessionManager.destroy();
 
 		verify(this.webClient, never()).post();
-		verify(this.webClient.post(), never()).uri("auth/token/revoke-self");
+		verify(this.webClient.post(), never()).path("auth/token/revoke-self");
 		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
 		verifyNoMoreInteractions(this.listener);
 	}
@@ -290,7 +324,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 				.verifyComplete();
 		this.sessionManager.destroy();
 
-		verify(this.requestBodyUriSpec).uri("auth/token/revoke-self");
+		verify(this.requestBodyPathSpec).path("auth/token/revoke-self");
 	}
 
 	@Test
@@ -330,7 +364,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 		runnableCaptor.getValue().run();
 
 		verify(this.webClient).post();
-		verify(this.webClient.post()).uri("auth/token/renew-self");
+		verify(this.webClient.post()).path("auth/token/renew-self");
 
 		verify(this.tokenSupplier, times(1)).getVaultToken();
 		verify(this.listener).onAuthenticationEvent(any(BeforeLoginTokenRenewedEvent.class));
