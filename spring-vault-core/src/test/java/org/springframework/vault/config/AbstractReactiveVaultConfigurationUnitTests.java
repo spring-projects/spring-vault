@@ -22,14 +22,11 @@ import reactor.test.StepVerifier;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
 import org.springframework.vault.client.WebClientCustomizer;
 import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultOperations;
-import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.util.Settings;
+import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -43,7 +40,7 @@ class AbstractReactiveVaultConfigurationUnitTests {
 	void shouldApplyCustomizerToWebClientFactory() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				WebClientCustomizerConfiguration.class);
+				VaultIntegrationTestConfiguration.class, WebClientCustomizerConfiguration.class);
 
 		WebClientFactory factory = context.getBean(WebClientFactory.class);
 		WebClient webClient = factory.create();
@@ -56,10 +53,27 @@ class AbstractReactiveVaultConfigurationUnitTests {
 	}
 
 	@Test
-	void shouldApplyCustomizerToTemplate() {
+	void shouldApplyWebClientCustomizer() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				WebClientCustomizerConfiguration.class);
+				VaultIntegrationTestConfiguration.class, WebClientCustomizerConfiguration.class);
+
+		ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
+
+		operations.read("/foo").as(StepVerifier::create).verifyError(CustomizedSignal.class);
+	}
+
+	@Test
+	void shouldApplyReactiveVaultClientCustomizer() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.register(VaultIntegrationTestConfiguration.class);
+		context.registerBean(ReactiveVaultClientCustomizer.class, () -> builder -> {
+			builder.clientConnector((method, uri, requestCallback) -> {
+				throw new CustomizedSignal();
+			});
+		});
+		context.refresh();
 
 		ReactiveVaultOperations operations = context.getBean(ReactiveVaultOperations.class);
 
@@ -67,22 +81,7 @@ class AbstractReactiveVaultConfigurationUnitTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	static class WebClientCustomizerConfiguration extends AbstractReactiveVaultConfiguration {
-
-		@Override
-		public VaultEndpoint vaultEndpoint() {
-			return Settings.TEST_VAULT_ENDPOINT;
-		}
-
-		@Override
-		public ClientAuthentication clientAuthentication() {
-			return new TokenAuthentication(Settings.token());
-		}
-
-		@Override
-		public SslConfiguration sslConfiguration() {
-			return Settings.createSslConfiguration();
-		}
+	static class WebClientCustomizerConfiguration {
 
 		@Bean
 		public WebClientCustomizer customizer() {

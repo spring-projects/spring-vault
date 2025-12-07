@@ -26,6 +26,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -41,21 +42,25 @@ import org.springframework.vault.authentication.AuthenticationSteps.Pair;
 import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueStep;
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClient.RequestHeadersBodyPathSpec;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodyUriSpec;
 
 /**
  * {@link VaultTokenSupplier} using {@link AuthenticationSteps} to create an
  * authentication flow emitting {@link VaultToken}.
- * <p>This class uses {@link WebClient} for non-blocking and reactive HTTP
- * access. The {@link AuthenticationSteps authentication flow} is materialized
- * as reactive sequence postponing execution until {@link Mono#subscribe()
- * subscription}.
+ * 
+ * <p>This class uses {@link ReactiveVaultClient} for non-blocking and reactive
+ * HTTP Vault access. It also uses {@link WebClient} for external HTTP access.
+ * The {@link AuthenticationSteps authentication flow} materializes as reactive
+ * sequence postponing execution until {@link Mono#subscribe() subscription}.
+ * 
  * <p>{@link Supplier Supplier} instances are inspected for their type.
  * {@link ResourceCredentialSupplier} instances are loaded through
- * {@link DataBufferUtils#read(org.springframework.core.io.Resource, org.springframework.core.io.buffer.DataBufferFactory, int)
+ * {@link DataBufferUtils#read(Resource, DataBufferFactory, int)
  * DataBufferUtils} to use non-blocking I/O for file access.
  * {@link Supplier#get() Calls} to generic supplier types are offloaded to a
  * {@link Schedulers#boundedElastic() scheduler} to avoid blocking calls on
@@ -72,6 +77,8 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 	private final AuthenticationSteps chain;
 
+	private final ReactiveVaultClient vaultClient;
+
 	private final WebClient webClient;
 
 	private final DataBufferFactory factory = new DefaultDataBufferFactory();
@@ -82,11 +89,31 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	 * {@link AuthenticationSteps} and {@link WebClient}.
 	 * @param steps must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
+	 * @deprecated since 4.1, use
+	 * {@link #AuthenticationStepsOperator(AuthenticationSteps, ReactiveVaultClient, WebClient)}
+	 * instead.
 	 */
+	@Deprecated(since = "4.1")
 	public AuthenticationStepsOperator(AuthenticationSteps steps, WebClient webClient) {
+		this(steps, ReactiveVaultClient.builder(webClient).build(), webClient);
+	}
+
+	/**
+	 * Create a new {@code AuthenticationStepsOperator} given
+	 * {@link AuthenticationSteps}, {@link ReactiveVaultClient}, and
+	 * {@link WebClient}.
+	 * @param steps must not be {@literal null}.
+	 * @param vaultClient must not be {@literal null}.
+	 * @param webClient must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public AuthenticationStepsOperator(AuthenticationSteps steps, ReactiveVaultClient vaultClient,
+			WebClient webClient) {
 		Assert.notNull(steps, "AuthenticationSteps must not be null");
+		Assert.notNull(vaultClient, "ReactiveVaultClient must not be null");
 		Assert.notNull(webClient, "WebClient must not be null");
 		this.chain = steps;
+		this.vaultClient = vaultClient;
 		this.webClient = webClient;
 	}
 
@@ -148,22 +175,43 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
-	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
-		HttpRequest<Object> definition = step.getDefinition();
+		return step.isVault() ? doVaultHttpRequest(step.getDefinition(), state)
+				: doExternalHttpRequest(step.getDefinition(), state);
+	}
+
+	private Mono<Object> doVaultHttpRequest(HttpRequest<Object> definition, Object state) {
 		HttpEntity<?> entity = AuthenticationStepsExecutor.getEntity(definition.getEntity(), state);
-		RequestBodySpec spec;
-		if (definition.getUri() == null) {
-			spec = this.webClient.method(definition.getMethod())
-					.uri(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
-		} else {
-			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
+		RequestHeadersBodyPathSpec spec = this.vaultClient.method(definition.getMethod());
+		if (definition.getUriTemplate() != null) {
+			spec.path(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
+		}
+		if (definition.getUri() != null) {
+			spec.uri(definition.getUri());
 		}
 		for (Entry<String, List<String>> header : entity.getHeaders().headerSet()) {
-			spec = spec.header(header.getKey(), header.getValue().get(0));
+			spec.header(header.getKey(), header.getValue().get(0));
 		}
 		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.UNDEFINDED)) {
-			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
+			spec.bodyValue(entity.getBody());
+		}
+		return spec.retrieve().bodyToMono(definition.getResponseType());
+	}
+
+	private Mono<Object> doExternalHttpRequest(HttpRequest<Object> definition, Object state) {
+		HttpEntity<?> entity = AuthenticationStepsExecutor.getEntity(definition.getEntity(), state);
+		RequestBodyUriSpec spec = this.webClient.method(definition.getMethod());
+		if (definition.getUriTemplate() != null) {
+			spec.uri(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
+		}
+		if (definition.getUri() != null) {
+			spec.uri(definition.getUri());
+		}
+		for (Entry<String, List<String>> header : entity.getHeaders().headerSet()) {
+			spec.header(header.getKey(), header.getValue().get(0));
+		}
+		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.UNDEFINDED)) {
+			spec.bodyValue(entity.getBody());
 		}
 		return spec.retrieve().bodyToMono(definition.getResponseType());
 	}

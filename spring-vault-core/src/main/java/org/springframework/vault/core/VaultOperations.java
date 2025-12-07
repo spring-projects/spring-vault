@@ -21,6 +21,7 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
@@ -28,21 +29,28 @@ import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.web.client.RestClientException;
 
 /**
- * Interface that specifies a basic set of Vault operations, implemented by
- * {@link org.springframework.vault.core.VaultTemplate}. This is the main entry
- * point to interact with Vault in an authenticated and unauthenticated context.
- * <p>{@link VaultOperations} allows execution of callback methods. Callbacks
- * can execute requests within a {@link #doWithSession(RestOperationsCallback)
- * session context} and the {@link #doWithVault(RestOperationsCallback) without
- * a session}.
- * <p>Paths used in this interface (and interfaces accessible from here) are
- * considered relative to the {@link VaultEndpoint}. Paths that are
- * fully-qualified URI's can be used to access Vault cluster members in an
- * authenticated context. To prevent unwanted full URI access, make sure to
- * sanitize paths before passing them to this interface.
+ * Central entrypoint for performing Vault operations on a reactive runtime.
+ *
+ * <p>Implemented by {@link org.springframework.vault.core.VaultTemplate}, this
+ * interface exposes reactive APIs for interacting with Vault backends such as
+ * Key/Value, Transit and {@code sys}. It supports callback-style execution for
+ * both {@link #doWithSession(RestOperationsCallback) authenticated
+ * doWithSession} and {@link #doWithVault(RestOperationsCallback)
+ * unauthenticated doWithVault} access.
+ *
+ * <p>{@link VaultClient.PathSpec#path Paths used} with this and other Template
+ * API interfaces are typically relative to the {@link VaultEndpoint} of the
+ * underlying {@link VaultClient}. If the client is configured without an
+ * endpoint, fully-qualified URIs can be used.
+ * <p><b>Note</b> that operations apply authentication and other headers
+ * regardless of using relative or absolute URIs. To prevent unwanted access to
+ * external endpoints using authentication headers, applications should sanitize
+ * paths to avoid unwanted access to external endpoints.
  *
  * @author Mark Paluch
  * @author Lauren Voswinkel
+ * @see #doWithSession(RestOperationsCallback)
+ * @see #doWithVault(RestOperationsCallback)
  * @see org.springframework.vault.client.VaultClient
  * @see org.springframework.vault.core.VaultTemplate
  * @see org.springframework.vault.core.VaultTokenOperations

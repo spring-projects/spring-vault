@@ -34,6 +34,7 @@ import org.springframework.vault.authentication.AuthenticationSteps.ScalarValueS
 import org.springframework.vault.authentication.AuthenticationSteps.SupplierStep;
 import org.springframework.vault.authentication.AuthenticationSteps.ZipStep;
 import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.client.VaultClient.RequestHeadersBodyPathSpec;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -56,9 +57,9 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private final AuthenticationSteps chain;
 
-	private final ClientAdapter adapter;
-
 	private final VaultLoginClient loginClient;
+
+	private final ClientAdapter adapter;
 
 
 	/**
@@ -66,11 +67,9 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	 * {@link AuthenticationSteps} and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
-	 * @deprecated since 4.1, use
 	 * {@link #AuthenticationStepsExecutor(AuthenticationSteps, VaultClient, RestClient)}
 	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
 		this(steps, ClientAdapter.from(restOperations));
 	}
@@ -90,7 +89,7 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	/**
-	 * Create a new {@link AuthenticationStepsExecutor} given
+	 * Create a new {@code AuthenticationStepsExecutor} given
 	 * {@link AuthenticationSteps} and {@link VaultClient}.
 	 * @param steps must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
@@ -179,6 +178,24 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	@SuppressWarnings("ConstantConditions")
 	private @Nullable Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
 		HttpRequest<Object> definition = step.getDefinition();
+		if (step.isVault()) {
+			RequestHeadersBodyPathSpec spec = this.loginClient.method(definition.getMethod());
+			if (definition.getUriTemplate() != null) {
+				spec.path(definition.getUriTemplate(), definition.getUrlVariables());
+			}
+			if (definition.getUri() != null) {
+				spec.uri(definition.getUri());
+			}
+			HttpEntity<?> entity = getEntity(definition.getEntity(), state);
+			if (!entity.getHeaders().isEmpty()) {
+				spec.headers(entity.getHeaders());
+			}
+			if (entity.getBody() != null) {
+				spec.body(entity.getBody());
+			}
+			return spec.retrieve().body(definition.getResponseType());
+		}
+
 		if (definition.getUriTemplate() != null) {
 			ResponseEntity<?> exchange = this.adapter.exchange(definition.getUriTemplate(), definition.getMethod(),
 					getEntity(definition.getEntity(), state), definition.getResponseType(),

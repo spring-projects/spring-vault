@@ -23,15 +23,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.TokenAuthentication;
 import org.springframework.vault.client.RestTemplateCustomizer;
 import org.springframework.vault.client.RestTemplateFactory;
-import org.springframework.vault.client.VaultEndpoint;
+import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.config.AbstractVaultConfiguration.TaskSchedulerWrapper;
+import org.springframework.vault.core.VaultIntegrationTestConfiguration;
 import org.springframework.vault.core.VaultOperations;
-import org.springframework.vault.support.SslConfiguration;
-import org.springframework.vault.util.Settings;
 import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
@@ -48,7 +45,7 @@ class AbstractVaultConfigurationUnitTests {
 	void shouldApplyCustomizerToRestTemplateFactory() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				RestTemplateCustomizerConfiguration.class);
+				VaultIntegrationTestConfiguration.class, RestTemplateCustomizerConfiguration.class);
 
 		RestTemplateFactory factory = context.getBean(RestTemplateFactory.class);
 		RestTemplate restTemplate = factory.create();
@@ -57,10 +54,29 @@ class AbstractVaultConfigurationUnitTests {
 	}
 
 	@Test
-	void shouldApplyCustomizerToTemplate() {
+	void shouldApplyRestTemplateCustomizer() {
 
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(
-				RestTemplateCustomizerConfiguration.class);
+				VaultIntegrationTestConfiguration.class, RestTemplateCustomizerConfiguration.class);
+
+		VaultOperations operations = context.getBean(VaultOperations.class);
+
+		assertThatExceptionOfType(CustomizedSignal.class).isThrownBy(() -> operations.opsForSys().health());
+	}
+
+	@Test
+	void shouldApplyVaultClientCustomizerToTemplate() {
+
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+
+		context.register(VaultIntegrationTestConfiguration.class);
+		context.registerBean(VaultClientCustomizer.class, () -> {
+			return builder -> builder.requestFactory((uri, httpMethod) -> {
+				throw new CustomizedSignal();
+			});
+		});
+
+		context.refresh();
 
 		VaultOperations operations = context.getBean(VaultOperations.class);
 
@@ -95,22 +111,7 @@ class AbstractVaultConfigurationUnitTests {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	static class RestTemplateCustomizerConfiguration extends AbstractVaultConfiguration {
-
-		@Override
-		public VaultEndpoint vaultEndpoint() {
-			return Settings.TEST_VAULT_ENDPOINT;
-		}
-
-		@Override
-		public ClientAuthentication clientAuthentication() {
-			return new TokenAuthentication(Settings.token());
-		}
-
-		@Override
-		public SslConfiguration sslConfiguration() {
-			return Settings.createSslConfiguration();
-		}
+	static class RestTemplateCustomizerConfiguration {
 
 		@Bean
 		public RestTemplateCustomizer customizer() {

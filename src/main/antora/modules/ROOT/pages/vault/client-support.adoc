@@ -1,8 +1,8 @@
 [[vault.core.client.support]]
-= Client Support
+= HTTP Client Support
 
 Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Vault uses
-javadoc:org.springframework.vault.client.VaultClient[`VaultClient`] as primary interface accessing Vault.
+javadoc:org.springframework.vault.client.VaultClient[] as primary interface accessing Vault.
 `VaultClient` is designed to be extensible and allows to plug in different HTTP clients based on a design similar to {spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestClient`].
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
@@ -24,15 +24,14 @@ Spring Vault's reactive integration supports the following reactive HTTP clients
 Using a specific client requires the according dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
 
-== Java's builtin `HttpClient`
+== Java's built-in `HttpClient`
 
 Java's builtin `HttpClient` is available out-of-the-box since Java 11 without additional
 dependencies.
 
 == External Clients
 You can use external clients to access Vault's API. Simply add one of the following
-dependencies to your project. You can omit the version number if using
-<<dependencies,Spring Vault's Dependency BOM>>
+dependencies to your project.
 
 
 .Apache Http Components Dependency

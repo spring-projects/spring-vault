@@ -1,0 +1,363 @@
+[[vault-client-access]]
+= Vault Client Access
+
+The value provided by the Spring Vault framework is perhaps best shown by the sequence of actions outlined in the following table below.
+The table shows which functionality Spring takes care of when choosing a specific client option:
+
+[cols="5",options="header"]
+|===
+
+| Client | HTTP Requests | Authentication | Vault Operations | Error Handling
+
+| {spring-framework-docs}/integration/rest-clients.html#rest-restclient[*RestClient*]
+| Low-level HTTP request access with full control over URIs, headers, and message conversion.	You manually construct requests and handle responses. javadoc:org.springframework.vault.client.VaultEndpoint[] can be configured through a `UriBuilderFactory` enabling relative path usage.
+| No built-in authentication support; you must manage tokens and headers yourself. | No direct Vault domain operations; you build requests for Vault endpoints manually.
+| `4xx`/`5xx` status translated to `HttpServerErrorException` respective `HttpClientErrorException`, `onStatus` lets you register custom handlers
+
+| <<vault-client,*VaultClient*>>
+| Vault-specific fluent HTTP client built on top of `RestClient`. Provides methods for common HTTP verbs and request construction along with javadoc:org.springframework.vault.client.VaultEndpoint[] support to decouple access to functionality through relative paths from actual Vault server configuration.
+| Convenience methods for setting tokens (`token(…)`) and namespaces (`namespace(…)`); easier to manage authentication headers and can be used with javadoc:org.springframework.vault.authentication.ClientAuthentication[] implementations to log into Vault.
+| Path-based request methods; Allows consuming Vault responses as javadoc:org.springframework.vault.support.VaultResponse[] through `ResponseSpec.body()` and `ResponseSpec.toEntity()` methods; supports response wrapping directly.
+| `4xx`/`5xx` status translated to `VaultClientResponseException`, `onStatus` lets you register custom handlers
+
+| xref:vault/imperative-template.adoc[*VaultTemplate*]
+| High-level abstraction for Vault operations. HTTP requests can be issued through client callbacks.
+| Support for simple javadoc:org.springframework.vault.authentication.ClientAuthentication[] and javadoc:org.springframework.vault.authentication.SessionManager[] implementations that handle token renewal and authentication.
+| Java API for several Vault domain operations (read, write, delete, list) supporting various secret backends (KV, Cubbyhole, PKI, Transit, etc.).
+| Built on top of `VaultClient`, translates HTTP errors into Spring Vault exceptions (e.g., `VaultException`).
+
+|===
+
+== Client Examples
+
+.`RestClient`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	RestClient client = RestClient.create();
+
+	VaultResponse response = client.get()
+		.uri("https://vault.example.com/v1/secret/my-secret")
+		.header("X-Vault-Token", "…")
+		.header("X-Vault-Namespace", "…")
+		.retrieve()
+		.body(VaultResponse.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val client = RestClient.create()
+
+	val response = client.get()
+		.uri("https://vault.example.com/v1/secret/my-secret")
+		.header("X-Vault-Token", "…")
+		.header("X-Vault-Namespace", "…")
+		.retrieve()
+		.body<VaultResponse>()
+----
+======
+
+.`VaultClient`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	VaultClient client = VaultClient.create(VaultEndpoint.create("vault.example.com", 8200));
+
+	VaultResponse response = client.get()
+		.path("secret/my-secret")
+		.token(VaultToken.of(…))
+		.namespace(…)
+		.retrieve()
+		.requiredBody();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val client = VaultClient.create(VaultEndpoint.create("vault.example.com", 8200))
+
+	val response = client.get()
+		.path("secret/my-secret")
+		.token(VaultToken.of(…))
+		.namespace(…)
+		.retrieve()
+		.requiredBody()
+----
+======
+
+.`VaultTemplate`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	VaultTemplate vaultOperations = new VaultTemplate(vaultClient, sessionManager);
+	VaultResponse response = vaultOperations.read("secret/my-secret");
+	// or
+	Object value = vaultOperations.readRequired("secret/my-secret").getRequiredData().get("value");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val vaultOperations = VaultTemplate(vaultClient, sessionManager)
+	val response = vaultOperations.read("secret/my-secret")
+	// or
+	val value = vaultOperations.readRequired("secret/my-secret").getRequiredData()["value"]
+----
+======
+
+=== Recommendations
+
+If you need the most flexibility and full control over the HTTP client (connection pooling, custom TLS keystore at the JVM level, wire logging for diagnostics), start with a properly configured `RestClient` or request factory.
+This is the right choice for framework-level code or libraries that must adapt to many environments.
+
+For most application code that uses Vault, `VaultClient` strikes the right balance: It provides a readable, fluent API along with easy request/response handling that resembles `RestClient` look-and-feel. Its safe defaults such as endpoint scoping and token helpers avoid common pitfalls.
+
+Choose `VaultTemplate` when you prefer working with Vault at a higher level of abstraction.
+It reduces boilerplate and integrates with Spring's conversion and exception-translation patterns.
+Use it when your application performs secret CRUD operations and you want concise, intention-revealing code that provides a Java API for Vault.
+
+[[vault-client]]
+== `VaultClient` and `ReactiveVaultClient`
+
+Spring Vault provides the following choices for making calls to Vault endpoints:
+
+* `VaultClient` -- synchronous client with a fluent API based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestClient`]
+* `ReactiveVaultClient` -- non-blocking, reactive client with fluent API  based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-webclient[`WebClient`]
+
+`VaultClient` is a synchronous HTTP client that provides a fluent API to perform requests.
+It's reactive variant `ReactiveVaultClient` mirrors ``VaultClient``'s design for non-blocking access.
+Going forward, the documentation shows `VaultClient`. Except for the reactive aspects, `ReactiveVaultClient` works the same way.
+It serves as an abstraction over HTTP libraries, and handles conversion of HTTP request and response content to and from higher level Java objects build on top of `RestClient` respective `WebClient` for its reactive variant.
+
+=== Create a `VaultClient`
+
+`VaultClient` has static `create` shortcut methods.
+It also exposes a `builder()` with further options:
+
+- select the HTTP library to use, see {spring-framework-docs}/integration/rest-clients.html#rest-request-factories[Client Request Factories]
+- set a `VaultEndpoint` or `VaultEndpointProvider` to enable relative path usage and limit requests to the configured Vault server
+- set default request headers
+- customize the underlying `RestClient` (or `WebClient` for `ReactiveVaultClient`)
+
+Once created, a `VaultClient` is safe to use in multiple threads.
+
+You can register javadoc:org.springframework.vault.client.VaultClientCustomizer[] or its reactive variant javadoc:org.springframework.vault.client.ReactiveVaultClientCustomizer[] when using Spring Vault's configuration infrastructure to customize the `VaultClient` or `ReactiveVaultClient` instances created by Spring Vault.
+
+The following example shows how to create or build a `VaultClient`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	VaultClient defaultClient = VaultClient.create();
+
+	VaultClient customClient = VaultClient.builder()
+		.endpoint(VaultEndpoint.create("vault.acme.com", 8200))
+		.requestFactory(new HttpComponentsClientHttpRequestFactory())
+		.defaultHeader("My-Header", "Foo")
+		.configureRestClient(builder -> … )
+		.build();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val defaultClient = VaultClient.create()
+
+	val customClient = VaultClient.builder()
+		.endpoint(VaultEndpoint.create("vault.acme.com", 8200))
+		.requestFactory(HttpComponentsClientHttpRequestFactory())
+		.defaultHeader("My-Header", "Foo")
+		.configureRestClient{ … }
+		.build()
+----
+======
+
+=== Use the `VaultClient`
+
+To perform a Vault request, first specify the HTTP method to use.
+Use the convenience methods like `get()`, `post()`, `delete()`, and others, or `method(HttpMethod)`.
+
+==== Request Path
+
+Next, specify the request path with the `path` methods.
+The path is typically specified as a `String`, with optional URI template variables.
+The following shows how to perform a request:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	int id = 42;
+	vaultClient.get()
+		.path("secret/{id}", id)
+		// ...
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val id = 42
+	vaultClient.get()
+		.path("secret/{id}", id)
+		// ...
+----
+======
+
+String URLs are encoded by default, but this can be changed by building a client with a custom `uriBuilderFactory`.
+The URL can also be provided with a function or as a `java.net.URI`, both of which are not encoded. Using a `URI` allows accessing external servers.
+
+==== Request headers and body
+
+If necessary, the Vault request can be manipulated by adding request headers with `header(String, String)` or `token(VaultToken)` and so on.
+
+The request body itself can be set by `body(Object)`, which internally uses {spring-framework-docs}/web/webmvc/message-converters.html#message-converters[HTTP Message conversion].
+Alternatively, the request body can be set using a `ParameterizedTypeReference`, allowing you to use generics.
+
+==== Retrieving the response
+
+Once the request has been set up, it can be sent by chaining method calls after `retrieve()`.
+For example, the response body can be accessed by using `retrieve().body(Class)` or `retrieve().body(ParameterizedTypeReference)` for parameterized types like lists. A convenience method `retrieve().body()` retuns the body using Vault's default response type javadoc:org.springframework.vault.support.VaultResponse[].
+The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, JSON can be converted into objects using Jackson.
+
+The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body, with `retrieve().toEntity(Class)`
+
+NOTE: Calling `retrieve()` by itself is a no-op and returns a `ResponseSpec`.
+Applications must invoke a terminal operation on the `ResponseSpec` to have any side effect.
+If consuming the response has no interest for your use case, you can use `retrieve().toBodilessEntity()`.
+
+This sample shows how `VaultClient` can be used to perform a simple `GET` request.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	VaultResponse result = vaultClient.get() <1>
+		.path("secret/my-secret")            <2>
+		.retrieve()                          <3>
+		.requiredBody();                     <4>
+
+	System.out.println(result);              <5>
+----
+<1> Set up a GET request
+<2> Specify the path on the Vault server
+<3> Retrieve the response
+<4> Convert the response into a `VaultResponse`
+<5> Print the result
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val result = vaultClient.get()   <1>
+		.path("secret/my-secret")   <2>
+		.retrieve()                 <3>
+		.requiredBody()             <4>
+
+	println(result)                 <5>
+----
+<1> Set up a GET request
+<2> Specify the path on the Vault server
+<3> Retrieve the response
+<4> Convert the response into a `VaultResponse`
+<5> Print the result
+======
+
+Access to the response status code and headers is provided through `ResponseEntity`:
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	ResponseEntity<VaultResponse> result = vaultClient.get() <1>
+		.path("secret/my-secret") <1>
+		.retrieve()
+		.toEntity(); <2>
+
+	System.out.println("Response status: " + result.getStatusCode()); <3>
+	System.out.println("Response headers: " + result.getHeaders()); <3>
+	System.out.println("Contents: " + result.getBody()); <3>
+----
+<1> Set up a GET request for the specified URL
+<2> Convert the response into a `ResponseEntity`
+<3> Print the result
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val result = vaultClient.get() <1>
+		.path("secret/my-secret") <1>
+		.retrieve()
+		.toEntity<String>() <2>
+
+	println("Response status: " + result.statusCode) <3>
+	println("Response headers: " + result.headers) <3>
+	println("Contents: " + result.body) <3>
+----
+<1> Set up a GET request for the specified URL
+<2> Convert the response into a `ResponseEntity`
+<3> Print the result
+======
+
+==== Error handling
+
+By default, `VaultClient` throws a subclass of `VaultClientResponseException` when retrieving a response with a 4xx or 5xx status code.
+This behavior can be overridden using `onStatus`.
+
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim,quotes"]
+----
+	String result = vaultClient.get()
+		.path("secret/this-path-does-not-exist") <1>
+		.retrieve()
+		.onStatus(HttpStatusCode::is4xxClientError, (request, response) -> { <2>
+			throw new MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()); <3>
+		})
+		.body(String.class);
+----
+<1> Create a GET request for a URL that returns a 404 status code
+<2> Set up a status handler for all 4xx status codes
+<3> Throw a custom exception
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim,quotes"]
+----
+	val result = vaultClient.get()
+		.path("secret/this-path-does-not-exist") <1>
+		.retrieve()
+		.onStatus(HttpStatusCode::is4xxClientError) { _, response -> <2>
+			throw MyCustomRuntimeException(response.getStatusCode(), response.getHeaders()) } <3>
+		.body<String>()
+----
+<1> Create a GET request for a URL that returns a 404 status code
+<2> Set up a status handler for all 4xx status codes
+<3> Throw a custom exception
+======

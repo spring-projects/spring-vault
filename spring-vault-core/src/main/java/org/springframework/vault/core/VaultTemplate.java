@@ -135,6 +135,23 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 
 	/**
 	 * Create a new {@link VaultTemplate} with a {@link VaultClient} and
+	 * {@link ClientAuthentication}.
+	 * @param client must not be {@literal null}.
+	 * @param clientAuthentication must not be {@literal null}.
+	 * @since 4.1
+	 */
+	public VaultTemplate(VaultClient client, ClientAuthentication clientAuthentication) {
+		Assert.notNull(client, "VaultEndpoint must not be null");
+		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
+		this.sessionManager = new SimpleSessionManager(clientAuthentication);
+		this.dedicatedSessionManager = true;
+		this.statelessTemplate = new RestClientOperationsWrapper(client);
+		this.statelessClient = client;
+		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient);
+	}
+
+	/**
+	 * Create a new {@link VaultTemplate} with a {@link VaultClient} and
 	 * {@link SessionManager}.
 	 * @param client must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.

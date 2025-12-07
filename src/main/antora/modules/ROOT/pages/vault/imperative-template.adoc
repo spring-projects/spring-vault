@@ -10,7 +10,7 @@ NOTE: Once configured, javadoc:org.springframework.vault.core.VaultTemplate[] is
 multiple instances.
 
 The mapping between Vault documents and domain classes is done by delegating to
-`RestClient`. Spring Web support provides the mapping infrastructure.
+xref:vault/vault-client.adoc[`VaultClient`]. Spring Web support provides the mapping infrastructure.
 
 The javadoc:org.springframework.vault.core.VaultTemplate[] class implements the interface
 javadoc:org.springframework.vault.core.VaultOperations[].

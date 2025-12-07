@@ -47,13 +47,12 @@ import org.springframework.web.util.UriBuilderFactory;
  * Client to perform Vault HTTP requests, exposing a fluent, synchronous API over
  * underlying {@link RestClient}.
  *
- * <p>
- * Use static factory methods {@link #create()}, {@link #create(String)}, or
+ * <p>Use static factory methods {@link #create()}, {@link #create(String)}, or
  * {@link VaultClient#builder()} to prepare an instance. To use the same configuration as
  * a {@link RestClient}, use {@link #builder(RestClient)} or
  * {@link #builder(RestTemplate)} respectively.
- * <p>
- * {@code VaultClient} is intended to be used with relative paths requiring a
+ *
+ * <p>{@code VaultClient} is intended to be used with relative paths requiring a
  * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint) configured}. Without
  * an endpoint, callers must provide the absolute URL for each request.
  *
@@ -318,26 +317,25 @@ public interface VaultClient {
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
-		 * configured for the client (for example, with a base URI) this method will
-		 * these to expand the URI template and prevent usage of absolute URIs to avoid
-		 * unwanted access to servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) this method will these to expand the URI
+		 * template and prevent usage of absolute URIs to avoid unwanted access to
+		 * servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, @Nullable Object... pathVariables);
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
-		 * configured for the client (for example, with a base URI) this method will
-		 * these to expand the URI template and prevent usage of absolute URIs to avoid
-		 * unwanted access to servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) this method will these to expand the URI
+		 * template and prevent usage of absolute URIs to avoid unwanted access to
+		 * servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
 
 		/**
 		 * Specify the URI using a fully constructed {@link URI}.
-		 * <p>
-		 * If the given URI is absolute, it is used as given. If it is a relative
+		 * <p>If the given URI is absolute, it is used as given. If it is a relative
 		 * URI, the {@link UriBuilderFactory} configured for the client (for example,
 		 * with a base URI) will be used to {@linkplain URI#resolve(URI) resolve} the
 		 * given URI against.
@@ -406,16 +404,20 @@ public interface VaultClient {
 		 *     .retrieve()
 		 *     .toEntity(Person.class);
 		 * </pre>
-		 * <p>*Or if interested only in the body: <pre class="code">
+		 *
+		 * <p> Or if interested only in the body:
+		 * <pre class="code">
 		 * Person person = client.get()
 		 *     .path("/persons/1")
 		 *     .retrieve()
 		 *     .body(Person.class);
-		 * </pre> Note that this method does not actually execute the request until you
+		 * </pre>
+		 * Note that this method does not actually execute the request until you
 		 * call one of the returned {@link VaultClient.ResponseSpec}.
-		 * <p>* By default, 4xx response code result in a {@link HttpClientErrorException} and
-		 * 5xx response codes in a {@link HttpServerErrorException}. To customize error
-		 * handling, use {@link ResponseSpec#onStatus(Predicate, ErrorHandler)} onStatus}
+		 * <p> By default, 4xx and 5xx response codes result in a
+		 * {@link VaultClientResponseException} with a {@link HttpClientErrorException}
+		 * cause respective {@link HttpServerErrorException} cause. To customize error
+		 * handling, use {@link ResponseSpec#onStatus(Predicate, ErrorHandler) onStatus}
 		 * handlers.
 		 * @return {@code ResponseSpec} to specify how to decode the body.
 		 */

@@ -44,6 +44,7 @@ import org.springframework.vault.support.VaultToken;
 @FunctionalInterface
 public interface ClientAuthentication {
 
+
 	/**
 	 * Obtain a {@link VaultToken} for authenticated Vault access.
 	 * <p>This method may perform an authentication request to Vault or return a

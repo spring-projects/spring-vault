@@ -298,19 +298,19 @@ public interface ReactiveVaultClient {
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
-		 * configured for the client (for example, with a base URI) this method will
-		 * these to expand the URI template and prevent usage of absolute URIs to avoid
-		 * unwanted access to servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) this method will these to expand the URI
+		 * template and prevent usage of absolute URIs to avoid unwanted access to
+		 * servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, @Nullable Object... pathVariables);
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
-		 * configured for the client (for example, with a base URI) this method will
-		 * these to expand the URI template and prevent usage of absolute URIs to avoid
-		 * unwanted access to servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
+		 * for the client (for example, with a base URI) this method will these to expand the URI
+		 * template and prevent usage of absolute URIs to avoid unwanted access to
+		 * servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
 

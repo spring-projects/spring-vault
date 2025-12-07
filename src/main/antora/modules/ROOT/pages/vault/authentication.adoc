@@ -42,6 +42,22 @@ NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultProp
 See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`]
 for a sample on referencing properties in components and other property sources.
 
+== `ClientAuthentication` Interface
+
+The javadoc:org.springframework.vault.authentication.ClientAuthentication[] interface enables authentication against Vault and returns a `VaultToken` for authenticated Vault requests.
+
+Implementations are typically stateless and thread-safe, using `VaultClient` for authentication requests.
+Most authentication methods also implement javadoc:org.springframework.vault.authentication.AuthenticationStepsFactory[] for <<vault.authentication.steps,composable authentication>> in reactive/non-blocking reactive arrangements.
+
+Typically, an authentication mechanism requires configuration options specific to its method and a xref:vault/vault-client.adoc[`VaultClient`] to request the token by providing method-specific credentials.
+For example, <<vault.authentication.approle>> retrieves all necessary credentials directly from Vault.
+
+Some authentication mechanisms depend on external credentials or tokens, particularly those relying on trusted environments (AWS, GCP, Azure compute instances).
+Built-in mechanisms accept either `RestClient` or transport-specific clients (such as Google IAM `TransportChannelProvider`).
+
+NOTE: When providing `RestClient` for authentication, configure it with Vault's base URL as authentication mechanisms use relative paths only.
+While `RestClient` allows customization of timeouts and SSL settings, we recommend using a separate `VaultClient` to avoid unintended configuration sharing between external communication and authentication requests.
+
 [[vault.authentication.token]]
 == Token authentication
 
@@ -348,10 +364,10 @@ class AppConfig extends AbstractVaultConfiguration {
     public ClientAuthentication clientAuthentication() {
 
         GcpComputeAuthenticationOptions options = GcpComputeAuthenticationOptions.builder()
-				.role(…).build();
+            .role(…).build();
 
-		GcpComputeAuthentication authentication = new GcpComputeAuthentication(options,
-				vaultClient());
+        GcpComputeAuthentication authentication = new GcpComputeAuthentication(options,
+            vaultClient());
     }
 
     // …
@@ -393,10 +409,10 @@ class AppConfig extends AbstractVaultConfiguration {
     public ClientAuthentication clientAuthentication() {
 
         GcpIamCredentialsAuthenticationOptions options = GcpIamCredentialsAuthenticationOptions.builder()
-				.role(…).credential(GoogleCredentials.getApplicationDefault()).build();
+            .role(…).credential(GoogleCredentials.getApplicationDefault()).build();
 
-		GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options,
-				vaultClient());
+        GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options,
+            vaultClient());
     }
 
     // …
@@ -849,11 +865,12 @@ for their authentication-specific options:
 [source,java]
 ----
 CubbyholeAuthenticationOptions options = …
-RestOperations vaultClient = …
+VaultClient vaultClient = …
+RestClient restClient = …
 
 AuthenticationSteps steps = CubbyholeAuthentication.createAuthenticationSteps(options);
 
-AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, vaultClient);
+AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, vaultClient, restClient);
 
 VaultToken token = executor.login();
 ----
@@ -875,4 +892,4 @@ Depending on the authentication method, a login can create two kinds of tokens:
 Authentication methods such as javadoc:org.springframework.vault.authentication.TokenAuthentication[] just create a `VaultToken` which does not carry any renewability/TTL details. javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] will run a self-lookup on the token to retrieve renewability and TTL from Vault.
 `VaultToken` are renewed periodically if self-lookup is enabled. Note that `VaultToken` are never revoked, only `LoginToken` are revoked.
 
-Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.
+Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to set up token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.

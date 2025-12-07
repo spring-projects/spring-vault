@@ -16,26 +16,42 @@
 
 package org.springframework.vault.config;
 
-import reactor.core.publisher.Mono;
-
 import java.time.Duration;
+
+import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
-import org.springframework.vault.authentication.*;
+import org.springframework.vault.authentication.AuthenticationEventPublisher;
+import org.springframework.vault.authentication.AuthenticationStepsFactory;
+import org.springframework.vault.authentication.AuthenticationStepsOperator;
+import org.springframework.vault.authentication.CachingVaultTokenSupplier;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ReactiveLifecycleAwareSessionManager;
+import org.springframework.vault.authentication.ReactiveSessionManager;
+import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
 import org.springframework.vault.authentication.event.AuthenticationEventMulticaster;
 import org.springframework.vault.authentication.event.AuthenticationListener;
-import org.springframework.vault.client.*;
+import org.springframework.vault.client.ClientHttpConnectorFactory;
+import org.springframework.vault.client.ReactiveVaultClient;
+import org.springframework.vault.client.ReactiveVaultClientCustomizer;
+import org.springframework.vault.client.ReactiveVaultClients;
+import org.springframework.vault.client.ReactiveVaultEndpointProvider;
+import org.springframework.vault.client.VaultEndpointProvider;
+import org.springframework.vault.client.WebClientBuilder;
+import org.springframework.vault.client.WebClientCustomizer;
+import org.springframework.vault.client.WebClientFactory;
 import org.springframework.vault.core.ReactiveVaultTemplate;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
@@ -118,9 +134,10 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	}
 
 	/**
-	 * Create a {@link org.springframework.vault.client.ReactiveVaultClient} initialized with
-	 * {@link #reactiveVaultEndpointProvider()} and {@link #clientHttpConnector()}. May
-	 * be overridden by subclasses.
+	 * Create a {@link org.springframework.vault.client.ReactiveVaultClient}
+	 * initialized with {@link #reactiveVaultEndpointProvider()} and
+	 * {@link #clientHttpConnector()}. The ReactiveVaultClient builder can be
+	 * customized through {@link ReactiveVaultClientCustomizer} beans.
 	 * @return the {@link ReactiveVaultClient}.
 	 * @see #reactiveVaultEndpointProvider()
 	 * @see #clientHttpConnector()
@@ -195,7 +212,7 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 		if (clientAuthentication instanceof AuthenticationStepsFactory factory) {
 			WebClient webClient = getWebClientFactory().create();
 			AuthenticationStepsOperator stepsOperator = new AuthenticationStepsOperator(
-					factory.getAuthenticationSteps(), webClient);
+					factory.getAuthenticationSteps(), reactiveVaultClient(), webClient);
 			return CachingVaultTokenSupplier.of(stepsOperator);
 		}
 
