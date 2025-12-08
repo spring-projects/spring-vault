@@ -4,13 +4,13 @@
 ** xref:introduction/dependencies.adoc[]
 ** xref:introduction/new-features.adoc[]
 * xref:vault/vault.adoc[]
+** xref:vault/authentication.adoc[]
 ** xref:vault/imperative-template.adoc[]
 ** xref:vault/vault-secret-engines.adoc[]
 ** xref:vault/reactive-template.adoc[]
 ** xref:vault/propertysource.adoc[]
 ** xref:vault/vault-repositories.adoc[]
 ** xref:vault/client-support.adoc[]
-** xref:vault/authentication.adoc[]
 ** xref:vault/spring-security.adoc[]
 
 
