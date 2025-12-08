@@ -24,6 +24,7 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -93,7 +94,6 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param awsMetadataRestOperations must not be {@literal null}.
-	 * @deprecated since 4.1, use
 	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
 	 * instead.
 	 */
@@ -108,11 +108,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * Create a new {@link AwsEc2Authentication}.
 	 * @param restClient must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(RestClient restClient) {
 		this(AwsEc2AuthenticationOptions.DEFAULT, restClient, restClient);
 	}
@@ -125,11 +121,7 @@ public class AwsEc2Authentication implements ClientAuthentication, Authenticatio
 	 * @param vaultClient must not be {@literal null}.
 	 * @param awsMetadataClient must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #AwsEc2Authentication(AwsEc2AuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AwsEc2Authentication(AwsEc2AuthenticationOptions options, RestClient vaultClient,
 			RestClient awsMetadataClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), awsMetadataClient);

@@ -54,7 +54,9 @@ import org.springframework.web.client.RestTemplate;
  * @since 2.2
  * @see ClientHttpRequestFactoryFactory
  * @see RestTemplateCustomizer
+ * @deprecated since 4.1, use {@link VaultClientCustomizer} or {@link RestClientCustomizer} instead.
  */
+@Deprecated(since = "4.1")
 public class RestTemplateBuilder {
 
 	@Nullable VaultEndpointProvider endpointProvider;

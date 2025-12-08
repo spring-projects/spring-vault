@@ -98,7 +98,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 1.0.1
+	 * @deprecated since 4.1, use {@link #LifecycleAwareSessionManager(ClientAuthentication, TaskScheduler, VaultClient)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations) {
 		this(clientAuthentication, taskScheduler, ClientAdapter.from(restOperations).vaultClient());
@@ -113,7 +115,9 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param restOperations must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
 	 * @since 1.0.1
+	 * @deprecated since 4.1, use {@link #LifecycleAwareSessionManager(ClientAuthentication, TaskScheduler, VaultClient, RefreshTrigger)} instead.
 	 */
+	@Deprecated(since = "4.1")
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			RestOperations restOperations, RefreshTrigger refreshTrigger) {
 		this(clientAuthentication, taskScheduler, ClientAdapter.from(restOperations).vaultClient(), refreshTrigger);
@@ -152,7 +156,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param clientAuthentication must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param client must not be {@literal null}.
-	 * @since 4.0
+	 * @since 4.1
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			VaultClient client) {
@@ -171,7 +175,7 @@ public class LifecycleAwareSessionManager extends LifecycleAwareSessionManagerSu
 	 * @param taskScheduler must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @param refreshTrigger must not be {@literal null}.
-	 * @since 4.0
+	 * @since 4.1
 	 */
 	public LifecycleAwareSessionManager(ClientAuthentication clientAuthentication, TaskScheduler taskScheduler,
 			VaultClient client, RefreshTrigger refreshTrigger) {

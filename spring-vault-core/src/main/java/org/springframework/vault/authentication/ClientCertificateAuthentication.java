@@ -69,10 +69,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	/**
 	 * Create a {@link ClientCertificateAuthentication} using {@link RestClient}.
 	 * @param client must not be {@literal null}.
-	 * @deprecated since 4.1, use
-	 * {@link #ClientCertificateAuthentication(VaultClient)} instead.
+	 * @since 4.0
 	 */
-	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(RestClient client) {
 		this(ClientCertificateAuthenticationOptions.builder().build(), client);
 	}
@@ -82,12 +80,8 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
-	 * @since 2.3
-	 * @deprecated since 4.1, use
-	 * {@link #ClientCertificateAuthentication(ClientCertificateAuthenticationOptions, VaultClient)}
-	 * instead.
+	 * @since 4.0
 	 */
-	@Deprecated(since = "4.1")
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

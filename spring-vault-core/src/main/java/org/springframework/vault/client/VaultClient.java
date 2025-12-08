@@ -43,30 +43,29 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Client to perform Vault HTTP requests, exposing a fluent, synchronous API over
- * underlying {@link RestClient}.
+ * Client to perform Vault HTTP requests, exposing a fluent, synchronous API
+ * over underlying {@link RestClient}.
  *
  * <p>Use static factory methods {@link #create()}, {@link #create(String)}, or
- * {@link VaultClient#builder()} to prepare an instance. To use the same configuration as
- * a {@link RestClient}, use {@link #builder(RestClient)} or
+ * {@link VaultClient#builder()} to prepare an instance. To use the same
+ * configuration as a {@link RestClient}, use {@link #builder(RestClient)} or
  * {@link #builder(RestTemplate)} respectively.
  *
  * <p>{@code VaultClient} is intended to be used with relative paths requiring a
- * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint) configured}. Without
- * an endpoint, callers must provide the absolute URL for each request.
+ * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint)
+ * configured}. Without an endpoint, callers must provide the absolute URL for
+ * each request.
  *
- * <p>
- * For examples with a response body see:
+ * <p>For examples with a response body see:
  * <ul>
- * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
+ * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</li>
  * </ul>
  *
- * <p>
- * For examples with a request body see:
+ * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#body(Object) body(Object)}
- * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference) body(Object,
- * ParameterizedTypeReference)}
+ * <li>{@link RequestBodySpec#body(Object) body(Object)}</li>
+ * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference)
+ * body(Object, ParameterizedTypeReference)}</li>
  * </ul>
  *
  * @author Mark Paluch

@@ -61,11 +61,15 @@ import org.springframework.web.util.UriBuilderFactory;
  * callers must provide the absolute URL for each request.
  * <p>For examples with a response body see:
  * <ul>
- * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</ul>
+ * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</li>
+ * <li>{@link RequestHeadersSpec#exchangeToMono(Function) exchangeToMono()}</li>
+ * <li>{@link RequestHeadersSpec#exchangeToFlux(Function) exchangeToFlux()}</li>
+ * </ul>
  * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#bodyValue(Object) bodyValue(Object)}
- * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}</ul>
+ * <li>{@link RequestBodySpec#bodyValue(Object) bodyValue(Object)}</li>
+ * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}</li>
+ * </ul>
  *
  * @author Mark Paluch
  * @since 4.1

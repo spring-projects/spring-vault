@@ -15,14 +15,6 @@
  */
 package org.springframework.vault.authentication;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.http.ContentStreamProvider;
-import software.amazon.awssdk.http.SdkHttpFullRequest;
-import software.amazon.awssdk.http.SdkHttpMethod;
-import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
-import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
-import software.amazon.awssdk.regions.Region;
-
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.Collections;
@@ -33,6 +25,14 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.http.ContentStreamProvider;
+import software.amazon.awssdk.http.SdkHttpFullRequest;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
+import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
+import software.amazon.awssdk.regions.Region;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -105,11 +105,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	 * {@link AwsIamAuthenticationOptions} and a Vault {@link RestClient}.
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient must not be {@literal null}.
-	 * @deprecated since 4.1, use
-	 * {@link #AwsIamAuthentication(AwsIamAuthenticationOptions, VaultClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AwsIamAuthentication(AwsIamAuthenticationOptions options, RestClient vaultClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient());
 	}

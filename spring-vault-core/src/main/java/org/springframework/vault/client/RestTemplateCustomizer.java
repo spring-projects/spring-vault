@@ -25,7 +25,9 @@ import org.springframework.web.client.RestTemplate;
  * @author Mark Paluch
  * @since 2.2
  * @see org.springframework.vault.client.RestTemplateBuilder#customizers(RestTemplateCustomizer...)
+ * @deprecated since 4.1, use {@link VaultClientCustomizer} or {@link RestClientCustomizer} instead.
  */
+@Deprecated(since = "4.1")
 @FunctionalInterface
 public interface RestTemplateCustomizer {
 
