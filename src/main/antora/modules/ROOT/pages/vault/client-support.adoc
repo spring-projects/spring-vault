@@ -1,5 +1,5 @@
 [[vault.core.client.support]]
-= Client support
+= Client Support
 
 Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Vault uses
 {spring-framework-docs}/integration/rest-clients.html#rest-resttemplate[`RestTemplate`] as primary interface accessing Vault.
