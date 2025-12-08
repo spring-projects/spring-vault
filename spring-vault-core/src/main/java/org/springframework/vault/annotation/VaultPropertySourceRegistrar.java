@@ -40,6 +40,7 @@ import org.springframework.vault.core.util.PropertyTransformers;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -130,7 +131,7 @@ class VaultPropertySourceRegistrar
 					? PropertyTransformers.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
 
             if (propertyMappings.length != 0) {
-                propertyTransformer = propertyTransformer.andThen(PropertyTransformers.propertyMappingBased(propertyMappings));
+                propertyTransformer = propertyTransformer.andThen(createMappingRulesBasedPropertyTransformer(propertyMappings));
             }
 
 			for (String propertyPath : paths) {
@@ -157,6 +158,16 @@ class VaultPropertySourceRegistrar
 			}
 		}
 	}
+
+    private PropertyTransformer createMappingRulesBasedPropertyTransformer(PropertyMapping[] mappings) {
+        Map<String, String> rules = new HashMap<>();
+
+        for (PropertyMapping mapping : mappings) {
+            rules.put(mapping.from(), mapping.to());
+        }
+
+        return PropertyTransformers.mappingRulesBased(rules);
+    }
 
 	private String potentiallyResolveRequiredPlaceholders(String expression) {
 		return this.environment != null ? this.environment.resolveRequiredPlaceholders(expression) : expression;
