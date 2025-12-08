@@ -1,11 +1,11 @@
 [[vault.core.getting-started]]
 = Getting Started
 
-Spring Vault support requires Vault 0.6 or higher and Java SE 6 or higher.
+Spring Vault support requires Vault 0.6 or higher and Java SE 17 or higher.
 An easy way to bootstrap setting up a working environment is to create a Spring based project in https://spring.io/tools/sts[STS].
 
 First you need to set up a running Vault server.
-Refer to the https://www.vaultproject.io/intro/[Vault] for an explanation on how to startup a Vault instance.
+Refer to the https://www.vaultproject.io/intro/[Vault] for an explanation on how to start up a Vault instance.
 
 To create a Spring project in STS go to File -> New ->
 Spring Template Project -> Simple Spring Utility Project ->
