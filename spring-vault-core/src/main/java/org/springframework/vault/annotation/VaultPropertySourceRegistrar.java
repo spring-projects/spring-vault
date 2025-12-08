@@ -15,14 +15,7 @@
  */
 package org.springframework.vault.annotation;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.jspecify.annotations.Nullable;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -44,6 +37,13 @@ import org.springframework.vault.annotation.VaultPropertySource.Renewal;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s
@@ -121,6 +121,7 @@ class VaultPropertySourceRegistrar
 			String propertyNamePrefix = propertySource.getString("propertyNamePrefix");
 			Renewal renewal = propertySource.getEnum("renewal");
 			boolean ignoreSecretNotFound = propertySource.getBoolean("ignoreSecretNotFound");
+            PropertyMapping[] propertyMappings = propertySource.getAnnotationArray("propertyMappings", PropertyMapping.class);
 
 			Assert.isTrue(paths.length > 0, "At least one @VaultPropertySource(value) location is required");
 
@@ -128,6 +129,10 @@ class VaultPropertySourceRegistrar
 
 			PropertyTransformer propertyTransformer = StringUtils.hasText(propertyNamePrefix)
 					? PropertyTransformers.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
+
+            if (propertyMappings.length != 0) {
+                propertyTransformer = propertyTransformer.andThen(createMappingRulesBasedPropertyTransformer(propertyMappings));
+            }
 
 			for (String propertyPath : paths) {
 
@@ -153,6 +158,16 @@ class VaultPropertySourceRegistrar
 			}
 		}
 	}
+
+    private PropertyTransformer createMappingRulesBasedPropertyTransformer(PropertyMapping[] mappings) {
+        Map<String, String> rules = new HashMap<>();
+
+        for (PropertyMapping mapping : mappings) {
+            rules.put(mapping.from(), mapping.to());
+        }
+
+        return PropertyTransformers.mappingRulesBased(rules);
+    }
 
 	private String potentiallyResolveRequiredPlaceholders(String expression) {
 		return this.environment != null ? this.environment.resolveRequiredPlaceholders(expression) : expression;

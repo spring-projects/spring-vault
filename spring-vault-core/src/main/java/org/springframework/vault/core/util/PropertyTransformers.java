@@ -15,11 +15,11 @@
  */
 package org.springframework.vault.core.util;
 
+import org.springframework.util.Assert;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.springframework.util.Assert;
 
 /**
  * Implementations of {@link PropertyTransformer} that provide various useful property
@@ -52,6 +52,14 @@ public abstract class PropertyTransformers {
 	public static PropertyTransformer propertyNamePrefix(String propertyNamePrefix) {
 		return KeyPrefixPropertyTransformer.forPrefix(propertyNamePrefix);
 	}
+
+    /**
+     * @param mappingRules the rules to remap property names.
+     * @return {@link PropertyTransformer} to map property names as specified in mappings.
+     */
+    public static PropertyTransformer mappingRulesBased(Map<String, String> mappingRules) {
+        return MappingRulesBasedPropertyTransformer.forMappingRules(mappingRules);
+    }
 
 	/**
 	 * {@link PropertyTransformer} that passes the given properties through without
@@ -159,4 +167,39 @@ public abstract class PropertyTransformers {
 
 	}
 
+    /**
+     * {@link PropertyTransformer} that maps property names based on specified mapping rules.
+     * Properties, not present in mapping rules, will not be remapped and will stay as is.
+     */
+    public static class MappingRulesBasedPropertyTransformer implements PropertyTransformer {
+
+        private final Map<String, String> mappingRules;
+
+        private MappingRulesBasedPropertyTransformer(Map<String, String> mappingRules) {
+            this.mappingRules = mappingRules;
+        }
+
+        /**
+         * Create a new {@link MappingRulesBasedPropertyTransformer} that maps property names as specified in mappings.
+         * @param mappingRules the property mapping rules.
+         * @return a new {@link MappingRulesBasedPropertyTransformer}.
+         */
+        public static PropertyTransformer forMappingRules(Map<String, String> mappingRules) {
+            return new MappingRulesBasedPropertyTransformer(mappingRules);
+        }
+
+        @Override
+        public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
+
+            Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
+
+            for (Entry<String, ? extends Object> entry : input.entrySet()) {
+                String newKey = this.mappingRules.getOrDefault(entry.getKey(), entry.getKey());
+                target.put(newKey, entry.getValue());
+            }
+
+            return target;
+        }
+
+    }
 }
