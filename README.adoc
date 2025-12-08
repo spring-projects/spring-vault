@@ -259,7 +259,7 @@ Changes to the documentation should be made to the adocs found under `src/main/a
 
 === Basic Compile and Test
 
-To build the source you will need to install JDK 1.6.
+To build the source you will need to install JDK 17.
 
 Spring Vault uses Maven for most build-related activities, and you should be able to get off the ground quite quickly by cloning the project you are interested in and typing
 
