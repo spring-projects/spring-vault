@@ -1,13 +1,141 @@
 [[vault-client-access]]
-= Vault Client
+= Vault Client Access
+
+The value provided by the Spring Vault framework is perhaps best shown by the sequence of actions outlined in the following table below.
+The table shows which functionality Spring takes care of when choosing a specific client option:
+
+[cols="5",options="header"]
+|===
+
+| Client | HTTP Requests | Authentication | Vault Operations | Error Handling
+
+| {spring-framework-docs}/integration/rest-clients.html#rest-restclient[*RestClient*]
+| Low-level HTTP request access with full control over URIs, headers, and message conversion.	You manually construct requests and handle responses. javadoc:org.springframework.vault.client.VaultEndpoint[] can be configured through a `UriBuilderFactory` enabling relative path usage.
+| No built-in authentication support; you must manage tokens and headers yourself. | No direct Vault domain operations; you build requests for Vault endpoints manually.
+| `4xx`/`5xx` status translated to `HttpServerErrorException` respective `HttpClientErrorException`, `onStatus` lets you register custom handlers
+
+| <<vault-client,*VaultClient*>>
+| Vault-specific fluent HTTP client built on top of `RestClient`. Provides methods for common HTTP verbs and request construction along with javadoc:org.springframework.vault.client.VaultEndpoint[] support to decouple access to functionality through relative paths from actual Vault server configuration.
+| Convenience methods for setting tokens (`token(…)`) and namespaces (`namespace(…)`); easier to manage authentication headers and can be used with javadoc:org.springframework.vault.authentication.ClientAuthentication[] implementations to log into Vault.
+| Path-based request methods; Allows consuming Vault responses as javadoc:org.springframework.vault.support.VaultResponse[] through `ResponseSpec.body()` and `ResponseSpec.toEntity()` methods; supports response wrapping directly.
+| `4xx`/`5xx` status translated to `VaultClientResponseException`, `onStatus` lets you register custom handlers
+
+| xref:vault/imperative-template.adoc[*VaultTemplate*]
+| High-level abstraction for Vault operations. HTTP requests can be issued through client callbacks.
+| Support for simple javadoc:org.springframework.vault.authentication.ClientAuthentication[] and javadoc:org.springframework.vault.authentication.SessionManager[] implementations that handle token renewal and authentication.
+| Java API for several Vault domain operations (read, write, delete, list) supporting various secret backends (KV, Cubbyhole, PKI, Transit, etc.).
+| Built on top of `VaultClient`, translates HTTP errors into Spring Vault exceptions (e.g., `VaultException`).
+
+|===
+
+== Client Examples
+
+.`RestClient`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	RestClient client = RestClient.create();
+
+	VaultResponse response = client.get()
+		.uri("https://vault.example.com/v1/secret/my-secret")
+		.header("X-Vault-Token", "…")
+		.header("X-Vault-Namespace", "…")
+		.retrieve()
+		.body(VaultResponse.class);
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val client = RestClient.create()
+
+	val response = client.get()
+		.uri("https://vault.example.com/v1/secret/my-secret")
+		.header("X-Vault-Token", "…")
+		.header("X-Vault-Namespace", "…")
+		.retrieve()
+		.body<VaultResponse>()
+----
+======
+
+.`VaultClient`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	VaultClient client = VaultClient.create(VaultEndpoint.create("vault.example.com", 8200));
+
+	VaultResponse response = client.get()
+		.path("secret/my-secret")
+		.token(VaultToken.of(…))
+		.namespace(…)
+		.retrieve()
+		.requiredBody();
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val client = VaultClient.create(VaultEndpoint.create("vault.example.com", 8200))
+
+	val response = client.get()
+		.path("secret/my-secret")
+		.token(VaultToken.of(…))
+		.namespace(…)
+		.retrieve()
+		.requiredBody()
+----
+======
+
+.`VaultTemplate`
+[tabs]
+======
+Java::
++
+[source,java,indent=0,subs="verbatim"]
+----
+	VaultTemplate vaultOperations = new VaultTemplate(vaultClient, sessionManager);
+	VaultResponse response = vaultOperations.read("secret/my-secret");
+	// or
+	Object value = vaultOperations.readRequired("secret/my-secret").getRequiredData().get("value");
+----
+
+Kotlin::
++
+[source,kotlin,indent=0,subs="verbatim"]
+----
+	val vaultOperations = VaultTemplate(vaultClient, sessionManager)
+	val response = vaultOperations.read("secret/my-secret")
+	// or
+	val value = vaultOperations.readRequired("secret/my-secret").getRequiredData()["value"]
+----
+======
+
+=== Recommendations
+
+If you need the most flexibility and full control over the HTTP client (connection pooling, custom TLS keystore at the JVM level, wire logging for diagnostics), start with a properly configured `RestClient` or request factory.
+This is the right choice for framework-level code or libraries that must adapt to many environments.
+
+For most application code that uses Vault, `VaultClient` strikes the right balance: It provides a readable, fluent API along with easy request/response handling that resembles `RestClient` look-and-feel. Its safe defaults such as endpoint scoping and token helpers avoid common pitfalls.
+
+Choose `VaultTemplate` when you prefer working with Vault at a higher level of abstraction.
+It reduces boilerplate and integrates with Spring's conversion and exception-translation patterns.
+Use it when your application performs secret CRUD operations and you want concise, intention-revealing code that provides a Java API for Vault.
+
+[[vault-client]]
+== `VaultClient` and `ReactiveVaultClient`
 
 Spring Vault provides the following choices for making calls to Vault endpoints:
 
 * `VaultClient` -- synchronous client with a fluent API based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestClient`]
 * `ReactiveVaultClient` -- non-blocking, reactive client with fluent API  based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-webclient[`WebClient`]
-
-[[vault-client]]
-== `VaultClient` and `ReactiveVaultClient`
 
 `VaultClient` is a synchronous HTTP client that provides a fluent API to perform requests.
 It's reactive variant `ReactiveVaultClient` mirrors ``VaultClient``'s design for non-blocking access.
