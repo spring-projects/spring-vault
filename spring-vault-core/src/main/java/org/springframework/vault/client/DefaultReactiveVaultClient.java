@@ -318,8 +318,8 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		}
 
 		@Override
-		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference) {
-			return toMono(it -> it.toEntity(bodyTypeReference));
+		public <T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeRef) {
+			return toMono(it -> it.toEntity(bodyTypeRef));
 		}
 
 		@Override
@@ -330,6 +330,16 @@ class DefaultReactiveVaultClient implements ReactiveVaultClient {
 		@Override
 		public <T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef) {
 			return toMono(it -> it.toEntityList(elementTypeRef));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType) {
+			return toMono(it -> it.toEntityFlux(elementType));
+		}
+
+		@Override
+		public <T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(ParameterizedTypeReference<T> elementTypeRef) {
+			return toMono(it -> it.toEntityFlux(elementTypeRef));
 		}
 
 		@Override

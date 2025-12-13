@@ -686,11 +686,11 @@ public interface ReactiveVaultClient {
 		/**
 		 * Variant of {@link #toEntity(Class)} with a
 		 * {@link ParameterizedTypeReference}.
-		 * @param bodyTypeReference the expected response body type.
+		 * @param bodyTypeRef the expected response body type.
 		 * @param <T> the response body type.
 		 * @return the {@code ResponseEntity} with the decoded body.
 		 */
-		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeReference);
+		<T> Mono<ResponseEntity<T>> toEntity(ParameterizedTypeReference<T> bodyTypeRef);
 
 		/**
 		 * Return a {@code ResponseEntity} with the body decoded to a {@code List} of
@@ -713,12 +713,13 @@ public interface ReactiveVaultClient {
 		<T> Mono<ResponseEntity<List<T>>> toEntityList(ParameterizedTypeReference<T> elementTypeRef);
 
 		/**
-		 * Return a {@code ResponseEntity} with the body decoded to a {@code Flux} of
-		 * elements of the given type. For an error response (status code of 4xx or
-		 * 5xx), the {@code Mono} emits a {@link VaultClientResponseException}. Use
-		 * {@link #onStatus(Predicate, Function)} to customize error response handling.
-		 * <p><strong>Note:</strong> The {@code Flux} representing the body must be
-		 * subscribed to or else associated resources will not be released.
+		 * Return a {@code ResponseEntity} with the body decoded to a {@code Flux}
+		 * of elements of the given type. For an error response (status code of
+		 * 4xx or 5xx), the {@code Mono} emits a {@link VaultClientResponseException}.
+		 * Use {@link #onStatus(Predicate, Function)} to customize error response
+		 * handling.
+		 * <p><strong>Note:</strong> The {@code Flux} representing the body must
+		 * be subscribed to or else associated resources will not be released.
 		 * @param elementType the type of element to decode the target Flux to.
 		 * @param <T> the body element type.
 		 * @return the {@code ResponseEntity}
@@ -726,8 +727,7 @@ public interface ReactiveVaultClient {
 		<T> Mono<ResponseEntity<Flux<T>>> toEntityFlux(Class<T> elementType);
 
 		/**
-		 * Variant of {@link #toEntityFlux(Class)} with a
-		 * {@link ParameterizedTypeReference}.
+		 * Variant of {@link #toEntityFlux(Class)} with a {@link ParameterizedTypeReference}.
 		 * @param elementTypeRef the type of element to decode the target Flux to.
 		 * @param <T> the body element type.
 		 * @return the {@code ResponseEntity}

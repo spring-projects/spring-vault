@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -242,7 +243,18 @@ class DefaultVaultClient implements VaultClient {
 		public <T> T requiredBody(Class<T> bodyType) {
 			T body = body(bodyType);
 			if (body == null) {
-				throw new VaultException("No body returned from Vault; %s %s"
+				throw new NoSuchElementException("No body returned from Vault; %s %s"
+						.formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
+			}
+			return body;
+		}
+
+		@SuppressWarnings("NullAway") // See https://github.com/uber/NullAway/issues/1290
+		@Override
+		public <T> T requiredBody(ParameterizedTypeReference<T> bodyType) {
+			T body = body(bodyType);
+			if (body == null) {
+				throw new NoSuchElementException("No body returned from Vault; %s %s"
 						.formatted(requestHeadersSpec.httpMethod.name(), requestHeadersSpec.path));
 			}
 			return body;

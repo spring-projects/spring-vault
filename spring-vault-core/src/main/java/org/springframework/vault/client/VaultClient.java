@@ -497,7 +497,7 @@ public interface VaultClient {
 		 * available.
 		 * @throws VaultClientResponseException when receiving a response with a status
 		 * code of 4xx or 5xx.
-		 * @throws IllegalStateException if no response body was available.
+		 * @throws java.util.NoSuchElementException if no response body was available.
 		 */
 		VaultResponse requiredBody();
 
@@ -516,9 +516,19 @@ public interface VaultClient {
 		 * available.
 		 * @throws VaultClientResponseException when receiving a response with a status
 		 * code of 4xx or 5xx.
-		 * @throws IllegalStateException if no response body was available.
+		 * @throws java.util.NoSuchElementException if no response body was available.
 		 */
 		<T> T requiredBody(Class<T> bodyType);
+
+		/**
+		 * Extract the required body as an object of the given type.
+		 * @return the body or {@link IllegalStateException} if no response body was
+		 * available.
+		 * @throws VaultClientResponseException when receiving a response with a status
+		 * code of 4xx or 5xx.
+		 * @throws java.util.NoSuchElementException if no response body was available.
+		 */
+		<T> T requiredBody(ParameterizedTypeReference<T> bodyType);
 
 		/**
 		 * Extract the body as an object of the given type.
