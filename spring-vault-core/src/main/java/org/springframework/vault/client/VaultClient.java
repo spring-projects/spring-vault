@@ -44,30 +44,29 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilderFactory;
 
 /**
- * Client to perform Vault HTTP requests, exposing a fluent, synchronous API over
- * underlying {@link RestClient}.
+ * Client to perform Vault HTTP requests, exposing a fluent, synchronous API
+ * over underlying {@link RestClient}.
  *
  * <p>Use static factory methods {@link #create()}, {@link #create(String)}, or
- * {@link VaultClient#builder()} to prepare an instance. To use the same configuration as
- * a {@link RestClient}, use {@link #builder(RestClient)} or
+ * {@link VaultClient#builder()} to prepare an instance. To use the same
+ * configuration as a {@link RestClient}, use {@link #builder(RestClient)} or
  * {@link #builder(RestTemplate)} respectively.
  *
  * <p>{@code VaultClient} is intended to be used with relative paths requiring a
- * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint) configured}. Without
- * an endpoint, callers must provide the absolute URL for each request.
+ * {@link VaultEndpoint} to be {@link Builder#endpoint(VaultEndpoint)
+ * configured}. Without an endpoint, callers must provide the absolute URL for
+ * each request.
  *
- * <p>
- * For examples with a response body see:
+ * <p>For examples with a response body see:
  * <ul>
- * <li>{@link RequestHeadersSpec#retrieve() retrieve()}
+ * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</li>
  * </ul>
  *
- * <p>
- * For examples with a request body see:
+ * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#body(Object) body(Object)}
- * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference) body(Object,
- * ParameterizedTypeReference)}
+ * <li>{@link RequestBodySpec#body(Object) body(Object)}</li>
+ * <li>{@link RequestBodySpec#body(Object, ParameterizedTypeReference)
+ * body(Object, ParameterizedTypeReference)}</li>
  * </ul>
  *
  * @author Mark Paluch
@@ -317,19 +316,19 @@ public interface VaultClient {
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
-		 * for the client (for example, with a base URI) this method will these to expand the URI
-		 * template and prevent usage of absolute URIs to avoid unwanted access to
-		 * servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
+		 * configured for the client (for example, with a base URI) this method will use
+		 * these to create a base URI and prevent usage of absolute URIs to avoid
+		 * unwanted access to servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, @Nullable Object... pathVariables);
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
-		 * for the client (for example, with a base URI) this method will these to expand the URI
-		 * template and prevent usage of absolute URIs to avoid unwanted access to
-		 * servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
+		 * configured for the client (for example, with a base URI) this method will use
+		 * these to create a base URI and prevent usage of absolute URIs to avoid
+		 * unwanted access to servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
 
@@ -405,16 +404,14 @@ public interface VaultClient {
 		 *     .toEntity(Person.class);
 		 * </pre>
 		 *
-		 * <p> Or if interested only in the body:
-		 * <pre class="code">
+		 * <p>Or if interested only in the body: <pre class="code">
 		 * Person person = client.get()
 		 *     .path("/persons/1")
 		 *     .retrieve()
 		 *     .body(Person.class);
-		 * </pre>
-		 * Note that this method does not actually execute the request until you
+		 * </pre> Note that this method does not actually execute the request until you
 		 * call one of the returned {@link VaultClient.ResponseSpec}.
-		 * <p> By default, 4xx and 5xx response codes result in a
+		 * <p>By default, 4xx and 5xx response codes result in a
 		 * {@link VaultClientResponseException} with a {@link HttpClientErrorException}
 		 * cause respective {@link HttpServerErrorException} cause. To customize error
 		 * handling, use {@link ResponseSpec#onStatus(Predicate, ErrorHandler) onStatus}

@@ -26,13 +26,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.HttpRequest;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * GCP GCE (Google Compute Engine)-based login implementation using GCE's
@@ -106,11 +107,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -123,11 +120,7 @@ public class GcpComputeAuthentication extends GcpJwtAuthenticationSupport
 	 * @param vaultClient must not be {@literal null}.
 	 * @param googleMetadataClient must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #GcpComputeAuthentication(GcpComputeAuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public GcpComputeAuthentication(GcpComputeAuthenticationOptions options, RestClient vaultClient,
 			RestClient googleMetadataClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), googleMetadataClient);

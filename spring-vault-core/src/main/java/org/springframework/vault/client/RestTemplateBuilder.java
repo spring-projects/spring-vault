@@ -60,6 +60,7 @@ import org.springframework.web.client.RestTemplate;
  * @deprecated since 4.1, use {@link VaultClientCustomizer} or
  * {@link RestClientCustomizer} instead.
  */
+@Deprecated(since = "4.1")
 public class RestTemplateBuilder {
 
 	@Nullable

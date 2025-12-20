@@ -23,9 +23,13 @@ import org.springframework.web.client.RestClient;
  * {@link RestClient.Builder}. Beans implementing this interface are applied to
  * {@link RestClientBuilder}.
  *
+ * <p>When intending to customize {@link VaultClient}, prefer using
+ * {@link VaultClientCustomizer} instead.
+ *
  * @author Mark Paluch
  * @since 4.0
  * @see RestClientBuilder#customizers(RestClientCustomizer...)
+ * @see VaultClientCustomizer
  */
 @FunctionalInterface
 public interface RestClientCustomizer {

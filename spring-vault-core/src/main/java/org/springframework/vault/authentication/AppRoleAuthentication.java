@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -31,7 +32,6 @@ import org.springframework.vault.authentication.AppRoleTokens.AbsentSecretId;
 import org.springframework.vault.authentication.AppRoleTokens.Provided;
 import org.springframework.vault.authentication.AppRoleTokens.Pull;
 import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.client.VaultHttpHeaders;
@@ -39,6 +39,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 
 /**
  * AppRole implementation of {@link ClientAuthentication}. RoleId and SecretId
@@ -82,9 +84,7 @@ public class AppRoleAuthentication implements ClientAuthentication, Authenticati
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated use constructor accepting {@link VaultClient} instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AppRoleAuthentication(AppRoleAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

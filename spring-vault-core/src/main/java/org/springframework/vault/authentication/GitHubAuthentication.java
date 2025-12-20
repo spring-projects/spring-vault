@@ -64,11 +64,7 @@ public class GitHubAuthentication implements ClientAuthentication, Authenticatio
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #GitHubAuthentication(GitHubAuthenticationOptions, VaultClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public GitHubAuthentication(GitHubAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

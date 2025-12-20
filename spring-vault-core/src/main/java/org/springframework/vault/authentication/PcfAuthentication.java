@@ -30,6 +30,7 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.engines.RSAEngine;
 import org.bouncycastle.crypto.params.RSAKeyParameters;
 import org.bouncycastle.crypto.signers.PSSSigner;
+
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.client.VaultClient;
@@ -83,10 +84,7 @@ public class PcfAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #PcfAuthentication(PcfAuthenticationOptions, VaultClient)} instead.
 	 */
-	@Deprecated(since = "4.1")
 	public PcfAuthentication(PcfAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

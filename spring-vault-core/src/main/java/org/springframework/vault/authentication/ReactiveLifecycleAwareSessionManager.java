@@ -150,7 +150,7 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	 * @since 4.1
 	 */
 	public ReactiveLifecycleAwareSessionManager(VaultTokenSupplier clientAuthentication, TaskScheduler taskScheduler,
-												ReactiveVaultClient client, RefreshTrigger refreshTrigger) {
+			ReactiveVaultClient client, RefreshTrigger refreshTrigger) {
 		super(taskScheduler, refreshTrigger);
 		Assert.notNull(clientAuthentication, "VaultTokenSupplier must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");

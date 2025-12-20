@@ -190,7 +190,8 @@ class AuthenticationStepsExecutorUnitTests {
 				.andExpect(method(HttpMethod.POST))
 				.andExpect(content().string("left-right"))
 				.andRespond(
-						withSuccess().contentType(MediaType.APPLICATION_JSON).body("{" + "\"auth\": { \"client_token\": \"fine\"} }"));
+						withSuccess().contentType(MediaType.APPLICATION_JSON)
+								.body("{" + "\"auth\": { \"client_token\": \"fine\"} }"));
 
 		Node<VaultResponse> left = AuthenticationSteps.fromHttpRequest(post("external/left").as(VaultResponse.class));
 		Node<VaultResponse> right = AuthenticationSteps

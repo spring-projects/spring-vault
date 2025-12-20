@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ParameterizedTypeReference;
@@ -126,11 +127,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 4.1
 	 */
 	public VaultTemplate(VaultClient client) {
-		Assert.notNull(client, "VaultClient must not be null");
-		this.dedicatedSessionManager = true;
-		this.statelessTemplate = new RestClientOperationsWrapper(client);
-		this.statelessClient = client;
-		this.sessionTemplate = this.statelessTemplate;
+		this(client, NoSessionManager.INSTANCE, true);
 	}
 
 	/**
@@ -141,13 +138,7 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 4.1
 	 */
 	public VaultTemplate(VaultClient client, ClientAuthentication clientAuthentication) {
-		Assert.notNull(client, "VaultEndpoint must not be null");
-		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
-		this.sessionManager = new SimpleSessionManager(clientAuthentication);
-		this.dedicatedSessionManager = true;
-		this.statelessTemplate = new RestClientOperationsWrapper(client);
-		this.statelessClient = client;
-		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient);
+		this(client, new SimpleSessionManager(clientAuthentication), true);
 	}
 
 	/**
@@ -158,10 +149,14 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @since 4.1
 	 */
 	public VaultTemplate(VaultClient client, SessionManager sessionManager) {
+		this(client, sessionManager, false);
+	}
+
+	private VaultTemplate(VaultClient client, SessionManager sessionManager, boolean dedicatedSessionManager) {
 		Assert.notNull(client, "VaultEndpoint must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
 		this.sessionManager = sessionManager;
-		this.dedicatedSessionManager = false;
+		this.dedicatedSessionManager = dedicatedSessionManager;
 		this.statelessTemplate = new RestClientOperationsWrapper(client);
 		this.statelessClient = client;
 		this.sessionTemplate = new RestClientOperationsWrapper(this.sessionClient);
@@ -254,7 +249,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * header}.
 	 * @param restTemplateBuilder must not be {@literal null}.
 	 * @since 2.2.1
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(RestTemplateBuilder restTemplateBuilder) {
 		Assert.notNull(restTemplateBuilder, "RestTemplateBuilder must not be null");
 		RestTemplate restTemplate = restTemplateBuilder.build();
@@ -288,7 +286,10 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param restTemplateBuilder must not be {@literal null}.
 	 * @param sessionManager must not be {@literal null}.
 	 * @since 2.2
+	 * @deprecated since 4.1 in favor of a revised {@link VaultClient}-based
+	 * constructor.
 	 */
+	@Deprecated(since = "4.1")
 	public VaultTemplate(RestTemplateBuilder restTemplateBuilder, SessionManager sessionManager) {
 		Assert.notNull(restTemplateBuilder, "RestTemplateBuilder must not be null");
 		Assert.notNull(sessionManager, "SessionManager must not be null");
@@ -365,7 +366,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate} used for Vault communication.
 	 * @since 2.1
+	 * @deprecated since 4.1, use {@link VaultClient} with the appropriate
+	 * constructor instead. Session-authentication will be performed through the
+	 * VaultClient and no longer through a request interceptor.
 	 */
+	@Deprecated(since = "4.1")
 	protected RestTemplate doCreateRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 		return RestTemplateBuilder.builder().endpointProvider(endpointProvider).requestFactory(requestFactory).build();
@@ -382,7 +387,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestClient} used for Vault communication.
 	 * @since 4.0
+	 * @deprecated since 4.1, use {@link VaultClient} with the appropriate
+	 * constructor instead. Session-authentication will be performed through the
+	 * VaultClient and no longer through a request interceptor.
 	 */
+	@Deprecated(since = "4.1")
 	protected RestClient doCreateRestClient(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 		return RestClientBuilder.builder().endpointProvider(endpointProvider).requestFactory(requestFactory).build();
@@ -400,7 +409,11 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate} used for Vault communication.
 	 * @since 2.1
+	 * @deprecated since 4.1, use {@link VaultClient} with the appropriate
+	 * constructor instead. Session-authentication will be performed through the
+	 * VaultClient and no longer through a request interceptor.
 	 */
+	@Deprecated(since = "4.1")
 	protected RestTemplate doCreateSessionTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
 		return RestTemplateBuilder.builder()
@@ -421,6 +434,9 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestClient} used for Vault communication.
 	 * @since 4.0
+	 * @deprecated since 4.1, use {@link VaultClient} with the appropriate
+	 * constructor instead. Session-authentication will be performed through the
+	 * VaultClient and no longer through a request interceptor.
 	 */
 	protected RestClient doCreateSessionClient(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {

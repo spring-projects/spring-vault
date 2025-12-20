@@ -21,11 +21,12 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
-import static org.springframework.vault.authentication.AuthenticationUtil.*;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
+
+import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
  * Username and password implementation of {@link ClientAuthentication}. Can be
@@ -74,11 +75,7 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions, VaultClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

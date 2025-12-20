@@ -16,9 +16,6 @@
 
 package org.springframework.vault.authentication;
 
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map.Entry;
@@ -26,6 +23,9 @@ import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.core.io.buffer.DataBufferUtils;
@@ -52,12 +52,12 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodyUri
 /**
  * {@link VaultTokenSupplier} using {@link AuthenticationSteps} to create an
  * authentication flow emitting {@link VaultToken}.
- * 
+ *
  * <p>This class uses {@link ReactiveVaultClient} for non-blocking and reactive
  * HTTP Vault access. It also uses {@link WebClient} for external HTTP access.
  * The {@link AuthenticationSteps authentication flow} materializes as reactive
  * sequence postponing execution until {@link Mono#subscribe() subscription}.
- * 
+ *
  * <p>{@link Supplier Supplier} instances are inspected for their type.
  * {@link ResourceCredentialSupplier} instances are loaded through
  * {@link DataBufferUtils#read(Resource, DataBufferFactory, int)
@@ -89,11 +89,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	 * {@link AuthenticationSteps} and {@link WebClient}.
 	 * @param steps must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
-	 * @deprecated since 4.1, use
-	 * {@link #AuthenticationStepsOperator(AuthenticationSteps, ReactiveVaultClient, WebClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AuthenticationStepsOperator(AuthenticationSteps steps, WebClient webClient) {
 		this(steps, ReactiveVaultClient.builder(webClient).build(), webClient);
 	}

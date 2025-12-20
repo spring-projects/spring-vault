@@ -62,11 +62,15 @@ import org.springframework.web.util.UriBuilderFactory;
  * callers must provide the absolute URL for each request.
  * <p>For examples with a response body see:
  * <ul>
- * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</ul>
+ * <li>{@link RequestHeadersSpec#retrieve() retrieve()}</li>
+ * <li>{@link RequestHeadersSpec#exchangeToMono(Function) exchangeToMono()}</li>
+ * <li>{@link RequestHeadersSpec#exchangeToFlux(Function) exchangeToFlux()}</li>
+ * </ul>
  * <p>For examples with a request body see:
  * <ul>
- * <li>{@link RequestBodySpec#bodyValue(Object) bodyValue(Object)}
- * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}</ul>
+ * <li>{@link RequestBodySpec#bodyValue(Object) bodyValue(Object)}</li>
+ * <li>{@link RequestBodySpec#body(Publisher, Class) body(Publisher,Class)}</li>
+ * </ul>
  *
  * @author Mark Paluch
  * @since 4.1
@@ -298,19 +302,19 @@ public interface ReactiveVaultClient {
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
-		 * for the client (for example, with a base URI) this method will these to expand the URI
-		 * template and prevent usage of absolute URIs to avoid unwanted access to
-		 * servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
+		 * configured for the client (for example, with a base URI) this method will use
+		 * these to create a base URI and prevent usage of absolute URIs to avoid
+		 * unwanted access to servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, @Nullable Object... pathVariables);
 
 		/**
 		 * Specify the path for the request using a URI template and URI variables.
-		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was configured
-		 * for the client (for example, with a base URI) this method will these to expand the URI
-		 * template and prevent usage of absolute URIs to avoid unwanted access to
-		 * servers other than the {@link VaultEndpoint}.
+		 * <p>If a {@link VaultEndpointProvider} or {@link UriBuilderFactory} was
+		 * configured for the client (for example, with a base URI) this method will use
+		 * these to create a base URI and prevent usage of absolute URIs to avoid
+		 * unwanted access to servers other than the {@link VaultEndpoint}.
 		 */
 		S path(String path, Map<String, ? extends @Nullable Object> pathVariables);
 

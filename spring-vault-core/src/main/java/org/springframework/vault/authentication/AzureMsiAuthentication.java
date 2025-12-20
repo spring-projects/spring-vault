@@ -20,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -89,11 +90,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param vaultRestOperations must not be {@literal null}.
 	 * @param azureMetadataRestOperations must not be {@literal null}.
-	 * @deprecated since 4.1, use
-	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestOperations vaultRestOperations,
 			RestOperations azureMetadataRestOperations) {
 		this(options, ClientAdapter.from(vaultRestOperations).vaultClient(),
@@ -105,11 +102,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient client) {
 		this(options, client, client);
 	}
@@ -122,11 +115,7 @@ public class AzureMsiAuthentication implements ClientAuthentication, Authenticat
 	 * @param vaultClient must not be {@literal null}.
 	 * @param azureMetadataClient must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #AzureMsiAuthentication(AzureMsiAuthenticationOptions, VaultClient, RestClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public AzureMsiAuthentication(AzureMsiAuthenticationOptions options, RestClient vaultClient,
 			RestClient azureMetadataClient) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), ClientAdapter.from(azureMetadataClient));

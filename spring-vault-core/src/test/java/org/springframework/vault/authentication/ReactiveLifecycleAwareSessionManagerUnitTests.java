@@ -53,10 +53,10 @@ import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 /**
  * Unit tests for {@link ReactiveLifecycleAwareSessionManager}.
@@ -212,7 +212,7 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 
 	}
 
-	static class MockVaultClientResponseException extends VaultClientResponseException{
+	static class MockVaultClientResponseException extends VaultClientResponseException {
 
 		public MockVaultClientResponseException(String msg) {
 			super(msg);

@@ -27,6 +27,8 @@ import org.springframework.web.client.RestTemplate;
  * @param <T> the {@link ClientHttpRequest} type.
  * @since 2.2
  * @see RestTemplateBuilder
+ * @deprecated since 4.1, use {@link ClientHttpRequestInitializer} through
+ * {@link RestClientBuilder#customizers(RestClientCustomizer...)}.
  */
 public interface RestTemplateRequestCustomizer<T extends ClientHttpRequest> extends ClientHttpRequestInitializer {
 

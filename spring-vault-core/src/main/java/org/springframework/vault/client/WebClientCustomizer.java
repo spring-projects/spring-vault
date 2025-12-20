@@ -23,9 +23,13 @@ import org.springframework.web.reactive.function.client.WebClient;
  * Beans implementing this interface are applied to
  * {@link org.springframework.vault.client.WebClientBuilder}.
  *
+ * <p>When intending to customize {@link ReactiveVaultClient}, prefer using
+ * {@link ReactiveVaultClientCustomizer} instead.
+ *
  * @author Mark Paluch
  * @since 2.2
  * @see org.springframework.vault.client.WebClientBuilder#customizers(WebClientCustomizer...)
+ * @see ReactiveVaultClientCustomizer
  */
 @FunctionalInterface
 public interface WebClientCustomizer {

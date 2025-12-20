@@ -22,13 +22,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.springframework.util.Assert;
-import org.springframework.vault.VaultException;
-import org.springframework.vault.client.VaultClient;
-import org.springframework.vault.support.VaultToken;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestOperations;
-
 import com.google.api.client.http.HttpTransport;
 import com.google.api.gax.grpc.InstantiatingGrpcChannelProvider;
 import com.google.api.gax.rpc.TransportChannelProvider;
@@ -38,6 +31,13 @@ import com.google.cloud.iam.credentials.v1.IamCredentialsSettings;
 import com.google.cloud.iam.credentials.v1.ServiceAccountName;
 import com.google.cloud.iam.credentials.v1.SignJwtResponse;
 import com.google.cloud.iam.credentials.v1.stub.IamCredentialsStubSettings;
+
+import org.springframework.util.Assert;
+import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClient;
+import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestOperations;
 
 /**
  * Google Cloud IAM credentials login implementation using GCP IAM service
@@ -119,11 +119,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	 * @param options must not be {@literal null}.
 	 * @param vaultClient HTTP client for Vault login, must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions, VaultClient)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options, RestClient vaultClient) {
 		this(options, vaultClient, IamCredentialsStubSettings.defaultGrpcTransportProviderBuilder().build());
 	}
@@ -137,11 +133,7 @@ public class GcpIamCredentialsAuthentication extends GcpJwtAuthenticationSupport
 	 * @param transportChannelProvider Provider for transport channel Google API
 	 * use, must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions, VaultClient, TransportChannelProvider)}
-	 * instead.
 	 */
-	@Deprecated(since = "4.1")
 	public GcpIamCredentialsAuthentication(GcpIamCredentialsAuthenticationOptions options, RestClient vaultClient,
 			TransportChannelProvider transportChannelProvider) {
 		this(options, ClientAdapter.from(vaultClient).vaultClient(), transportChannelProvider);

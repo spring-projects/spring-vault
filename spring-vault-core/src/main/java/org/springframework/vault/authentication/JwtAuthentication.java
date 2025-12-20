@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
@@ -69,10 +70,7 @@ public class JwtAuthentication implements ClientAuthentication, AuthenticationSt
 	 * @param options must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 * @since 4.0
-	 * @deprecated since 4.1, use
-	 * {@link #JwtAuthentication(JwtAuthenticationOptions, VaultClient)} instead.
 	 */
-	@Deprecated(since = "4.1")
 	public JwtAuthentication(JwtAuthenticationOptions options, RestClient client) {
 		this(options, ClientAdapter.from(client).vaultClient());
 	}

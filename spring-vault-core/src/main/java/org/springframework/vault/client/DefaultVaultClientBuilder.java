@@ -19,6 +19,7 @@ package org.springframework.vault.client;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.vault.support.ClientOptions;
