@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.IOException;
@@ -22,10 +23,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import reactor.test.StepVerifier;
+import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -38,7 +39,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link ReactiveVaultTemplate} using the {@code generic} backend.
+ * Integration tests for {@link ReactiveVaultTemplate} using the {@code generic}
+ * backend.
  *
  * @author Mark Paluch
  */
@@ -60,20 +62,20 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 	void readShouldReturnExistingKey() {
 
 		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		this.vaultOperations.read("secret/mykey")
-			.as(StepVerifier::create)
-			.consumeNextWith(actual -> assertThat(actual.getRequiredData()).containsEntry("hello", "world")) //
-			.verifyComplete();
+				.as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual.getRequiredData()).containsEntry("hello", "world")) //
+				.verifyComplete();
 	}
 
 	@Test
 	void readShouldReturnNestedPropertiesKey() throws IOException {
 
 		Map map = this.OBJECT_MAPPER
-			.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
+				.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
 
 		this.vaultOperations.write("secret/mykey", map).as(StepVerifier::create).verifyComplete();
 
@@ -107,59 +109,59 @@ class ReactiveVaultTemplateGenericIntegrationTests extends IntegrationTestSuppor
 		data.put("password", "Secret");
 
 		this.vaultOperations.write("secret/mykey", data) //
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		this.vaultOperations.read("secret/mykey", Person.class) //
-			.as(StepVerifier::create) //
-			.consumeNextWith(actual -> {
+				.as(StepVerifier::create) //
+				.consumeNextWith(actual -> {
 
-				Person person = actual.getRequiredData();
-				assertThat(person.getFirstname()).isEqualTo("Walter");
-				assertThat(person.getPassword()).isEqualTo("Secret");
+					Person person = actual.getRequiredData();
+					assertThat(person.getFirstname()).isEqualTo("Walter");
+					assertThat(person.getPassword()).isEqualTo("Secret");
 
-			})
-			.verifyComplete();
+				})
+				.verifyComplete();
 	}
 
 	@Test
 	void listShouldNotReturnAbsentKey() {
 
 		this.vaultOperations.list("foo")
-			.collectList()
-			.as(StepVerifier::create)
-			.consumeNextWith(actual -> assertThat(actual).isEmpty())
-			.verifyComplete();
+				.collectList()
+				.as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual).isEmpty())
+				.verifyComplete();
 	}
 
 	@Test
 	void listShouldReturnExistingKey() {
 
 		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		this.vaultOperations.list("secret")
-			.collectList()
-			.as(StepVerifier::create)
-			.consumeNextWith(actual -> assertThat(actual).contains("mykey"))
-			.verifyComplete();
+				.collectList()
+				.as(StepVerifier::create)
+				.consumeNextWith(actual -> assertThat(actual).contains("mykey"))
+				.verifyComplete();
 	}
 
 	@Test
 	void deleteShouldRemoveKey() {
 
 		this.vaultOperations.write("secret/mykey", Collections.singletonMap("hello", "world"))
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		this.vaultOperations.delete("secret/mykey") //
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		this.vaultOperations.read("secret/mykey") //
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.verifyComplete();
 	}
 
 	@Test

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
@@ -21,9 +22,9 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published after an expired {@link Lease} for a {@link RequestedSecret} was
- * observed. Secrets associated with the lease are about to expire or already expired at
- * the time this event is received.
+ * Event published after an expired {@link Lease} for a {@link RequestedSecret}
+ * was observed. Secrets associated with the lease are about to expire or
+ * already expired at the time this event is received.
  *
  * @author Mark Paluch
  */
@@ -33,8 +34,8 @@ public class SecretLeaseExpiredEvent extends SecretLeaseEvent {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Create a new {@link SecretLeaseExpiredEvent} given {@link RequestedSecret} and
-	 * {@link Lease}.
+	 * Create a new {@code SecretLeaseExpiredEvent} given {@link RequestedSecret}
+	 * and {@link Lease}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */

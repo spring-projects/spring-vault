@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Objects;
@@ -30,21 +31,23 @@ public class Signature {
 
 	private final String signature;
 
+
 	private Signature(String signature) {
 		this.signature = signature;
 	}
 
+
 	/**
-	 * Factory method to create a {@link Signature} from the given {@code signature}.
+	 * Factory method to create a {@link Signature} from the given
+	 * {@code signature}.
 	 * @param signature the signature, must not be {@literal null} or empty.
 	 * @return the {@link Signature} encapsulating {@code signature}.
 	 */
 	public static Signature of(String signature) {
-
 		Assert.hasText(signature, "Signature must not be null or empty");
-
 		return new Signature(signature);
 	}
+
 
 	public String getSignature() {
 		return this.signature;

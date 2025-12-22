@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.ArrayList;
@@ -51,8 +52,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	private final String path;
 
 	/**
-	 * Create a new {@link VaultTransitTemplate} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultTransitTemplate} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -83,7 +84,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 	}
 
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public List<String> getKeys() {
 
 		VaultResponse response = this.vaultOperations.read("%s/keys?list=true".formatted(this.path));
@@ -108,7 +109,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.notNull(type, "Key type must not be null");
 
 		VaultResponseSupport<RawTransitKeyImpl> result = this.vaultOperations
-			.read("%s/export/%s/%s".formatted(this.path, type.getValue(), keyName), RawTransitKeyImpl.class);
+				.read("%s/export/%s/%s".formatted(this.path, type.getValue(), keyName), RawTransitKeyImpl.class);
 
 		return result != null ? result.getRequiredData() : null;
 	}
@@ -119,7 +120,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 
 		VaultResponseSupport<VaultTransitKeyImpl> result = this.vaultOperations
-			.read("%s/keys/%s".formatted(this.path, keyName), VaultTransitKeyImpl.class);
+				.read("%s/keys/%s".formatted(this.path, keyName), VaultTransitKeyImpl.class);
 
 		if (result != null) {
 			return result.getRequiredData();
@@ -221,7 +222,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		request.put("ciphertext", ciphertext);
 
 		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
-			.get("plaintext");
+				.get("plaintext");
 
 		return new String(Base64.getDecoder().decode(plaintext));
 	}
@@ -251,7 +252,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		applyTransitOptions(transitContext, request);
 
 		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
-			.get("plaintext");
+				.get("plaintext");
 
 		return Base64.getDecoder().decode(plaintext);
 	}
@@ -357,8 +358,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(hmacRequest.getPlaintext()::getPlaintext)
-			.as(Base64.getEncoder()::encodeToString)
-			.to("input", request);
+				.as(Base64.getEncoder()::encodeToString)
+				.to("input", request);
 		mapper.from(hmacRequest::getAlgorithm).whenHasText().to("algorithm", request);
 		mapper.from(hmacRequest::getKeyVersion).whenNonNull().to("key_version", request);
 
@@ -396,8 +397,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(signRequest.getPlaintext()::getPlaintext)
-			.as(Base64.getEncoder()::encodeToString)
-			.to("input", request);
+				.as(Base64.getEncoder()::encodeToString)
+				.to("input", request);
 		mapper.from(signRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(signRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
 		mapper.from(signRequest::isPrehashed).to("prehashed", request);
@@ -454,13 +455,13 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		PropertyMapper mapper = PropertyMapper.get();
 
 		mapper.from(verificationRequest.getPlaintext()::getPlaintext)
-			.as(Base64.getEncoder()::encodeToString)
-			.to("input", request);
+				.as(Base64.getEncoder()::encodeToString)
+				.to("input", request);
 		mapper.from(verificationRequest::getHmac).whenNonNull().as(Hmac::getHmac).to("hmac", request);
 		mapper.from(verificationRequest::getSignature)
-			.whenNonNull()
-			.as(Signature::getSignature)
-			.to("signature", request);
+				.whenNonNull()
+				.as(Signature::getSignature)
+				.to("signature", request);
 		mapper.from(verificationRequest::getHashAlgorithm).whenHasText().to("hash_algorithm", request);
 		mapper.from(verificationRequest::getSignatureAlgorithm).whenHasText().to("signature_algorithm", request);
 		mapper.from(verificationRequest::isPrehashed).to("prehashed", request);
@@ -499,13 +500,11 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 				Map<String, String> data = batchData.get(i);
 				if (StringUtils.hasText(data.get("error"))) {
 					encrypted = new VaultEncryptionResult(new VaultException(data.get("error")));
-				}
-				else {
+				} else {
 					encrypted = new VaultEncryptionResult(
 							toCiphertext(data.get("ciphertext"), contextExtractor.apply(request)));
 				}
-			}
-			else {
+			} else {
 				encrypted = new VaultEncryptionResult(new VaultException("No result for request #" + i));
 			}
 
@@ -527,8 +526,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 			if (batchData.size() > i) {
 				encrypted = getDecryptionResult(batchData.get(i), ciphertext);
-			}
-			else {
+			} else {
 				encrypted = new VaultDecryptionResult(new VaultException("No result for ciphertext #" + i));
 			}
 
@@ -566,7 +564,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		return context != null ? Ciphertext.of(ciphertext).with(context) : Ciphertext.of(ciphertext);
 	}
 
-	@SuppressWarnings({ "NullAway", "unchecked" })
+	@SuppressWarnings({"NullAway", "unchecked"})
 	static List<Map<String, String>> getBatchData(VaultResponse vaultResponse) {
 		return (List<Map<String, String>>) vaultResponse.getRequiredData().get("batch_results");
 	}

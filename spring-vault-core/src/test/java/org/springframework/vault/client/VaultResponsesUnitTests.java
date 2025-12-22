@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.nio.charset.StandardCharsets;
@@ -69,7 +70,7 @@ class VaultResponsesUnitTests {
 
 		VaultException vaultException = VaultResponses.buildException(cause, "sys/path");
 		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]: some-error")
-			.hasCause(cause);
+				.hasCause(cause);
 	}
 
 }

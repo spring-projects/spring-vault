@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
@@ -32,9 +33,8 @@ import java.security.spec.RSAPublicKeySpec;
  * Key factories to create {@link KeySpec} from its encoded representation.
  *
  * Supports plain- and PKCS#8-encoded keys.
- * <p/>
- * The ASN.1 syntax for the private key is
- * <p/>
+ * <p>The ASN.1 syntax for the private key is
+ * <p>
  *
  * <pre>
  * --
@@ -63,9 +63,10 @@ class KeyFactories {
 
 	static final RsaPublicKeyFactory RSA_PUBLIC = new RsaPublicKeyFactory();
 
+
 	/**
-	 * Interface defining a contract for key factories to create a {@link KeySpec} from a
-	 * binary key representation using ASN.1 syntax.
+	 * Interface defining a contract for key factories to create a {@link KeySpec}
+	 * from a binary key representation using ASN.1 syntax.
 	 */
 	interface KeyFactory {
 
@@ -80,11 +81,10 @@ class KeyFactories {
 
 	}
 
+
 	/**
 	 * Convert PKCS#1 encoded ec key into ECPrivateKeySpec.
-	 * <p/>
-	 * The ASN.1 syntax for the private key with CRT is
-	 * <p/>
+	 * <p>The ASN.1 syntax for the private key with CRT is
 	 *
 	 * <pre>
 	 * --
@@ -112,7 +112,6 @@ class KeyFactories {
 
 			// Parse inside the sequence
 			parser = sequence.createNestedParser();
-
 			parser.read(); // skip version
 			DerParser.Asn1Object first = parser.read(); // read first token to identify
 														// how the key is represented
@@ -123,15 +122,12 @@ class KeyFactories {
 
 				DerParser nested = first.createNestedParser();
 				DerParser.Asn1Object oid = nested.read();
-
 				if (!EC_PUBLIC_KEY.equalsIgnoreCase(oid.getString())) {
 					throw new InvalidKeySpecException(
 							"Unsupported Public Key Algorithm. Expected EC (" + EC + "), but was: " + oid.getString());
 				}
-
 				parameterOid = nested.read().getString();
-			}
-			else {
+			} else {
 				parameterOid = readParameters(parser);
 			}
 
@@ -141,31 +137,25 @@ class KeyFactories {
 			AlgorithmParameters ec = AlgorithmParameters.getInstance("EC");
 			ec.init(new ECGenParameterSpec(parameterOid));
 			ECParameterSpec parameterSpec = ec.getParameterSpec(ECParameterSpec.class);
-
 			return new ECPrivateKeySpec(key, parameterSpec);
 		}
 
 		private static String readParameters(DerParser keyParser) throws IOException, GeneralSecurityException {
-
 			while (keyParser.hasLength()) {
-
 				DerParser.Asn1Object object = keyParser.read();
-
 				if (object.isTagged() && object.getTagNo() == 0) {
 					return object.createNestedParser().read().getString();
 				}
 			}
-
 			throw new InvalidParameterSpecException("Cannot decode EC parameter OID");
 		}
 
 	}
 
+
 	/**
 	 * Convert PKCS#1 encoded private key into RSAPrivateCrtKeySpec.
-	 * <p/>
-	 * The ASN.1 syntax for the private key with CRT is
-	 * <p/>
+	 * <p>The ASN.1 syntax for the private key with CRT is
 	 *
 	 * <pre>
 	 * --
@@ -191,7 +181,6 @@ class KeyFactories {
 		public RSAPrivateCrtKeySpec getKey(byte[] keyBytes) throws IOException, GeneralSecurityException {
 
 			DerParser parser = new DerParser(keyBytes);
-
 			DerParser.Asn1Object sequence = parser.read();
 			if (sequence.getType() != DerParser.SEQUENCE) {
 				throw new InvalidKeySpecException("Invalid DER: not a sequence");
@@ -200,21 +189,17 @@ class KeyFactories {
 			// Parse inside the sequence
 			parser = sequence.createNestedParser();
 			parser.read();// Skip version
-
 			DerParser.Asn1Object first = parser.read(); // read first token to identify
 														// how the key is represented
 
 			// RSA Key nested in a sequence
 			if (first.getType() == DerParser.SEQUENCE) {
-
 				DerParser nestedParser = first.createNestedParser();
 				DerParser.Asn1Object oid = nestedParser.read();
-
 				if (!RSA.equalsIgnoreCase(oid.getString())) {
 					throw new InvalidKeySpecException("Unsupported Public Key Algorithm. Expected RSA (" + RSA
 							+ "), but was: " + oid.getString());
 				}
-
 				DerParser.Asn1Object octetString = parser.read();
 				return getKey(octetString.getValue());
 			}
@@ -227,17 +212,16 @@ class KeyFactories {
 			BigInteger exp1 = parser.read().getInteger();
 			BigInteger exp2 = parser.read().getInteger();
 			BigInteger crtCoef = parser.read().getInteger();
-
 			return new RSAPrivateCrtKeySpec(modulus, publicExp, privateExp, prime1, prime2, exp1, exp2, crtCoef);
 		}
 
 	}
 
+
 	/**
 	 * Convert PKCS#1 encoded public key into RSAPublicKeySpec.
-	 * <p/>
-	 * The ASN.1 syntax for the public key with CRT is
-	 * <p/>
+	 * <p>The ASN.1 syntax for the public key with CRT is
+	 * <p>
 	 *
 	 * <pre>
 	 * --
@@ -249,17 +233,15 @@ class KeyFactories {
 	 * }
 	 * </pre>
 	 *
-	 * Supports PEM objects with a {@code SEQUENCE} and {@code OBJECT IDENTIFIER} header
-	 * where the actual key sequence is represented as {@code BIT_STRING} (as of
-	 * {@code openssl -pubout} format).
+	 * Supports PEM objects with a {@code SEQUENCE} and {@code OBJECT IDENTIFIER}
+	 * header where the actual key sequence is represented as {@code BIT_STRING} (as
+	 * of {@code openssl -pubout} format).
 	 */
 	static class RsaPublicKeyFactory implements KeyFactory {
 
 		@Override
 		public RSAPublicKeySpec getKey(byte[] keyBytes) throws IOException, GeneralSecurityException {
-
 			DerParser parser = new DerParser(keyBytes);
-
 			DerParser.Asn1Object sequence = parser.read();
 			if (sequence.getType() != DerParser.SEQUENCE) {
 				throw new InvalidKeySpecException("Invalid DER: not a sequence");
@@ -268,27 +250,21 @@ class KeyFactories {
 			// Parse inside the sequence
 			parser = sequence.createNestedParser();
 			DerParser.Asn1Object object = parser.read();
-
 			if (object.getType() == DerParser.SEQUENCE) {
-
 				DerParser.Asn1Object read = object.createNestedParser().read();
 				if (!RSA.equalsIgnoreCase(read.getString())) {
 					throw new InvalidKeySpecException("Unsupported Public Key Algorithm. Expected RSA (" + RSA
 							+ "), but was: " + read.getString());
 				}
-
 				DerParser.Asn1Object bitString = parser.read();
 				if (bitString.getType() != DerParser.BIT_STRING) {
 					throw new InvalidKeySpecException("Invalid DER: not a bit string");
 				}
-
 				parser = new DerParser(bitString.getValue());
 				sequence = parser.read();
-
 				if (sequence.getType() != DerParser.SEQUENCE) {
 					throw new InvalidKeySpecException("Invalid DER: not a sequence");
 				}
-
 				parser = sequence.createNestedParser();
 			}
 

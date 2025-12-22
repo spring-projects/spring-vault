@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
@@ -47,16 +48,12 @@ class PolicyJackson2 {
 
 		@Override
 		public void serialize(Policy value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-
 			gen.writeStartObject();
-
 			gen.writeFieldName("path");
 			gen.writeStartObject();
-
 			for (Policy.Rule rule : value.getRules()) {
 				gen.writeObjectField(rule.getPath(), rule);
 			}
-
 			gen.writeEndObject();
 			gen.writeEndObject();
 		}
@@ -67,50 +64,38 @@ class PolicyJackson2 {
 
 		@Override
 		public Policy deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-
 			Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
 					"Expected START_OBJECT, got: " + p.getCurrentToken());
-
 			String fieldName = p.nextFieldName();
-
 			Set<Policy.Rule> rules = new LinkedHashSet<>();
-
 			if ("path".equals(fieldName)) {
-
 				p.nextToken();
 				Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
 						"Expected START_OBJECT, got: " + p.getCurrentToken());
-
 				p.nextToken();
-
 				while (p.currentToken() == JsonToken.FIELD_NAME) {
-
 					String path = p.currentName();
 					p.nextToken();
-
 					Assert.isTrue(p.getCurrentToken() == JsonToken.START_OBJECT,
 							"Expected START_OBJECT, got: " + p.getCurrentToken());
-
 					Policy.Rule rule = p.getCodec().readValue(p, Policy.Rule.class);
 					rules.add(rule.withPath(path));
-
 					JsonToken jsonToken = p.nextToken();
 					if (jsonToken == JsonToken.END_OBJECT) {
 						break;
 					}
 				}
-
 				Assert.isTrue(p.getCurrentToken() == JsonToken.END_OBJECT,
 						"Expected END_OBJECT, got: " + p.getCurrentToken());
 				p.nextToken();
 			}
-
 			Assert.isTrue(p.getCurrentToken() == JsonToken.END_OBJECT,
 					"Expected END_OBJECT, got: " + p.getCurrentToken());
 			return Policy.of(rules);
 		}
 
 	}
+
 
 	static class CapabilityToStringConverter implements Converter<Policy.Capability, String> {
 
@@ -131,13 +116,12 @@ class PolicyJackson2 {
 
 	}
 
+
 	static class StringToCapabilityConverter implements Converter<String, Policy.Capability> {
 
 		@Override
 		public Policy.Capability convert(String value) {
-
 			Policy.Capability capability = Policy.BuiltinCapabilities.find(value);
-
 			return capability != null ? capability : () -> value;
 		}
 
@@ -152,6 +136,7 @@ class PolicyJackson2 {
 		}
 
 	}
+
 
 	static class DurationToStringConverter implements Converter<Duration, String> {
 
@@ -172,6 +157,7 @@ class PolicyJackson2 {
 
 	}
 
+
 	static class StringToDurationConverter implements Converter<String, Duration> {
 
 		static Pattern SECONDS = Pattern.compile("(\\d+)s");
@@ -180,29 +166,24 @@ class PolicyJackson2 {
 
 		static Pattern HOURS = Pattern.compile("(\\d+)h");
 
+
 		@Override
 		public Duration convert(String value) {
-
 			try {
 				return Duration.ofSeconds(Long.parseLong(value));
-			}
-			catch (NumberFormatException e) {
-
+			} catch (NumberFormatException e) {
 				Matcher matcher = SECONDS.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofSeconds(Long.parseLong(matcher.group(1)));
 				}
-
 				matcher = MINUTES.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofMinutes(Long.parseLong(matcher.group(1)));
 				}
-
 				matcher = HOURS.matcher(value);
 				if (matcher.matches()) {
 					return Duration.ofHours(Long.parseLong(matcher.group(1)));
 				}
-
 				throw new IllegalArgumentException("Unsupported duration value: " + value);
 			}
 		}

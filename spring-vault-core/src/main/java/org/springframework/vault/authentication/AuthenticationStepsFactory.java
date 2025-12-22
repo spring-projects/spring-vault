@@ -13,13 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 /**
  * Factory interface for components that create {@link AuthenticationSteps}.
- * <p>
- * Implementing objects are required to construct {@link AuthenticationSteps} by their
- * needs and invoked once upon {@link AuthenticationSteps} retrieval.
+ * <p>Implementing objects are required to construct {@link AuthenticationSteps}
+ * by their needs and invoked once upon {@link AuthenticationSteps} retrieval.
  *
  * @author Mark Paluch
  * @since 2.0

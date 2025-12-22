@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.util.function.Consumer;
@@ -20,8 +21,9 @@ import java.util.function.Consumer;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Factory interface that produces a {@link WebClient} object. Factory implementations are
- * expected to create a new {@link WebClient} object when calling {@link #create()}.
+ * Factory interface that produces a {@link WebClient} object. Factory
+ * implementations are expected to create a new {@link WebClient} object when
+ * calling {@link #create()}.
  *
  * @author Mark Paluch
  * @since 2.3

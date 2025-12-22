@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.mapping;
 
 import java.util.Collections;
@@ -28,7 +29,8 @@ import org.springframework.data.spel.spi.EvaluationContextExtension;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link BasicVaultPersistentEntity} via {@link VaultMappingContext}.
+ * Unit tests for {@link BasicVaultPersistentEntity} via
+ * {@link VaultMappingContext}.
  *
  * @author Mark Paluch
  */

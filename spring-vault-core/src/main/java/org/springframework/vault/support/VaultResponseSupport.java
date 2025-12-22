@@ -56,13 +56,13 @@ public class VaultResponseSupport<T> {
 
 	private List<String> warnings = Collections.emptyList();
 
+
 	/**
 	 * Apply metadata such as auth or warnings without copying data.
 	 * @param other
 	 * @since 3.1
 	 */
 	public void applyMetadata(VaultResponseSupport<?> other) {
-
 		this.auth = other.auth;
 		this.metadata = other.metadata;
 		this.wrapInfo = other.wrapInfo;
@@ -95,15 +95,22 @@ public class VaultResponseSupport<T> {
 	}
 
 	/**
+	 * @return {@literal true} if {@code data} is not null; {@literal false}
+	 * otherwise.
+	 * @since 4.1
+	 */
+	public boolean hasData() {
+		return this.data != null;
+	}
+
+	/**
 	 * @return the required secret data.
 	 * @throws IllegalStateException if {@code data} is null.
 	 */
 	public T getRequiredData() {
-
 		if (this.data != null) {
 			return this.data;
 		}
-
 		throw new IllegalStateException("Data field is empty");
 	}
 

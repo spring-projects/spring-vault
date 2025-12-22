@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -133,16 +134,17 @@ public interface VaultSysOperations {
 	List<String> getPolicyNames() throws VaultException;
 
 	/**
-	 * Read a {@link Policy} by its {@literal name}. Policies are either represented as
-	 * HCL (HashiCorp configuration language) or JSON. Retrieving policies is only
-	 * possible if the policy is represented as JSON.
+	 * Read a {@link Policy} by its {@literal name}. Policies are either represented
+	 * as HCL (HashiCorp configuration language) or JSON. Retrieving policies is
+	 * only possible if the policy is represented as JSON.
 	 * @return the {@link Policy} or {@literal null}, if the policy was not found.
 	 * @since 2.0
 	 * @throws UnsupportedOperationException if the policy is represented as HCL.
 	 * @see <a href="https://www.vaultproject.io/api/system/policy.html">GET
 	 * /sys/policy/{name}</a>
 	 */
-	@Nullable Policy getPolicy(String name) throws VaultException;
+	@Nullable
+	Policy getPolicy(String name) throws VaultException;
 
 	/**
 	 * Create or update a {@link Policy}.

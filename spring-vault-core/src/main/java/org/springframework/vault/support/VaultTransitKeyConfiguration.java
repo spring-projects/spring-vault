@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,13 +35,14 @@ public class VaultTransitKeyConfiguration {
 	@JsonProperty("min_encryption_version")
 	private final @Nullable Integer minEncryptionVersion;
 
+
 	private VaultTransitKeyConfiguration(@Nullable Boolean deletionAllowed, @Nullable Integer minDecryptionVersion,
 			@Nullable Integer minEncryptionVersion) {
-
 		this.deletionAllowed = deletionAllowed;
 		this.minDecryptionVersion = minDecryptionVersion;
 		this.minEncryptionVersion = minEncryptionVersion;
 	}
+
 
 	/**
 	 * @return a new {@link VaultTransitKeyConfigurationBuilder}.
@@ -48,6 +50,7 @@ public class VaultTransitKeyConfiguration {
 	public static VaultTransitKeyConfigurationBuilder builder() {
 		return new VaultTransitKeyConfigurationBuilder();
 	}
+
 
 	/**
 	 * @return whether key deletion is configured
@@ -65,13 +68,14 @@ public class VaultTransitKeyConfiguration {
 	}
 
 	/**
-	 * @return the minimum version of the key that can be used to encrypt plaintext, sign
-	 * payloads, or generate HMACs.
+	 * @return the minimum version of the key that can be used to encrypt plaintext,
+	 * sign payloads, or generate HMACs.
 	 * @since 1.1
 	 */
 	public @Nullable Integer getMinEncryptionVersion() {
 		return this.minEncryptionVersion;
 	}
+
 
 	/**
 	 * Builder for {@link VaultTransitKeyConfiguration}.
@@ -84,13 +88,15 @@ public class VaultTransitKeyConfiguration {
 
 		private @Nullable Integer minEncryptionVersion;
 
+
 		VaultTransitKeyConfigurationBuilder() {
 		}
+
 
 		/**
 		 * Set whether key deletion is allowed.
 		 * @param deletionAllowed {@literal true} if key deletion should be allowed.
-		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @return this builder.
 		 */
 		public VaultTransitKeyConfigurationBuilder deletionAllowed(boolean deletionAllowed) {
 			this.deletionAllowed = deletionAllowed;
@@ -98,14 +104,14 @@ public class VaultTransitKeyConfiguration {
 		}
 
 		/**
-		 * Specifies the minimum version of ciphertext allowed to be decrypted. Adjusting
-		 * this as part of a key rotation policy can prevent old copies of ciphertext from
-		 * being decrypted, should they fall into the wrong hands. For signatures, this
-		 * value controls the minimum version of signature that can be verified against.
-		 * For HMACs, this controls the minimum version of a key allowed to be used as the
-		 * key for verification.
+		 * Specifies the minimum version of ciphertext allowed to be decrypted.
+		 * Adjusting this as part of a key rotation policy can prevent old copies of
+		 * ciphertext from being decrypted, should they fall into the wrong hands. For
+		 * signatures, this value controls the minimum version of signature that can be
+		 * verified against. For HMACs, this controls the minimum version of a key
+		 * allowed to be used as the key for verification.
 		 * @param minDecryptionVersion key version.
-		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @return this builder.
 		 * @since 1.1
 		 */
 		public VaultTransitKeyConfigurationBuilder minDecryptionVersion(int minDecryptionVersion) {
@@ -114,11 +120,12 @@ public class VaultTransitKeyConfiguration {
 		}
 
 		/**
-		 * Specifies the minimum version of the key that can be used to encrypt plaintext,
-		 * sign payloads, or generate HMACs. Must be 0 (which will use the latest version)
-		 * or a value greater or equal to {@link #minDecryptionVersion(int)}.
+		 * Specifies the minimum version of the key that can be used to encrypt
+		 * plaintext, sign payloads, or generate HMACs. Must be 0 (which will use the
+		 * latest version) or a value greater or equal to
+		 * {@link #minDecryptionVersion(int)}.
 		 * @param minEncryptionVersion key version.
-		 * @return {@code this} {@link VaultTransitKeyConfigurationBuilder}.
+		 * @return this builder.
 		 * @since 1.1
 		 */
 		public VaultTransitKeyConfigurationBuilder minEncryptionVersion(int minEncryptionVersion) {

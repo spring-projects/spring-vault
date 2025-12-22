@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.io.File;
@@ -50,7 +51,7 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	void reactorNettyClientShouldWork() {
 
 		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.ReactorNetty
-			.usingReactorNetty(new ClientOptions(), Settings.createSslConfiguration());
+				.usingReactorNetty(new ClientOptions(), Settings.createSslConfiguration());
 
 		RestTemplate template = new RestTemplate(factory);
 
@@ -112,8 +113,8 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 
 		File caCertificate = new File(Settings.findWorkDir(), "ca/certs/ca.cert.pem");
 		SslConfiguration sslConfiguration = SslConfiguration
-			.forTrustStore(SslConfiguration.KeyStoreConfiguration.of(new FileSystemResource(caCertificate))
-				.withStoreType(SslConfiguration.PEM_KEYSTORE_TYPE));
+				.forTrustStore(SslConfiguration.KeyStoreConfiguration.of(new FileSystemResource(caCertificate))
+						.withStoreType(SslConfiguration.PEM_KEYSTORE_TYPE));
 
 		ClientHttpRequestFactory factory = HttpComponents.usingHttpComponents(new ClientOptions(), sslConfiguration);
 		RestTemplate template = new RestTemplate(factory);
@@ -213,7 +214,7 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 	void jdkHttpClientShouldWork() throws Exception {
 
 		ClientHttpRequestFactory factory = ClientHttpRequestFactoryFactory.JdkHttpClient
-			.usingJdkHttpClient(new ClientOptions(), Settings.createSslConfiguration());
+				.usingJdkHttpClient(new ClientOptions(), Settings.createSslConfiguration());
 
 		RestTemplate template = new RestTemplate(factory);
 
@@ -228,8 +229,7 @@ class ClientHttpRequestFactoryFactoryIntegrationTests {
 		try {
 			ResponseEntity<String> responseEntity = template.exchange(this.url, HttpMethod.GET, null, String.class);
 			return responseEntity.getBody();
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			return e.getResponseBodyAsString();
 		}
 	}

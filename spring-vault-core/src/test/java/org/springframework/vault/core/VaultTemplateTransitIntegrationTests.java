@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Base64;
@@ -36,7 +37,8 @@ import org.springframework.vault.util.Version;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTemplate} using the {@code transit} backend.
+ * Integration tests for {@link VaultTemplate} using the {@code transit}
+ * backend.
  *
  * @author Mark Paluch
  * @author Sven Schürmann
@@ -75,15 +77,13 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 
 		try {
 			this.vaultOperations.opsForTransit()
-				.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
-		}
-		catch (Exception e) {
+					.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
+		} catch (Exception e) {
 		}
 
 		try {
 			this.vaultOperations.opsForTransit().deleteKey(keyName);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 		}
 	}
 
@@ -92,8 +92,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
 			List<String> keys = this.vaultOperations.opsForTransit().getKeys();
 			keys.forEach(this::deleteKey);
-		}
-		else {
+		} else {
 			deleteKey("mykey");
 		}
 	}
@@ -102,7 +101,7 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	void shouldEncrypt() {
 
 		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey", Collections
-			.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
+				.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("ciphertext")).isNotEmpty();
 	}
@@ -111,13 +110,13 @@ class VaultTemplateTransitIntegrationTests extends IntegrationTestSupport {
 	void shouldEncryptAndDecrypt() {
 
 		VaultResponse response = this.vaultOperations.write("transit/encrypt/mykey", Collections
-			.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
+				.singletonMap("plaintext", Base64.getEncoder().encodeToString("that message is secret".getBytes())));
 
 		VaultResponse decrypted = this.vaultOperations.write("transit/decrypt/mykey",
 				Collections.singletonMap("ciphertext", response.getRequiredData().get("ciphertext")));
 
 		assertThat((String) decrypted.getRequiredData().get("plaintext"))
-			.isEqualTo(Base64.getEncoder().encodeToString("that message is secret".getBytes()));
+				.isEqualTo(Base64.getEncoder().encodeToString("that message is secret".getBytes()));
 	}
 
 }

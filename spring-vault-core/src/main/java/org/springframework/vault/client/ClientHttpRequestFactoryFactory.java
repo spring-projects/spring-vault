@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
-
 import javax.net.ssl.SSLContext;
 
 import org.apache.hc.client5.http.config.ConnectionConfig;
@@ -47,9 +47,10 @@ import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 
 /**
- * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
- * Netty and the JDK HTTP client (in that order). This factory configures a
- * {@link ClientHttpRequestFactory} depending on the available dependencies.
+ * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP
+ * Components, Netty and the JDK HTTP client (in that order). This factory
+ * configures a {@link ClientHttpRequestFactory} depending on the available
+ * dependencies.
  *
  * @author Mark Paluch
  * @author Ryan Gow
@@ -69,39 +70,35 @@ public class ClientHttpRequestFactoryFactory {
 	private static final boolean jettyPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient",
 			ClientHttpConnectorFactory.class.getClassLoader());
 
+
 	/**
-	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
-	 * {@link SslConfiguration}.
+	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions}
+	 * and {@link SslConfiguration}.
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
-	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be initialized
-	 * after obtaining.
+	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be
+	 * initialized after obtaining.
 	 */
 	public static ClientHttpRequestFactory create(ClientOptions options, SslConfiguration sslConfiguration) {
-
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 
 		try {
-
 			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
 			}
-
 			if (reactorNettyPresent) {
 				return ReactorNetty.usingReactorNetty(options, sslConfiguration);
 			}
-
 			if (jettyPresent) {
 				return JettyClient.usingJetty(options, sslConfiguration);
 			}
-
 			return JdkHttpClient.usingJdkHttpClient(options, sslConfiguration);
-		}
-		catch (GeneralSecurityException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}
+
 
 	/**
 	 * {@link ClientHttpConnector} for Reactor Netty.
@@ -115,7 +112,8 @@ public class ClientHttpRequestFactoryFactory {
 		 * Create a {@link ReactorClientHttpRequestFactory} using Reactor Netty.
 		 * @param options must not be {@literal null}
 		 * @param sslConfiguration must not be {@literal null}
-		 * @return a new and configured {@link ReactorClientHttpRequestFactory} instance.
+		 * @return a new and configured {@link ReactorClientHttpRequestFactory}
+		 * instance.
 		 */
 		public static ReactorClientHttpRequestFactory usingReactorNetty(ClientOptions options,
 				SslConfiguration sslConfiguration) {
@@ -125,8 +123,10 @@ public class ClientHttpRequestFactoryFactory {
 
 	}
 
+
 	/**
-	 * Utilities to create a {@link ClientHttpRequestFactory} for Apache Http Components.
+	 * Utilities to create a {@link ClientHttpRequestFactory} for Apache Http
+	 * Components.
 	 *
 	 * @author Mark Paluch
 	 */
@@ -134,82 +134,68 @@ public class ClientHttpRequestFactoryFactory {
 
 		/**
 		 * Create a {@link ClientHttpRequestFactory} using Apache Http Components.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link HttpComponentsClientHttpRequestFactory}
 		 * instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static HttpComponentsClientHttpRequestFactory usingHttpComponents(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
 			HttpClientBuilder httpClientBuilder = getHttpClientBuilder(options, sslConfiguration);
-
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
 
 		public static HttpClientBuilder getHttpClientBuilder(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
-
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
-
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
-
 			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
 			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
-
 			ConnectionConfig connectionConfig = ConnectionConfig.custom()
-				.setConnectTimeout(connectTimeout) //
-				.setSocketTimeout(readTimeout) //
-				.build();
-
+					.setConnectTimeout(connectTimeout) //
+					.setSocketTimeout(readTimeout) //
+					.build();
 			RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectionRequestTimeout(connectTimeout)
-				.setResponseTimeout(readTimeout)
-				.setAuthenticationEnabled(true) //
-				.setRedirectsEnabled(true)
-				.build();
-
+					.setConnectionRequestTimeout(connectTimeout)
+					.setResponseTimeout(readTimeout)
+					.setAuthenticationEnabled(true) //
+					.setRedirectsEnabled(true)
+					.build();
 			PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder //
-				.create()
-				.setDefaultConnectionConfig(connectionConfig) //
-				.setDefaultSocketConfig(SocketConfig.custom() //
-					.setSoTimeout(readTimeout)
-					.build());
+					.create()
+					.setDefaultConnectionConfig(connectionConfig) //
+					.setDefaultSocketConfig(SocketConfig.custom() //
+							.setSoTimeout(readTimeout)
+							.build());
 
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
-
 				SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
-
 				String[] enabledProtocols = null;
-
 				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
 				}
-
 				String[] enabledCipherSuites = null;
-
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
 				}
-
 				DefaultClientTlsStrategy tlsStrategy = new DefaultClientTlsStrategy(sslContext, enabledProtocols,
 						enabledCipherSuites, SSLBufferMode.STATIC, HttpsSupport.getDefaultHostnameVerifier());
 				connectionManagerBuilder.setTlsSocketStrategy(tlsStrategy);
 			}
-
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
-
 			return httpClientBuilder;
 		}
 
 	}
 
+
 	/**
-	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty Client.
+	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty
+	 * Client.
 	 *
 	 * @author Mark Paluch
 	 * @since 4.5
@@ -218,11 +204,11 @@ public class ClientHttpRequestFactoryFactory {
 
 		/**
 		 * Create a {@link JettyClientHttpRequestFactory} using Jetty.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link JettyClientHttpConnector} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static JettyClientHttpRequestFactory usingJetty(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
@@ -241,6 +227,7 @@ public class ClientHttpRequestFactoryFactory {
 
 	}
 
+
 	/**
 	 * {@link ClientHttpRequestFactory} using the JDK's HttpClient.
 	 *
@@ -251,17 +238,15 @@ public class ClientHttpRequestFactoryFactory {
 
 		/**
 		 * Create a {@link JdkClientHttpRequestFactory} using the JDK's HttpClient.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link JdkClientHttpRequestFactory} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static JdkClientHttpRequestFactory usingJdkHttpClient(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
 			java.net.http.HttpClient.Builder builder = getBuilder(options, sslConfiguration);
-
 			return new JdkClientHttpRequestFactory(builder.build());
 		}
 

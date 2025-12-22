@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 /**
  * Component that provides a {@link VaultEndpoint}. Allows to use a different
- * {@link VaultEndpoint} for each Vault request.
+ * {@link VaultEndpoint} for each Vault request for service registry or load
+ * balancing usage.
  *
  * @author Mark Paluch
  * @since 1.1

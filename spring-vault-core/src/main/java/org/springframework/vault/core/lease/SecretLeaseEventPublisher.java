@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.util.Map;
@@ -31,10 +32,9 @@ import org.springframework.vault.core.lease.event.*;
 
 /**
  * Publisher for {@link SecretLeaseEvent}s.
- * <p>
- * This publisher dispatches events to {@link LeaseListener} and
- * {@link LeaseErrorListener}. Instances are thread-safe once {@link #afterPropertiesSet()
- * initialized}.
+ * <p>This publisher dispatches events to {@link LeaseListener} and
+ * {@link LeaseErrorListener}. Instances are thread-safe once
+ * {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
  * @see SecretLeaseEvent
@@ -48,8 +48,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	private final Set<LeaseErrorListener> leaseErrorListeners = new CopyOnWriteArraySet<>();
 
 	/**
-	 * Add a {@link LeaseListener} to the container. The listener starts receiving events
-	 * as soon as possible.
+	 * Add a {@link LeaseListener} to the container. The listener starts receiving
+	 * events as soon as possible.
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addLeaseListener(LeaseListener listener) {
@@ -68,8 +68,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Add a {@link LeaseErrorListener} to the container. The listener starts receiving
-	 * events as soon as possible.
+	 * Add a {@link LeaseErrorListener} to the container. The listener starts
+	 * receiving events as soon as possible.
 	 * @param listener lease listener, must not be {@literal null}.
 	 */
 	public void addErrorListener(LeaseErrorListener listener) {
@@ -96,8 +96,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when secrets were obtained. The default implementation is to
-	 * notify {@link LeaseListener}. Implementations can override this method in
+	 * Hook method called when secrets were obtained. The default implementation is
+	 * to notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
@@ -109,8 +109,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when secrets were rotated. The default implementation is to
-	 * notify {@link LeaseListener}. Implementations can override this method in
+	 * Hook method called when secrets were rotated. The default implementation is
+	 * to notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
@@ -124,8 +124,8 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when secrets were not found. The default implementation is to
-	 * notify {@link LeaseListener}. Implementations can override this method in
+	 * Hook method called when secrets were not found. The default implementation is
+	 * to notify {@link LeaseListener}. Implementations can override this method in
 	 * subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @see SecretNotFoundEvent
@@ -135,9 +135,9 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when a {@link Lease} is renewed. The default implementation is
-	 * to notify {@link LeaseListener}. Implementations can override this method in
-	 * subclasses.
+	 * Hook method called when a {@link Lease} is renewed. The default
+	 * implementation is to notify {@link LeaseListener}. Implementations can
+	 * override this method in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @see AfterSecretLeaseRenewedEvent
@@ -147,9 +147,9 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called before triggering revocation for a {@link Lease}. The default
-	 * implementation is to notify {@link LeaseListener}. Implementations can override
-	 * this method in subclasses.
+	 * Hook method called before triggering revocation for a {@link Lease}. The
+	 * default implementation is to notify {@link LeaseListener}. Implementations
+	 * can override this method in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @see BeforeSecretLeaseRevocationEvent
@@ -159,9 +159,9 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called after triggering revocation for a {@link Lease}. The default
-	 * implementation is to notify {@link LeaseListener}. Implementations can override
-	 * this method in subclasses.
+	 * Hook method called after triggering revocation for a {@link Lease}. The
+	 * default implementation is to notify {@link LeaseListener}. Implementations
+	 * can override this method in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @see AfterSecretLeaseRevocationEvent
@@ -171,9 +171,9 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when a {@link Lease} expires. The default implementation is to
-	 * notify {@link LeaseListener}. Implementations can override this method in
-	 * subclasses.
+	 * Hook method called when a {@link Lease} expires. The default implementation
+	 * is to notify {@link LeaseListener}. Implementations can override this method
+	 * in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @see SecretLeaseExpiredEvent
@@ -183,9 +183,10 @@ public class SecretLeaseEventPublisher implements InitializingBean {
 	}
 
 	/**
-	 * Hook method called when an error occurred during secret retrieval, lease renewal,
-	 * and other Vault interactions. The default implementation is to notify
-	 * {@link LeaseErrorListener}. Implementations can override this method in subclasses.
+	 * Hook method called when an error occurred during secret retrieval, lease
+	 * renewal, and other Vault interactions. The default implementation is to
+	 * notify {@link LeaseErrorListener}. Implementations can override this method
+	 * in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease may be {@literal null}
 	 * @param e the causing exception.

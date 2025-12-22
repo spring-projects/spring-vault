@@ -20,8 +20,8 @@ import java.util.Map;
 
 /**
  * Value object to bind generic Vault HTTP API responses.
- * <p>
- * This class binds the data element to a {@link Map} for generic response handling.
+ * <p>This class binds the data element to a {@link Map} for generic response
+ * handling.
  *
  * @author Spencer Gibb
  * @author Mark Paluch

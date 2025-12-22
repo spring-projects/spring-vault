@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.springframework.vault.util.Version;
 class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	static final String SUITABLE_FOR_APP_ROLE_TESTS = "0.6.2";
+
 	static final Version sysUnwrapSince = Version.parse("0.6.2");
 
 	@BeforeEach
@@ -79,8 +81,8 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	String getRoleId(String roleName) {
 		return (String) getVaultOperations().read("auth/approle/role/%s/role-id".formatted(roleName))
-			.getRequiredData()
-			.get("role_id");
+				.getRequiredData()
+				.get("role_id");
 	}
 
 	VaultToken generateWrappedSecretIdResponse() {
@@ -90,8 +92,9 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
 			VaultResponse response = restOperations
-				.exchange("auth/approle/role/with-secret-id/secret-id", HttpMethod.PUT, httpEntity, VaultResponse.class)
-				.getBody();
+					.exchange("auth/approle/role/with-secret-id/secret-id", HttpMethod.PUT, httpEntity,
+							VaultResponse.class)
+					.getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});
@@ -104,8 +107,9 @@ class AppRoleAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 			HttpEntity<String> httpEntity = getWrappingHeaders();
 
 			VaultResponse response = restOperations
-				.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET, httpEntity, VaultResponse.class)
-				.getBody();
+					.exchange("auth/approle/role/with-secret-id/role-id", HttpMethod.GET, httpEntity,
+							VaultResponse.class)
+					.getBody();
 
 			return VaultToken.of(response.getWrapInfo().get("token"));
 		});

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Collections;
@@ -75,10 +76,10 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.list("/")
-			.collectList()
-			.as(StepVerifier::create)
-			.assertNext(elements -> assertThat(elements).contains(key))
-			.verifyComplete();
+				.collectList()
+				.as(StepVerifier::create)
+				.assertNext(elements -> assertThat(elements).contains(key))
+				.verifyComplete();
 	}
 
 	@Test
@@ -91,10 +92,10 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put(key, secret).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get(key)
-			.map(VaultResponseSupport::getRequiredData)
-			.as(StepVerifier::create)
-			.assertNext(n -> assertThat(n).containsEntry("key", "value"))
-			.verifyComplete();
+				.map(VaultResponseSupport::getRequiredData)
+				.as(StepVerifier::create)
+				.assertNext(n -> assertThat(n).containsEntry("key", "value"))
+				.verifyComplete();
 	}
 
 	@Test
@@ -116,20 +117,20 @@ abstract class AbstractReactiveVaultKeyValueTemplateIntegrationTests extends Int
 		kvOperations.put("my-secret", person).as(StepVerifier::create).verifyComplete();
 
 		kvOperations.get("my-secret")
-			.map(VaultResponseSupport::getRequiredData)
-			.as(StepVerifier::create)
-			.assertNext(m -> {
-				assertThat(m).containsAllEntriesOf(
-						Map.of("firstname", "Walter", "lastname", "Heisenberg", "password", "some-password"));
-				assertThat(m).containsEntry("id", null);
-			})
-			.verifyComplete();
+				.map(VaultResponseSupport::getRequiredData)
+				.as(StepVerifier::create)
+				.assertNext(m -> {
+					assertThat(m).containsAllEntriesOf(
+							Map.of("firstname", "Walter", "lastname", "Heisenberg", "password", "some-password"));
+					assertThat(m).containsEntry("id", null);
+				})
+				.verifyComplete();
 
 		kvOperations.get("my-secret", Person.class)
-			.map(VaultResponseSupport::getRequiredData)
-			.as(StepVerifier::create)
-			.assertNext(p -> assertThat(p).isEqualTo(person))
-			.verifyComplete();
+				.map(VaultResponseSupport::getRequiredData)
+				.as(StepVerifier::create)
+				.assertNext(p -> assertThat(p).isEqualTo(person))
+				.verifyComplete();
 	}
 
 	@Test

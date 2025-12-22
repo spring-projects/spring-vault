@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import org.junit.jupiter.api.Test;
@@ -45,16 +46,16 @@ class ReactiveVaultClientsUnitTests {
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder()
-			.clientConnector(connector)
-			.filter(ReactiveVaultClients.namespace("foo/bar"))
-			.build();
+				.clientConnector(connector)
+				.filter(ReactiveVaultClients.namespace("foo/bar"))
+				.build();
 
 		webClient.get()
-			.uri("/auth/foo")
-			.retrieve()
-			.bodyToMono(String.class)
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.uri("/auth/foo")
+				.retrieve()
+				.bodyToMono(String.class)
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		assertThat(request.getHeaders().containsHeaderValue(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar")).isTrue();
 	}
@@ -68,17 +69,17 @@ class ReactiveVaultClientsUnitTests {
 		ClientHttpConnector connector = (method, uri, fn) -> fn.apply(request).then(Mono.just(response));
 
 		WebClient webClient = WebClient.builder()
-			.clientConnector(connector)
-			.filter(ReactiveVaultClients.namespace("foo/bar"))
-			.build();
+				.clientConnector(connector)
+				.filter(ReactiveVaultClients.namespace("foo/bar"))
+				.build();
 
 		webClient.get()
-			.uri("/auth/foo")
-			.header(VaultHttpHeaders.VAULT_NAMESPACE, "baz")
-			.retrieve()
-			.bodyToMono(String.class) //
-			.as(StepVerifier::create) //
-			.verifyComplete();
+				.uri("/auth/foo")
+				.header(VaultHttpHeaders.VAULT_NAMESPACE, "baz")
+				.retrieve()
+				.bodyToMono(String.class) //
+				.as(StepVerifier::create) //
+				.verifyComplete();
 
 		assertThat(request.getHeaders().containsHeaderValue(VaultHttpHeaders.VAULT_NAMESPACE, "baz")).isTrue();
 	}

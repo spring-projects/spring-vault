@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ class VaultCertificateRequestUnitTests {
 	@Test
 	void shouldRejectUnconfiguredBuilder() {
 		assertThatExceptionOfType(IllegalArgumentException.class)
-			.isThrownBy(() -> VaultCertificateRequest.builder().build());
+				.isThrownBy(() -> VaultCertificateRequest.builder().build());
 	}
 
 	@Test
@@ -46,15 +47,15 @@ class VaultCertificateRequestUnitTests {
 	void shouldBuildFullyConfiguredRequest() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder() //
-			.commonName("hello.com") //
-			.withAltName("alt") //
-			.withIpSubjectAltName("127.0.0.1") //
-			.withUriSubjectAltName("hello.world") //
-			.withOtherSans("email;UTF-8:me@example.com") //
-			.excludeCommonNameFromSubjectAltNames() //
-			.format("pem") //
-			.privateKeyFormat("der") //
-			.build();
+				.commonName("hello.com") //
+				.withAltName("alt") //
+				.withIpSubjectAltName("127.0.0.1") //
+				.withUriSubjectAltName("hello.world") //
+				.withOtherSans("email;UTF-8:me@example.com") //
+				.excludeCommonNameFromSubjectAltNames() //
+				.format("pem") //
+				.privateKeyFormat("der") //
+				.build();
 
 		assertThat(request.getCommonName()).isEqualTo("hello.com");
 		assertThat(request.getAltNames()).hasSize(1).contains("alt");
@@ -70,9 +71,9 @@ class VaultCertificateRequestUnitTests {
 	void shouldConsiderOtherSansList() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder() //
-			.commonName("hello.com") //
-			.otherSans(Arrays.asList("foo", "bar")) //
-			.build();
+				.commonName("hello.com") //
+				.otherSans(Arrays.asList("foo", "bar")) //
+				.build();
 
 		assertThat(request.getOtherSans()).contains("foo", "bar");
 	}

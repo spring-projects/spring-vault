@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -72,10 +73,10 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
-			.renewable()
-			.ttl(1, TimeUnit.HOURS) //
-			.explicitMaxTtl(10, TimeUnit.HOURS) //
-			.build();
+				.renewable()
+				.ttl(1, TimeUnit.HOURS) //
+				.explicitMaxTtl(10, TimeUnit.HOURS) //
+				.build();
 
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 
@@ -85,6 +86,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 		final AtomicInteger counter = new AtomicInteger();
 		LifecycleAwareSessionManager sessionManager = new LifecycleAwareSessionManager(tokenAuthentication,
 				this.taskScheduler, prepare().getRestTemplate()) {
+
 			@Override
 			public VaultToken getSessionToken() {
 
@@ -93,6 +95,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 				}
 				return super.getSessionToken();
 			}
+
 		};
 
 		sessionManager.getSessionToken();
@@ -116,8 +119,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
 				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
@@ -143,8 +145,7 @@ class LifecycleAwareSessionManagerIntegrationTests extends IntegrationTestSuppor
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
 				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}

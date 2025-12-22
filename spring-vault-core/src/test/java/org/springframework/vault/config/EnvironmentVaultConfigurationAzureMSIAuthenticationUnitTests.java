@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.net.URI;
@@ -33,14 +34,15 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with AzureMSI authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with AzureMSI
+ * authentication.
  *
  * @author Justin Bertrand
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=http://null", "vault.authentication=azure", "vault.azure-msi.role=role",
-		"vault.azure-msi.metadata-service=http://foo" })
+@TestPropertySource(properties = {"vault.uri=http://null", "vault.authentication=azure", "vault.azure-msi.role=role",
+		"vault.azure-msi.metadata-service=http://foo"})
 class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 
 	@Configuration
@@ -60,7 +62,7 @@ class EnvironmentVaultConfigurationAzureMSIAuthenticationUnitTests {
 		AzureMsiAuthenticationOptions options = (AzureMsiAuthenticationOptions) accessor.getPropertyValue("options");
 
 		assertThat(options.getIdentityTokenServiceUri())
-			.isEqualTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
+				.isEqualTo(AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
 		assertThat(options.getInstanceMetadataServiceUri()).isEqualTo(URI.create("http://foo"));
 	}
 

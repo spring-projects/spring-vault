@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.HashMap;
@@ -31,25 +32,27 @@ import org.springframework.web.client.RestOperations;
 
 /**
  * Kubernetes implementation of {@link ClientAuthentication}.
- * {@link KubernetesAuthentication} uses a Kubernetes Service Account JSON Web Token to
- * login into Vault. JWT and Role are sent in the login request to Vault to obtain a
- * {@link VaultToken}.
+ * {@link KubernetesAuthentication} uses a Kubernetes Service Account JSON Web
+ * Token to login into Vault. JWT and Role are sent in the login request to
+ * Vault to obtain a {@link VaultToken}.
  *
  * @author Michal Budzyn
  * @author Mark Paluch
  * @since 2.0
  * @see KubernetesAuthenticationOptions
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth Backend:
- * Kubernetes</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth
+ * Backend: Kubernetes</a>
  */
 public class KubernetesAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(KubernetesAuthentication.class);
 
+
 	private final KubernetesAuthenticationOptions options;
 
 	private final ClientAdapter adapter;
+
 
 	/**
 	 * Create a {@link KubernetesAuthentication} using
@@ -58,10 +61,8 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestOperations restOperations) {
-
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(restOperations);
 	}
@@ -74,45 +75,36 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	 * @since 4.0
 	 */
 	public KubernetesAuthentication(KubernetesAuthenticationOptions options, RestClient client) {
-
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
 		Assert.notNull(client, "RestClient must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for kubernetes authentication given
+	 * Create {@link AuthenticationSteps} for kubernetes authentication given
 	 * {@link KubernetesAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for kubernetes authentication.
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(KubernetesAuthenticationOptions options) {
-
 		Assert.notNull(options, "KubernetesAuthenticationOptions must not be null");
-
 		return AuthenticationSteps.fromSupplier(options.getJwtSupplier())
-			.map(token -> getKubernetesLogin(options.getRole(), token))
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.map(token -> getKubernetesLogin(options.getRole(), token))
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
-
 		Map<String, String> login = getKubernetesLogin(this.options.getRole(), this.options.getJwtSupplier().get());
-
 		try {
 			VaultResponse response = this.adapter.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()),
 					login, VaultResponse.class);
-
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-
 			logger.debug("Login successful using Kubernetes authentication");
-
 			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw VaultLoginException.create("Kubernetes", e);
 		}
 	}
@@ -123,15 +115,11 @@ public class KubernetesAuthentication implements ClientAuthentication, Authentic
 	}
 
 	private static Map<String, String> getKubernetesLogin(String role, String jwt) {
-
 		Assert.hasText(role, "Role must not be empty");
 		Assert.hasText(jwt, "JWT must not be empty");
-
 		Map<String, String> login = new HashMap<>();
-
 		login.put("jwt", jwt);
 		login.put("role", role);
-
 		return login;
 	}
 

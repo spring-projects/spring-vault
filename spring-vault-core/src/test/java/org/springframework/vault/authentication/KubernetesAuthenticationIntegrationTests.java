@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.File;
@@ -42,9 +43,9 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("my-role")
-			.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
-			.build();
+				.role("my-role")
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
+				.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
@@ -60,14 +61,14 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 		File tokenFile = new File(findWorkDir(), "minikube/hello-minikube-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("wrong")
-			.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
-			.build();
+				.role("wrong")
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenFile))
+				.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
 	}
 
 	@Test
@@ -76,14 +77,14 @@ class KubernetesAuthenticationIntegrationTests extends KubernetesAuthenticationI
 		ClassPathResource tokenResource = new ClassPathResource("kube-jwt-token");
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("my-role")
-			.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenResource))
-			.build();
+				.role("my-role")
+				.jwtSupplier(new KubernetesServiceAccountTokenFile(tokenResource))
+				.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, restTemplate).login());
 	}
 
 }

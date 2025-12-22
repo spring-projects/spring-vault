@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.net.URI;
@@ -49,19 +50,17 @@ abstract class ClientAdapter {
 	}
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template, and return
-	 * the representation found in the response.
-	 * <p>
-	 * URI Template variables are expanded using the given URI variables, if any.
-	 * <p>
-	 * The {@code request} parameter can be a {@link HttpEntity} in order to add
+	 * Create a new resource by POSTing the given object to the URI template, and
+	 * return the representation found in the response.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
+	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to add
 	 * additional HTTP headers to the request.
-	 * <p>
-	 * The body of the entity, or {@code request} itself, can be a
-	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a multipart
-	 * request. The values in the {@code MultiValueMap} can be any Object representing the
-	 * body of the part, or an {@link org.springframework.http.HttpEntity HttpEntity}
-	 * representing a part with body and headers.
+	 * <p>The body of the entity, or {@code request} itself, can be a
+	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a
+	 * multipart request. The values in the {@code MultiValueMap} can be any Object
+	 * representing the body of the part, or an
+	 * {@link org.springframework.http.HttpEntity HttpEntity} representing a part
+	 * with body and headers.
 	 * @param url the URL
 	 * @param request the Object to be POSTed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -73,19 +72,17 @@ abstract class ClientAdapter {
 			@Nullable Object... uriVariables);
 
 	/**
-	 * Create a new resource by POSTing the given object to the URI template, and return
-	 * the representation found in the response.
-	 * <p>
-	 * URI Template variables are expanded using the given map.
-	 * <p>
-	 * The {@code request} parameter can be a {@link HttpEntity} in order to add
+	 * Create a new resource by POSTing the given object to the URI template, and
+	 * return the representation found in the response.
+	 * <p>URI Template variables are expanded using the given map.
+	 * <p>The {@code request} parameter can be a {@link HttpEntity} in order to add
 	 * additional HTTP headers to the request.
-	 * <p>
-	 * The body of the entity, or {@code request} itself, can be a
-	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a multipart
-	 * request. The values in the {@code MultiValueMap} can be any Object representing the
-	 * body of the part, or an {@link org.springframework.http.HttpEntity HttpEntity}
-	 * representing a part with body and headers.
+	 * <p>The body of the entity, or {@code request} itself, can be a
+	 * {@link org.springframework.util.MultiValueMap MultiValueMap} to create a
+	 * multipart request. The values in the {@code MultiValueMap} can be any Object
+	 * representing the body of the part, or an
+	 * {@link org.springframework.http.HttpEntity HttpEntity} representing a part
+	 * with body and headers.
 	 * @param url the URL
 	 * @param request the Object to be POSTed (may be {@code null})
 	 * @param responseType the type of the return value
@@ -97,16 +94,15 @@ abstract class ClientAdapter {
 			Map<String, ? extends @Nullable Object> uriVariables);
 
 	/**
-	 * Execute the HTTP method to the given URI template, writing the given request entity
-	 * to the request, and return the response as {@link ResponseEntity}.
-	 * <p>
-	 * URI Template variables are expanded using the given URI variables, if any.
+	 * Execute the HTTP method to the given URI template, writing the given request
+	 * entity to the request, and return the response as {@link ResponseEntity}.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request may
-	 * be {@code null})
-	 * @param responseType the type to convert the response to, or {@code Void.class} for
-	 * no body
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * may be {@code null})
+	 * @param responseType the type to convert the response to, or
+	 * {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 */
@@ -114,16 +110,15 @@ abstract class ClientAdapter {
 			Class<T> responseType, @Nullable Object... uriVariables);
 
 	/**
-	 * Execute the HTTP method to the given URI template, writing the given request entity
-	 * to the request, and return the response as {@link ResponseEntity}.
-	 * <p>
-	 * URI Template variables are expanded using the given URI variables, if any.
+	 * Execute the HTTP method to the given URI template, writing the given request
+	 * entity to the request, and return the response as {@link ResponseEntity}.
+	 * <p>URI Template variables are expanded using the given URI variables, if any.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request (may
-	 * be {@code null})
-	 * @param responseType the type to convert the response to, or {@code Void.class} for
-	 * no body
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * (may be {@code null})
+	 * @param responseType the type to convert the response to, or
+	 * {@code Void.class} for no body
 	 * @param uriVariables the variables to expand in the template
 	 * @return the response as entity
 	 */
@@ -131,14 +126,14 @@ abstract class ClientAdapter {
 			Class<T> responseType, Map<String, ? extends @Nullable Object> uriVariables);
 
 	/**
-	 * Execute the HTTP method to the given URI template, writing the given request entity
-	 * to the request, and return the response as {@link ResponseEntity}.
+	 * Execute the HTTP method to the given URI template, writing the given request
+	 * entity to the request, and return the response as {@link ResponseEntity}.
 	 * @param url the URL
 	 * @param method the HTTP method (GET, POST, etc)
-	 * @param requestEntity the entity (headers and/or body) to write to the request (may
-	 * be {@code null})
-	 * @param responseType the type to convert the response to, or {@code Void.class} for
-	 * no body
+	 * @param requestEntity the entity (headers and/or body) to write to the request
+	 * (may be {@code null})
+	 * @param responseType the type to convert the response to, or
+	 * {@code Void.class} for no body
 	 * @return the response as entity
 	 */
 	abstract <T> ResponseEntity<T> exchange(URI uri, HttpMethod method, @Nullable HttpEntity<?> requestEntity,

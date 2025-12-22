@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.jspecify.annotations.Nullable;
@@ -21,10 +22,9 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link ClientCertificateAuthentication}.
- * <p>
- * Authentication options provide the path. {@link ClientCertificateAuthenticationOptions}
- * can be constructed using {@link #builder()}. Instances of this class are immutable once
- * constructed.
+ * <p>Authentication options provide the path.
+ * {@link ClientCertificateAuthenticationOptions} can be constructed using
+ * {@link #builder()}. Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @author Andy Lintner
@@ -36,6 +36,7 @@ public class ClientCertificateAuthenticationOptions {
 
 	public static final String DEFAULT_CERT_PATH = "cert";
 
+
 	/**
 	 * Path of the cert authentication backend mount.
 	 */
@@ -46,10 +47,12 @@ public class ClientCertificateAuthenticationOptions {
 	 */
 	private final @Nullable String role;
 
+
 	private ClientCertificateAuthenticationOptions(String path, @Nullable String role) {
 		this.path = path;
 		this.role = role;
 	}
+
 
 	/**
 	 * @return a new {@link ClientCertificateAuthenticationOptionsBuilder}.
@@ -57,6 +60,7 @@ public class ClientCertificateAuthenticationOptions {
 	public static ClientCertificateAuthenticationOptionsBuilder builder() {
 		return new ClientCertificateAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the azure authentication backend mount.
@@ -73,6 +77,7 @@ public class ClientCertificateAuthenticationOptions {
 		return this.role;
 	}
 
+
 	/**
 	 * Builder for {@link ClientCertificateAuthenticationOptions}.
 	 */
@@ -82,13 +87,15 @@ public class ClientCertificateAuthenticationOptions {
 
 		private @Nullable String role;
 
+
 		ClientCertificateAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path, defaults to {@literal azure}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link ClientCertificateAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public ClientCertificateAuthenticationOptionsBuilder path(String path) {
 
@@ -101,7 +108,7 @@ public class ClientCertificateAuthenticationOptions {
 		/**
 		 * Configure the named certificate role to authenticate against.
 		 * @param name must not be empty or {@literal null}.
-		 * @return {@code this} {@link ClientCertificateAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 2.3.4
 		 */
 		public ClientCertificateAuthenticationOptionsBuilder role(String name) {

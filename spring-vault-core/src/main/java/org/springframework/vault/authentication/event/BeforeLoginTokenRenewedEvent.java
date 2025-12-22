@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication.event;
 
 import java.io.Serial;
@@ -32,8 +33,9 @@ public class BeforeLoginTokenRenewedEvent extends AuthenticationEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	/**
-	 * Create a new {@link BeforeLoginTokenRenewedEvent} given {@link VaultToken}.
+	 * Create a new {@code BeforeLoginTokenRenewedEvent} given {@link VaultToken}.
 	 * @param source the {@link VaultToken} associated with this event, must not be
 	 * {@literal null}.
 	 */

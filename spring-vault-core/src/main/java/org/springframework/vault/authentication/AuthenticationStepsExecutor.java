@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.apache.commons.logging.Log;
@@ -41,8 +42,8 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Synchronous executor for {@link AuthenticationSteps} using {@link RestOperations} to
- * login using authentication flows.
+ * Synchronous executor for {@link AuthenticationSteps} using
+ * {@link RestOperations} to login using authentication flows.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -52,72 +53,61 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	private static final Log logger = LogFactory.getLog(AuthenticationStepsExecutor.class);
 
+
 	private final AuthenticationSteps chain;
 
 	private final ClientAdapter adapter;
 
+
 	/**
-	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
-	 * and {@link RestOperations}.
+	 * Create a new {@code AuthenticationStepsExecutor} given
+	 * {@link AuthenticationSteps} and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestOperations restOperations) {
-
 		Assert.notNull(steps, "AuthenticationSteps must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.chain = steps;
 		this.adapter = ClientAdapter.from(restOperations);
 	}
 
 	/**
-	 * Create a new {@link AuthenticationStepsExecutor} given {@link AuthenticationSteps}
-	 * and {@link RestOperations}.
+	 * Create a new {@code AuthenticationStepsExecutor} given
+	 * {@link AuthenticationSteps} and {@link RestOperations}.
 	 * @param steps must not be {@literal null}.
 	 * @param client must not be {@literal null}.
 	 */
 	public AuthenticationStepsExecutor(AuthenticationSteps steps, RestClient client) {
-
 		Assert.notNull(steps, "AuthenticationSteps must not be null");
 		Assert.notNull(client, "RestClient must not be null");
-
 		this.chain = steps;
 		this.adapter = ClientAdapter.from(client);
 	}
 
 	@Override
 	public VaultToken login() throws VaultException {
-
 		Iterable<Node<?>> steps = this.chain.steps;
-
 		Object state = evaluate(steps);
-
 		if (state instanceof VaultToken) {
 			return (VaultToken) state;
 		}
 
 		if (state instanceof VaultResponse response) {
-
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
 			return LoginTokenUtil.from(response.getAuth());
 		}
-
 		throw new IllegalStateException(
 				"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(state));
 	}
 
-	@SuppressWarnings({ "unchecked", "ConstantConditions" })
+	@SuppressWarnings({"unchecked", "ConstantConditions"})
 	private @Nullable Object evaluate(Iterable<Node<?>> steps) {
-
 		Object state = null;
-
 		for (Node<?> o : steps) {
-
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing %s with current state %s".formatted(o, state));
 			}
-
 			try {
 				if (o instanceof HttpRequestNode) {
 					state = doHttpRequest((HttpRequestNode<Object>) o, state);
@@ -149,12 +139,10 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executed %s with current state %s".formatted(o, state));
 				}
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw new VaultLoginException("HTTP request %s in state %s failed with Status %s and body %s".formatted(
 						o, state, e.getStatusCode().value(), VaultResponses.getError(e.getResponseBodyAsString())), e);
-			}
-			catch (RuntimeException e) {
+			} catch (RuntimeException e) {
 				throw new VaultLoginException("Authentication execution failed in %s".formatted(o), e);
 			}
 		}
@@ -163,23 +151,17 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	@SuppressWarnings("ConstantConditions")
 	private @Nullable Object doHttpRequest(HttpRequestNode<Object> step, @Nullable Object state) {
-
 		HttpRequest<Object> definition = step.getDefinition();
-
 		if (definition.getUriTemplate() != null) {
-
 			ResponseEntity<?> exchange = this.adapter.exchange(definition.getUriTemplate(), definition.getMethod(),
 					getEntity(definition.getEntity(), state), definition.getResponseType(),
 					(Object[]) definition.getUrlVariables());
-
 			return exchange.getBody();
 		}
 
 		if (definition.getUri() != null) {
-
 			ResponseEntity<?> exchange = this.adapter.exchange(definition.getUri(), definition.getMethod(),
 					getEntity(definition.getEntity(), state), definition.getResponseType());
-
 			return exchange.getBody();
 		}
 
@@ -187,20 +169,16 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 	}
 
 	static HttpEntity<?> getEntity(@Nullable HttpEntity<?> entity, @Nullable Object state) {
-
 		if (entity == null) {
-
 			if (state instanceof HttpHeaders headers) {
 				return new HttpEntity<>(headers);
 			}
-
 			return state == null ? HttpEntity.EMPTY : new HttpEntity<>(state);
 		}
 
 		if (entity.getBody() == null && state != null) {
 			return new HttpEntity<>(state, entity.getHeaders());
 		}
-
 		return entity;
 	}
 
@@ -210,7 +188,6 @@ public class AuthenticationStepsExecutor implements ClientAuthentication {
 
 	@SuppressWarnings("NullAway")
 	private Object doZipStep(ZipStep<Object, Object> o, Object state) {
-
 		Object result = evaluate(o.getRight());
 		return Pair.of(state, result);
 	}

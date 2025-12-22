@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.annotation;
 
 import java.util.Collections;
@@ -42,17 +43,17 @@ import static org.assertj.core.api.Assertions.*;
 @ExtendWith(VaultExtension.class)
 class LeaseAwareVaultPropertySourceIntegrationTests {
 
-	@VaultPropertySource(value = { "secret/myapp", "secret/myapp/profile" }, renewal = Renewal.RENEW)
+	@VaultPropertySource(value = {"secret/myapp", "secret/myapp/profile"}, renewal = Renewal.RENEW)
 	static class Config extends VaultIntegrationTestConfiguration {
 
 	}
 
-	@VaultPropertySource(value = { "unknown" }, ignoreSecretNotFound = false)
+	@VaultPropertySource(value = {"unknown"}, ignoreSecretNotFound = false)
 	static class FailingConfig extends VaultIntegrationTestConfiguration {
 
 	}
 
-	@VaultPropertySource(value = { "unknown" }, ignoreSecretNotFound = false, renewal = Renewal.RENEW)
+	@VaultPropertySource(value = {"unknown"}, ignoreSecretNotFound = false, renewal = Renewal.RENEW)
 	static class FailingRenewableConfig extends VaultIntegrationTestConfiguration {
 
 	}
@@ -85,10 +86,9 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 
 		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(FailingConfig.class)) {
 			fail("AnnotationConfigApplicationContext startup did not fail");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
-				.hasRootCauseMessage("Vault location [unknown] not resolvable");
+					.hasRootCauseMessage("Vault location [unknown] not resolvable");
 		}
 	}
 
@@ -99,10 +99,9 @@ class LeaseAwareVaultPropertySourceIntegrationTests {
 				FailingRenewableConfig.class)) {
 
 			fail("AnnotationConfigApplicationContext startup did not fail");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			assertThat(e).hasRootCauseInstanceOf(VaultPropertySourceNotFoundException.class)
-				.hasRootCauseMessage("Vault location [unknown] not resolvable");
+					.hasRootCauseMessage("Vault location [unknown] not resolvable");
 		}
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Map;
@@ -37,15 +38,16 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
 
 /**
  * Cubbyhole {@link ClientAuthentication} implementation.
- * <p>
- * Cubbyhole authentication uses Vault primitives to provide a secured authentication
- * workflow. Cubbyhole authentication uses {@link VaultToken tokens} as primary login
- * method. An ephemeral token is used to obtain a second, login {@link VaultToken} from
- * Vault's Cubbyhole secret backend. The login token is usually longer-lived and used to
- * interact with Vault. The login token can be retrieved either from a wrapped response or
- * from the {@code data} section.
+ * <p>Cubbyhole authentication uses Vault primitives to provide a secured
+ * authentication workflow. Cubbyhole authentication uses {@link VaultToken
+ * tokens} as primary login method. An ephemeral token is used to obtain a
+ * second, login {@link VaultToken} from Vault's Cubbyhole secret backend. The
+ * login token is usually longer-lived and used to interact with Vault. The
+ * login token can be retrieved either from a wrapped response or from the
+ * {@code data} section.
  *
- * <h2>Wrapped token response usage</h2> <strong>Create a Token</strong>
+ * <h2>Wrapped token response usage</h2>
+ * <strong>Create a Token</strong>
  *
  * <pre>
  * <code>
@@ -70,7 +72,8 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *  CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restOperations);
  * </code> </pre>
  *
- * <h2>Stored token response usage</h2> <strong>Create a Token</strong>
+ * <h2>Stored token response usage</h2>
+ * <strong>Create a Token</strong>
  *
  * <pre>
  * <code>
@@ -109,23 +112,25 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * </code> </pre>
  *
  * <strong>Remaining TTL/Renewability</strong>
- * <p>
- * Tokens retrieved from Cubbyhole associated with a non-zero TTL start their TTL at the
- * time of token creation. That time is not necessarily identical with application
- * startup. To compensate for the initial delay, Cubbyhole authentication performs a
- * {@link CubbyholeAuthenticationOptions#isSelfLookup() self lookup} for tokens associated
- * with a non-zero TTL to retrieve the remaining TTL. Cubbyhole authentication will not
- * self-lookup wrapped tokens without a TTL because a zero TTL indicates there is no TTL
- * associated.
- * <p>
- * Non-wrapped tokens do not provide details regarding renewability and TTL by just
- * retrieving the token. A self-lookup will lookup renewability and the remaining TTL.
+ * <p>Tokens retrieved from Cubbyhole associated with a non-zero TTL start their
+ * TTL at the time of token creation. That time is not necessarily identical
+ * with application startup. To compensate for the initial delay, Cubbyhole
+ * authentication performs a
+ * {@link CubbyholeAuthenticationOptions#isSelfLookup() self lookup} for tokens
+ * associated with a non-zero TTL to retrieve the remaining TTL. Cubbyhole
+ * authentication will not self-lookup wrapped tokens without a TTL because a
+ * zero TTL indicates there is no TTL associated.
+ * <p>Non-wrapped tokens do not provide details regarding renewability and TTL
+ * by just retrieving the token. A self-lookup will lookup renewability and the
+ * remaining TTL.
  *
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
- * @see <a href="https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * Token</a>
+ * @see <a href=
+ * "https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
  * Secret Backend</a>
  * @see <a href=
  * "https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
@@ -135,9 +140,11 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 
 	private static final Log logger = LogFactory.getLog(CubbyholeAuthentication.class);
 
+
 	private final CubbyholeAuthenticationOptions options;
 
 	private final ClientAdapter adapter;
+
 
 	/**
 	 * Create a new {@link CubbyholeAuthentication} given
@@ -146,10 +153,8 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestOperations restOperations) {
-
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(restOperations);
 	}
@@ -162,52 +167,41 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	 * @since 4.0
 	 */
 	public CubbyholeAuthentication(CubbyholeAuthenticationOptions options, RestClient client) {
-
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
 		Assert.notNull(client, "RestClient must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for cubbyhole authentication given
+	 * Create {@link AuthenticationSteps} for cubbyhole authentication given
 	 * {@link CubbyholeAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for cubbyhole authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(CubbyholeAuthenticationOptions options) {
-
 		Assert.notNull(options, "CubbyholeAuthenticationOptions must not be null");
-
 		String url = getRequestPath(options);
-
 		HttpMethod unwrapMethod = getRequestMethod(options);
 		HttpEntity<Object> requestEntity = getRequestEntity(options);
-
 		HttpRequest<VaultResponse> initialRequest = method(unwrapMethod, url) //
-			.with(requestEntity) //
-			.as(VaultResponse.class);
-
+				.with(requestEntity) //
+				.as(VaultResponse.class);
 		return AuthenticationSteps.fromHttpRequest(initialRequest) //
-			.login(it -> getToken(options, it, url));
+				.login(it -> getToken(options, it, url));
 	}
+
 
 	@Override
 	public VaultToken login() throws VaultException {
-
 		String url = getRequestPath(this.options);
 		VaultResponse data = lookupToken(url);
-
 		VaultToken tokenToUse = getToken(this.options, data, url);
-
 		if (shouldEnhanceTokenWithSelfLookup(tokenToUse)) {
-
 			LoginTokenAdapter adapter = new LoginTokenAdapter(new TokenAuthentication(tokenToUse), this.adapter);
 			tokenToUse = adapter.login();
 		}
-
 		logger.debug("Login successful using Cubbyhole authentication");
 		return tokenToUse;
 	}
@@ -218,33 +212,26 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	}
 
 	private VaultResponse lookupToken(String url) {
-
 		try {
 			HttpMethod unwrapMethod = getRequestMethod(this.options);
 			HttpEntity<Object> requestEntity = getRequestEntity(this.options);
 			ResponseEntity<VaultResponse> entity = this.adapter.exchange(url, unwrapMethod, requestEntity,
 					VaultResponse.class);
-
 			return ResponseUtil.getRequiredBody(entity);
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw VaultLoginException.create("Cubbyhole", e);
 		}
 	}
 
 	private boolean shouldEnhanceTokenWithSelfLookup(VaultToken token) {
-
 		if (!this.options.isSelfLookup()) {
 			return false;
 		}
-
 		if (token instanceof LoginToken loginToken) {
-
 			if (loginToken.getLeaseDuration().isZero()) {
 				return false;
 			}
 		}
-
 		return true;
 	}
 
@@ -253,31 +240,17 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 	}
 
 	private static HttpMethod getRequestMethod(CubbyholeAuthenticationOptions options) {
-
-		if (options.isWrappedToken()) {
-			return options.getUnwrappingEndpoints().getUnwrapRequestMethod();
-		}
-
-		return HttpMethod.GET;
+		return options.isWrappedToken() ? options.getUnwrappingEndpoints().getUnwrapRequestMethod() : HttpMethod.GET;
 	}
 
 	private static String getRequestPath(CubbyholeAuthenticationOptions options) {
-
-		if (options.isWrappedToken()) {
-			return options.getUnwrappingEndpoints().getPath();
-		}
-
-		return options.getPath();
+		return options.isWrappedToken() ? options.getUnwrappingEndpoints().getPath() : options.getPath();
 	}
 
 	private static VaultToken getToken(CubbyholeAuthenticationOptions options, VaultResponse response, String url) {
-
 		if (options.isWrappedToken()) {
-
 			VaultResponse responseToUse = options.getUnwrappingEndpoints().unwrap(response);
-
 			Assert.state(responseToUse.getAuth() != null, "Auth field must not be null");
-
 			return LoginTokenUtil.from(responseToUse.getAuth());
 		}
 
@@ -285,7 +258,7 @@ public class CubbyholeAuthentication implements ClientAuthentication, Authentica
 		if (data == null || data.isEmpty()) {
 			throw new VaultLoginException(
 					"Cannot retrieve Token from Cubbyhole: Response at %s does not contain a token"
-						.formatted(options.getPath()));
+							.formatted(options.getPath()));
 		}
 
 		if (data.size() == 1) {

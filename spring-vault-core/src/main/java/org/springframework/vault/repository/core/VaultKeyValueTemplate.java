@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.core;
 
 import java.util.Collections;
@@ -24,7 +25,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.keyvalue.core.KeyValueAdapter;
-import org.springframework.data.keyvalue.core.KeyValueCallback;
 import org.springframework.data.keyvalue.core.KeyValueTemplate;
 import org.springframework.data.keyvalue.core.event.KeyValueEvent;
 import org.springframework.data.keyvalue.core.mapping.KeyValuePersistentEntity;
@@ -71,15 +71,14 @@ public class VaultKeyValueTemplate extends KeyValueTemplate {
 
 	/**
 	 * Define the event types to publish via {@link ApplicationEventPublisher}.
-	 * @param eventTypesToPublish use {@literal null} or {@link Collections#emptySet()} to
-	 * stop publishing.
+	 * @param eventTypesToPublish use {@literal null} or
+	 * {@link Collections#emptySet()} to stop publishing.
 	 */
 	public void setEventTypesToPublish(Set<Class<? extends KeyValueEvent>> eventTypesToPublish) {
 
 		if (CollectionUtils.isEmpty(eventTypesToPublish)) {
 			this.publishEvents = false;
-		}
-		else {
+		} else {
 			this.publishEvents = true;
 			this.eventTypesToPublish = Collections.unmodifiableSet(eventTypesToPublish);
 		}

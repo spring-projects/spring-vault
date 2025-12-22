@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,7 @@ class VaultTransformContextUnitTests {
 	@Test
 	void createsFromTweak() {
 
-		byte[] bytes = new byte[] { 1 };
+		byte[] bytes = new byte[] {1};
 
 		VaultTransformContext context = VaultTransformContext.fromTweak(bytes);
 
@@ -68,25 +69,25 @@ class VaultTransformContextUnitTests {
 		VaultTransformContext context = VaultTransformContext.builder().reference(referenceValue).build();
 
 		assertThat(context.getReference()).isEqualTo(referenceValue);
-		assertThat(context).isEqualTo(context).isNotEqualTo(VaultTransformContext.fromTweak(new byte[] { 1 }));
+		assertThat(context).isEqualTo(context).isNotEqualTo(VaultTransformContext.fromTweak(new byte[] {1}));
 		assertThat(context).hasSameHashCodeAs(context)
-			.doesNotHaveSameHashCodeAs(VaultTransformContext.fromTweak(new byte[] { 1 }));
+				.doesNotHaveSameHashCodeAs(VaultTransformContext.fromTweak(new byte[] {1}));
 	}
 
 	@Test
 	void appliesMutation() {
 
 		String transformName = "some_transformation";
-		byte[] tweak = { 1, 2, 3, 4, 5, 6, 7 };
+		byte[] tweak = {1, 2, 3, 4, 5, 6, 7};
 		String referenceValue = "my-reference";
 
 		VaultTransformContext context = VaultTransformContext.builder()
-			.transformation(transformName)
-			.tweak(tweak)
-			.reference(referenceValue)
-			.build()
-			.mutate()
-			.build();
+				.transformation(transformName)
+				.tweak(tweak)
+				.reference(referenceValue)
+				.build()
+				.mutate()
+				.build();
 
 		assertThat(context.getTransformation()).isEqualTo(transformName);
 		assertThat(context.getTweak()).isEqualTo(tweak);

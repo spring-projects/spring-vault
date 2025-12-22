@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.jspecify.annotations.Nullable;
@@ -31,6 +32,7 @@ import org.springframework.util.Assert;
 public class UsernamePasswordAuthenticationOptions {
 
 	public static final String DEFAULT_USERPASS_AUTHENTICATION_PATH = "userpass";
+
 
 	/**
 	 * Path of the userpass authentication backend mount.
@@ -52,6 +54,7 @@ public class UsernamePasswordAuthenticationOptions {
 	 */
 	private final @Nullable CharSequence totp;
 
+
 	private UsernamePasswordAuthenticationOptions(String path, String username, CharSequence password,
 			@Nullable CharSequence totp) {
 		this.username = username;
@@ -60,12 +63,14 @@ public class UsernamePasswordAuthenticationOptions {
 		this.totp = totp;
 	}
 
+
 	/**
 	 * @return a new {@link UsernamePasswordAuthenticationBuilder}.
 	 */
 	public static UsernamePasswordAuthenticationBuilder builder() {
 		return new UsernamePasswordAuthenticationBuilder();
 	}
+
 
 	/**
 	 * @return the path of the userpass authentication backend mount.
@@ -95,6 +100,7 @@ public class UsernamePasswordAuthenticationOptions {
 		return this.totp;
 	}
 
+
 	/**
 	 * Builder for {@link UsernamePasswordAuthenticationOptions}.
 	 */
@@ -108,18 +114,18 @@ public class UsernamePasswordAuthenticationOptions {
 
 		private @Nullable CharSequence totp;
 
+
 		UsernamePasswordAuthenticationBuilder() {
 		}
+
 
 		/**
 		 * Configure a {@code username} for userpass authentication.
 		 * @param username must not be empty or {@literal null}.
-		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 * @return this builder.
 		 */
 		public UsernamePasswordAuthenticationBuilder username(String username) {
-
 			Assert.hasText(username, "Username must not be null and not be empty");
-
 			this.username = username;
 			return this;
 		}
@@ -127,12 +133,10 @@ public class UsernamePasswordAuthenticationOptions {
 		/**
 		 * Configure a {@code password} for userpass authentication.
 		 * @param password must not be {@literal null}.
-		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 * @return this builder.
 		 */
 		public UsernamePasswordAuthenticationBuilder password(CharSequence password) {
-
 			Assert.notNull(password, "Password must not be null");
-
 			this.password = password;
 			return this;
 		}
@@ -141,12 +145,10 @@ public class UsernamePasswordAuthenticationOptions {
 		 * Configure an optional {@code totp} (time-based one-time token) for
 		 * userpass/Okta authentication.
 		 * @param totp must not be {@literal null}.
-		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 * @return this builder.
 		 */
 		public UsernamePasswordAuthenticationBuilder totp(CharSequence totp) {
-
 			Assert.notNull(password, "One-time token must not be null");
-
 			this.totp = totp;
 			return this;
 		}
@@ -154,12 +156,10 @@ public class UsernamePasswordAuthenticationOptions {
 		/**
 		 * Configure the mount path.
 		 * @param path must not be {@literal null} or empty.
-		 * @return {@code this} {@link UsernamePasswordAuthenticationBuilder}.
+		 * @return this builder.
 		 */
 		public UsernamePasswordAuthenticationBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -169,10 +169,8 @@ public class UsernamePasswordAuthenticationOptions {
 		 * @return a new {@link UsernamePasswordAuthenticationOptions}.
 		 */
 		public UsernamePasswordAuthenticationOptions build() {
-
 			Assert.hasText(this.username, "Username must not be null and not be empty");
 			Assert.notNull(this.password, "Password must not be null");
-
 			return new UsernamePasswordAuthenticationOptions(path, username, password, totp);
 		}
 

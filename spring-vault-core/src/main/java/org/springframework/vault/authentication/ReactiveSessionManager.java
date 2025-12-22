@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import reactor.core.publisher.Mono;
@@ -20,13 +21,12 @@ import reactor.core.publisher.Mono;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * Strategy interface that encapsulates the creation and management of Vault sessions
- * based on {@link VaultToken} used by reactive components.
- * <p>
- * {@link ReactiveSessionManager} is used by
- * {@link org.springframework.vault.core.ReactiveVaultTemplate} to initiate a session.
- * Implementing classes usually use {@link VaultTokenSupplier} to log into Vault and
- * obtain tokens.
+ * Strategy interface that encapsulates the creation and management of Vault
+ * sessions based on {@link VaultToken} used by reactive components.
+ * <p>{@link ReactiveSessionManager} is used by
+ * {@link org.springframework.vault.core.ReactiveVaultTemplate} to initiate a
+ * session. Implementing classes usually use {@link VaultTokenSupplier} to log
+ * into Vault and obtain tokens.
  *
  * @author Mark Paluch
  * @see CachingVaultTokenSupplier

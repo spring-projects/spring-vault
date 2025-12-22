@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.File;
@@ -63,7 +64,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.util.Settings.*;
 
 /**
- * Integration tests for {@link VaultPkiTemplate} through {@link VaultPkiOperations}.
+ * Integration tests for {@link VaultPkiTemplate} through
+ * {@link VaultPkiOperations}.
  *
  * @author Mark Paluch
  * @author Alex Bremora
@@ -174,17 +176,17 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	void issueCertificateUsingFormat(KeyFixture keyFixture) throws Exception {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-			.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
-			.privateKeyFormat(keyFixture.privateKeyFormat)
-			.format(keyFixture.format)
-			.build();
+				.commonName(keyFixture.format.replace('_', '-') + ".hello.example.com")
+				.privateKeyFormat(keyFixture.privateKeyFormat)
+				.format(keyFixture.format)
+				.build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations
-			.issueCertificate("testrole-" + keyFixture.keyType.name(), request);
+				.issueCertificate("testrole-" + keyFixture.keyType.name(), request);
 
 		CertificateBundle data = certificateResponse.getRequiredData();
 		assertThat(data.getX509Certificate().getSubjectX500Principal().getName())
-			.isEqualTo("CN=" + request.getCommonName());
+				.isEqualTo("CN=" + request.getCommonName());
 		assertThat(data.getX509IssuerCertificates()).hasSize(2);
 
 		assertThat(data.getPrivateKeySpec()).isNotNull();
@@ -253,9 +255,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 	void issueCertificateWithTtlShouldCreateCertificate() {
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-			.ttl(Duration.ofHours(48))
-			.commonName("hello.example.com")
-			.build();
+				.ttl(Duration.ofHours(48))
+				.commonName("hello.example.com")
+				.build();
 
 		VaultCertificateResponse certificateResponse = this.pkiOperations.issueCertificate("testrole", request);
 
@@ -263,7 +265,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		Instant now = Instant.now();
 		assertThat(certificate.getNotAfter()).isAfter(Date.from(now.plus(40, ChronoUnit.HOURS)))
-			.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
+				.isBefore(Date.from(now.plus(50, ChronoUnit.HOURS)));
 	}
 
 	@Test
@@ -291,9 +293,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 				-----END CERTIFICATE REQUEST-----""";
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-			.commonName("hello.example.com")
-			.notAfter(notAfter)
-			.build();
+				.commonName("hello.example.com")
+				.notAfter(notAfter)
+				.build();
 
 		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
 				csr, request);
@@ -327,13 +329,13 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 				-----END CERTIFICATE REQUEST-----""";
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-			.commonName("hello.example.com")
-			.userIds(List.of("test1", "test2"))
-			.build();
+				.commonName("hello.example.com")
+				.userIds(List.of("test1", "test2"))
+				.build();
 
 		assertThatThrownBy(() -> this.pkiOperations.signCertificateRequest("testrole", csr, request))
-			.hasCauseInstanceOf(HttpClientErrorException.BadRequest.class)
-			.hasMessageContaining("user_id test1 is not allowed by this role");
+				.hasCauseInstanceOf(HttpClientErrorException.BadRequest.class)
+				.hasMessageContaining("user_id test1 is not allowed by this role");
 	}
 
 	@Test
@@ -360,9 +362,9 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 				-----END CERTIFICATE REQUEST-----""";
 
 		VaultCertificateRequest request = VaultCertificateRequest.builder()
-			.commonName("hello.example.com")
-			.userIds(Arrays.asList("robot", "humanoid"))
-			.build();
+				.commonName("hello.example.com")
+				.userIds(Arrays.asList("robot", "humanoid"))
+				.build();
 
 		VaultSignCertificateRequestResponse certificateResponse = this.pkiOperations.signCertificateRequest("testrole",
 				csr, request);
@@ -371,7 +373,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		assertThat(data.getCertificate()).isNotEmpty();
 		assertThat(data.getX509Certificate().getSubjectX500Principal().getName()).contains("UID=humanoid")
-			.contains("UID=robot");
+				.contains("UID=robot");
 	}
 
 	@Test
@@ -417,7 +419,7 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultCertificateRequest request = VaultCertificateRequest.create("not.supported");
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
+				.isThrownBy(() -> this.pkiOperations.issueCertificate("testrole", request));
 	}
 
 	@Test

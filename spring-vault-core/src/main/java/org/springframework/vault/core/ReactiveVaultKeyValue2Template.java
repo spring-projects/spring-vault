@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Collections;
@@ -26,8 +27,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Default implementation of {@link VaultKeyValueOperations} for the key-value backend
- * version 2.
+ * Default implementation of {@link VaultKeyValueOperations} for the key-value
+ * backend version 2.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch
@@ -37,9 +38,10 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link ReactiveVaultKeyValue2Template} given {@link VaultOperations}
-	 * and the mount {@code path}.
+	 * Create a new {@link ReactiveVaultKeyValue2Template} given
+	 * {@link VaultOperations} and the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
@@ -48,18 +50,15 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 		this.path = path;
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Mono<VaultResponse> get(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doRead(path, Map.class, (response, data) -> {
-
 			VaultResponse vaultResponse = new VaultResponse();
 			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(data);
-
 			return vaultResponse;
 		});
 	}
@@ -67,12 +66,9 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> Mono<VaultResponseSupport<T>> get(String path, Class<T> responseType) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");
-
 		return doRead(path, responseType, (response, data) -> {
-
 			VaultResponseSupport result = response;
 			result.setData(data);
 			return result;
@@ -81,30 +77,29 @@ class ReactiveVaultKeyValue2Template extends ReactiveVaultKeyValue2Accessor impl
 
 	@Override
 	public Mono<Boolean> patch(String path, Map<String, ?> patch) {
-
 		Assert.notNull(patch, "Patch body must not be null");
-
 		return get(path).filter(it -> it.getData() != null)
-			.switchIfEmpty(Mono.error(new SecretNotFoundException(
-					"No data found at '%s'; patch only works on existing data".formatted(createDataPath(path)),
-					createLogicalPath(path))))
-			.flatMap(readResponse -> {
+				.switchIfEmpty(Mono.error(new SecretNotFoundException(
+						"No data found at '%s'; patch only works on existing data".formatted(createDataPath(path)),
+						createLogicalPath(path))))
+				.flatMap(readResponse -> {
 
-				if (readResponse.getMetadata() == null) {
-					return Mono.error(new VaultException("Metadata must not be null"));
-				}
-
-				Map<String, Object> body = KeyValueUtilities.createPatchRequest(patch, readResponse.getRequiredData(),
-						readResponse.getMetadata());
-
-				return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class, e -> {
-					if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
-							|| e.getMessage().contains("did not match the current version"))) {
-						return Mono.just(Boolean.FALSE);
+					if (readResponse.getMetadata() == null) {
+						return Mono.error(new VaultException("Metadata must not be null"));
 					}
-					return Mono.error(e);
+
+					Map<String, Object> body = KeyValueUtilities.createPatchRequest(patch,
+							readResponse.getRequiredData(),
+							readResponse.getMetadata());
+					return doWrite(createDataPath(path), body).thenReturn(true).onErrorResume(VaultException.class,
+							e -> {
+								if (e.getMessage() != null && (e.getMessage().contains("check-and-set")
+										|| e.getMessage().contains("did not match the current version"))) {
+									return Mono.just(Boolean.FALSE);
+								}
+								return Mono.error(e);
+							});
 				});
-			});
 	}
 
 	@Override

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Map;
@@ -23,13 +24,13 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
- * backend. Paths used in this operations interface are relative and outgoing requests
- * prepend paths with the according operation-specific prefix.
- * <p/>
- * This API supports both, versioned and unversioned key-value backends. Versioned usage
- * is limited as updates requiring compare-and-set (CAS) are not possible. Use
- * {@link VaultVersionedKeyValueOperations} in such cases instead.
+ * Interface that specifies a basic set of Vault operations using Vault's
+ * Key/Value secret backend. Paths used in this operations interface are
+ * relative and outgoing requests prepend paths with the according
+ * operation-specific prefix.
+ * <p>This API supports both, versioned and unversioned key-value backends.
+ * Versioned usage is limited as updates requiring compare-and-set (CAS) are not
+ * possible. Use {@link VaultVersionedKeyValueOperations} in such cases instead.
  *
  * @author Mark Paluch
  * @author Younghwan Jang
@@ -45,7 +46,8 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
 	@Override
-	@Nullable VaultResponse get(String path);
+	@Nullable
+	VaultResponse get(String path);
 
 	/**
 	 * Read the secret at {@code path}.
@@ -56,11 +58,12 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	<T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType);
 
 	/**
-	 * Update the secret at {@code path} without removing the existing secrets. Requires a
-	 * Key-Value version 2 mount to ensure an atomic update.
+	 * Update the secret at {@code path} without removing the existing secrets.
+	 * Requires a Key-Value version 2 mount to ensure an atomic update.
 	 * @param path must not be {@literal null}.
 	 * @param patch must not be {@literal null}.
-	 * @return {@code true} if the patch operation is successful, {@code false} otherwise.
+	 * @return {@code true} if the patch operation is successful, {@code false}
+	 * otherwise.
 	 * @since 2.3
 	 */
 	boolean patch(String path, Map<String, ?> patch);

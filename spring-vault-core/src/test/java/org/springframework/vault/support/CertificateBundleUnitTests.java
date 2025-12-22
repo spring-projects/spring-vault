@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
@@ -28,9 +28,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import tools.jackson.databind.ObjectMapper;
 
-import org.springframework.util.StreamUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * Unit tests for {@link CertificateBundle}.
@@ -130,9 +128,9 @@ class CertificateBundleUnitTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "certificate-response-rsa-pem.json", "certificate-response-rsa-der.json",
+	@ValueSource(strings = {"certificate-response-rsa-pem.json", "certificate-response-rsa-der.json",
 			"certificate-response-rsa-pembundle.json", "certificate-response-ec-pem.json",
-			"certificate-response-ec-der.json", "certificate-response-ec-pembundle.json" })
+			"certificate-response-ec-der.json", "certificate-response-ec-pembundle.json"})
 	void createKeystore(String path) {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
@@ -147,7 +145,7 @@ class CertificateBundleUnitTests {
 	}
 
 	@ParameterizedTest
-	@ValueSource(strings = { "certificate-response-rsa-pem-pkcs8.json", "certificate-response-ec-pem-pkcs8.json" })
+	@ValueSource(strings = {"certificate-response-rsa-pem-pkcs8.json", "certificate-response-ec-pem-pkcs8.json"})
 	void shouldCreateKeystore(String path) {
 
 		CertificateBundle bundle = loadCertificateBundle(path);
@@ -167,12 +165,10 @@ class CertificateBundleUnitTests {
 		assertThat(resource).as("Resource " + path).isNotNull();
 		try {
 			return this.OBJECT_MAPPER.readValue(resource, CertificateBundle.class);
-		}
-		finally {
+		} finally {
 			try {
 				resource.close();
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}

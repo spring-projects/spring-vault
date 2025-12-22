@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Collections;
@@ -41,8 +42,8 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 
 		String roleId = getRoleId("no-secret-id");
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.build();
+				.roleId(RoleId.provided(roleId))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
@@ -52,10 +53,10 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 	void shouldAuthenticateWithFullPullMode() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.appRole("with-secret-id")
-			.roleId(RoleId.pull(Settings.token()))
-			.secretId(SecretId.pull(Settings.token()))
-			.build();
+				.appRole("with-secret-id")
+				.roleId(RoleId.pull(Settings.token()))
+				.secretId(SecretId.pull(Settings.token()))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
@@ -65,10 +66,10 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 	void shouldAuthenticateWithPullMode() {
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(getRoleId("with-secret-id")))
-			.appRole("with-secret-id")
-			.secretId(SecretId.pull(Settings.token()))
-			.build();
+				.roleId(RoleId.provided(getRoleId("with-secret-id")))
+				.appRole("with-secret-id")
+				.secretId(SecretId.pull(Settings.token()))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
@@ -79,14 +80,14 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 
 		String roleId = getRoleId("with-secret-id");
 		String secretId = (String) getVaultOperations()
-			.write("auth/approle/role/%s/secret-id".formatted("with-secret-id"), null)
-			.getRequiredData()
-			.get("secret_id");
+				.write("auth/approle/role/%s/secret-id".formatted("with-secret-id"), null)
+				.getRequiredData()
+				.get("secret_id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.secretId(SecretId.provided(secretId))
-			.build();
+				.roleId(RoleId.provided(roleId))
+				.secretId(SecretId.provided(secretId))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();
@@ -99,10 +100,10 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		VaultToken unwrappingToken = generateWrappedSecretIdResponse();
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.secretId(SecretId.wrapped(unwrappingToken))
-			.roleId(RoleId.provided(roleId))
-			.unwrappingEndpoints(getUnwrappingEndpoints())
-			.build();
+				.secretId(SecretId.wrapped(unwrappingToken))
+				.roleId(RoleId.provided(roleId))
+				.unwrappingEndpoints(getUnwrappingEndpoints())
+				.build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
@@ -116,10 +117,10 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		VaultToken roleIdToken = generateWrappedRoleIdResponse();
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.secretId(SecretId.wrapped(secretIdToken))
-			.roleId(RoleId.wrapped(roleIdToken))
-			.unwrappingEndpoints(getUnwrappingEndpoints())
-			.build();
+				.secretId(SecretId.wrapped(secretIdToken))
+				.roleId(RoleId.wrapped(roleIdToken))
+				.unwrappingEndpoints(getUnwrappingEndpoints())
+				.build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
@@ -133,10 +134,10 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		String unwrappingToken = "incorrect-unwrapping-token";
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.secretId(SecretId.wrapped(VaultToken.of(unwrappingToken)))
-			.roleId(RoleId.provided(roleId))
-			.unwrappingEndpoints(getUnwrappingEndpoints())
-			.build();
+				.secretId(SecretId.wrapped(VaultToken.of(unwrappingToken)))
+				.roleId(RoleId.provided(roleId))
+				.unwrappingEndpoints(getUnwrappingEndpoints())
+				.build();
 
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
@@ -149,8 +150,8 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		String roleId = getRoleId("with-secret-id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.build();
+				.roleId(RoleId.provided(roleId))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(authentication::login);
@@ -162,9 +163,9 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 		String roleId = getRoleId("with-secret-id");
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.secretId(SecretId.provided("this-is-a-wrong-secret-id"))
-			.build();
+				.roleId(RoleId.provided(roleId))
+				.secretId(SecretId.provided("this-is-a-wrong-secret-id"))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(authentication::login);
@@ -180,9 +181,9 @@ class AppRoleAuthenticationIntegrationTests extends AppRoleAuthenticationIntegra
 				"auth/approle/role/with-secret-id/custom-secret-id", Collections.singletonMap("secret_id", secretId));
 
 		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.secretId(SecretId.provided(secretId))
-			.build();
+				.roleId(RoleId.provided(roleId))
+				.secretId(SecretId.provided(secretId))
+				.build();
 		AppRoleAuthentication authentication = new AppRoleAuthentication(options, prepare().getRestTemplate());
 
 		assertThat(authentication.login()).isNotNull();

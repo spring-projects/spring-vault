@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Arrays;
@@ -33,17 +34,20 @@ public class VaultTransitContext {
 	 */
 	private static final VaultTransitContext EMPTY = new VaultTransitContext(new byte[0], new byte[0], 0);
 
+
 	private final byte[] context;
 
 	private final byte[] nonce;
 
 	private final int keyVersion;
 
+
 	VaultTransitContext(byte[] context, byte[] nonce, int keyVersion) {
 		this.context = context;
 		this.nonce = nonce;
 		this.keyVersion = keyVersion;
 	}
+
 
 	/**
 	 * @return a new {@link VaultTransitRequestBuilder}.
@@ -79,6 +83,7 @@ public class VaultTransitContext {
 		return builder().nonce(nonce).build();
 	}
 
+
 	/**
 	 * @return the key derivation context.
 	 */
@@ -94,9 +99,9 @@ public class VaultTransitContext {
 	}
 
 	/**
-	 * @return the version of the key to use for the operation. Uses the latest version if
-	 * not set. Must be greater than or equal to the key's {@code min_encryption_version},
-	 * if set.
+	 * @return the version of the key to use for the operation. Uses the latest
+	 * version if not set. Must be greater than or equal to the key's
+	 * {@code min_encryption_version}, if set.
 	 * @since 3.0.3
 	 */
 	public int getKeyVersion() {
@@ -120,6 +125,7 @@ public class VaultTransitContext {
 		return result;
 	}
 
+
 	/**
 	 * Builder for {@link VaultTransitContext}.
 	 */
@@ -131,36 +137,34 @@ public class VaultTransitContext {
 
 		private int keyVersion;
 
+
 		VaultTransitRequestBuilder() {
 		}
+
 
 		/**
 		 * Configure a key derivation context for the {@code transit} operation.
 		 * @param context key derivation context, provided as a binary data. Must be
 		 * provided if derivation is enabled.
-		 * @return {@code this} {@link VaultTransitRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultTransitRequestBuilder context(byte[] context) {
-
 			Assert.notNull(context, "Context must not be null");
-
 			this.context = context;
 			return this;
 		}
 
 		/**
-		 * Configure the nonce value for a {@code transit} operation. Must be provided if
-		 * convergent encryption is enabled for this key and the key was generated with
-		 * Vault 0.6.1. Not required for keys created in 0.6.2+.
+		 * Configure the nonce value for a {@code transit} operation. Must be provided
+		 * if convergent encryption is enabled for this key and the key was generated
+		 * with Vault 0.6.1. Not required for keys created in 0.6.2+.
 		 * @param nonce value must be exactly 96 bits (12 bytes) long and the user must
 		 * ensure that for any given context (and thus, any given encryption key) this
 		 * nonce value is never reused
-		 * @return {@code this} {@link VaultTransitRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultTransitRequestBuilder nonce(byte[] nonce) {
-
 			Assert.notNull(nonce, "Nonce must not be null");
-
 			this.nonce = nonce;
 			return this;
 		}
@@ -168,15 +172,13 @@ public class VaultTransitContext {
 		/**
 		 * Configure the key version to use. Must be greater than or equal to the key's
 		 * {@code min_encryption_version}. The key version is not used if not set.
-		 * @param keyVersion the key version to be used, must be greater than or equal to
-		 * the key's {@code min_encryption_version}
-		 * @return {@code this} {@link VaultTransitRequestBuilder}.
+		 * @param keyVersion the key version to be used, must be greater than or equal
+		 * to the key's {@code min_encryption_version}
+		 * @return this builder.
 		 * @since 3.0.3
 		 */
 		public VaultTransitRequestBuilder keyVersion(int keyVersion) {
-
 			Assert.isTrue(keyVersion >= 0, "Key version must have a positive value");
-
 			this.keyVersion = keyVersion;
 			return this;
 		}

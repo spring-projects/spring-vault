@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,14 @@ import org.springframework.vault.authentication.ClientCertificateAuthentication;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with AppRole authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with AppRole
+ * authentication.
  *
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(
-		properties = { "vault.uri=https://localhost:8123", "vault.authentication=cert", "vault.aws-ec2.role-id=role" })
+@TestPropertySource(properties = {"vault.uri=https://localhost:8123", "vault.authentication=cert",
+		"vault.aws-ec2.role-id=role"})
 class EnvironmentVaultConfigurationClientCertAuthenticationUnitTests {
 
 	@Configuration

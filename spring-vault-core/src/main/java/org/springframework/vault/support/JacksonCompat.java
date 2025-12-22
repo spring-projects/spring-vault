@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
@@ -47,11 +48,11 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Compatibility layer for Jackson 2 and Jackson 3. This class auto-detects whether
- * Jackson 3 or Jackson 2 are available prefering Jackson 3. Note that Jackson 2 support
- * will be removed in future versions.
- * <p>
- * This class is intened for internal use only and will be removed in future versions.
+ * Compatibility layer for Jackson 2 and Jackson 3. This class auto-detects
+ * whether Jackson 3 or Jackson 2 are available prefering Jackson 3. Note that
+ * Jackson 2 support will be removed in future versions.
+ * <p>This class is intened for internal use only and will be removed in future
+ * versions.
  *
  * @author Mark Paluch
  * @since 4.0
@@ -60,8 +61,11 @@ import org.springframework.web.client.RestTemplate;
 public abstract class JacksonCompat {
 
 	static final @Nullable Class JACKSON_2_JSON_NODE;
+
 	static final @Nullable Class JACKSON_3_JSON_NODE;
+
 	static final JacksonCompat compat;
+
 
 	static {
 
@@ -69,34 +73,32 @@ public abstract class JacksonCompat {
 		Class<?> jackson3JsonNode = null;
 		try {
 			jackson2JsonNode = ClassUtils
-				.isPresent("com.fasterxml.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
-						? ClassUtils.forName("com.fasterxml.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
-						: null;
-		}
-		catch (ClassNotFoundException e) {
+					.isPresent("com.fasterxml.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
+							? ClassUtils.forName("com.fasterxml.jackson.databind.JsonNode",
+									Jackson2.class.getClassLoader())
+							: null;
+		} catch (ClassNotFoundException e) {
 		}
 
 		try {
 			jackson3JsonNode = ClassUtils.isPresent("tools.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
-					? ClassUtils.forName("tools.jackson.databind.JsonNode", Jackson2.class.getClassLoader()) : null;
+					? ClassUtils.forName("tools.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
+					: null;
 
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 		}
 
 		JACKSON_2_JSON_NODE = jackson2JsonNode;
 		JACKSON_3_JSON_NODE = jackson3JsonNode;
-
 		if (JACKSON_3_JSON_NODE != null) {
 			compat = Jackson3.INSTANCE;
-		}
-		else if (JACKSON_2_JSON_NODE != null) {
+		} else if (JACKSON_2_JSON_NODE != null) {
 			compat = Jackson2.INSTANCE;
-		}
-		else {
+		} else {
 			throw new IllegalStateException("Either Jackson 2 or Jackson 3 must be available on the classpath");
 		}
 	}
+
 
 	/**
 	 * Obtain the {@link JacksonCompat} instance.
@@ -105,6 +107,7 @@ public abstract class JacksonCompat {
 	public static JacksonCompat instance() {
 		return compat;
 	}
+
 
 	public boolean isJackson3() {
 		return this instanceof Jackson3;
@@ -125,6 +128,7 @@ public abstract class JacksonCompat {
 	public abstract @Nullable ObjectMapperAccessor getObjectMapperAccessor(
 			List<HttpMessageConverter<?>> messageConverters);
 
+
 	/**
 	 * Accessor for {@code ObjectMapper} that provides methods to serialize and
 	 * deserialize JSON.
@@ -138,16 +142,12 @@ public abstract class JacksonCompat {
 		static ObjectMapperAccessor from(VaultOperations vaultOperations) {
 
 			return vaultOperations.doWithSession(operations -> {
-
 				if (operations instanceof RestTemplate template) {
-
 					ObjectMapperAccessor accessor = compat.getObjectMapperAccessor(template.getMessageConverters());
-
 					if (accessor != null) {
 						return accessor;
 					}
 				}
-
 				return ObjectMapperAccessor.create();
 			});
 		}
@@ -167,17 +167,22 @@ public abstract class JacksonCompat {
 	static class Jackson2 extends JacksonCompat {
 
 		static final Jackson2 INSTANCE = new Jackson2();
+
 		static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
 		static final ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = new ObjectMapper()
-			.enable(SerializationFeature.INDENT_OUTPUT);
+				.enable(SerializationFeature.INDENT_OUTPUT);
+
 		static final Jackson2ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(OBJECT_MAPPER);
 
 		static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
 				OBJECT_MAPPER);
 
+
 		public static boolean isAvailable() {
 			return JACKSON_2_JSON_NODE != null;
 		}
+
 
 		@Override
 		public AbstractHttpMessageConverter<Object> createHttpMessageConverter() {
@@ -213,24 +218,25 @@ public abstract class JacksonCompat {
 
 		@SuppressWarnings("removal")
 		public @Nullable ObjectMapperAccessor getObjectMapperAccessor(List<HttpMessageConverter<?>> converters) {
-
 			Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = converters.stream()
-				.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
-				.map(AbstractJackson2HttpMessageConverter.class::cast) //
-				.findFirst();
-
+					.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
+					.map(AbstractJackson2HttpMessageConverter.class::cast) //
+					.findFirst();
 			return jackson2Converter.map(AbstractJackson2HttpMessageConverter::getObjectMapper)
-				.map(Jackson2ObjectMapperAccessor::new)
-				.orElse(null);
+					.map(Jackson2ObjectMapperAccessor::new)
+					.orElse(null);
 		}
+
 
 		static class Jackson2ObjectMapperAccessor implements ObjectMapperAccessor {
 
 			private final com.fasterxml.jackson.databind.ObjectMapper mapper;
 
+
 			Jackson2ObjectMapperAccessor(ObjectMapper mapper) {
 				this.mapper = mapper;
 			}
+
 
 			public com.fasterxml.jackson.core.TreeNode getJsonNode(Object jsonNode) {
 				return (com.fasterxml.jackson.databind.JsonNode) jsonNode;
@@ -239,18 +245,14 @@ public abstract class JacksonCompat {
 			@Override
 			public <I> I deserialize(Object json, Class<I> type) {
 				try {
-
 					if (json instanceof String s) {
 						return this.mapper.reader().readValue(s, type);
 					}
-
 					if (json instanceof byte[] bs) {
 						return this.mapper.reader().readValue(bs, type);
 					}
-
 					return this.mapper.reader().readValue(getJsonNode(json).traverse(), type);
-				}
-				catch (IOException e) {
+				} catch (IOException e) {
 					throw new VaultException("Cannot deserialize response", e);
 				}
 			}
@@ -259,8 +261,7 @@ public abstract class JacksonCompat {
 			public String writeValueAsString(Object object) {
 				try {
 					return mapper.writeValueAsString(object);
-				}
-				catch (JsonProcessingException e) {
+				} catch (JsonProcessingException e) {
 					throw new IllegalStateException("Cannot serialize headers to JSON", e);
 				}
 			}
@@ -269,23 +270,28 @@ public abstract class JacksonCompat {
 
 	}
 
+
 	static class Jackson3 extends JacksonCompat {
 
 		static final Jackson3 INSTANCE = new Jackson3();
 
 		static final tools.jackson.databind.json.JsonMapper JSON_MAPPER = JsonMapper.builder().build();
+
 		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
-			.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
-			.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
-			.build();
+				.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
+				.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
+				.build();
+
 		static final Jackson3ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
 
 		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(JSON_MAPPER);
 
+
 		public static boolean isAvailable() {
 			return JACKSON_3_JSON_NODE != null;
 		}
+
 
 		@Override
 		public AbstractHttpMessageConverter<Object> createHttpMessageConverter() {
@@ -320,24 +326,26 @@ public abstract class JacksonCompat {
 		}
 
 		public @Nullable ObjectMapperAccessor getObjectMapperAccessor(List<HttpMessageConverter<?>> converters) {
-
 			Optional<AbstractJacksonHttpMessageConverter> jackson3Converter = converters.stream()
-				.filter(AbstractJacksonHttpMessageConverter.class::isInstance) //
-				.map(AbstractJacksonHttpMessageConverter.class::cast) //
-				.findFirst();
+					.filter(AbstractJacksonHttpMessageConverter.class::isInstance) //
+					.map(AbstractJacksonHttpMessageConverter.class::cast) //
+					.findFirst();
 
 			return jackson3Converter.map(AbstractJacksonHttpMessageConverter::getMapper)
-				.map(Jackson3.Jackson3ObjectMapperAccessor::new)
-				.orElse(null);
+					.map(Jackson3.Jackson3ObjectMapperAccessor::new)
+					.orElse(null);
 		}
+
 
 		static class Jackson3ObjectMapperAccessor implements ObjectMapperAccessor {
 
 			private final tools.jackson.databind.ObjectMapper mapper;
 
+
 			Jackson3ObjectMapperAccessor(tools.jackson.databind.ObjectMapper mapper) {
 				this.mapper = mapper;
 			}
+
 
 			public tools.jackson.databind.JsonNode getJsonNode(Object jsonNode) {
 				return (tools.jackson.databind.JsonNode) jsonNode;
@@ -345,17 +353,13 @@ public abstract class JacksonCompat {
 
 			@Override
 			public <I> I deserialize(Object json, Class<I> type) {
-
 				ObjectReader reader = this.mapper.readerFor(type);
-
 				if (json instanceof String s) {
 					return reader.readValue(s);
 				}
-
 				if (json instanceof byte[] bs) {
 					return reader.readValue(bs);
 				}
-
 				return reader.readValue(getJsonNode(json).traverse(ObjectReadContext.empty()));
 			}
 

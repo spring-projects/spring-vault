@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Collections;
@@ -31,8 +32,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Fail.fail;
 
 /**
- * Integration tests for {@link VaultKeyValue2Template} using the versioned Key/Value (k/v
- * version 2) backend.
+ * Integration tests for {@link VaultKeyValue2Template} using the versioned
+ * Key/Value (k/v version 2) backend.
  *
  * @author Mark Paluch
  * @author Younghwan Jang
@@ -74,8 +75,7 @@ class VaultKeyValueTemplateVersionedIntegrationTests extends AbstractVaultKeyVal
 		try {
 			this.kvOperations.patch("unknown", Collections.singletonMap("foo", "newValue"));
 			fail("missing SecretNotFoundException");
-		}
-		catch (SecretNotFoundException e) {
+		} catch (SecretNotFoundException e) {
 			assertThat(e).hasMessageContaining("versioned/data/unknown");
 			assertThat(e.getPath()).isEqualTo("versioned/unknown");
 		}

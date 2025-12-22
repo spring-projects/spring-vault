@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository;
 
 import java.util.Collections;
@@ -59,9 +60,8 @@ import static org.assertj.core.api.Assertions.*;
 class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 	@Configuration
-	@EnableVaultRepositories(considerNestedRepositories = true,
-			includeFilters = @ComponentScan.Filter(classes = { VersionedRepository.class, SimpleRepository.class },
-					type = FilterType.ASSIGNABLE_TYPE))
+	@EnableVaultRepositories(considerNestedRepositories = true, includeFilters = @ComponentScan.Filter(classes = {
+			VersionedRepository.class, SimpleRepository.class}, type = FilterType.ASSIGNABLE_TYPE))
 	static class VaultRepositoryTestConfiguration extends VaultIntegrationTestConfiguration {
 
 	}
@@ -82,8 +82,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 
 		try {
 			vaultSysOperations.unmount("versioned");
-		}
-		catch (VaultException e) {
+		} catch (VaultException e) {
 		}
 
 		vaultSysOperations.mount("versioned",
@@ -179,7 +178,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		person.setVersion(2);
 
 		assertThatExceptionOfType(OptimisticLockingFailureException.class)
-			.isThrownBy(() -> this.versionedRepository.save(person));
+				.isThrownBy(() -> this.versionedRepository.save(person));
 	}
 
 	@Test
@@ -194,7 +193,7 @@ class VaultKv2RepositoryIntegrationTests extends IntegrationTestSupport {
 		saved.setFirstname("baz");
 
 		assertThatExceptionOfType(OptimisticLockingFailureException.class)
-			.isThrownBy(() -> this.versionedRepository.save(saved));
+				.isThrownBy(() -> this.versionedRepository.save(saved));
 	}
 
 	@Test

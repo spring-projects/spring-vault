@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.time.Duration;
@@ -35,7 +36,6 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -64,7 +64,7 @@ public class LeaseEndpointsUnitTests {
 		vaultResponseBody.put("lease_duration", 90L);
 		vaultResponseBody.put("renewable", false);
 		when(restOperations.exchange(eq("sys/renew"), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Map.class)))
-			.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
+				.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
 
 		when(oldLease.getRequiredLeaseId()).thenReturn("old_lease");
 		when(oldLease.getLeaseDuration()).thenReturn(Duration.ofSeconds(70));
@@ -110,7 +110,7 @@ public class LeaseEndpointsUnitTests {
 		vaultResponseBody.put("lease_duration", 90L);
 		vaultResponseBody.put("renewable", false);
 		when(restOperations.exchange(eq("sys/leases/renew"), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Map.class)))
-			.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
+				.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
 
 		when(oldLease.getRequiredLeaseId()).thenReturn("old_lease");
 		when(oldLease.getLeaseDuration()).thenReturn(Duration.ofSeconds(70));
@@ -157,7 +157,7 @@ public class LeaseEndpointsUnitTests {
 		vaultResponseBody.put("lease_duration", 90L);
 		vaultResponseBody.put("renewable", false);
 		when(restOperations.exchange(eq("sys/leases/renew"), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Map.class)))
-			.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
+				.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
 
 		when(oldLease.getRequiredLeaseId()).thenReturn("old_lease");
 		when(oldLease.getLeaseDuration()).thenReturn(Duration.ofSeconds(70));
@@ -203,7 +203,7 @@ public class LeaseEndpointsUnitTests {
 		vaultResponseBody.put("lease_duration", 90L);
 		vaultResponseBody.put("renewable", false);
 		when(restOperations.exchange(eq("sys/leases/renew"), eq(HttpMethod.PUT), any(HttpEntity.class), eq(Map.class)))
-			.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
+				.thenReturn(new ResponseEntity<>(vaultResponseBody, HttpStatus.OK));
 
 		when(oldLease.getRequiredLeaseId()).thenReturn("old_lease");
 		when(oldLease.getLeaseDuration()).thenReturn(Duration.ofSeconds(70));

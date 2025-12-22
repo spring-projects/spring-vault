@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import org.junit.jupiter.api.Test;
@@ -49,10 +50,10 @@ class AbstractReactiveVaultConfigurationUnitTests {
 		WebClient webClient = factory.create();
 
 		webClient.get()
-			.uri("/foo")
-			.exchangeToMono(it -> it.bodyToMono(String.class))
-			.as(StepVerifier::create)
-			.verifyError(CustomizedSignal.class);
+				.uri("/foo")
+				.exchangeToMono(it -> it.bodyToMono(String.class))
+				.as(StepVerifier::create)
+				.verifyError(CustomizedSignal.class);
 	}
 
 	@Test

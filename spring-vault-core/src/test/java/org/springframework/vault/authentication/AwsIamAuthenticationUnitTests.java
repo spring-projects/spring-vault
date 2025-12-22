@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -58,21 +59,22 @@ class AwsIamAuthenticationUnitTests {
 	void shouldAuthenticate() {
 
 		this.mockRest.expect(requestTo("/auth/aws/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
-			.andExpect(jsonPath("$.iam_request_url").exists())
-			.andExpect(jsonPath("$.iam_request_body").exists())
-			.andExpect(jsonPath("$.iam_request_headers").exists())
-			.andExpect(jsonPath("$.role").value("foo-role"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
+				.andExpect(jsonPath("$.iam_request_url").exists())
+				.andExpect(jsonPath("$.iam_request_body").exists())
+				.andExpect(jsonPath("$.iam_request_headers").exists())
+				.andExpect(jsonPath("$.role").value("foo-role"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
-			.role("foo-role")
-			.regionProvider(() -> Region.US_WEST_1)
-			.credentials(AwsBasicCredentials.create("foo", "bar"))
-			.build();
+				.role("foo-role")
+				.regionProvider(() -> Region.US_WEST_1)
+				.credentials(AwsBasicCredentials.create("foo", "bar"))
+				.build();
 		AwsIamAuthentication sut = new AwsIamAuthentication(options, this.restTemplate);
 
 		VaultToken login = sut.login();
@@ -87,21 +89,22 @@ class AwsIamAuthenticationUnitTests {
 	void shouldUsingAuthenticationSteps() {
 
 		this.mockRest.expect(requestTo("/auth/aws/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
-			.andExpect(jsonPath("$.iam_request_url").exists())
-			.andExpect(jsonPath("$.iam_request_body").exists())
-			.andExpect(jsonPath("$.iam_request_headers").exists())
-			.andExpect(jsonPath("$.role").value("foo-role"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.iam_http_request_method").value("POST"))
+				.andExpect(jsonPath("$.iam_request_url").exists())
+				.andExpect(jsonPath("$.iam_request_body").exists())
+				.andExpect(jsonPath("$.iam_request_headers").exists())
+				.andExpect(jsonPath("$.role").value("foo-role"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
-			.role("foo-role")
-			.region(Region.US_WEST_1)
-			.credentials(AwsBasicCredentials.create("foo", "bar"))
-			.build();
+				.role("foo-role")
+				.region(Region.US_WEST_1)
+				.credentials(AwsBasicCredentials.create("foo", "bar"))
+				.build();
 
 		AuthenticationSteps steps = AwsIamAuthentication.createAuthenticationSteps(options);
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);

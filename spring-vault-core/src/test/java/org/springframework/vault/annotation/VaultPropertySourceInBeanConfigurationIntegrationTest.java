@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.annotation;
 
 import java.util.Collections;
@@ -43,7 +44,7 @@ import static org.assertj.core.api.Assertions.*;
 @ContextConfiguration
 class VaultPropertySourceInBeanConfigurationIntegrationTest {
 
-	@VaultPropertySource({ "secret/myapp" })
+	@VaultPropertySource({"secret/myapp"})
 	static class Config extends VaultIntegrationTestConfiguration {
 
 		@Bean

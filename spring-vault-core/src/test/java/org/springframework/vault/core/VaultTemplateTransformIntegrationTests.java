@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Base64;
@@ -35,7 +36,8 @@ import org.springframework.vault.util.Version;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTemplate} using the {@code transform} backend.
+ * Integration tests for {@link VaultTemplate} using the {@code transform}
+ * backend.
  *
  * @author Lauren Voswinkel
  */
@@ -80,7 +82,7 @@ class VaultTemplateTransformIntegrationTests extends IntegrationTestSupport {
 
 		VaultResponse response = this.vaultOperations.write("transform/encode/myrole",
 				"{\"value\": \"123-45-6789\", \"tweak\": \"%s\"}"
-					.formatted(Base64.getEncoder().encodeToString("somenum".getBytes())));
+						.formatted(Base64.getEncoder().encodeToString("somenum".getBytes())));
 
 		assertThat((String) response.getRequiredData().get("encoded_value")).isNotEmpty();
 	}

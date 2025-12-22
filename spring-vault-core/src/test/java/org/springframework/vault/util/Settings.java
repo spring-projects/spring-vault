@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.io.File;
@@ -40,8 +41,8 @@ public class Settings {
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the {@code user.dir} directory. Search
-	 * is performed by walking the parent directories.
+	 * Find the {@code work} directory, starting at the {@code user.dir} directory.
+	 * Search is performed by walking the parent directories.
 	 * @return the {@link File} pointing to the {@code work} directory
 	 * @throws IllegalStateException If the {@code work} directory cannot be found.
 	 */
@@ -50,8 +51,8 @@ public class Settings {
 	}
 
 	/**
-	 * Find the {@code work} directory, starting at the given {@code directory}. Search is
-	 * performed by walking the parent directories.
+	 * Find the {@code work} directory, starting at the given {@code directory}.
+	 * Search is performed by walking the parent directories.
 	 * @return the {@link File} pointing to the {@code work} directory
 	 * @throws IllegalStateException If the {@code work} directory cannot be found.
 	 */

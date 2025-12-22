@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import reactor.core.publisher.Mono;
 
 /**
- * Component that provides reactively a {@link VaultEndpoint}. Allows to use a different
- * {@link VaultEndpoint} for each Vault request.
+ * Component that provides reactively a {@link VaultEndpoint}. Allows to use a
+ * different {@link VaultEndpoint} for each Vault request.
  *
  * @author Mark Paluch
  * @since 2.3

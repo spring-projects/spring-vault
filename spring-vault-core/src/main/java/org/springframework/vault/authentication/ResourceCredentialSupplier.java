@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.File;
@@ -38,11 +39,13 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 
 	static final Charset CHARSET = StandardCharsets.US_ASCII;
 
+
 	private final Resource resource;
 
+
 	/**
-	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
-	 * from a {@code path}.
+	 * Create a new {@link ResourceCredentialSupplier}
+	 * {@link ResourceCredentialSupplier} from a {@code path}.
 	 * @param path path to the file holding the credential.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -51,8 +54,8 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	}
 
 	/**
-	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
-	 * from a {@link File} handle.
+	 * Create a new {@link ResourceCredentialSupplier}
+	 * {@link ResourceCredentialSupplier} from a {@link File} handle.
 	 * @param file path to the file holding the credential.
 	 * @throws IllegalArgumentException if the{@code path} does not exist.
 	 */
@@ -61,25 +64,22 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	}
 
 	/**
-	 * Create a new {@link ResourceCredentialSupplier} {@link ResourceCredentialSupplier}
-	 * from a {@link Resource} handle.
+	 * Create a new {@link ResourceCredentialSupplier}
+	 * {@link ResourceCredentialSupplier} from a {@link Resource} handle.
 	 * @param resource resource pointing to the resource holding the credential.
 	 * @throws IllegalArgumentException if the {@link Resource} does not exist.
 	 */
 	public ResourceCredentialSupplier(Resource resource) {
-
 		Assert.isTrue(resource.exists(), () -> "Resource %s does not exist".formatted(resource));
-
 		this.resource = resource;
 	}
 
+
 	@Override
 	public String get() {
-
 		try {
 			return new String(readToken(this.resource), CHARSET);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new VaultException("Credential retrieval from %s failed".formatted(this.resource), e);
 		}
 	}
@@ -95,9 +95,7 @@ public class ResourceCredentialSupplier implements CredentialSupplier {
 	 * @throws IOException in case of I/O errors.
 	 */
 	private static byte[] readToken(Resource resource) throws IOException {
-
 		Assert.notNull(resource, "Resource must not be null");
-
 		try (InputStream is = resource.getInputStream()) {
 			return StreamUtils.copyToByteArray(is);
 		}

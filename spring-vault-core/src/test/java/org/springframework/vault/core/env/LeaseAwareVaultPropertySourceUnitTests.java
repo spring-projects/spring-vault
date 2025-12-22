@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.env;
 
 import java.util.ArrayList;
@@ -36,7 +37,6 @@ import org.springframework.vault.core.lease.event.SecretNotFoundEvent;
 import org.springframework.vault.core.util.PropertyTransformers;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -112,7 +112,7 @@ class LeaseAwareVaultPropertySourceUnitTests {
 		when(this.leaseContainer.addRequestedSecret(any())).then(invocation -> {
 
 			listeners.forEach(leaseListener -> leaseListener
-				.onLeaseEvent(new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
+					.onLeaseEvent(new SecretNotFoundEvent(invocation.getArgument(0), Lease.none())));
 			return invocation.getArgument(0);
 		});
 
@@ -166,8 +166,8 @@ class LeaseAwareVaultPropertySourceUnitTests {
 
 		assertThatThrownBy(() -> new LeaseAwareVaultPropertySource("name", this.leaseContainer, secret,
 				PropertyTransformers.noop(), false))
-			.isInstanceOf(VaultPropertySourceNotFoundException.class)
-			.hasRootCauseExactlyInstanceOf(RuntimeException.class);
+						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+						.hasRootCauseExactlyInstanceOf(RuntimeException.class);
 	}
 
 }

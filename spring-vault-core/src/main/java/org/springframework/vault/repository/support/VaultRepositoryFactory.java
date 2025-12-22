@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.support;
 
 import java.util.Objects;
@@ -44,6 +45,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 
 	private final KeyValueOperations operations;
 
+
 	public VaultRepositoryFactory(KeyValueOperations keyValueOperations) {
 		this(keyValueOperations, VaultQueryCreator.class);
 	}
@@ -57,9 +59,9 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 			Class<? extends AbstractQueryCreator<?, ?>> queryCreator,
 			Class<? extends RepositoryQuery> repositoryQueryType) {
 		super(keyValueOperations, queryCreator, repositoryQueryType);
-
 		this.operations = keyValueOperations;
 	}
+
 
 	@Override
 	protected RepositoryComposition.RepositoryFragments getRepositoryFragments(RepositoryMetadata metadata,
@@ -71,7 +73,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 				&& operations instanceof VaultKeyValueTemplate template) {
 
 			VaultPersistentEntity<?> entity = (VaultPersistentEntity<?>) this.operations.getMappingContext()
-				.getRequiredPersistentEntity(metadata.getDomainType());
+					.getRequiredPersistentEntity(metadata.getDomainType());
 			EntityInformation<?, String> entityInformation = getEntityInformation(metadata.getDomainType());
 			VaultRevisionRepository<?> repository = new VaultRevisionRepository<>(entityInformation,
 					Objects.requireNonNull(entity.getKeySpace()), template);
@@ -87,7 +89,7 @@ public class VaultRepositoryFactory extends KeyValueRepositoryFactory {
 	public <T, ID> EntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
 
 		VaultPersistentEntity<T> entity = (VaultPersistentEntity<T>) this.operations.getMappingContext()
-			.getRequiredPersistentEntity(domainClass);
+				.getRequiredPersistentEntity(domainClass);
 
 		return new MappingVaultEntityInformation<>(entity);
 	}

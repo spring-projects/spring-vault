@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.io.ByteArrayInputStream;
@@ -43,7 +44,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 public abstract class VaultResponses {
 
 	private static final AbstractHttpMessageConverter<Object> converter = JacksonCompat.instance()
-		.createHttpMessageConverter();
+			.createHttpMessageConverter();
+
 
 	/**
 	 * Build a {@link VaultException} given {@link HttpStatusCodeException}.
@@ -65,8 +67,8 @@ public abstract class VaultResponses {
 	}
 
 	/**
-	 * Build a {@link VaultException} given {@link HttpStatusCodeException} and request
-	 * {@code path}.
+	 * Build a {@link VaultException} given {@link HttpStatusCodeException} and
+	 * request {@code path}.
 	 * @param e must not be {@literal null}.
 	 * @param path must not be {@literal null}.
 	 * @return the {@link VaultException}.
@@ -95,6 +97,7 @@ public abstract class VaultResponses {
 		return new VaultException("Status %s [%s]".formatted(renderStatus(statusCode), path));
 	}
 
+
 	/**
 	 * Create a {@link ParameterizedTypeReference} for {@code responseType}.
 	 * @param responseType must not be {@literal null}.
@@ -109,7 +112,7 @@ public abstract class VaultResponses {
 
 			@Override
 			public Type[] getActualTypeArguments() {
-				return new Type[] { responseType };
+				return new Type[] {responseType};
 			}
 
 			@Override
@@ -121,13 +124,16 @@ public abstract class VaultResponses {
 			public Type getOwnerType() {
 				return VaultResponseSupport.class;
 			}
+
 		};
 
 		return new ParameterizedTypeReference<>() {
+
 			@Override
 			public Type getType() {
 				return supportType;
 			}
+
 		};
 	}
 
@@ -144,8 +150,8 @@ public abstract class VaultResponses {
 		if (json.contains("\"errors\":")) {
 
 			Map<String, Object> map = JacksonCompat.instance()
-				.getObjectMapperAccessor()
-				.deserialize(json.getBytes(), Map.class);
+					.getObjectMapperAccessor()
+					.deserialize(json.getBytes(), Map.class);
 			if (map.containsKey("errors")) {
 
 				Collection<String> errors = (Collection<String>) map.get("errors");
@@ -160,7 +166,8 @@ public abstract class VaultResponses {
 
 	/**
 	 * Unwrap a wrapped response created by Vault Response Wrapping
-	 * @param wrappedResponse the wrapped response , must not be empty or {@literal null}.
+	 * @param wrappedResponse the wrapped response , must not be empty or
+	 * {@literal null}.
 	 * @param responseType the type of the return value.
 	 * @return the unwrapped response.
 	 */
@@ -171,6 +178,7 @@ public abstract class VaultResponses {
 
 		try {
 			return (T) converter.read(responseType, new HttpInputMessage() {
+
 				@Override
 				public InputStream getBody() {
 					return new ByteArrayInputStream(wrappedResponse.getBytes());
@@ -180,9 +188,9 @@ public abstract class VaultResponses {
 				public HttpHeaders getHeaders() {
 					return new HttpHeaders();
 				}
+
 			});
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 	}

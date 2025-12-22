@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -31,22 +32,20 @@ public class TestWebClientFactory {
 
 	private static final VaultEndpoint TEST_VAULT_ENDPOINT = TestRestTemplateFactory.TEST_VAULT_ENDPOINT;
 
+
 	/**
 	 * Create a new {@link WebClient} using the {@link SslConfiguration}. See
-	 * {@link ReactiveVaultClients#createWebClient(VaultEndpoint, ClientHttpConnector)} to
-	 * create {@link WebClient} for a given {@link ClientHttpConnector}.
+	 * {@link ReactiveVaultClients#createWebClient(VaultEndpoint, ClientHttpConnector)}
+	 * to create {@link WebClient} for a given {@link ClientHttpConnector}.
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
 	public static WebClient create(SslConfiguration sslConfiguration) {
-
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null!");
-
 		try {
 			ClientHttpConnector connector = ClientHttpConnectorFactory.create(new ClientOptions(), sslConfiguration);
 			return ReactiveVaultClients.createWebClient(TEST_VAULT_ENDPOINT, connector);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}

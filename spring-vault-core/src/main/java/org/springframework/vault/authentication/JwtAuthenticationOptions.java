@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.function.Supplier;
@@ -23,10 +24,9 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link JwtAuthentication}.
- * <p>
- * Authentication options provide the role and the JWT. {@link JwtAuthenticationOptions}
- * can be constructed using {@link #builder()}. Instances of this class are immutable once
- * constructed.
+ * <p>Authentication options provide the role and the JWT.
+ * {@link JwtAuthenticationOptions} can be constructed using {@link #builder()}.
+ * Instances of this class are immutable once constructed.
  *
  * @author Nanne Baars
  * @author Mark Paluch
@@ -38,6 +38,7 @@ public class JwtAuthenticationOptions {
 
 	public static final String DEFAULT_JWT_AUTHENTICATION_PATH = "jwt";
 
+
 	/**
 	 * Path of the JWT authentication backend mount. Optional and defaults to
 	 * {@literal jwt}.
@@ -45,10 +46,10 @@ public class JwtAuthenticationOptions {
 	private final String path;
 
 	/**
-	 * Name of the role against which the login is being attempted. Defaults to configured
-	 * default_role if not provided. See
-	 * <a href="https://developer.hashicorp.com/vault/api-docs/auth/jwt#configure">Vault
-	 * JWT configuration</a>
+	 * Name of the role against which the login is being attempted. Defaults to
+	 * configured default_role if not provided. See <a href=
+	 * "https://developer.hashicorp.com/vault/api-docs/auth/jwt#configure">Vault JWT
+	 * configuration</a>
 	 */
 	private final @Nullable String role;
 
@@ -57,12 +58,13 @@ public class JwtAuthenticationOptions {
 	 */
 	private final Supplier<String> jwtSupplier;
 
-	private JwtAuthenticationOptions(@Nullable String role, Supplier<String> jwtSupplier, String path) {
 
+	private JwtAuthenticationOptions(@Nullable String role, Supplier<String> jwtSupplier, String path) {
 		this.role = role;
 		this.jwtSupplier = jwtSupplier;
 		this.path = path;
 	}
+
 
 	/**
 	 * @return a new {@link JwtAuthenticationOptionsBuilder}.
@@ -70,6 +72,7 @@ public class JwtAuthenticationOptions {
 	public static JwtAuthenticationOptionsBuilder builder() {
 		return new JwtAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return name of the role against which the login is being attempted. Can be
@@ -104,15 +107,18 @@ public class JwtAuthenticationOptions {
 
 		private @Nullable Supplier<String> jwtSupplier;
 
+
+		JwtAuthenticationOptionsBuilder() {
+		}
+
+
 		/**
 		 * Configure the mount path.
 		 * @param path must not be {@literal null} or empty.
-		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public JwtAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -121,39 +127,33 @@ public class JwtAuthenticationOptions {
 		 * Configure the role.
 		 * @param role name of the role against which the login is being attempted, must
 		 * not be {@literal null} or empty.
-		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public JwtAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be empty");
-
 			this.role = role;
 			return this;
 		}
 
 		/**
 		 * Configure the JWT authentication token. Vault authentication will use this
-		 * token as singleton. If you want to provide a dynamic token that can change over
-		 * time, see {@link #jwtSupplier(Supplier)}.
+		 * token as singleton. If you want to provide a dynamic token that can change
+		 * over time, see {@link #jwtSupplier(Supplier)}.
 		 * @param jwt must not be {@literal null}.
-		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public JwtAuthenticationOptionsBuilder jwt(String jwt) {
-
 			Assert.hasText(jwt, "JWT must not be empty");
-
 			return jwtSupplier(() -> jwt);
 		}
 
 		/**
 		 * Configure the {@link Supplier} to obtain a JWT authentication token.
 		 * @param jwtSupplier must not be {@literal null}.
-		 * @return {@code this} {@link JwtAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public JwtAuthenticationOptionsBuilder jwtSupplier(Supplier<String> jwtSupplier) {
-
 			Assert.notNull(jwtSupplier, "JWT supplier must not be null");
-
 			this.jwtSupplier = jwtSupplier;
 			return this;
 		}
@@ -163,9 +163,7 @@ public class JwtAuthenticationOptions {
 		 * @return a new {@link JwtAuthenticationOptions}.
 		 */
 		public JwtAuthenticationOptions build() {
-
 			Assert.notNull(this.jwtSupplier, "JWT must not be null");
-
 			return new JwtAuthenticationOptions(this.role, this.jwtSupplier, this.path);
 		}
 

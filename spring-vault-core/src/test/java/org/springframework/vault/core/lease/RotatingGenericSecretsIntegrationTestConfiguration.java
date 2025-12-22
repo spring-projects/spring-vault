@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.util.Map;
@@ -32,8 +33,7 @@ import org.springframework.vault.core.env.LeaseAwareVaultPropertySource;
  * @author Steven Swor
  */
 @Configuration
-@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "versioned/rotating",
-		renewal = VaultPropertySource.Renewal.ROTATE)
+@VaultPropertySource(propertyNamePrefix = "generic.rotating.", value = "versioned/rotating", renewal = VaultPropertySource.Renewal.ROTATE)
 public class RotatingGenericSecretsIntegrationTestConfiguration {
 
 	/**
@@ -59,7 +59,7 @@ public class RotatingGenericSecretsIntegrationTestConfiguration {
 		public void afterPropertiesSet() throws Exception {
 			Assert.notNull(this.appContext, "application context must be set");
 			Map<String, LeaseAwareVaultPropertySource> leaseAwareVaultPropertySources = this.appContext
-				.getBeansOfType(LeaseAwareVaultPropertySource.class);
+					.getBeansOfType(LeaseAwareVaultPropertySource.class);
 			for (LeaseAwareVaultPropertySource candidate : leaseAwareVaultPropertySources.values()) {
 				if (candidate.getRequestedSecret().getPath().equals("versioned/rotating")) {
 					this.propertySource = candidate;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.query;
 
 import java.util.Arrays;
@@ -39,9 +40,10 @@ import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
 /**
- * Query creator for Vault queries. Vault queries are limited to criterias constraining
- * the {@link org.springframework.data.annotation.Id} property. A query consists of
- * chained {@link Predicate}s that are evaluated for each Id value.
+ * Query creator for Vault queries. Vault queries are limited to criterias
+ * constraining the {@link org.springframework.data.annotation.Id} property. A
+ * query consists of chained {@link Predicate}s that are evaluated for each Id
+ * value.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -49,6 +51,7 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQuery>, VaultQuery> {
 
 	private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
+
 
 	/**
 	 * Create a new {@link VaultQueryCreator} given {@link PartTree} and
@@ -59,10 +62,10 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 	 */
 	public VaultQueryCreator(PartTree tree, ParameterAccessor parameters,
 			MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
-
 		super(tree, parameters);
 		this.mappingContext = mappingContext;
 	}
+
 
 	@Override
 	protected VaultQuery create(Part part, Iterator<Object> parameters) {
@@ -75,19 +78,14 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 	}
 
 	private Predicate<String> createPredicate(Part part, Iterator<Object> parameters) {
-
 		PersistentPropertyPath<VaultPersistentProperty> propertyPath = this.mappingContext
-			.getPersistentPropertyPath(part.getProperty());
-
+				.getPersistentPropertyPath(part.getProperty());
 		if (propertyPath.getLeafProperty() != null && !propertyPath.getLeafProperty().isIdProperty()) {
 			throw new InvalidDataAccessApiUsageException(
 					"Cannot create criteria for non-@Id property %s".formatted(propertyPath.getLeafProperty()));
 		}
-
 		VariableAccessor accessor = getVariableAccessor(part);
-
 		Predicate<String> predicate = from(part, accessor, parameters);
-
 		return it -> predicate.test(accessor.toString(it));
 	}
 
@@ -102,49 +100,49 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 		Type type = part.getType();
 
 		switch (type) {
-			case AFTER:
-			case GREATER_THAN:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) > 0);
-			case GREATER_THAN_EQUAL:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) >= 0);
-			case BEFORE:
-			case LESS_THAN:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) < 0);
-			case LESS_THAN_EQUAL:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) <= 0);
-			case BETWEEN:
+		case AFTER:
+		case GREATER_THAN:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) > 0);
+		case GREATER_THAN_EQUAL:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) >= 0);
+		case BEFORE:
+		case LESS_THAN:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) < 0);
+		case LESS_THAN_EQUAL:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.compareTo(value) <= 0);
+		case BETWEEN:
 
-				String from = accessor.nextString(parameters);
-				String to = accessor.nextString(parameters);
+			String from = accessor.nextString(parameters);
+			String to = accessor.nextString(parameters);
 
-				return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
-			case NOT_IN:
-				return new Criteria<>(accessor.nextAsArray(parameters),
-						(value, it) -> Arrays.binarySearch(value, it) < 0);
-			case IN:
-				return new Criteria<>(accessor.nextAsArray(parameters),
-						(value, it) -> Arrays.binarySearch(value, it) >= 0);
-			case STARTING_WITH:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
-			case ENDING_WITH:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.endsWith(value));
-			case CONTAINING:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.contains(value));
-			case NOT_CONTAINING:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
-			case REGEX:
-				return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
+			return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
+		case NOT_IN:
+			return new Criteria<>(accessor.nextAsArray(parameters),
+					(value, it) -> Arrays.binarySearch(value, it) < 0);
+		case IN:
+			return new Criteria<>(accessor.nextAsArray(parameters),
+					(value, it) -> Arrays.binarySearch(value, it) >= 0);
+		case STARTING_WITH:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
+		case ENDING_WITH:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.endsWith(value));
+		case CONTAINING:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.contains(value));
+		case NOT_CONTAINING:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
+		case REGEX:
+			return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
 					.asPredicate();
-			case TRUE:
-				return it -> it.equalsIgnoreCase("true");
-			case FALSE:
-				return it -> it.equalsIgnoreCase("false");
-			case SIMPLE_PROPERTY:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.equals(value));
-			case NEGATING_SIMPLE_PROPERTY:
-				return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.equals(value));
-			default:
-				throw new IllegalArgumentException("Unsupported keyword!");
+		case TRUE:
+			return it -> it.equalsIgnoreCase("true");
+		case FALSE:
+			return it -> it.equalsIgnoreCase("false");
+		case SIMPLE_PROPERTY:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.equals(value));
+		case NEGATING_SIMPLE_PROPERTY:
+			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.equals(value));
+		default:
+			throw new IllegalArgumentException("Unsupported keyword!");
 		}
 	}
 
@@ -172,6 +170,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 	private static boolean isIgnoreCase(Part part) {
 		return part.shouldIgnoreCase() != IgnoreCaseType.NEVER;
 	}
+
 
 	record Criteria<T>(T value, BiPredicate<T, String> predicate) implements Predicate<String> {
 
@@ -218,6 +217,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 
 	}
 
+
 	enum VariableAccessor {
 
 		AsIs {
@@ -234,18 +234,18 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 
 				if (next instanceof Collection) {
 					return ((Collection<?>) next).toArray(new String[0]);
-				}
-				else if (next != null && next.getClass().isArray()) {
+				} else if (next != null && next.getClass().isArray()) {
 					return (String[]) next;
 				}
 
-				return new String[] { (String) next };
+				return new String[] {(String) next};
 			}
 
 			@Override
 			String toString(String value) {
 				return value;
 			}
+
 		},
 
 		Lowercase {
@@ -272,6 +272,7 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 			String toString(String value) {
 				return value.toLowerCase();
 			}
+
 		};
 
 		abstract String[] nextAsArray(Iterator<Object> iterator);

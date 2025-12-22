@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication.event;
 
 /**
  * Listener for Vault exceptional {@link AuthenticationEvent}s.
- * <p>
- * Error events can occur during login, login token renewal and login token revocation.
+ * <p>Error events can occur during login, login token renewal and login token
+ * revocation.
  *
  * @author Mark Paluch
  * @since 2.2

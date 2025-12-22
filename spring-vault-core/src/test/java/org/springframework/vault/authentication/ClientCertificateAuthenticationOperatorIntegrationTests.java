@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
@@ -42,9 +43,9 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectNextCount(1) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -57,9 +58,9 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectNextCount(1) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -72,8 +73,8 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				ClientCertificateAuthentication.createAuthenticationSteps(), webClient);
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.verifyError(VaultLoginException.class);
+				.as(StepVerifier::create) //
+				.verifyError(VaultLoginException.class);
 	}
 
 	@Test
@@ -87,10 +88,10 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				webClient);
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.assertNext(token -> assertThatPolicies(token).contains("cert-auth1") //
-				.doesNotContain("cert-auth2")) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.assertNext(token -> assertThatPolicies(token).contains("cert-auth1") //
+						.doesNotContain("cert-auth2")) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -104,16 +105,17 @@ class ClientCertificateAuthenticationOperatorIntegrationTests
 				webClient);
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.assertNext(token -> assertThatPolicies(token).contains("cert-auth2") //
-				.doesNotContain("cert-auth1")) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.assertNext(token -> assertThatPolicies(token).contains("cert-auth2") //
+						.doesNotContain("cert-auth1")) //
+				.verifyComplete();
 	}
 
 	@Test
 	void shouldProvideInvalidKeyPassword() {
 		assertThatIllegalStateException().isThrownBy(() -> TestWebClientFactory
-			.create(prepareCertAuthenticationMethod(SslConfiguration.KeyConfiguration.of("wrong".toCharArray(), "1"))));
+				.create(prepareCertAuthenticationMethod(
+						SslConfiguration.KeyConfiguration.of("wrong".toCharArray(), "1"))));
 	}
 
 }

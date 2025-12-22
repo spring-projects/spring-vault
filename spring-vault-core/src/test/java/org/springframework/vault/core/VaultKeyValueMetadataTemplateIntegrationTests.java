@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -58,19 +59,17 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 	void setup() {
 
 		this.vaultKeyValueMetadataOperations = this.vaultOperations.opsForVersionedKeyValue("versioned")
-			.opsForKeyValueMetadata();
+				.opsForKeyValueMetadata();
 
 		try {
 			this.vaultKeyValueMetadataOperations.delete(SECRET_NAME);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 
 		try {
 			this.vaultKeyValueMetadataOperations.delete(CAS_SECRET_NAME);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			// ignore
 		}
 
@@ -128,10 +127,10 @@ class VaultKeyValueMetadataTemplateIntegrationTests extends AbstractVaultKeyValu
 
 		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30);
 		VaultMetadataRequest request = VaultMetadataRequest.builder()
-			.casRequired(true)
-			.deleteVersionAfter(duration)
-			.maxVersions(20)
-			.build();
+				.casRequired(true)
+				.deleteVersionAfter(duration)
+				.maxVersions(20)
+				.build();
 
 		this.vaultKeyValueMetadataOperations.put(CAS_SECRET_NAME, request);
 

@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.springframework.vault.VaultException;
 
 /**
- * Abstract superclass for all exceptions thrown in the session manager implementations
+ * Abstract superclass for all exceptions thrown in the session manager
+ * implementations.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -26,7 +28,8 @@ import org.springframework.vault.VaultException;
 public abstract class VaultSessionManagerException extends VaultException {
 
 	/**
-	 * Create a {@code VaultSessionManagerException} with the specified detail message.
+	 * Create a {@code VaultSessionManagerException} with the specified detail
+	 * message.
 	 * @param msg the detail message.
 	 */
 	public VaultSessionManagerException(String msg) {
@@ -34,8 +37,8 @@ public abstract class VaultSessionManagerException extends VaultException {
 	}
 
 	/**
-	 * Create a {@code VaultSessionManagerException} with the specified detail message and
-	 * nested exception.
+	 * Create a {@code VaultSessionManagerException} with the specified detail
+	 * message and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */
