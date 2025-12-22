@@ -527,7 +527,7 @@ public class Policy {
 		/**
 		 * Allows listing values at the given path. Note that the keys returned by a
 		 * list operation are not filtered by policies. Do not encode sensitive
-		 * information in key names. Not all backends support listing.
+		 * information in key names. Not all secrets engines support listing.
 		 */
 		LIST,
 

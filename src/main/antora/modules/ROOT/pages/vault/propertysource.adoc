@@ -39,8 +39,7 @@ to be used in conjunction with `@Configuration` classes.
 
 `@VaultPropertySource` takes a Vault path such as ``secret/my-application``
 and exposes the data stored at the node in a ``PropertySource``.
-`@VaultPropertySource` supports lease renewal for secrets associated with a lease
-(i. e. credentials from the `mysql` backend) and credential rotation upon terminal
+`@VaultPropertySource` supports lease renewal for secrets associated with a lease (i. e. credentials from the `mysql` secrets engine) and credential rotation upon terminal
 lease expiration. Lease renewal is disabled by default.
 
 .Properties stored in Vault
@@ -97,9 +96,11 @@ public class AppConfig {
 ----
 ====
 
-NOTE: Secrets obtained from `generic` secret backends are associated with a TTL (`refresh_interval`) but not a lease Id. Spring Vault's ``PropertySource`` rotates generic secrets when reaching its TTL.
+NOTE: Secrets obtained from `generic` secrets engines are associated with a TTL (`refresh_interval`) but not a lease Id.
+Spring Vault's ``PropertySource`` rotates generic secrets when reaching its TTL.
 
-NOTE: You can use `@VaultPropertySource` to obtain the newest secret version from the versioned Key-Value backend. Make sure to not include the `data/` segment in the path.
+NOTE: You can use `@VaultPropertySource` to obtain the newest secret version from the versioned Key-Value secrets backend.
+Make sure to not include the `data/` segment in the path.
 
 Any `${…}` placeholders present in a `@VaultPropertySource` path are resolved against the set of property sources already registered against the environment, as the following example shows:
 

@@ -37,7 +37,7 @@ public class ClientCertificateAuthenticationOptions {
 
 
 	/**
-	 * Path of the cert authentication backend mount.
+	 * Path of the cert authentication method mount.
 	 */
 	private final String path;
 
@@ -63,7 +63,7 @@ public class ClientCertificateAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the azure authentication backend mount.
+	 * @return the path of the azure authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

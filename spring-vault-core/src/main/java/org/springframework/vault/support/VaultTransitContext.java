@@ -21,7 +21,7 @@ import java.util.Arrays;
 import org.springframework.util.Assert;
 
 /**
- * Transit backend encryption/decryption/rewrapping context.
+ * Transit secrets engine encryption/decryption/rewrapping context.
  *
  * @author Mark Paluch
  * @author Nanne Baars

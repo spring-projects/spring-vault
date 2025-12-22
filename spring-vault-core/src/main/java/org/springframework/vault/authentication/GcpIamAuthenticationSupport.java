@@ -31,7 +31,7 @@ import java.time.Duration;
 public abstract class GcpIamAuthenticationSupport {
 
 	/**
-	 * Path of the gcp authentication backend mount.
+	 * Path of the gcp authentication method mount.
 	 */
 	private final String path;
 
@@ -62,7 +62,7 @@ public abstract class GcpIamAuthenticationSupport {
 
 
 	/**
-	 * @return the path of the gcp authentication backend mount.
+	 * @return the path of the gcp authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

@@ -66,7 +66,7 @@ import org.springframework.web.client.RestOperations;
  * @see AwsIamAuthenticationOptions
  * @see software.amazon.awssdk.auth.credentials.AwsCredentialsProvider
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/aws.html">Auth Method:
  * aws (IAM)</a>
  * @see <a href=
  * "https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html">AWS:

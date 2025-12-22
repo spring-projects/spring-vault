@@ -39,9 +39,9 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 	private static final ValueExpressionParser PARSER = ValueExpressionParser.create();
 
-	private final String backend;
+	private final String engine;
 
-	private final @Nullable ValueExpression backendExpression;
+	private final @Nullable ValueExpression engineExpression;
 
 
 	/**
@@ -71,12 +71,12 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 		if (annotation != null && StringUtils.hasText(annotation.backend())) {
 
-			this.backend = annotation.backend();
-			this.backendExpression = detectExpression(this.backend);
+			this.engine = annotation.backend();
+			this.engineExpression = detectExpression(this.engine);
 
 		} else {
-			this.backend = "secret";
-			this.backendExpression = null;
+			this.engine = "secret";
+			this.engineExpression = null;
 		}
 	}
 
@@ -101,10 +101,10 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 	@Override
 	public String getSecretBackend() {
-		return this.backendExpression == null //
-				? this.backend //
-				: ObjectUtils.nullSafeToString(this.backendExpression
-						.evaluate(getValueEvaluationContext(null, backendExpression.getExpressionDependencies())));
+		return this.engineExpression == null //
+				? this.engine //
+				: ObjectUtils.nullSafeToString(this.engineExpression
+						.evaluate(getValueEvaluationContext(null, engineExpression.getExpressionDependencies())));
 	}
 
 }

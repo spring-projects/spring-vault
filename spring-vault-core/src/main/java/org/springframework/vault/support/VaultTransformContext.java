@@ -23,7 +23,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Transform backend encode/decode context object.
+ * Transform secrets engine encode/decode context object.
  *
  * @author Lauren Voswinkel
  * @author Roopesh Chandran

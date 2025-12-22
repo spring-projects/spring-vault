@@ -35,7 +35,7 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
 /**
  * Username and password implementation of {@link ClientAuthentication}. Can be
  * used for {@code userpass}, {@code ldap}, {@code okta}, and {@code radius}
- * authentication backends.
+ * authentication methods.
  *
  * @author Mikhael Sokolov
  * @author Mark Paluch

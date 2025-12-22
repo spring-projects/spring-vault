@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.vault.support.*;
 
 /**
- * Interface that specifies operations using the {@code transit} backend.
+ * Interface that specifies operations using the {@code transit} secrets engine.
  *
  * @author Mark Paluch
  * @author Sven Schürmann
@@ -30,8 +30,8 @@ import org.springframework.vault.support.*;
  * @author Luander Ribeiro
  * @author Nanne Baars
  * @see <a href=
- * "https://www.vaultproject.io/docs/secrets/transit/index.html">Transit Secret
- * Backend</a>
+ * "https://www.vaultproject.io/docs/secrets/transit/index.html">Transit Secrets
+ * Engine</a>
  */
 public interface VaultTransitOperations {
 
@@ -134,7 +134,7 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Encrypts the provided batch of {@code plaintext} using the named key and
-	 * context. The encryption is done using transit backend's batch operation.
+	 * context. The encryption is done using transit engine's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Plaintext} which includes plain text and
 	 * an optional context.
@@ -178,7 +178,7 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Decrypts the provided batch of cipher text using the named key and context.
-	 * The* decryption is done using transit backend's batch operation.
+	 * The* decryption is done using transit engine's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plain text
 	 * and an optional context.

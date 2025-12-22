@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ReactiveVaultTemplate} using the {@code generic}
- * backend.
+ * secrets engine.
  *
  * @author Mark Paluch
  */

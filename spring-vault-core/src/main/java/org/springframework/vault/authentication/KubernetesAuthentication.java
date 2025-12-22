@@ -41,7 +41,7 @@ import org.springframework.web.client.RestOperations;
  * @see KubernetesAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/kubernetes.html">Auth
- * Backend: Kubernetes</a>
+ * Method: Kubernetes</a>
  */
 public class KubernetesAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 

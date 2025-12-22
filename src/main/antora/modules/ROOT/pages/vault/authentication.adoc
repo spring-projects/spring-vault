@@ -78,7 +78,7 @@ class AppConfig extends AbstractVaultConfiguration {
 See also:
 
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
-* https://www.vaultproject.io/docs/auth/token.html[Vault Documentation: Using the Token auth backend]
+* https://www.vaultproject.io/docs/auth/token.html[Vault Documentation: Using the Token auth method]
 
 [[vault.authentication.appid]]
 == AppId authentication
@@ -260,15 +260,15 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth backend]
+See also: https://www.vaultproject.io/docs/auth/approle.html[Vault Documentation: Using the AppRole auth method]
 
 [[vault.authentication.awsec2]]
 == AWS-EC2 authentication
 
 The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
-auth backend provides a secure introduction mechanism
-for AWS EC2 instances, allowing automated retrieval of a Vault
-token. Unlike most Vault authentication backends, this backend
+auth method provides a secure introduction mechanism
+for AWS EC2 instances, allowing automated retrieval of a Vault token.
+Unlike most Vault authentication methods, this method
 does not require first-deploying, or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats AWS as a Trusted Third Party and uses the
@@ -298,8 +298,7 @@ the Trust On First Use (TOFU) principle. Any unintended party that
 gains access to the PKCS#7 identity metadata can authenticate
 against Vault.
 
-During the first login, Spring Vault generates a nonce
-that is stored in the auth backend aside the instance Id.
+During the first login, Spring Vault generates a nonce that is stored in the auth method aside the instance Id.
 Re-authentication requires the same nonce to be sent. Any other
 party does not have the nonce and can raise an alert in Vault for
 further investigation.
@@ -313,13 +312,13 @@ AWS-EC2 authentication roles are optional and default to the AMI.
 You can configure the authentication role by setting
 it in `AwsEc2AuthenticationOptions`.
 
-See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the AWS-EC2 auth backend]
+See also: https://www.vaultproject.io/docs/auth/aws-ec2.html[Vault Documentation: Using the AWS-EC2 auth method]
 
 [[vault.authentication.awsiam]]
 == AWS-IAM authentication
 
 The https://www.vaultproject.io/docs/auth/aws.html[aws]
-auth backend allows Vault login by using existing AWS IAM credentials.
+auth method allows Vault login by using existing AWS IAM credentials.
 
 AWS IAM authentication creates a signed HTTP request that is
 executed by Vault to get the identity of the signer using AWS STS
@@ -382,16 +381,16 @@ You can configure the authentication via `AwsIamAuthenticationOptions`.
 
 See also:
 
-* https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth backend]
+* https://www.vaultproject.io/docs/auth/aws.html[Vault Documentation: Using the AWS auth method]
 * https://docs.aws.amazon.com/STS/latest/APIReference/API_GetCallerIdentity.html[AWS Documentation: STS GetCallerIdentity]
 
 [[vault.authentication.azuremsi]]
 == Azure (MSI) authentication
 
 The https://www.vaultproject.io/docs/auth/azure.html[azure]
-auth backend provides a secure introduction mechanism
-for Azure VM instances, allowing automated retrieval of a Vault
-token. Unlike most Vault authentication backends, this backend
+auth method provides a secure introduction mechanism
+for Azure VM instances, allowing automated retrieval of a Vault token.
+Unlike most Vault authentication methods, this method
 does not require first-deploying, or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats Azure as a Trusted Third Party and uses the
@@ -428,21 +427,21 @@ obtain these details.
 
 See also:
 
-* https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the Azure auth backend]
+* https://www.vaultproject.io/docs/auth/azure.html[Vault Documentation: Using the Azure auth method]
 * https://docs.microsoft.com/en-us/azure/active-directory/managed-service-identity/overview[Azure Documentation: Managed Service Identity]
 
 [[vault.authentication.gcpgce]]
 == GCP-GCE authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
-auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+auth method allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
 
 GCP GCE (Google Compute Engine) authentication creates a signature in the form of a
 JSON Web Token (JWT) for a service account. A JWT for a Compute Engine instance
 is obtained from the GCE  metadata service using https://cloud.google.com/compute/docs/instances/verifying-instance-identity[Instance identification].
 This API creates a JSON Web Token that can be used to confirm the instance identity.
 
-Unlike most Vault authentication backends, this backend
+Unlike most Vault authentication methods, this method
 does not require first-deploying, or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats GCP as a Trusted Third Party and uses the
@@ -477,19 +476,19 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also:
 
-* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth method]
 * https://cloud.google.com/compute/docs/instances/verifying-instance-identity[GCP Documentation: Verifying the Identity of Instances]
 
 [[vault.authentication.gcpiam]]
 == GCP-IAM authentication
 
 The https://www.vaultproject.io/docs/auth/gcp.html[gcp]
-auth backend allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
+auth method allows Vault login by using existing GCP (Google Cloud Platform) IAM and GCE credentials.
 
 GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT)
 for a service account. A JWT for a service account is obtained by
-calling GCP IAM's https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM
-and proves thereby its identity. This Vault backend treats GCP as a Trusted Third Party.
+calling GCP IAM's https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM and proves thereby its identity.
+This Vault auth method treats GCP as a Trusted Third Party.
 
 IAM credentials can be obtained from either the runtime environment
 or supplied externally as e.g. JSON. JSON is the preferred form as it
@@ -533,7 +532,7 @@ NOTE: `GcpIamCredentialsAuthentication` uses the https://cloud.google.com/iam/do
 
 See also:
 
-* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth backend]
+* https://www.vaultproject.io/docs/auth/gcp.html[Vault Documentation: Using the GCP auth method]
 * https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt
 * https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/signJwt (deprecated)
 
@@ -541,7 +540,7 @@ See also:
 == GitHub Authentication
 
 The https://www.vaultproject.io/docs/auth/github.html[github]
-auth backend provides an authentication mechanism based on GitHub tokens.
+auth method provides an authentication mechanism based on GitHub tokens.
 Vault does not support an OAuth workflow to generate GitHub tokens,
 so it does not act as a GitHub application.
 
@@ -579,7 +578,7 @@ See also:
 == PCF authentication
 
 The https://www.vaultproject.io/docs/auth/pcf.html[pcf]
-auth backend allows Vault login for PCF instances.
+auth method allows Vault login for PCF instances.
 It leverages https://content.pivotal.io/blog/new-in-pcf-2-1-app-container-identity-assurance-via-automatic-cert-rotation[PCF's App and Container Identity Assurance].
 
 PCF authentication uses the instance key and certificate to create a signature that is validated by Vault.
@@ -619,12 +618,12 @@ You can configure the authentication via `PcfAuthenticationOptions`.
 See also:
 
 * https://www.vaultproject.io/docs/auth/pcf.html[Vault Documentation:
-Using the PCF auth backend]
+Using the PCF auth method]
 
 [[vault.authentication.clientcert]]
 == TLS certificate authentication
 
-The `cert` auth backend allows authentication using SSL/TLS client
+The `cert` auth method allows authentication using SSL/TLS client
 certificates that are either signed by a CA or self-signed.
 
 To enable `cert` authentication you need to:
@@ -655,15 +654,15 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth backend]
+See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: Using the Cert auth method]
 
 [[vault.authentication.cubbyhole]]
 == Cubbyhole authentication
 
 Cubbyhole authentication uses Vault primitives to provide a secured authentication
 workflow. Cubbyhole authentication uses tokens as primary login method.
-An ephemeral token is used to obtain a second, login VaultToken from Vault's
-Cubbyhole secret backend. The login token is usually longer-lived and used to
+An ephemeral token is used to obtain a second, login VaultToken from Vault's Cubbyhole secrets engine.
+The login token is usually longer-lived and used to
 interact with Vault. The login token can be retrieved either from a wrapped
 response or from the `data` section.
 
@@ -781,7 +780,7 @@ retrieving the token. A self-lookup will lookup renewability and the remaining T
 See also:
 
 * https://www.vaultproject.io/docs/concepts/tokens.html[Vault Documentation: Tokens]
-* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secret Backend]
+* https://www.vaultproject.io/docs/secrets/cubbyhole/index.html[Vault Documentation: Cubbyhole Secrets Engine]
 * https://www.vaultproject.io/docs/concepts/response-wrapping.html[Vault Documentation: Response Wrapping]
 
 [[vault.authentication.jwt]]
@@ -790,8 +789,8 @@ See also:
 Configuring JWT authentication requires the token or a JWT supplier.
 You can configure the authentication via `JwtAuthenticationOptions`.
 
-On the Vault side you can configure the JWT backend by enabling the JWT auth backend and creating a role.
-You can either use `oidc_discovery_url`, `jwks_url` or `jwt_validation_pubkeys` to configure the JWT backend.
+On the Vault side you can configure the JWT auth method by enabling the JWT auth method and creating a role.
+You can either use `oidc_discovery_url`, `jwks_url` or `jwt_validation_pubkeys` to configure the JWT auth method.
 
 ====
 [source,java]
@@ -817,7 +816,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also:
 
-* https://developer.hashicorp.com/vault/docs/auth/jwt[Vault Documentation: Using the JWT auth backend]
+* https://developer.hashicorp.com/vault/docs/auth/jwt[Vault Documentation: Using the JWT auth method]
 
 [[vault.authentication.kubernetes]]
 == Kubernetes authentication
@@ -857,21 +856,21 @@ You can configure the authentication via `KubernetesAuthenticationOptions`.
 
 See also:
 
-* https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Using the Kubernetes auth backend]
+* https://www.vaultproject.io/docs/auth/kubernetes.html[Vault Documentation: Using the Kubernetes auth method]
 * https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/[Kubernetes Documentation: Configure Service Accounts for Pods]
 
 [[vault.authentication.userpass]]
 == Username/Password authentication
 
 Username/Password is typically a end-user authentication scheme.
-Using username and password is supported by multiple Vault authentication backends:
+Using username and password is supported by multiple Vault authentication methods:
 
 * Username and Password (`userpass`)
 * LDAP (`ldap`)
 * Okta (`okta`, supports additionaly time-based one-time tokens)
 * RADIUS (`radius`)
 
-`UserPasswordAuthenticationOptions` can be used with all above mentioned authentication backends as the Login API is similar across all mechanisms.
+`UserPasswordAuthenticationOptions` can be used with all above mentioned authentication methods as the Login API is similar across all mechanisms.
 Please ensure to use the appropriate auth mount path when configuring `UserPasswordAuthenticationOptions`.
 
 .Configuring `UserPasswordAuthentication`
@@ -899,10 +898,10 @@ class AppConfig extends AbstractVaultConfiguration {
 
 See also:
 
-* https://www.vaultproject.io/api-docs/auth/userpass[Vault Documentation: Using the Userpass auth backend]
-* https://www.vaultproject.io/api-docs/auth/ldap[Vault Documentation: Using the LDAP auth backend]
-* https://www.vaultproject.io/api-docs/auth/radius[Vault Documentation: Using the RADIUS auth backend]
-* https://www.vaultproject.io/api-docs/auth/okta[Vault Documentation: Using the Okta auth backend]
+* https://www.vaultproject.io/api-docs/auth/userpass[Vault Documentation: Using the Userpass auth method]
+* https://www.vaultproject.io/api-docs/auth/ldap[Vault Documentation: Using the LDAP auth method]
+* https://www.vaultproject.io/api-docs/auth/radius[Vault Documentation: Using the RADIUS auth method]
+* https://www.vaultproject.io/api-docs/auth/okta[Vault Documentation: Using the Okta auth method]
 
 [[vault.authentication.steps]]
 == Authentication Steps

@@ -56,7 +56,7 @@ public class AwsEc2AuthenticationOptions {
 
 
 	/**
-	 * Path of the aws-ec2 authentication backend mount.
+	 * Path of the aws-ec2 authentication method mount.
 	 */
 	private final String path;
 
@@ -121,7 +121,7 @@ public class AwsEc2AuthenticationOptions {
 
 
 	/**
-	 * @return the path of the aws-ec2 authentication backend mount.
+	 * @return the path of the aws-ec2 authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

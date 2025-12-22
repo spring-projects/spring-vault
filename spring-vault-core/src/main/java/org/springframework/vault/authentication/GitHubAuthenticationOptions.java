@@ -38,7 +38,7 @@ public class GitHubAuthenticationOptions {
 
 
 	/**
-	 * Path of the GitHub authentication backend mount. Optional and defaults to
+	 * Path of the GitHub authentication method mount. Optional and defaults to
 	 * {@literal github}.
 	 */
 	private final String path;
@@ -71,7 +71,7 @@ public class GitHubAuthenticationOptions {
 	}
 
 	/**
-	 * @return the path of the GitHub authentication backend mount.
+	 * @return the path of the GitHub authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

@@ -22,7 +22,7 @@ import org.springframework.lang.Nullable;
 
 /**
  * Interface that specifies a basic set of Vault operations using Vault's
- * Key/Value secret backend. Paths used in this operations interface are
+ * Key/Value secrets engine. Paths used in this operations interface are
  * relative and outgoing requests prepend paths with the according
  * operation-specific prefix.
  *
@@ -60,17 +60,17 @@ public interface VaultKeyValueOperationsSupport {
 
 
 	/**
-	 * Enumeration of supported Key/Value backend API versions.
+	 * Enumeration of supported Key/Value secrets engine API versions.
 	 */
 	enum KeyValueBackend {
 
 		/**
-		 * Key/Value backend version 1 (unversioned).
+		 * Key/Value engine version 1 (unversioned).
 		 */
 		KV_1,
 
 		/**
-		 * K/V backend version 2 (versioned).
+		 * Key/Value engine version 2 (versioned).
 		 */
 		KV_2;
 

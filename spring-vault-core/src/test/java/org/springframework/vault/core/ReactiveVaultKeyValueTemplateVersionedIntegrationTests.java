@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ReactiveVaultKeyValue2Template} using the
- * versioned Key/Value (k/v version 2) backend.
+ * versioned Key/Value (k/v version 2) secrets engine.
  *
  * @author Timothy Weiand
  * @author Mark Paluch

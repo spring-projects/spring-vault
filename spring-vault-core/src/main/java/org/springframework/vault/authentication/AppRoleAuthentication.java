@@ -60,7 +60,7 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  * @see AppRoleAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth
- * Backend: AppRole</a>
+ * Method: AppRole</a>
  */
 public class AppRoleAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 

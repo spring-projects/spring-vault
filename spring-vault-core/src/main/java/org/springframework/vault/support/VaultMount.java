@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
 public class VaultMount {
 
 	/**
-	 * Backend type. Can be an auth or secret backend.
+	 * Backend type. Can be an auth method or secrets engine.
 	 */
 	private final String type;
 
@@ -69,7 +69,7 @@ public class VaultMount {
 
 	/**
 	 * Create a new {@link VaultMount} given a {@code type}.
-	 * @param type backend type, must not be empty or {@literal null}.
+	 * @param type engine type, must not be empty or {@literal null}.
 	 * @return the created {@link VaultMount}.
 	 */
 	public static VaultMount create(String type) {
@@ -85,7 +85,7 @@ public class VaultMount {
 
 
 	/**
-	 * @return the backend type.
+	 * @return the secrets engine type.
 	 */
 	public String getType() {
 		return this.type;
@@ -138,8 +138,8 @@ public class VaultMount {
 
 
 		/**
-		 * Configure the backend type.
-		 * @param type the backend type, must not be empty or {@literal null}.
+		 * Configure the engine type.
+		 * @param type the engine type, must not be empty or {@literal null}.
 		 * @return this builder.
 		 */
 		public VaultMountBuilder type(String type) {

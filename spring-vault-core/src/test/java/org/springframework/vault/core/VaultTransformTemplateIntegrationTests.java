@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link VaultTemplate} using the {@code transform}
- * backend.
+ * secrets engine.
  *
  * @author Lauren Voswinkel
  * @author Mark Paluch

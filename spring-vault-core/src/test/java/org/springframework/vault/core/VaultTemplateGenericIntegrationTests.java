@@ -38,8 +38,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTemplate} using the {@code generic}
- * backend.
+ * Integration tests for {@link VaultTemplate} using the {@code generic} secrets
+ * engine.
  *
  * @author Mark Paluch
  */

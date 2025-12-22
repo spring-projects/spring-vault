@@ -37,8 +37,8 @@ import org.springframework.vault.util.Version;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTemplate} using the {@code transit}
- * backend.
+ * Integration tests for {@link VaultTemplate} using the {@code transit} secrets
+ * engine.
  *
  * @author Mark Paluch
  * @author Sven Schürmann

@@ -43,7 +43,7 @@ public class KubernetesAuthenticationOptions {
 
 
 	/**
-	 * Path of the kubernetes authentication backend mount.
+	 * Path of the kubernetes authentication method mount.
 	 */
 	private final String path;
 
@@ -75,7 +75,7 @@ public class KubernetesAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the kubernetes authentication backend mount.
+	 * @return the path of the kubernetes authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

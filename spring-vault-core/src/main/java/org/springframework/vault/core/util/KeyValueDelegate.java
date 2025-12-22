@@ -33,8 +33,8 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * Key-Value utility to retrieve secrets from a versioned key-value backend. For
- * internal use within the framework.
+ * Key-Value utility to retrieve secrets from a versioned key-value secrets
+ * engine. For internal use within the framework.
  * <p>Uses Vault's internal API {@code sys/internal/ui/mounts} to determine
  * mount information.
  *
@@ -73,8 +73,8 @@ public class KeyValueDelegate {
 	}
 
 	/**
-	 * Read a secret from a key-value backend. Considers the backend type and
-	 * whether the backend is a versioned key-value backend.
+	 * Read a secret from a key-value secrets engine. Considers the engine type and
+	 * whether the engine is a versioned key-value secrets engine.
 	 * @param path the path to fetch the secret from.
 	 * @return the secret, can be {@literal null}.
 	 */

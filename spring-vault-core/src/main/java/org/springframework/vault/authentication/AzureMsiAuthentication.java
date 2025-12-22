@@ -48,7 +48,7 @@ import org.springframework.web.client.RestOperations;
  * @since 2.1
  * @see AzureMsiAuthenticationOptions
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/azure.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/azure.html">Auth Method:
  * azure</a>
  * @link <a href=
  * "https://docs.microsoft.com/en-us/azure/virtual-machines/windows/instance-metadata-service"

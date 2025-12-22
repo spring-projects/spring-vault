@@ -41,7 +41,7 @@ public class AppRoleAuthenticationOptions {
 
 
 	/**
-	 * Path of the approle authentication backend mount.
+	 * Path of the approle authentication method mount.
 	 */
 	private final String path;
 

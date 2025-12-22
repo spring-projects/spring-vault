@@ -28,7 +28,7 @@ import org.springframework.data.mapping.PersistentEntity;
 public interface VaultPersistentEntity<T> extends KeyValuePersistentEntity<T, VaultPersistentProperty> {
 
 	/**
-	 * @return the secret backend in which this {@link PersistentEntity} is stored.
+	 * @return the secrets engine in which this {@link PersistentEntity} is stored.
 	 */
 	String getSecretBackend();
 
