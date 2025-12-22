@@ -33,7 +33,7 @@ import static org.assertj.core.api.Fail.fail;
 
 /**
  * Integration tests for {@link VaultKeyValue2Template} using the versioned
- * Key/Value (k/v version 2) backend.
+ * Key/Value (k/v version 2) secrets engine.
  *
  * @author Mark Paluch
  * @author Younghwan Jang

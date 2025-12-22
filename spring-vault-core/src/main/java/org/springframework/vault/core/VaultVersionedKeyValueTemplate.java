@@ -146,7 +146,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 			return;
 		}
 		List<Integer> versions = toVersionList(versionsToDelete);
-		doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions));
+		doWrite(createEnginePath("delete", path), Collections.singletonMap("versions", versions));
 	}
 
 	private static List<Integer> toVersionList(Version[] versionsToDelete) {
@@ -161,7 +161,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 		List<Integer> versions = toVersionList(versionsToDelete);
-		doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions));
+		doWrite(createEnginePath("undelete", path), Collections.singletonMap("versions", versions));
 	}
 
 	@Override
@@ -169,7 +169,7 @@ public class VaultVersionedKeyValueTemplate extends VaultKeyValue2Accessor imple
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 		List<Integer> versions = toVersionList(versionsToDelete);
-		doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions));
+		doWrite(createEnginePath("destroy", path), Collections.singletonMap("versions", versions));
 	}
 
 	@Override

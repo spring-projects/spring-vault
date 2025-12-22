@@ -77,7 +77,7 @@ public interface VaultSysOperations {
 	VaultUnsealStatus getUnsealStatus() throws VaultException;
 
 	/**
-	 * Mounts a secret backend {@link VaultMount} to {@code path}.
+	 * Mounts a secrets engine {@link VaultMount} to {@code path}.
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">POST
@@ -86,14 +86,14 @@ public interface VaultSysOperations {
 	void mount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
-	 * @return {@link Map} of all secret backend {@link VaultMount mounts}.
+	 * @return {@link Map} of all secrets engine {@link VaultMount mounts}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">GET
 	 * /sys/mounts/</a>
 	 */
 	Map<String, VaultMount> getMounts() throws VaultException;
 
 	/**
-	 * Unmounts the secret backend mount at {@code path}.
+	 * Unmounts the secrets engine mount at {@code path}.
 	 * @param path must not be empty or {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-mounts.html">DELETE
 	 * /sys/mounts/{mount}</a>
@@ -101,7 +101,7 @@ public interface VaultSysOperations {
 	void unmount(String path) throws VaultException;
 
 	/**
-	 * Mounts an auth backend {@link VaultMount} to {@code path}.
+	 * Mounts an auth method {@link VaultMount} to {@code path}.
 	 * @param path must not be empty or {@literal null}.
 	 * @param vaultMount must not be {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">POST
@@ -110,14 +110,14 @@ public interface VaultSysOperations {
 	void authMount(String path, VaultMount vaultMount) throws VaultException;
 
 	/**
-	 * @return {@link Map} of all auth backend {@link VaultMount mounts}.
+	 * @return {@link Map} of all auth method {@link VaultMount mounts}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">GET
 	 * /sys/auth/</a>
 	 */
 	Map<String, VaultMount> getAuthMounts() throws VaultException;
 
 	/**
-	 * Unmounts the auth backend mount at {@code path}.
+	 * Unmounts the auth method mount at {@code path}.
 	 * @param path must not be empty or {@literal null}.
 	 * @see <a href="https://www.vaultproject.io/docs/http/sys-auth.html">DELETE
 	 * /sys/auth/{mount}</a>

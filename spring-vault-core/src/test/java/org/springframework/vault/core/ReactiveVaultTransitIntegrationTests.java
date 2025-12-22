@@ -42,7 +42,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link ReactiveVaultTransitTemplate} using the
- * {@code transit} backend.
+ * {@code transit} secrets engine.
  *
  * @author James Luke
  */

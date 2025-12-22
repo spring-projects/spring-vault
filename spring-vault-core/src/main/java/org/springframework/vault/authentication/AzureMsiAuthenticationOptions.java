@@ -46,7 +46,7 @@ public class AzureMsiAuthenticationOptions {
 
 
 	/**
-	 * Path of the azure authentication backend mount.
+	 * Path of the azure authentication method mount.
 	 */
 	private final String path;
 
@@ -90,7 +90,7 @@ public class AzureMsiAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the azure authentication backend mount.
+	 * @return the path of the azure authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

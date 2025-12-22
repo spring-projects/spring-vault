@@ -58,7 +58,7 @@ import org.springframework.web.client.RestOperations;
  * @see GoogleCredentials
  * @see GoogleCredentials#getApplicationDefault()
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Method:
  * gcp (IAM)</a>
  * @see <a href=
  * "https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt">GCP:

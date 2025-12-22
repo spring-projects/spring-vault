@@ -35,17 +35,17 @@ public class UsernamePasswordAuthenticationOptions {
 
 
 	/**
-	 * Path of the userpass authentication backend mount.
+	 * Path of the userpass authentication method mount.
 	 */
 	private final String path;
 
 	/**
-	 * Username of the userpass authentication backend mount.
+	 * Username of the userpass authentication method mount.
 	 */
 	private final String username;
 
 	/**
-	 * Password of the userpass authentication backend mount.
+	 * Password of the userpass authentication method mount.
 	 */
 	private final CharSequence password;
 
@@ -73,7 +73,7 @@ public class UsernamePasswordAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the userpass authentication backend mount.
+	 * @return the path of the userpass authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

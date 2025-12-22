@@ -24,13 +24,13 @@ import reactor.core.publisher.Mono;
 import org.springframework.vault.support.*;
 
 /**
- * Interface that specifies operations using the {@code transit} backend.
+ * Interface that specifies operations using the {@code transit} secrets engine.
  *
  * @author James Luke
  * @since 3.1
  * @see <a href=
  * "https://www.vaultproject.io/docs/secrets/transit/index.html">Transit Secret
- * Backend</a>
+ * Engine</a>
  */
 public interface ReactiveVaultTransitOperations {
 
@@ -130,7 +130,7 @@ public interface ReactiveVaultTransitOperations {
 
 	/**
 	 * Encrypts the provided batch of {@code plaintext} using the named key and
-	 * context. The encryption is done using transit backend's batch operation.
+	 * context. The encryption is done using transit engine's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Plaintext} which includes plain text and
 	 * an optional context.
@@ -172,7 +172,7 @@ public interface ReactiveVaultTransitOperations {
 
 	/**
 	 * Decrypts the provided batch of cipher text using the named key and context.
-	 * The* decryption is done using transit backend's batch operation.
+	 * The* decryption is done using transit engine's batch operation.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plain text
 	 * and an optional context.

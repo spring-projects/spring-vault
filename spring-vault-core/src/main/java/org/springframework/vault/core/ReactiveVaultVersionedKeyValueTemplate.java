@@ -131,7 +131,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 			return delete(path);
 		}
 		List<Integer> versions = toVersionList(versionsToDelete);
-		return doWrite(createBackendPath("delete", path), Collections.singletonMap("versions", versions)).then().log();
+		return doWrite(createEnginePath("delete", path), Collections.singletonMap("versions", versions)).then().log();
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 		List<Integer> versions = toVersionList(versionsToDelete);
-		return doWrite(createBackendPath("undelete", path), Collections.singletonMap("versions", versions)).then();
+		return doWrite(createEnginePath("undelete", path), Collections.singletonMap("versions", versions)).then();
 	}
 
 	@Override
@@ -147,7 +147,7 @@ public class ReactiveVaultVersionedKeyValueTemplate extends ReactiveVaultKeyValu
 		Assert.hasText(path, "Path must not be empty");
 		Assert.noNullElements(versionsToDelete, "Versions must not be null");
 		List<Integer> versions = toVersionList(versionsToDelete);
-		return doWrite(createBackendPath("destroy", path), Collections.singletonMap("versions", versions)).then();
+		return doWrite(createEnginePath("destroy", path), Collections.singletonMap("versions", versions)).then();
 	}
 
 	@Override

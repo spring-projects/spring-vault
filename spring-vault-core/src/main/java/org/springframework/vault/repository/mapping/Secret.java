@@ -51,8 +51,8 @@ public @interface Secret {
 	String value() default "";
 
 	/**
-	 * Secret backend mount, defaults to {@literal secret}. The attribute supports
-	 * SpEL expressions to dynamically calculate the backend based on a
+	 * Secrets engine mount, defaults to {@literal secret}. The attribute supports
+	 * SpEL expressions to dynamically calculate the secrets engine based on a
 	 * per-operation basis.
 	 */
 	String backend() default "secret";

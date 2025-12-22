@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.*;
 
 /**
  * Integration tests for {@link VaultKeyValue2Template} using the non-versioned
- * Key/Value (k/v version 1) backend.
+ * Key/Value (k/v version 1) secrets engine.
  *
  * @author Mark Paluch
  */

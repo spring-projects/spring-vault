@@ -39,7 +39,7 @@ import org.springframework.web.client.RestOperations;
  * @see GitHubAuthentication
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/api-docs/auth/github">GitHub Auth
- * Backend</a>
+ * Method</a>
  */
 public class GitHubAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 

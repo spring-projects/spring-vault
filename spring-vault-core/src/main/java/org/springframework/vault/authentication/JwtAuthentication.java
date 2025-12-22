@@ -42,7 +42,7 @@ import org.springframework.web.client.RestOperations;
  * @see JwtAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/api-docs/auth/jwt">Vault Auth
- * Backend: JWT</a>
+ * Method: JWT</a>
  */
 public class JwtAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 

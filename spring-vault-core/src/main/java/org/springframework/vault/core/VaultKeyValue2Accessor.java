@@ -25,8 +25,8 @@ import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Support class to build accessor methods for the Vault key-value backend
- * version 2.
+ * Support class to build accessor methods for the Vault key-value secrets
+ * engine version 2.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -54,7 +54,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 		VaultListResponse read = doRead(client -> {
 			return client.get()
 					.uri("%s?list=true"
-							.formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+							.formatted(createEnginePath("metadata", KeyValueUtilities.normalizeListPath(path))))
 					.retrieve()
 					.toEntity(VaultListResponse.class);
 		});
@@ -76,10 +76,10 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 	@Override
 	String createDataPath(String path) {
-		return createBackendPath("data", path);
+		return createEnginePath("data", path);
 	}
 
-	String createBackendPath(String segment, String path) {
+	String createEnginePath(String segment, String path) {
 		return "%s/%s/%s".formatted(this.path, segment, path);
 	}
 

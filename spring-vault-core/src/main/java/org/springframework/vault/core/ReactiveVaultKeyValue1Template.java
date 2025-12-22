@@ -28,7 +28,7 @@ import org.springframework.vault.support.VaultResponseSupport;
 
 /**
  * Default implementation of {@link ReactiveVaultKeyValueOperations} for the
- * Key/Value backend version 1.
+ * Key/Value secrets engine version 1.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch

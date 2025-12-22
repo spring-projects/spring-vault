@@ -25,8 +25,8 @@ import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Support class to build accessor methods for the Vault key-value backend
- * version 2.
+ * Support class to build accessor methods for the Vault key-value secrets
+ * engine version 2.
  *
  * @author Timothy R. Weiand
  * @author Mark Paluch
@@ -54,7 +54,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
 		return doRead(
-				"%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))),
+				"%s?list=true".formatted(createEnginePath("metadata", KeyValueUtilities.normalizeListPath(path))),
 				VaultListResponse.class)
 						.flatMapMany(response -> {
 							List<String> list = (List<String>) response.getRequiredData().get("keys");
@@ -74,10 +74,10 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 
 	@Override
 	String createDataPath(String path) {
-		return createBackendPath("data", path);
+		return createEnginePath("data", path);
 	}
 
-	String createBackendPath(String segment, String path) {
+	String createEnginePath(String segment, String path) {
 		return "%s/%s/%s".formatted(this.path, segment, path);
 	}
 

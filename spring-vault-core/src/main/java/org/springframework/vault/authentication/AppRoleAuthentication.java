@@ -35,7 +35,6 @@ import org.springframework.vault.authentication.AppRoleTokens.AbsentSecretId;
 import org.springframework.vault.authentication.AppRoleTokens.Provided;
 import org.springframework.vault.authentication.AppRoleTokens.Pull;
 import org.springframework.vault.authentication.AppRoleTokens.Wrapped;
-import static org.springframework.vault.authentication.AuthenticationSteps.HttpRequestBuilder.*;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
@@ -62,7 +61,7 @@ import static org.springframework.vault.authentication.AuthenticationUtil.*;
  * @see AppRoleAuthenticationOptions
  * @see RestOperations
  * @see <a href="https://www.vaultproject.io/docs/auth/approle.html">Auth
- * Backend: AppRole</a>
+ * Method: AppRole</a>
  */
 public class AppRoleAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 

@@ -8,7 +8,7 @@
 xref:introduction/introduction.adoc[Introduction] :: Introduction to Spring Vault
 xref:vault/vault.adoc[Vault Core Support] :: Vault Template and Repositories
 xref:vault/authentication.adoc[Authentication] :: Supported Authentication Methods
-xref:vault/propertysource.adoc[Vault Property Source] :: Mounting Vault Secret Backends as Property Source
+xref:vault/propertysource.adoc[Vault Property Source] :: Mounting Vault Secrets Engines as Property Source
 
 Mark Paluch
 
