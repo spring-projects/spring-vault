@@ -44,7 +44,7 @@ public class PcfAuthenticationOptions {
 
 
 	/**
-	 * Path of the pcf authentication backend mount.
+	 * Path of the pcf authentication method mount.
 	 */
 	private final String path;
 
@@ -85,7 +85,7 @@ public class PcfAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the pcf authentication backend mount.
+	 * @return the path of the pcf authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

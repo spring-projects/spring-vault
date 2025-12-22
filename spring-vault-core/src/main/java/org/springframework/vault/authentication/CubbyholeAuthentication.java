@@ -42,7 +42,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * <p>Cubbyhole authentication uses Vault primitives to provide a secured
  * authentication workflow. Cubbyhole authentication uses {@link VaultToken
  * tokens} as primary login method. An ephemeral token is used to obtain a
- * second, login {@link VaultToken} from Vault's Cubbyhole secret backend. The
+ * second, login {@link VaultToken} from Vault's Cubbyhole secrets engine. The
  * login token is usually longer-lived and used to interact with Vault. The
  * login token can be retrieved either from a wrapped response or from the
  * {@code data} section.
@@ -128,11 +128,11 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * @author Mark Paluch
  * @see CubbyholeAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Method:
  * Token</a>
  * @see <a href=
  * "https://www.vaultproject.io/docs/secrets/cubbyhole/index.html">Cubbyhole
- * Secret Backend</a>
+ * Secrets Engine</a>
  * @see <a href=
  * "https://www.vaultproject.io/docs/concepts/response-wrapping.html">Response
  * Wrapping</a>

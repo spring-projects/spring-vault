@@ -26,11 +26,11 @@ import org.springframework.vault.support.Versioned.Version;
 
 /**
  * Interface that specifies a basic set of Vault operations using Vault's
- * versioned Key/Value (kv version 2) secret backend. Paths used in this
+ * versioned Key/Value (kv version 2) secrets engine. Paths used in this
  * operations interface are relative and outgoing requests prepend paths with
  * the according operation-specific prefix.
  * <p>Clients using versioned Key/Value must be aware they are reading from a
- * versioned backend as the versioned Key/Value API (kv version 2) is different
+ * versioned engine as the versioned Key/Value API (kv version 2) is different
  * from the unversioned Key/Value API (kv version 1).
  *
  * @author Mark Paluch
@@ -114,7 +114,7 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	/**
 	 * Return {@link VaultKeyValueMetadataOperations}
 	 * @return the operations interface to interact with the Vault Key/Value
-	 * metadata backend
+	 * metadata engine.
 	 */
 	VaultKeyValueMetadataOperations opsForKeyValueMetadata();
 

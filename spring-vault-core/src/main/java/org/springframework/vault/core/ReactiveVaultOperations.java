@@ -71,8 +71,8 @@ public interface ReactiveVaultOperations {
 	 * Return {@link VaultKeyValueOperations}.
 	 * @param path the mount path, must not be empty or {@literal null}.
 	 * @param apiVersion API version to use, must not be {@literal null}.
-	 * @return the operations interface to interact with the Vault Key/Value
-	 * backend.
+	 * @return the operations interface to interact with the Vault Key/Value secrets
+	 * engine.
 	 * @since 3.1
 	 */
 	ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
@@ -81,22 +81,22 @@ public interface ReactiveVaultOperations {
 	 * Return {@link ReactiveVaultVersionedKeyValueOperations}.
 	 * @param path the mount path
 	 * @return the operations interface to interact with the versioned Vault
-	 * Key/Value (version 2) backend.
+	 * Key/Value (version 2) secrets engine.
 	 * @since 3.1
 	 */
 	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
 	/**
-	 * @return the operations interface to interact with the Vault transit backend.
+	 * @return the operations interface to interact with the Vault transit engine.
 	 * @since 3.1
 	 */
 	ReactiveVaultTransitOperations opsForTransit();
 
 	/**
-	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is
+	 * Return {@link ReactiveVaultTransitOperations} if the transit engine is
 	 * mounted on a different path than {@code transit}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault transit backend.
+	 * @return the operations interface to interact with the Vault transit engine.
 	 * @since 3.1
 	 */
 	ReactiveVaultTransitOperations opsForTransit(String path);
@@ -110,7 +110,7 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
-	 * calls/secret backends that do not require a request body.
+	 * calls/secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.
 	 */
@@ -118,7 +118,7 @@ public interface ReactiveVaultOperations {
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
-	 * calls/secret backends that do not require a request body.
+	 * calls/secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be empty if the path does not exist.

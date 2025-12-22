@@ -46,7 +46,7 @@ public class AwsIamAuthenticationOptions {
 
 
 	/**
-	 * Path of the aws authentication backend mount.
+	 * Path of the aws authentication method mount.
 	 */
 	private final String path;
 
@@ -100,7 +100,7 @@ public class AwsIamAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the aws authentication backend mount.
+	 * @return the path of the aws authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

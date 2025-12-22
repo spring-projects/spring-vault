@@ -19,7 +19,7 @@ package org.springframework.vault.support;
 import java.util.Map;
 
 /**
- * A key inside Vault's {@code transit} backend.
+ * A key inside Vault's {@code transit} secrets engine.
  *
  * @author Mark Paluch
  * @author Sven Schürmann

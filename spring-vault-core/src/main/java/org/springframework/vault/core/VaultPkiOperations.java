@@ -28,8 +28,8 @@ import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
 
 /**
- * Interface that specifies PKI backend-related operations.
- * <p>The PKI secret backend for Vault generates X.509 certificates dynamically
+ * Interface that specifies PKI engine-related operations.
+ * <p>The PKI secrets engine for Vault generates X.509 certificates dynamically
  * based on configured roles. This means services can get certificates needed
  * for both client and server authentication without going through the usual
  * manual process of generating a private key and CSR, submitting to a CA, and
@@ -46,7 +46,7 @@ public interface VaultPkiOperations {
 
 	/**
 	 * Requests a certificate bundle (private key and certificate) from Vault's PKI
-	 * backend given a {@code roleName} and {@link VaultCertificateRequest}. The
+	 * engine given a {@code roleName} and {@link VaultCertificateRequest}. The
 	 * issuing CA certificate is returned as well, so that only the root CA need be
 	 * in a client's trust store.
 	 * @param roleName must not be empty or {@literal null}.
@@ -61,7 +61,7 @@ public interface VaultPkiOperations {
 			throws VaultException;
 
 	/**
-	 * Signs a CSR using Vault's PKI backend given a {@code roleName}, {@code csr}
+	 * Signs a CSR using Vault's PKI engine given a {@code roleName}, {@code csr}
 	 * and {@link VaultCertificateRequest}. The issuing CA certificate is returned
 	 * as well, so that only the root CA need be in a client's trust store.
 	 * @param roleName must not be empty or {@literal null}.

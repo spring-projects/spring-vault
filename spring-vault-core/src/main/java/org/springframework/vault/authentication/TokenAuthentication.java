@@ -29,7 +29,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  * @see VaultToken
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Method:
  * Token</a>
  */
 public class TokenAuthentication implements ClientAuthentication, AuthenticationStepsFactory {

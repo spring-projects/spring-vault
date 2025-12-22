@@ -38,8 +38,8 @@ import org.springframework.vault.util.VaultInitializer;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration test for secrets retrieved from a versioned Key-Value backend
- * using {@link KeyValueDelegate}.
+ * Integration test for secrets retrieved from a versioned Key-Value secrets
+ * engine using {@link KeyValueDelegate}.
  *
  * @author Mark Paluch
  * @see SecretLeaseContainer

@@ -40,7 +40,7 @@ public class JwtAuthenticationOptions {
 
 
 	/**
-	 * Path of the JWT authentication backend mount. Optional and defaults to
+	 * Path of the JWT authentication method mount. Optional and defaults to
 	 * {@literal jwt}.
 	 */
 	private final String path;
@@ -90,7 +90,7 @@ public class JwtAuthenticationOptions {
 	}
 
 	/**
-	 * @return the path of the JWT authentication backend mount.
+	 * @return the path of the JWT authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

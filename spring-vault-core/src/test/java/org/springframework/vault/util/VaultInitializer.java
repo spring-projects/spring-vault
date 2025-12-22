@@ -30,7 +30,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 /**
  * Vault initializer to ensure a running and prepared Vault. Prepared means
- * unsealed, having a non-versioning key-value backend mounted at
+ * unsealed, having a non-versioning key-value secrets engine mounted at
  * {@code secret/} and a {@link VaultToken} with {@code root} privileges.
  *
  * @author Mark Paluch
@@ -86,7 +86,7 @@ public class VaultInitializer {
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
-				this.prepareVault.mountVersionedKvBackend();
+				this.prepareVault.mountVersionedKvSecretsEngine();
 			}
 		}
 	}

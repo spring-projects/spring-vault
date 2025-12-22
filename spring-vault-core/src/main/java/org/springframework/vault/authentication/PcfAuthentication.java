@@ -48,7 +48,7 @@ import org.springframework.web.client.RestOperations;
  * @since 2.2
  * @see PcfAuthenticationOptions
  * @see VaultClient
- * @see <a href="https://www.vaultproject.io/docs/auth/pcf.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/pcf.html">Auth Method:
  * PCF</a>
  */
 public class PcfAuthentication implements ClientAuthentication, AuthenticationStepsFactory {

@@ -54,7 +54,7 @@ import org.springframework.web.client.RestOperations;
  * @see AwsEc2AuthenticationOptions
  * @see VaultClient
  * @see <a href="https://www.vaultproject.io/docs/auth/aws-ec2.html">Auth
- * Backend: aws-ec2</a>
+ * Method: aws-ec2</a>
  */
 public class AwsEc2Authentication implements ClientAuthentication, AuthenticationStepsFactory {
 

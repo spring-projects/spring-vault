@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.util.Assert;
 
 /**
- * Transit backend key creation request options.
+ * Transit secrets engine key creation request options.
  *
  * @author Mark Paluch
  * @author Sven Schürmann

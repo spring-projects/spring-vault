@@ -62,8 +62,8 @@ public interface VaultOperations {
 	 * Return {@link VaultKeyValueOperations}.
 	 * @param path the mount path, must not be empty or {@literal null}.
 	 * @param apiVersion API version to use, must not be {@literal null}.
-	 * @return the operations interface to interact with the Vault Key/Value
-	 * backend.
+	 * @return the operations interface to interact with the Vault Key/Value secrets
+	 * engine.
 	 * @since 2.1
 	 */
 	VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
@@ -72,21 +72,23 @@ public interface VaultOperations {
 	 * Return {@link VaultVersionedKeyValueOperations}.
 	 * @param path the mount path
 	 * @return the operations interface to interact with the versioned Vault
-	 * Key/Value (version 2) backend.
+	 * Key/Value (version 2) secrets engine.
 	 * @since 2.1
 	 */
 	VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
 
 	/**
-	 * @return the operations interface to interact with the Vault PKI backend.
+	 * @return the operations interface to interact with the Vault PKI secrets
+	 * engine.
 	 */
 	VaultPkiOperations opsForPki();
 
 	/**
-	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a
+	 * Return {@link VaultPkiOperations} if the PKI secrets engine is mounted on a
 	 * different path than {@code pki}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault PKI backend.
+	 * @return the operations interface to interact with the Vault PKI secrets
+	 * engine.
 	 */
 	VaultPkiOperations opsForPki(String path);
 
@@ -101,32 +103,34 @@ public interface VaultOperations {
 	VaultTokenOperations opsForToken();
 
 	/**
-	 * @return the operations interface to interact with the Vault transform
-	 * backend.
+	 * @return the operations interface to interact with the Vault transform secrets
+	 * engine.
 	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform();
 
 	/**
-	 * Return {@link VaultTransformOperations} if the transit backend is mounted on
-	 * a different path than {@code transform}.
+	 * Return {@link VaultTransformOperations} if the transit secrets engine is
+	 * mounted on a different path than {@code transform}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault transform
-	 * backend.
+	 * @return the operations interface to interact with the Vault transform secrets
+	 * engine.
 	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform(String path);
 
 	/**
-	 * @return the operations interface to interact with the Vault transit backend.
+	 * @return the operations interface to interact with the Vault transit secrets
+	 * engine.
 	 */
 	VaultTransitOperations opsForTransit();
 
 	/**
-	 * Return {@link VaultTransitOperations} if the transit backend is mounted on a
-	 * different path than {@code transit}.
+	 * Return {@link VaultTransitOperations} if the transit secrets engine is
+	 * mounted on a different path than {@code transit}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault transit backend.
+	 * @return the operations interface to interact with the Vault transit secrets
+	 * engine.
 	 */
 	VaultTransitOperations opsForTransit(String path);
 
@@ -139,7 +143,7 @@ public interface VaultOperations {
 
 	/**
 	 * Read ({@code GET)} from a Vault path. Reading data using this method is
-	 * suitable for API calls/secret backends that do not require a request body.
+	 * suitable for API calls/secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
@@ -148,7 +152,7 @@ public interface VaultOperations {
 
 	/**
 	 * Read ({@code GET)} from a Vault path. Reading data using this method is
-	 * suitable for API calls/secret backends that do not require a request body.
+	 * suitable for API calls/secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @return the data.
 	 * @throws SecretNotFoundException if the path does not exist.
@@ -166,8 +170,8 @@ public interface VaultOperations {
 	}
 
 	/**
-	 * Read ({@code GET)} from a secret backend. Reading data using this method is
-	 * suitable for secret backends that do not require a request body.
+	 * Read ({@code GET)} from a secrets engine. Reading data using this method is
+	 * suitable for secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -175,8 +179,8 @@ public interface VaultOperations {
 	<T extends @Nullable Object> @Nullable VaultResponseSupport<T> read(String path, Class<T> responseType);
 
 	/**
-	 * Read ({@code GET)} from a secret backend. Reading data using this method is
-	 * suitable for secret backends that do not require a request body.
+	 * Read ({@code GET)} from a secrets engine. Reading data using this method is
+	 * suitable for secrets engines that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data.

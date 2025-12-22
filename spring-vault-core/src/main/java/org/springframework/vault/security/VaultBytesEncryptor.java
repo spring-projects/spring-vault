@@ -25,8 +25,8 @@ import org.springframework.vault.support.Ciphertext;
 import org.springframework.vault.support.Plaintext;
 
 /**
- * Vault-based {@link BytesEncryptor} using Vault's {@literal transit} backend.
- * Encryption/decryption is bound to a particular key that must support
+ * Vault-based {@link BytesEncryptor} using Vault's {@literal transit} secrets
+ * engine. Encryption/decryption is bound to a particular key that must support
  * encryption and decryption.
  *
  * @author Mark Paluch

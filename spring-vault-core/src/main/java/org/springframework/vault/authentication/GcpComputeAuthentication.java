@@ -46,7 +46,7 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  * @author Mark Paluch
  * @since 2.1
  * @see GcpComputeAuthenticationOptions
- * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend:
+ * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Method:
  * gcp (IAM)</a>
  * @see <a href=
  * "https://cloud.google.com/compute/docs/instances/verifying-instance-identity">Google

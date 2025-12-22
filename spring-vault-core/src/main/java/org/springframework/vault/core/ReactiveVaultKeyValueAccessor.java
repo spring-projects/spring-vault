@@ -167,7 +167,7 @@ abstract class ReactiveVaultKeyValueAccessor implements ReactiveVaultKeyValueOpe
 
 	/**
 	 * @param path must not be {@literal null} or empty.
-	 * @return backend path representing the data path.
+	 * @return secrets engine path representing the data path.
 	 */
 	abstract String createDataPath(String path);
 

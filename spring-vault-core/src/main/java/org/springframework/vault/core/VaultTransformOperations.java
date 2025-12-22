@@ -27,7 +27,7 @@ import org.springframework.vault.support.VaultTransformDecodeResult;
 import org.springframework.vault.support.VaultTransformEncodeResult;
 
 /**
- * Interface that specifies operations using the {@code transform} backend.
+ * Interface that specifies operations using the {@code transform} engine.
  *
  * @author Lauren Voswinkel
  * @author Mark Paluch
@@ -69,7 +69,7 @@ public interface VaultTransformOperations {
 	/**
 	 * Encode the provided batch of plaintext using the role given and
 	 * transformation in each list item. The encryption is done using transformation
-	 * secret backend's batch operation.
+	 * secrets engine's batch operation.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and
 	 * an optional context.
@@ -108,7 +108,7 @@ public interface VaultTransformOperations {
 	/**
 	 * Decode the provided batch of ciphertext using the role given and
 	 * transformation in each list item. The decryption is done using transformation
-	 * secret backend's batch operation.
+	 * secrets engine's batch operation.
 	 * @param roleName must not be empty or {@literal null}.
 	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and
 	 * an optional context.

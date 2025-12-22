@@ -36,7 +36,7 @@ public class GcpComputeAuthenticationOptions {
 
 
 	/**
-	 * Path of the gcp authentication backend mount.
+	 * Path of the gcp authentication method mount.
 	 */
 	private final String path;
 
@@ -69,7 +69,7 @@ public class GcpComputeAuthenticationOptions {
 
 
 	/**
-	 * @return the path of the gcp authentication backend mount.
+	 * @return the path of the gcp authentication method mount.
 	 */
 	public String getPath() {
 		return this.path;

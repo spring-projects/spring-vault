@@ -25,8 +25,8 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * Random byte generator using Vault's {@code transit} backend to generate
- * high-quality random bytes of the configured length.
+ * Random byte generator using Vault's {@code transit} secrets engine to
+ * generate high-quality random bytes of the configured length.
  * <p>Using Vault ensures to use a high-entropy source preventing to consume
  * entropy of the local machine.
  *
@@ -55,8 +55,8 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	 * Create a new {@code VaultBytesKeyGenerator} initialized to generate
 	 * {@code length} random bytes.
 	 * @param vaultOperations must not be {@literal null}.
-	 * @param transitPath path of the transit backend, must not be {@literal null}
-	 * or empty.
+	 * @param transitPath path of the transit engine, must not be {@literal null} or
+	 * empty.
 	 * @param length number of random bytes to generate. Must be greater than zero.
 	 */
 	public VaultBytesKeyGenerator(VaultOperations vaultOperations, String transitPath, int length) {
