@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.security;
 
 import org.springframework.security.crypto.codec.Utf8;
@@ -25,8 +26,8 @@ import org.springframework.vault.support.Plaintext;
 
 /**
  * Vault-based {@link BytesEncryptor} using Vault's {@literal transit} backend.
- * Encryption/decryption is bound to a particular key that must support encryption and
- * decryption.
+ * Encryption/decryption is bound to a particular key that must support
+ * encryption and decryption.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -37,40 +38,34 @@ public class VaultBytesEncryptor implements BytesEncryptor {
 
 	private final String keyName;
 
+
 	/**
-	 * Create a new {@link VaultBytesEncryptor} given {@link VaultTransitOperations} and
-	 * {@code keyName}.
+	 * Create a new {@link VaultBytesEncryptor} given {@link VaultTransitOperations}
+	 * and {@code keyName}.
 	 * @param transitOperations must not be {@literal null}.
 	 * @param keyName must not be {@literal null} or empty.
 	 */
 	public VaultBytesEncryptor(VaultTransitOperations transitOperations, String keyName) {
-
 		Assert.notNull(transitOperations, "VaultTransitOperations must not be null");
 		Assert.hasText(keyName, "Key name must not be null or empty");
-
 		this.transitOperations = transitOperations;
 		this.keyName = keyName;
 	}
 
+
 	@Override
 	public byte[] encrypt(byte[] plaintext) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.isTrue(!ObjectUtils.isEmpty(plaintext), "Plaintext must not be empty");
-
 		Ciphertext ciphertext = this.transitOperations.encrypt(this.keyName, Plaintext.of(plaintext));
-
 		return Utf8.encode(ciphertext.getCiphertext());
 	}
 
 	@Override
 	public byte[] decrypt(byte[] ciphertext) {
-
 		Assert.notNull(ciphertext, "Ciphertext must not be null");
 		Assert.isTrue(!ObjectUtils.isEmpty(ciphertext), "Ciphertext must not be empty");
-
 		Plaintext plaintext = this.transitOperations.decrypt(this.keyName, Ciphertext.of(Utf8.decode(ciphertext)));
-
 		return plaintext.getPlaintext();
 	}
 

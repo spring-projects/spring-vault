@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
@@ -99,7 +100,7 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 
 		assertThat(login.getToken()).isNotEmpty();
 		assertThatPolicies(login).contains("cert-auth1") //
-			.doesNotContain("cert-auth2");
+				.doesNotContain("cert-auth2");
 	}
 
 	@Test
@@ -115,7 +116,7 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 
 		assertThat(login.getToken()).isNotEmpty();
 		assertThatPolicies(login).contains("cert-auth2") //
-			.doesNotContain("cert-auth1");
+				.doesNotContain("cert-auth1");
 	}
 
 	// Compatibility for Vault 0.6.0 and below. Vault 0.6.1 fixed that issue and we
@@ -129,7 +130,7 @@ class ClientCertificateAuthenticationIntegrationTests extends ClientCertificateA
 				clientHttpRequestFactory);
 
 		assertThatExceptionOfType(NestedRuntimeException.class)
-			.isThrownBy(() -> new ClientCertificateAuthentication(restTemplate).login());
+				.isThrownBy(() -> new ClientCertificateAuthentication(restTemplate).login());
 	}
 
 }

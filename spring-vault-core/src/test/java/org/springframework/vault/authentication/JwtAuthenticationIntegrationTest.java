@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.security.KeyPair;
@@ -94,13 +95,13 @@ class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 		JWSHeader header = new JWSHeader(JWSAlgorithm.RS256);
 		JWSObject body = new JWSObject(header,
 				new JWTClaimsSet.Builder().audience("local")
-					.subject("admin")
-					.claim("user", user)
-					.issueTime(new Date())
-					.expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
-					.issuer("http://localhost:8000")
-					.build()
-					.toPayload());
+						.subject("admin")
+						.claim("user", user)
+						.issueTime(new Date())
+						.expirationTime(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)))
+						.issuer("http://localhost:8000")
+						.build()
+						.toPayload());
 		body.sign(signer);
 		return body.serialize();
 	}
@@ -132,8 +133,8 @@ class JwtAuthenticationIntegrationTest extends IntegrationTestSupport {
 				JwtAuthenticationOptions.builder().jwtSupplier(() -> jwt).role("my-role").build(), restTemplate);
 
 		assertThatThrownBy(authentication::login).isInstanceOf(VaultLoginException.class)
-			.hasMessageContaining("Cannot login using JWT", "error validating token",
-					"error verifying token signature");
+				.hasMessageContaining("Cannot login using JWT", "error validating token",
+						"error verifying token signature");
 	}
 
 }

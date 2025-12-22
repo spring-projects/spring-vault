@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import java.util.Map;
@@ -20,8 +21,8 @@ import java.util.Map;
 import org.springframework.data.convert.TypeMapper;
 
 /**
- * Vault-specific {@link TypeMapper} exposing that {@link SecretDocument}s might contain a
- * type key.
+ * Vault-specific {@link TypeMapper} exposing that {@link SecretDocument}s might
+ * contain a type key.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -29,7 +30,7 @@ import org.springframework.data.convert.TypeMapper;
 public interface VaultTypeMapper extends TypeMapper<Map<String, Object>> {
 
 	/**
-	 * Returns whether the given {@code key} is the type key.
+	 * Return whether the given {@code key} is the type key.
 	 * @return {@literal true} if the {@code key} is the type key.
 	 */
 	boolean isTypeKey(String key);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import java.util.ArrayList;
@@ -47,10 +48,11 @@ import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 
 /**
- * {@link VaultConverter} that uses a {@link MappingContext} to do sophisticated mapping
- * of domain objects to {@link SecretDocument}. This converter converts between Map-typed
- * representations and domain objects without use of a JSON library.
- * {@link SecretDocument} is the input to JSON mapping to exchange secrets with Vault.
+ * {@link VaultConverter} that uses a {@link MappingContext} to do sophisticated
+ * mapping of domain objects to {@link SecretDocument}. This converter converts
+ * between Map-typed representations and domain objects without use of a JSON
+ * library. {@link SecretDocument} is the input to JSON mapping to exchange
+ * secrets with Vault.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -60,6 +62,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	private final MappingContext<? extends VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
 
 	private VaultTypeMapper typeMapper;
+
 
 	public MappingVaultConverter(
 			MappingContext<? extends VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
@@ -72,12 +75,14 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		this.typeMapper = new DefaultVaultTypeMapper(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, mappingContext);
 	}
 
+
 	/**
 	 * Configures the {@link VaultTypeMapper} to be used to add type information to
-	 * {@link SecretDocument}s created by the converter and how to lookup type information
-	 * from {@link SecretDocument}s when reading them. Uses a
-	 * {@link DefaultVaultTypeMapper} by default. Setting this to {@literal null} will
-	 * reset the {@link org.springframework.data.convert.TypeMapper} to the default one.
+	 * {@link SecretDocument}s created by the converter and how to lookup type
+	 * information from {@link SecretDocument}s when reading them. Uses a
+	 * {@link DefaultVaultTypeMapper} by default. Setting this to {@literal null}
+	 * will reset the {@link org.springframework.data.convert.TypeMapper} to the
+	 * default one.
 	 * @param typeMapper the typeMapper to set, must not be {@literal null}.
 	 */
 	public void setTypeMapper(VaultTypeMapper typeMapper) {
@@ -102,7 +107,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		SecretDocument secretDocument = getSecretDocument(source);
 
 		TypeInformation<? extends S> typeToUse = secretDocument != null
-				? this.typeMapper.readType(secretDocument.getBody(), type) : (TypeInformation) TypeInformation.OBJECT;
+				? this.typeMapper.readType(secretDocument.getBody(), type)
+				: (TypeInformation) TypeInformation.OBJECT;
 		Class<? extends S> rawType = typeToUse.getType();
 
 		if (this.conversions.hasCustomReadTarget(source.getClass(), rawType)) {
@@ -166,6 +172,7 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 				Object value = parameterProvider.getParameterValue(parameter);
 				return value != null ? readValue(value, parameter.getType()) : null;
 			}
+
 		};
 	}
 
@@ -233,27 +240,25 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 		if (this.conversions.hasCustomReadTarget(value.getClass(), rawType)) {
 			return (T) this.conversionService.convert(value, rawType);
-		}
-		else if (value instanceof List) {
+		} else if (value instanceof List) {
 			return (T) readCollectionOrArray(type, (List) value);
-		}
-		else if (value instanceof Map) {
+		} else if (value instanceof Map) {
 			return (T) read(type, (Map) value);
-		}
-		else {
+		} else {
 			return (T) getPotentiallyConvertedSimpleRead(value, rawType);
 		}
 	}
 
 	/**
-	 * Reads the given {@link List} into a collection of the given {@link TypeInformation}
-	 * .
+	 * Reads the given {@link List} into a collection of the given
+	 * {@link TypeInformation} .
 	 * @param targetType must not be {@literal null}.
 	 * @param sourceValue must not be {@literal null}.
-	 * @return the converted {@link Collection} or array, will never be {@literal null}.
+	 * @return the converted {@link Collection} or array, will never be
+	 * {@literal null}.
 	 */
 	@Nullable
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings({"rawtypes"})
 	private Object readCollectionOrArray(TypeInformation<?> targetType, List sourceValue) {
 
 		Assert.notNull(targetType, "Target type must not be null");
@@ -276,11 +281,9 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 			if (obj instanceof Map) {
 				items.add(read(componentType, obj));
-			}
-			else if (obj instanceof List) {
+			} else if (obj instanceof List) {
 				items.add(readCollectionOrArray(TypeInformation.OBJECT, (List) obj));
-			}
-			else {
+			} else {
 				items.add(getPotentiallyConvertedSimpleRead(obj, rawComponentType));
 			}
 		}
@@ -289,10 +292,10 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Reads the given {@link Map} into a {@link Map}. will recursively resolve nested
-	 * {@link Map}s as well.
-	 * @param type the {@link Map} {@link TypeInformation} to be used to unmarshal this
-	 * {@link Map}.
+	 * Reads the given {@link Map} into a {@link Map}. will recursively resolve
+	 * nested {@link Map}s as well.
+	 * @param type the {@link Map} {@link TypeInformation} to be used to unmarshal
+	 * this {@link Map}.
 	 * @param sourceMap must not be {@literal null}
 	 * @return the converted {@link Map}.
 	 */
@@ -328,11 +331,9 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 			if (value instanceof Map) {
 				map.put(key, read(defaultedValueType, (Map) value));
-			}
-			else if (value instanceof List) {
+			} else if (value instanceof List) {
 				map.put(key, readCollectionOrArray(valueType != null ? valueType : TypeInformation.LIST, (List) value));
-			}
-			else {
+			} else {
 				map.put(key, getPotentiallyConvertedSimpleRead(value, rawValueType));
 			}
 		}
@@ -341,14 +342,15 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Checks whether we have a custom conversion for the given simple object. Converts
-	 * the given value if so, applies {@link Enum} handling or returns the value as is.
+	 * Checks whether we have a custom conversion for the given simple object.
+	 * Converts the given value if so, applies {@link Enum} handling or returns the
+	 * value as is.
 	 * @param value
 	 * @param target must not be {@literal null}.
 	 * @return
 	 */
 	@Nullable
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private Object getPotentiallyConvertedSimpleRead(@Nullable Object value, @Nullable Class<?> target) {
 
 		if (value == null || target == null || target.isAssignableFrom(value.getClass())) {
@@ -448,14 +450,13 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 			if (!this.conversions.isSimpleType(value.getClass())) {
 				writePropertyInternal(value, sink, prop);
-			}
-			else {
+			} else {
 				sink.put(prop, getPotentiallyConvertedSimpleWrite(value, prop.getTypeInformation().getType()));
 			}
 		}
 	}
 
-	@SuppressWarnings({ "unchecked" })
+	@SuppressWarnings({"unchecked"})
 	protected void writePropertyInternal(@Nullable Object obj, SecretDocumentAccessor accessor,
 			VaultPersistentProperty prop) {
 
@@ -482,7 +483,6 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		Optional<Class<?>> basicTargetType = this.conversions.getCustomWriteTarget(obj.getClass());
 
 		if (basicTargetType.isPresent()) {
-
 			accessor.put(prop, this.conversionService.convert(obj, basicTargetType.get()));
 			return;
 		}
@@ -502,22 +502,23 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Writes the given {@link Collection} using the given {@link VaultPersistentProperty}
-	 * information.
+	 * Writes the given {@link Collection} using the given
+	 * {@link VaultPersistentProperty} information.
 	 * @param collection must not be {@literal null}.
 	 * @param property must not be {@literal null}.
 	 * @return the converted {@link List}.
 	 */
 	protected List<Object> createCollection(Collection<?> collection, VaultPersistentProperty property) {
-
 		return writeCollectionInternal(collection, property.getTypeInformation(), new ArrayList<>());
 	}
 
 	/**
-	 * Populates the given {@link List} with values from the given {@link Collection}.
+	 * Populates the given {@link List} with values from the given
+	 * {@link Collection}.
 	 * @param source the collection to create a {@link List} for, must not be
 	 * {@literal null}.
-	 * @param type the {@link TypeInformation} to consider or {@literal null} if unknown.
+	 * @param type the {@link TypeInformation} to consider or {@literal null} if
+	 * unknown.
 	 * @param sink the {@link List} to write to.
 	 * @return the converted {@link List}.
 	 */
@@ -531,16 +532,12 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 		}
 
 		for (Object element : source) {
-
 			Class<?> elementType = element == null ? null : element.getClass();
-
 			if (elementType == null || this.conversions.isSimpleType(elementType)) {
 				sink.add(getPotentiallyConvertedSimpleWrite(element, elementType == null ? Object.class : elementType));
-			}
-			else if (element instanceof Collection || elementType.isArray()) {
+			} else if (element instanceof Collection || elementType.isArray()) {
 				sink.add(writeCollectionInternal(asCollection(element), componentType, new ArrayList<>()));
-			}
-			else {
+			} else {
 				SecretDocumentAccessor accessor = new SecretDocumentAccessor(new SecretDocument());
 				writeInternal(element, accessor, componentType);
 				sink.add(accessor.getBody());
@@ -558,10 +555,8 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	 * @return the converted {@link Map}.
 	 */
 	protected Map<String, Object> createMap(Map<Object, Object> map, VaultPersistentProperty property) {
-
 		Assert.notNull(map, "Given map must not be null");
 		Assert.notNull(property, "PersistentProperty must not be null");
-
 		return writeMapInternal(map, new LinkedHashMap<>(), property.getTypeInformation());
 	}
 
@@ -586,21 +581,18 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 				String simpleKey = key.toString();
 				if (val == null || this.conversions.isSimpleType(val.getClass())) {
 					bson.put(simpleKey, val);
-				}
-				else if (val instanceof Collection || val.getClass().isArray()) {
+				} else if (val instanceof Collection || val.getClass().isArray()) {
 
 					bson.put(simpleKey, writeCollectionInternal(asCollection(val), propertyType.getMapValueType(),
 							new ArrayList<>()));
-				}
-				else {
+				} else {
 					SecretDocumentAccessor nested = new SecretDocumentAccessor(new SecretDocument());
 					TypeInformation<?> valueTypeInfo = propertyType.isMap() ? propertyType.getMapValueType()
 							: TypeInformation.OBJECT;
 					writeInternal(val, nested, valueTypeInfo);
 					bson.put(simpleKey, nested.getBody());
 				}
-			}
-			else {
+			} else {
 				throw new MappingException("Cannot use a complex object as a key value.");
 			}
 		}
@@ -609,19 +601,18 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Adds custom type information to the given {@link SecretDocument} if necessary. That
-	 * is if the value is not the same as the one given. This is usually the case if you
-	 * store a subtype of the actual declared type of the property.
+	 * Adds custom type information to the given {@link SecretDocument} if
+	 * necessary. That is if the value is not the same as the one given. This is
+	 * usually the case if you store a subtype of the actual declared type of the
+	 * property.
 	 * @param type type hint.
 	 * @param value must not be {@literal null}.
 	 * @param accessor must not be {@literal null}.
 	 */
 	protected void addCustomTypeKeyIfNecessary(@Nullable TypeInformation<?> type, Object value,
 			SecretDocumentAccessor accessor) {
-
 		Class<?> reference = type != null ? type.getRequiredActualType().getType() : Object.class;
 		Class<?> valueType = ClassUtils.getUserClass(value.getClass());
-
 		boolean notTheSameClass = !valueType.equals(reference);
 		if (notTheSameClass) {
 			this.typeMapper.writeType(valueType, accessor.getBody());
@@ -629,9 +620,9 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Checks whether we have a custom conversion registered for the given value into an
-	 * arbitrary simple Vault type. Returns the converted value if so. If not, we perform
-	 * special enum handling or simply return the value as is.
+	 * Checks whether we have a custom conversion registered for the given value
+	 * into an arbitrary simple Vault type. Returns the converted value if so. If
+	 * not, we perform special enum handling or simply return the value as is.
 	 * @param value the value to write.
 	 * @param targetType
 	 * @return the converted value. Can be {@literal null}.
@@ -670,22 +661,21 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 	}
 
 	/**
-	 * Returns given object as {@link Collection}. Will return the {@link Collection} as
-	 * is if the source is a {@link Collection} already, will convert an array into a
-	 * {@link Collection} or simply create a single element collection for everything
-	 * else.
+	 * Return given object as {@link Collection}. Will return the {@link Collection}
+	 * as is if the source is a {@link Collection} already, will convert an array
+	 * into a {@link Collection} or simply create a single element collection for
+	 * everything else.
 	 * @param source the collection object. Can be a {@link Collection}, array or
 	 * singleton object.
 	 * @return the {@code source} as {@link Collection}.
 	 */
 	private static Collection<?> asCollection(Object source) {
-
 		if (source instanceof Collection) {
 			return (Collection<?>) source;
 		}
-
 		return source.getClass().isArray() ? CollectionUtils.arrayToList(source) : Collections.singleton(source);
 	}
+
 
 	/**
 	 * {@link PropertyValueProvider} to evaluate a SpEL expression if present on the
@@ -697,28 +687,23 @@ public class MappingVaultConverter extends AbstractVaultConverter {
 
 		private final SecretDocumentAccessor source;
 
+
 		VaultPropertyValueProvider(SecretDocument source) {
-
 			Assert.notNull(source, "Source document must no be null!");
-
 			this.source = new SecretDocumentAccessor(source);
 		}
 
 		VaultPropertyValueProvider(SecretDocumentAccessor accessor) {
-
 			Assert.notNull(accessor, "SecretDocumentAccessor must no be null!");
-
 			this.source = accessor;
 		}
 
+
 		public @Nullable <T> T getPropertyValue(VaultPersistentProperty property) {
-
 			Object value = this.source.get(property);
-
 			if (value == null) {
 				return null;
 			}
-
 			return readValue(value, property.getTypeInformation());
 		}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -57,16 +58,16 @@ class KubernetesAuthenticationUnitTests {
 	void loginShouldObtainTokenWithStaticJwtSupplier() {
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("hello") //
-			.jwtSupplier(() -> "my-jwt-token")
-			.build();
+				.role("hello") //
+				.jwtSupplier(() -> "my-jwt-token")
+				.build();
 
 		this.mockRest.expect(requestTo("/auth/kubernetes/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.role").value("hello"))
-			.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("hello"))
+				.andExpect(jsonPath("$.jwt").value("my-jwt-token"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
 
@@ -79,15 +80,15 @@ class KubernetesAuthenticationUnitTests {
 	void loginShouldFail() {
 
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("hello")
-			.jwtSupplier(() -> "my-jwt-token")
-			.build();
+				.role("hello")
+				.jwtSupplier(() -> "my-jwt-token")
+				.build();
 
 		this.mockRest.expect(requestTo("/auth/kubernetes/login")) //
-			.andRespond(withServerError());
+				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new KubernetesAuthentication(options, this.restTemplate).login());
+				.isThrownBy(() -> new KubernetesAuthentication(options, this.restTemplate).login());
 	}
 
 	@Test
@@ -95,18 +96,18 @@ class KubernetesAuthenticationUnitTests {
 
 		AtomicReference<String> token = new AtomicReference<>("foo");
 		KubernetesAuthenticationOptions options = KubernetesAuthenticationOptions.builder()
-			.role("hello") //
-			.jwtSupplier(((KubernetesJwtSupplier) token::get).cached())
-			.build();
+				.role("hello") //
+				.jwtSupplier(((KubernetesJwtSupplier) token::get).cached())
+				.build();
 
 		token.set("bar");
 
 		this.mockRest.expect(requestTo("/auth/kubernetes/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.role").value("hello"))
-			.andExpect(jsonPath("$.jwt").value("foo"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("hello"))
+				.andExpect(jsonPath("$.jwt").value("foo"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		KubernetesAuthentication authentication = new KubernetesAuthentication(options, this.restTemplate);
 

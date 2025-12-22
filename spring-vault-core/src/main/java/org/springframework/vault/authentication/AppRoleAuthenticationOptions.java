@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.jspecify.annotations.Nullable;
@@ -25,10 +26,9 @@ import org.springframework.vault.support.VaultToken;
 
 /**
  * Authentication options for {@link AppRoleAuthentication}.
- * <p>
- * Authentication options provide the path, roleId and pull/push mode.
- * {@link AppRoleAuthentication} can be constructed using {@link #builder()}. Instances of
- * this class are immutable once constructed.
+ * <p>Authentication options provide the path, roleId and pull/push mode.
+ * {@link AppRoleAuthentication} can be constructed using {@link #builder()}.
+ * Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @author Vincent Le Nair
@@ -39,6 +39,7 @@ import org.springframework.vault.support.VaultToken;
 public class AppRoleAuthenticationOptions {
 
 	public static final String DEFAULT_APPROLE_AUTHENTICATION_PATH = "approle";
+
 
 	/**
 	 * Path of the approle authentication backend mount.
@@ -65,9 +66,9 @@ public class AppRoleAuthenticationOptions {
 	 */
 	private final UnwrappingEndpoints unwrappingEndpoints;
 
+
 	private AppRoleAuthenticationOptions(String path, RoleId roleId, SecretId secretId, @Nullable String appRole,
 			UnwrappingEndpoints unwrappingEndpoints) {
-
 		this.path = path;
 		this.roleId = roleId;
 		this.secretId = secretId;
@@ -75,12 +76,14 @@ public class AppRoleAuthenticationOptions {
 		this.unwrappingEndpoints = unwrappingEndpoints;
 	}
 
+
 	/**
 	 * @return a new {@link AppRoleAuthenticationOptionsBuilder}.
 	 */
 	public static AppRoleAuthenticationOptionsBuilder builder() {
 		return new AppRoleAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the mount path.
@@ -119,6 +122,7 @@ public class AppRoleAuthenticationOptions {
 		return this.unwrappingEndpoints;
 	}
 
+
 	/**
 	 * Builder for {@link AppRoleAuthenticationOptions}.
 	 */
@@ -138,19 +142,19 @@ public class AppRoleAuthenticationOptions {
 
 		private UnwrappingEndpoints unwrappingEndpoints = UnwrappingEndpoints.SysWrapping;
 
+
 		AppRoleAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_APPROLE_AUTHENTICATION_PATH
 		 */
 		public AppRoleAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -158,13 +162,11 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Configure the RoleId.
 		 * @param roleId must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 2.0
 		 */
 		public AppRoleAuthenticationOptionsBuilder roleId(RoleId roleId) {
-
 			Assert.notNull(roleId, "RoleId must not be null");
-
 			this.roleId = roleId;
 			return this;
 		}
@@ -172,13 +174,11 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Configure a {@code secretId}.
 		 * @param secretId must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 2.0
 		 */
 		public AppRoleAuthenticationOptionsBuilder secretId(SecretId secretId) {
-
 			Assert.notNull(secretId, "SecretId must not be null");
-
 			this.secretId = secretId;
 			return this;
 		}
@@ -186,13 +186,11 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Configure a {@code appRole}.
 		 * @param appRole must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 1.1
 		 */
 		public AppRoleAuthenticationOptionsBuilder appRole(String appRole) {
-
 			Assert.hasText(appRole, "AppRole must not be empty");
-
 			this.appRole = appRole;
 			return this;
 		}
@@ -200,13 +198,11 @@ public class AppRoleAuthenticationOptions {
 		/**
 		 * Configure the {@link UnwrappingEndpoints} to use.
 		 * @param endpoints must not be {@literal null}.
-		 * @return {@code this} {@link AppRoleAuthenticationOptionsBuilder}
+		 * @return this builder
 		 * @since 2.2
 		 */
 		public AppRoleAuthenticationOptionsBuilder unwrappingEndpoints(UnwrappingEndpoints endpoints) {
-
 			Assert.notNull(endpoints, "UnwrappingEndpoints must not be empty");
-
 			this.unwrappingEndpoints = endpoints;
 			return this;
 		}
@@ -218,21 +214,16 @@ public class AppRoleAuthenticationOptions {
 		 * @return a new {@link AppRoleAuthenticationOptions}.
 		 */
 		public AppRoleAuthenticationOptions build() {
-
 			Assert.hasText(this.path, "Path must not be empty");
-
 			if (this.secretId == null) {
-
 				if (this.providedSecretId != null) {
 					secretId(SecretId.provided(this.providedSecretId));
-				}
-				else {
+				} else {
 					secretId(SecretId.absent());
 				}
 			}
 
 			if (this.roleId == null) {
-
 				Assert.notNull(this.providedRoleId,
 						"AppRole authentication configured for pull mode. Role Identifier must be provided.");
 				roleId(RoleId.provided(this.providedRoleId));
@@ -245,17 +236,17 @@ public class AppRoleAuthenticationOptions {
 
 			Assert.notNull(this.roleId, "RoleId must not be null");
 			Assert.notNull(this.secretId, "SecretId must not be null");
-
 			return new AppRoleAuthenticationOptions(this.path, this.roleId, this.secretId, this.appRole,
 					this.unwrappingEndpoints);
 		}
 
 	}
 
+
 	/**
-	 * RoleId type encapsulating how the roleId is actually obtained. Provides factory
-	 * methods to obtain a {@link RoleId} by wrapping, pull-mode or whether to use a
-	 * string literal.
+	 * RoleId type encapsulating how the roleId is actually obtained. Provides
+	 * factory methods to obtain a {@link RoleId} by wrapping, pull-mode or whether
+	 * to use a string literal.
 	 *
 	 * @since 2.0
 	 */
@@ -265,14 +256,12 @@ public class AppRoleAuthenticationOptions {
 		 * Create a {@link RoleId} object that obtains its value from unwrapping a
 		 * response using the {@link VaultToken initial token} from a Cubbyhole.
 		 * @param initialToken must not be {@literal null}.
-		 * @return {@link RoleId} object that obtains its value from unwrapping a response
-		 * using the {@link VaultToken initial token}.
+		 * @return {@link RoleId} object that obtains its value from unwrapping a
+		 * response using the {@link VaultToken initial token}.
 		 * @see org.springframework.vault.client.VaultResponses#unwrap(String, Class)
 		 */
 		static RoleId wrapped(VaultToken initialToken) {
-
 			Assert.notNull(initialToken, "Initial token must not be null");
-
 			return new AppRoleTokens.Wrapped(initialToken);
 		}
 
@@ -284,9 +273,7 @@ public class AppRoleAuthenticationOptions {
 		 * @return {@link RoleId} that obtains its value using pull-mode.
 		 */
 		static RoleId pull(VaultToken initialToken) {
-
 			Assert.notNull(initialToken, "Initial token must not be null");
-
 			return new AppRoleTokens.Pull(initialToken);
 		}
 
@@ -296,18 +283,17 @@ public class AppRoleAuthenticationOptions {
 		 * @return {@link RoleId} that encapsulates a static {@code roleId}.
 		 */
 		static RoleId provided(String roleId) {
-
 			Assert.hasText(roleId, "RoleId must not be null or empty");
-
 			return new Provided(roleId);
 		}
 
 	}
 
+
 	/**
-	 * SecretId type encapsulating how the secretId is actually obtained. Provides factory
-	 * methods to obtain a {@link SecretId} by wrapping, pull-mode or whether to use a
-	 * string literal.
+	 * SecretId type encapsulating how the secretId is actually obtained. Provides
+	 * factory methods to obtain a {@link SecretId} by wrapping, pull-mode or
+	 * whether to use a string literal.
 	 *
 	 * @since 2.0
 	 */
@@ -322,23 +308,19 @@ public class AppRoleAuthenticationOptions {
 		 * @see org.springframework.vault.client.VaultResponses#unwrap(String, Class)
 		 */
 		static SecretId wrapped(VaultToken initialToken) {
-
 			Assert.notNull(initialToken, "Initial token must not be null");
-
 			return new AppRoleTokens.Wrapped(initialToken);
 		}
 
 		/**
-		 * Create a {@link SecretId} that obtains its value using pull-mode, specifying a
-		 * {@link VaultToken initial token}. The token policy must allow reading the
+		 * Create a {@link SecretId} that obtains its value using pull-mode, specifying
+		 * a {@link VaultToken initial token}. The token policy must allow reading the
 		 * SecretId from {@code auth/approle/role/(role-name)/secret-id}.
 		 * @param initialToken must not be {@literal null}.
 		 * @return {@link SecretId} that obtains its value using pull-mode.
 		 */
 		static SecretId pull(VaultToken initialToken) {
-
 			Assert.notNull(initialToken, "Initial token must not be null");
-
 			return new AppRoleTokens.Pull(initialToken);
 		}
 
@@ -348,15 +330,13 @@ public class AppRoleAuthenticationOptions {
 		 * @return {@link SecretId} that encapsulates a static {@code SecretId}.
 		 */
 		static SecretId provided(String secretId) {
-
 			Assert.hasText(secretId, "SecretId must not be null or empty");
-
 			return new Provided(secretId);
 		}
 
 		/**
-		 * Create a {@link SecretId} that represents an absent secretId. Using this object
-		 * will not send a secretId during AppRole login.
+		 * Create a {@link SecretId} that represents an absent secretId. Using this
+		 * object will not send a secretId during AppRole login.
 		 * @return a {@link SecretId} that represents an absent secretId
 		 */
 		static SecretId absent() {

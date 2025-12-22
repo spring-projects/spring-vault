@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -62,9 +63,9 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 
 		for (var key : List.of(SECRET_NAME, CAS_SECRET_NAME)) {
 			vaultKeyValueMetadataOperations.delete(key)
-				.onErrorResume(e -> Mono.empty())
-				.as(StepVerifier::create)
-				.verifyComplete();
+					.onErrorResume(e -> Mono.empty())
+					.as(StepVerifier::create)
+					.verifyComplete();
 		}
 
 		var secret = new HashMap<>();
@@ -123,26 +124,26 @@ class ReactiveVaultKeyValueMetadataTemplateIntegrationTests
 
 		Duration duration = Duration.ofMinutes(30).plusHours(6).plusSeconds(30);
 		VaultMetadataRequest request = VaultMetadataRequest.builder()
-			.casRequired(true)
-			.deleteVersionAfter(duration)
-			.maxVersions(20)
-			.build();
+				.casRequired(true)
+				.deleteVersionAfter(duration)
+				.maxVersions(20)
+				.build();
 
 		vaultKeyValueMetadataOperations.put(CAS_SECRET_NAME, request).as(StepVerifier::create).verifyComplete();
 
 		final var version = prepare().getVersion();
 
 		vaultKeyValueMetadataOperations.get(CAS_SECRET_NAME)
-			.as(StepVerifier::create)
-			.assertNext(metadataResponseAfterUpdate -> {
-				assertThat(metadataResponseAfterUpdate.isCasRequired()).isEqualTo(request.isCasRequired());
-				assertThat(metadataResponseAfterUpdate.getMaxVersions()).isEqualTo(request.getMaxVersions());
+				.as(StepVerifier::create)
+				.assertNext(metadataResponseAfterUpdate -> {
+					assertThat(metadataResponseAfterUpdate.isCasRequired()).isEqualTo(request.isCasRequired());
+					assertThat(metadataResponseAfterUpdate.getMaxVersions()).isEqualTo(request.getMaxVersions());
 
-				if (version.isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
-					assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(duration);
-				}
-			})
-			.verifyComplete();
+					if (version.isGreaterThanOrEqualTo(Version.parse("1.2.0"))) {
+						assertThat(metadataResponseAfterUpdate.getDeleteVersionAfter()).isEqualTo(duration);
+					}
+				})
+				.verifyComplete();
 	}
 
 	@Test

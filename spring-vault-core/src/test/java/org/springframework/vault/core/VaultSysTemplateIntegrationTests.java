@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -42,7 +43,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.support.Policy.BuiltinCapabilities.*;
 
 /**
- * Integration tests for {@link VaultSysTemplate} through {@link VaultSysOperations}.
+ * Integration tests for {@link VaultSysTemplate} through
+ * {@link VaultSysOperations}.
  *
  * @author Mark Paluch
  * @author Maciej Drozdzowski
@@ -80,10 +82,10 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		VaultMount mount = VaultMount.builder()
-			.type("generic")
-			.config(Collections.singletonMap("default_lease_ttl", "1h"))
-			.description("hello, world")
-			.build();
+				.type("generic")
+				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.description("hello, world")
+				.build();
 
 		this.adminOperations.mount("other", mount);
 
@@ -106,10 +108,10 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		VaultMount mount = VaultMount.builder()
-			.type("kv")
-			.config(Collections.singletonMap("default_lease_ttl", "1h"))
-			.description("hello, world")
-			.build();
+				.type("kv")
+				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.description("hello, world")
+				.build();
 
 		this.adminOperations.mount("kVv1", mount);
 
@@ -138,11 +140,11 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 		}
 
 		VaultMount mount = VaultMount.builder()
-			.type("kv")
-			.config(Collections.singletonMap("default_lease_ttl", "1h"))
-			.options(Collections.singletonMap("version", "2"))
-			.description("hello, world")
-			.build();
+				.type("kv")
+				.config(Collections.singletonMap("default_lease_ttl", "1h"))
+				.options(Collections.singletonMap("version", "2"))
+				.description("hello, world")
+				.build();
 
 		this.adminOperations.mount("kVv2", mount);
 
@@ -226,7 +228,7 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	void shouldReadDefaultPolicy() {
 
 		assertThatExceptionOfType(UnsupportedOperationException.class)
-			.isThrownBy(() -> this.adminOperations.getPolicy("default"));
+				.isThrownBy(() -> this.adminOperations.getPolicy("default"));
 	}
 
 	@Test
@@ -234,11 +236,11 @@ class VaultSysTemplateIntegrationTests extends IntegrationTestSupport {
 	void shouldCreatePolicy() {
 
 		Rule rule = Rule.builder()
-			.path("foo")
-			.capabilities(READ, UPDATE)
-			.minWrappingTtl(Duration.ofSeconds(100))
-			.maxWrappingTtl(Duration.ofHours(2))
-			.build();
+				.path("foo")
+				.capabilities(READ, UPDATE)
+				.minWrappingTtl(Duration.ofSeconds(100))
+				.maxWrappingTtl(Duration.ofHours(2))
+				.build();
 
 		this.adminOperations.createOrUpdatePolicy("foo", Policy.of(rule));
 

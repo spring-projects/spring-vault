@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Clock;
@@ -26,10 +27,9 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link GcpIamCredentialsAuthentication}.
- * <p/>
- * Authentication options provide the path, a {@link GoogleCredentialsSupplier}, role and
- * JWT expiry for GCP IAM authentication. Instances of this class are immutable once
- * constructed.
+ * <p>Authentication options provide the path, a
+ * {@link GoogleCredentialsSupplier}, role and JWT expiry for GCP IAM
+ * authentication. Instances of this class are immutable once constructed.
  *
  * @author Andreas Gebauer
  * @author Magnus Jungsbluth
@@ -41,6 +41,7 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 
 	public static final String DEFAULT_GCP_AUTHENTICATION_PATH = "gcp";
 
+
 	/**
 	 * Provide the {@link GoogleCredentials}.
 	 */
@@ -51,14 +52,15 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 	 */
 	private final GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor;
 
+
 	private GcpIamCredentialsAuthenticationOptions(String path, GoogleCredentialsSupplier credentialSupplier,
 			String role, Duration jwtValidity, Clock clock,
 			GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor) {
-
 		super(path, role, jwtValidity, clock);
 		this.credentialSupplier = credentialSupplier;
 		this.serviceAccountIdAccessor = serviceAccountIdAccessor;
 	}
+
 
 	/**
 	 * @return a new {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
@@ -66,6 +68,7 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 	public static GcpIamCredentialsAuthenticationOptionsBuilder builder() {
 		return new GcpIamCredentialsAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the {@link GoogleCredentials} supplier.
@@ -80,6 +83,7 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 	public GoogleCredentialsAccountIdAccessor getServiceAccountIdAccessor() {
 		return this.serviceAccountIdAccessor;
 	}
+
 
 	/**
 	 * Builder for {@link GcpIamCredentialsAuthenticationOptions}.
@@ -98,18 +102,18 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 
 		private GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor = DefaultGoogleCredentialsAccessors.INSTANCE;
 
+
 		GcpIamCredentialsAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -119,44 +123,39 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * use static credentials or provide a
 		 * {@link #credentialsSupplier(GoogleCredentialsSupplier) credentials provider}.
 		 * @param credentials must not be {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #credentialsSupplier(GoogleCredentialsSupplier)
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder credentials(GoogleCredentials credentials) {
-
 			Assert.notNull(credentials, "ServiceAccountCredentials must not be null");
-
 			return credentialsSupplier(() -> credentials);
 		}
 
 		/**
-		 * Configure a {@link GoogleCredentialsSupplier}, required to create a signed JWT.
-		 * Alternatively, configure static {@link #credentials(GoogleCredentials)
+		 * Configure a {@link GoogleCredentialsSupplier}, required to create a signed
+		 * JWT. Alternatively, configure static {@link #credentials(GoogleCredentials)
 		 * credentials}.
 		 * @param credentialsSupplier must not be {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #credentials(GoogleCredentials)
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder credentialsSupplier(
 				GoogleCredentialsSupplier credentialsSupplier) {
-
 			Assert.notNull(credentialsSupplier, "GcpServiceAccountCredentialsSupplier must not be null");
-
 			this.credentialsSupplier = credentialsSupplier;
 			return this;
 		}
 
 		/**
 		 * Configure an explicit service account id to use in GCP IAM calls. If none is
-		 * configured, falls back to using {@link ServiceAccountCredentials#getAccount()}.
+		 * configured, falls back to using
+		 * {@link ServiceAccountCredentials#getAccount()}.
 		 * @param serviceAccountId the service account id (email) to use
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 2.1
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder serviceAccountId(String serviceAccountId) {
-
 			Assert.notNull(serviceAccountId, "Service account id may not be null");
-
 			return serviceAccountIdAccessor((GoogleCredentials credentials) -> serviceAccountId);
 		}
 
@@ -165,14 +164,12 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * account id used in GCP IAM calls. If none is configured, falls back to using
 		 * {@link ServiceAccountCredentials#getAccount()}.
 		 * @param serviceAccountIdAccessor the service account id provider to use
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see GoogleCredentialsAccountIdAccessor
 		 */
 		GcpIamCredentialsAuthenticationOptionsBuilder serviceAccountIdAccessor(
 				GoogleCredentialsAccountIdAccessor serviceAccountIdAccessor) {
-
 			Assert.notNull(serviceAccountIdAccessor, "GcpServiceAccountIdAccessor must not be null");
-
 			this.serviceAccountIdAccessor = serviceAccountIdAccessor;
 			return this;
 		}
@@ -180,12 +177,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		/**
 		 * Configure the name of the role against which the login is being attempted.
 		 * @param role must not be empty or {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be null or empty");
-
 			this.role = role;
 			return this;
 		}
@@ -194,12 +189,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Configure the {@link Duration} for the JWT expiration. This defaults to 15
 		 * minutes and cannot be more than a hour.
 		 * @param jwtValidity must not be {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder jwtValidity(Duration jwtValidity) {
-
 			Assert.notNull(jwtValidity, "JWT validity duration must not be null");
-
 			this.jwtValidity = jwtValidity;
 			return this;
 		}
@@ -208,12 +201,10 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * Configure the {@link Clock} used to calculate epoch seconds until the JWT
 		 * expiration.
 		 * @param clock must not be {@literal null}.
-		 * @return {@code this} {@link GcpIamCredentialsAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GcpIamCredentialsAuthenticationOptionsBuilder clock(Clock clock) {
-
 			Assert.notNull(clock, "Clock must not be null");
-
 			this.clock = clock;
 			return this;
 		}
@@ -223,10 +214,8 @@ public class GcpIamCredentialsAuthenticationOptions extends GcpIamAuthentication
 		 * @return a new {@link GcpIamCredentialsAuthenticationOptions}.
 		 */
 		public GcpIamCredentialsAuthenticationOptions build() {
-
 			Assert.notNull(this.credentialsSupplier, "GoogleCredentialsSupplier must not be null");
 			Assert.notNull(this.role, "Role must not be null");
-
 			return new GcpIamCredentialsAuthenticationOptions(this.path, this.credentialsSupplier, this.role,
 					this.jwtValidity, this.clock, this.serviceAccountIdAccessor);
 		}

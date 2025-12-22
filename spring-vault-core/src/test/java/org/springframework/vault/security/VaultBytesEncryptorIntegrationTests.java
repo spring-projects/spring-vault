@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.security;
 
 import java.util.List;
@@ -59,8 +60,7 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 		if (this.vaultVersion.isGreaterThanOrEqualTo(Version.parse("0.6.4"))) {
 			List<String> keys = this.transit.getKeys();
 			keys.forEach(this::deleteKey);
-		}
-		else {
+		} else {
 			deleteKey(KEY_NAME);
 		}
 	}
@@ -69,14 +69,12 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 
 		try {
 			this.transit.configureKey(keyName, VaultTransitKeyConfiguration.builder().deletionAllowed(true).build());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 		}
 
 		try {
 			this.transit.deleteKey(keyName);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 		}
 	}
 

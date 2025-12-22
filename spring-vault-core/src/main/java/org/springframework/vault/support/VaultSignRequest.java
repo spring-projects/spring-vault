@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.jspecify.annotations.Nullable;
@@ -38,14 +39,15 @@ public class VaultSignRequest {
 
 	private final boolean prehashed;
 
+
 	private VaultSignRequest(Plaintext plaintext, @Nullable String hashAlgorithm, @Nullable String signatureAlgorithm,
 			boolean prehashed) {
-
 		this.plaintext = plaintext;
 		this.hashAlgorithm = hashAlgorithm;
 		this.signatureAlgorithm = signatureAlgorithm;
 		this.prehashed = prehashed;
 	}
+
 
 	/**
 	 * @return a new instance of {@link VaultSignRequestBuilder}.
@@ -55,13 +57,14 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * Create a new {@link VaultSignRequest} given {@link Plaintext}. Uses the default
-	 * algorithm.
-	 * @return a new {@link VaultSignRequest} for the given {@link Plaintext input}.
+	 * Create a new {@code VaultSignRequest} given {@link Plaintext}. Uses the
+	 * default algorithm.
+	 * @return a new {@code VaultSignRequest} for the given {@link Plaintext input}.
 	 */
 	public static VaultSignRequest create(Plaintext input) {
 		return builder().plaintext(input).build();
 	}
+
 
 	/**
 	 * @return plain text input used as basis to generate the signature.
@@ -71,8 +74,8 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * @return hashAlgorithm used for creating the signature or {@literal null} to use the
-	 * default hash algorithm.
+	 * @return hashAlgorithm used for creating the signature or {@literal null} to
+	 * use the default hash algorithm.
 	 * @since 2.4
 	 */
 	public @Nullable String getHashAlgorithm() {
@@ -80,8 +83,8 @@ public class VaultSignRequest {
 	}
 
 	/**
-	 * @return signatureAlgorithm used for creating the signature when using an RSA key or
-	 * {@literal null} to use the default signature algorithm.
+	 * @return signatureAlgorithm used for creating the signature when using an RSA
+	 * key or {@literal null} to use the default signature algorithm.
 	 * @since 2.4
 	 */
 	public @Nullable String getSignatureAlgorithm() {
@@ -96,6 +99,7 @@ public class VaultSignRequest {
 		return this.prehashed;
 	}
 
+
 	/**
 	 * Builder to build a {@link VaultSignRequest}.
 	 */
@@ -109,15 +113,14 @@ public class VaultSignRequest {
 
 		private boolean prehashed;
 
+
 		/**
 		 * Configure the input to be used to create the signature.
 		 * @param input base input to create the signature, must not be {@literal null}.
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultSignRequestBuilder plaintext(Plaintext input) {
-
 			Assert.notNull(input, "Plaintext must not be null");
-
 			this.plaintext = input;
 			return this;
 		}
@@ -128,12 +131,10 @@ public class VaultSignRequest {
 		 * Supported algorithms are: {@literal sha1}, {@literal sha2-224},
 		 * {@literal sha2-256}, {@literal sha2-384}, {@literal sha2-512}. Defaults to
 		 * {@literal sha2-256} if not set.
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultSignRequestBuilder hashAlgorithm(String hashAlgorithm) {
-
 			Assert.hasText(hashAlgorithm, "Hash algorithm must not be null or empty");
-
 			this.hashAlgorithm = hashAlgorithm;
 			return this;
 		}
@@ -143,7 +144,7 @@ public class VaultSignRequest {
 		 * {@literal rsa-2048}, {@literal rsa-3072}, or {@literal rsa-4096} then specify
 		 * the algorithm used to hash the input through {@link #hashAlgorithm(String)}.
 		 * @param prehashed whether the input is already hashed.
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @return this builder.
 		 * @since 3.1
 		 */
 		public VaultSignRequestBuilder prehashed(boolean prehashed) {
@@ -157,12 +158,10 @@ public class VaultSignRequest {
 		 * @param signatureAlgorithm Specify the signature algorithm to be used for the
 		 * operation. Supported algorithms are: {@literal pss}, {@literal pkcs1v15}.
 		 * Defaults to {@literal pss} if not set.
-		 * @return {@code this} {@link VaultSignRequestBuilder}.
+		 * @return this builder.
 		 */
 		public VaultSignRequestBuilder signatureAlgorithm(String signatureAlgorithm) {
-
 			Assert.hasText(signatureAlgorithm, "Signature algorithm must not be null or empty");
-
 			this.signatureAlgorithm = signatureAlgorithm;
 			return this;
 		}
@@ -173,9 +172,7 @@ public class VaultSignRequest {
 		 * @return a new {@link VaultSignRequest}.
 		 */
 		public VaultSignRequest build() {
-
 			Assert.notNull(this.plaintext, "Plaintext input must not be null");
-
 			return new VaultSignRequest(this.plaintext, this.hashAlgorithm, this.signatureAlgorithm, this.prehashed);
 		}
 

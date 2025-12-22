@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -31,7 +32,8 @@ import org.springframework.vault.support.VaultTransformEncodeResult;
  * @author Lauren Voswinkel
  * @author Mark Paluch
  * @since 2.3
- * @see <a href="https://www.vaultproject.io/docs/secrets/transform/index.html">Transform
+ * @see <a href=
+ * "https://www.vaultproject.io/docs/secrets/transform/index.html">Transform
  * Secrets Engine</a>
  */
 public interface VaultTransformOperations {
@@ -65,12 +67,12 @@ public interface VaultTransformOperations {
 	}
 
 	/**
-	 * Encode the provided batch of plaintext using the role given and transformation in
-	 * each list item. The encryption is done using transformation secret backend's batch
-	 * operation.
+	 * Encode the provided batch of plaintext using the role given and
+	 * transformation in each list item. The encryption is done using transformation
+	 * secret backend's batch operation.
 	 * @param roleName must not be empty or {@literal null}.
-	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and an
-	 * optional context.
+	 * @param batchRequest a list of {@link Plaintext} which includes plaintext and
+	 * an optional context.
 	 * @return the encrypted result in the order of {@code batchRequest} plaintexts.
 	 */
 	List<VaultTransformEncodeResult> encode(String roleName, List<TransformPlaintext> batchRequest);
@@ -104,13 +106,14 @@ public interface VaultTransformOperations {
 	String decode(String roleName, String ciphertext, VaultTransformContext transformContext);
 
 	/**
-	 * Decode the provided batch of ciphertext using the role given and transformation in
-	 * each list item. The decryption is done using transformation secret backend's batch
-	 * operation.
+	 * Decode the provided batch of ciphertext using the role given and
+	 * transformation in each list item. The decryption is done using transformation
+	 * secret backend's batch operation.
 	 * @param roleName must not be empty or {@literal null}.
-	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and an
-	 * optional context.
-	 * @return the decrypted result in the order of {@code batchRequest} ciphertexts.
+	 * @param batchRequest a list of {@link Ciphertext} which includes plaintext and
+	 * an optional context.
+	 * @return the decrypted result in the order of {@code batchRequest}
+	 * ciphertexts.
 	 */
 	List<VaultTransformDecodeResult> decode(String roleName, List<TransformCiphertext> batchRequest);
 

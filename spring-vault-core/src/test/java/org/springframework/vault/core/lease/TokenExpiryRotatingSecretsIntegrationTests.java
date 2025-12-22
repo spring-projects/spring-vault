@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.util.Collections;
@@ -60,7 +61,7 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@SpringJUnitConfig(classes = { UserPassConfiguration.class, RotatingGenericSecretsIntegrationTestConfiguration.class })
+@SpringJUnitConfig(classes = {UserPassConfiguration.class, RotatingGenericSecretsIntegrationTestConfiguration.class})
 class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeAll
@@ -86,7 +87,7 @@ class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport 
 				"token_max_ttl", 8, "token_policies", "TokenExpiryRotatingSecretsIntegrationTests"));
 
 		VaultKeyValueOperations versioned = prepare.getVaultOperations()
-			.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
+				.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
 
 		versioned.put("rotating", Collections.singletonMap("key", "value"));
 	}
@@ -115,7 +116,7 @@ class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport 
 		});
 
 		VaultKeyValueOperations versioned = prepare().getVaultOperations()
-			.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
+				.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
 
 		versioned.put("rotating", Collections.singletonMap("key", "updated-value"));
 
@@ -138,9 +139,9 @@ class TokenExpiryRotatingSecretsIntegrationTests extends IntegrationTestSupport 
 		@Override
 		public ClientAuthentication clientAuthentication() {
 			return new UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions.builder()
-				.username("token-expiry")
-				.password("token-expiry")
-				.build(), getRestTemplateFactory().create());
+					.username("token-expiry")
+					.password("token-expiry")
+					.build(), getRestTemplateFactory().create());
 		}
 
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.net.URI;
@@ -48,13 +49,12 @@ import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Configuration using Spring's {@link org.springframework.core.env.Environment} to
- * configure Spring Vault endpoint, SSL options and authentication options. This
- * configuration class uses predefined property keys and is usually imported as part of an
- * existing Java-based configuration. Configuration is obtained from other, existing
- * property sources.
- * <p>
- * Usage:
+ * Configuration using Spring's {@link org.springframework.core.env.Environment}
+ * to configure Spring Vault endpoint, SSL options and authentication options.
+ * This configuration class uses predefined property keys and is usually
+ * imported as part of an existing Java-based configuration. Configuration is
+ * obtained from other, existing property sources.
+ * <p>Usage:
  *
  * Java-based configuration part:
  *
@@ -76,26 +76,29 @@ import org.springframework.web.client.RestOperations;
  *
  * <h3>Property keys</h3>
  *
- * Authentication-specific properties must be provided depending on the authentication
- * method.
+ * Authentication-specific properties must be provided depending on the
+ * authentication method.
  * <ul>
  * <li>Vault URI: {@code vault.uri}</li>
  * <li>SSL Configuration
  * <ul>
  * <li>Keystore resource: {@code vault.ssl.key-store} (optional)</li>
  * <li>Keystore password: {@code vault.ssl.key-store-password} (optional)</li>
- * <li>Keystore type: {@code vault.ssl.key-store-type} (since 2.3, optional)</li>
+ * <li>Keystore type: {@code vault.ssl.key-store-type} (since 2.3,
+ * optional)</li>
  * <li>Truststore resource: {@code vault.ssl.trust-store} (optional)</li>
- * <li>Truststore password: {@code vault.ssl.trust-store-password} (optional)</li>
- * <li>Truststore type: {@code vault.ssl.trust-store-password} (since 2.3, optional)</li>
- * <li>Enabled SSL/TLS protocols: {@code vault.ssl.enabled-protocols} (since 2.3.2,
- * optional, protocols separated with comma)</li>
- * <li>Enabled SSL/TLS cipher suites: {@code vault.ssl.enabled-cipher-suites} (since
- * 2.3.2, optional, cipher suites separated with comma)</li>
+ * <li>Truststore password: {@code vault.ssl.trust-store-password}
+ * (optional)</li>
+ * <li>Truststore type: {@code vault.ssl.trust-store-password} (since 2.3,
+ * optional)</li>
+ * <li>Enabled SSL/TLS protocols: {@code vault.ssl.enabled-protocols} (since
+ * 2.3.2, optional, protocols separated with comma)</li>
+ * <li>Enabled SSL/TLS cipher suites: {@code vault.ssl.enabled-cipher-suites}
+ * (since 2.3.2, optional, cipher suites separated with comma)</li>
  * </ul>
  * </li>
- * <li>Authentication method: {@code vault.authentication} (defaults to {@literal TOKEN},
- * supported authentication methods are:
+ * <li>Authentication method: {@code vault.authentication} (defaults to
+ * {@literal TOKEN}, supported authentication methods are:
  * {@literal TOKEN, APPID, APPROLE, AWS_EC2, AWS_IAM, AZURE, CERT, CUBBYHOLE, KUBERNETES},
  * see {@link AuthenticationMethod})</li>
  * <li>Token authentication
@@ -104,19 +107,21 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>AppRole authentication
  * <ul>
- * <li>AppRole path: {@code vault.app-role.app-role-path} (since 2.2.1, defaults to
+ * <li>AppRole path: {@code vault.app-role.app-role-path} (since 2.2.1, defaults
+ * to
  * {@link AppRoleAuthenticationOptions#DEFAULT_APPROLE_AUTHENTICATION_PATH})</li>
  * <li>RoleId: {@code vault.app-role.role-id}</li>
  * <li>SecretId: {@code vault.app-role.secret-id} (optional)</li>
  * </ul>
  * <li>AWS EC2 authentication
  * <ul>
- * <li>AWS EC2 path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults to
- * {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
+ * <li>AWS EC2 path: {@code vault.aws-ec2.aws-ec2-path} (since 2.2.1, defaults
+ * to {@link AwsEc2AuthenticationOptions#DEFAULT_AWS_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.aws-ec2.role} (since 2.2.1)</li>
- * <li>RoleId: {@code vault.aws-ec2.role-id} (<strong>deprecated since 2.2.1:</strong> use
- * {@code vault.aws-ec2.role} instead)</li>
- * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults to
+ * <li>RoleId: {@code vault.aws-ec2.role-id} (<strong>deprecated since
+ * 2.2.1:</strong> use {@code vault.aws-ec2.role} instead)</li>
+ * <li>Identity Document URL: {@code vault.aws-ec2.identity-document} (defaults
+ * to
  * {@link AwsEc2AuthenticationOptions#DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI})</li>
  * </ul>
  * <li>AWS IAM authentication
@@ -125,13 +130,15 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>Azure MSI authentication
  * <ul>
- * <li>Azure MSI path: {@code vault.azure-msi.azure-path} (since 2.2.1, defaults to
+ * <li>Azure MSI path: {@code vault.azure-msi.azure-path} (since 2.2.1, defaults
+ * to
  * {@link AzureMsiAuthenticationOptions#DEFAULT_AZURE_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.azure-msi.role}</li>
  * <li>MetadataServiceUri: {@code vault.azure-msi.metadata-service} (defaults to
  * {@link AzureMsiAuthenticationOptions#DEFAULT_INSTANCE_METADATA_SERVICE_URI})</li>
- * <li>IdentityTokenServiceUri: {@code vault.azure-msi.identity-token-service} (defaults
- * to {@link AzureMsiAuthenticationOptions#DEFAULT_IDENTITY_TOKEN_SERVICE_URI})</li>
+ * <li>IdentityTokenServiceUri: {@code vault.azure-msi.identity-token-service}
+ * (defaults to
+ * {@link AzureMsiAuthenticationOptions#DEFAULT_IDENTITY_TOKEN_SERVICE_URI})</li>
  * </ul>
  * <li>Client Certificate authentication
  * <ul>
@@ -143,7 +150,8 @@ import org.springframework.web.client.RestOperations;
  * </ul>
  * <li>Kubernetes authentication
  * <ul>
- * <li>Kubernetes path: {@code vault.kubernetes.kubernetes-path} (since 2.2.1, defaults to
+ * <li>Kubernetes path: {@code vault.kubernetes.kubernetes-path} (since 2.2.1,
+ * defaults to
  * {@link KubernetesAuthenticationOptions#DEFAULT_KUBERNETES_AUTHENTICATION_PATH})</li>
  * <li>Role: {@code vault.kubernetes.role}</li>
  * <li>Path to service account token file:
@@ -174,91 +182,77 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	private static final Log logger = LogFactory.getLog(EnvironmentVaultConfiguration.class);
 
+
 	private @Nullable RestOperations cachedRestOperations;
 
 	private @Nullable ApplicationContext applicationContext;
 
+
 	@Override
 	public RestOperations restOperations() {
-
 		if (this.cachedRestOperations != null) {
 			return this.cachedRestOperations;
 		}
-
 		this.cachedRestOperations = super.restOperations();
 		return this.cachedRestOperations;
 	}
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-
 		this.applicationContext = applicationContext;
 		super.setApplicationContext(applicationContext);
 	}
 
 	@Override
 	public VaultEndpoint vaultEndpoint() {
-
 		String uri = getProperty("vault.uri");
 		if (uri != null) {
 			return VaultEndpoint.from(URI.create(uri));
 		}
-
 		throw new IllegalStateException("Vault URI (vault.uri) is null");
 	}
 
 	@Override
 	public SslConfiguration sslConfiguration() {
-
 		KeyStoreConfiguration keyStoreConfiguration = getKeyStoreConfiguration("vault.ssl.key-store",
 				"vault.ssl.key-store-password", "vault.ssl.key-store-type");
-
 		KeyStoreConfiguration trustStoreConfiguration = getKeyStoreConfiguration("vault.ssl.trust-store",
 				"vault.ssl.trust-store-password", "vault.ssl.trust-store-type");
-
 		List<String> enabledProtocols = getPropertyAsList("vault.ssl.enabled-protocols");
-
 		List<String> enabledCipherSuites = getPropertyAsList("vault.ssl.enabled-cipher-suites");
-
 		return new SslConfiguration(keyStoreConfiguration, trustStoreConfiguration, enabledProtocols,
 				enabledCipherSuites);
 	}
 
 	private KeyStoreConfiguration getKeyStoreConfiguration(String resourceProperty, String passwordProperty,
 			String keystoreTypeProperty) {
-
 		Resource keyStore = getResource(resourceProperty);
 		String keyStorePassword = getProperty(passwordProperty);
 		String keystoreType = getProperty(keystoreTypeProperty, SslConfiguration.PEM_KEYSTORE_TYPE);
-
 		if (keyStore == null) {
 			return KeyStoreConfiguration.unconfigured();
 		}
-
 		if (StringUtils.hasText(keyStorePassword)) {
 			return KeyStoreConfiguration.of(keyStore, keyStorePassword.toCharArray(), keystoreType);
 		}
-
 		return KeyStoreConfiguration.of(keyStore).withStoreType(keystoreType);
 	}
 
 	@Override
 	public ClientAuthentication clientAuthentication() {
-
 		String authentication = getProperty("vault.authentication", AuthenticationMethod.TOKEN.name()).toUpperCase()
-			.replace('-', '_');
-
+				.replace('-', '_');
 		AuthenticationMethod authenticationMethod = AuthenticationMethod.valueOf(authentication);
 
 		return switch (authenticationMethod) {
-			case TOKEN -> tokenAuthentication();
-			case APPROLE -> appRoleAuthentication();
-			case AWS_EC2 -> awsEc2Authentication();
-			case AWS_IAM -> awsIamAuthentication();
-			case AZURE -> azureMsiAuthentication();
-			case CERT -> new ClientCertificateAuthentication(restOperations());
-			case CUBBYHOLE -> cubbyholeAuthentication();
-			case KUBERNETES -> kubeAuthentication();
+		case TOKEN -> tokenAuthentication();
+		case APPROLE -> appRoleAuthentication();
+		case AWS_EC2 -> awsEc2Authentication();
+		case AWS_IAM -> awsIamAuthentication();
+		case AZURE -> azureMsiAuthentication();
+		case CERT -> new ClientCertificateAuthentication(restOperations());
+		case CUBBYHOLE -> cubbyholeAuthentication();
+		case KUBERNETES -> kubeAuthentication();
 		};
 	}
 
@@ -267,76 +261,59 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	// -------------------------------------------------------------------------
 
 	protected ClientAuthentication tokenAuthentication() {
-
 		String token = getProperty("vault.token");
 		Assert.hasText(token, "Vault Token authentication: Token (vault.token) must not be empty");
-
 		return new TokenAuthentication(token);
 	}
 
 	protected ClientAuthentication appRoleAuthentication() {
-
 		String roleId = getProperty("vault.app-role.role-id");
 		String secretId = getProperty("vault.app-role.secret-id");
 		String path = getProperty("vault.app-role.app-role-path",
 				AppRoleAuthenticationOptions.DEFAULT_APPROLE_AUTHENTICATION_PATH);
-
 		Assert.hasText(roleId, "Vault AppRole authentication: RoleId (vault.app-role.role-id) must not be empty");
-
 		AppRoleAuthenticationOptionsBuilder builder = AppRoleAuthenticationOptions.builder()
-			.roleId(RoleId.provided(roleId))
-			.path(path);
-
+				.roleId(RoleId.provided(roleId))
+				.path(path);
 		if (StringUtils.hasText(secretId)) {
 			builder = builder.secretId(SecretId.provided(secretId));
 		}
-
 		return new AppRoleAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication awsEc2Authentication() {
-
 		String role = getProperty("vault.aws-ec2.role");
 		String roleId = getProperty("vault.aws-ec2.role-id");
 		String identityDocument = getProperty("vault.aws-ec2.identity-document");
 		String path = getProperty("vault.aws-ec2.aws-ec2-path",
 				AwsEc2AuthenticationOptions.DEFAULT_AWS_AUTHENTICATION_PATH);
-
 		Assert.isTrue(StringUtils.hasText(roleId) || StringUtils.hasText(role),
 				"Vault AWS-EC2 authentication: Role (vault.aws-ec2.role) must not be empty");
-
 		if (StringUtils.hasText(roleId) && StringUtils.hasText(role)) {
 			throw new IllegalStateException("AWS-EC2 Authentication: Only one of Role (vault.aws-ec2.role) or"
 					+ " RoleId (deprecated, vault.aws-ec2.roleId) must be provided");
 		}
-
 		if (StringUtils.hasText(roleId)) {
 			logger.warn(
 					"AWS-EC2 Authentication: vault.aws-ec2.roleId is deprecated. Please use vault.aws-ec2.role instead.");
 		}
-
 		AwsEc2AuthenticationOptionsBuilder builder = AwsEc2AuthenticationOptions.builder()
-			.role(StringUtils.hasText(role) ? role : roleId)
-			.path(path);
-
+				.role(StringUtils.hasText(role) ? role : roleId)
+				.path(path);
 		if (StringUtils.hasText(identityDocument)) {
 			builder.identityDocumentUri(URI.create(identityDocument));
 		}
-
 		return new AwsEc2Authentication(builder.build(), restOperations(), restOperations());
 	}
 
 	protected ClientAuthentication awsIamAuthentication() {
-
 		String role = getProperty("vault.aws-iam.role");
 		Assert.isTrue(StringUtils.hasText(role),
 				"Vault AWS-IAM authentication: Role (vault.aws-iam.role) must not be empty");
-
 		return AwsIam.doCreateIamAuthentication(role, restOperations());
 	}
 
 	protected ClientAuthentication azureMsiAuthentication() {
-
 		String role = getProperty("vault.azure-msi.role");
 		String path = getProperty("vault.azure-msi.azure-path",
 				AzureMsiAuthenticationOptions.DEFAULT_AZURE_AUTHENTICATION_PATH);
@@ -345,56 +322,43 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 		URI identityTokenServiceUri = getUri("vault.azure-msi.identity-token-service",
 				AzureMsiAuthenticationOptions.DEFAULT_IDENTITY_TOKEN_SERVICE_URI);
 		Assert.hasText(role, "Vault Azure MSI authentication: Role (vault.azure-msi.role) must not be empty");
-
 		AzureMsiAuthenticationOptionsBuilder builder = AzureMsiAuthenticationOptions.builder()
-			.role(role)
-			.path(path)
-			.instanceMetadataUri(metadataServiceUri)
-			.identityTokenServiceUri(identityTokenServiceUri);
-
+				.role(role)
+				.path(path)
+				.instanceMetadataUri(metadataServiceUri)
+				.identityTokenServiceUri(identityTokenServiceUri);
 		return new AzureMsiAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication cubbyholeAuthentication() {
-
 		String token = getProperty("vault.token");
 		Assert.hasText(token, "Vault Cubbyhole authentication: Initial token (vault.token) must not be empty");
-
 		CubbyholeAuthenticationOptionsBuilder builder = CubbyholeAuthenticationOptions.builder()
-			.wrapped()
-			.initialToken(VaultToken.of(token));
-
+				.wrapped()
+				.initialToken(VaultToken.of(token));
 		return new CubbyholeAuthentication(builder.build(), restOperations());
 	}
 
 	protected ClientAuthentication kubeAuthentication() {
-
 		String role = getProperty("vault.kubernetes.role");
 		String tokenFile = getProperty("vault.kubernetes.service-account-token-file",
 				KubernetesServiceAccountTokenFile.DEFAULT_KUBERNETES_SERVICE_ACCOUNT_TOKEN_FILE);
 		String path = getProperty("vault.kubernetes.kubernetes-path",
 				KubernetesAuthenticationOptions.DEFAULT_KUBERNETES_AUTHENTICATION_PATH);
-
 		Assert.hasText(role, "Vault Kubernetes authentication: role must not be empty");
-
 		KubernetesJwtSupplier jwtSupplier = new KubernetesServiceAccountTokenFile(tokenFile);
-
 		KubernetesAuthenticationOptionsBuilder builder = KubernetesAuthenticationOptions.builder()
-			.role(role)
-			.jwtSupplier(jwtSupplier)
-			.path(path);
-
+				.role(role)
+				.jwtSupplier(jwtSupplier)
+				.path(path);
 		return new KubernetesAuthentication(builder.build(), restOperations());
 	}
 
 	private List<String> getPropertyAsList(String key) {
-
 		String val = getEnvironment().getProperty(key);
-
 		if (val == null) {
 			return Collections.emptyList();
 		}
-
 		return Arrays.stream(val.split(",")).map(String::trim).collect(Collectors.toList());
 	}
 
@@ -411,10 +375,10 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	}
 
 	private @Nullable Resource getResource(String key) {
-
 		String value = getProperty(key);
 		return value != null && this.applicationContext != null ? this.applicationContext.getResource(value) : null;
 	}
+
 
 	enum AuthenticationMethod {
 
@@ -422,15 +386,14 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 
 	}
 
+
 	static class AwsIam {
 
 		static ClientAuthentication doCreateIamAuthentication(String role, RestOperations restOperations) {
-
 			AwsIamAuthenticationOptions.AwsIamAuthenticationOptionsBuilder builder = AwsIamAuthenticationOptions
-				.builder()
-				.role(role)
-				.credentialsProvider(DefaultCredentialsProvider.create());
-
+					.builder()
+					.role(role)
+					.credentialsProvider(DefaultCredentialsProvider.create());
 			return new AwsIamAuthentication(builder.build(), restOperations);
 		}
 

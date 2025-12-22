@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Clock;
@@ -34,11 +35,10 @@ import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * Support class to build Lifecycle-aware Session Manager implementations, defining common
- * properties such as the {@link TaskScheduler} and {@link RefreshTrigger}. Typically used
- * within the framework itself.
- * <p>
- * Not intended to be used directly.
+ * Support class to build Lifecycle-aware Session Manager implementations,
+ * defining common properties such as the {@link TaskScheduler} and
+ * {@link RefreshTrigger}. Typically used within the framework itself.
+ * <p>Not intended to be used directly.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -52,6 +52,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 	private static final RefreshTrigger DEFAULT_TRIGGER = new FixedTimeoutRefreshTrigger(REFRESH_PERIOD_BEFORE_EXPIRY,
 			TimeUnit.SECONDS);
+
 
 	/**
 	 * Logger available to subclasses.
@@ -71,17 +72,18 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	/**
 	 * Controls whether to perform a token self-lookup using
 	 * {@code auth/token/lookup-self} for {@link VaultToken}s obtained from a
-	 * {@link ClientAuthentication}. Self-lookup determines whether a token is renewable
-	 * and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup requests
-	 * decrement token usage count by one.
+	 * {@link ClientAuthentication}. Self-lookup determines whether a token is
+	 * renewable and its TTL. Self lookup is skipped for {@link LoginToken}.
+	 * Self-lookup requests decrement token usage count by one.
 	 */
 	private boolean tokenSelfLookupEnabled = true;
 
 	private LeaseStrategy leaseStrategy = LeaseStrategy.dropOnError();
 
+
 	/**
-	 * Create a {@link LifecycleAwareSessionManager} given {@link TaskScheduler}. Using
-	 * {@link #DEFAULT_TRIGGER} to trigger refresh.
+	 * Create a {@link LifecycleAwareSessionManager} given {@link TaskScheduler}.
+	 * Using {@link #DEFAULT_TRIGGER} to trigger refresh.
 	 * @param taskScheduler must not be {@literal null}.
 	 */
 	public LifecycleAwareSessionManagerSupport(TaskScheduler taskScheduler) {
@@ -95,23 +97,22 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	 * @param refreshTrigger must not be {@literal null}.
 	 */
 	public LifecycleAwareSessionManagerSupport(TaskScheduler taskScheduler, RefreshTrigger refreshTrigger) {
-
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		Assert.notNull(refreshTrigger, "RefreshTrigger must not be null");
-
 		this.taskScheduler = taskScheduler;
 		this.refreshTrigger = refreshTrigger;
 	}
 
+
 	/**
-	 * Returns whether token self-lookup is enabled to augment {@link VaultToken} obtained
-	 * from a {@link ClientAuthentication}. Self-lookup determines whether a token is
-	 * renewable and its TTL. Self lookup is skipped for {@link LoginToken}. Self-lookup
-	 * requests decrement token usage count by one. Skipped for {@link LoginToken}.
-	 * <p>
-	 * Self-lookup for tokens without a permission to access
-	 * {@code auth/token/lookup-self} will fail gracefully and continue without token
-	 * renewal.
+	 * Return whether token self-lookup is enabled to augment {@link VaultToken}
+	 * obtained from a {@link ClientAuthentication}. Self-lookup determines whether
+	 * a token is renewable and its TTL. Self lookup is skipped for
+	 * {@link LoginToken}. Self-lookup requests decrement token usage count by one.
+	 * Skipped for {@link LoginToken}.
+	 * <p>Self-lookup for tokens without a permission to access
+	 * {@code auth/token/lookup-self} will fail gracefully and continue without
+	 * token renewal.
 	 * @return {@literal true} to enable self-lookup, {@literal false} to disable
 	 * self-lookup. Enabled by default.
 	 */
@@ -121,8 +122,8 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 	/**
 	 * Enables/disables token self-lookup. Self-lookup augments {@link VaultToken}
-	 * obtained from a {@link ClientAuthentication}. Self-lookup determines whether a
-	 * token is renewable and its TTL.
+	 * obtained from a {@link ClientAuthentication}. Self-lookup determines whether
+	 * a token is renewable and its TTL.
 	 * @param tokenSelfLookupEnabled {@literal true} to enable self-lookup,
 	 * {@literal false} to disable self-lookup. Enabled by default.
 	 */
@@ -136,7 +137,6 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	 * @since 2.2
 	 */
 	public void setLeaseStrategy(LeaseStrategy leaseStrategy) {
-
 		Assert.notNull(leaseStrategy, "LeaseStrategy must not be null");
 		this.leaseStrategy = leaseStrategy;
 	}
@@ -168,20 +168,21 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 	 * {@literal false} if still valid.
 	 */
 	protected boolean isExpired(LoginToken loginToken) {
-
 		Duration validTtlThreshold = getRefreshTrigger().getValidTtlThreshold(loginToken);
 		return loginToken.getLeaseDuration().compareTo(validTtlThreshold) <= 0;
 	}
 
+
 	/**
-	 * This one-shot trigger creates only one execution time to trigger an execution only
-	 * once.
+	 * This one-shot trigger creates only one execution time to trigger an execution
+	 * only once.
 	 */
 	protected static class OneShotTrigger implements Trigger {
 
 		private final AtomicBoolean fired = new AtomicBoolean();
 
 		private final @Nullable Instant nextExecutionTime;
+
 
 		public OneShotTrigger(@Nullable Date nextExecutionTime) {
 			this(nextExecutionTime != null ? nextExecutionTime.toInstant() : null);
@@ -191,6 +192,7 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 			this.nextExecutionTime = nextExecutionTime;
 		}
 
+
 		@Override
 		public @Nullable Instant nextExecution(TriggerContext triggerContext) {
 			return this.fired.compareAndSet(false, true) ? this.nextExecutionTime : null;
@@ -198,9 +200,10 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 	}
 
+
 	/**
-	 * Common interface for trigger objects that determine the next execution time of a
-	 * refresh task.
+	 * Common interface for trigger objects that determine the next execution time
+	 * of a refresh task.
 	 */
 	public interface RefreshTrigger {
 
@@ -211,10 +214,11 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		 * the trigger won't fire anymore.
 		 * @since 3.1
 		 */
-		@Nullable Instant nextExecution(LoginToken loginToken);
+		@Nullable
+		Instant nextExecution(LoginToken loginToken);
 
 		/**
-		 * Returns the minimum TTL duration to consider a token valid after renewal.
+		 * Return the minimum TTL duration to consider a token valid after renewal.
 		 * Tokens with a shorter TTL are revoked and considered expired.
 		 * @param loginToken the login token after renewal.
 		 * @return minimum TTL {@link Duration} to consider a token valid.
@@ -224,9 +228,10 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 	}
 
+
 	/**
-	 * {@link RefreshTrigger} implementation using a fixed timeout to schedule renewal
-	 * before a {@link LoginToken} expires.
+	 * {@link RefreshTrigger} implementation using a fixed timeout to schedule
+	 * renewal before a {@link LoginToken} expires.
 	 *
 	 * @author Mark Paluch
 	 * @since 1.0.1
@@ -237,31 +242,31 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 
 		private static final Duration ONE_SECOND = Duration.ofSeconds(1);
 
+
 		private final Duration duration;
 
 		private final Duration expiryThreshold;
 
+
 		/**
-		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
-		 * {@code timeout} before the {@link LoginToken} expires
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times
+		 * of {@code timeout} before the {@link LoginToken} expires
 		 * @param refreshBeforeExpiry timeout value, non-negative long value that
 		 * schedules an execution of {@code lease duration - refreshBeforeExpiry}.
 		 * @param timeUnit must not be {@literal null}.
 		 */
 		public FixedTimeoutRefreshTrigger(long refreshBeforeExpiry, TimeUnit timeUnit) {
-
 			Assert.isTrue(refreshBeforeExpiry >= 0, "Duration must be greater or equal to zero");
 			Assert.notNull(timeUnit, "TimeUnit must not be null");
-
 			this.duration = Duration.ofMillis(timeUnit.toMillis(refreshBeforeExpiry));
 			this.expiryThreshold = Duration.ofMillis(timeUnit.toMillis(refreshBeforeExpiry) + 2000);
 		}
 
 		/**
-		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
-		 * {@code refreshBeforeExpiry} before the {@link LoginToken} expires. Valid TTL
-		 * threshold is set to two seconds longer to compensate for timing issues during
-		 * scheduling.
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times
+		 * of {@code refreshBeforeExpiry} before the {@link LoginToken} expires. Valid
+		 * TTL threshold is set to two seconds longer to compensate for timing issues
+		 * during scheduling.
 		 * @param refreshBeforeExpiry timeout value for the trigger that schedules an
 		 * execution of {@code lease duration - refreshBeforeExpiry}.
 		 * @since 2.0
@@ -271,8 +276,8 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		}
 
 		/**
-		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times of
-		 * {@code timeout} before the {@link LoginToken} expires.
+		 * Create a new {@link FixedTimeoutRefreshTrigger} to calculate execution times
+		 * of {@code timeout} before the {@link LoginToken} expires.
 		 * @param refreshBeforeExpiry timeout value for the trigger that schedules an
 		 * execution of {@code lease duration - refreshBeforeExpiry}.
 		 * @param expiryThreshold minimum TTL duration to consider a Token as valid.
@@ -282,22 +287,18 @@ public abstract class LifecycleAwareSessionManagerSupport extends Authentication
 		 * @since 2.0
 		 */
 		public FixedTimeoutRefreshTrigger(Duration refreshBeforeExpiry, Duration expiryThreshold) {
-
 			Assert.isTrue(refreshBeforeExpiry.toMillis() >= 0,
 					"Refresh before expiry timeout must be greater or equal to zero");
-
 			Assert.notNull(expiryThreshold, "Expiry threshold must not be null");
-
 			this.duration = refreshBeforeExpiry;
 			this.expiryThreshold = expiryThreshold;
 		}
 
+
 		@Override
 		public Instant nextExecution(LoginToken loginToken) {
-
 			long milliseconds = Math.max(ONE_SECOND.toMillis(),
 					loginToken.getLeaseDuration().toMillis() - this.duration.toMillis());
-
 			return CLOCK.instant().plusMillis(milliseconds);
 		}
 

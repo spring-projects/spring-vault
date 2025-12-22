@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -36,14 +37,16 @@ public abstract class AbstractVaultConverter implements VaultConverter, Initiali
 
 	protected EntityInstantiators instantiators = new EntityInstantiators();
 
+
 	/**
-	 * Creates a new {@link AbstractVaultConverter} using the given
+	 * Create a new {@code AbstractVaultConverter} using the given
 	 * {@link GenericConversionService}.
 	 * @param conversionService must not be {@literal null}.
 	 */
 	public AbstractVaultConverter(GenericConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	/**
 	 * Registers the given custom conversions with the converter.

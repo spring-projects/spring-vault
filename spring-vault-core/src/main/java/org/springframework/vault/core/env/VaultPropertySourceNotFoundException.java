@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.env;
 
 import org.springframework.vault.VaultException;
 
 /**
- * Exception throws when a {@code VaultPropertySource} could not load its properties.
+ * Exception throws when a {@code VaultPropertySource} could not load its
+ * properties.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -27,8 +29,8 @@ import org.springframework.vault.VaultException;
 public class VaultPropertySourceNotFoundException extends VaultException {
 
 	/**
-	 * Create a {@code VaultPropertySourceNotFoundException} with the specified detail
-	 * message.
+	 * Create a {@code VaultPropertySourceNotFoundException} with the specified
+	 * detail message.
 	 * @param msg the detail message.
 	 */
 	public VaultPropertySourceNotFoundException(String msg) {
@@ -36,8 +38,8 @@ public class VaultPropertySourceNotFoundException extends VaultException {
 	}
 
 	/**
-	 * Create a {@code VaultPropertySourceNotFoundException} with the specified detail
-	 * message and nested exception.
+	 * Create a {@code VaultPropertySourceNotFoundException} with the specified
+	 * detail message and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */

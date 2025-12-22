@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.aot;
 
 import java.io.IOException;
@@ -42,14 +43,15 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 
 	private final CachingMetadataReaderFactory factory = new CachingMetadataReaderFactory();
 
+
 	@Override
 	public void registerHints(RuntimeHints hints, @Nullable ClassLoader classLoader) {
 
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(classLoader);
 
 		ReflectionHints reflection = hints.reflection();
-		MemberCategory[] dataObjectCategories = new MemberCategory[] { MemberCategory.ACCESS_DECLARED_FIELDS,
-				MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS };
+		MemberCategory[] dataObjectCategories = new MemberCategory[] {MemberCategory.ACCESS_DECLARED_FIELDS,
+				MemberCategory.INVOKE_DECLARED_METHODS, MemberCategory.INVOKE_DECLARED_CONSTRUCTORS};
 		try {
 			Resource[] resources = resolver.getResources(ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
 					+ ClassUtils.convertClassNameToResourcePath("org.springframework.vault.support") + "/*.class");
@@ -65,30 +67,29 @@ class VaultRuntimeHints implements RuntimeHintsRegistrar {
 
 				reflection.registerType(TypeReference.of(className), dataObjectCategories);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 
 		Stream
-			.of("org.springframework.vault.core.VaultSysTemplate$GetMounts$VaultMountsResponse",
-					"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse",
-					"org.springframework.vault.core.ReactiveVaultTemplate$VaultListResponse",
-					"org.springframework.vault.core.VaultListResponse",
+				.of("org.springframework.vault.core.VaultSysTemplate$GetMounts$VaultMountsResponse",
+						"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse",
+						"org.springframework.vault.core.ReactiveVaultTemplate$VaultListResponse",
+						"org.springframework.vault.core.VaultListResponse",
 
-					"org.springframework.vault.core.VaultTransitTemplate$RawTransitKeyImpl",
-					"org.springframework.vault.core.VaultTransitTemplate$VaultTransitKeyImpl",
+						"org.springframework.vault.core.VaultTransitTemplate$RawTransitKeyImpl",
+						"org.springframework.vault.core.VaultTransitTemplate$VaultTransitKeyImpl",
 
-					"org.springframework.vault.core.VaultSysTemplate$GetMounts",
-					"org.springframework.vault.core.VaultSysTemplate$GetUnsealStatus",
-					"org.springframework.vault.core.VaultSysTemplate$Health",
-					"org.springframework.vault.core.VaultSysTemplate$Seal",
-					"org.springframework.vault.core.VaultSysTemplate$VaultHealthImpl",
-					"org.springframework.vault.core.VaultSysTemplate$VaultInitializationResponseImpl",
-					"org.springframework.vault.core.VaultSysTemplate$VaultUnsealStatusImpl",
+						"org.springframework.vault.core.VaultSysTemplate$GetMounts",
+						"org.springframework.vault.core.VaultSysTemplate$GetUnsealStatus",
+						"org.springframework.vault.core.VaultSysTemplate$Health",
+						"org.springframework.vault.core.VaultSysTemplate$Seal",
+						"org.springframework.vault.core.VaultSysTemplate$VaultHealthImpl",
+						"org.springframework.vault.core.VaultSysTemplate$VaultInitializationResponseImpl",
+						"org.springframework.vault.core.VaultSysTemplate$VaultUnsealStatusImpl",
 
-					"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse")
-			.forEach(cls -> reflection.registerType(TypeReference.of(cls), dataObjectCategories));
+						"org.springframework.vault.core.VaultVersionedKeyValueTemplate$VersionedResponse")
+				.forEach(cls -> reflection.registerType(TypeReference.of(cls), dataObjectCategories));
 
 		reflection.registerTypeIfPresent(classLoader, "com.google.api.client.json.jackson2.JacksonFactory",
 				MemberCategory.INVOKE_DECLARED_CONSTRUCTORS, MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS);

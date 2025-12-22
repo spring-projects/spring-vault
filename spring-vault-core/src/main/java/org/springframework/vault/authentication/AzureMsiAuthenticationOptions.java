@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.net.URI;
@@ -23,11 +24,10 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link AzureMsiAuthentication}.
- * <p>
- * Authentication options provide the path, role, an optional {@link AzureVmEnvironment},
- * and instance metadata/OAuth2 token URIs. {@link AzureMsiAuthenticationOptions} can be
- * constructed using {@link #builder()}. Instances of this class are immutable once
- * constructed.
+ * <p>Authentication options provide the path, role, an optional
+ * {@link AzureVmEnvironment}, and instance metadata/OAuth2 token URIs.
+ * {@link AzureMsiAuthenticationOptions} can be constructed using
+ * {@link #builder()}. Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -39,10 +39,11 @@ public class AzureMsiAuthenticationOptions {
 	public static final String DEFAULT_AZURE_AUTHENTICATION_PATH = "azure";
 
 	public static final URI DEFAULT_INSTANCE_METADATA_SERVICE_URI = URI
-		.create("http://169.254.169.254/metadata/instance?api-version=2017-12-01");
+			.create("http://169.254.169.254/metadata/instance?api-version=2017-12-01");
 
 	public static final URI DEFAULT_IDENTITY_TOKEN_SERVICE_URI = URI.create(
 			"http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.hashicorp.com&api-version=2018-02-01");
+
 
 	/**
 	 * Path of the azure authentication backend mount.
@@ -69,9 +70,9 @@ public class AzureMsiAuthenticationOptions {
 	 */
 	private final @Nullable AzureVmEnvironment vmEnvironment;
 
+
 	private AzureMsiAuthenticationOptions(String path, String role, URI instanceMetadataServiceUri,
 			URI identityTokenServiceUri, @Nullable AzureVmEnvironment vmEnvironment) {
-
 		this.path = path;
 		this.role = role;
 		this.instanceMetadataServiceUri = instanceMetadataServiceUri;
@@ -79,12 +80,14 @@ public class AzureMsiAuthenticationOptions {
 		this.vmEnvironment = vmEnvironment;
 	}
 
+
 	/**
 	 * @return a new {@link AzureMsiAuthenticationOptionsBuilder}.
 	 */
 	public static AzureMsiAuthenticationOptionsBuilder builder() {
 		return new AzureMsiAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the azure authentication backend mount.
@@ -101,9 +104,9 @@ public class AzureMsiAuthenticationOptions {
 	}
 
 	/**
-	 * @return the {@link AzureVmEnvironment}. If {@literal null}, the environment is
-	 * retrieved from the {@link #getInstanceMetadataServiceUri() VM instance metadata
-	 * service}.
+	 * @return the {@link AzureVmEnvironment}. If {@literal null}, the environment
+	 * is retrieved from the {@link #getInstanceMetadataServiceUri() VM instance
+	 * metadata service}.
 	 */
 	public @Nullable AzureVmEnvironment getVmEnvironment() {
 		return this.vmEnvironment;
@@ -123,6 +126,7 @@ public class AzureMsiAuthenticationOptions {
 		return this.identityTokenServiceUri;
 	}
 
+
 	/**
 	 * Builder for {@link AzureMsiAuthenticationOptions}.
 	 */
@@ -138,18 +142,18 @@ public class AzureMsiAuthenticationOptions {
 
 		private URI identityTokenServiceUri = DEFAULT_IDENTITY_TOKEN_SERVICE_URI;
 
+
 		AzureMsiAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path, defaults to {@literal azure}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link AzureMsiAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AzureMsiAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -157,12 +161,10 @@ public class AzureMsiAuthenticationOptions {
 		/**
 		 * Configure the name of the role against which the login is being attempted.
 		 * @param role must not be empty or {@literal null}.
-		 * @return {@code this} {@link AzureMsiAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AzureMsiAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be null or empty");
-
 			this.role = role;
 			return this;
 		}
@@ -170,15 +172,13 @@ public class AzureMsiAuthenticationOptions {
 		/**
 		 * Configure a VM environment (subscriptionId, resource group name, VM name).
 		 * Environment details are passed to Vault as login body. If left unconfigured,
-		 * {@link AzureMsiAuthentication} looks up the details from the instance metadata
-		 * service.
+		 * {@link AzureMsiAuthentication} looks up the details from the instance
+		 * metadata service.
 		 * @param vmEnvironment must not be {@literal null}.
-		 * @return {@code this} {@link AzureMsiAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AzureMsiAuthenticationOptionsBuilder vmEnvironment(AzureVmEnvironment vmEnvironment) {
-
 			Assert.notNull(vmEnvironment, "AzureVmEnvironment must not be null");
-
 			this.vmEnvironment = vmEnvironment;
 			return this;
 		}
@@ -186,13 +186,11 @@ public class AzureMsiAuthenticationOptions {
 		/**
 		 * Configure the instance metadata {@link URI}.
 		 * @param instanceMetadataServiceUri must not be {@literal null}.
-		 * @return {@code this} {@link AzureMsiAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_IDENTITY_TOKEN_SERVICE_URI
 		 */
 		public AzureMsiAuthenticationOptionsBuilder instanceMetadataUri(URI instanceMetadataServiceUri) {
-
 			Assert.notNull(instanceMetadataServiceUri, "Instance metadata service URI must not be null");
-
 			this.instanceMetadataServiceUri = instanceMetadataServiceUri;
 			return this;
 		}
@@ -200,13 +198,11 @@ public class AzureMsiAuthenticationOptions {
 		/**
 		 * Configure the managed identity service token {@link URI}.
 		 * @param identityTokenServiceUri must not be {@literal null}.
-		 * @return {@code this} {@link AzureMsiAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_IDENTITY_TOKEN_SERVICE_URI
 		 */
 		public AzureMsiAuthenticationOptionsBuilder identityTokenServiceUri(URI identityTokenServiceUri) {
-
 			Assert.notNull(identityTokenServiceUri, "Identity token service URI must not be null");
-
 			this.identityTokenServiceUri = identityTokenServiceUri;
 			return this;
 		}
@@ -216,9 +212,7 @@ public class AzureMsiAuthenticationOptions {
 		 * @return a new {@link AzureMsiAuthenticationOptions}.
 		 */
 		public AzureMsiAuthenticationOptions build() {
-
 			Assert.hasText(this.role, "Role must not be null or empty");
-
 			return new AzureMsiAuthenticationOptions(this.path, this.role, this.instanceMetadataServiceUri,
 					this.identityTokenServiceUri, this.vmEnvironment);
 		}

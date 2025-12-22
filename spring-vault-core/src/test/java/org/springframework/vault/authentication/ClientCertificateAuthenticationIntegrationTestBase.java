@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.File;
@@ -44,7 +45,8 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.vault.util.Settings.*;
 
 /**
- * Integration test base class for {@link ClientCertificateAuthentication} tests.
+ * Integration test base class for {@link ClientCertificateAuthentication}
+ * tests.
  *
  * @author Mark Paluch
  * @author Andy Lintner
@@ -52,16 +54,16 @@ import static org.springframework.vault.util.Settings.*;
 public abstract class ClientCertificateAuthenticationIntegrationTestBase extends IntegrationTestSupport {
 
 	static final Policy DEFAULT_POLICY = Policy.of(Policy.Rule.builder()
-		.path("/default/*")
-		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
-				Policy.BuiltinCapabilities.UPDATE)
-		.build());
+			.path("/default/*")
+			.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+					Policy.BuiltinCapabilities.UPDATE)
+			.build());
 
 	static final Policy ALTERNATE_POLICY = Policy.of(Policy.Rule.builder()
-		.path("/alternate/*")
-		.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
-				Policy.BuiltinCapabilities.UPDATE)
-		.build());
+			.path("/alternate/*")
+			.capabilities(Policy.BuiltinCapabilities.READ, Policy.BuiltinCapabilities.CREATE,
+					Policy.BuiltinCapabilities.UPDATE)
+			.build());
 
 	VaultOperations vaultOperations;
 
@@ -97,10 +99,10 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 
 	ListAssert<String> assertThatPolicies(VaultToken token) {
 		return assertThat(lookupSelf(token).getBody()).isNotNull()
-			.extracting("data", as(InstanceOfAssertFactories.map(String.class, Object.class)))
-			.isNotNull()
-			.extracting("policies", as(InstanceOfAssertFactories.list(String.class)))
-			.isNotNull();
+				.extracting("data", as(InstanceOfAssertFactories.map(String.class, Object.class)))
+				.isNotNull()
+				.extracting("policies", as(InstanceOfAssertFactories.list(String.class)))
+				.isNotNull();
 	}
 
 	ResponseEntity<Map<String, Object>> lookupSelf(VaultToken token) {
@@ -124,7 +126,7 @@ public abstract class ClientCertificateAuthenticationIntegrationTestBase extends
 		SslConfiguration original = createSslConfiguration();
 
 		return new SslConfiguration(KeyStoreConfiguration
-			.of(new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
+				.of(new FileSystemResource(new File(findWorkDir(), "client-cert.jks")), "changeit".toCharArray()),
 				keyConfiguration, original.getTrustStoreConfiguration());
 	}
 

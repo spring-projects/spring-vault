@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Arrays;
@@ -37,7 +38,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTemplate} using the {@code generic} backend.
+ * Integration tests for {@link VaultTemplate} using the {@code generic}
+ * backend.
  *
  * @author Mark Paluch
  */
@@ -72,7 +74,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 	void readShouldReturnNestedPropertiesKey() throws Exception {
 
 		Map map = this.OBJECT_MAPPER
-			.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
+				.readValue("{ \"hello.array[0]\":\"array-value0\", \"hello.array[1]\":\"array-value1\" }", Map.class);
 		this.vaultOperations.write("secret/mykey", map);
 
 		VaultResponse read = this.vaultOperations.read("secret/mykey");
@@ -91,7 +93,7 @@ class VaultTemplateGenericIntegrationTests extends IntegrationTestSupport {
 		VaultResponse read = this.vaultOperations.read("secret/mykey");
 		assertThat(read).isNotNull();
 		assertThat(read.getRequiredData()).containsEntry("array", Arrays
-			.asList(Collections.singletonMap("hello", "world"), Collections.singletonMap("hello1", "world1")));
+				.asList(Collections.singletonMap("hello", "world"), Collections.singletonMap("hello1", "world1")));
 	}
 
 	@Test

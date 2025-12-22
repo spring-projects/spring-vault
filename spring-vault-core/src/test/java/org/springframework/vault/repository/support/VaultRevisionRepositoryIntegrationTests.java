@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.support;
 
 import java.util.Collections;
@@ -70,8 +71,7 @@ class VaultRevisionRepositoryIntegrationTests extends IntegrationTestSupport {
 
 		try {
 			vaultSysOperations.unmount("versioned");
-		}
-		catch (VaultException e) {
+		} catch (VaultException e) {
 		}
 
 		vaultSysOperations.mount("versioned",
@@ -193,8 +193,8 @@ class VaultRevisionRepositoryIntegrationTests extends IntegrationTestSupport {
 	private VaultRevisionRepository<VersionedPerson> getRepository() {
 
 		VaultPersistentEntity<?> entity = keyValueTemplate.getConverter()
-			.getMappingContext()
-			.getRequiredPersistentEntity(VersionedPerson.class);
+				.getMappingContext()
+				.getRequiredPersistentEntity(VersionedPerson.class);
 
 		return new VaultRevisionRepository<>(new MappingVaultEntityInformation(entity), "versioned/versionedPerson",
 				keyValueTemplate);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.core;
 
 import org.springframework.data.mapping.MappingException;
@@ -20,10 +21,10 @@ import org.springframework.data.repository.core.support.PersistentEntityInformat
 import org.springframework.vault.repository.mapping.VaultPersistentEntity;
 
 /**
- * {@link VaultEntityInformation} implementation using a {@link VaultPersistentEntity}
- * instance to lookup the necessary information. Can be configured with a custom
- * collection to be returned which will trump the one returned by the
- * {@link VaultPersistentEntity} if given.
+ * {@link VaultEntityInformation} implementation using a
+ * {@link VaultPersistentEntity} instance to lookup the necessary information.
+ * Can be configured with a custom collection to be returned which will trump
+ * the one returned by the {@link VaultPersistentEntity} if given.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -42,7 +43,7 @@ public class MappingVaultEntityInformation<T, ID> extends PersistentEntityInform
 
 			throw new MappingException(
 					"Entity %s requires to have an explicit id field. Did you forget to provide one using @Id?"
-						.formatted(entity.getName()));
+							.formatted(entity.getName()));
 		}
 	}
 

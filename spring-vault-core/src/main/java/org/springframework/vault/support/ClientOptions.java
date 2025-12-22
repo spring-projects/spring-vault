@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.time.Duration;
@@ -37,6 +38,7 @@ public class ClientOptions {
 	 */
 	private final Duration readTimeout;
 
+
 	/**
 	 * Create new {@link ClientOptions} with default timeouts of {@literal 5}
 	 * {@link TimeUnit#SECONDS} connection timeout and {@literal 15}
@@ -53,13 +55,12 @@ public class ClientOptions {
 	 * @since 2.0
 	 */
 	public ClientOptions(Duration connectionTimeout, Duration readTimeout) {
-
 		Assert.notNull(connectionTimeout, "Connection timeout must not be null");
 		Assert.notNull(readTimeout, "Read timeout must not be null");
-
 		this.connectionTimeout = connectionTimeout;
 		this.readTimeout = readTimeout;
 	}
+
 
 	/**
 	 * @return the connection timeout in {@link TimeUnit#MILLISECONDS}.

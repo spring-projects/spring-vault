@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.mapping;
 
 import java.util.Collections;
@@ -23,8 +24,8 @@ import org.springframework.data.mapping.model.SimpleTypeHolder;
 import org.springframework.vault.repository.convert.SecretDocument;
 
 /**
- * Simple constant holder for a {@link SimpleTypeHolder} enriched with Vault-specific
- * simple (JSON) types.
+ * Simple constant holder for a {@link SimpleTypeHolder} enriched with
+ * Vault-specific simple (JSON) types.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -42,6 +43,7 @@ public abstract class VaultSimpleTypes {
 	private static final Set<Class<?>> VAULT_SIMPLE_TYPES;
 
 	public static final SimpleTypeHolder HOLDER = new SimpleTypeHolder(VAULT_SIMPLE_TYPES, true);
+
 
 	private VaultSimpleTypes() {
 	}

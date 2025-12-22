@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.env;
 
 import java.util.Collections;
@@ -37,8 +38,8 @@ import org.springframework.vault.util.VaultInitializer;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration test for secrets retrieved from a versioned Key-Value backend using
- * {@link KeyValueDelegate}.
+ * Integration test for secrets retrieved from a versioned Key-Value backend
+ * using {@link KeyValueDelegate}.
  *
  * @author Mark Paluch
  * @see SecretLeaseContainer
@@ -66,7 +67,7 @@ class VersionedKeyValueBackendIntegrationTests extends IntegrationTestSupport {
 		PrepareVault prepare = initializer.prepare();
 
 		VaultKeyValueOperations versionedKv = prepare.getVaultOperations()
-			.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
+				.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.versioned());
 
 		versionedKv.put("my/path", Collections.singletonMap("my-key", "my-value"));
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -53,19 +54,18 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import static org.springframework.web.reactive.function.client.ExchangeFilterFunction.*;
 
 /**
- * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate} will log
- * into Vault on initialization and use the token throughout the whole lifetime. This is
- * the main entry point to interact with Vault in an authenticated and unauthenticated
- * context.
- * <p>
- * {@link ReactiveVaultTemplate} allows execution of callback methods. Callbacks can
- * execute requests within a {@link #doWithSession(Function) session context} and the
- * {@link #doWithVault(Function) without a session}.
- * <p>
- * Paths used in this interface (and interfaces accessible from here) are considered
- * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
- * to access Vault cluster members in an authenticated context. To prevent unwanted full
- * URI access, make sure to sanitize paths before passing them to this interface.
+ * This class encapsulates main Vault interaction. {@link ReactiveVaultTemplate}
+ * will log into Vault on initialization and use the token throughout the whole
+ * lifetime. This is the main entry point to interact with Vault in an
+ * authenticated and unauthenticated context.
+ * <p>{@link ReactiveVaultTemplate} allows execution of callback methods.
+ * Callbacks can execute requests within a {@link #doWithSession(Function)
+ * session context} and the {@link #doWithVault(Function) without a session}.
+ * <p>Paths used in this interface (and interfaces accessible from here) are
+ * considered relative to the {@link VaultEndpoint}. Paths that are
+ * fully-qualified URI's can be used to access Vault cluster members in an
+ * authenticated context. To prevent unwanted full URI access, make sure to
+ * sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author Raoof Mohammed
@@ -82,12 +82,13 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 
 	private final VaultTokenSupplier vaultTokenSupplier;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpoint},
 	 * {@link ClientHttpConnector}. This constructor does not use a
-	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
-	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
-	 * authentication token header}.
+	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to
+	 * inherit Vault Agent's authentication without using the
+	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @since 2.2.1
@@ -109,108 +110,99 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	}
 
 	/**
-	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpointProvider} and
-	 * {@link ClientHttpConnector}. This constructor does not use a
-	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to inherit
-	 * Vault Agent's authentication without using the {@link VaultHttpHeaders#VAULT_TOKEN
-	 * authentication token header}.
+	 * Create a new {@link ReactiveVaultTemplate} with a
+	 * {@link VaultEndpointProvider} and {@link ClientHttpConnector}. This
+	 * constructor does not use a {@link VaultTokenSupplier}. It is intended for
+	 * usage with Vault Agent to inherit Vault Agent's authentication without using
+	 * the {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @since 2.2.1
 	 */
 	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
-
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
-
 		WebClient webClient = doCreateWebClient(endpointProvider, connector);
-
 		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
 		this.statelessClient = webClient;
 		this.sessionClient = webClient;
 	}
 
 	/**
-	 * Create a new {@link ReactiveVaultTemplate} with a {@link VaultEndpointProvider},
-	 * {@link ClientHttpConnector} and {@link VaultTokenSupplier}.
+	 * Create a new {@link ReactiveVaultTemplate} with a
+	 * {@link VaultEndpointProvider}, {@link ClientHttpConnector} and
+	 * {@link VaultTokenSupplier}.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @param vaultTokenSupplier must not be {@literal null}.
 	 */
 	public ReactiveVaultTemplate(VaultEndpointProvider endpointProvider, ClientHttpConnector connector,
 			VaultTokenSupplier vaultTokenSupplier) {
-
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
 		Assert.notNull(vaultTokenSupplier, "VaultTokenSupplier must not be null");
-
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = doCreateWebClient(endpointProvider, connector);
 		this.sessionClient = doCreateSessionWebClient(endpointProvider, connector);
 	}
 
 	/**
-	 * Create a new {@link ReactiveVaultTemplate} through a {@link WebClientBuilder}. This
-	 * constructor does not use a {@link VaultTokenSupplier}. It is intended for usage
-	 * with Vault Agent to inherit Vault Agent's authentication without using the
+	 * Create a new {@link ReactiveVaultTemplate} through a
+	 * {@link WebClientBuilder}. This constructor does not use a
+	 * {@link VaultTokenSupplier}. It is intended for usage with Vault Agent to
+	 * inherit Vault Agent's authentication without using the
 	 * {@link VaultHttpHeaders#VAULT_TOKEN authentication token header}.
 	 * @param webClientBuilder must not be {@literal null}.
 	 * @since 2.2.1
 	 */
 	public ReactiveVaultTemplate(WebClientBuilder webClientBuilder) {
-
 		Assert.notNull(webClientBuilder, "WebClientBuilder must not be null");
-
 		WebClient webClient = webClientBuilder.build();
-
 		this.vaultTokenSupplier = NoTokenSupplier.INSTANCE;
 		this.statelessClient = webClient;
 		this.sessionClient = webClient;
 	}
 
 	/**
-	 * Create a new {@link ReactiveVaultTemplate} through a {@link WebClientBuilder}, and
-	 * {@link VaultTokenSupplier}.
+	 * Create a new {@link ReactiveVaultTemplate} through a
+	 * {@link WebClientBuilder}, and {@link VaultTokenSupplier}.
 	 * @param webClientBuilder must not be {@literal null}.
 	 * @param vaultTokenSupplier must not be {@literal null}
 	 * @since 2.2
 	 */
 	public ReactiveVaultTemplate(WebClientBuilder webClientBuilder, VaultTokenSupplier vaultTokenSupplier) {
-
 		Assert.notNull(webClientBuilder, "WebClientBuilder must not be null");
 		Assert.notNull(vaultTokenSupplier, "VaultTokenSupplier must not be null");
-
 		this.vaultTokenSupplier = vaultTokenSupplier;
 		this.statelessClient = webClientBuilder.build();
 		this.sessionClient = webClientBuilder.build().mutate().filter(getSessionFilter()).build();
 	}
 
 	/**
-	 * Create a {@link WebClient} to be used by {@link ReactiveVaultTemplate} for Vault
-	 * communication given {@link VaultEndpointProvider} and {@link ClientHttpConnector}.
-	 * {@link VaultEndpointProvider} is used to contribute host and port details for
-	 * relative URLs typically used by the Template API. Subclasses may override this
-	 * method to customize the {@link WebClient}.
+	 * Create a {@link WebClient} to be used by {@link ReactiveVaultTemplate} for
+	 * Vault communication given {@link VaultEndpointProvider} and
+	 * {@link ClientHttpConnector}. {@link VaultEndpointProvider} is used to
+	 * contribute host and port details for relative URLs typically used by the
+	 * Template API. Subclasses may override this method to customize the
+	 * {@link WebClient}.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the {@link WebClient} used for Vault communication.
 	 * @since 2.1
 	 */
 	protected WebClient doCreateWebClient(VaultEndpointProvider endpointProvider, ClientHttpConnector connector) {
-
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
-
 		return WebClientBuilder.builder().httpConnector(connector).endpointProvider(endpointProvider).build();
 	}
 
 	/**
-	 * Create a session-bound {@link WebClient} to be used by {@link VaultTemplate} for
-	 * Vault communication given {@link VaultEndpointProvider} and
+	 * Create a session-bound {@link WebClient} to be used by {@link VaultTemplate}
+	 * for Vault communication given {@link VaultEndpointProvider} and
 	 * {@link ClientHttpConnector} for calls that require an authenticated context.
 	 * {@link VaultEndpointProvider} is used to contribute host and port details for
-	 * relative URLs typically used by the Template API. Subclasses may override this
-	 * method to customize the {@link WebClient}.
+	 * relative URLs typically used by the Template API. Subclasses may override
+	 * this method to customize the {@link WebClient}.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param connector must not be {@literal null}.
 	 * @return the {@link WebClient} used for Vault communication.
@@ -218,28 +210,24 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	 */
 	protected WebClient doCreateSessionWebClient(VaultEndpointProvider endpointProvider,
 			ClientHttpConnector connector) {
-
 		Assert.notNull(endpointProvider, "VaultEndpointProvider must not be null");
 		Assert.notNull(connector, "ClientHttpConnector must not be null");
-
 		ExchangeFilterFunction filter = getSessionFilter();
-
 		return WebClientBuilder.builder()
-			.httpConnector(connector)
-			.endpointProvider(endpointProvider)
-			.filter(filter)
-			.build();
+				.httpConnector(connector)
+				.endpointProvider(endpointProvider)
+				.filter(filter)
+				.build();
 	}
 
 	private ExchangeFilterFunction getSessionFilter() {
-
 		return ofRequestProcessor(request -> this.vaultTokenSupplier.getVaultToken().map(token -> {
-
 			return ClientRequest.from(request).headers(headers -> {
 				headers.set(VaultHttpHeaders.VAULT_TOKEN, token.getToken());
 			}).build();
 		}));
 	}
+
 
 	@Override
 	public ReactiveVaultSysOperations opsForSys() {
@@ -259,8 +247,8 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	public ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
 		return switch (apiVersion) {
-			case KV_1 -> new ReactiveVaultKeyValue1Template(this, path);
-			case KV_2 -> new ReactiveVaultKeyValue2Template(this, path);
+		case KV_1 -> new ReactiveVaultKeyValue1Template(this, path);
+		case KV_2 -> new ReactiveVaultKeyValue2Template(this, path);
 		};
 	}
 
@@ -269,78 +257,63 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 		return new ReactiveVaultVersionedKeyValueTemplate(this, path);
 	}
 
+
 	@Override
 	public Mono<VaultResponse> read(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doRead(path, VaultResponse.class).onErrorResume(WebClientResponseException.NotFound.class,
 				e -> Mono.empty());
 	}
 
 	@Override
 	public <T> Mono<VaultResponseSupport<T>> read(String path, Class<T> responseType) {
-
 		return doWithSession(webClient -> {
-
 			ParameterizedTypeReference<VaultResponseSupport<T>> ref = VaultResponses.getTypeReference(responseType);
-
 			return webClient.get()
-				.uri(path)
-				.exchangeToMono(mapResponse(ref, path, HttpMethod.GET))
-				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
+					.uri(path)
+					.exchangeToMono(mapResponse(ref, path, HttpMethod.GET))
+					.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty());
 		});
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Flux<String> list(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doRead("%s?list=true".formatted(path.endsWith("/") ? path : (path + "/")), VaultListResponse.class)
-			.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
-			.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
-			.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
+				.onErrorResume(WebClientResponseException.NotFound.class, e -> Mono.empty())
+				.filter(response -> response.getData() != null && response.getData().containsKey("keys"))
+				.flatMapIterable(response -> (List<String>) response.getRequiredData().get("keys"));
 	}
 
 	@Override
 	public Mono<VaultResponse> write(String path, @Nullable Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doWithSession(webClient -> {
 
 			RequestBodySpec uri = webClient.post().uri(path);
-
 			if (body != null) {
 				return uri.bodyValue(body).exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
 			}
-
 			return uri.exchangeToMono(mapResponse(VaultResponse.class, path, HttpMethod.POST));
 		});
 	}
 
 	@Override
 	public Mono<Void> delete(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doWithSession(webClient -> webClient.delete()
-			.uri(path)
-			.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
+				.uri(path)
+				.exchangeToMono(mapResponse(String.class, path, HttpMethod.DELETE))).then();
 	}
 
 	@Override
 	public <V, T extends Publisher<V>> T doWithVault(Function<WebClient, ? extends T> clientCallback)
 			throws VaultException, WebClientException {
-
 		Assert.notNull(clientCallback, "Client callback must not be null");
-
 		try {
 			return clientCallback.apply(this.statelessClient);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
 		}
 	}
@@ -348,22 +321,18 @@ public class ReactiveVaultTemplate implements ReactiveVaultOperations {
 	@Override
 	public <V, T extends Publisher<V>> T doWithSession(Function<WebClient, ? extends T> sessionCallback)
 			throws VaultException, WebClientException {
-
 		Assert.notNull(sessionCallback, "Session callback must not be null");
-
 		try {
 			return sessionCallback.apply(this.sessionClient);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e);
 		}
 	}
 
 	private <T> Mono<T> doRead(String path, Class<T> responseType) {
-
 		return doWithSession(client -> client.get() //
-			.uri(path)
-			.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
+				.uri(path)
+				.exchangeToMono(mapResponse(responseType, path, HttpMethod.GET)));
 	}
 
 	static <T> Function<ClientResponse, Mono<T>> mapResponse(Class<T> bodyType, String path, HttpMethod method) {

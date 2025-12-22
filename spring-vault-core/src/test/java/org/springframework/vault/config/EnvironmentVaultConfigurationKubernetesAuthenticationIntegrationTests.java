@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.nio.file.Files;
@@ -34,15 +35,16 @@ import org.springframework.vault.util.VaultExtension;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with Kube authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with Kube
+ * authentication.
  *
  * @author Michal Budzyn
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
 @ExtendWith(VaultExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.authentication=kubernetes",
-		"vault.kubernetes.role=my-role", "vault.kubernetes.service-account-token-file=target/token" })
+@TestPropertySource(properties = {"vault.uri=https://localhost:8123", "vault.authentication=kubernetes",
+		"vault.kubernetes.role=my-role", "vault.kubernetes.service-account-token-file=target/token"})
 class EnvironmentVaultConfigurationKubernetesAuthenticationIntegrationTests {
 
 	@Configuration

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.HashMap;
@@ -29,8 +30,8 @@ import org.springframework.vault.support.VaultResponse;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultKeyValue2Template} using the non-versioned Key/Value
- * (k/v version 1) backend.
+ * Integration tests for {@link VaultKeyValue2Template} using the non-versioned
+ * Key/Value (k/v version 1) backend.
  *
  * @author Mark Paluch
  */

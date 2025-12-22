@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.support;
 
 import java.util.ArrayList;
@@ -42,8 +43,8 @@ import org.springframework.vault.support.VaultMetadataResponse;
 import org.springframework.vault.support.Versioned;
 
 /**
- * Vault-based {@link RevisionRepository} providing revision metadata for versioned
- * secrets.
+ * Vault-based {@link RevisionRepository} providing revision metadata for
+ * versioned secrets.
  *
  * @author Mark Paluch
  * @since 2.4
@@ -59,6 +60,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 	private final VaultKeyValueMetadataOperations metadataOperations;
 
 	private final VaultConverter converter;
+
 
 	public VaultRevisionRepository(EntityInformation<T, String> metadata, String keyspace,
 			VaultKeyValueTemplate keyValueTemplate) {
@@ -86,6 +88,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 		this.operations = vaultOperations.opsForVersionedKeyValue(mountInfo.getPath());
 		this.metadataOperations = this.operations.opsForKeyValueMetadata();
 	}
+
 
 	@Override
 	public Optional<Revision<Integer, T>> findLastChangeRevision(String id) {

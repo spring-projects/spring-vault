@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
@@ -30,8 +31,8 @@ class PcfAuthenticationOptionsUnitTests {
 	void emptyEnvVariableShouldFailWithMeaningfulMessage() {
 
 		assertThatThrownBy(() -> PcfAuthenticationOptions.builder().role("my-role").build())
-			.isInstanceOf(IllegalStateException.class) //
-			.hasMessageContaining("Environment variable CF_INSTANCE_CERT not set");
+				.isInstanceOf(IllegalStateException.class) //
+				.hasMessageContaining("Environment variable CF_INSTANCE_CERT not set");
 	}
 
 }

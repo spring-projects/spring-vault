@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -58,7 +59,6 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeEach
 	void before() {
-
 		this.wrappingOperations = this.vaultOperations.opsForWrapping();
 	}
 
@@ -72,7 +72,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(metadata.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(metadata.getToken()).isNotNull();
 		assertThat(metadata.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-			.isAfter(Instant.now().minusSeconds(60));
+				.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
@@ -87,7 +87,7 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(lookup.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(lookup.getToken()).isNotNull();
 		assertThat(lookup.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-			.isAfter(Instant.now().minusSeconds(60));
+				.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
@@ -139,13 +139,13 @@ class VaultWrappingTemplateIntegrationTests extends IntegrationTestSupport {
 		assertThat(rewrap.getTtl()).isEqualTo(Duration.ofSeconds(100));
 		assertThat(rewrap.getToken()).isNotEqualTo(metadata.getToken());
 		assertThat(rewrap.getCreationTime()).isBefore(Instant.now().plusSeconds(60))
-			.isAfter(Instant.now().minusSeconds(60));
+				.isAfter(Instant.now().minusSeconds(60));
 	}
 
 	@Test
 	void shouldRewrapAbsentSecret() {
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
+				.isThrownBy(() -> this.wrappingOperations.rewrap(VaultToken.of("foo")));
 	}
 
 	record Secret(String key) {

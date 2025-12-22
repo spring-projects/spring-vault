@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.util.HashMap;
@@ -43,8 +44,8 @@ import static org.assertj.core.api.Assertions.*;
  * @author Ryan Gow
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.token=my-token",
-		"vault.ssl.key-store-password=key store password", "vault.ssl.trust-store-password=trust store password" })
+@TestPropertySource(properties = {"vault.uri=https://localhost:8123", "vault.token=my-token",
+		"vault.ssl.key-store-password=key store password", "vault.ssl.trust-store-password=trust store password"})
 class EnvironmentVaultConfigurationUnitTests {
 
 	@Configuration
@@ -90,11 +91,11 @@ class EnvironmentVaultConfigurationUnitTests {
 
 		assertThat(sslConfiguration.getKeyStore()).isInstanceOf(ClassPathResource.class);
 		assertThat(new String(sslConfiguration.getKeyStoreConfiguration().getStorePassword()))
-			.isEqualTo("key store password");
+				.isEqualTo("key store password");
 
 		assertThat(sslConfiguration.getTrustStore()).isInstanceOf(ClassPathResource.class);
 		assertThat(new String(sslConfiguration.getTrustStoreConfiguration().getStorePassword()))
-			.isEqualTo("trust store password");
+				.isEqualTo("trust store password");
 
 		assertThat(sslConfiguration.getEnabledProtocols()).containsExactly("TLSv1.2", "TLSv1.1");
 		assertThat(sslConfiguration.getEnabledCipherSuites()).containsExactly("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",

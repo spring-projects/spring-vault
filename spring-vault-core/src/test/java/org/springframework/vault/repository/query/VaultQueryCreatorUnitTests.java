@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.query;
 
 import java.util.Arrays;
@@ -186,7 +187,7 @@ class VaultQueryCreatorUnitTests {
 	@Test
 	void failsForNonIdProperties() {
 		assertThatExceptionOfType(InvalidDataAccessApiUsageException.class)
-			.isThrownBy(() -> createQuery("findByName", ""));
+				.isThrownBy(() -> createQuery("findByName", ""));
 	}
 
 	VaultQuery createQuery(String methodName, String value) {
@@ -196,7 +197,7 @@ class VaultQueryCreatorUnitTests {
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }), this.mappingContext);
+				new ParametersParameterAccessor(defaultParameters, new Object[] {value}), this.mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}
@@ -208,7 +209,7 @@ class VaultQueryCreatorUnitTests {
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value }), this.mappingContext);
+				new ParametersParameterAccessor(defaultParameters, new Object[] {value}), this.mappingContext);
 
 		return queryCreator.createQuery().getCriteria();
 	}
@@ -216,11 +217,11 @@ class VaultQueryCreatorUnitTests {
 	VaultQuery createQuery(String methodName, String value, String anotherValue) {
 
 		DefaultParameters defaultParameters = new DefaultParameters(ParametersSource
-			.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class, String.class)));
+				.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class, String.class)));
 
 		PartTree partTree = new PartTree(methodName, Credentials.class);
 		VaultQueryCreator queryCreator = new VaultQueryCreator(partTree,
-				new ParametersParameterAccessor(defaultParameters, new Object[] { value, anotherValue }),
+				new ParametersParameterAccessor(defaultParameters, new Object[] {value, anotherValue}),
 				this.mappingContext);
 
 		return queryCreator.createQuery().getCriteria();

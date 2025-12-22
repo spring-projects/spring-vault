@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Objects;
@@ -30,9 +31,11 @@ public class Hmac {
 
 	private final String hmac;
 
+
 	private Hmac(String hmac) {
 		this.hmac = hmac;
 	}
+
 
 	/**
 	 * Factory method to create a {@link Hmac} from the given {@code hmac}.
@@ -40,11 +43,10 @@ public class Hmac {
 	 * @return the {@link Hmac} encapsulating {@code hmac}.
 	 */
 	public static Hmac of(String hmac) {
-
 		Assert.hasText(hmac, "Hmac digest must not be null or empty");
-
 		return new Hmac(hmac);
 	}
+
 
 	public String getHmac() {
 		return this.hmac;

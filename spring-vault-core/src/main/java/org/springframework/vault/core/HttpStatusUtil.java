@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 /**
+ * Utility class for HTTP status codes.
  * @author Mark Paluch
  */
 class HttpStatusUtil {

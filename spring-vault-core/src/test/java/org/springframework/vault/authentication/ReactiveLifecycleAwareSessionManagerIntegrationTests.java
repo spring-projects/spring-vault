@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.File;
@@ -94,9 +95,9 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 				() -> Mono.just(loginToken), this.taskScheduler, prepare().getWebClient());
 
 		sessionManager.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectNext(loginToken) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
 	}
 
 	// Expect no exception to be thrown.
@@ -106,10 +107,10 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 		VaultTokenOperations tokenOperations = prepare().getVaultOperations().opsForToken();
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder() //
-			.renewable()
-			.ttl(1, TimeUnit.HOURS) //
-			.explicitMaxTtl(10, TimeUnit.HOURS) //
-			.build();
+				.renewable()
+				.ttl(1, TimeUnit.HOURS) //
+				.explicitMaxTtl(10, TimeUnit.HOURS) //
+				.build();
 
 		VaultToken token = tokenOperations.create(tokenRequest).getToken();
 
@@ -129,16 +130,17 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 
 				return super.getVaultToken();
 			}
+
 		};
 
 		sessionManager.getSessionToken() //
-			.as(StepVerifier::create) //
-			.expectNext(loginToken) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
 		sessionManager.renewToken() //
-			.as(StepVerifier::create) //
-			.expectNext(loginToken) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
 	}
 
 	@Test
@@ -151,9 +153,9 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 				prepare().getWebClient());
 
 		sessionManager.getSessionToken() //
-			.as(StepVerifier::create) //
-			.expectNext(loginToken) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
 		sessionManager.destroy();
 
 		prepare().getVaultOperations().doWithSession(restOperations -> {
@@ -161,8 +163,7 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
 				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}
@@ -181,9 +182,9 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 				prepare().getWebClient());
 
 		sessionManager.getSessionToken() //
-			.as(StepVerifier::create) //
-			.expectNext(loginToken) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNext(loginToken) //
+				.verifyComplete();
 		sessionManager.revokeNow();
 
 		prepare().getVaultOperations().doWithSession(restOperations -> {
@@ -191,8 +192,7 @@ class ReactiveLifecycleAwareSessionManagerIntegrationTests extends IntegrationTe
 			try {
 				restOperations.getForEntity("auth/token/lookup/{token}", Map.class, loginToken.toCharArray());
 				fail("Missing HttpStatusCodeException");
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				// Compatibility across Vault versions.
 				assertThat(e.getStatusCode()).isIn(HttpStatus.BAD_REQUEST, HttpStatus.NOT_FOUND, HttpStatus.FORBIDDEN);
 			}

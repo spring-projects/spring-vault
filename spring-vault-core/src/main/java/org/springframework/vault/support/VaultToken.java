@@ -32,11 +32,10 @@ public class VaultToken {
 
 	private final char[] token;
 
-	protected VaultToken(char[] token) {
 
+	protected VaultToken(char[] token) {
 		Assert.notNull(token, "Token must not be null");
 		Assert.isTrue(token.length > 0, "Token must not be empty");
-
 		this.token = Arrays.copyOf(token, token.length);
 	}
 
@@ -47,9 +46,7 @@ public class VaultToken {
 	 */
 	@Contract("null -> fail")
 	public static VaultToken of(@Nullable String token) {
-
 		Assert.hasText(token, "Token must not be empty");
-
 		return of(token.toCharArray());
 	}
 
@@ -62,6 +59,7 @@ public class VaultToken {
 	public static VaultToken of(char[] token) {
 		return new VaultToken(token);
 	}
+
 
 	/**
 	 * @return the token value.

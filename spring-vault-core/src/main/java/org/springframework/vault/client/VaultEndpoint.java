@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.io.Serializable;
@@ -27,15 +28,16 @@ import org.springframework.util.StringUtils;
 
 /**
  * Value object that defines Vault connection coordinates.
- * <p>
- * A {@link VaultEndpoint} defines the hostname, TCP port, the protocol scheme (HTTP or
- * HTTPS), and the context path prefix. The path defaults to {@link #API_VERSION}.
+ * <p>A {@link VaultEndpoint} defines the hostname, TCP port, the protocol
+ * scheme (HTTP or HTTPS), and the context path prefix. The path defaults to
+ * {@link #API_VERSION}.
  *
  * @author Mark Paluch
  */
 public class VaultEndpoint implements Serializable {
 
 	public static final String API_VERSION = "v1";
+
 
 	/**
 	 * Vault server host.
@@ -57,22 +59,19 @@ public class VaultEndpoint implements Serializable {
 	 */
 	private String path = API_VERSION;
 
+
 	/**
-	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port} using
-	 * {@code https}.
+	 * Create a secure {@link VaultEndpoint} given a {@code host} and {@code port}
+	 * using {@code https}.
 	 * @param host must not be empty or {@literal null}.
 	 * @param port must be a valid port in the range of 1-65535
 	 * @return a new {@link VaultEndpoint}.
 	 */
 	public static VaultEndpoint create(String host, int port) {
-
 		Assert.hasText(host, "Host must not be empty");
-
 		VaultEndpoint vaultEndpoint = new VaultEndpoint();
-
 		vaultEndpoint.setHost(host);
 		vaultEndpoint.setPort(port);
-
 		return vaultEndpoint;
 	}
 
@@ -95,36 +94,31 @@ public class VaultEndpoint implements Serializable {
 	 * @return a new {@link VaultEndpoint}.
 	 */
 	public static VaultEndpoint from(URI uri) {
-
 		Assert.notNull(uri, "URI must not be null");
 		Assert.hasText(uri.getScheme(), "Scheme must not be empty");
 		Assert.hasText(uri.getHost(), "Host must not be empty");
 
 		VaultEndpoint vaultEndpoint = new VaultEndpoint();
-
 		vaultEndpoint.setHost(uri.getHost());
 		try {
 			vaultEndpoint.setPort(uri.getPort() == -1 ? uri.toURL().getDefaultPort() : uri.getPort());
-		}
-		catch (MalformedURLException e) {
+		} catch (MalformedURLException e) {
 			throw new IllegalArgumentException("Can't retrieve default port from %s".formatted(uri), e);
 		}
 		vaultEndpoint.setScheme(uri.getScheme());
 
 		String path = getPath(uri);
-
 		if (StringUtils.hasText(path)) {
 			vaultEndpoint.setPath(path);
 		}
-
 		return vaultEndpoint;
 	}
 
 	private @Nullable static String getPath(URI uri) {
-
 		String path = uri.getPath();
-		return path != null && path.startsWith("/") ? path.substring(1) : path;
+		return path != null ? stripSlashes(path) : null;
 	}
+
 
 	/**
 	 * @return the hostname.
@@ -169,9 +163,7 @@ public class VaultEndpoint implements Serializable {
 	 * @param scheme must be {@literal http} or {@literal https}.
 	 */
 	public void setScheme(String scheme) {
-
 		Assert.isTrue("http".equals(scheme) || "https".equals(scheme), "Scheme must be http or https");
-
 		this.scheme = scheme;
 	}
 
@@ -184,15 +176,13 @@ public class VaultEndpoint implements Serializable {
 	}
 
 	/**
-	 * @param path context path prefix. Must not be {@literal null} or empty and must not
-	 * start with a leading slash.
+	 * @param path context path prefix. Must not be {@literal null} or empty and
+	 * must not start with a leading slash.
 	 * @since 2.1
 	 */
 	public void setPath(String path) {
-
 		Assert.hasText(path, "Path must not be null or empty");
 		Assert.isTrue(!path.startsWith("/"), () -> "Path %s must not start with a leading slash".formatted(path));
-
 		this.path = path;
 	}
 
@@ -211,10 +201,14 @@ public class VaultEndpoint implements Serializable {
 	 * @return constructed URI String.
 	 */
 	public String createUriString(String path) {
-
-		Assert.hasText(path, "Path must not be empty");
-
-		return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), getPath(), path);
+		Assert.notNull(path, "Path must not be null");
+		String apiPath = stripSlashes(getPath());
+		if (StringUtils.hasText(apiPath)) {
+			return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), apiPath,
+					stripLeadingSlashes(path));
+		}
+		return "%s://%s:%s/%s".formatted(getScheme(), getHost(), getPort(),
+				stripLeadingSlashes(path));
 	}
 
 	@Override
@@ -235,6 +229,26 @@ public class VaultEndpoint implements Serializable {
 	@Override
 	public String toString() {
 		return "%s://%s:%d".formatted(this.scheme, this.host, this.port);
+	}
+
+	/**
+	 * Remove slashes from the beginning and the end of the given {@code path}.
+	 */
+	static String stripSlashes(String path) {
+		if (path.startsWith("/")) {
+			return stripSlashes(path.substring(1));
+		}
+		if (path.endsWith("/")) {
+			return stripSlashes(path.substring(0, path.length() - 1));
+		}
+		return path;
+	}
+
+	/**
+	 * Remove slashes from the beginning and the end of the given {@code path}.
+	 */
+	static String stripLeadingSlashes(String path) {
+		return path.startsWith("/") ? stripLeadingSlashes(path.substring(1)) : path;
 	}
 
 }

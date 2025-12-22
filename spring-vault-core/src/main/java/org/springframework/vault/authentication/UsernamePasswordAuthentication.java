@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.LinkedHashMap;
@@ -33,23 +34,28 @@ import org.springframework.web.client.RestOperations;
 import static org.springframework.vault.authentication.AuthenticationUtil.*;
 
 /**
- * Username and password implementation of {@link ClientAuthentication}. Can be used for
- * {@code userpass}, {@code ldap}, {@code okta}, and {@code radius} authentication
- * backends.
+ * Username and password implementation of {@link ClientAuthentication}. Can be
+ * used for {@code userpass}, {@code ldap}, {@code okta}, and {@code radius}
+ * authentication backends.
  *
  * @author Mikhael Sokolov
  * @author Mark Paluch
  * @see UsernamePasswordAuthenticationOptions
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/userpass">Username and password</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/ldap">LDAP authentication</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/okta">Okta authentication</a>
- * @see <a href="https://www.vaultproject.io/docs/auth/radius">RADIUS authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/userpass">Username and
+ * password</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/ldap">LDAP
+ * authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/okta">Okta
+ * authentication</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/radius">RADIUS
+ * authentication</a>
  * @since 2.4
  */
 public class UsernamePasswordAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private static final Log logger = LogFactory.getLog(UsernamePasswordAuthentication.class);
+
 
 	private final UsernamePasswordAuthenticationOptions options;
 
@@ -63,10 +69,8 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options,
 			RestOperations restOperations) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(restOperations);
 	}
@@ -79,28 +83,23 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	 * @since 4.0
 	 */
 	public UsernamePasswordAuthentication(UsernamePasswordAuthenticationOptions options, RestClient client) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Assert.notNull(client, "RestClient must not be null");
-
 		this.options = options;
 		this.adapter = ClientAdapter.from(client);
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for username/password authentication given
-	 * {@link UsernamePasswordAuthenticationOptions}.
+	 * Create {@link AuthenticationSteps} for username/password authentication
+	 * given {@link UsernamePasswordAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for username/password authentication.
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(UsernamePasswordAuthenticationOptions options) {
-
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
-
 		Map<String, Object> body = createLoginBody(options);
-
 		return AuthenticationSteps.fromSupplier(() -> body)
-			.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
+				.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
 	}
 
 	@Override
@@ -115,27 +114,21 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 
 	@SuppressWarnings("NullAway")
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
-
 		try {
 			VaultResponse response = adapter.postForObject(
 					"%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()), createLoginBody(options),
 					VaultResponse.class);
-
 			logger.debug("Login successful using username and password credentials");
-
 			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw new VaultException("Cannot login using username and password: %s"
-				.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
+					.formatted(VaultResponses.getError(e.getResponseBodyAsString())), e);
 		}
 	}
 
 	private static Map<String, Object> createLoginBody(UsernamePasswordAuthenticationOptions options) {
-
 		Map<String, Object> body = new LinkedHashMap<>();
 		body.put("password", options.getPassword());
-
 		CharSequence totp = options.getTotp();
 		if (totp != null) {
 			body.put("totp", totp);

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.support;
 
 import java.io.Serializable;
@@ -37,13 +38,14 @@ public class VaultRepositoryFactoryBean<T extends Repository<S, ID>, S, ID exten
 		extends KeyValueRepositoryFactoryBean<T, S, ID> {
 
 	/**
-	 * Creates a new {@link VaultRepositoryFactoryBean} for the given repository
+	 * Create a new {@code VaultRepositoryFactoryBean} for the given repository
 	 * interface.
 	 * @param repositoryInterface must not be {@literal null}.
 	 */
 	public VaultRepositoryFactoryBean(Class<? extends T> repositoryInterface) {
 		super(repositoryInterface);
 	}
+
 
 	@Override
 	protected VaultRepositoryFactory createRepositoryFactory(KeyValueOperations operations,

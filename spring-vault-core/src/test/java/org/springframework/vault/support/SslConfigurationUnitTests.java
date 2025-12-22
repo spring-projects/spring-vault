@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.junit.jupiter.api.Test;
@@ -71,9 +72,9 @@ class SslConfigurationUnitTests {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
 		SslConfiguration tsConfig = SslConfiguration.unconfigured()
-			.withTrustStore(keystore)
-			.withEnabledCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-					"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
+				.withTrustStore(keystore)
+				.withEnabledCipherSuites("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+						"TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
@@ -87,8 +88,8 @@ class SslConfigurationUnitTests {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"));
 		SslConfiguration tsConfig = SslConfiguration.unconfigured()
-			.withTrustStore(keystore)
-			.withEnabledProtocols("TLSv1.2", "TLSv1.1");
+				.withTrustStore(keystore)
+				.withEnabledProtocols("TLSv1.2", "TLSv1.1");
 
 		assertThat(tsConfig.getTrustStoreConfiguration()).isSameAs(keystore);
 		assertThat(tsConfig.getKeyStoreConfiguration().isPresent()).isFalse();
@@ -101,7 +102,7 @@ class SslConfigurationUnitTests {
 	void shouldCreatePemConfiguration() {
 
 		KeyStoreConfiguration keystore = KeyStoreConfiguration.of(new ClassPathResource("certificate.json"))
-			.withStoreType("PEM");
+				.withStoreType("PEM");
 		SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
 
 		assertThat(configuration.getTrustStoreConfiguration().getStoreType()).isEqualTo("PEM");

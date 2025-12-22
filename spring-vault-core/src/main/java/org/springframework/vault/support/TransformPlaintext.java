@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.nio.charset.Charset;
@@ -22,8 +23,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Value object representing plain text with an optional {@link VaultTransformContext}.
- * Plaintext is represented binary safe as {@code byte[]}.
+ * Value object representing plain text with an optional
+ * {@link VaultTransformContext}. Plaintext is represented binary safe as
+ * {@code byte[]}.
  *
  * @author Lauren Voswinkel
  * @since 2.3
@@ -32,15 +34,17 @@ public class TransformPlaintext {
 
 	private static final TransformPlaintext EMPTY = new TransformPlaintext(new byte[0], VaultTransformContext.empty());
 
+
 	private final byte[] plaintext;
 
 	private final VaultTransformContext context;
 
-	private TransformPlaintext(byte[] plaintext, VaultTransformContext context) {
 
+	private TransformPlaintext(byte[] plaintext, VaultTransformContext context) {
 		this.plaintext = plaintext;
 		this.context = context;
 	}
+
 
 	/**
 	 * Factory method to create an empty {@link TransformPlaintext}.
@@ -56,19 +60,13 @@ public class TransformPlaintext {
 	 * @return the {@link TransformPlaintext} for {@code plaintext}.
 	 */
 	public static TransformPlaintext of(byte[] plaintext) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
-
-		if (plaintext.length == 0) {
-			return empty();
-		}
-
-		return new TransformPlaintext(plaintext, VaultTransformContext.empty());
+		return plaintext.length == 0 ? empty() : new TransformPlaintext(plaintext, VaultTransformContext.empty());
 	}
 
 	/**
-	 * Factory method to create {@link TransformPlaintext} using from {@link String}.
-	 * {@link String} is encoded to {@code byte} using the default
+	 * Factory method to create {@link TransformPlaintext} using from
+	 * {@link String}. {@link String} is encoded to {@code byte} using the default
 	 * {@link java.nio.charset.Charset}.
 	 * @param plaintext the plain text to encrypt, must not be {@literal null}.
 	 * @return the {@link TransformPlaintext} for {@code plaintext}.
@@ -78,22 +76,18 @@ public class TransformPlaintext {
 	}
 
 	/**
-	 * Factory method to create {@link TransformPlaintext} using from a {@link String}
-	 * using the given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
+	 * Factory method to create {@link TransformPlaintext} using from a
+	 * {@link String} using the given {@link java.nio.charset.Charset}.
+	 * {@link java.nio.charset.Charset}.
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
 	public static TransformPlaintext of(String plaintext, Charset charset) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.notNull(charset, "Charset must not be null");
-
-		if (plaintext.length() == 0) {
-			return empty();
-		}
-
-		return of(plaintext.getBytes(charset));
+		return plaintext.isEmpty() ? empty() : of(plaintext.getBytes(charset));
 	}
+
 
 	public byte[] getPlaintext() {
 		return this.plaintext;
@@ -104,15 +98,13 @@ public class TransformPlaintext {
 	}
 
 	/**
-	 * Create a new {@link TransformPlaintext} object from this plaintext associated with
-	 * the given {@link VaultTransformContext}.
+	 * Create a new {@link TransformPlaintext} object from this plaintext associated
+	 * with the given {@link VaultTransformContext}.
 	 * @param context transform context.
 	 * @return the new {@link TransformPlaintext} object.
 	 */
 	public TransformPlaintext with(VaultTransformContext context) {
-
 		Assert.notNull(context, "VaultTransformContext must not be null");
-
 		return new TransformPlaintext(getPlaintext(), context);
 	}
 
@@ -130,9 +122,7 @@ public class TransformPlaintext {
 	 * {@link java.nio.charset.Charset}.
 	 */
 	public String asString(Charset charset) {
-
 		Assert.notNull(charset, "Charset must not be null");
-
 		return new String(getPlaintext(), charset);
 	}
 

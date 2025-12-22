@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
@@ -28,11 +29,11 @@ import java.io.IOException;
 public interface LeaseStrategy {
 
 	/**
-	 * Return {@literal true} to drop the lease after {@link Throwable error} happened.
-	 * {@literal false} to retain the lease.
+	 * Return {@literal true} to drop the lease after {@link Throwable error}
+	 * happened. {@literal false} to retain the lease.
 	 * @param error the error that occurred.
-	 * @return {@literal true} to drop the lease after {@link Throwable error} happened.
-	 * {@literal false} to retain the lease.
+	 * @return {@literal true} to drop the lease after {@link Throwable error}
+	 * happened. {@literal false} to retain the lease.
 	 */
 	boolean shouldDrop(Throwable error);
 
@@ -59,18 +60,13 @@ public interface LeaseStrategy {
 	 */
 	static LeaseStrategy retainOnIoError() {
 		return error -> {
-
 			Throwable inspect = error;
-
 			do {
 				if (inspect instanceof IOException) {
 					return false;
 				}
-
 				inspect = inspect.getCause();
-			}
-			while (inspect != null);
-
+			} while (inspect != null);
 			return true;
 		};
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
@@ -54,7 +55,7 @@ class KeyFactoriesUnitTests {
 
 		ECPrivateKeySpec ecKeySpec = (ECPrivateKeySpec) keySpec;
 		assertThat(ecKeySpec.getS())
-			.isEqualTo("80321543313819895612774489145376520718294627432743956845606752593828296924959");
+				.isEqualTo("80321543313819895612774489145376520718294627432743956845606752593828296924959");
 
 		// Verify against BouncyCastle parser
 		ECPrivateKey ecPrivateKey = ECPrivateKey.getInstance(key.getContent());

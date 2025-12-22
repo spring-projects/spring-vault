@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Map;
@@ -48,9 +49,9 @@ public abstract class UsernamePasswordAuthenticationIntegrationTestBase extends 
 
 		prepare().getVaultOperations().opsForSys().createOrUpdatePolicy(DEFAULT_USERPASS_AUTHENTICATION_PATH, POLICY);
 		prepare().getVaultOperations()
-			.doWithSession(restOperations -> restOperations.postForEntity(
-					"auth/%s/users/%s".formatted(DEFAULT_USERPASS_AUTHENTICATION_PATH, username),
-					singletonMap("password", password), Map.class));
+				.doWithSession(restOperations -> restOperations.postForEntity(
+						"auth/%s/users/%s".formatted(DEFAULT_USERPASS_AUTHENTICATION_PATH, username),
+						singletonMap("password", password), Map.class));
 	}
 
 }

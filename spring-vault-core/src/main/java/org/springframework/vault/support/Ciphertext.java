@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Objects;
@@ -20,7 +21,8 @@ import java.util.Objects;
 import org.springframework.util.Assert;
 
 /**
- * Value object representing cipher text with an optional {@link VaultTransitContext}.
+ * Value object representing cipher text with an optional
+ * {@link VaultTransitContext}.
  *
  * @author Praveendra Singh
  * @author Mark Paluch
@@ -32,23 +34,25 @@ public class Ciphertext {
 
 	private final VaultTransitContext context;
 
-	private Ciphertext(String ciphertext, VaultTransitContext context) {
 
+	private Ciphertext(String ciphertext, VaultTransitContext context) {
 		this.ciphertext = ciphertext;
 		this.context = context;
 	}
 
+
 	/**
-	 * Factory method to create {@link Ciphertext} from the given {@code ciphertext}.
-	 * @param ciphertext the cipher text to decrypt, must not be {@literal null} or empty.
+	 * Factory method to create {@link Ciphertext} from the given
+	 * {@code ciphertext}.
+	 * @param ciphertext the cipher text to decrypt, must not be {@literal null} or
+	 * empty.
 	 * @return the {@link Ciphertext} for {@code ciphertext}.
 	 */
 	public static Ciphertext of(String ciphertext) {
-
 		Assert.hasText(ciphertext, "Ciphertext must not be null or empty");
-
 		return new Ciphertext(ciphertext, VaultTransitContext.empty());
 	}
+
 
 	public String getCiphertext() {
 		return this.ciphertext;
@@ -59,15 +63,13 @@ public class Ciphertext {
 	}
 
 	/**
-	 * Create a new {@link Ciphertext} object from this ciphertext associated with the
-	 * given {@link VaultTransitContext}.
+	 * Create a new {@link Ciphertext} object from this ciphertext associated with
+	 * the given {@link VaultTransitContext}.
 	 * @param context transit context, must not be {@literal null}.
 	 * @return the new {@link Ciphertext} object.
 	 */
 	public Ciphertext with(VaultTransitContext context) {
-
 		Assert.notNull(context, "VaultTransitContext must not be null");
-
 		return new Ciphertext(getCiphertext(), context);
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
@@ -48,17 +49,17 @@ import org.springframework.web.reactive.function.client.WebClient.RequestBodySpe
 /**
  * {@link VaultTokenSupplier} using {@link AuthenticationSteps} to create an
  * authentication flow emitting {@link VaultToken}.
- * <p>
- * This class uses {@link WebClient} for non-blocking and reactive HTTP access. The
- * {@link AuthenticationSteps authentication flow} is materialized as reactive sequence
- * postponing execution until {@link Mono#subscribe() subscription}.
- * <p>
- * {@link Supplier Supplier} instances are inspected for their type.
+ * <p>This class uses {@link WebClient} for non-blocking and reactive HTTP
+ * access. The {@link AuthenticationSteps authentication flow} is materialized
+ * as reactive sequence postponing execution until {@link Mono#subscribe()
+ * subscription}.
+ * <p>{@link Supplier Supplier} instances are inspected for their type.
  * {@link ResourceCredentialSupplier} instances are loaded through
  * {@link DataBufferUtils#read(org.springframework.core.io.Resource, org.springframework.core.io.buffer.DataBufferFactory, int)
- * DataBufferUtils} to use non-blocking I/O for file access. {@link Supplier#get() Calls}
- * to generic supplier types are offloaded to a {@link Schedulers#boundedElastic()
- * scheduler} to avoid blocking calls on reactive worker/eventloop threads.
+ * DataBufferUtils} to use non-blocking I/O for file access.
+ * {@link Supplier#get() Calls} to generic supplier types are offloaded to a
+ * {@link Schedulers#boundedElastic() scheduler} to avoid blocking calls on
+ * reactive worker/eventloop threads.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -68,45 +69,39 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 	private static final Log logger = LogFactory.getLog(AuthenticationStepsOperator.class);
 
+
 	private final AuthenticationSteps chain;
 
 	private final WebClient webClient;
 
 	private final DataBufferFactory factory = new DefaultDataBufferFactory();
 
+
 	/**
-	 * Create a new {@link AuthenticationStepsOperator} given {@link AuthenticationSteps}
-	 * and {@link WebClient}.
+	 * Create a new {@code AuthenticationStepsOperator} given
+	 * {@link AuthenticationSteps} and {@link WebClient}.
 	 * @param steps must not be {@literal null}.
 	 * @param webClient must not be {@literal null}.
 	 */
 	public AuthenticationStepsOperator(AuthenticationSteps steps, WebClient webClient) {
-
 		Assert.notNull(steps, "AuthenticationSteps must not be null");
 		Assert.notNull(webClient, "WebClient must not be null");
-
 		this.chain = steps;
 		this.webClient = webClient;
 	}
 
 	@Override
 	public Mono<VaultToken> getVaultToken() throws VaultException {
-
 		Mono<Object> state = createMono(this.chain.steps);
-
 		return state.map(stateObject -> {
-
 			if (stateObject instanceof VaultToken) {
 				return (VaultToken) stateObject;
 			}
 
 			if (stateObject instanceof VaultResponse response) {
-
 				Assert.state(response.getAuth() != null, "Auth field must not be null");
-
 				return LoginTokenUtil.from(response.getAuth());
 			}
-
 			throw new IllegalStateException(
 					"Cannot retrieve VaultToken from authentication chain. Got instead %s".formatted(stateObject));
 		}).onErrorMap(t -> new VaultLoginException("Cannot retrieve VaultToken from authentication chain", t));
@@ -114,11 +109,8 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 	@SuppressWarnings("unchecked")
 	private Mono<Object> createMono(Iterable<Node<?>> steps) {
-
 		Mono<Object> state = Mono.just(Undefinded.UNDEFINDED);
-
 		for (Node<?> o : steps) {
-
 			if (logger.isDebugEnabled()) {
 				logger.debug("Executing %s with current state %s".formatted(o, state));
 			}
@@ -133,7 +125,7 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 
 			if (o instanceof ZipStep) {
 				state = state.zipWith(doZipStep((ZipStep<Object, Object>) o))
-					.map(it -> Pair.of(it.getT1(), it.getT2()));
+						.map(it -> Pair.of(it.getT1(), it.getT2()));
 			}
 
 			if (o instanceof OnNextStep) {
@@ -155,26 +147,20 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 		return state;
 	}
 
-	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
+	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	private Mono<Object> doHttpRequest(HttpRequestNode<Object> step, Object state) {
-
 		HttpRequest<Object> definition = step.getDefinition();
 		HttpEntity<?> entity = AuthenticationStepsExecutor.getEntity(definition.getEntity(), state);
-
 		RequestBodySpec spec;
 		if (definition.getUri() == null) {
-
 			spec = this.webClient.method(definition.getMethod())
-				.uri(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
-		}
-		else {
+					.uri(definition.getUriTemplate(), (Object[]) definition.getUrlVariables());
+		} else {
 			spec = this.webClient.method(definition.getMethod()).uri(definition.getUri());
 		}
-
 		for (Entry<String, List<String>> header : entity.getHeaders().headerSet()) {
 			spec = spec.header(header.getKey(), header.getValue().get(0));
 		}
-
 		if (entity.getBody() != null && !entity.getBody().equals(Undefinded.UNDEFINDED)) {
 			return spec.bodyValue(entity.getBody()).retrieve().bodyToMono(definition.getResponseType());
 		}
@@ -199,22 +185,20 @@ public class AuthenticationStepsOperator implements VaultTokenSupplier {
 	}
 
 	private Mono<Object> doSupplierStepLater(SupplierStep<Object> supplierStep) {
-
 		Supplier<?> supplier = supplierStep.getSupplier();
-
 		if (!(supplier instanceof ResourceCredentialSupplier resourceSupplier)) {
 			return Mono.fromSupplier(supplierStep.getSupplier()).subscribeOn(Schedulers.boundedElastic());
 		}
-
 		return DataBufferUtils.join(DataBufferUtils.read(resourceSupplier.getResource(), this.factory, 4096))
-			.map(dataBuffer -> {
-				String result = dataBuffer.toString(ResourceCredentialSupplier.CHARSET);
-				DataBufferUtils.release(dataBuffer);
-				return (Object) result;
-			})
-			.onErrorMap(IOException.class, e -> new VaultException(
-					"Credential retrieval from %s failed".formatted(resourceSupplier.getResource()), e));
+				.map(dataBuffer -> {
+					String result = dataBuffer.toString(ResourceCredentialSupplier.CHARSET);
+					DataBufferUtils.release(dataBuffer);
+					return (Object) result;
+				})
+				.onErrorMap(IOException.class, e -> new VaultException(
+						"Credential retrieval from %s failed".formatted(resourceSupplier.getResource()), e));
 	}
+
 
 	enum Undefinded {
 

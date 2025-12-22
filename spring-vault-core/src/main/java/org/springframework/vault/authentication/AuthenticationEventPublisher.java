@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Set;
@@ -27,8 +28,7 @@ import org.springframework.vault.authentication.event.AuthenticationListener;
 
 /**
  * Publisher for {@link AuthenticationEvent}s.
- * <p>
- * This publisher dispatches events to {@link AuthenticationListener} and
+ * <p>This publisher dispatches events to {@link AuthenticationListener} and
  * {@link AuthenticationErrorListener}.
  *
  * @author Mark Paluch
@@ -44,16 +44,15 @@ public abstract class AuthenticationEventPublisher implements AuthenticationEven
 
 	private final Set<AuthenticationErrorListener> errorListeners = new CopyOnWriteArraySet<>();
 
+
 	/**
-	 * Add a {@link AuthenticationListener}. The listener starts receiving events as soon
-	 * as possible.
+	 * Add a {@link AuthenticationListener}. The listener starts receiving events as
+	 * soon as possible.
 	 * @param listener the listener, must not be {@literal null}.
 	 */
 	@Override
 	public void addAuthenticationListener(AuthenticationListener listener) {
-
 		Assert.notNull(listener, "AuthenticationEventListener must not be null");
-
 		this.listeners.add(listener);
 	}
 
@@ -67,15 +66,13 @@ public abstract class AuthenticationEventPublisher implements AuthenticationEven
 	}
 
 	/**
-	 * Add a {@link AuthenticationErrorListener}. The listener starts receiving events as
-	 * soon as possible.
+	 * Add a {@link AuthenticationErrorListener}. The listener starts receiving
+	 * events as soon as possible.
 	 * @param listener the listener, must not be {@literal null}.
 	 */
 	@Override
 	public void addErrorListener(AuthenticationErrorListener listener) {
-
 		Assert.notNull(listener, "AuthenticationEventErrorListener must not be null");
-
 		this.errorListeners.add(listener);
 	}
 

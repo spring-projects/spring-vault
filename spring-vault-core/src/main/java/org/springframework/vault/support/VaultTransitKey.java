@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Map;
@@ -37,24 +38,24 @@ public interface VaultTransitKey {
 	String getType();
 
 	/**
-	 * @return whether the key can be backed up in the plaintext format. Once set, this
-	 * cannot be disabled.
+	 * @return whether the key can be backed up in the plaintext format. Once set,
+	 * this cannot be disabled.
 	 * @since 3.0.3
 	 */
 	boolean allowPlaintextBackup();
 
 	/**
 	 * @return the version of the convergent nonce to use. Note: since version 3 the
-	 * algorithm used in {@code transit} convergent encryption returns {@code -1} as the
-	 * version is stored with the key. For backwards compatability this field might be
-	 * useful.
+	 * algorithm used in {@code transit} convergent encryption returns {@code -1} as
+	 * the version is stored with the key. For backwards compatability this field
+	 * might be useful.
 	 * @since 3.0.3
 	 */
 	int getConvergentVersion();
 
 	/**
-	 * @return {@literal true} if deletion of the key is allowed. Key deletion must be
-	 * turned on to make keys deletable.
+	 * @return {@literal true} if deletion of the key is allowed. Key deletion must
+	 * be turned on to make keys deletable.
 	 */
 	boolean isDeletionAllowed();
 
@@ -91,8 +92,8 @@ public interface VaultTransitKey {
 
 	/**
 	 * @return whether the key supports convergent encryption (i.e where the same
-	 * plaintext creates the same ciphertext). Requires {@link #isDerived()} to be set to
-	 * {@code true}.
+	 * plaintext creates the same ciphertext). Requires {@link #isDerived()} to be
+	 * set to {@code true}.
 	 * @since 3.0.3
 	 */
 	boolean supportsConvergentEncryption();

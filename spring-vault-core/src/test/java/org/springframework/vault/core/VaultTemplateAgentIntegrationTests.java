@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.IOException;
@@ -51,8 +52,7 @@ class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 
 			socket.connect(new InetSocketAddress(this.endpoint.getHost(), this.endpoint.getPort()),
 					(int) new ClientOptions().getConnectionTimeout().toMillis());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new TestAbortedException("Vault Agent not available: " + e.getMessage());
 		}
 	}
@@ -69,8 +69,8 @@ class VaultTemplateAgentIntegrationTests extends IntegrationTestSupport {
 	void shouldUseAgentAuthenticationWithBuilder() {
 
 		RestTemplateBuilder builder = RestTemplateBuilder.builder()
-			.endpoint(this.endpoint)
-			.requestFactory(this.requestFactory);
+				.endpoint(this.endpoint)
+				.requestFactory(this.requestFactory);
 
 		VaultTemplate vaultTemplate = new VaultTemplate(builder);
 

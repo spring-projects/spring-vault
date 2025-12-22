@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -34,20 +35,22 @@ import org.springframework.vault.support.WrappedMetadata;
 public interface VaultWrappingOperations {
 
 	/**
-	 * Looks up {@link WrappedMetadata metadata} for the given token containing a wrapped
-	 * response.
+	 * Looks up {@link WrappedMetadata metadata} for the given token containing a
+	 * wrapped response.
 	 * @param token must not be {@literal null}.
-	 * @return the {@link WrappedMetadata} the {@code token} or {@literal null} if the
-	 * token was invalid or expired.
+	 * @return the {@link WrappedMetadata} the {@code token} or {@literal null} if
+	 * the token was invalid or expired.
 	 */
-	@Nullable WrappedMetadata lookup(VaultToken token);
+	@Nullable
+	WrappedMetadata lookup(VaultToken token);
 
 	/**
 	 * Read a wrapped secret.
 	 * @param token must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
-	@Nullable VaultResponse read(VaultToken token);
+	@Nullable
+	VaultResponse read(VaultToken token);
 
 	/**
 	 * Read a wrapped secret of type {@link Class responseType}.
@@ -55,14 +58,15 @@ public interface VaultWrappingOperations {
 	 * @param responseType must not be {@literal null}.
 	 * @return the data or {@literal null} if the token was invalid or expired.
 	 */
-	@Nullable <T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
+	@Nullable
+	<T> VaultResponseSupport<T> read(VaultToken token, Class<T> responseType);
 
 	/**
-	 * Rewraps a response-wrapped token. The new token will use the same creation TTL as
-	 * the original token and contain the same response. The old token will be
-	 * invalidated. This can be used for long-term storage of a secret in a
-	 * response-wrapped token when rotation is a requirement. Rewrapping with an invalid
-	 * token throws {@link VaultException}.
+	 * Rewraps a response-wrapped token. The new token will use the same creation
+	 * TTL as the original token and contain the same response. The old token will
+	 * be invalidated. This can be used for long-term storage of a secret in a
+	 * response-wrapped token when rotation is a requirement. Rewrapping with an
+	 * invalid token throws {@link VaultException}.
 	 * @param token must not be {@literal null}.
 	 * @return the {@link WrappedMetadata} for this wrapping operation.
 	 */

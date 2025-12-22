@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import com.google.api.client.json.JsonFactory;
@@ -35,20 +36,16 @@ class GoogleJsonUtil {
 	static final String GSON = "com.google.api.client.json.gson.GsonFactory";
 
 	static {
-
 		try {
-
 			if (ClassUtils.isPresent(JACKSON, null)) {
 				JSON_FACTORY = instantiate(JACKSON);
-			}
-			else {
+			} else {
 				JSON_FACTORY = instantiate(GSON);
 			}
-		}
-		catch (ClassNotFoundException e) {
+		} catch (ClassNotFoundException e) {
 			throw new IllegalStateException(
 					"No com.google.api.client.json.JsonFactory implementation available. Make sure to include either %s or %s on your classpath."
-						.formatted(JACKSON, GSON),
+							.formatted(JACKSON, GSON),
 					e);
 		}
 	}

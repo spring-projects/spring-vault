@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class VaultTransitContextUnitTests {
 	@Test
 	void createsFromContext() {
 
-		byte[] bytes = new byte[] { 1 };
+		byte[] bytes = new byte[] {1};
 
 		VaultTransitContext context = VaultTransitContext.fromContext(bytes);
 
@@ -50,7 +51,7 @@ class VaultTransitContextUnitTests {
 	@Test
 	void createsFromNonce() {
 
-		byte[] bytes = new byte[] { 1 };
+		byte[] bytes = new byte[] {1};
 
 		VaultTransitContext context = VaultTransitContext.fromNonce(bytes);
 

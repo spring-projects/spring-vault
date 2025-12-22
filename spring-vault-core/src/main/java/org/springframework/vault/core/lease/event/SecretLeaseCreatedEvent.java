@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
@@ -24,7 +25,8 @@ import org.springframework.vault.core.lease.domain.Lease;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 
 /**
- * Event published after obtaining secrets potentially associated with a {@link Lease}.
+ * Event published after obtaining secrets potentially associated with a
+ * {@link Lease}.
  *
  * @author Mark Paluch
  */
@@ -33,20 +35,22 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 	@Serial
 	private static final long serialVersionUID = 1L;
 
+
 	private final Map<String, Object> secrets;
 
+
 	/**
-	 * Create a new {@link SecretLeaseCreatedEvent} given {@link RequestedSecret},
+	 * Create a new {@code SecretLeaseCreatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 * @param secrets must not be {@literal null}.
 	 */
 	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease, Map<String, Object> secrets) {
-
 		super(requestedSecret, lease);
 		this.secrets = Collections.unmodifiableMap(new LinkedHashMap<>(secrets));
 	}
+
 
 	public Map<String, Object> getSecrets() {
 		return this.secrets;

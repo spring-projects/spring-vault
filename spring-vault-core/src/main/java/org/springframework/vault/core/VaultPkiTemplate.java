@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.ByteArrayInputStream;
@@ -49,28 +50,26 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link VaultPkiTemplate} given {@link VaultOperations} and the mount
-	 * {@code path}.
+	 * Create a new {@link VaultPkiTemplate} given {@link VaultOperations} and the
+	 * mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public VaultPkiTemplate(VaultOperations vaultOperations, String path) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations = VaultTemplate.from(vaultOperations);
 		this.path = path;
 	}
 
+
 	@Override
 	public VaultCertificateResponse issueCertificate(String roleName, VaultCertificateRequest certificateRequest)
 			throws VaultException {
-
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
-
 		return requestCertificate(roleName, "{path}/issue/{roleName}", createIssueRequest(certificateRequest),
 				VaultCertificateResponse.class);
 	}
@@ -78,29 +77,22 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@Override
 	public VaultSignCertificateRequestResponse signCertificateRequest(String roleName, String csr,
 			VaultCertificateRequest certificateRequest) throws VaultException {
-
 		Assert.hasText(roleName, "Role name must not be empty");
 		Assert.hasText(csr, "CSR name must not be empty");
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
-
 		Map<String, Object> body = createIssueRequest(certificateRequest);
 		body.put("csr", csr);
-
 		return requestCertificate(roleName, "{path}/sign/{roleName}", body, VaultSignCertificateRequestResponse.class);
 	}
 
 	@SuppressWarnings("NullAway")
 	private <T> T requestCertificate(String roleName, String requestPath, Map<String, Object> request,
 			Class<T> responseType) {
-
 		request.putIfAbsent("format", "der");
-
 		return this.vaultOperations.doWithSessionClient(client -> {
-
 			try {
 				return client.post().uri(requestPath, this.path, roleName).body(request).retrieve().body(responseType);
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		});
@@ -109,47 +101,38 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@Override
 	@SuppressWarnings("NullAway")
 	public void revoke(String serialNumber) throws VaultException {
-
 		Assert.hasText(serialNumber, "Serial number must not be null or empty");
-
 		this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable Void>) client -> {
-
 			try {
 				return client.post()
-					.uri("{path}/revoke", this.path)
-					.body(Collections.singletonMap("serial_number", serialNumber))
-					.retrieve()
-					.toBodilessEntity()
-					.getBody();
-			}
-			catch (HttpStatusCodeException e) {
+						.uri("{path}/revoke", this.path)
+						.body(Collections.singletonMap("serial_number", serialNumber))
+						.retrieve()
+						.toBodilessEntity()
+						.getBody();
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		});
 	}
 
 	@Override
-	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
+	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	public InputStream getCrl(Encoding encoding) throws VaultException {
-
 		Assert.notNull(encoding, "Encoding must not be null");
-
 		return this.vaultOperations.doWithSessionClient((RestClientCallback<@Nullable InputStream>) client -> {
-
 			String requestPath = encoding == Encoding.DER ? "{path}/crl" : "{path}/crl/pem";
 			try {
 				ResponseEntity<byte[]> response = client.get()
-					.uri(requestPath, this.path)
-					.retrieve()
-					.toEntity(byte[].class);
+						.uri(requestPath, this.path)
+						.retrieve()
+						.toEntity(byte[].class);
 
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());
 				}
-
 				return null;
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		});
@@ -158,47 +141,36 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	@Override
 	@SuppressWarnings("NullAway")
 	public VaultIssuerCertificateRequestResponse getIssuerCertificate(String issuer) throws VaultException {
-
 		Assert.hasText(issuer, "Issuer must not be empty");
-
 		return this.vaultOperations.doWithSessionClient(client -> {
-
 			try {
 				return client.get()
-					.uri("{path}/issuer/{issuer}/json", this.path, issuer)
-					.retrieve()
-					.body(VaultIssuerCertificateRequestResponse.class);
-			}
-			catch (HttpStatusCodeException e) {
+						.uri("{path}/issuer/{issuer}/json", this.path, issuer)
+						.retrieve()
+						.body(VaultIssuerCertificateRequestResponse.class);
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		});
 	}
 
 	@Override
-	@SuppressWarnings({ "NullAway", "DataFlowIssue" })
+	@SuppressWarnings({"NullAway", "DataFlowIssue"})
 	public InputStream getIssuerCertificate(String issuer, Encoding encoding) throws VaultException {
-
 		Assert.hasText(issuer, "Issuer must not be empty");
 		Assert.notNull(encoding, "Encoding must not be null");
-
 		return this.vaultOperations.doWithSessionClient(client -> {
-
 			String requestPath = "{path}/issuer/{issuer}/%s".formatted(encoding.name().toLowerCase(Locale.ROOT));
-
 			try {
 				ResponseEntity<byte[]> response = client.get()
-					.uri(requestPath, this.path, issuer)
-					.retrieve()
-					.toEntity(byte[].class);
-
+						.uri(requestPath, this.path, issuer)
+						.retrieve()
+						.toEntity(byte[].class);
 				if (response.getStatusCode().is2xxSuccessful() && response.hasBody()) {
 					return new ByteArrayInputStream(response.getBody());
 				}
-
 				return null;
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		});
@@ -211,39 +183,34 @@ public class VaultPkiTemplate implements VaultPkiOperations {
 	 * @return the body as {@link Map}.
 	 */
 	private static Map<String, Object> createIssueRequest(VaultCertificateRequest certificateRequest) {
-
 		Assert.notNull(certificateRequest, "Certificate request must not be null");
-
 		Map<String, Object> request = new HashMap<>();
-
 		PropertyMapper mapper = PropertyMapper.get();
-
 		mapper.from(certificateRequest::getCommonName).to("common_name", request);
 		mapper.from(certificateRequest::getAltNames)
-			.whenNotEmpty()
-			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
-			.to("alt_names", request);
+				.whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+				.to("alt_names", request);
 		mapper.from(certificateRequest::getIpSubjectAltNames)
-			.whenNotEmpty()
-			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
-			.to("ip_sans", request);
+				.whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+				.to("ip_sans", request);
 		mapper.from(certificateRequest::getUriSubjectAltNames)
-			.whenNotEmpty()
-			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
-			.to("uri_sans", request);
+				.whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+				.to("uri_sans", request);
 		mapper.from(certificateRequest::getOtherSans)
-			.whenNotEmpty()
-			.as(i -> StringUtils.collectionToDelimitedString(i, ","))
-			.to("other_sans", request);
+				.whenNotEmpty()
+				.as(i -> StringUtils.collectionToDelimitedString(i, ","))
+				.to("other_sans", request);
 		mapper.from(certificateRequest::getTtl).whenNonNull().as(i -> i.get(ChronoUnit.SECONDS)).to("ttl", request);
 		mapper.from(certificateRequest::isExcludeCommonNameFromSubjectAltNames)
-			.whenTrue()
-			.to("exclude_cn_from_sans", request);
+				.whenTrue()
+				.to("exclude_cn_from_sans", request);
 		mapper.from(certificateRequest::getFormat).whenHasText().to("format", request);
 		mapper.from(certificateRequest::getPrivateKeyFormat).whenHasText().to("private_key_format", request);
 		mapper.from(certificateRequest::getNotAfter).whenHasText().as(Instant::toString).to("not_after", request);
 		mapper.from(certificateRequest::getUserIds).whenHasText().to("user_ids", request);
-
 		return request;
 	}
 

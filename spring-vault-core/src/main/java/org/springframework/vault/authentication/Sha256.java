@@ -32,15 +32,14 @@ class Sha256 {
 
 	private static final Charset US_ASCII = StandardCharsets.US_ASCII;
 
+
 	/**
 	 * Generates a hex-encoded SHA256 checksum from the supplied {@code content}.
 	 * @param content must not be {@literal null} and not empty.
 	 * @return hex-encoded SHA256 checksum
 	 */
 	public static String toSha256(String content) {
-
 		Assert.hasText(content, "Content must not be empty");
-
 		MessageDigest messageDigest = getMessageDigest("SHA-256");
 		byte[] digest = messageDigest.digest(content.getBytes(US_ASCII));
 		return toHexString(digest);
@@ -55,20 +54,16 @@ class Sha256 {
 	private static MessageDigest getMessageDigest(String algorithm) throws IllegalArgumentException {
 		try {
 			return MessageDigest.getInstance(algorithm);
-		}
-		catch (NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			throw new IllegalArgumentException("No such algorithm [" + algorithm + "]");
 		}
 	}
 
 	static String toHexString(byte[] bytes) {
-
 		StringBuilder sb = new StringBuilder(bytes.length * 2);
-
 		for (byte b : bytes) {
 			sb.append("%X".formatted(b));
 		}
-
 		return sb.toString();
 	}
 

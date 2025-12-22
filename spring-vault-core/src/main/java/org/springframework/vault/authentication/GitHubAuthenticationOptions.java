@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.function.Supplier;
@@ -23,10 +24,9 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link GitHubAuthentication}.
- * <p>
- * Authentication options provide the role and the token.
- * {@link GitHubAuthenticationOptions} can be constructed using {@link #builder()}.
- * Instances of this class are immutable once constructed.
+ * <p>Authentication options provide the role and the token.
+ * {@link GitHubAuthenticationOptions} can be constructed using
+ * {@link #builder()}. Instances of this class are immutable once constructed.
  *
  * @author Nanne Baars
  * @since 3.2
@@ -36,6 +36,7 @@ import org.springframework.util.Assert;
 public class GitHubAuthenticationOptions {
 
 	public static final String DEFAULT_GITHUB_AUTHENTICATION_PATH = "github";
+
 
 	/**
 	 * Path of the GitHub authentication backend mount. Optional and defaults to
@@ -48,11 +49,12 @@ public class GitHubAuthenticationOptions {
 	 */
 	private final Supplier<String> tokenSupplier;
 
-	private GitHubAuthenticationOptions(Supplier<String> tokenSupplier, String path) {
 
+	private GitHubAuthenticationOptions(Supplier<String> tokenSupplier, String path) {
 		this.tokenSupplier = tokenSupplier;
 		this.path = path;
 	}
+
 
 	/**
 	 * @return a new {@link GitHubAuthenticationOptions}.
@@ -60,6 +62,7 @@ public class GitHubAuthenticationOptions {
 	public static GithubAuthenticationOptionsBuilder builder() {
 		return new GithubAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return access token to use.
@@ -75,6 +78,7 @@ public class GitHubAuthenticationOptions {
 		return this.path;
 	}
 
+
 	/**
 	 * Builder for {@link GitHubAuthenticationOptions}.
 	 */
@@ -84,15 +88,17 @@ public class GitHubAuthenticationOptions {
 
 		private @Nullable Supplier<String> tokenSupplier;
 
+
+		GithubAuthenticationOptionsBuilder() {
+		}
+
 		/**
 		 * Configure the mount path.
 		 * @param path must not be {@literal null} or empty.
-		 * @return {@code this} {@link GithubAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GithubAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -102,24 +108,20 @@ public class GitHubAuthenticationOptions {
 		 * singleton. If you want to provide a dynamic token that can change over time,
 		 * see {@link #tokenSupplier(Supplier)}.
 		 * @param token must not be {@literal null}.
-		 * @return {@code this} {@link GithubAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GithubAuthenticationOptionsBuilder token(String token) {
-
 			Assert.hasText(token, "Token must not be empty");
-
 			return tokenSupplier(() -> token);
 		}
 
 		/**
 		 * Configure the {@link Supplier} to obtain a token.
 		 * @param tokenSupplier must not be {@literal null}.
-		 * @return {@code this} {@link GithubAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public GithubAuthenticationOptionsBuilder tokenSupplier(Supplier<String> tokenSupplier) {
-
 			Assert.notNull(tokenSupplier, "Token supplier must not be null");
-
 			this.tokenSupplier = tokenSupplier;
 			return this;
 		}
@@ -129,9 +131,7 @@ public class GitHubAuthenticationOptions {
 		 * @return a new {@link GitHubAuthenticationOptions}.
 		 */
 		public GitHubAuthenticationOptions build() {
-
 			Assert.notNull(this.tokenSupplier, "Token must not be null");
-
 			return new GitHubAuthenticationOptions(this.tokenSupplier, this.path);
 		}
 

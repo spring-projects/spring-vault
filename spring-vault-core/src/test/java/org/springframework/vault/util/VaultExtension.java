@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -22,8 +23,8 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
 /**
- * This is an {@link BeforeAllCallback} and {@link ParameterResolver} that initializes
- * Vault and provides {@link VaultInitializer}.
+ * This is an {@link BeforeAllCallback} and {@link ParameterResolver} that
+ * initializes Vault and provides {@link VaultInitializer}.
  *
  * @author Mark Paluch
  * @see VaultInitializer
@@ -32,9 +33,9 @@ public class VaultExtension implements BeforeAllCallback, ParameterResolver {
 
 	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace.create("vault.initializer");
 
+
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
-
 		VaultInitializer initializer = getInitializer(extensionContext);
 		initializer.initialize();
 	}

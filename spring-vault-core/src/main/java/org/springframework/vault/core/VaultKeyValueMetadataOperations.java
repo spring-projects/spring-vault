@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import org.jspecify.annotations.Nullable;
@@ -36,7 +37,8 @@ public interface VaultKeyValueMetadataOperations {
 	 * @param path the secret path, must not be {@literal null} or empty.
 	 * @return {@link VaultMetadataResponse}
 	 */
-	@Nullable VaultMetadataResponse get(String path);
+	@Nullable
+	VaultMetadataResponse get(String path);
 
 	/**
 	 * Update the secret metadata, or creates new metadata if not present.
@@ -46,8 +48,8 @@ public interface VaultKeyValueMetadataOperations {
 	void put(String path, VaultMetadataRequest body);
 
 	/**
-	 * Permanently delete the key metadata and all version data for the specified key. All
-	 * version history will be removed.
+	 * Permanently delete the key metadata and all version data for the specified
+	 * key. All version history will be removed.
 	 * @param path the secret path, must not be {@literal null} or empty.
 	 */
 	void delete(String path);

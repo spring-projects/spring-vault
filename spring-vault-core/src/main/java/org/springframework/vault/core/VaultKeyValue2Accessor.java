@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Collections;
@@ -20,12 +21,12 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Support class to build accessor methods for the Vault key-value backend version 2.
+ * Support class to build accessor methods for the Vault key-value backend
+ * version 2.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -35,34 +36,31 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValue2Accessor} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	VaultKeyValue2Accessor(VaultOperations vaultOperations, String path) {
-
 		super(vaultOperations, path);
-
 		this.path = path;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public @Nullable List<String> list(String path) {
-
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-				.uri("%s?list=true".formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
-				.retrieve()
-				.toEntity(VaultListResponse.class);
+					.uri("%s?list=true"
+							.formatted(createBackendPath("metadata", KeyValueUtilities.normalizeListPath(path))))
+					.retrieve()
+					.toEntity(VaultListResponse.class);
 		});
-
 		if (read == null) {
 			return Collections.emptyList();
 		}
-
 		return (List<String>) read.getRequiredData().get("keys");
 	}
 

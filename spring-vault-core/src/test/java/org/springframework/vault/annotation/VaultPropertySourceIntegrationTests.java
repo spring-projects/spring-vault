@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.annotation;
 
 import java.util.Collections;
@@ -45,12 +46,12 @@ import static org.assertj.core.api.Assertions.*;
 @ContextConfiguration
 class VaultPropertySourceIntegrationTests {
 
-	@Import({ Partial1.class, Partial2.class })
+	@Import({Partial1.class, Partial2.class})
 	static class Config extends VaultIntegrationTestConfiguration {
 
 	}
 
-	@VaultPropertySource({ "secret/myapp", "secret/myapp/profile" })
+	@VaultPropertySource({"secret/myapp", "secret/myapp/profile"})
 	static class Partial1 {
 
 	}

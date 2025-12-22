@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -25,8 +26,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
 /**
- * Default implementation of {@link VaultKeyValueOperations} for the Key/Value backend
- * version 1.
+ * Default implementation of {@link VaultKeyValueOperations} for the Key/Value
+ * backend version 1.
  *
  * @author Mark Paluch
  * @author Younghwan Jang
@@ -39,19 +40,19 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 
 	private final String path;
 
+
 	/**
-	 * Create a new {@link VaultKeyValue1Template} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValue1Template} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	public VaultKeyValue1Template(VaultOperations vaultOperations, String path) {
-
 		super(vaultOperations, path);
-
 		this.vaultOperations = vaultOperations;
 		this.path = path;
 	}
+
 
 	@Override
 	public @Nullable List<String> list(String path) {
@@ -60,15 +61,11 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 
 	@Override
 	public @Nullable VaultResponse get(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		return doRead(path, Map.class, (response, data) -> {
-
 			VaultResponse vaultResponse = new VaultResponse();
 			vaultResponse.applyMetadata(response);
 			vaultResponse.setData(data);
-
 			return vaultResponse;
 		});
 	}
@@ -76,12 +73,9 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> @Nullable VaultResponseSupport<T> get(String path, Class<T> responseType) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(responseType, "Response type must not be null");
-
 		return doRead(path, responseType, (response, data) -> {
-
 			VaultResponseSupport result = response;
 			result.setData(data);
 			return result;
@@ -95,9 +89,7 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 
 	@Override
 	public void put(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		doWrite(createDataPath(path), body);
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.net.URI;
@@ -26,12 +27,10 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link AwsEc2Authentication}.
- * <p>
- * Authentication options provide the path, the Identity Document URI and an optional
- * role. {@link AwsEc2AuthenticationOptions} can be constructed using {@link #builder()}.
- * Instances of this class are immutable once constructed.
- * <p>
- * Metadata retrieval defaults to IMDSv2 (session-token).
+ * <p>Authentication options provide the path, the Identity Document URI and an
+ * optional role. {@link AwsEc2AuthenticationOptions} can be constructed using
+ * {@link #builder()}. Instances of this class are immutable once constructed.
+ * <p>Metadata retrieval defaults to IMDSv2 (session-token).
  *
  * @author Mark Paluch
  * @see AwsEc2Authentication
@@ -40,7 +39,7 @@ import org.springframework.util.Assert;
 public class AwsEc2AuthenticationOptions {
 
 	public static final URI DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI = URI
-		.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
+			.create("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7");
 
 	/**
 	 * @since 3.2
@@ -55,6 +54,7 @@ public class AwsEc2AuthenticationOptions {
 	 * {@link #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI}.
 	 */
 	public static final AwsEc2AuthenticationOptions DEFAULT = new AwsEc2AuthenticationOptions();
+
 
 	/**
 	 * Path of the aws-ec2 authentication backend mount.
@@ -94,6 +94,7 @@ public class AwsEc2AuthenticationOptions {
 	 */
 	private final InstanceMetadataServiceVersion version;
 
+
 	private AwsEc2AuthenticationOptions() {
 		this(DEFAULT_AWS_AUTHENTICATION_PATH, DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI, "", Nonce.generated(),
 				Duration.ofMinutes(1), DEFAULT_IMDSV2_TOKEN_URI, InstanceMetadataServiceVersion.V2);
@@ -101,7 +102,6 @@ public class AwsEc2AuthenticationOptions {
 
 	private AwsEc2AuthenticationOptions(String path, URI identityDocumentUri, @Nullable String role, Nonce nonce,
 			Duration metadataTokenTtl, URI metadataTokenRequestUri, InstanceMetadataServiceVersion version) {
-
 		this.path = path;
 		this.identityDocumentUri = identityDocumentUri;
 		this.role = role;
@@ -111,12 +111,14 @@ public class AwsEc2AuthenticationOptions {
 		this.version = version;
 	}
 
+
 	/**
 	 * @return a new {@link AwsEc2AuthenticationOptionsBuilder}.
 	 */
 	public static AwsEc2AuthenticationOptionsBuilder builder() {
 		return new AwsEc2AuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the aws-ec2 authentication backend mount.
@@ -163,12 +165,14 @@ public class AwsEc2AuthenticationOptions {
 	}
 
 	/**
-	 * @return the {@link URI} to the AWS EC2 Metadata Service to obtain IMDSv2 tokens.
+	 * @return the {@link URI} to the AWS EC2 Metadata Service to obtain IMDSv2
+	 * tokens.
 	 * @since 3.2
 	 */
 	public URI getMetadataTokenRequestUri() {
 		return this.metadataTokenRequestUri;
 	}
+
 
 	/**
 	 * Builder for {@link AwsEc2AuthenticationOptionsBuilder}.
@@ -189,18 +193,18 @@ public class AwsEc2AuthenticationOptions {
 
 		private InstanceMetadataServiceVersion version = InstanceMetadataServiceVersion.V2;
 
+
 		AwsEc2AuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsEc2AuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -208,13 +212,11 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Configure the Identity Document {@link URI}.
 		 * @param identityDocumentUri must not be {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_PKCS7_IDENTITY_DOCUMENT_URI
 		 */
 		public AwsEc2AuthenticationOptionsBuilder identityDocumentUri(URI identityDocumentUri) {
-
 			Assert.notNull(identityDocumentUri, "Identity document URI must not be null");
-
 			this.identityDocumentUri = identityDocumentUri;
 			return this;
 		}
@@ -224,10 +226,9 @@ public class AwsEc2AuthenticationOptions {
 		 * role is not specified, then the login endpoint looks for a role bearing the
 		 * name of the AMI ID of the EC2 instance that is trying to login.
 		 * @param role may be empty or {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsEc2AuthenticationOptionsBuilder role(@Nullable String role) {
-
 			this.role = role;
 			return this;
 		}
@@ -236,13 +237,11 @@ public class AwsEc2AuthenticationOptions {
 		 * Configure a {@link Nonce} for login requests. Defaults to
 		 * {@link Nonce#generated()}.
 		 * @param nonce must not be {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 1.1
 		 */
 		public AwsEc2AuthenticationOptionsBuilder nonce(Nonce nonce) {
-
 			Assert.notNull(nonce, "Nonce must not be null");
-
 			this.nonce = nonce;
 			return this;
 		}
@@ -250,14 +249,12 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Configure the Instance Service Metadata v2 Token TTL. Defaults to 1 minute.
 		 * @param ttl must not be {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 3.2
 		 */
 		public AwsEc2AuthenticationOptionsBuilder metadataTokenTtl(Duration ttl) {
-
 			Assert.notNull(ttl, "Duration must not be null");
 			Assert.isTrue(!ttl.isNegative() && !ttl.isZero(), "Duration must not be zero or negative");
-
 			this.metadataTokenTtl = ttl;
 			return this;
 		}
@@ -265,14 +262,12 @@ public class AwsEc2AuthenticationOptions {
 		/**
 		 * Configure the Identity Metadata token request {@link URI}.
 		 * @param metadataTokenRequestUri must not be {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 3.2
 		 * @see #DEFAULT_IMDSV2_TOKEN_URI
 		 */
 		public AwsEc2AuthenticationOptionsBuilder metadataTokenRequestUri(URI metadataTokenRequestUri) {
-
 			Assert.notNull(metadataTokenRequestUri, "Metadata token request URI must not be null");
-
 			this.metadataTokenRequestUri = metadataTokenRequestUri;
 			return this;
 		}
@@ -281,13 +276,11 @@ public class AwsEc2AuthenticationOptions {
 		 * Configure the Instance Service Metadata {@link InstanceMetadataServiceVersion
 		 * version}. Defaults to {@link InstanceMetadataServiceVersion#V1}.
 		 * @param version must not be {@literal null}.
-		 * @return {@code this} {@link AwsEc2AuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 3.2
 		 */
 		public AwsEc2AuthenticationOptionsBuilder version(InstanceMetadataServiceVersion version) {
-
 			Assert.notNull(version, "Version must not be null");
-
 			this.version = version;
 			return this;
 		}
@@ -297,14 +290,13 @@ public class AwsEc2AuthenticationOptions {
 		 * @return a new {@link AwsEc2AuthenticationOptions}.
 		 */
 		public AwsEc2AuthenticationOptions build() {
-
 			Assert.notNull(this.identityDocumentUri, "IdentityDocumentUri must not be null");
-
 			return new AwsEc2AuthenticationOptions(this.path, this.identityDocumentUri, this.role, this.nonce,
 					this.metadataTokenTtl, this.metadataTokenRequestUri, this.version);
 		}
 
 	}
+
 
 	/**
 	 * Value object for an authentication nonce.
@@ -315,9 +307,11 @@ public class AwsEc2AuthenticationOptions {
 
 		private final char[] value;
 
+
 		protected Nonce(char[] value) {
 			this.value = value;
 		}
+
 
 		/**
 		 * Create a new generated {@link Nonce} using {@link UUID}.
@@ -338,12 +332,14 @@ public class AwsEc2AuthenticationOptions {
 			return new Provided(Arrays.copyOf(nonce, nonce.length));
 		}
 
+
 		/**
 		 * @return the nonce value.
 		 */
 		public char[] getValue() {
 			return this.value;
 		}
+
 
 		static class Generated extends Nonce {
 
@@ -352,6 +348,7 @@ public class AwsEc2AuthenticationOptions {
 			}
 
 		}
+
 
 		static class Provided extends Nonce {
 
@@ -362,6 +359,7 @@ public class AwsEc2AuthenticationOptions {
 		}
 
 	}
+
 
 	/**
 	 * Enumeration for the Instance metadata service version.

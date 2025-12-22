@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
@@ -84,19 +85,19 @@ class GcpIamCredentialsAuthenticationUnitTests {
 
 		String serverName = InProcessServerBuilder.generateName();
 		this.server = InProcessServerBuilder.forName(serverName)
-			.directExecutor()
-			.addService(ServerServiceDefinition.builder("google.iam.credentials.v1.IAMCredentials")
-				.addMethod(MethodDescriptor
-					.newBuilder(ProtoLiteUtils.marshaller(SignJwtRequest.getDefaultInstance()),
-							ProtoLiteUtils.marshaller(SignJwtResponse.getDefaultInstance()))
-					.setType(MethodDescriptor.MethodType.UNARY)
-					.setFullMethodName("google.iam.credentials.v1.IAMCredentials/SignJwt")
-					.build(), asyncUnaryCall((request, responseObserver) -> {
-						this.serverCall.invoke(request, responseObserver);
-					}))
-				.build())
-			.build()
-			.start();
+				.directExecutor()
+				.addService(ServerServiceDefinition.builder("google.iam.credentials.v1.IAMCredentials")
+						.addMethod(MethodDescriptor
+								.newBuilder(ProtoLiteUtils.marshaller(SignJwtRequest.getDefaultInstance()),
+										ProtoLiteUtils.marshaller(SignJwtResponse.getDefaultInstance()))
+								.setType(MethodDescriptor.MethodType.UNARY)
+								.setFullMethodName("google.iam.credentials.v1.IAMCredentials/SignJwt")
+								.build(), asyncUnaryCall((request, responseObserver) -> {
+									this.serverCall.invoke(request, responseObserver);
+								}))
+						.build())
+				.build()
+				.start();
 		this.managedChannel = InProcessChannelBuilder.forName(serverName).directExecutor().build();
 	}
 
@@ -109,37 +110,38 @@ class GcpIamCredentialsAuthenticationUnitTests {
 	void shouldLogin() throws NoSuchAlgorithmException {
 		this.serverCall = ((request, responseObserver) -> {
 			SignJwtResponse signJwtResponse = SignJwtResponse.newBuilder()
-				.setSignedJwt("my-jwt")
-				.setKeyId("key-id")
-				.build();
+					.setSignedJwt("my-jwt")
+					.setKeyId("key-id")
+					.build();
 			responseObserver.onNext(signJwtResponse);
 			responseObserver.onCompleted();
 		});
 
 		this.mockRest.expect(requestTo("/auth/gcp/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.role").value("dev-role"))
-			.andExpect(jsonPath("$.jwt").value("my-jwt"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role"))
+				.andExpect(jsonPath("$.jwt").value("my-jwt"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
 		kpg.initialize(2048);
 		KeyPair kp = kpg.generateKeyPair();
 
 		ServiceAccountCredentials credential = (ServiceAccountCredentials) ServiceAccountCredentials.newBuilder()
-			.setClientEmail("hello@world")
-			.setProjectId("foobar")
-			.setPrivateKey(kp.getPrivate())
-			.setPrivateKeyId("key-id")
-			.setAccessToken(new AccessToken("foobar", Date.from(Instant.now().plus(1, ChronoUnit.DAYS))))
-			.build();
+				.setClientEmail("hello@world")
+				.setProjectId("foobar")
+				.setPrivateKey(kp.getPrivate())
+				.setPrivateKeyId("key-id")
+				.setAccessToken(new AccessToken("foobar", Date.from(Instant.now().plus(1, ChronoUnit.DAYS))))
+				.build();
 
 		GcpIamCredentialsAuthenticationOptions options = GcpIamCredentialsAuthenticationOptions.builder()
-			.role("dev-role")
-			.credentials(credential)
-			.build();
+				.role("dev-role")
+				.credentials(credential)
+				.build();
 		GcpIamCredentialsAuthentication authentication = new GcpIamCredentialsAuthentication(options, this.restTemplate,
 				FixedTransportChannelProvider.create(GrpcTransportChannel.create(managedChannel)));
 
@@ -158,17 +160,17 @@ class GcpIamCredentialsAuthenticationUnitTests {
 
 		PrivateKey privateKeyMock = mock(PrivateKey.class);
 		ServiceAccountCredentials credential = (ServiceAccountCredentials) ServiceAccountCredentials.newBuilder()
-			.setClientEmail("hello@world")
-			.setProjectId("foobar")
-			.setPrivateKey(privateKeyMock)
-			.setPrivateKeyId("key-id")
-			.setAccessToken(new AccessToken("foobar", Date.from(Instant.now().plus(1, ChronoUnit.DAYS))))
-			.build();
+				.setClientEmail("hello@world")
+				.setProjectId("foobar")
+				.setPrivateKey(privateKeyMock)
+				.setPrivateKeyId("key-id")
+				.setAccessToken(new AccessToken("foobar", Date.from(Instant.now().plus(1, ChronoUnit.DAYS))))
+				.build();
 
 		GcpIamCredentialsAuthenticationOptions options = GcpIamCredentialsAuthenticationOptions.builder()
-			.role("dev-role")
-			.credentials(credential)
-			.build();
+				.role("dev-role")
+				.credentials(credential)
+				.build();
 
 		new GcpIamCredentialsAuthentication(options, this.restTemplate);
 	}

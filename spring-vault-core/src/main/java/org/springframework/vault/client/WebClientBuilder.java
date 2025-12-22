@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.util.ArrayList;
@@ -36,9 +37,10 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Builder that can be used to configure and create a {@link WebClient}. Provides
- * convenience methods to configure {@link #httpConnector(ClientHttpConnector)
- * ClientHttpConnector} and {@link #defaultHeader(String, String) default headers}.
+ * Builder that can be used to configure and create a {@link WebClient}.
+ * Provides convenience methods to configure
+ * {@link #httpConnector(ClientHttpConnector) ClientHttpConnector} and
+ * {@link #defaultHeader(String, String) default headers}.
  *
  * By default the built {@link WebClient} will attempt to use the most suitable
  * {@link ClientHttpConnector} using {@link ClientHttpConnectorFactory#create}.
@@ -61,8 +63,10 @@ public class WebClientBuilder {
 
 	private final Set<ExchangeFilterFunction> filterFunctions = new LinkedHashSet<>();
 
+
 	private WebClientBuilder() {
 	}
+
 
 	/**
 	 * Create a new {@link WebClientBuilder}.
@@ -72,10 +76,11 @@ public class WebClientBuilder {
 		return new WebClientBuilder();
 	}
 
+
 	/**
 	 * Set the {@link VaultEndpoint} that should be used with the {@link WebClient}.
 	 * @param endpoint the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder endpoint(VaultEndpoint endpoint) {
 		return endpointProvider(SimpleVaultEndpointProvider.of(endpoint));
@@ -83,11 +88,11 @@ public class WebClientBuilder {
 
 	/**
 	 * Set the {@link VaultEndpointProvider} that should be used with the
-	 * {@link WebClient}. {@link VaultEndpointProvider#getVaultEndpoint()} is called on
-	 * {@link reactor.core.scheduler.Schedulers#boundedElastic() a dedicated Thread} to
-	 * ensure that I/O threads are never blocked.
+	 * {@link WebClient}. {@link VaultEndpointProvider#getVaultEndpoint()} is called
+	 * on {@link reactor.core.scheduler.Schedulers#boundedElastic() a dedicated
+	 * Thread} to ensure that I/O threads are never blocked.
 	 * @param provider the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder endpointProvider(VaultEndpointProvider provider) {
 		return endpointProvider(ReactiveVaultClients.wrap(provider));
@@ -97,40 +102,34 @@ public class WebClientBuilder {
 	 * Set the {@link ReactiveVaultEndpointProvider} that should be used with the
 	 * {@link WebClient}.
 	 * @param provider the {@link VaultEndpoint} provider.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder endpointProvider(ReactiveVaultEndpointProvider provider) {
-
 		Assert.notNull(provider, "ReactiveVaultEndpointProvider must not be null");
-
 		this.endpointProvider = provider;
-
 		return this;
 	}
 
 	/**
-	 * Set the {@link ClientHttpConnector} that should be used with the {@link WebClient}.
+	 * Set the {@link ClientHttpConnector} that should be used with the
+	 * {@link WebClient}.
 	 * @param httpConnector the HTTP connector.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder httpConnector(ClientHttpConnector httpConnector) {
-
 		Assert.notNull(httpConnector, "ClientHttpConnector must not be null");
-
 		return httpConnectorFactory(() -> httpConnector);
 	}
 
 	/**
-	 * Set the {@link Supplier} of {@link ClientHttpConnector} that should be called each
-	 * time we {@link #build()} a new {@link WebClient} instance.
+	 * Set the {@link Supplier} of {@link ClientHttpConnector} that should be called
+	 * each time we {@link #build()} a new {@link WebClient} instance.
 	 * @param httpConnector the supplier for the HTTP connector.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 * @since 2.2.1
 	 */
 	public WebClientBuilder httpConnectorFactory(Supplier<ClientHttpConnector> httpConnector) {
-
 		Assert.notNull(httpConnector, "Supplier of ClientHttpConnector must not be null");
-
 		this.httpConnector = httpConnector;
 		return this;
 	}
@@ -140,41 +139,35 @@ public class WebClientBuilder {
 	 * {@link HttpRequest}.
 	 * @param name the name of the header.
 	 * @param value the header value.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder defaultHeader(String name, String value) {
-
 		Assert.hasText(name, "Header name must not be null or empty");
-
 		this.defaultHeaders.put(name, value);
-
 		return this;
 	}
 
 	/**
-	 * Add the {@link WebClientCustomizer WebClientCustomizers} that should be applied to
-	 * the {@link WebClient}. Customizers are applied in the order that they were added.
+	 * Add the {@link WebClientCustomizer WebClientCustomizers} that should be
+	 * applied to the {@link WebClient}. Customizers are applied in the order that
+	 * they were added.
 	 * @param customizer the client customizers to add.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder customizers(WebClientCustomizer... customizer) {
-
 		this.customizers.addAll(Arrays.asList(customizer));
-
 		return this;
 	}
 
 	/**
 	 * Add the {@link ExchangeFilterFunction ExchangeFilterFunctions} that should be
-	 * applied to the {@link ClientRequest}. {@link ExchangeFilterFunction}s are applied
-	 * in the order that they were added.
+	 * applied to the {@link ClientRequest}. {@link ExchangeFilterFunction}s are
+	 * applied in the order that they were added.
 	 * @param filterFunctions the request customizers to add.
-	 * @return {@code this} {@link WebClientBuilder}.
+	 * @return this builder.
 	 */
 	public WebClientBuilder filter(ExchangeFilterFunction... filterFunctions) {
-
 		Assert.notNull(filterFunctions, "ExchangeFilterFunctions must not be null");
-
 		this.filterFunctions.addAll(Arrays.asList(filterFunctions));
 		return this;
 	}
@@ -182,32 +175,27 @@ public class WebClientBuilder {
 	/**
 	 * Build a new {@link WebClient}. {@link VaultEndpoint} must be set.
 	 *
-	 * Applies also {@link ExchangeFilterFunction} and {@link WebClientCustomizer} if
-	 * configured.
+	 * Applies also {@link ExchangeFilterFunction} and {@link WebClientCustomizer}
+	 * if configured.
 	 * @return a new {@link WebClient}.
 	 */
 	public WebClient build() {
-
 		WebClient.Builder builder = createWebClientBuilder();
-
 		if (!this.defaultHeaders.isEmpty()) {
-
 			Map<String, String> defaultHeaders = this.defaultHeaders;
 			builder.filter((request, next) -> {
-
 				return next
-					.exchange(ClientRequest.from(request).headers(headers -> defaultHeaders.forEach((key, value) -> {
-						if (!headers.containsHeader(key)) {
-							headers.add(key, value);
-						}
-					})).build());
+						.exchange(
+								ClientRequest.from(request).headers(headers -> defaultHeaders.forEach((key, value) -> {
+									if (!headers.containsHeader(key)) {
+										headers.add(key, value);
+									}
+								})).build());
 			});
 		}
 
 		builder.filters(exchangeFilterFunctions -> exchangeFilterFunctions.addAll(this.filterFunctions));
-
 		this.customizers.forEach(customizer -> customizer.customize(builder));
-
 		return builder.build();
 	}
 
@@ -216,11 +204,8 @@ public class WebClientBuilder {
 	 * @return the {@link WebClient.Builder} to use.
 	 */
 	protected WebClient.Builder createWebClientBuilder() {
-
 		Assert.state(this.endpointProvider != null, "VaultEndpointProvider must not be null");
-
 		ClientHttpConnector connector = this.httpConnector.get();
-
 		return ReactiveVaultClients.createWebClientBuilder(this.endpointProvider, connector);
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.support;
 
 import java.time.Instant;
@@ -28,6 +29,7 @@ public class VaultRevisionMetadata implements RevisionMetadata<Integer> {
 
 	private final Versioned.Metadata metadata;
 
+
 	public VaultRevisionMetadata(Versioned<?> versioned) {
 		this(versioned.getRequiredMetadata());
 	}
@@ -35,6 +37,7 @@ public class VaultRevisionMetadata implements RevisionMetadata<Integer> {
 	public VaultRevisionMetadata(Versioned.Metadata metadata) {
 		this.metadata = metadata;
 	}
+
 
 	@Override
 	public Optional<Integer> getRevisionNumber() {

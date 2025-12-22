@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.IOException;
@@ -52,8 +53,7 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 
 			socket.connect(new InetSocketAddress(this.endpoint.getHost(), this.endpoint.getPort()),
 					(int) new ClientOptions().getConnectionTimeout().toMillis());
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new TestAbortedException("Vault Agent not available: " + e.getMessage());
 		}
 	}
@@ -64,8 +64,8 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(this.endpoint, this.connector);
 
 		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
-			.as(StepVerifier::create)
-			.verifyComplete();
+				.as(StepVerifier::create)
+				.verifyComplete();
 	}
 
 	@Test
@@ -76,8 +76,8 @@ class ReactiveVaultTemplateAgentIntegrationTests extends IntegrationTestSupport 
 		ReactiveVaultTemplate vaultTemplate = new ReactiveVaultTemplate(builder);
 
 		vaultTemplate.write("secret/foo", Collections.singletonMap("key", "value"))
-			.as(StepVerifier::create)
-			.verifyComplete();
+				.as(StepVerifier::create)
+				.verifyComplete();
 	}
 
 }

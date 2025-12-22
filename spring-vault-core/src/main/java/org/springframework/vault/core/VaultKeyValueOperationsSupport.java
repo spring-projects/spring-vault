@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -20,10 +21,10 @@ import java.util.List;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Interface that specifies a basic set of Vault operations using Vault's Key/Value secret
- * backend. Paths used in this operations interface are relative and outgoing requests
- * prepend paths with the according operation-specific prefix.
- * <p/>
+ * Interface that specifies a basic set of Vault operations using Vault's
+ * Key/Value secret backend. Paths used in this operations interface are
+ * relative and outgoing requests prepend paths with the according
+ * operation-specific prefix.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -35,14 +36,16 @@ public interface VaultKeyValueOperationsSupport {
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable List<String> list(String path);
+	@Nullable
+	List<String> list(String path);
 
 	/**
 	 * Read the secret at {@code path}.
 	 * @param path must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
 	 */
-	@Nullable Object get(String path);
+	@Nullable
+	Object get(String path);
 
 	/**
 	 * Delete the secret at {@code path}.
@@ -54,6 +57,7 @@ public interface VaultKeyValueOperationsSupport {
 	 * @return the used API version.
 	 */
 	KeyValueBackend getApiVersion();
+
 
 	/**
 	 * Enumeration of supported Key/Value backend API versions.

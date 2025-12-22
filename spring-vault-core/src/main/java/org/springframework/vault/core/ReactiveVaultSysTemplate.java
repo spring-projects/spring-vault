@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Map;
@@ -33,47 +34,43 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 
 	private final ReactiveVaultOperations vaultOperations;
 
+
 	/**
 	 * Create a new {@link ReactiveVaultSysTemplate} with the given
 	 * {@link ReactiveVaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public ReactiveVaultSysTemplate(ReactiveVaultOperations vaultOperations) {
-
 		Assert.notNull(vaultOperations, "ReactiveVaultOperations must not be null");
-
 		this.vaultOperations = vaultOperations;
-
 	}
+
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public Mono<Boolean> isInitialized() {
-
 		return this.vaultOperations.doWithSession(webClient -> {
 			return webClient.get()
-				.uri("sys/init")
-				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.exchangeToMono(clientResponse -> clientResponse.toEntity(Map.class))
-				.filter(HttpEntity::hasBody)
-				.map(it -> (Boolean) it.getBody().get("initialized"));
+					.uri("sys/init")
+					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
+					.exchangeToMono(clientResponse -> clientResponse.toEntity(Map.class))
+					.filter(HttpEntity::hasBody)
+					.map(it -> (Boolean) it.getBody().get("initialized"));
 		});
 	}
 
 	@Override
 	@SuppressWarnings("NullAway")
 	public Mono<VaultHealth> health() {
-
 		return this.vaultOperations.doWithVault(webClient -> {
-
 			return webClient.get()
-				.uri("sys/health")
-				.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
-				.exchangeToMono(clientResponse -> {
-					return clientResponse.toEntity(VaultSysTemplate.VaultHealthImpl.class)
-						.filter(HttpEntity::hasBody)
-						.map(HttpEntity::getBody);
-				});
+					.uri("sys/health")
+					.header(VaultHttpHeaders.VAULT_NAMESPACE, "")
+					.exchangeToMono(clientResponse -> {
+						return clientResponse.toEntity(VaultSysTemplate.VaultHealthImpl.class)
+								.filter(HttpEntity::hasBody)
+								.map(HttpEntity::getBody);
+					});
 		});
 	}
 

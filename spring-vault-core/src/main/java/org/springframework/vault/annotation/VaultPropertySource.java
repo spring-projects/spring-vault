@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.annotation;
 
 import java.lang.annotation.Documented;
@@ -26,15 +27,17 @@ import org.springframework.context.annotation.Import;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
- * {@link VaultPropertySource} to Spring's {@link org.springframework.core.env.Environment
- * Environment}. To be used in conjunction with
- * {@link org.springframework.context.annotation.Configuration @Configuration} classes.
+ * {@link VaultPropertySource} to Spring's
+ * {@link org.springframework.core.env.Environment Environment}. To be used in
+ * conjunction with
+ * {@link org.springframework.context.annotation.Configuration @Configuration}
+ * classes.
  * <h3>Example usage</h3>
- * <p>
- * Given a Vault path {@code secret/my-application} containing the configuration data pair
- * {@code database.password=mysecretpassword}, the following {@code @Configuration} class
- * uses {@code @VaultPropertySource} to contribute {@code secret/my-application} to the
- * {@code Environment}'s set of {@code PropertySources}.
+ * <p>Given a Vault path {@code secret/my-application} containing the
+ * configuration data pair {@code database.password=mysecretpassword}, the
+ * following {@code @Configuration} class uses {@code @VaultPropertySource} to
+ * contribute {@code secret/my-application} to the {@code Environment}'s set of
+ * {@code PropertySources}.
  *
  * <pre class="code">
  * &#064;Configuration
@@ -54,18 +57,19 @@ import org.springframework.context.annotation.Import;
  * </pre>
  *
  * Notice that the {@code Environment} object is
- * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} into the
- * configuration class and then used when populating the {@code TestBean} object. Given
- * the configuration above, a call to {@code testBean.getPassword()} will return
- * "mysecretpassword".
- * <p>
- * In certain situations, it may not be possible or practical to tightly control property
- * source ordering when using {@code @VaultPropertySource} annotations. For example, if
- * the {@code @Configuration} classes above were registered via component-scanning, the
- * ordering is difficult to predict. In such cases - and if overriding is important - it
- * is recommended that the user fall back to using the programmatic PropertySource API.
- * See {@link org.springframework.core.env.ConfigurableEnvironment} and
- * {@link org.springframework.core.env.MutablePropertySources} javadocs for details.
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired}
+ * into the configuration class and then used when populating the
+ * {@code TestBean} object. Given the configuration above, a call to
+ * {@code testBean.getPassword()} will return "mysecretpassword".
+ * <p>In certain situations, it may not be possible or practical to tightly
+ * control property source ordering when using {@code @VaultPropertySource}
+ * annotations. For example, if the {@code @Configuration} classes above were
+ * registered via component-scanning, the ordering is difficult to predict. In
+ * such cases - and if overriding is important - it is recommended that the user
+ * fall back to using the programmatic PropertySource API. See
+ * {@link org.springframework.core.env.ConfigurableEnvironment} and
+ * {@link org.springframework.core.env.MutablePropertySources} javadocs for
+ * details.
  *
  * @author Mark Paluch
  * @see org.springframework.vault.core.env.VaultPropertySource
@@ -81,30 +85,29 @@ public @interface VaultPropertySource {
 	/**
 	 * Indicate the Vault path(s) of the secret to be retrieved. For example,
 	 * {@code "secret/myapp"} or {@code "secret/my-application/profile"}.
-	 * <p>
-	 * Each location will be added to the enclosing {@code Environment} as its own
-	 * property source, and in the order declared.
+	 * <p>Each location will be added to the enclosing {@code Environment} as its
+	 * own property source, and in the order declared.
 	 */
 	String[] value();
 
 	/**
-	 * Property name prefix for properties obtained from Vault. All properties will be
-	 * prefixed with {@code propertyNamePrefix}.
+	 * Property name prefix for properties obtained from Vault. All properties will
+	 * be prefixed with {@code propertyNamePrefix}.
 	 */
 	String propertyNamePrefix() default "";
 
 	/**
 	 * Indicate if failure to find the {@link #value() secrets} should be ignored.
-	 * <p>
-	 * {@literal true} is appropriate if the secrets are completely optional. Default is
-	 * {@literal true}.
+	 * <p>{@literal true} is appropriate if the secrets are completely optional.
+	 * Default is {@literal true}.
 	 * @since 2.2.
 	 */
 	boolean ignoreSecretNotFound() default true;
 
 	/**
-	 * Configure the name of the {@link org.springframework.vault.core.VaultTemplate} bean
-	 * to be used with the property sources.
+	 * Configure the name of the
+	 * {@link org.springframework.vault.core.VaultTemplate} bean to be used with the
+	 * property sources.
 	 */
 	String vaultTemplateRef() default "vaultTemplate";
 
