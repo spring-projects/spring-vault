@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Map;
@@ -31,11 +32,11 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
- * Adapts tokens created by a {@link ClientAuthentication} to a {@link LoginToken}. Allows
- * decoration of a {@link ClientAuthentication} object to perform a self-lookup after
- * token retrieval to obtain the remaining TTL, renewability, accessor and token type.
- * <p>
- * Using this adapter decrements the usage counter for the created token.
+ * Adapts tokens created by a {@link ClientAuthentication} to a
+ * {@link LoginToken}. Allows decoration of a {@link ClientAuthentication}
+ * object to perform a self-lookup after token retrieval to obtain the remaining
+ * TTL, renewability, accessor and token type.
+ * <p>Using this adapter decrements the usage counter for the created token.
  *
  * @author Mark Paluch
  * @since 1.1
@@ -47,6 +48,7 @@ public class LoginTokenAdapter implements ClientAuthentication {
 
 	private final RestOperations restOperations;
 
+
 	/**
 	 * Create a new {@link LoginTokenAdapter} given {@link ClientAuthentication} to
 	 * decorate and {@link RestOperations}.
@@ -54,10 +56,8 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public LoginTokenAdapter(ClientAuthentication delegate, RestOperations restOperations) {
-
 		Assert.notNull(delegate, "ClientAuthentication delegate must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.delegate = delegate;
 		this.restOperations = restOperations;
 	}
@@ -79,7 +79,6 @@ public class LoginTokenAdapter implements ClientAuthentication {
 	}
 
 	private static Map<String, Object> lookupSelf(RestOperations restOperations, VaultToken token) {
-
 		try {
 			ResponseEntity<VaultResponse> entity = restOperations.exchange("auth/token/lookup-self", HttpMethod.GET,
 					new HttpEntity<>(VaultHttpHeaders.from(token)), VaultResponse.class);
@@ -87,12 +86,10 @@ public class LoginTokenAdapter implements ClientAuthentication {
 			Assert.state(entity.getBody() != null && entity.getBody().getData() != null, "Token response is null");
 
 			return entity.getBody().getData();
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed: %s %s".formatted(e.getStatusCode(),
 					VaultResponses.getError(e.getResponseBodyAsString())), e);
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw new VaultTokenLookupException("Token self-lookup failed", e);
 		}
 	}

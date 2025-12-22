@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
@@ -37,9 +38,9 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 	void shouldLoginSuccessfully() {
 
 		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
-			.username(username)
-			.password(password)
-			.build();
+				.username(username)
+				.password(password)
+				.build();
 
 		UsernamePasswordAuthentication authentication = new UsernamePasswordAuthentication(options, restTemplate);
 		VaultToken login = authentication.login();
@@ -51,9 +52,9 @@ class UsernamePasswordAuthenticationIntegrationTests extends UsernamePasswordAut
 	void shouldLoginUsingAuthenticationSteps() {
 
 		UsernamePasswordAuthenticationOptions options = UsernamePasswordAuthenticationOptions.builder()
-			.username(username)
-			.password(password)
-			.build();
+				.username(username)
+				.password(password)
+				.build();
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				UsernamePasswordAuthentication.createAuthenticationSteps(options), restTemplate);

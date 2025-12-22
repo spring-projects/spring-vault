@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import org.springframework.http.HttpHeaders;
@@ -33,7 +34,6 @@ public abstract class VaultHttpHeaders {
 
 	/**
 	 * The HTTP {@code X-Vault-Namespace} header field name.
-	 *
 	 * @since 2.2
 	 */
 	public static final String VAULT_NAMESPACE = "X-Vault-Namespace";
@@ -42,18 +42,15 @@ public abstract class VaultHttpHeaders {
 	}
 
 	/**
-	 * Create {@link HttpHeaders} given {@link VaultToken}. The resulting object can be
-	 * used to authenticate HTTP requests.
+	 * Create {@link HttpHeaders} given {@link VaultToken}. The resulting object can
+	 * be used to authenticate HTTP requests.
 	 * @param vaultToken must not be {@literal null}.
 	 * @return {@link HttpHeaders} containing the {@link VaultToken}.
 	 */
 	public static HttpHeaders from(VaultToken vaultToken) {
-
 		Assert.notNull(vaultToken, "VaultToken must not be null");
-
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VAULT_TOKEN, vaultToken.getToken());
-
 		return headers;
 	}
 

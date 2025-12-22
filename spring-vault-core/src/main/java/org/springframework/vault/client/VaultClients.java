@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.net.URI;
@@ -36,8 +37,8 @@ import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 /**
- * Vault Client factory to create {@link RestTemplate} configured to the needs of
- * accessing Vault.
+ * Vault Client factory to create {@link RestTemplate} configured to the needs
+ * of accessing Vault.
  *
  * @author Mark Paluch
  * @see VaultEndpoint
@@ -47,15 +48,15 @@ public class VaultClients {
 
 	/**
 	 * Create a {@link RestTemplate} configured with {@link VaultEndpoint} and
-	 * {@link ClientHttpRequestFactory}. The template accepts relative URIs without a
-	 * leading slash that are expanded to use {@link VaultEndpoint}. {@link RestTemplate}
-	 * is configured with a {@link ClientHttpRequestInterceptor} to enforce serialization
-	 * to a byte array prior continuing the request. Eager serialization leads to a known
-	 * request body size that is required to send a
+	 * {@link ClientHttpRequestFactory}. The template accepts relative URIs without
+	 * a leading slash that are expanded to use {@link VaultEndpoint}.
+	 * {@link RestTemplate} is configured with a
+	 * {@link ClientHttpRequestInterceptor} to enforce serialization to a byte array
+	 * prior continuing the request. Eager serialization leads to a known request
+	 * body size that is required to send a
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
-	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * <p>Requires Jackson 2 for Object-to-JSON mapping.
 	 * @param endpoint must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
@@ -66,16 +67,16 @@ public class VaultClients {
 	}
 
 	/**
-	 * Create a {@link RestTemplate} configured with {@link VaultEndpointProvider} and
-	 * {@link ClientHttpRequestFactory}. The template accepts relative URIs without a
-	 * leading slash that are expanded to use {@link VaultEndpoint}. {@link RestTemplate}
-	 * is configured with a {@link ClientHttpRequestInterceptor} to enforce serialization
-	 * to a byte array prior continuing the request. Eager serialization leads to a known
-	 * request body size that is required to send a
+	 * Create a {@link RestTemplate} configured with {@link VaultEndpointProvider}
+	 * and {@link ClientHttpRequestFactory}. The template accepts relative URIs
+	 * without a leading slash that are expanded to use {@link VaultEndpoint}.
+	 * {@link RestTemplate} is configured with a
+	 * {@link ClientHttpRequestInterceptor} to enforce serialization to a byte array
+	 * prior continuing the request. Eager serialization leads to a known request
+	 * body size that is required to send a
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
-	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * <p>Requires Jackson 2 for Object-to-JSON mapping.
 	 * @param endpointProvider must not be {@literal null}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return the {@link RestTemplate}.
@@ -84,62 +85,50 @@ public class VaultClients {
 	 */
 	public static RestTemplate createRestTemplate(VaultEndpointProvider endpointProvider,
 			ClientHttpRequestFactory requestFactory) {
-
 		RestTemplate restTemplate = createRestTemplate();
-
 		restTemplate.setRequestFactory(requestFactory);
 		restTemplate.setUriTemplateHandler(createUriBuilderFactory(endpointProvider));
-
 		return restTemplate;
 	}
 
 	/**
 	 * Create a {@link RestTemplate} for Vault interaction. {@link RestTemplate} is
-	 * configured with a {@link ClientHttpRequestInterceptor} to enforce serialization to
-	 * a byte array prior continuing the request. Eager serialization leads to a known
-	 * request body size that is required to send a
+	 * configured with a {@link ClientHttpRequestInterceptor} to enforce
+	 * serialization to a byte array prior continuing the request. Eager
+	 * serialization leads to a known request body size that is required to send a
 	 * {@link org.springframework.http.HttpHeaders#CONTENT_LENGTH} request header.
 	 * Otherwise, Vault will deny body processing.
-	 * <p>
-	 * Requires Jackson 2 for Object-to-JSON mapping.
+	 * <p>Requires Jackson 2 for Object-to-JSON mapping.
 	 * @return the {@link RestTemplate}.
 	 * @see MappingJackson2HttpMessageConverter
 	 */
 	public static RestTemplate createRestTemplate() {
-
 		List<HttpMessageConverter<?>> messageConverters = new ArrayList<>(3);
 		messageConverters.add(new ByteArrayHttpMessageConverter());
 		messageConverters.add(new StringHttpMessageConverter());
 		messageConverters.add(new MappingJackson2HttpMessageConverter());
-
 		RestTemplate restTemplate = new RestTemplate(messageConverters);
-
 		restTemplate.getInterceptors().add((request, body, execution) -> execution.execute(request, body));
-
 		return restTemplate;
 	}
 
 	/**
-	 * Create a {@link ClientHttpRequestInterceptor} that associates each request with a
-	 * {@code X-Vault-Namespace} header if the header is not present.
-	 * @param namespace the Vault namespace to use. Must not be {@literal null} or empty.
+	 * Create a {@link ClientHttpRequestInterceptor} that associates each request
+	 * with a {@code X-Vault-Namespace} header if the header is not present.
+	 * @param namespace the Vault namespace to use. Must not be {@literal null} or
+	 * empty.
 	 * @return the {@link ClientHttpRequestInterceptor} to register with
 	 * {@link RestTemplate}.
 	 * @see VaultHttpHeaders#VAULT_NAMESPACE
 	 * @since 2.2
 	 */
 	public static ClientHttpRequestInterceptor createNamespaceInterceptor(String namespace) {
-
 		Assert.hasText(namespace, "Vault Namespace must not be empty!");
-
 		return (request, body, execution) -> {
-
 			HttpHeaders headers = request.getHeaders();
-
 			if (!headers.containsKey(VaultHttpHeaders.VAULT_NAMESPACE)) {
 				headers.add(VaultHttpHeaders.VAULT_NAMESPACE, namespace);
 			}
-
 			return execution.execute(request, body);
 		};
 	}
@@ -147,6 +136,7 @@ public class VaultClients {
 	public static UriBuilderFactory createUriBuilderFactory(VaultEndpointProvider endpointProvider) {
 		return new PrefixAwareUriBuilderFactory(endpointProvider);
 	}
+
 
 	/**
 	 * @since 2.0
@@ -156,6 +146,7 @@ public class VaultClients {
 		@Nullable
 		private final VaultEndpointProvider endpointProvider;
 
+
 		public PrefixAwareUriBuilderFactory() {
 			this.endpointProvider = null;
 		}
@@ -164,84 +155,71 @@ public class VaultClients {
 			this.endpointProvider = endpointProvider;
 		}
 
+
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
-
 			if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
 				return UriComponentsBuilder.fromUriString(uriTemplate);
 			}
-
 			if (endpointProvider != null) {
 				VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
 
 				String baseUri = toBaseUri(endpoint);
 				UriComponents uriComponents = UriComponentsBuilder
-					.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
-					.build();
-
+						.fromUriString(prepareUriTemplate(baseUri, uriTemplate))
+						.build();
 				return UriComponentsBuilder.fromUriString(baseUri).uriComponents(uriComponents);
 			}
-
 			return UriComponentsBuilder.fromUriString(uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate);
 		}
 
 	}
 
 	private static String toBaseUri(VaultEndpoint endpoint) {
-
 		return "%s://%s:%s/%s".formatted(endpoint.getScheme(), endpoint.getHost(), endpoint.getPort(),
 				endpoint.getPath());
 	}
 
 	/**
-	 * Strip/add leading slashes from {@code uriTemplate} depending on whether the base
-	 * url has a trailing slash.
+	 * Strip/add leading slashes from {@code uriTemplate} depending on whether the
+	 * base url has a trailing slash.
 	 * @param uriTemplate
 	 * @return
 	 */
 	static String prepareUriTemplate(@Nullable String baseUrl, String uriTemplate) {
-
 		if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
 			return uriTemplate;
 		}
-
 		if (baseUrl != null) {
 			return normalizePath(baseUrl, uriTemplate);
 		}
-
 		try {
 			URI uri = URI.create(uriTemplate);
-
 			if (uri.getHost() != null) {
 				return uriTemplate;
 			}
+		} catch (IllegalArgumentException ignored) {
 		}
-		catch (IllegalArgumentException e) {
-		}
-
 		if (!uriTemplate.startsWith("/")) {
 			return "/" + uriTemplate;
 		}
-
 		return uriTemplate;
 	}
 
 	/**
-	 * Normalize the URI {@code path} so that it can be combined with {@code prefix}.
+	 * Normalize the URI {@code path} so that it can be combined with
+	 * {@code prefix}.
 	 * @param prefix
 	 * @param path
 	 * @return
 	 */
 	static String normalizePath(String prefix, String path) {
-
 		if (path.startsWith("/") && prefix.endsWith("/")) {
 			return path.substring(1);
 		}
-
 		if (!path.startsWith("/") && !prefix.endsWith("/")) {
 			return "/" + path;
 		}
-
 		return path;
 	}
 

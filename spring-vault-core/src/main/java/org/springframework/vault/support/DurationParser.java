@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.time.Duration;
@@ -30,7 +31,8 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Mark Paluch
  * @since 2.3
- * @see <a href="https://golang.org/pkg/time/#ParseDuration">Go ParseDuration</a>
+ * @see <a href="https://golang.org/pkg/time/#ParseDuration">Go
+ * ParseDuration</a>
  */
 public class DurationParser {
 
@@ -38,23 +40,22 @@ public class DurationParser {
 
 	private static final Pattern VERIFY_PATTERN = Pattern.compile("(([0-9]+)(ns|us|ms|s|m|h|d))+");
 
+
 	/**
 	 * Parse a Go format duration into a {@link Duration} object.
 	 * @param duration the duration string to parse in Go's duration format.
-	 * @return the duration object. Can be {@literal null} if {@code duration} is empty.
+	 * @return the duration object. Can be {@literal null} if {@code duration} is
+	 * empty.
 	 * @throws IllegalArgumentException if unable to parse the requested duration.
 	 */
 	@Nullable
 	public static Duration parseDuration(String duration) {
-
 		if (ObjectUtils.isEmpty(duration)) {
 			return null;
 		}
-
 		if ("0".equals(duration)) {
 			return Duration.ZERO;
 		}
-
 		if (!VERIFY_PATTERN.matcher(duration.toLowerCase(Locale.ENGLISH)).matches()) {
 			throw new IllegalArgumentException("Cannot parse '%s' into a Duration".formatted(duration));
 		}
@@ -65,20 +66,18 @@ public class DurationParser {
 
 			int num = Integer.parseInt(matcher.group(1));
 			String typ = matcher.group(2);
-
 			result = switch (typ) {
-				case "ns" -> result.plus(Duration.ofNanos(num));
-				case "us" -> result.plus(Duration.ofNanos(num * 1000));
-				case "ms" -> result.plus(Duration.ofMillis(num));
-				case "s" -> result.plus(Duration.ofSeconds(num));
-				case "m" -> result.plus(Duration.ofMinutes(num));
-				case "h" -> result.plus(Duration.ofHours(num));
-				case "d" -> result.plus(Duration.ofDays(num));
-				case "w" -> result.plus(Duration.ofDays(num * 7));
-				default -> result;
+			case "ns" -> result.plus(Duration.ofNanos(num));
+			case "us" -> result.plus(Duration.ofNanos(num * 1000));
+			case "ms" -> result.plus(Duration.ofMillis(num));
+			case "s" -> result.plus(Duration.ofSeconds(num));
+			case "m" -> result.plus(Duration.ofMinutes(num));
+			case "h" -> result.plus(Duration.ofHours(num));
+			case "d" -> result.plus(Duration.ofDays(num));
+			case "w" -> result.plus(Duration.ofDays(num * 7));
+			default -> result;
 			};
 		}
-
 		return result;
 	}
 
@@ -88,9 +87,7 @@ public class DurationParser {
 	 * @return the duration formatted in Go's duration format.
 	 */
 	public static String formatDuration(Duration duration) {
-
 		StringBuilder builder = new StringBuilder();
-
 		for (TemporalUnit unit : duration.getUnits()) {
 
 			if (unit == ChronoUnit.MINUTES) {
@@ -109,7 +106,6 @@ public class DurationParser {
 				builder.append(duration.get(unit)).append("ns");
 			}
 		}
-
 		return builder.toString();
 	}
 

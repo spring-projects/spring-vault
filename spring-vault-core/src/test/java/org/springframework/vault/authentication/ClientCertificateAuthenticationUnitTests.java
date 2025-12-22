@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -57,16 +58,17 @@ class ClientCertificateAuthenticationUnitTests {
 	void loginShouldObtainToken() {
 
 		this.mockRest.expect(requestTo("/auth/my/path/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(content().json("{\"name\": \"my-default-role\"}"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(content().json("{\"name\": \"my-default-role\"}"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		ClientCertificateAuthenticationOptions options = ClientCertificateAuthenticationOptions.builder()
-			.role("my-default-role") //
-			.path("my/path")
-			.build();
+				.role("my-default-role") //
+				.path("my/path")
+				.build();
 
 		ClientCertificateAuthentication sut = new ClientCertificateAuthentication(options, this.restTemplate);
 
@@ -82,10 +84,10 @@ class ClientCertificateAuthenticationUnitTests {
 	void loginShouldFail() {
 
 		this.mockRest.expect(requestTo("/auth/cert/login")) //
-			.andRespond(withServerError());
+				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
+				.isThrownBy(() -> new ClientCertificateAuthentication(this.restTemplate).login());
 	}
 
 }

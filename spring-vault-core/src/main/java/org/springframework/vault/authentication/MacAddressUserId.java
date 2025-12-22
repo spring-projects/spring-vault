@@ -31,10 +31,10 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Mechanism to generate a UserId based on the Mac address. {@link MacAddressUserId}
- * creates a hex-encoded representation of the Mac address without any separators
- * (0123456789AB). A network interface hint can be specified optionally to select a
- * network interface (index/name).
+ * Mechanism to generate a UserId based on the Mac address.
+ * {@link MacAddressUserId} creates a hex-encoded representation of the Mac
+ * address without any separators (0123456789AB). A network interface hint can
+ * be specified optionally to select a network interface (index/name).
  *
  * @author Mark Paluch
  * @see AppIdUserIdMechanism
@@ -46,17 +46,17 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private final String networkInterfaceHint;
 
 	/**
-	 * Create a new {@link MacAddressUserId} using the {@link NetworkInterface} from the
-	 * {@link InetAddress#getLocalHost()}.
+	 * Create a new {@link MacAddressUserId} using the {@link NetworkInterface} from
+	 * the {@link InetAddress#getLocalHost()}.
 	 */
 	public MacAddressUserId() {
 		this("");
 	}
 
 	/**
-	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceIndex}. The
-	 * index is applied to {@link NetworkInterface#getNetworkInterfaces()} to obtain the
-	 * desired network interface.
+	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceIndex}.
+	 * The index is applied to {@link NetworkInterface#getNetworkInterfaces()} to
+	 * obtain the desired network interface.
 	 * @param networkInterfaceIndex must be greater or equal to zero.
 	 */
 	public MacAddressUserId(int networkInterfaceIndex) {
@@ -67,9 +67,10 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	}
 
 	/**
-	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceName}. This
-	 * name is compared with {@link NetworkInterface#getName()} and
-	 * {@link NetworkInterface#getDisplayName()} to obtain the desired network interface.
+	 * Create a new {@link MacAddressUserId} using a {@code networkInterfaceName}.
+	 * This name is compared with {@link NetworkInterface#getName()} and
+	 * {@link NetworkInterface#getDisplayName()} to obtain the desired network
+	 * interface.
 	 * @param networkInterfaceName must not be {@literal null}.
 	 */
 	public MacAddressUserId(String networkInterfaceName) {
@@ -91,8 +92,7 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 				try {
 					networkInterface = getNetworkInterface(Integer.parseInt(this.networkInterfaceHint), interfaces);
-				}
-				catch (NumberFormatException e) {
+				} catch (NumberFormatException e) {
 					networkInterface = getNetworkInterface((this.networkInterfaceHint), interfaces);
 				}
 			}
@@ -101,7 +101,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 
 				if (StringUtils.hasText(this.networkInterfaceHint)) {
 					this.logger
-						.warn("Did not find a NetworkInterface applying hint %s".formatted(this.networkInterfaceHint));
+							.warn("Did not find a NetworkInterface applying hint %s"
+									.formatted(this.networkInterfaceHint));
 				}
 
 				InetAddress localHost = InetAddress.getLocalHost();
@@ -113,11 +114,10 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			}
 
 			return networkInterface.map(MacAddressUserId::getRequiredNetworkAddress) //
-				.map(Sha256::toHexString) //
-				.map(Sha256::toSha256) //
-				.orElseThrow(() -> new IllegalStateException("Cannot determine NetworkInterface"));
-		}
-		catch (IOException e) {
+					.map(Sha256::toHexString) //
+					.map(Sha256::toSha256) //
+					.orElseThrow(() -> new IllegalStateException("Cannot determine NetworkInterface"));
+		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -135,8 +135,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private static Optional<NetworkInterface> getNetworkInterface(String hint, List<NetworkInterface> interfaces) {
 
 		return interfaces.stream() //
-			.filter(anInterface -> matchesHint(hint, anInterface)) //
-			.findFirst();
+				.filter(anInterface -> matchesHint(hint, anInterface)) //
+				.findFirst();
 	}
 
 	private static boolean matchesHint(String hint, NetworkInterface networkInterface) {
@@ -148,17 +148,16 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 			List<NetworkInterface> interfaces) {
 
 		return interfaces.stream() //
-			.filter(MacAddressUserId::hasNetworkAddress) //
-			.sorted(Comparator.comparingInt(NetworkInterface::getIndex)) //
-			.findFirst();
+				.filter(MacAddressUserId::hasNetworkAddress) //
+				.sorted(Comparator.comparingInt(NetworkInterface::getIndex)) //
+				.findFirst();
 	}
 
 	private static Optional<byte[]> getNetworkAddress(NetworkInterface it) {
 
 		try {
 			return Optional.ofNullable(it.getHardwareAddress());
-		}
-		catch (SocketException e) {
+		} catch (SocketException e) {
 			throw new IllegalStateException("Cannot determine hardware address for %s".formatted(it.getName()));
 		}
 	}
@@ -166,8 +165,8 @@ public class MacAddressUserId implements AppIdUserIdMechanism {
 	private static byte[] getRequiredNetworkAddress(NetworkInterface it) {
 
 		return getNetworkAddress(it) //
-			.orElseThrow(() -> new IllegalStateException(
-					"Network interface %s has no hardware address".formatted(it.getName())));
+				.orElseThrow(() -> new IllegalStateException(
+						"Network interface %s has no hardware address".formatted(it.getName())));
 	}
 
 	private static boolean hasNetworkAddress(NetworkInterface it) {

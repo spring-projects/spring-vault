@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,22 +51,22 @@ class ReactiveVaultClientsIntegrationTests extends IntegrationTestSupport {
 		}, ClientHttpConnectorFactory.create(new ClientOptions(), Settings.createSslConfiguration()));
 
 		client.get()
-			.uri("/sys/health")
-			.exchangeToMono(it -> it.bodyToMono(String.class))
-			.as(StepVerifier::create)
-			.consumeNextWith(actual -> {
-				assertThat(actual).contains("initialized").contains("standby");
-			})
-			.verifyComplete();
+				.uri("/sys/health")
+				.exchangeToMono(it -> it.bodyToMono(String.class))
+				.as(StepVerifier::create)
+				.consumeNextWith(actual -> {
+					assertThat(actual).contains("initialized").contains("standby");
+				})
+				.verifyComplete();
 
 		client.get()
-			.uri("sys/health")
-			.exchangeToMono(it -> it.bodyToMono(String.class))
-			.as(StepVerifier::create)
-			.consumeNextWith(actual -> {
-				assertThat(actual).contains("initialized").contains("standby");
-			})
-			.verifyComplete();
+				.uri("sys/health")
+				.exchangeToMono(it -> it.bodyToMono(String.class))
+				.as(StepVerifier::create)
+				.consumeNextWith(actual -> {
+					assertThat(actual).contains("initialized").contains("standby");
+				})
+				.verifyComplete();
 
 		assertThat(resolver).hasValue(Thread.currentThread());
 	}

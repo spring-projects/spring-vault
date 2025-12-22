@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.function.Supplier;
@@ -22,12 +23,10 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link KubernetesAuthentication}.
- * <p>
- * Authentication options provide the path, role and jwt supplier.
- * {@link KubernetesAuthentication} can be constructed using {@link #builder()}. Instances
- * of this class are immutable once constructed.
- * <p>
- * Defaults to obtain the token from
+ * <p>Authentication options provide the path, role and jwt supplier.
+ * {@link KubernetesAuthentication} can be constructed using {@link #builder()}.
+ * Instances of this class are immutable once constructed.
+ * <p>Defaults to obtain the token from
  * {@code /var/run/secrets/kubernetes.io/serviceaccount/token} on each login.
  *
  * @author Michal Budzyn
@@ -41,6 +40,7 @@ import org.springframework.util.Assert;
 public class KubernetesAuthenticationOptions {
 
 	public static final String DEFAULT_KUBERNETES_AUTHENTICATION_PATH = "kubernetes";
+
 
 	/**
 	 * Path of the kubernetes authentication backend mount.
@@ -57,6 +57,7 @@ public class KubernetesAuthenticationOptions {
 	 */
 	private final Supplier<String> jwtSupplier;
 
+
 	private KubernetesAuthenticationOptions(String path, String role, Supplier<String> jwtSupplier) {
 
 		this.path = path;
@@ -64,12 +65,14 @@ public class KubernetesAuthenticationOptions {
 		this.jwtSupplier = jwtSupplier;
 	}
 
+
 	/**
 	 * @return a new {@link KubernetesAuthenticationOptionsBuilder}.
 	 */
 	public static KubernetesAuthenticationOptionsBuilder builder() {
 		return new KubernetesAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the kubernetes authentication backend mount.
@@ -92,6 +95,7 @@ public class KubernetesAuthenticationOptions {
 		return this.jwtSupplier;
 	}
 
+
 	/**
 	 * Builder for {@link KubernetesAuthenticationOptions}.
 	 */
@@ -105,15 +109,17 @@ public class KubernetesAuthenticationOptions {
 		@Nullable
 		private Supplier<String> jwtSupplier;
 
+		KubernetesAuthenticationOptionsBuilder() {
+		}
+
+
 		/**
 		 * Configure the mount path.
 		 * @param path must not be {@literal null} or empty.
-		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public KubernetesAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -122,12 +128,10 @@ public class KubernetesAuthenticationOptions {
 		 * Configure the role.
 		 * @param role name of the role against which the login is being attempted, must
 		 * not be {@literal null} or empty.
-		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public KubernetesAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be empty");
-
 			this.role = role;
 			return this;
 		}
@@ -135,13 +139,11 @@ public class KubernetesAuthenticationOptions {
 		/**
 		 * Configure the {@link Supplier} to obtain a Kubernetes authentication token.
 		 * @param jwtSupplier the supplier, must not be {@literal null}.
-		 * @return {@code this} {@link KubernetesAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see KubernetesJwtSupplier
 		 */
 		public KubernetesAuthenticationOptionsBuilder jwtSupplier(Supplier<String> jwtSupplier) {
-
 			Assert.notNull(jwtSupplier, "JwtSupplier must not be null");
-
 			this.jwtSupplier = jwtSupplier;
 			return this;
 		}
@@ -151,9 +153,7 @@ public class KubernetesAuthenticationOptions {
 		 * @return a new {@link KubernetesAuthenticationOptions}.
 		 */
 		public KubernetesAuthenticationOptions build() {
-
 			Assert.notNull(this.role, "Role must not be null");
-
 			return new KubernetesAuthenticationOptions(this.path, this.role,
 					this.jwtSupplier == null ? new KubernetesServiceAccountTokenFile() : this.jwtSupplier);
 		}

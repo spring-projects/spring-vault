@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Map;
@@ -23,14 +24,13 @@ import org.springframework.vault.support.Versioned.Metadata;
 import org.springframework.vault.support.Versioned.Version;
 
 /**
- * Interface that specifies a basic set of Vault operations using Vault's versioned
- * Key/Value (kv version 2) secret backend. Paths used in this operations interface are
- * relative and outgoing requests prepend paths with the according operation-specific
- * prefix.
- * <p/>
- * Clients using versioned Key/Value must be aware they are reading from a versioned
- * backend as the versioned Key/Value API (kv version 2) is different from the unversioned
- * Key/Value API (kv version 1).
+ * Interface that specifies a basic set of Vault operations using Vault's
+ * versioned Key/Value (kv version 2) secret backend. Paths used in this
+ * operations interface are relative and outgoing requests prepend paths with
+ * the according operation-specific prefix.
+ * <p>Clients using versioned Key/Value must be aware they are reading from a
+ * versioned backend as the versioned Key/Value API (kv version 2) is different
+ * from the unversioned Key/Value API (kv version 1).
  *
  * @author Mark Paluch
  * @since 2.1
@@ -59,8 +59,8 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	<T> Versioned<T> get(String path, Version version);
 
 	/**
-	 * Read the most recent secret at {@code path} and deserialize the secret to the given
-	 * {@link Class responseType}.
+	 * Read the most recent secret at {@code path} and deserialize the secret to the
+	 * given {@link Class responseType}.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -71,8 +71,8 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	}
 
 	/**
-	 * Read the requested {@link Version} of the secret at {@code path} and deserialize
-	 * the secret to the given {@link Class responseType}.
+	 * Read the requested {@link Version} of the secret at {@code path} and
+	 * deserialize the secret to the given {@link Class responseType}.
 	 * @param path must not be {@literal null}.
 	 * @param version must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
@@ -82,8 +82,8 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 	<T> Versioned<T> get(String path, Version version, Class<T> responseType);
 
 	/**
-	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body} may be
-	 * either plain secrets (e.g. map) or {@link Versioned} objects. Using
+	 * Write the {@link Versioned versioned secret} at {@code path}. {@code body}
+	 * may be either plain secrets (e.g. map) or {@link Versioned} objects. Using
 	 * {@link Versioned} will apply versioning for Compare-and-Set (CAS).
 	 * @param path must not be {@literal null}.
 	 * @param body must not be {@literal null}.
@@ -116,8 +116,8 @@ public interface VaultVersionedKeyValueOperations extends VaultKeyValueOperation
 
 	/**
 	 * Return {@link VaultKeyValueMetadataOperations}
-	 * @return the operations interface to interact with the Vault Key/Value metadata
-	 * backend
+	 * @return the operations interface to interact with the Vault Key/Value
+	 * metadata backend
 	 */
 	VaultKeyValueMetadataOperations opsForKeyValueMetadata();
 

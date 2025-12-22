@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.core;
 
 import java.util.ArrayList;
@@ -30,9 +31,10 @@ import org.springframework.lang.Nullable;
 import org.springframework.vault.repository.query.VaultQuery;
 
 /**
- * Query engine for Vault repository query methods. This engine queries Vault for all
- * elements in the keyspace and applies {@link java.util.function.Predicate}s to the
- * object id. Queries can contain only predicate subjects pointing to the
+ * Query engine for Vault repository query methods. This engine queries Vault
+ * for all elements in the keyspace and applies
+ * {@link java.util.function.Predicate}s to the object id. Queries can contain
+ * only predicate subjects pointing to the
  * {@link org.springframework.data.annotation.Id} property.
  *
  * @author Mark Paluch

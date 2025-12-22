@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.time.Duration;
@@ -41,7 +42,8 @@ import org.springframework.vault.util.IntegrationTestSupport;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link VaultTokenTemplate} through {@link VaultTokenOperations}.
+ * Integration tests for {@link VaultTokenTemplate} through
+ * {@link VaultTokenOperations}.
  *
  * @author Mark Paluch
  * @author Nanne Baars
@@ -71,16 +73,16 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void createTokenShouldCreateACustomizedToken() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.displayName("display") //
-			.explicitMaxTtl(Duration.ofHours(5)) //
-			.ttl(Duration.ofMinutes(30 * 60)) //
-			.policies(Collections.singleton("root")) //
-			.numUses(2) //
-			.renewable() //
-			.noDefaultPolicy() //
-			.noParent() //
-			.id(UUID.randomUUID().toString()) //
-			.build();
+				.displayName("display") //
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
+				.policies(Collections.singleton("root")) //
+				.numUses(2) //
+				.renewable() //
+				.noDefaultPolicy() //
+				.noParent() //
+				.id(UUID.randomUUID().toString()) //
+				.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
@@ -90,7 +92,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void createTokenWithRoleShouldCreateAToken() {
 
 		prepare().getVaultOperations()
-			.doWithSession(template -> template.postForEntity("auth/token/roles/my-role", Map.of(), String.class));
+				.doWithSession(template -> template.postForEntity("auth/token/roles/my-role", Map.of(), String.class));
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create("my-role");
 		assertThat(tokenResponse.getAuth()).containsKey("client_token");
@@ -105,8 +107,8 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void createTokenWithEntityAliasShouldCreateAToken() {
 
 		prepare().getVaultOperations()
-			.doWithSession(template -> template.postForEntity("auth/token/roles/my-role",
-					Map.of("allowed_entity_aliases", "my-entity-alias"), String.class));
+				.doWithSession(template -> template.postForEntity("auth/token/roles/my-role",
+						Map.of("allowed_entity_aliases", "my-entity-alias"), String.class));
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create("my-role",
 				VaultTokenRequest.builder().entityAlias("my-entity-alias").build());
@@ -124,16 +126,16 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void createOrphanTokenShouldCreateACustomizedToken() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.displayName("display") //
-			.explicitMaxTtl(Duration.ofHours(5)) //
-			.ttl(Duration.ofMinutes(30 * 60)) //
-			.policies(Collections.singleton("root")) //
-			.numUses(2) //
-			.renewable() //
-			.noDefaultPolicy() //
-			.noParent() //
-			.id(UUID.randomUUID().toString()) //
-			.build();
+				.displayName("display") //
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
+				.policies(Collections.singleton("root")) //
+				.numUses(2) //
+				.renewable() //
+				.noDefaultPolicy() //
+				.noParent() //
+				.id(UUID.randomUUID().toString()) //
+				.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.createOrphan(tokenRequest);
 		assertThat(tokenResponse.getAuth()).containsEntry("client_token", tokenRequest.getId());
@@ -143,10 +145,10 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 	void renewShouldRenewToken() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.explicitMaxTtl(Duration.ofHours(5)) //
-			.ttl(Duration.ofMinutes(30 * 60)) //
-			.renewable() //
-			.build();
+				.explicitMaxTtl(Duration.ofHours(5)) //
+				.ttl(Duration.ofMinutes(30 * 60)) //
+				.renewable() //
+				.build();
 
 		VaultTokenResponse tokenResponse = this.tokenOperations.create(tokenRequest);
 		VaultTokenResponse renew = this.tokenOperations.renew(tokenResponse.getToken());
@@ -160,7 +162,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 		VaultTokenResponse tokenResponse = this.tokenOperations.create();
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> this.tokenOperations.renew(tokenResponse.getToken()));
+				.isThrownBy(() -> this.tokenOperations.renew(tokenResponse.getToken()));
 	}
 
 	@Test
@@ -171,8 +173,7 @@ class VaultTokenTemplateIntegrationTests extends IntegrationTestSupport {
 
 		try {
 			lookupSelf(tokenResponse);
-		}
-		catch (VaultException e) {
+		} catch (VaultException e) {
 			assertThat(e).hasMessageContaining("permission denied");
 		}
 	}

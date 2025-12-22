@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.util.Optional;
@@ -23,8 +24,8 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.platform.commons.util.AnnotationUtils;
 
 /**
- * This is an {@link org.junit.jupiter.api.extension.ExecutionCondition} that supports the
- * {@link RequiresVaultVersion @RequiresVaultVersion} and
+ * This is an {@link org.junit.jupiter.api.extension.ExecutionCondition} that
+ * supports the {@link RequiresVaultVersion @RequiresVaultVersion} and
  * {@link DisabledOnVaultVersion @DisabledOnVaultVersion} annotations.
  *
  * @author Mark Paluch
@@ -36,58 +37,47 @@ class VaultVersionExtension implements ExecutionCondition {
 	private static final ExtensionContext.Namespace VAULT = ExtensionContext.Namespace.create("vault.version");
 
 	private static final ConditionEvaluationResult ENABLED_BY_DEFAULT = ConditionEvaluationResult
-		.enabled("@VaultVersion is not present");
+			.enabled("@VaultVersion is not present");
+
 
 	@Override
 	public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
-
 		Optional<RequiresVaultVersion> required = AnnotationUtils.findAnnotation(context.getElement(),
 				RequiresVaultVersion.class);
-
 		Optional<DisabledOnVaultVersion> disabled = AnnotationUtils.findAnnotation(context.getElement(),
 				DisabledOnVaultVersion.class);
-
 		if (required.isEmpty() && disabled.isEmpty()) {
 			return ENABLED_BY_DEFAULT;
 		}
-
 		ExtensionContext.Store store = context.getStore(VAULT);
-
 		Version runningVersion = store.getOrComputeIfAbsent(Version.class, versionClass -> {
-
 			VaultInitializer initializer = new VaultInitializer();
 			initializer.initialize();
 			return initializer.prepare().getVersion();
 		}, Version.class);
 
 		if (required.isPresent()) {
-
 			Version requiredVersion = Version.parse(required.get().value());
-
 			if (runningVersion.isGreaterThanOrEqualTo(requiredVersion)) {
 				return ConditionEvaluationResult
-					.enabled("Test is enabled, @VaultVersion(%s) is met with Vault running version %s"
-						.formatted(requiredVersion, runningVersion));
+						.enabled("Test is enabled, @VaultVersion(%s) is met with Vault running version %s"
+								.formatted(requiredVersion, runningVersion));
 			}
-
 			return ConditionEvaluationResult
-				.disabled("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s"
-					.formatted(requiredVersion, runningVersion));
+					.disabled("Test is disabled, @VaultVersion(%s) is not met with Vault running version %s"
+							.formatted(requiredVersion, runningVersion));
 		}
 
 		if (disabled.isPresent()) {
-
 			Version disabledVersion = Version.parse(disabled.get().value());
-
 			if (runningVersion.isGreaterThanOrEqualTo(disabledVersion)) {
 				return ConditionEvaluationResult
-					.disabled("Test is disabled, @DisabledOnVaultVersion(%s) is met with Vault running version %s"
-						.formatted(disabledVersion, runningVersion));
+						.disabled("Test is disabled, @DisabledOnVaultVersion(%s) is met with Vault running version %s"
+								.formatted(disabledVersion, runningVersion));
 			}
-
 			return ConditionEvaluationResult
-				.enabled("Test is enabled, @DisabledOnVaultVersion(%s) is not met with Vault running version %s"
-					.formatted(disabledVersion, runningVersion));
+					.enabled("Test is enabled, @DisabledOnVaultVersion(%s) is not met with Vault running version %s"
+							.formatted(disabledVersion, runningVersion));
 		}
 
 		return ENABLED_BY_DEFAULT;

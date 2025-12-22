@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 
 /**
- * Holds the response from encryption operation and provides methods to access the result.
+ * Holds the response from encryption operation and provides methods to access
+ * the result.
  *
  * @author Lauren Voswinkel
  * @since 2.3
@@ -27,6 +29,7 @@ import org.springframework.vault.VaultException;
 public class VaultTransformEncodeResult extends AbstractResult<TransformCiphertext> {
 
 	private final @Nullable TransformCiphertext cipherText;
+
 
 	/**
 	 * Create {@link VaultTransformEncodeResult} for a successfully encrypted
@@ -42,14 +45,13 @@ public class VaultTransformEncodeResult extends AbstractResult<TransformCipherte
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultTransformEncodeResult(VaultException exception) {
-
 		super(exception);
 		this.cipherText = null;
 	}
 
-	@Nullable
+
 	@Override
-	protected TransformCiphertext get0() {
+	protected @Nullable TransformCiphertext get0() {
 		return this.cipherText;
 	}
 
@@ -62,7 +64,6 @@ public class VaultTransformEncodeResult extends AbstractResult<TransformCipherte
 	 */
 	@Nullable
 	public String getAsString() {
-
 		TransformCiphertext ciphertext = get();
 		return ciphertext == null ? null : ciphertext.getCiphertext();
 	}

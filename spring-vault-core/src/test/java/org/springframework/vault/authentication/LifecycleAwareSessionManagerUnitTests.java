@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -20,7 +21,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.net.ssl.SSLException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,7 +49,6 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestOperations;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -117,7 +116,7 @@ class LifecycleAwareSessionManagerUnitTests {
 		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
 		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
-			.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
+				.thenReturn(new ResponseEntity<>(vaultResponse, HttpStatus.OK));
 
 		LoginToken sessionToken = (LoginToken) this.sessionManager.getSessionToken();
 		assertThat(sessionToken.getLeaseDuration()).isEqualTo(Duration.ofSeconds(100));
@@ -140,7 +139,7 @@ class LifecycleAwareSessionManagerUnitTests {
 		when(this.clientAuthentication.login()).thenReturn(VaultToken.of("login"));
 
 		when(this.restOperations.exchange(anyString(), any(), any(), ArgumentMatchers.<Class>any()))
-			.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
+				.thenThrow(new HttpClientErrorException(HttpStatus.FORBIDDEN));
 
 		VaultToken sessionToken = this.sessionManager.getSessionToken();
 		assertThat(sessionToken).isExactlyInstanceOf(VaultToken.class);
@@ -375,7 +374,7 @@ class LifecycleAwareSessionManagerUnitTests {
 				this.restOperations);
 
 		when(this.clientAuthentication.login())
-			.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
+				.thenReturn(LoginToken.renewable("login".toCharArray(), Duration.ofSeconds(5)));
 
 		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
 

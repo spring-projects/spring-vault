@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Collections;
@@ -29,8 +30,8 @@ import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBac
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Integration tests for {@link ReactiveVaultKeyValue2Template} using the versioned
- * Key/Value (k/v version 2) backend.
+ * Integration tests for {@link ReactiveVaultKeyValue2Template} using the
+ * versioned Key/Value (k/v version 2) backend.
  *
  * @author Timothy Weiand
  * @author Mark Paluch
@@ -59,15 +60,15 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 		var newSecret = Collections.singletonMap(newKey, "newValue");
 
 		kvOperations.patch(key, newSecret)
-			.as(StepVerifier::create)
-			.assertNext(b -> assertThat(b).isTrue())
-			.verifyComplete();
+				.as(StepVerifier::create)
+				.assertNext(b -> assertThat(b).isTrue())
+				.verifyComplete();
 
 		kvOperations.list("/")
-			.collectList()
-			.as(StepVerifier::create)
-			.assertNext(list -> assertThat(list).contains(key))
-			.verifyComplete();
+				.collectList()
+				.as(StepVerifier::create)
+				.assertNext(list -> assertThat(list).contains(key))
+				.verifyComplete();
 
 		kvOperations.get(key).as(StepVerifier::create).assertNext(vaultResponse -> {
 			var data = vaultResponse.getRequiredData();
@@ -79,14 +80,14 @@ class ReactiveVaultKeyValueTemplateVersionedIntegrationTests
 	void patchShouldFailWithSecretNotFoundException() {
 
 		kvOperations.patch("unknown", Collections.singletonMap("foo", "newValue"))
-			.as(StepVerifier::create)
-			.verifyErrorSatisfies(t -> {
+				.as(StepVerifier::create)
+				.verifyErrorSatisfies(t -> {
 
-				assertThat(t).isInstanceOf(SecretNotFoundException.class)
-					.hasMessageContaining("versioned/data/unknown");
+					assertThat(t).isInstanceOf(SecretNotFoundException.class)
+							.hasMessageContaining("versioned/data/unknown");
 
-				assertThat(((SecretNotFoundException) t).getPath()).isEqualTo("versioned/unknown");
-			});
+					assertThat(((SecretNotFoundException) t).getPath()).isEqualTo("versioned/unknown");
+				});
 	}
 
 }

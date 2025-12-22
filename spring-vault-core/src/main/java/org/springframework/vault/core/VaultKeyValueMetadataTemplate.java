@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.Map;
@@ -36,29 +37,25 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 
 	private final String basePath;
 
+
 	VaultKeyValueMetadataTemplate(VaultOperations vaultOperations, String basePath) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
-
 		this.vaultOperations = vaultOperations;
 		this.basePath = basePath;
 	}
 
+
 	@Override
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public VaultMetadataResponse get(String path) {
-
 		VaultResponseSupport<Map> response = this.vaultOperations.read(getPath(path), Map.class);
-
-		return response != null ? KeyValueUtilities.fromMap(response.getRequiredData()) : null;
+		return response != null && response.hasData() ? KeyValueUtilities.fromMap(response.getRequiredData()) : null;
 	}
 
 	@Override
 	public void put(String path, VaultMetadataRequest body) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(body, "Body must not be null");
-
 		this.vaultOperations.write(getPath(path), body);
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.time.Duration;
@@ -56,7 +57,6 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -115,20 +115,20 @@ class SecretLeaseContainerUnitTests {
 	void defaultIsExpiredShouldCalculateCorrectResult() {
 
 		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).accepts(Lease.none())
-			.accepts(Lease.of("foo", Duration.ZERO, false))
-			.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
-			.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
-			.accepts(Lease.of("foo", Duration.ofSeconds(10), false))
-			.rejects(Lease.of("foo", Duration.ofSeconds(11), false));
+				.accepts(Lease.of("foo", Duration.ZERO, false))
+				.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
+				.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
+				.accepts(Lease.of("foo", Duration.ofSeconds(10), false))
+				.rejects(Lease.of("foo", Duration.ofSeconds(11), false));
 
 		this.secretLeaseContainer.setMinRenewal(Duration.ofMinutes(2));
 
 		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).accepts(Lease.none())
-			.accepts(Lease.of("foo", Duration.ZERO, false))
-			.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
-			.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
-			.accepts(Lease.of("foo", Duration.ofSeconds(120), false))
-			.rejects(Lease.of("foo", Duration.ofSeconds(121), false));
+				.accepts(Lease.of("foo", Duration.ZERO, false))
+				.accepts(Lease.fromTimeToLive(Duration.ofHours(1)))
+				.accepts(Lease.of("foo", Duration.ofSeconds(9), false))
+				.accepts(Lease.of("foo", Duration.ofSeconds(120), false))
+				.rejects(Lease.of("foo", Duration.ofSeconds(121), false));
 	}
 
 	@Test
@@ -137,8 +137,8 @@ class SecretLeaseContainerUnitTests {
 		secretLeaseContainer.setExpiryPredicate(lease -> "expired".equals(lease.getLeaseId()));
 
 		assertThat((Predicate<Lease>) secretLeaseContainer::isExpired).rejects(Lease.none())
-			.rejects(Lease.of("not-expired", Duration.ZERO, false))
-			.accepts(Lease.of("expired", Duration.ZERO, false));
+				.rejects(Lease.of("not-expired", Duration.ZERO, false))
+				.accepts(Lease.of("expired", Duration.ZERO, false));
 	}
 
 	@Test
@@ -244,7 +244,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 
@@ -263,7 +263,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 
@@ -314,7 +314,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenThrow(new VaultException("Renewal failure"));
+				.thenThrow(new VaultException("Renewal failure"));
 
 		this.secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
 		this.secretLeaseContainer.start();
@@ -340,10 +340,12 @@ class SecretLeaseContainerUnitTests {
 
 		this.secretLeaseContainer.addRequestedSecret(RequestedSecret.rotating(this.requestedSecret.getPath()));
 		this.secretLeaseContainer.addLeaseListener(new LeaseListenerAdapter() {
+
 			@Override
 			public void onLeaseEvent(SecretLeaseEvent leaseEvent) {
 				events.add(leaseEvent);
 			}
+
 		});
 
 		this.secretLeaseContainer.start();
@@ -459,7 +461,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(5), true));
 
 		this.secretLeaseContainer.start();
 
@@ -562,7 +564,8 @@ class SecretLeaseContainerUnitTests {
 		this.secretLeaseContainer.addRequestedSecret(secret);
 		this.secretLeaseContainer.start();
 
-		Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler> renewals = (Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler>) ReflectionTestUtils.getField(this.secretLeaseContainer, "renewals");
+		Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler> renewals = (Map<RequestedSecret, SecretLeaseContainer.LeaseRenewalScheduler>) ReflectionTestUtils
+				.getField(this.secretLeaseContainer, "renewals");
 
 		SecretLeaseContainer.LeaseRenewalScheduler scheduler = renewals.get(secret);
 		Lease lease = scheduler.getLease();
@@ -600,7 +603,7 @@ class SecretLeaseContainerUnitTests {
 
 		prepareRenewal();
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
+				.thenThrow(new HttpClientErrorException(HttpStatus.I_AM_A_TEAPOT));
 
 		this.secretLeaseContainer.start();
 
@@ -626,7 +629,7 @@ class SecretLeaseContainerUnitTests {
 		prepareRenewal();
 
 		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
-			.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
+				.thenReturn(Lease.of("new_lease", Duration.ofSeconds(70), true));
 
 		this.secretLeaseContainer.start();
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.util;
 
 import java.util.LinkedHashMap;
@@ -22,16 +23,16 @@ import java.util.Map.Entry;
 import org.springframework.util.Assert;
 
 /**
- * Implementations of {@link PropertyTransformer} that provide various useful property
- * transformation operations, prefixing, etc.
+ * Implementations of {@link PropertyTransformer} that provide various useful
+ * property transformation operations, prefixing, etc.
  *
  * @author Mark Paluch
  */
 public abstract class PropertyTransformers {
 
 	/**
-	 * @return "no-operation" transformer which simply returns given name as is. Used
-	 * commonly as placeholder or marker.
+	 * @return "no-operation" transformer which simply returns given name as is.
+	 * Used commonly as placeholder or marker.
 	 */
 	public static PropertyTransformer noop() {
 		return NoOpPropertyTransformer.instance();
@@ -52,6 +53,7 @@ public abstract class PropertyTransformers {
 	public static PropertyTransformer propertyNamePrefix(String propertyNamePrefix) {
 		return KeyPrefixPropertyTransformer.forPrefix(propertyNamePrefix);
 	}
+
 
 	/**
 	 * {@link PropertyTransformer} that passes the given properties through without
@@ -79,6 +81,7 @@ public abstract class PropertyTransformers {
 
 	}
 
+
 	/**
 	 * {@link PropertyTransformer} to remove {@literal null}-value properties.
 	 */
@@ -86,8 +89,10 @@ public abstract class PropertyTransformers {
 
 		static RemoveNullProperties INSTANCE = new RemoveNullProperties();
 
+
 		private RemoveNullProperties() {
 		}
+
 
 		/**
 		 * @return the {@link PropertyTransformer} instance.
@@ -96,24 +101,21 @@ public abstract class PropertyTransformers {
 			return INSTANCE;
 		}
 
+
 		@Override
 		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
-
 			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
-
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
-
 				if (entry.getValue() == null) {
 					continue;
 				}
-
 				target.put(entry.getKey(), entry.getValue());
 			}
-
 			return target;
 		}
 
 	}
+
 
 	/**
 	 * {@link PropertyTransformer} that adds a prefix to each key name.
@@ -122,12 +124,12 @@ public abstract class PropertyTransformers {
 
 		private final String propertyNamePrefix;
 
+
 		private KeyPrefixPropertyTransformer(String propertyNamePrefix) {
-
 			Assert.notNull(propertyNamePrefix, "Property name prefix must not be null");
-
 			this.propertyNamePrefix = propertyNamePrefix;
 		}
+
 
 		public String getPropertyNamePrefix() {
 			return propertyNamePrefix;
@@ -136,8 +138,8 @@ public abstract class PropertyTransformers {
 		/**
 		 * Create a new {@link KeyPrefixPropertyTransformer} that adds a prefix to each
 		 * key name.
-		 * @param propertyNamePrefix the property name prefix to be added in front of each
-		 * property name, must not be {@literal null}.
+		 * @param propertyNamePrefix the property name prefix to be added in front of
+		 * each property name, must not be {@literal null}.
 		 * @return a new {@link KeyPrefixPropertyTransformer} that adds a prefix to each
 		 * key name.
 		 */
@@ -147,13 +149,10 @@ public abstract class PropertyTransformers {
 
 		@Override
 		public Map<String, Object> transformProperties(Map<String, ? extends Object> input) {
-
 			Map<String, Object> target = new LinkedHashMap<>(input.size(), 1);
-
 			for (Entry<String, ? extends Object> entry : input.entrySet()) {
 				target.put(this.propertyNamePrefix + entry.getKey(), entry.getValue());
 			}
-
 			return target;
 		}
 

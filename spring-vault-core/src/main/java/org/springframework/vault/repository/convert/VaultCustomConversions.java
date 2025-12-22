@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import java.util.ArrayList;
@@ -30,8 +31,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.vault.repository.mapping.VaultSimpleTypes;
 
 /**
- * Value object to capture custom conversion. {@link VaultCustomConversions} also act as
- * factory for {@link org.springframework.data.mapping.model.SimpleTypeHolder}
+ * Value object to capture custom conversion. {@link VaultCustomConversions}
+ * also act as factory for
+ * {@link org.springframework.data.mapping.model.SimpleTypeHolder}
  *
  * @author Mark Paluch
  * @since 2.0
@@ -55,8 +57,9 @@ public class VaultCustomConversions extends org.springframework.data.convert.Cus
 		STORE_CONVERSIONS = StoreConversions.of(VaultSimpleTypes.HOLDER, STORE_CONVERTERS);
 	}
 
+
 	/**
-	 * Creates an empty {@link VaultCustomConversions} object.
+	 * Create an empty {@code VaultCustomConversions} object.
 	 */
 	VaultCustomConversions() {
 		this(Collections.emptyList());
@@ -71,16 +74,15 @@ public class VaultCustomConversions extends org.springframework.data.convert.Cus
 		super(STORE_CONVERSIONS, converters);
 	}
 
+
 	@WritingConverter
 	private enum CustomToStringConverter implements GenericConverter {
 
 		INSTANCE;
 
 		public Set<ConvertiblePair> getConvertibleTypes() {
-
 			ConvertiblePair localeToString = new ConvertiblePair(Locale.class, String.class);
 			ConvertiblePair booleanToString = new ConvertiblePair(Character.class, String.class);
-
 			return new HashSet<>(Arrays.asList(localeToString, booleanToString));
 		}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import org.springframework.vault.VaultException;
@@ -28,6 +29,7 @@ public class SecretNotFoundException extends VaultException {
 
 	private final String path;
 
+
 	/**
 	 * Create a {@code SecretNotFoundException} with the specified detail message.
 	 * @param msg the detail message.
@@ -39,8 +41,8 @@ public class SecretNotFoundException extends VaultException {
 	}
 
 	/**
-	 * Create a {@code SecretNotFoundException} with the specified detail message and
-	 * nested exception.
+	 * Create a {@code SecretNotFoundException} with the specified detail message
+	 * and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 * @param path the canonical data path.
@@ -49,6 +51,7 @@ public class SecretNotFoundException extends VaultException {
 		super(msg, cause);
 		this.path = path;
 	}
+
 
 	/**
 	 * @return the path to the requested secret.

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -61,12 +62,12 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldObtainIdentityDocumentV1() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andRespond(withSuccess().body("Hello, world"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("Hello, world"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
 
@@ -77,14 +78,14 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldObtainIdentityDocument() {
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
-			.andExpect(method(HttpMethod.PUT)) //
-			.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
-			.andRespond(withSuccess().body("my-token"));
+				.andExpect(method(HttpMethod.PUT)) //
+				.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
+				.andRespond(withSuccess().body("my-token"));
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
-			.andRespond(withSuccess().body("Hello, world"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
+				.andRespond(withSuccess().body("Hello, world"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(this.restTemplate);
 
@@ -95,24 +96,24 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldObtainIdentityDocumentWithImperativeAuthenticationStepsV2() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(InstanceMetadataServiceVersion.V2)
-			.build();
+				.version(InstanceMetadataServiceVersion.V2)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/api/token")) //
-			.andExpect(method(HttpMethod.PUT)) //
-			.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
-			.andRespond(withSuccess().body("my-token"));
+				.andExpect(method(HttpMethod.PUT)) //
+				.andExpect(header("X-aws-ec2-metadata-token-ttl-seconds", "60")) //
+				.andRespond(withSuccess().body("my-token"));
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
-			.andRespond(withSuccess().body("Hello, world"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andExpect(header("X-aws-ec2-metadata-token", "my-token")) //
+				.andRespond(withSuccess().body("Hello, world"));
 
 		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.pkcs7").value("Hello, world"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.pkcs7").value("Hello, world"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AuthenticationSteps steps = AwsEc2Authentication.createAuthenticationSteps(options);
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(steps, this.restTemplate);
@@ -124,12 +125,12 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldCleanUpIdentityResponse() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andRespond(withSuccess().body("Hello, \r\r\n\nworld"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("Hello, \r\r\n\nworld"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
 
@@ -140,21 +141,21 @@ class AwsEc2AuthenticationUnitTests {
 	void shouldContainRole() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.role("ami")
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.role("ami")
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andRespond(withSuccess().body("Hello, world"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("Hello, world"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(options, this.restTemplate, this.restTemplate);
 
 		assertThat(authentication.getEc2Login()) //
-			.containsEntry("pkcs7", "Hello, world") //
-			.containsEntry("role", "ami") //
-			.containsKey("nonce")
-			.hasSize(3);
+				.containsEntry("pkcs7", "Hello, world") //
+				.containsEntry("role", "ami") //
+				.containsKey("nonce")
+				.hasSize(3);
 	}
 
 	@Test
@@ -163,20 +164,20 @@ class AwsEc2AuthenticationUnitTests {
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
 		AwsEc2AuthenticationOptions authenticationOptions = AwsEc2AuthenticationOptions.builder()
-			.nonce(nonce)
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.nonce(nonce)
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andRespond(withSuccess().body("value"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("value"));
 
 		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.pkcs7").value("value"))
-			.andExpect(jsonPath("$.nonce").value("foo"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.pkcs7").value("value"))
+				.andExpect(jsonPath("$.nonce").value("foo"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AwsEc2Authentication authentication = new AwsEc2Authentication(authenticationOptions, this.restTemplate,
 				this.restTemplate);
@@ -195,20 +196,20 @@ class AwsEc2AuthenticationUnitTests {
 		Nonce nonce = Nonce.provided("foo".toCharArray());
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.nonce(nonce)
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.nonce(nonce)
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andExpect(method(HttpMethod.GET)) //
-			.andRespond(withSuccess().body("value"));
+				.andExpect(method(HttpMethod.GET)) //
+				.andRespond(withSuccess().body("value"));
 
 		this.mockRest.expect(requestTo("/auth/aws-ec2/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.pkcs7").value("value"))
-			.andExpect(jsonPath("$.nonce").value("foo"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.pkcs7").value("value"))
+				.andExpect(jsonPath("$.nonce").value("foo"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"lease_duration\":20}" + "}"));
 
 		AuthenticationStepsExecutor executor = new AuthenticationStepsExecutor(
 				AwsEc2Authentication.createAuthenticationSteps(options), this.restTemplate);
@@ -224,33 +225,35 @@ class AwsEc2AuthenticationUnitTests {
 	void loginShouldFailWhileObtainingIdentityDocument() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("http://169.254.169.254/latest/dynamic/instance-identity/pkcs7")) //
-			.andRespond(withServerError());
+				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate).login());
+				.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate).login());
 	}
 
 	@Test
 	void loginShouldFail() {
 
 		AwsEc2AuthenticationOptions options = AwsEc2AuthenticationOptions.builder()
-			.version(InstanceMetadataServiceVersion.V1)
-			.build();
+				.version(InstanceMetadataServiceVersion.V1)
+				.build();
 
 		this.mockRest.expect(requestTo("/auth/aws-ec2/login")) //
-			.andRespond(withServerError());
+				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate) {
-				@Override
-				protected Map<String, String> getEc2Login() {
-					return Collections.singletonMap("pkcs7", "value");
-				}
-			}.login());
+				.isThrownBy(() -> new AwsEc2Authentication(options, this.restTemplate, this.restTemplate) {
+
+					@Override
+					protected Map<String, String> getEc2Login() {
+						return Collections.singletonMap("pkcs7", "value");
+					}
+
+				}.login());
 	}
 
 }

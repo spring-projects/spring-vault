@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.query;
 
 import org.springframework.data.keyvalue.core.KeyValueOperations;
@@ -37,15 +38,15 @@ import org.springframework.vault.repository.mapping.VaultPersistentProperty;
 public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 
 	/**
-	 * Creates a new {@link VaultPartTreeQuery} for the given {@link QueryMethod},
-	 * {@link EvaluationContextProvider}, {@link KeyValueOperations} and query creator
-	 * type.
+	 * Create a new {@code VaultPartTreeQuery} for the given {@link QueryMethod},
+	 * {@link EvaluationContextProvider}, {@link KeyValueOperations} and query
+	 * creator type.
 	 * @param queryMethod must not be {@literal null}.
 	 * @param evaluationContextProvider must not be {@literal null}.
 	 * @param keyValueOperations must not be {@literal null}.
 	 * @param queryCreator must not be {@literal null}.
 	 */
-	@SuppressWarnings({ "unchecked", "RedundantCast", "rawtypes" })
+	@SuppressWarnings({"unchecked", "RedundantCast", "rawtypes"})
 	public VaultPartTreeQuery(QueryMethod queryMethod, QueryMethodEvaluationContextProvider evaluationContextProvider,
 			KeyValueOperations keyValueOperations, Class<? extends AbstractQueryCreator<?, ?>> queryCreator) {
 
@@ -54,18 +55,21 @@ public class VaultPartTreeQuery extends KeyValuePartTreeQuery {
 						(MappingContext) keyValueOperations.getMappingContext()));
 	}
 
+
 	static class VaultQueryCreatorFactory
 			implements KeyValuePartTreeQuery.QueryCreatorFactory<AbstractQueryCreator<KeyValueQuery<?>, ?>> {
 
 		private final MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext;
+
 
 		public VaultQueryCreatorFactory(
 				MappingContext<VaultPersistentEntity<?>, VaultPersistentProperty> mappingContext) {
 			this.mappingContext = mappingContext;
 		}
 
+
 		@Override
-		@SuppressWarnings({ "unchecked", "rawtypes" })
+		@SuppressWarnings({"unchecked", "rawtypes"})
 		public AbstractQueryCreator<KeyValueQuery<?>, ?> queryCreatorFor(PartTree partTree,
 				ParameterAccessor accessor) {
 			return (AbstractQueryCreator) new VaultQueryCreator(partTree, accessor, this.mappingContext);

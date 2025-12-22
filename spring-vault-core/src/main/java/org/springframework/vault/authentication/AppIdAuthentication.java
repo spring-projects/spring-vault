@@ -28,15 +28,16 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
- * AppId implementation of {@link ClientAuthentication}. {@link AppIdAuthentication} uses
- * a configured {@link AppIdUserIdMechanism} to obtain or calculate a UserId. AppId and
- * UserId are sent in the login request to Vault to obtain a {@link VaultToken}.
+ * AppId implementation of {@link ClientAuthentication}.
+ * {@link AppIdAuthentication} uses a configured {@link AppIdUserIdMechanism} to
+ * obtain or calculate a UserId. AppId and UserId are sent in the login request
+ * to Vault to obtain a {@link VaultToken}.
  *
  * @author Mark Paluch
  * @see AppIdAuthenticationOptions
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth Backend: App
- * ID</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/app-id.html">Auth
+ * Backend: App ID</a>
  * @deprecated since 2.2. Use {@link AppRoleAuthentication}.
  */
 @Deprecated(since = "2.2", forRemoval = true)
@@ -44,40 +45,39 @@ public class AppIdAuthentication implements ClientAuthentication, Authentication
 
 	private static final Log logger = LogFactory.getLog(AppIdAuthentication.class);
 
+
 	private final AppIdAuthenticationOptions options;
 
 	private final RestOperations restOperations;
 
+
 	/**
-	 * Create a {@link AppIdAuthentication} using {@link AppIdAuthenticationOptions} and
-	 * {@link RestOperations}.
+	 * Create {@code AppIdAuthentication} using {@link AppIdAuthenticationOptions}
+	 * and {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public AppIdAuthentication(AppIdAuthenticationOptions options, RestOperations restOperations) {
-
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.options = options;
 		this.restOperations = restOperations;
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for AppId authentication given
+	 * Create {@code AuthenticationSteps} for AppId authentication given
 	 * {@link AppIdAuthenticationOptions}.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for AppId authentication.
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(AppIdAuthenticationOptions options) {
-
 		Assert.notNull(options, "AppIdAuthenticationOptions must not be null");
-
 		return AuthenticationSteps
-			.fromSupplier(() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId())) //
-			.login(AuthenticationUtil.getLoginPath(options.getPath()));
+				.fromSupplier(() -> getAppIdLogin(options.getAppId(), options.getUserIdMechanism().createUserId())) //
+				.login(AuthenticationUtil.getLoginPath(options.getPath()));
 	}
+
 
 	@Override
 	public VaultToken login() {
@@ -90,32 +90,23 @@ public class AppIdAuthentication implements ClientAuthentication, Authentication
 	}
 
 	private VaultToken createTokenUsingAppId() {
-
 		Map<String, String> login = getAppIdLogin(this.options.getAppId(),
 				this.options.getUserIdMechanism().createUserId());
-
 		try {
 			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
-
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), login, VaultResponse.class);
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
-
 			logger.debug("Login successful using AppId authentication");
-
 			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw VaultLoginException.create("app-id", e);
 		}
 	}
 
 	private static Map<String, String> getAppIdLogin(String appId, String userId) {
-
 		Map<String, String> login = new HashMap<>();
-
 		login.put("app_id", appId);
 		login.put("user_id", userId);
-
 		return login;
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.springframework.util.Assert;
@@ -28,20 +29,20 @@ import static org.springframework.vault.authentication.AuthenticationSteps.HttpR
  *
  * @author Mark Paluch
  * @see VaultToken
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * Token</a>
  */
 public class TokenAuthentication implements ClientAuthentication, AuthenticationStepsFactory {
 
 	private final VaultToken token;
+
 
 	/**
 	 * Create a new {@link TokenAuthentication} with a static {@code token}.
 	 * @param token the Vault token, must not be empty or {@literal null}.
 	 */
 	public TokenAuthentication(String token) {
-
 		Assert.hasText(token, "Token must not be empty");
-
 		this.token = VaultToken.of(token);
 	}
 
@@ -50,14 +51,13 @@ public class TokenAuthentication implements ClientAuthentication, Authentication
 	 * @param token the Vault token, must not be {@literal null}.
 	 */
 	public TokenAuthentication(VaultToken token) {
-
 		Assert.notNull(token, "Token must not be null");
-
 		this.token = token;
 	}
 
+
 	/**
-	 * Creates a {@link AuthenticationSteps} for token authentication given
+	 * Create {@link AuthenticationSteps} for token authentication given
 	 * {@link VaultToken}.
 	 * @param token must not be {@literal null}.
 	 * @param selfLookup {@literal true} to perform a self-lookup using the given
@@ -67,20 +67,16 @@ public class TokenAuthentication implements ClientAuthentication, Authentication
 	 * @since 2.0
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(VaultToken token, boolean selfLookup) {
-
 		Assert.notNull(token, "VaultToken must not be null");
-
 		if (selfLookup) {
-
 			HttpRequest<VaultResponse> httpRequest = get("auth/token/lookup-self").with(VaultHttpHeaders.from(token))
-				.as(VaultResponse.class);
-
+					.as(VaultResponse.class);
 			return AuthenticationSteps.fromHttpRequest(httpRequest)
-				.login(response -> LoginTokenUtil.from(token.toCharArray(), response.getRequiredData()));
+					.login(response -> LoginTokenUtil.from(token.toCharArray(), response.getRequiredData()));
 		}
-
 		return AuthenticationSteps.just(token);
 	}
+
 
 	@Override
 	public VaultToken login() {

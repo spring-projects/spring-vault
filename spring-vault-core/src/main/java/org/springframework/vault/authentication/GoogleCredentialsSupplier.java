@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
@@ -22,8 +23,9 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
 
 /**
- * Interface to obtain a {@link ServiceAccountCredentials} for GCP IAM credentials
- * authentication. Implementations are used by {@link GcpIamCredentialsAuthentication}.
+ * Interface to obtain a {@link ServiceAccountCredentials} for GCP IAM
+ * credentials authentication. Implementations are used by
+ * {@link GcpIamCredentialsAuthentication}.
  *
  * @author Andreas Gebauer
  * @since 2.3.2
@@ -39,18 +41,16 @@ public interface GoogleCredentialsSupplier extends Supplier<GoogleCredentials> {
 	 */
 	@Override
 	default GoogleCredentials get() {
-
 		try {
 			return getCredentials();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Cannot obtain GoogleCredentials", e);
 		}
 	}
 
 	/**
-	 * Get a {@link GoogleCredentials} for GCP IAM credentials authentication via JWT
-	 * signing.
+	 * Get a {@link GoogleCredentials} for GCP IAM credentials authentication via
+	 * JWT signing.
 	 * @return the {@link GoogleCredentials}.
 	 * @throws IOException if the credentials lookup fails.
 	 */

@@ -40,13 +40,13 @@ import org.springframework.web.client.RestOperations;
  * GCP IAM login implementation using GCP IAM service accounts to legitimate its
  * authenticity via JSON Web Token using the deprecated IAM
  * {@code projects.serviceAccounts.signJwt} method.
- * <p/>
- * This authentication method uses Googles IAM API to obtain a signed token for a specific
- * {@link com.google.api.client.auth.oauth2.Credential}. Project and service account
- * details are obtained from a {@link GoogleCredential} that can be retrieved either from
- * a JSON file or the runtime environment (GAE, GCE).
- * <p/>
- * {@link GcpIamAuthentication} uses Google Java API that uses synchronous API.
+ * <p>This authentication method uses Googles IAM API to obtain a signed token
+ * for a specific {@link GoogleCredential}. Project
+ * and service account details are obtained from a {@link GoogleCredential} that
+ * can be retrieved either from a JSON file or the runtime environment (GAE,
+ * GCE).
+ * <p>{@link GcpIamAuthentication} uses Google Java API that uses synchronous
+ * API.
  *
  * @author Mark Paluch
  * @author Magnus Jungsbluth
@@ -57,8 +57,8 @@ import org.springframework.web.client.RestOperations;
  * @see GoogleCredential
  * @see GoogleCredentials#getApplicationDefault()
  * @see RestOperations
- * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend: gcp
- * (IAM)</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/gcp.html">Auth Backend:
+ * gcp (IAM)</a>
  * @see <a href=
  * "https://cloud.google.com/iam/reference/rest/v1/projects.serviceAccounts/signJwt">GCP:
  * projects.serviceAccounts.signJwt</a>
@@ -69,18 +69,21 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 
 	private static final String SCOPE = "https://www.googleapis.com/auth/iam";
 
+
 	private final GcpIamAuthenticationOptions options;
 
 	private final HttpTransport httpTransport;
 
 	private final GoogleCredential credential;
 
+
 	/**
 	 * Create a new instance of {@link GcpIamAuthentication} given
-	 * {@link GcpIamAuthenticationOptions} and {@link RestOperations}. This constructor
-	 * initializes {@link NetHttpTransport} for Google API usage.
+	 * {@link GcpIamAuthenticationOptions} and {@link RestOperations}. This
+	 * constructor initializes {@link NetHttpTransport} for Google API usage.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be
+	 * {@literal null}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations) {
 		this(options, restOperations, new NetHttpTransport());
@@ -91,56 +94,46 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	 * {@link GcpIamAuthenticationOptions}, {@link RestOperations} and
 	 * {@link HttpTransport}.
 	 * @param options must not be {@literal null}.
-	 * @param restOperations HTTP client for Vault login, must not be {@literal null}.
-	 * @param httpTransport HTTP client for Google API use, must not be {@literal null}.
+	 * @param restOperations HTTP client for Vault login, must not be
+	 * {@literal null}.
+	 * @param httpTransport HTTP client for Google API use, must not be
+	 * {@literal null}.
 	 */
 	public GcpIamAuthentication(GcpIamAuthenticationOptions options, RestOperations restOperations,
 			HttpTransport httpTransport) {
-
 		super(restOperations);
-
 		Assert.notNull(options, "GcpIamAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
 		Assert.notNull(httpTransport, "HttpTransport must not be null");
-
 		this.options = options;
 		this.httpTransport = httpTransport;
 		this.credential = options.getCredentialSupplier().get().createScoped(Collections.singletonList(SCOPE));
 	}
 
+
 	@Override
 	public VaultToken login() throws VaultException {
-
 		String signedJwt = signJwt();
-
 		return doLogin("GCP-IAM", signedJwt, this.options.getPath(), this.options.getRole());
 	}
 
 	protected String signJwt() {
-
 		String projectId = getProjectId();
 		String serviceAccount = getServiceAccountId();
 		Map<String, Object> jwtPayload = getJwtPayload(this.options, serviceAccount);
-
 		Iam iam = new Builder(this.httpTransport, GoogleJsonUtil.JSON_FACTORY, this.credential)
-			.setApplicationName("Spring Vault/" + getClass().getName())
-			.build();
-
+				.setApplicationName("Spring Vault/" + getClass().getName())
+				.build();
 		try {
-
 			String payload = GoogleJsonUtil.JSON_FACTORY.toString(jwtPayload);
 			SignJwtRequest request = new SignJwtRequest();
 			request.setPayload(payload);
-
 			SignJwt signJwt = iam.projects()
-				.serviceAccounts()
-				.signJwt("projects/%s/serviceAccounts/%s".formatted(projectId, serviceAccount), request);
-
+					.serviceAccounts()
+					.signJwt("projects/%s/serviceAccounts/%s".formatted(projectId, serviceAccount), request);
 			SignJwtResponse response = signJwt.execute();
-
 			return response.getSignedJwt();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new VaultLoginException("Cannot sign JWT", e);
 		}
 	}
@@ -154,15 +147,11 @@ public class GcpIamAuthentication extends GcpJwtAuthenticationSupport implements
 	}
 
 	private static Map<String, Object> getJwtPayload(GcpIamAuthenticationOptions options, String serviceAccount) {
-
 		Instant validUntil = options.getClock().instant().plus(options.getJwtValidity());
-
 		Map<String, Object> payload = new LinkedHashMap<>();
-
 		payload.put("sub", serviceAccount);
 		payload.put("aud", "vault/" + options.getRole());
 		payload.put("exp", validUntil.getEpochSecond());
-
 		return payload;
 	}
 

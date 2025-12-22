@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.mapping;
 
 import org.springframework.data.expression.ValueExpression;
@@ -22,9 +23,7 @@ import org.springframework.data.keyvalue.core.mapping.BasicKeyValuePersistentEnt
 import org.springframework.data.keyvalue.core.mapping.KeySpaceResolver;
 import org.springframework.data.util.TypeInformation;
 import org.springframework.expression.Expression;
-import org.springframework.expression.ParserContext;
 import org.springframework.expression.common.LiteralExpression;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -44,8 +43,9 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 	private final @Nullable ValueExpression backendExpression;
 
+
 	/**
-	 * Creates new {@link BasicVaultPersistentEntity}.
+	 * Create new {@code BasicVaultPersistentEntity}.
 	 * @param information must not be {@literal null}.
 	 * @param keySpaceResolver can be {@literal null}.
 	 */
@@ -74,17 +74,16 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 			this.backend = annotation.backend();
 			this.backendExpression = detectExpression(this.backend);
 
-		}
-		else {
+		} else {
 			this.backend = "secret";
 			this.backendExpression = null;
 		}
 	}
 
 	/**
-	 * Returns a SpEL {@link Expression} if the given {@link String} is actually an
-	 * expression that does not evaluate to a {@link LiteralExpression} (indicating that
-	 * no subsequent evaluation is necessary).
+	 * Return a SpEL {@link Expression} if the given {@link String} is actually an
+	 * expression that does not evaluate to a {@link LiteralExpression} (indicating
+	 * that no subsequent evaluation is necessary).
 	 * @param potentialExpression can be {@literal null}
 	 * @return
 	 */
@@ -94,6 +93,7 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 		return expression.isLiteral() ? null : expression;
 	}
 
+
 	@Override
 	public String getKeySpace() {
 		return "%s/%s".formatted(getSecretBackend(), super.getKeySpace());
@@ -101,11 +101,10 @@ public class BasicVaultPersistentEntity<T> extends BasicKeyValuePersistentEntity
 
 	@Override
 	public String getSecretBackend() {
-
 		return this.backendExpression == null //
 				? this.backend //
 				: ObjectUtils.nullSafeToString(this.backendExpression
-					.evaluate(getValueEvaluationContext(null, backendExpression.getExpressionDependencies())));
+						.evaluate(getValueEvaluationContext(null, backendExpression.getExpressionDependencies())));
 	}
 
 }

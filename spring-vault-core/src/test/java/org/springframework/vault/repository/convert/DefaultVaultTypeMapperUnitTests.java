@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import java.util.Arrays;
@@ -168,8 +169,7 @@ class DefaultVaultTypeMapperUnitTests {
 		if (type != null) {
 			assertThat(typeInfo).isNotNull();
 			assertThat(typeInfo.getType()).isAssignableFrom(type);
-		}
-		else {
+		} else {
 			assertThat(typeInfo).isNull();
 		}
 	}
@@ -180,8 +180,7 @@ class DefaultVaultTypeMapperUnitTests {
 
 		if (field == null) {
 			assertThat(document.keySet()).isEmpty();
-		}
-		else {
+		} else {
 			assertThat(document).containsKey(field);
 			assertThat(document).containsEntry(field, type.getName());
 		}
@@ -193,8 +192,7 @@ class DefaultVaultTypeMapperUnitTests {
 
 		if (value == null) {
 			assertThat(document.keySet()).isEmpty();
-		}
-		else {
+		} else {
 			assertThat(document).containsKey(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY);
 			assertThat(document).containsEntry(DefaultVaultTypeMapper.DEFAULT_TYPE_KEY, value);
 		}

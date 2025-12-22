@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.springframework.vault.support.VaultToken;
 
 /**
- * Strategy interface that encapsulates the creation and management of Vault sessions
- * based on {@link VaultToken}.
- * <p>
- * {@link SessionManager} is used by {@link org.springframework.vault.core.VaultTemplate}
- * to initiate a session. Implementing classes usually use {@link ClientAuthentication} to
- * log into Vault and obtain tokens.
+ * Strategy interface that encapsulates the creation and management of Vault
+ * sessions based on {@link VaultToken}.
+ * <p>{@link SessionManager} is used by
+ * {@link org.springframework.vault.core.VaultTemplate} to initiate a session.
+ * Implementing classes usually use {@link ClientAuthentication} to log into
+ * Vault and obtain tokens.
  *
  * @author Mark Paluch
  * @see SimpleSessionManager

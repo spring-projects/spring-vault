@@ -19,10 +19,10 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link AppIdAuthentication}.
- * <p>
- * Authentication options provide the path, appId and a {@link AppIdUserIdMechanism}.
- * {@link AppIdAuthentication} can be constructed using {@link #builder()}. Instances of
- * this class are immutable once constructed.
+ * <p>Authentication options provide the path, appId and a
+ * {@link AppIdUserIdMechanism}. {@link AppIdAuthentication} can be constructed
+ * using {@link #builder()}. Instances of this class are immutable once
+ * constructed.
  *
  * @author Mark Paluch
  * @see AppIdAuthentication
@@ -34,6 +34,7 @@ import org.springframework.util.Assert;
 public class AppIdAuthenticationOptions {
 
 	public static final String DEFAULT_APPID_AUTHENTICATION_PATH = "app-id";
+
 
 	/**
 	 * Path of the appid authentication backend mount.
@@ -50,6 +51,7 @@ public class AppIdAuthenticationOptions {
 	 */
 	private final AppIdUserIdMechanism userIdMechanism;
 
+
 	private AppIdAuthenticationOptions(String path, String appId, AppIdUserIdMechanism userIdMechanism) {
 
 		this.path = path;
@@ -57,12 +59,14 @@ public class AppIdAuthenticationOptions {
 		this.userIdMechanism = userIdMechanism;
 	}
 
+
 	/**
 	 * @return a new {@link AppIdAuthenticationOptionsBuilder}.
 	 */
 	public static AppIdAuthenticationOptionsBuilder builder() {
 		return new AppIdAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the mount path.
@@ -85,6 +89,7 @@ public class AppIdAuthenticationOptions {
 		return this.userIdMechanism;
 	}
 
+
 	/**
 	 * Builder for {@link AppIdAuthenticationOptions}.
 	 */
@@ -96,13 +101,15 @@ public class AppIdAuthenticationOptions {
 
 		private AppIdUserIdMechanism userIdMechanism;
 
+
 		AppIdAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_APPID_AUTHENTICATION_PATH
 		 */
 		public AppIdAuthenticationOptionsBuilder path(String path) {
@@ -116,7 +123,7 @@ public class AppIdAuthenticationOptions {
 		/**
 		 * Configure the AppId.
 		 * @param appId must not be empty or {@literal null}.
-		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AppIdAuthenticationOptionsBuilder appId(String appId) {
 
@@ -129,7 +136,7 @@ public class AppIdAuthenticationOptions {
 		/**
 		 * Configure the {@link AppIdUserIdMechanism}.
 		 * @param userIdMechanism must not be {@literal null}.
-		 * @return {@code this} {@link AppIdAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AppIdAuthenticationOptionsBuilder userIdMechanism(AppIdUserIdMechanism userIdMechanism) {
 

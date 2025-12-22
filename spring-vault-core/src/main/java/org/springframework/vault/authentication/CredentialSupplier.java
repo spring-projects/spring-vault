@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.function.Supplier;
 
 /**
  * Interface to obtain an arbitrary credential that is uses in
- * {@link ClientAuthentication} or {@link AuthenticationSteps} methods. Typically,
- * implementations obtain their credential from a file.
+ * {@link ClientAuthentication} or {@link AuthenticationSteps} methods.
+ * Typically, implementations obtain their credential from a file.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -37,17 +38,14 @@ public interface CredentialSupplier extends Supplier<String> {
 	String get();
 
 	/**
-	 * Retrieve a cached {@link CredentialSupplier} that obtains the credential early and
-	 * reuses the token for each {@link #get()} call.
-	 * <p>
-	 * Reusing a cached token can lead to authentication failures if the credential
-	 * expires.
+	 * Retrieve a cached {@link CredentialSupplier} that obtains the credential
+	 * early and reuses the token for each {@link #get()} call.
+	 * <p>Reusing a cached token can lead to authentication failures if the
+	 * credential expires.
 	 * @return a caching {@link CredentialSupplier}.
 	 */
 	default CredentialSupplier cached() {
-
 		String credential = get();
-
 		return () -> credential;
 	}
 

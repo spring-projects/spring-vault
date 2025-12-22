@@ -36,34 +36,34 @@ class AppIdAuthenticationOperatorIntegrationTests extends AppIdAuthenticationInt
 	void authenticationStepsShouldLoginSuccessfully() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-			.appId("myapp") //
-			.userIdMechanism(new StaticUserId("static-userid-value")) //
-			.build();
+				.appId("myapp") //
+				.userIdMechanism(new StaticUserId("static-userid-value")) //
+				.build();
 
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
 				AppIdAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		supplier.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectNextCount(1) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 	}
 
 	@Test
 	void authenticationStepsLoginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-			.appId("wrong") //
-			.userIdMechanism(new StaticUserId("wrong")) //
-			.build();
+				.appId("wrong") //
+				.userIdMechanism(new StaticUserId("wrong")) //
+				.build();
 
 		AuthenticationStepsOperator supplier = new AuthenticationStepsOperator(
 				AppIdAuthentication.createAuthenticationSteps(options), this.webClient);
 
 		supplier.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectError() //
-			.verify();
+				.as(StepVerifier::create) //
+				.expectError() //
+				.verify();
 	}
 
 }

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.util.function.Consumer;
@@ -35,21 +36,20 @@ class DefaultRestTemplateFactory implements RestTemplateFactory {
 
 	private final Function<ClientHttpRequestFactory, RestTemplateBuilder> builderFunction;
 
+
 	DefaultRestTemplateFactory(ClientHttpRequestFactory requestFactory,
 			Function<ClientHttpRequestFactory, RestTemplateBuilder> builderFunction) {
 		this.requestFactory = requestFactory;
 		this.builderFunction = builderFunction;
 	}
 
+
 	@Override
 	public RestTemplate create(@Nullable Consumer<RestTemplateBuilder> customizer) {
-
 		RestTemplateBuilder builder = this.builderFunction.apply(this.requestFactory);
-
 		if (customizer != null) {
 			customizer.accept(builder);
 		}
-
 		return builder.build();
 	}
 

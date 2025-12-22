@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.time.Duration;
@@ -24,16 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
-import org.springframework.vault.authentication.AuthenticationEventPublisher;
-import org.springframework.vault.authentication.AuthenticationStepsFactory;
-import org.springframework.vault.authentication.AuthenticationStepsOperator;
-import org.springframework.vault.authentication.CachingVaultTokenSupplier;
-import org.springframework.vault.authentication.ClientAuthentication;
-import org.springframework.vault.authentication.ReactiveLifecycleAwareSessionManager;
-import org.springframework.vault.authentication.ReactiveSessionManager;
-import org.springframework.vault.authentication.SessionManager;
-import org.springframework.vault.authentication.TokenAuthentication;
-import org.springframework.vault.authentication.VaultTokenSupplier;
+import org.springframework.vault.authentication.*;
 import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
@@ -54,18 +46,16 @@ import org.springframework.web.reactive.function.client.WebClient;
 /**
  * Base class for Spring Vault configuration using JavaConfig for a reactive
  * infrastructure.
- * <p>
- * Reactive Vault support creates a {@link ReactiveSessionManager} (for the session token)
- * from the configured {@link #clientAuthentication()} via {@link #vaultTokenSupplier()}.
- * The authentication object must implement {@link AuthenticationStepsFactory} exposing
- * {@link org.springframework.vault.authentication.AuthenticationSteps} to obtain
- * authentication using reactive infrastructure.
- * <p>
- * This configuration class provides configuration for imperative and reactive usage.
- * Using this configuration creates an imperative {@link SessionManager} adapter by
- * wrapping {@link #reactiveSessionManager()}.
- * <p>
- * Subclasses may override methods to customize configuration.
+ * <p>Reactive Vault support creates a {@link ReactiveSessionManager} (for the
+ * session token) from the configured {@link #clientAuthentication()} via
+ * {@link #vaultTokenSupplier()}. The authentication object must implement
+ * {@link AuthenticationStepsFactory} exposing
+ * {@link org.springframework.vault.authentication.AuthenticationSteps} to
+ * obtain authentication using reactive infrastructure.
+ * <p>This configuration class provides configuration for imperative and
+ * reactive usage. Using this configuration creates an imperative
+ * {@link SessionManager} adapter by wrapping {@link #reactiveSessionManager()}.
+ * <p>Subclasses may override methods to customize configuration.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -85,8 +75,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	}
 
 	/**
-	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
-	 * and {@link ClientHttpConnector}. May be overridden by subclasses.
+	 * Create a {@link WebClientBuilder} initialized with
+	 * {@link VaultEndpointProvider} and {@link ClientHttpConnector}. May be
+	 * overridden by subclasses.
 	 * @return the {@link WebClientBuilder}.
 	 * @see #reactiveVaultEndpointProvider()
 	 * @see #clientHttpConnector()
@@ -98,8 +89,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	}
 
 	/**
-	 * Create a {@link WebClientBuilder} initialized with {@link VaultEndpointProvider}
-	 * and {@link ClientHttpConnector}. May be overridden by subclasses.
+	 * Create a {@link WebClientBuilder} initialized with
+	 * {@link VaultEndpointProvider} and {@link ClientHttpConnector}. May be
+	 * overridden by subclasses.
 	 * @return the {@link WebClientBuilder}.
 	 * @see #reactiveVaultEndpointProvider()
 	 * @see #clientHttpConnector()
@@ -107,29 +99,24 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	 */
 	protected WebClientBuilder webClientBuilder(ReactiveVaultEndpointProvider endpointProvider,
 			ClientHttpConnector httpConnector) {
-
 		ObjectProvider<WebClientCustomizer> customizers = getBeanFactory().getBeanProvider(WebClientCustomizer.class);
-
 		WebClientBuilder builder = WebClientBuilder.builder()
-			.endpointProvider(endpointProvider)
-			.httpConnector(httpConnector);
-
+				.endpointProvider(endpointProvider)
+				.httpConnector(httpConnector);
 		builder.customizers(customizers.stream().toArray(WebClientCustomizer[]::new));
-
 		return builder;
 	}
 
 	/**
-	 * Create a {@link WebClientFactory} bean that is used to produce a {@link WebClient}.
+	 * Create a {@link WebClientFactory} bean that is used to produce a
+	 * {@link WebClient}.
 	 * @return the {@link WebClientFactory}.
 	 * @see #clientHttpConnector()
 	 * @since 2.3
 	 */
 	@Bean
 	public WebClientFactory webClientFactory() {
-
 		ClientHttpConnector httpConnector = clientHttpConnector();
-
 		return new DefaultWebClientFactory(httpConnector, clientHttpConnector -> {
 			return webClientBuilder(reactiveVaultEndpointProvider(), clientHttpConnector);
 		});
@@ -145,14 +132,14 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	 */
 	@Bean
 	public ReactiveVaultTemplate reactiveVaultTemplate() {
-
 		return new ReactiveVaultTemplate(webClientBuilder(reactiveVaultEndpointProvider(), clientHttpConnector()),
 				getReactiveSessionManager());
 	}
 
 	/**
-	 * Construct a session manager adapter wrapping {@link #reactiveSessionManager()} and
-	 * exposing imperative {@link SessionManager} on top of a reactive API.
+	 * Construct a session manager adapter wrapping
+	 * {@link #reactiveSessionManager()} and exposing imperative
+	 * {@link SessionManager} on top of a reactive API.
 	 * @return the {@link SessionManager} adapter.
 	 */
 	@Bean
@@ -164,8 +151,9 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	}
 
 	/**
-	 * Construct a {@link ReactiveSessionManager} using {@link #vaultTokenSupplier()}.
-	 * This {@link org.springframework.vault.authentication.ReactiveSessionManager} uses
+	 * Construct a {@link ReactiveSessionManager} using
+	 * {@link #vaultTokenSupplier()}. This
+	 * {@link org.springframework.vault.authentication.ReactiveSessionManager} uses
 	 * {@link #threadPoolTaskScheduler()}.
 	 * @return the {@link VaultTokenSupplier} for Vault session token management.
 	 * @see VaultTokenSupplier
@@ -173,9 +161,7 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	 */
 	@Bean
 	public ReactiveSessionManager reactiveSessionManager() {
-
 		WebClient webClient = getWebClientFactory().create();
-
 		return new ReactiveLifecycleAwareSessionManager(vaultTokenSupplier(), getVaultThreadPoolTaskScheduler(),
 				webClient);
 	}
@@ -187,33 +173,28 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	 * @see #clientAuthentication()
 	 */
 	protected VaultTokenSupplier vaultTokenSupplier() {
-
 		ClientAuthentication clientAuthentication = clientAuthentication();
-
 		Assert.notNull(clientAuthentication, "ClientAuthentication must not be null");
 
 		if (clientAuthentication instanceof TokenAuthentication authentication) {
-
 			return () -> Mono.just(authentication.login());
 		}
 
 		if (clientAuthentication instanceof AuthenticationStepsFactory factory) {
-
 			WebClient webClient = getWebClientFactory().create();
 			AuthenticationStepsOperator stepsOperator = new AuthenticationStepsOperator(
 					factory.getAuthenticationSteps(), webClient);
-
 			return CachingVaultTokenSupplier.of(stepsOperator);
 		}
 
 		throw new IllegalStateException("Cannot construct VaultTokenSupplier from %s. "
 				+ "ClientAuthentication must implement AuthenticationStepsFactory or be TokenAuthentication"
-					.formatted(clientAuthentication));
+						.formatted(clientAuthentication));
 	}
 
 	/**
-	 * Create a {@link ClientHttpConnector} configured with {@link ClientOptions} and
-	 * {@link org.springframework.vault.support.SslConfiguration}.
+	 * Create a {@link ClientHttpConnector} configured with {@link ClientOptions}
+	 * and {@link org.springframework.vault.support.SslConfiguration}.
 	 * @return the {@link ClientHttpConnector} instance.
 	 * @see #clientOptions()
 	 * @see #sslConfiguration()
@@ -235,17 +216,20 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 		return getBeanFactory().getBean("reactiveSessionManager", ReactiveSessionManager.class);
 	}
 
+
 	/**
-	 * Simple {@link SessionManager} adapter using a {@link ReactiveSessionManager} to
-	 * obtain tokens.
+	 * Simple {@link SessionManager} adapter using a {@link ReactiveSessionManager}
+	 * to obtain tokens.
 	 */
 	static class ReactiveSessionManagerAdapter implements SessionManager {
 
 		private final ReactiveSessionManager sessionManager;
 
+
 		public ReactiveSessionManagerAdapter(ReactiveSessionManager sessionManager) {
 			this.sessionManager = sessionManager;
 		}
+
 
 		@Override
 		public VaultToken getSessionToken() {
@@ -253,6 +237,7 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 		}
 
 	}
+
 
 	/**
 	 * Extension to {@link ReactiveSessionManagerAdapter} that can multicast
@@ -263,10 +248,12 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 
 		private final AuthenticationEventMulticaster delegate;
 
+
 		public ReactiveMulticastingSessionManagerAdapter(ReactiveSessionManager sessionManager) {
 			super(sessionManager);
 			this.delegate = (AuthenticationEventMulticaster) sessionManager;
 		}
+
 
 		@Override
 		public void addAuthenticationListener(AuthenticationListener listener) {

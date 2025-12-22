@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.core;
 
 import org.junit.jupiter.api.Test;
@@ -48,7 +49,7 @@ class VaultKeyValueAdapterIntegrationTests extends IntegrationTestSupport {
 		VaultKeyValueAdapter adapter = new VaultKeyValueAdapter(template);
 
 		assertThatExceptionOfType(VaultException.class).isThrownBy(() -> adapter.get("some-id", "absent", Person.class))
-			.withMessageContaining("Cannot determine MountInfo");
+				.withMessageContaining("Cannot determine MountInfo");
 	}
 
 	@Test

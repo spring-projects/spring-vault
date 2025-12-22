@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -41,11 +42,11 @@ class LoginTokenUnitTests {
 
 		assertThat(LoginToken.of("token")).hasToString("LoginToken [renewable=false, leaseDuration=PT0S, type=null]");
 		assertThat(LoginToken.of("token".toCharArray(), Duration.ofSeconds(1)))
-			.hasToString("LoginToken [renewable=false, leaseDuration=PT1S, type=null]");
+				.hasToString("LoginToken [renewable=false, leaseDuration=PT1S, type=null]");
 		assertThat(LoginToken.renewable("token".toCharArray(), Duration.ofSeconds(1)))
-			.hasToString("LoginToken [renewable=true, leaseDuration=PT1S, type=null]");
+				.hasToString("LoginToken [renewable=true, leaseDuration=PT1S, type=null]");
 		assertThat(LoginToken.builder().token("foo").type("service").build())
-			.hasToString("LoginToken [renewable=false, leaseDuration=PT0S, type=service]");
+				.hasToString("LoginToken [renewable=false, leaseDuration=PT0S, type=service]");
 	}
 
 	@Test

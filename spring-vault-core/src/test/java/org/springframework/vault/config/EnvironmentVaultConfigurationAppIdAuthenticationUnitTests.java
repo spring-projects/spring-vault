@@ -29,13 +29,14 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with AppId authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with AppId
+ * authentication.
  *
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = { "vault.uri=https://localhost:8123", "vault.authentication=appid",
-		"vault.app-id.user-id=IP_ADDRESS", "vault.app-id.app-id=foo" })
+@TestPropertySource(properties = {"vault.uri=https://localhost:8123", "vault.authentication=appid",
+		"vault.app-id.user-id=IP_ADDRESS", "vault.app-id.app-id=foo"})
 class EnvironmentVaultConfigurationAppIdAuthenticationUnitTests {
 
 	@Configuration

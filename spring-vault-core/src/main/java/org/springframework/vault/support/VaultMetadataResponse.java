@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.time.Duration;
@@ -52,10 +53,10 @@ public class VaultMetadataResponse {
 
 	private final List<Versioned.Metadata> versions;
 
+
 	private VaultMetadataResponse(boolean casRequired, Instant createdTime, int currentVersion,
 			Map<String, String> customMetadata, Duration deleteVersionAfter, int maxVersions, int oldestVersion,
 			Instant updatedTime, List<Metadata> versions) {
-
 		this.casRequired = casRequired;
 		this.createdTime = createdTime;
 		this.customMetadata = customMetadata;
@@ -67,9 +68,11 @@ public class VaultMetadataResponse {
 		this.versions = versions;
 	}
 
+
 	public static VaultMetadataResponseBuilder builder() {
 		return new VaultMetadataResponseBuilder();
 	}
+
 
 	/**
 	 * @return whether compare-and-swap is required (i.e. optimistic locking).
@@ -93,8 +96,9 @@ public class VaultMetadataResponse {
 	}
 
 	/**
-	 * @return the duration after which a secret is to be deleted. {@link Period#ZERO} for
-	 * unlimited duration. Versions prior to Vault 1.2 may return {@code null}.
+	 * @return the duration after which a secret is to be deleted.
+	 * {@link Period#ZERO} for unlimited duration. Versions prior to Vault 1.2 may
+	 * return {@code null}.
 	 */
 	@Nullable
 	public Duration getDeleteVersionAfter() {
@@ -132,15 +136,19 @@ public class VaultMetadataResponse {
 
 	/**
 	 * Follows the following format. "versions": { "1": { "created_time":
-	 * "2020-05-18T12:23:09.895587932Z", "deletion_time": "2020-05-18T12:31:00.66257744Z",
-	 * "destroyed": false }, "2": { "created_time": "2020-05-18T12:23:10.122081788Z",
-	 * "deletion_time": "", "destroyed": false } }
+	 * "2020-05-18T12:23:09.895587932Z", "deletion_time":
+	 * "2020-05-18T12:31:00.66257744Z", "destroyed": false }, "2": { "created_time":
+	 * "2020-05-18T12:23:10.122081788Z", "deletion_time": "", "destroyed": false } }
 	 * @return the key versions and their details
 	 */
 	public List<Versioned.Metadata> getVersions() {
 		return this.versions;
 	}
 
+
+	/**
+	 * Builder for {@link VaultMetadataResponse}.
+	 */
 	public static class VaultMetadataResponseBuilder {
 
 		private boolean casRequired;
@@ -160,6 +168,11 @@ public class VaultMetadataResponse {
 		private Instant updatedTime;
 
 		private List<Versioned.Metadata> versions;
+
+
+		VaultMetadataResponseBuilder() {
+		}
+
 
 		public VaultMetadataResponseBuilder casRequired(boolean casRequired) {
 			this.casRequired = casRequired;

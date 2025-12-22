@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Map;
@@ -42,10 +43,10 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 		String initialToken = wrapInfo.get("token");
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-			.unwrappingEndpoints(getUnwrappingEndpoints())
-			.initialToken(VaultToken.of(initialToken))
-			.wrapped()
-			.build();
+				.unwrappingEndpoints(getUnwrappingEndpoints())
+				.initialToken(VaultToken.of(initialToken))
+				.wrapped()
+				.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
@@ -57,10 +58,10 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 	void loginShouldFail() {
 
 		CubbyholeAuthenticationOptions options = CubbyholeAuthenticationOptions.builder()
-			.unwrappingEndpoints(getUnwrappingEndpoints())
-			.initialToken(VaultToken.of("Hello"))
-			.wrapped()
-			.build();
+				.unwrappingEndpoints(getUnwrappingEndpoints())
+				.initialToken(VaultToken.of("Hello"))
+				.wrapped()
+				.build();
 
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, restTemplate);
@@ -68,8 +69,7 @@ class CubbyholeAuthenticationIntegrationTests extends CubbyholeAuthenticationInt
 		try {
 			authentication.login();
 			fail("Missing VaultException");
-		}
-		catch (VaultException e) {
+		} catch (VaultException e) {
 			assertThat(e).hasMessageContaining("Cannot login using Cubbyhole");
 		}
 	}

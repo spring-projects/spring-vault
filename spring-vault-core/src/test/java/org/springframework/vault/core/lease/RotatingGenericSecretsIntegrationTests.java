@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.util.Collections;
@@ -40,8 +41,8 @@ import static org.assertj.core.api.Assumptions.*;
  * @author Mark Paluch
  */
 @ExtendWith(SpringExtension.class)
-@SpringJUnitConfig(
-		classes = { VaultIntegrationTestConfiguration.class, RotatingGenericSecretsIntegrationTestConfiguration.class })
+@SpringJUnitConfig(classes = {VaultIntegrationTestConfiguration.class,
+		RotatingGenericSecretsIntegrationTestConfiguration.class})
 class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 
 	@BeforeAll
@@ -55,7 +56,7 @@ class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 		assumeThat(prepare.getVersion()).isGreaterThanOrEqualTo(VaultInitializer.VERSIONING_INTRODUCED_WITH);
 
 		VaultKeyValueOperations versioned = prepare.getVaultOperations()
-			.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
+				.opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2);
 
 		versioned.put("rotating", Collections.singletonMap("key", "value"));
 	}

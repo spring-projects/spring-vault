@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.core;
 
 import java.util.ArrayList;
@@ -42,7 +43,8 @@ import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.Versioned;
 
 /**
- * Vault-specific {@link org.springframework.data.keyvalue.core.KeyValueAdapter}.
+ * Vault-specific
+ * {@link org.springframework.data.keyvalue.core.KeyValueAdapter}.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -56,6 +58,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	private final KeyValueDelegate keyValueDelegate;
 
 	private final Map<String, VaultKeyValueKeyspaceAccessor> accessors = new ConcurrentHashMap<>();
+
 
 	/**
 	 * Create a new {@link VaultKeyValueAdapter} given {@link VaultOperations}.
@@ -72,16 +75,14 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	 * @param vaultConverter must not be {@literal null}.
 	 */
 	public VaultKeyValueAdapter(VaultOperations vaultOperations, VaultConverter vaultConverter) {
-
 		super(new VaultQueryEngine());
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.notNull(vaultConverter, "VaultConverter must not be null");
-
 		this.vaultOperations = vaultOperations;
 		this.vaultConverter = vaultConverter;
 		this.keyValueDelegate = new KeyValueDelegate(vaultOperations);
 	}
+
 
 	@Override
 	public Object put(Object id, Object item, String keyspace) {
@@ -108,15 +109,11 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	@Nullable
 	@Override
 	public <T> T get(Object id, String keyspace, Class<T> type) {
-
 		VaultKeyValueKeyspaceAccessor accessor = getAccessor(keyspace);
-
 		SecretDocument document = accessor.get(id.toString());
-
 		if (document == null) {
 			return null;
 		}
-
 		return this.vaultConverter.read(type, document);
 	}
 
@@ -129,53 +126,41 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	@Nullable
 	@Override
 	public <T> T delete(Object id, String keyspace, Class<T> type) {
-
 		T entity = get(id, keyspace, type);
-
 		if (entity == null) {
 			return null;
 		}
-
 		return deleteEntity(entity, keyspace);
 	}
 
 	public <T> T deleteEntity(T entity, String keyspace) {
-
 		SecretDocument document = new SecretDocument();
 		this.vaultConverter.write(entity, document);
-
 		getAccessor(keyspace).delete(document);
-
 		return entity;
 	}
 
 	@Override
 	public Iterable<?> getAllOf(String keyspace) {
-
 		List<String> list = doList(keyspace);
 		List<Object> items = new ArrayList<>(list.size());
-
 		for (String id : list) {
-
 			Object object = get(id, keyspace);
 			if (object != null) {
 				items.add(object);
 			}
 		}
-
 		return items;
 	}
 
 	@Override
 	public CloseableIterator<Entry<Object, Object>> entries(String keyspace) {
-
 		List<String> list = doList(keyspace);
 		Iterator<String> iterator = list.iterator();
-
 		return new CloseableIterator<Entry<Object, Object>>() {
+
 			@Override
 			public void close() {
-
 			}
 
 			@Override
@@ -189,6 +174,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 				final String key = iterator.next();
 
 				return new Entry<Object, Object>() {
+
 					@Override
 					public Object getKey() {
 						return key;
@@ -204,6 +190,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 					public Object setValue(Object value) {
 						throw new UnsupportedOperationException();
 					}
+
 				};
 			}
 
@@ -211,6 +198,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			public void remove() {
 				throw new UnsupportedOperationException();
 			}
+
 		};
 	}
 
@@ -243,22 +231,17 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 	}
 
 	List<String> doList(String keyspace) {
-
 		VaultKeyValueKeyspaceAccessor accessor = getAccessor(keyspace);
-
 		List<String> list = accessor.list(keyspace);
-
 		return list == null ? Collections.emptyList() : list;
 	}
 
 	private VaultKeyValueKeyspaceAccessor getAccessor(String keyspace) {
 
 		KeyValueDelegate.MountInfo mountInfo = keyValueDelegate.getMountInfo(keyspace);
-
 		if (!mountInfo.isAvailable()) {
 			throw new VaultException("Cannot determine MountInfo");
 		}
-
 		return accessors.computeIfAbsent(keyspace, it -> {
 
 			if (keyValueDelegate.isVersioned(it)) {
@@ -267,7 +250,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 			}
 
 			return new VaultKeyValue1KeyspaceAccessor(mountInfo, it, this.vaultOperations
-				.opsForKeyValue(mountInfo.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1));
+					.opsForKeyValue(mountInfo.getPath(), VaultKeyValueOperationsSupport.KeyValueBackend.KV_1));
 		});
 
 	}
@@ -288,11 +271,13 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 		private final String pathPrefix;
 
+
 		protected VaultKeyValueKeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace) {
 			this.mountInfo = mountInfo;
 			this.keyspace = keyspace;
 			this.pathPrefix = getPathInMount(keyspace);
 		}
+
 
 		@Nullable
 		abstract List<String> list(String pattern);
@@ -321,9 +306,11 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	}
 
+
 	static class VaultKeyValue1KeyspaceAccessor extends VaultKeyValueKeyspaceAccessor {
 
 		private final VaultKeyValueOperations operations;
+
 
 		public VaultKeyValue1KeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace,
 				VaultKeyValueOperations operations) {
@@ -340,21 +327,16 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		@Nullable
 		@Override
 		SecretDocument get(String id) {
-
 			VaultResponse vaultResponse = operations.get(createPath(id));
-
 			if (vaultResponse == null) {
 				return null;
 			}
-
 			return new SecretDocument(id, vaultResponse.getRequiredData());
 		}
 
 		@Override
 		SecretDocument put(SecretDocument secretDocument) {
-
 			operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());
-
 			return secretDocument;
 		}
 
@@ -370,9 +352,11 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 	}
 
+
 	static class VaultKeyValue2KeyspaceAccessor extends VaultKeyValueKeyspaceAccessor {
 
 		private final VaultVersionedKeyValueOperations operations;
+
 
 		public VaultKeyValue2KeyspaceAccessor(KeyValueDelegate.MountInfo mountInfo, String keyspace,
 				VaultVersionedKeyValueOperations operations) {
@@ -389,13 +373,10 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		@Nullable
 		@Override
 		SecretDocument get(String id) {
-
 			Versioned<Map<String, Object>> versioned = operations.get(createPath(id));
-
 			if (versioned == null || !versioned.hasData()) {
 				return null;
 			}
-
 			return new SecretDocument(id, versioned.getVersion().getVersion(), versioned.getRequiredData());
 		}
 
@@ -406,16 +387,14 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 				Versioned.Metadata metadata;
 				if (secretDocument.getVersion() != null) {
 					metadata = operations.put(createPath(secretDocument.getRequiredId()), Versioned
-						.create(secretDocument.getBody(), Versioned.Version.from(secretDocument.getVersion())));
-				}
-				else {
+							.create(secretDocument.getBody(), Versioned.Version.from(secretDocument.getVersion())));
+				} else {
 					metadata = operations.put(createPath(secretDocument.getRequiredId()), secretDocument.getBody());
 				}
 
 				return new SecretDocument(secretDocument.getRequiredId(), metadata.getVersion().getVersion(),
 						secretDocument.getBody());
-			}
-			catch (VaultException e) {
+			} catch (VaultException e) {
 				if (e.getMessage() != null
 						&& e.getMessage().contains("check-and-set parameter did not match the current version")) {
 					throw new OptimisticLockingFailureException(e.getMessage(), e);
@@ -435,8 +414,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 
 			if (document.getVersion() != null) {
 				operations.delete(createPath(document.getRequiredId()), Versioned.Version.from(document.getVersion()));
-			}
-			else {
+			} else {
 				delete(document.getRequiredId());
 			}
 		}

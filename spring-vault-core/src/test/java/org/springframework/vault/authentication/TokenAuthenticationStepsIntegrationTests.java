@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -42,10 +43,10 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 	void shouldSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.ttl(Duration.ofSeconds(60))
-			.renewable()
-			.numUses(1)
-			.build();
+				.ttl(Duration.ofSeconds(60))
+				.renewable()
+				.numUses(1)
+				.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
@@ -65,10 +66,10 @@ class TokenAuthenticationStepsIntegrationTests extends TokenAuthenticationIntegr
 	void shouldFailDuringSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.ttl(Duration.ofSeconds(60))
-			.renewable()
-			.numUses(1)
-			.build();
+				.ttl(Duration.ofSeconds(60))
+				.renewable()
+				.numUses(1)
+				.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 

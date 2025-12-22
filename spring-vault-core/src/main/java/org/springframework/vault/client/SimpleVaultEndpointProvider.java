@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import org.springframework.util.Assert;
@@ -27,12 +28,14 @@ public class SimpleVaultEndpointProvider implements VaultEndpointProvider {
 
 	private final VaultEndpoint endpoint;
 
+
 	private SimpleVaultEndpointProvider(VaultEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
 
+
 	/**
-	 * Creates a new {@link VaultEndpointProvider} given {@link VaultEndpoint}.
+	 * Create a new {@code VaultEndpointProvider} given {@link VaultEndpoint}.
 	 * @param endpoint must not be {@literal null}.
 	 */
 	public static VaultEndpointProvider of(VaultEndpoint endpoint) {
@@ -41,6 +44,7 @@ public class SimpleVaultEndpointProvider implements VaultEndpointProvider {
 
 		return new SimpleVaultEndpointProvider(endpoint);
 	}
+
 
 	@Override
 	public VaultEndpoint getVaultEndpoint() {

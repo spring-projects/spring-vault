@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.IOException;
@@ -42,10 +43,10 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Base class for {@link VaultVersionedKeyValueTemplate} and
- * {@link VaultKeyValue2Template} and other Vault KV-accessing helpers, defining common
- * <p/>
- * Not intended to be used directly. See {@link VaultVersionedKeyValueTemplate} and
- * {@link VaultKeyValue2Template}.
+ * {@link VaultKeyValue2Template} and other Vault KV-accessing helpers, defining
+ * common
+ * <p>Not intended to be used directly. See
+ * {@link VaultVersionedKeyValueTemplate} and {@link VaultKeyValue2Template}.
  *
  * @author Mark Paluch
  * @since 2.1
@@ -58,27 +59,25 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 	private final ObjectMapper mapper;
 
+
 	/**
-	 * Create a new {@link VaultKeyValueAccessor} given {@link VaultOperations} and the
-	 * mount {@code path}.
+	 * Create a new {@link VaultKeyValueAccessor} given {@link VaultOperations} and
+	 * the mount {@code path}.
 	 * @param vaultOperations must not be {@literal null}.
 	 * @param path must not be empty or {@literal null}.
 	 */
 	VaultKeyValueAccessor(VaultOperations vaultOperations, String path) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations = vaultOperations;
 		this.path = path;
 		this.mapper = extractObjectMapper(vaultOperations);
 	}
 
+
 	@Override
 	public void delete(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations.doWithSession((restOperations -> {
 			restOperations.exchange(createDataPath(path), HttpMethod.DELETE, null, Void.class);
 
@@ -87,40 +86,34 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	}
 
 	/**
-	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
-	 * given {@link Class type}.
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to
+	 * the given {@link Class type}.
 	 * @param path must not be {@literal null}.
 	 * @param deserializeAs must not be {@literal null}.
-	 * @param mappingFunction Mapping function to convert from the intermediate to the
-	 * target data type. Must not be {@literal null}.
+	 * @param mappingFunction Mapping function to convert from the intermediate to
+	 * the target data type. Must not be {@literal null}.
 	 * @param <I> intermediate data type for {@literal data} deserialization.
 	 * @param <T> return type. Value is created by the {@code mappingFunction}.
 	 * @return mapped value.
 	 */
 	@Nullable
 	<I, T> T doRead(String path, Class<I> deserializeAs, BiFunction<VaultResponseSupport<?>, I, T> mappingFunction) {
-
 		ParameterizedTypeReference<VaultResponseSupport<JsonNode>> ref = VaultResponses
-			.getTypeReference(JsonNode.class);
-
+				.getTypeReference(JsonNode.class);
 		VaultResponseSupport<JsonNode> response = doRead(createDataPath(path), ref);
-
 		if (response != null) {
-
 			JsonNode jsonNode = getJsonNode(response);
 			JsonNode jsonMeta = response.getRequiredData().at("/metadata");
 			response.setMetadata(this.mapper.convertValue(jsonMeta, new TypeReference<>() {
 			}));
-
 			return mappingFunction.apply(response, deserialize(jsonNode, deserializeAs));
 		}
-
 		return null;
 	}
 
 	/**
-	 * Read a secret at {@code path} and deserialize the {@literal data} element to the
-	 * given {@link ParameterizedTypeReference type}.
+	 * Read a secret at {@code path} and deserialize the {@literal data} element to
+	 * the given {@link ParameterizedTypeReference type}.
 	 * @param path must not be {@literal null} or empty.
 	 * @param typeReference must not be {@literal null}
 	 * @return mapped value.
@@ -143,8 +136,7 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 
 		try {
 			return this.mapper.reader().readValue(jsonNode.traverse(), type);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new VaultException("Cannot deserialize response", e);
 		}
 	}
@@ -158,18 +150,13 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 */
 	@Nullable
 	<T> T doRead(Function<RestOperations, ResponseEntity<T>> callback) {
-
 		return this.vaultOperations.doWithSession((restOperations) -> {
-
 			try {
 				return callback.apply(restOperations).getBody();
-			}
-			catch (HttpStatusCodeException e) {
-
+			} catch (HttpStatusCodeException e) {
 				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
-
 				throw VaultResponses.buildException(e, this.path);
 			}
 		});
@@ -183,17 +170,14 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 	 */
 	@Nullable
 	VaultResponse doWrite(String path, Object body) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		try {
 
 			return this.vaultOperations.doWithSession((restOperations) -> {
 				return restOperations.exchange(path, HttpMethod.POST, new HttpEntity<>(body), VaultResponse.class)
-					.getBody();
+						.getBody();
 			});
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			throw VaultResponses.buildException(e, path);
 		}
 	}
@@ -218,10 +202,10 @@ abstract class VaultKeyValueAccessor implements VaultKeyValueOperationsSupport {
 			if (operations instanceof RestTemplate template) {
 
 				Optional<AbstractJackson2HttpMessageConverter> jackson2Converter = template.getMessageConverters()
-					.stream()
-					.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
-					.map(AbstractJackson2HttpMessageConverter.class::cast) //
-					.findFirst();
+						.stream()
+						.filter(AbstractJackson2HttpMessageConverter.class::isInstance) //
+						.map(AbstractJackson2HttpMessageConverter.class::cast) //
+						.findFirst();
 
 				return jackson2Converter.map(AbstractJackson2HttpMessageConverter::getObjectMapper);
 			}

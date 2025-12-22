@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.function.Function;
@@ -32,19 +33,19 @@ import org.springframework.web.reactive.function.client.WebClientException;
 import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
 
 /**
- * Interface that specifies a basic set of Vault operations executed on a reactive
- * infrastructure, implemented by
- * {@link org.springframework.vault.core.ReactiveVaultTemplate}. This is the main entry
- * point to interact with Vault in an authenticated and unauthenticated context.
- * <p>
- * {@link ReactiveVaultOperations} allows execution of callback methods. Callbacks can
- * execute requests within a {@link #doWithSession(Function) session context} and the
- * {@link #doWithVault(Function) without a session}.
- * <p>
- * Paths used in this interface (and interfaces accessible from here) are considered
- * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
- * to access Vault cluster members in an authenticated context. To prevent unwanted full
- * URI access, make sure to sanitize paths before passing them to this interface.
+ * Interface that specifies a basic set of Vault operations executed on a
+ * reactive infrastructure, implemented by
+ * {@link org.springframework.vault.core.ReactiveVaultTemplate}. This is the
+ * main entry point to interact with Vault in an authenticated and
+ * unauthenticated context.
+ * <p>{@link ReactiveVaultOperations} allows execution of callback methods.
+ * Callbacks can execute requests within a {@link #doWithSession(Function)
+ * session context} and the {@link #doWithVault(Function) without a session}.
+ * <p>Paths used in this interface (and interfaces accessible from here) are
+ * considered relative to the {@link VaultEndpoint}. Paths that are
+ * fully-qualified URI's can be used to access Vault cluster members in an
+ * authenticated context. To prevent unwanted full URI access, make sure to
+ * sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author James Luke
@@ -58,15 +59,12 @@ import static org.springframework.vault.core.VaultKeyValueOperationsSupport.*;
  */
 public interface ReactiveVaultOperations {
 
-	/*
+	/**
 	 * Return {@link VaultKeyValueOperations}.
-	 *
 	 * @param path the mount path, must not be empty or {@literal null}.
-	 *
 	 * @param apiVersion API version to use, must not be {@literal null}.
-	 *
-	 * @return the operations interface to interact with the Vault Key/Value backend.
-	 *
+	 * @return the operations interface to interact with the Vault Key/Value
+	 * backend.
 	 * @since 3.1
 	 */
 	ReactiveVaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
@@ -74,8 +72,8 @@ public interface ReactiveVaultOperations {
 	/**
 	 * Return {@link ReactiveVaultVersionedKeyValueOperations}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the versioned Vault Key/Value
-	 * (version 2) backend.
+	 * @return the operations interface to interact with the versioned Vault
+	 * Key/Value (version 2) backend.
 	 * @since 3.1
 	 */
 	ReactiveVaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
@@ -87,8 +85,8 @@ public interface ReactiveVaultOperations {
 	ReactiveVaultTransitOperations opsForTransit();
 
 	/**
-	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is mounted on
-	 * a different path than {@code transit}.
+	 * Return {@link ReactiveVaultTransitOperations} if the transit backend is
+	 * mounted on a different path than {@code transit}.
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault transit backend.
 	 * @since 3.1
@@ -100,6 +98,7 @@ public interface ReactiveVaultOperations {
 	 * @since 3.1
 	 */
 	ReactiveVaultSysOperations opsForSys();
+
 
 	/**
 	 * Read from a Vault path. Reading data using this method is suitable for API
@@ -149,9 +148,9 @@ public interface ReactiveVaultOperations {
 	Mono<Void> delete(String path);
 
 	/**
-	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
-	 * using {@link org.springframework.web.client.RestOperations} without requiring a
-	 * session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with
+	 * Vault using {@link org.springframework.web.client.RestOperations} without
+	 * requiring a session.
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
@@ -163,8 +162,8 @@ public interface ReactiveVaultOperations {
 			throws VaultException, WebClientException;
 
 	/**
-	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
-	 * an authenticated session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with
+	 * Vault in an authenticated session.
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.net.URI;
@@ -92,9 +93,9 @@ class VaultClientsUnitTests {
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
 		mockRest.expect(requestTo("/auth/foo"))
-			.andExpect(method(HttpMethod.GET))
-			.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
-			.andRespond(withSuccess());
+				.andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "foo/bar"))
+				.andRespond(withSuccess());
 
 		restTemplate.getForEntity("/auth/foo", String.class);
 	}
@@ -109,9 +110,9 @@ class VaultClientsUnitTests {
 		MockRestServiceServer mockRest = MockRestServiceServer.createServer(restTemplate);
 
 		mockRest.expect(requestTo("/auth/foo"))
-			.andExpect(method(HttpMethod.GET))
-			.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "baz"))
-			.andRespond(withSuccess());
+				.andExpect(method(HttpMethod.GET))
+				.andExpect(header(VaultHttpHeaders.VAULT_NAMESPACE, "baz"))
+				.andRespond(withSuccess());
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(VaultHttpHeaders.VAULT_NAMESPACE, "baz");

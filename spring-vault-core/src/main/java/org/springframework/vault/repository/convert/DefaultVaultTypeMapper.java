@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.convert;
 
 import java.util.Collections;
@@ -30,10 +31,11 @@ import org.springframework.data.util.TypeInformation;
 import org.springframework.lang.Nullable;
 
 /**
- * Default implementation of {@link VaultTypeMapper} allowing configuration of the key to
- * lookup and store type information in {@link SecretDocument}. The key defaults to
- * {@link #DEFAULT_TYPE_KEY}. Actual type-to-{@link String} conversion and back is done in
- * {@link #readType(Object)} or {@link #getDefaultedTypeToBeUsed(Object)}. respectively.
+ * Default implementation of {@link VaultTypeMapper} allowing configuration of
+ * the key to lookup and store type information in {@link SecretDocument}. The
+ * key defaults to {@link #DEFAULT_TYPE_KEY}. Actual type-to-{@link String}
+ * conversion and back is done in {@link #readType(Object)} or
+ * {@link #getDefaultedTypeToBeUsed(Object)}. respectively.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -45,18 +47,20 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	@SuppressWarnings("rawtypes")
 	private static final TypeInformation<Map> MAP_TYPE_INFO = TypeInformation.MAP;
 
+
 	private final @Nullable String typeKey;
 
+
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the type key
-	 * {@literal _class}.
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the type
+	 * key {@literal _class}.
 	 */
 	public DefaultVaultTypeMapper() {
 		this(DEFAULT_TYPE_KEY);
 	}
 
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey}.
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 */
@@ -65,7 +69,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 	}
 
 	/**
-	 * Creates a default {@link VaultTypeMapper} that exchanges types using the given
+	 * Create a default {@code VaultTypeMapper} that exchanges types using the given
 	 * {@code typeKey} and {@link MappingContext}.
 	 * @param typeKey may not be {@literal null} to disable type hinting.
 	 * @param mappingContext must not be {@literal null} or empty.
@@ -89,6 +93,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 		this.typeKey = typeKey;
 	}
 
+
 	/**
 	 * Checks whether the given key name matches the {@literal typeKey}.
 	 * @param key
@@ -103,6 +108,7 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 		return MAP_TYPE_INFO;
 	}
 
+
 	/**
 	 * {@link TypeAliasAccessor} to store aliases in a {@link SecretDocument}.
 	 *
@@ -112,9 +118,11 @@ public class DefaultVaultTypeMapper extends DefaultTypeMapper<Map<String, Object
 
 		private final @Nullable String typeKey;
 
+
 		SecretDocumentTypeAliasAccessor(@Nullable String typeKey) {
 			this.typeKey = typeKey;
 		}
+
 
 		public Alias readAliasFrom(Map<String, Object> source) {
 			return this.typeKey == null ? Alias.NONE : Alias.ofNullable(source.get(this.typeKey));

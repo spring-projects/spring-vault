@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Callback interface that can be used to customize the {@link ClientHttpRequest} sent
- * from a {@link RestTemplate}.
+ * Callback interface that can be used to customize the
+ * {@link ClientHttpRequest} sent from a {@link RestTemplate}.
  *
  * @param <T> the {@link ClientHttpRequest} type.
  * @since 2.2

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease;
 
 import java.time.Clock;
@@ -95,23 +96,22 @@ import org.springframework.web.client.HttpStatusCodeException;
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
  * </code> </pre>
- * <p>
- * This container keeps track over {@link RequestedSecret}s and requests secrets upon
- * {@link #start()}. Leases qualified for {@link Lease#isRenewable() renewal} are renewed
- * by this container applying {@code minRenewalSeconds}/{@code expiryThresholdSeconds} on
- * a {@link TaskScheduler background thread}.
- * <p>
- * Requests for secrets can define either renewal or rotation. The container renews leases
- * until expiry. Rotating secrets renew their associated lease until expiry and request
- * new secrets after expiry. Vault requires active interaction from a caller side to
- * determine a secret is expired. Vault does not send any events. Expired secrets events
- * can dispatch later than the actual expiry.
- * <p>
- * The container dispatches lease events to {@link LeaseListener} and
+ * <p>This container keeps track over {@link RequestedSecret}s and requests
+ * secrets upon {@link #start()}. Leases qualified for
+ * {@link Lease#isRenewable() renewal} are renewed by this container applying
+ * {@code minRenewalSeconds}/{@code expiryThresholdSeconds} on a
+ * {@link TaskScheduler background thread}.
+ * <p>Requests for secrets can define either renewal or rotation. The container
+ * renews leases until expiry. Rotating secrets renew their associated lease
+ * until expiry and request new secrets after expiry. Vault requires active
+ * interaction from a caller side to determine a secret is expired. Vault does
+ * not send any events. Expired secrets events can dispatch later than the
+ * actual expiry.
+ * <p>The container dispatches lease events to {@link LeaseListener} and
  * {@link LeaseErrorListener}. Event notifications are dispatched either on the
- * {@link #start() starting} {@link Thread} or worker threads used for background renewal.
- * <p>
- * Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
+ * {@link #start() starting} {@link Thread} or worker threads used for
+ * background renewal.
+ * <p>Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
  * @author Steven Swor
@@ -126,7 +126,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		implements InitializingBean, DisposableBean, SmartLifecycle {
 
 	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
-		.newUpdater(SecretLeaseContainer.class, "status");
+			.newUpdater(SecretLeaseContainer.class, "status");
 
 	/**
 	 * {@link Predicate} to test whether a {@link Lease} has no lease identifier.
@@ -148,6 +148,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 	private static Log logger = LogFactory.getLog(SecretLeaseContainer.class);
+
 
 	private final Clock clock = Clock.systemDefaultZone();
 
@@ -182,14 +183,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private volatile int status = STATUS_INITIAL;
 
+
 	/**
 	 * Create a new {@link SecretLeaseContainer} given {@link VaultOperations}.
 	 * @param operations must not be {@literal null}.
 	 */
 	public SecretLeaseContainer(VaultOperations operations) {
-
 		Assert.notNull(operations, "VaultOperations must not be null");
-
 		this.operations = operations;
 		this.keyValueDelegate = new KeyValueDelegate(this.operations);
 	}
@@ -201,17 +201,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @param taskScheduler must not be {@literal null}.
 	 */
 	public SecretLeaseContainer(VaultOperations operations, TaskScheduler taskScheduler) {
-
 		Assert.notNull(operations, "VaultOperations must not be null");
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
-
 		this.operations = operations;
 		this.keyValueDelegate = new KeyValueDelegate(this.operations);
 		setTaskScheduler(taskScheduler);
 	}
 
+
 	/**
-	 * Returns the {@link AuthenticationListener} to listen for login token events.
+	 * Return the {@link AuthenticationListener} to listen for login token events.
 	 * @return the {@link AuthenticationListener} to listen for login token events.
 	 * @since 3.1
 	 */
@@ -220,8 +219,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Returns the {@link AuthenticationListener} to listen for login token error events.
-	 * @return the {@link AuthenticationListener} to listen for login token error events
+	 * Return the {@link AuthenticationListener} to listen for login token error
+	 * events.
+	 * @return the {@link AuthenticationListener} to listen for login token error
+	 * events
 	 * @since 3.1
 	 */
 	public AuthenticationErrorListener getAuthenticationErrorListener() {
@@ -230,45 +231,40 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	/**
 	 * Set the {@link LeaseEndpoints} to delegate renewal/revocation calls to.
-	 * {@link LeaseEndpoints} encapsulates differences between Vault versions that affect
-	 * the location of renewal/revocation endpoints.
+	 * {@link LeaseEndpoints} encapsulates differences between Vault versions that
+	 * affect the location of renewal/revocation endpoints.
 	 * @param leaseEndpoints must not be {@literal null}.
 	 * @see LeaseEndpoints
 	 * @since 2.1
 	 */
 	public void setLeaseEndpoints(LeaseEndpoints leaseEndpoints) {
-
 		Assert.notNull(leaseEndpoints, "LeaseEndpoints must not be null");
-
 		this.leaseEndpoints = leaseEndpoints;
 	}
 
 	/**
-	 * Sets the amount {@link Duration} that is at least required before renewing a lease.
-	 * {@code minRenewal} prevents renewals from happening too often.
+	 * Sets the amount {@link Duration} that is at least required before renewing a
+	 * lease. {@code minRenewal} prevents renewals from happening too often.
 	 * @param minRenewal duration that is at least required before renewing a
 	 * {@link Lease}, must not be {@literal null} or negative.
 	 * @since 2.0
 	 */
 	public void setMinRenewal(Duration minRenewal) {
-
 		Assert.notNull(minRenewal, "Minimal renewal time must not be null");
 		Assert.isTrue(!minRenewal.isNegative(), "Minimal renewal time must not be negative");
-
 		this.minRenewal = minRenewal;
 		this.isExpiredFallback = createIsExpiredPredicate(this.minRenewal);
 	}
 
 	/**
 	 * Sets the {@link Predicate} to determine whether a {@link Lease} is expired.
-	 * Defaults to comparing whether a lease {@link Lease#hasLeaseId() has no identifier},
-	 * its remaining TTL is zero or less or equal to {@code minRenewal}.
+	 * Defaults to comparing whether a lease {@link Lease#hasLeaseId() has no
+	 * identifier}, its remaining TTL is zero or less or equal to
+	 * {@code minRenewal}.
 	 * @since 3.2
 	 */
 	public void setExpiryPredicate(Predicate<Lease> isExpired) {
-
 		Assert.notNull(isExpired, "Expiry predicate must not be null");
-
 		this.isExpired = isExpired;
 	}
 
@@ -280,10 +276,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @since 2.0
 	 */
 	public void setExpiryThreshold(Duration expiryThreshold) {
-
 		Assert.notNull(expiryThreshold, "Expiry threshold must not be null");
 		Assert.isTrue(!expiryThreshold.isNegative(), "Expiry threshold must not be negative");
-
 		this.expiryThreshold = expiryThreshold;
 	}
 
@@ -317,7 +311,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @since 2.2
 	 */
 	public void setLeaseStrategy(LeaseStrategy leaseStrategy) {
-
 		Assert.notNull(leaseStrategy, "LeaseStrategy must not be null");
 		this.leaseStrategy = leaseStrategy;
 	}
@@ -328,7 +321,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @param taskScheduler must not be {@literal null}.
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
-
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		this.taskScheduler = taskScheduler;
 	}
@@ -356,49 +348,39 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @param requestedSecret must not be {@literal null}.
 	 */
 	public RequestedSecret addRequestedSecret(RequestedSecret requestedSecret) {
-
 		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
-
 		this.requestedSecrets.add(requestedSecret);
 
 		if (this.initialized) {
-
 			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
-
 			LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
 			this.renewals.put(requestedSecret, leaseRenewalScheduler);
-
 			if (this.status == STATUS_STARTED) {
 				start(requestedSecret, leaseRenewalScheduler);
 			}
 		}
-
 		return requestedSecret;
 	}
 
 	/**
 	 * Start the {@link SecretLeaseContainer}. Starting the container will initially
-	 * obtain secrets and leases for the requested secrets. A started container publishes
-	 * events through {@link LeaseListener}. Additional secrets can be requested at any
-	 * time.
-	 * <p>
-	 * Multiple calls are synchronized to start the container only once. Container start
-	 * requires {@link #afterPropertiesSet() initialization} and cannot be started once
-	 * the container was {@link #destroy() destroyed}.
+	 * obtain secrets and leases for the requested secrets. A started container
+	 * publishes events through {@link LeaseListener}. Additional secrets can be
+	 * requested at any time.
+	 * <p>Multiple calls are synchronized to start the container only once.
+	 * Container start requires {@link #afterPropertiesSet() initialization} and
+	 * cannot be started once the container was {@link #destroy() destroyed}.
 	 *
 	 * @see #afterPropertiesSet()
 	 * @see #stop()
 	 */
 	@Override
 	public void start() {
-
 		Assert.state(this.initialized, "Container is not initialized");
 		Assert.state(this.status != STATUS_DESTROYED, "Container is destroyed and cannot be started");
-
 		Map<RequestedSecret, LeaseRenewalScheduler> renewals = new HashMap<>(this.renewals);
 
 		if (UPDATER.compareAndSet(this, STATUS_INITIAL, STATUS_STARTED)) {
-
 			for (Entry<RequestedSecret, LeaseRenewalScheduler> entry : renewals.entrySet()) {
 				start(entry.getKey(), entry.getValue());
 			}
@@ -406,7 +388,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	private void start(RequestedSecret requestedSecret, LeaseRenewalScheduler renewalScheduler) {
-
 		doStart(requestedSecret, renewalScheduler, (secrets, lease) -> {
 			onSecretsObtained(requestedSecret, lease, secrets.getRequiredData());
 		}, () -> {
@@ -420,57 +401,46 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		VaultResponseSupport<Map<String, Object>> secrets = doGetSecrets(requestedSecret);
 
 		if (secrets != null) {
-
 			Lease lease;
-
 			if (StringUtils.hasText(secrets.getLeaseId())) {
 				lease = Lease.of(secrets.getLeaseId(), Duration.ofSeconds(secrets.getLeaseDuration()),
 						secrets.isRenewable());
-			}
-			else if (isRotatingGenericSecret(requestedSecret, secrets)) {
+			} else if (isRotatingGenericSecret(requestedSecret, secrets)) {
 				lease = Lease.fromTimeToLive(Duration.ofSeconds(secrets.getLeaseDuration()));
-			}
-			else {
+			} else {
 				lease = Lease.none();
 			}
 
 			if (renewalScheduler.isLeaseRenewable(lease, requestedSecret)) {
 				scheduleLeaseRenewal(requestedSecret, lease, renewalScheduler);
-			}
-			else if (renewalScheduler.isLeaseRotateOnly(lease, requestedSecret)) {
+			} else if (renewalScheduler.isLeaseRotateOnly(lease, requestedSecret)) {
 				scheduleLeaseRotation(requestedSecret, lease, renewalScheduler);
-			}
-			else if (lease.hasLeaseId()) {
+			} else if (lease.hasLeaseId()) {
 				renewalScheduler.associateLease(lease);
 			}
-
 			callback.accept(secrets, lease);
-		}
-		else {
+		} else {
 			cannotObtainSecretsCallback.run();
 		}
 	}
 
 	private static boolean isRotatingGenericSecret(RequestedSecret requestedSecret,
 			VaultResponseSupport<Map<String, Object>> secrets) {
-
 		return Mode.ROTATE.equals(requestedSecret.getMode()) && !secrets.isRenewable()
 				&& secrets.getLeaseDuration() > 0;
 	}
 
 	/**
 	 * Stop the {@link SecretLeaseContainer}. Stopping the container will stop lease
-	 * renewal, secrets rotation and event publishing. Active leases are not expired.
-	 * <p>
-	 * Multiple calls are synchronized to stop the container only once.
+	 * renewal, secrets rotation and event publishing. Active leases are not
+	 * expired.
+	 * <p>Multiple calls are synchronized to stop the container only once.
 	 *
 	 * @see #start()
 	 */
 	@Override
 	public void stop() {
-
 		if (UPDATER.compareAndSet(this, STATUS_STARTED, STATUS_INITIAL)) {
-
 			for (LeaseRenewalScheduler leaseRenewal : this.renewals.values()) {
 				leaseRenewal.disableScheduleRenewal();
 			}
@@ -489,22 +459,17 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	@Override
 	public void afterPropertiesSet() {
-
 		if (this.initialized) {
 			return;
 		}
-
 		super.afterPropertiesSet();
-
 		this.initialized = true;
 
 		if (this.taskScheduler == null) {
-
 			ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
 			scheduler.setDaemon(true);
 			scheduler.setThreadNamePrefix("%s-%d-".formatted(getClass().getSimpleName(), poolId.incrementAndGet()));
 			scheduler.afterPropertiesSet();
-
 			this.taskScheduler = scheduler;
 			this.manageTaskScheduler = true;
 		}
@@ -524,31 +489,22 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 */
 	@Override
 	public void destroy() throws Exception {
-
 		int status = this.status;
-
 		if (status == STATUS_INITIAL || status == STATUS_STARTED) {
-
 			if (UPDATER.compareAndSet(this, status, STATUS_DESTROYED)) {
-
 				for (Entry<RequestedSecret, LeaseRenewalScheduler> entry : this.renewals.entrySet()) {
-
 					Lease lease = entry.getValue().getLease();
 					Lease previousLease = entry.getValue().getPreviousLease();
 					entry.getValue().disableScheduleRenewal();
-
 					if (lease != null && lease.hasLeaseId()) {
 						doRevokeLease(entry.getKey(), lease);
 					}
-
 					if (previousLease != null && previousLease.hasLeaseId()) {
 						doRevokeLease(entry.getKey(), previousLease);
 					}
 				}
 				this.renewals.clear();
-
 				if (this.manageTaskScheduler) {
-
 					if (this.taskScheduler instanceof DisposableBean) {
 						((DisposableBean) this.taskScheduler).destroy();
 						this.taskScheduler = null;
@@ -559,12 +515,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	void restartSecrets() {
-
 		int status = this.status;
 		if (status == STATUS_STARTED) {
-
 			logger.debug("Restarting all secrets after token expiry/rotation");
-
 			try {
 
 				Map<RequestedSecret, LeaseRenewalScheduler> previousLeases = new LinkedHashMap<>(this.renewals);
@@ -572,7 +525,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 				previousLeases.values().forEach(LeaseRenewalScheduler::disableScheduleRenewal);
 
 				for (RequestedSecret requestedSecret : this.requestedSecrets) {
-
 					LeaseRenewalScheduler renewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
 					Lease previousLease = getPreviousLease(previousLeases, requestedSecret);
 
@@ -583,13 +535,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 						}, () -> {
 						});
 
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						onError(requestedSecret, previousLease, e);
 					}
 				}
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				logger.error("Cannot restart secrets", e);
 			}
 		}
@@ -597,10 +547,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private static Lease getPreviousLease(Map<RequestedSecret, LeaseRenewalScheduler> previousLeases,
 			RequestedSecret requestedSecret) {
-
 		LeaseRenewalScheduler leaseRenewalScheduler = previousLeases.get(requestedSecret);
 		Lease previousLease = leaseRenewalScheduler != null ? leaseRenewalScheduler.getLease() : null;
-
 		return previousLease == null ? Lease.none() : previousLease;
 	}
 
@@ -608,95 +556,73 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * Renew a {@link RequestedSecret secret}.
 	 * @param secret the {@link RequestedSecret secret}' to renew.
 	 * @return {@literal true} if the lease was renewed.
-	 * @throws IllegalArgumentException if the {@link RequestedSecret secret} was not
-	 * previously {@link #addRequestedSecret(RequestedSecret) registered}.
+	 * @throws IllegalArgumentException if the {@link RequestedSecret secret} was
+	 * not previously {@link #addRequestedSecret(RequestedSecret) registered}.
 	 * @throws IllegalStateException if there's no {@link Lease} associated with the
 	 * {@link RequestedSecret secret} or the secret is not qualified for renewal.
 	 * @since 2.2
 	 */
 	public boolean renew(RequestedSecret secret) {
-
 		LeaseRenewalScheduler renewalScheduler = getRenewalSchedulder(secret);
 		Lease lease = renewalScheduler.getLease();
-
 		if (lease == null) {
 			throw new IllegalStateException("No lease associated with secret %s".formatted(secret));
 		}
-
 		if (!renewalScheduler.isLeaseRenewable(lease, secret)) {
 			throw new IllegalStateException("Secret is not qualified for renewal");
 		}
-
 		return renewAndSchedule(secret, renewalScheduler, lease) != lease;
 	}
 
 	/**
 	 * Rotate a {@link RequestedSecret secret}.
 	 * @param secret the {@link RequestedSecret secret}' to rotate.
-	 * @throws IllegalArgumentException if the {@link RequestedSecret secret} was not
-	 * previously {@link #addRequestedSecret(RequestedSecret) registered}.
+	 * @throws IllegalArgumentException if the {@link RequestedSecret secret} was
+	 * not previously {@link #addRequestedSecret(RequestedSecret) registered}.
 	 * @throws IllegalStateException if there's no {@link Lease} associated with the
 	 * {@link RequestedSecret secret} or the secret is not qualified for rotation.
 	 * @since 2.2
 	 */
 	public void rotate(RequestedSecret secret) {
-
 		LeaseRenewalScheduler renewalScheduler = getRenewalSchedulder(secret);
 		Lease lease = renewalScheduler.getLease();
-
 		if (lease == null) {
 			throw new IllegalStateException("No lease associated with secret %s".formatted(secret));
 		}
-
 		if (!renewalScheduler.isLeaseRenewable(lease, secret) && !renewalScheduler.isLeaseRotateOnly(lease, secret)) {
 			throw new IllegalStateException("Secret is not qualified for rotation");
 		}
-
 		onLeaseExpired(secret, lease);
 	}
 
 	private void scheduleLeaseRenewal(RequestedSecret requestedSecret, Lease lease,
 			LeaseRenewalScheduler leaseRenewal) {
-
 		logRenewalCandidate(requestedSecret, lease, "renewal");
-
 		leaseRenewal.scheduleRenewal(requestedSecret, leaseToRenew -> {
-
 			return renewAndSchedule(requestedSecret, leaseRenewal, leaseToRenew);
 		}, lease, getMinRenewal(), getExpiryThreshold());
-
 	}
 
 	private Lease renewAndSchedule(RequestedSecret requestedSecret, LeaseRenewalScheduler leaseRenewal,
 			Lease leaseToRenew) {
-
 		Lease newLease = doRenewLease(requestedSecret, leaseToRenew);
-
 		if (!Lease.none().equals(newLease)) {
-
 			scheduleLeaseRenewal(requestedSecret, newLease, leaseRenewal);
-
 			onAfterLeaseRenewed(requestedSecret, newLease);
 		}
-
 		return newLease;
 	}
 
 	private void scheduleLeaseRotation(RequestedSecret secret, Lease lease, LeaseRenewalScheduler leaseRenewal) {
-
 		logRenewalCandidate(secret, lease, "rotation");
-
 		leaseRenewal.scheduleRenewal(secret, leaseToRotate -> {
-
 			onLeaseExpired(secret, lease);
-
 			return Lease.none(); // rotation creates a new lease.
 		}, lease, getMinRenewal(), getExpiryThreshold());
 	}
 
 	private LeaseRenewalScheduler getRenewalSchedulder(RequestedSecret secret) {
 		LeaseRenewalScheduler renewalScheduler = this.renewals.get(secret);
-
 		if (renewalScheduler == null) {
 			throw new IllegalArgumentException("No such secret %s".formatted(secret));
 		}
@@ -704,14 +630,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	private static void logRenewalCandidate(RequestedSecret requestedSecret, Lease lease, String action) {
-
 		if (logger.isDebugEnabled()) {
-
 			if (lease.hasLeaseId()) {
 				logger.debug("Secret %s with Lease %s qualified for %s".formatted(requestedSecret.getPath(),
 						lease.getLeaseId(), action));
-			}
-			else {
+			} else {
 				logger.debug(
 						"Secret %s with cache hint is qualified for %s".formatted(requestedSecret.getPath(), action));
 			}
@@ -736,8 +659,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			if (this.keyValueDelegate.isVersioned(requestedSecret.getPath())) {
 				secrets = this.keyValueDelegate.getSecret(requestedSecret.getPath());
-			}
-			else {
+			} else {
 				secrets = this.operations.read(requestedSecret.getPath());
 			}
 
@@ -746,8 +668,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			}
 
 			return secrets;
-		}
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 
 			onError(requestedSecret, Lease.none(), e);
 			return null;
@@ -761,36 +682,27 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @return the new lease or {@literal null} if expired/secret cannot be rotated.
 	 */
 	protected Lease doRenewLease(RequestedSecret requestedSecret, Lease lease) {
-
 		try {
 			Lease renewed = lease.hasLeaseId() ? doRenew(lease) : lease;
-
 			if (isExpired(renewed)) {
-
 				onLeaseExpired(requestedSecret, lease);
 				return Lease.none();
 			}
-
 			return renewed;
-		}
-		catch (RuntimeException e) {
-
+		} catch (RuntimeException e) {
 			HttpStatusCodeException httpException = potentiallyUnwrapHttpStatusCodeException(e);
-
 			boolean expired = false;
 			Exception exceptionToUse;
-			if (httpException != null) {
 
+			if (httpException != null) {
 				if (httpException.getStatusCode().value() == HttpStatus.BAD_REQUEST.value()) {
 					expired = true;
 					onLeaseExpired(requestedSecret, lease);
 				}
-
 				exceptionToUse = new VaultException("Cannot renew lease: Status %s %s %s".formatted(
 						httpException.getStatusCode().value(), httpException.getStatusText(),
 						VaultResponses.getError(httpException.getResponseBodyAsString())), e);
-			}
-			else {
+			} else {
 				exceptionToUse = new VaultException("Cannot renew lease", e);
 			}
 
@@ -798,8 +710,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 			if (expired || this.leaseStrategy.shouldDrop(exceptionToUse)) {
 				return Lease.none();
-			}
-			else {
+			} else {
 				return lease;
 			}
 		}
@@ -811,15 +722,12 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	@Nullable
 	private HttpStatusCodeException potentiallyUnwrapHttpStatusCodeException(RuntimeException e) {
-
 		if (e instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e;
 		}
-
 		if (e.getCause() instanceof HttpStatusCodeException) {
 			return (HttpStatusCodeException) e.getCause();
 		}
-
 		return null;
 	}
 
@@ -829,15 +737,14 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Hook method called when a {@link Lease} expires. The default implementation is to
-	 * notify {@link LeaseListener}. Implementations can override this method in
-	 * subclasses.
+	 * Hook method called when a {@link Lease} expires. The default implementation
+	 * is to notify {@link LeaseListener}. Implementations can override this method
+	 * in subclasses.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
 	 */
 	@Override
 	protected void onLeaseExpired(RequestedSecret requestedSecret, Lease lease) {
-
 		if (requestedSecret.getMode() == Mode.ROTATE) {
 			LeaseRenewalScheduler renewalScheduler = this.renewals.get(requestedSecret);
 			// prevent races for concurrent renewals of the same secret using different
@@ -845,17 +752,15 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			if (renewalScheduler == null || !renewalScheduler.leaseEquals(lease)) {
 				logger.debug(
 						"Skipping rotation after renewal expiry for secret %s with lease %s as no LeaseRenewalScheduler is found. This can happen if leases have been restarted while concurrent expiry processing."
-							.formatted(requestedSecret.getPath(), lease.getLeaseId()));
+								.formatted(requestedSecret.getPath(), lease.getLeaseId()));
 
 				super.onLeaseExpired(requestedSecret, lease);
 				return;
 			}
-
 			doStart(requestedSecret, renewalScheduler, (secrets, currentLease) -> {
 				onSecretsRotated(requestedSecret, lease, currentLease, secrets.getRequiredData());
 			}, () -> super.onLeaseExpired(requestedSecret, lease));
-		}
-		else {
+		} else {
 			super.onLeaseExpired(requestedSecret, lease);
 		}
 	}
@@ -867,23 +772,17 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 */
 	@SuppressWarnings("unchecked")
 	protected void doRevokeLease(RequestedSecret requestedSecret, Lease lease) {
-
 		try {
-
 			onBeforeLeaseRevocation(requestedSecret, lease);
-
 			this.operations.doWithSession(restOperations -> {
 				this.leaseEndpoints.revoke(lease, restOperations);
 				return null;
 			});
-
 			onAfterLeaseRevocation(requestedSecret, lease);
-		}
-		catch (HttpStatusCodeException e) {
+		} catch (HttpStatusCodeException e) {
 			onError(requestedSecret, lease, new VaultException(
 					"Cannot revoke lease: %s".formatted(VaultResponses.getError(e.getResponseBodyAsString()))));
-		}
-		catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 			onError(requestedSecret, lease, e);
 		}
 	}
@@ -900,20 +799,22 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		return lease -> predicate.test(lease.getLeaseDuration());
 	}
 
+
 	/**
-	 * Abstracts scheduled lease renewal. A {@link LeaseRenewalScheduler} can be accessed
-	 * concurrently to schedule lease renewal. Each renewal run checks if the previously
-	 * attached {@link Lease} is still relevant to update. If any other process scheduled
-	 * a newer {@link Lease} for renewal, the previously registered renewal task will skip
-	 * renewal.
+	 * Abstracts scheduled lease renewal. A {@link LeaseRenewalScheduler} can be
+	 * accessed concurrently to schedule lease renewal. Each renewal run checks if
+	 * the previously attached {@link Lease} is still relevant to update. If any
+	 * other process scheduled a newer {@link Lease} for renewal, the previously
+	 * registered renewal task will skip renewal.
 	 */
 	static class LeaseRenewalScheduler {
 
 		private static final AtomicReferenceFieldUpdater<LeaseRenewalScheduler, Lease> CURRENT_UPDATER = AtomicReferenceFieldUpdater
-			.newUpdater(LeaseRenewalScheduler.class, Lease.class, "currentLeaseRef");
+				.newUpdater(LeaseRenewalScheduler.class, Lease.class, "currentLeaseRef");
 
 		@SuppressWarnings("FieldMayBeFinal") // allow setting via reflection.
 		private static Log logger = LogFactory.getLog(LeaseRenewalScheduler.class);
+
 
 		private final TaskScheduler taskScheduler;
 
@@ -925,6 +826,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 		final Map<Lease, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
 
+
 		/**
 		 * @param taskScheduler must not be {@literal null}.
 		 */
@@ -932,33 +834,31 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			this.taskScheduler = taskScheduler;
 		}
 
+
 		/**
 		 * Schedule {@link Lease} renewal. Previously registered renewal tasks are
 		 * canceled to prevent renewal of stale {@link Lease}s.
 		 * @param requestedSecret the requested secret.
 		 * @param renewLease strategy to renew a {@link Lease}.
 		 * @param lease the current {@link Lease}.
-		 * @param minRenewal minimum duration before renewing a {@link Lease}. This is to
-		 * prevent too many renewals in a very short timeframe.
+		 * @param minRenewal minimum duration before renewing a {@link Lease}. This is
+		 * to prevent too many renewals in a very short timeframe.
 		 * @param expiryThreshold duration to renew before {@link Lease}.
 		 */
 		void scheduleRenewal(RequestedSecret requestedSecret, RenewLease renewLease, Lease lease, Duration minRenewal,
 				Duration expiryThreshold) {
-
 			if (logger.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
 					logger.debug("Scheduling renewal for secret %s with lease %s, lease duration %d".formatted(
 							requestedSecret.getPath(), lease.getLeaseId(), lease.getLeaseDuration().getSeconds()));
-				}
-				else {
+				} else {
 					logger.debug("Scheduling renewal for secret %s, with cache hint duration %d"
-						.formatted(requestedSecret.getPath(), lease.getLeaseDuration().getSeconds()));
+							.formatted(requestedSecret.getPath(), lease.getLeaseDuration().getSeconds()));
 				}
 			}
 
 			Lease currentLease = CURRENT_UPDATER.get(this);
 			CURRENT_UPDATER.set(this, lease);
-
 			if (currentLease != null) {
 				cancelSchedule(currentLease);
 			}
@@ -967,9 +867,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 				@Override
 				public void run() {
-
 					LeaseRenewalScheduler.this.schedules.remove(lease);
-
 					if (CURRENT_UPDATER.get(LeaseRenewalScheduler.this) != lease) {
 						logger.debug("Current lease has changed. Skipping renewal");
 						return;
@@ -979,28 +877,25 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 						if (lease.hasLeaseId()) {
 							logger.debug("Renewing lease %s for secret %s".formatted(lease.getLeaseId(),
 									requestedSecret.getPath()));
-						}
-						else {
+						} else {
 							logger.debug("Renewing secret without lease %s".formatted(requestedSecret.getPath()));
 						}
 					}
 
 					try {
-
 						// Renew lease may call scheduleRenewal(…) with a different lease
 						// Id to alter set up its own renewal schedule. If it's the old
 						// lease, then renewLease() outcome controls the current LeaseId.
 						CURRENT_UPDATER.compareAndSet(LeaseRenewalScheduler.this, lease, renewLease.renewLease(lease));
-					}
-					catch (Exception e) {
+					} catch (Exception e) {
 						logger.error("Cannot renew lease %s".formatted(lease.getLeaseId()), e);
 					}
 				}
+
 			};
 
 			ScheduledFuture<?> scheduledFuture = this.taskScheduler.schedule(task,
 					new OneShotTrigger(getRenewalSeconds(lease, minRenewal, expiryThreshold)));
-
 			this.schedules.put(lease, scheduledFuture);
 		}
 
@@ -1009,14 +904,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 
 		private void cancelSchedule(Lease lease) {
-
 			ScheduledFuture<?> scheduledFuture = this.schedules.get(lease);
 			if (scheduledFuture != null) {
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Canceling previously registered schedule for lease %s".formatted(lease.getLeaseId()));
 				}
-
 				scheduledFuture.cancel(false);
 			}
 		}
@@ -1025,11 +917,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		 * Disables schedule for already scheduled renewals.
 		 */
 		void disableScheduleRenewal() {
-
 			// capture the previous lease to revoke it
 			this.previousLeaseRef = CURRENT_UPDATER.getAndSet(this, null);
 			Set<Lease> leases = new HashSet<>(this.schedules.keySet());
-
 			for (Lease lease : leases) {
 				cancelSchedule(lease);
 				this.schedules.remove(lease);
@@ -1042,19 +932,15 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 
 		private boolean isLeaseRenewable(@Nullable Lease lease, RequestedSecret requestedSecret) {
-
 			if (lease == null) {
 				return false;
 			}
-
 			if (lease.isRenewable()) {
 				return true;
 			}
-
 			if (!lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && requestedSecret.getMode() == Mode.ROTATE) {
 				return true;
 			}
-
 			return false;
 		}
 
@@ -1069,11 +955,9 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 
 		private boolean isLeaseRotateOnly(Lease lease, RequestedSecret requestedSecret) {
-
 			if (lease == null) {
 				return false;
 			}
-
 			return lease.hasLeaseId() && !lease.getLeaseDuration().isZero() && !lease.isRenewable()
 					&& requestedSecret.getMode() == Mode.ROTATE;
 		}
@@ -1084,11 +968,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	}
 
+
 	private class LeaseAuthenticationEventListener implements AuthenticationListener, AuthenticationErrorListener {
 
 		private final BackOff backOff = new ExponentialBackOff(500, 1.5);
 
 		private final AtomicReference<Timeout> timeout = new AtomicReference<>();
+
 
 		@Override
 		public void onAuthenticationError(AuthenticationErrorEvent authenticationEvent) {
@@ -1111,29 +997,25 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		 * expired.
 		 */
 		private void restartSecrets() {
-
 			if (!isRunning()) {
 				logger.debug("Ignore token event as the container is not running");
 			}
-
 			Timeout timeout = this.timeout.get();
 			if (timeout != null && !timeout.isExpired(clock)) {
 				logger.debug("Backoff timeout not reached. Dropping event");
 				return;
 			}
-
 			Timeout executionToSet = new Timeout(backOff.start(), clock);
 
 			if (this.timeout.compareAndSet(timeout, executionToSet)) {
-
 				if (taskScheduler instanceof Executor e) {
 					e.execute(SecretLeaseContainer.this::restartSecrets);
-				}
-				else {
+				} else {
 					taskScheduler.schedule(SecretLeaseContainer.this::restartSecrets, Instant.now());
 				}
 			}
 		}
+
 
 		record Timeout(BackOffExecution execution, long timeout) {
 
@@ -1144,33 +1026,38 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			public boolean isExpired(Clock clock) {
 				return clock.millis() > timeout;
 			}
+
 		}
 
 	}
 
+
 	/**
-	 * This one-shot trigger creates only one execution time to trigger an execution only
-	 * once.
+	 * This one-shot trigger creates only one execution time to trigger an execution
+	 * only once.
 	 */
 	static class OneShotTrigger implements Trigger {
 
 		private static final Clock CLOCK = Clock.systemDefaultZone();
 
 		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
-			.newUpdater(OneShotTrigger.class, "status");
+				.newUpdater(OneShotTrigger.class, "status");
 
 		private static final int STATUS_ARMED = 0;
 
 		private static final int STATUS_FIRED = 1;
+
 
 		// see AtomicIntegerFieldUpdater UPDATER
 		private volatile int status = 0;
 
 		private final long seconds;
 
+
 		OneShotTrigger(long seconds) {
 			this.seconds = seconds;
 		}
+
 
 		@Nullable
 		@Override
@@ -1180,6 +1067,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 
 	}
+
 
 	/**
 	 * Strategy interface to renew a {@link Lease}.

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.BufferedReader;
@@ -34,10 +35,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
- * Represents a PEM object that is internally decoded to a DER object. Typically, used to
- * obtain a {@link RSAPrivateCrtKeySpec}.
- * <p>
- * Mainly for use within the framework.
+ * Represents a PEM object that is internally decoded to a DER object.
+ * Typically, used to obtain a {@link RSAPrivateCrtKeySpec}.
+ * <p>Mainly for use within the framework.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -48,9 +48,11 @@ public class PemObject {
 
 	private static final Pattern END_PATTERN = Pattern.compile("-+END ([A-Z ]+)-+");
 
+
 	private final PemObjectType objectType;
 
 	private final byte[] content;
+
 
 	private PemObject(PemObjectType objectType, String content) {
 
@@ -58,6 +60,7 @@ public class PemObject {
 		String sanitized = content.replaceAll("\r", "").replaceAll("\n", "");
 		this.content = Base64.getDecoder().decode(sanitized);
 	}
+
 
 	/**
 	 * Check whether the content is PEM-encoded.
@@ -70,39 +73,35 @@ public class PemObject {
 
 	/**
 	 * Create a {@link PemObject} from PEM {@code content} that is enclosed with
-	 * {@code -BEGIN PRIVATE KEY-} and {@code -END PRIVATE KEY-}. This method returns
-	 * either the first PEM object ot throws {@link IllegalArgumentException} of no object
-	 * could be found.
+	 * {@code -BEGIN PRIVATE KEY-} and {@code -END PRIVATE KEY-}. This method
+	 * returns either the first PEM object ot throws
+	 * {@link IllegalArgumentException} of no object could be found.
 	 * @param content the PEM content.
 	 * @return the {@link PemObject} from PEM {@code content}.
 	 * @throws IllegalArgumentException if no PEM object could be found.
 	 */
 	public static PemObject fromKey(String content) {
-
 		return parse(content).stream()
-			.filter(PemObject::isPrivateKey)
-			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("Could not find a PKCS #8 private key"));
+				.filter(PemObject::isPrivateKey)
+				.findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Could not find a PKCS #8 private key"));
 	}
 
 	/**
 	 * Create a {@link PemObject} from PEM {@code content} that is enclosed with
-	 * {@code -BEGIN PRIVATE KEY-} or {@code -BEGIN PUBLIC KEY-}. This method returns
-	 * either the first PEM object ot throws {@link IllegalArgumentException} of no object
-	 * could be found.
+	 * {@code -BEGIN PRIVATE KEY-} or {@code -BEGIN PUBLIC KEY-}. This method
+	 * returns either the first PEM object ot throws
+	 * {@link IllegalArgumentException} of no object could be found.
 	 * @param content the PEM content.
 	 * @return the {@link PemObject} from PEM {@code content}.
 	 * @throws IllegalArgumentException if no PEM object could be found.
 	 * @since 2.3
 	 */
 	public static PemObject parseFirst(String content) {
-
 		List<PemObject> objects = parse(content);
-
 		if (objects.isEmpty()) {
 			throw new IllegalArgumentException("Cannot find PEM object");
 		}
-
 		return objects.get(0);
 	}
 
@@ -114,21 +113,15 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public static List<PemObject> parse(String content) {
-
 		List<PemObject> objects = new ArrayList<>();
-
 		try (BufferedReader reader = new BufferedReader(new StringReader(content))) {
-
 			PemObject object;
-
 			while ((object = readNextSection(reader)) != null) {
 				objects.add(object);
 			}
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new RuntimeException("No way this could happen with a StringReader underneath", e);
 		}
-
 		return objects;
 	}
 
@@ -154,8 +147,7 @@ public class PemObject {
 					keyBuilder = new StringBuilder();
 					title = curTitle;
 				}
-			}
-			else {
+			} else {
 				Matcher m = END_PATTERN.matcher(line);
 				if (m.matches()) {
 					String endTitle = m.group(1);
@@ -171,8 +163,10 @@ public class PemObject {
 		}
 	}
 
+
 	/**
-	 * @return {@literal true} if the object was identified to contain a private key.
+	 * @return {@literal true} if the object was identified to contain a private
+	 * key.
 	 * @since 2.3
 	 */
 	public boolean isCertificate() {
@@ -181,7 +175,8 @@ public class PemObject {
 	}
 
 	/**
-	 * @return {@literal true} if the object was identified to contain a private key.
+	 * @return {@literal true} if the object was identified to contain a private
+	 * key.
 	 * @since 2.3
 	 */
 	public boolean isPrivateKey() {
@@ -203,15 +198,12 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public X509Certificate getCertificate() {
-
 		if (!isCertificate()) {
 			throw new IllegalStateException("PEM object is not a certificate");
 		}
-
 		try {
 			return KeystoreUtil.getCertificate(this.content);
-		}
-		catch (CertificateException e) {
+		} catch (CertificateException e) {
 			throw new IllegalStateException("Cannot obtain Certificate", e);
 		}
 	}
@@ -222,15 +214,12 @@ public class PemObject {
 	 * @since 2.4
 	 */
 	public List<X509Certificate> getCertificates() {
-
 		if (!isCertificate()) {
 			throw new IllegalStateException("PEM object is not a certificate");
 		}
-
 		try {
 			return Collections.unmodifiableList(KeystoreUtil.getCertificates(this.content));
-		}
-		catch (CertificateException e) {
+		} catch (CertificateException e) {
 			throw new IllegalStateException("Cannot obtain Certificates", e);
 		}
 	}
@@ -241,15 +230,12 @@ public class PemObject {
 	 * @since 2.3
 	 */
 	public RSAPrivateCrtKeySpec getRSAPrivateKeySpec() {
-
 		if (!isPrivateKey()) {
 			throw new IllegalStateException("PEM object is not a private key");
 		}
-
 		try {
 			return KeyFactories.RSA_PRIVATE.getKey(this.content);
-		}
-		catch (GeneralSecurityException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException("Cannot obtain PrivateKey", e);
 		}
 	}
@@ -259,15 +245,12 @@ public class PemObject {
 	 * @return the {@link RSAPrivateCrtKeySpec}.
 	 */
 	public RSAPublicKeySpec getRSAPublicKeySpec() {
-
 		if (!isPublicKey()) {
 			throw new IllegalStateException("PEM object is not a public key");
 		}
-
 		try {
 			return KeyFactories.RSA_PUBLIC.getKey(this.content);
-		}
-		catch (GeneralSecurityException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException("Cannot obtain PrivateKey", e);
 		}
 	}
@@ -275,6 +258,7 @@ public class PemObject {
 	byte[] getContent() {
 		return content;
 	}
+
 
 	enum PemObjectType {
 
@@ -288,26 +272,26 @@ public class PemObject {
 		// cache
 		private static final PemObjectType[] constants = values();
 
+
 		private final String name;
+
 
 		PemObjectType(String value) {
 			this.name = value;
 		}
+
 
 		public String toString() {
 			return name;
 		}
 
 		public static PemObjectType of(String identifier) {
-
 			Assert.hasText(identifier, "Identifier must not be empty");
-
 			for (PemObjectType constant : constants) {
 				if (constant.name.equalsIgnoreCase(identifier)) {
 					return constant;
 				}
 			}
-
 			throw new IllegalArgumentException("No enum constant %s".formatted(identifier));
 		}
 

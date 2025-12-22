@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.time.Duration;
@@ -37,19 +38,18 @@ public class WrappedMetadata {
 
 	private final Duration ttl;
 
+
 	/**
-	 * Creates a new {@link WrappedMetadata}.
+	 * Create a new {@code WrappedMetadata}.
 	 * @param token must not be {@literal null}.
 	 * @param ttl must not be {@literal null}.
 	 * @param creationTime must not be {@literal null}.
 	 * @param path can be {@literal null}.
 	 */
 	public WrappedMetadata(VaultToken token, Duration ttl, Instant creationTime, @Nullable String path) {
-
 		Assert.notNull(token, "VaultToken must not be null");
 		Assert.notNull(ttl, "TTL duration must not be null");
 		Assert.notNull(creationTime, "Creation time must not be null");
-
 		this.token = token;
 		this.ttl = ttl;
 		this.creationTime = creationTime;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.annotation;
 
 import java.util.Collection;
@@ -45,14 +46,15 @@ import org.springframework.vault.core.util.PropertyTransformer;
 import org.springframework.vault.core.util.PropertyTransformers;
 
 /**
- * Registrar to register {@link org.springframework.vault.core.env.VaultPropertySource}s
- * based on {@link VaultPropertySource}.
- * <p>
- * This class registers potentially multiple property sources based on different Vault
- * paths. {@link org.springframework.vault.core.env.VaultPropertySource}s are resolved and
- * added to {@link ConfigurableEnvironment} once the bean factory is post-processed. This
- * allows injection of Vault properties and and lookup using the
- * {@link org.springframework.core.env.Environment}.
+ * Registrar to register
+ * {@link org.springframework.vault.core.env.VaultPropertySource}s based on
+ * {@link VaultPropertySource}.
+ * <p>This class registers potentially multiple property sources based on
+ * different Vault paths.
+ * {@link org.springframework.vault.core.env.VaultPropertySource}s are resolved
+ * and added to {@link ConfigurableEnvironment} once the bean factory is
+ * post-processed. This allows injection of Vault properties and and lookup
+ * using the {@link org.springframework.core.env.Environment}.
  *
  * @author Mark Paluch
  */
@@ -60,6 +62,7 @@ class VaultPropertySourceRegistrar
 		implements ImportBeanDefinitionRegistrar, BeanFactoryPostProcessor, EnvironmentAware {
 
 	private @Nullable Environment environment;
+
 
 	@Override
 	public void setEnvironment(Environment environment) {
@@ -78,7 +81,7 @@ class VaultPropertySourceRegistrar
 
 		registerPropertySources(
 				beanFactory.getBeansOfType(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class)
-					.values(),
+						.values(),
 				propertySources);
 	}
 
@@ -103,9 +106,9 @@ class VaultPropertySourceRegistrar
 
 		if (!registry.isBeanNameInUse("VaultPropertySourceRegistrar")) {
 			registry.registerBeanDefinition("VaultPropertySourceRegistrar", BeanDefinitionBuilder //
-				.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
-				.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
-				.getBeanDefinition());
+					.rootBeanDefinition(VaultPropertySourceRegistrar.class) //
+					.setRole(BeanDefinition.ROLE_INFRASTRUCTURE) //
+					.getBeanDefinition());
 		}
 
 		Set<AnnotationAttributes> propertySources = attributesForRepeatable(annotationMetadata,
@@ -126,7 +129,8 @@ class VaultPropertySourceRegistrar
 			Assert.hasText(ref, "'vaultTemplateRef' in @EnableVaultPropertySource must not be empty");
 
 			PropertyTransformer propertyTransformer = StringUtils.hasText(propertyNamePrefix)
-					? PropertyTransformers.propertyNamePrefix(propertyNamePrefix) : PropertyTransformers.noop();
+					? PropertyTransformers.propertyNamePrefix(propertyNamePrefix)
+					: PropertyTransformers.noop();
 
 			for (String propertyPath : paths) {
 
@@ -147,8 +151,7 @@ class VaultPropertySourceRegistrar
 					}
 
 					counter++;
-				}
-				while (true);
+				} while (true);
 			}
 		}
 	}
@@ -164,7 +167,7 @@ class VaultPropertySourceRegistrar
 
 		if (isRenewable(renewal)) {
 			builder = BeanDefinitionBuilder
-				.rootBeanDefinition(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
+					.rootBeanDefinition(org.springframework.vault.core.env.LeaseAwareVaultPropertySource.class);
 
 			RequestedSecret requestedSecret = renewal == Renewal.ROTATE ? RequestedSecret.rotating(propertyPath)
 					: RequestedSecret.renewable(propertyPath);
@@ -172,10 +175,9 @@ class VaultPropertySourceRegistrar
 			builder.addConstructorArgValue(propertyPath);
 			builder.addConstructorArgReference("secretLeaseContainer");
 			builder.addConstructorArgValue(requestedSecret);
-		}
-		else {
+		} else {
 			builder = BeanDefinitionBuilder
-				.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
+					.rootBeanDefinition(org.springframework.vault.core.env.VaultPropertySource.class);
 
 			builder.addConstructorArgValue(propertyPath);
 			builder.addConstructorArgReference(ref);

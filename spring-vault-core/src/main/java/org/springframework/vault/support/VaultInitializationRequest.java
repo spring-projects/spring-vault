@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -30,14 +31,16 @@ public class VaultInitializationRequest {
 	@JsonProperty("secret_threshold")
 	private final int secretThreshold;
 
+
 	private VaultInitializationRequest(int secretShares, int secretThreshold) {
 		this.secretShares = secretShares;
 		this.secretThreshold = secretThreshold;
 	}
 
+
 	/**
-	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares} and
-	 * {@code secretThreshold}.
+	 * Create a new {@literal VaultInitializationRequest} given {@code secretShares}
+	 * and {@code secretThreshold}.
 	 * @param secretShares number of key shares.
 	 * @param secretThreshold number of required keys for unsealing.
 	 * @return a new {@link VaultInitializationRequest}.
@@ -45,6 +48,7 @@ public class VaultInitializationRequest {
 	public static VaultInitializationRequest create(int secretShares, int secretThreshold) {
 		return new VaultInitializationRequest(secretShares, secretThreshold);
 	}
+
 
 	/**
 	 * @return number of secret shares.

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.net.URI;
@@ -29,11 +30,10 @@ import org.springframework.util.Assert;
 
 /**
  * Authentication options for {@link AwsIamAuthentication}.
- * <p>
- * Authentication options provide the path, a {@link AwsCredentialsProvider} optional role
- * and server name ({@literal Vault-AWS-IAM-Server-ID} header).
- * {@link AwsIamAuthenticationOptions} can be constructed using {@link #builder()}.
- * Instances of this class are immutable once constructed.
+ * <p>Authentication options provide the path, a {@link AwsCredentialsProvider}
+ * optional role and server name ({@literal Vault-AWS-IAM-Server-ID} header).
+ * {@link AwsIamAuthenticationOptions} can be constructed using
+ * {@link #builder()}. Instances of this class are immutable once constructed.
  *
  * @author Mark Paluch
  * @since 1.1
@@ -43,6 +43,7 @@ import org.springframework.util.Assert;
 public class AwsIamAuthenticationOptions {
 
 	public static final String DEFAULT_AWS_AUTHENTICATION_PATH = "aws";
+
 
 	/**
 	 * Path of the aws authentication backend mount.
@@ -61,15 +62,15 @@ public class AwsIamAuthenticationOptions {
 
 	/**
 	 * Name of the role against which the login is being attempted. If role is not
-	 * specified, the friendly name (i.e., role name or username) of the IAM principal
-	 * authenticated. If a matching role is not found, login fails.
+	 * specified, the friendly name (i.e., role name or username) of the IAM
+	 * principal authenticated. If a matching role is not found, login fails.
 	 */
 	@Nullable
 	private final String role;
 
 	/**
-	 * Server name to mitigate risk of replay attacks, preferably set to Vault server's
-	 * DNS name. Used for {@literal Vault-AWS-IAM-Server-ID} header.
+	 * Server name to mitigate risk of replay attacks, preferably set to Vault
+	 * server's DNS name. Used for {@literal Vault-AWS-IAM-Server-ID} header.
 	 */
 	@Nullable
 	private final String serverId;
@@ -78,6 +79,7 @@ public class AwsIamAuthenticationOptions {
 	 * STS server URI.
 	 */
 	private final URI endpointUri;
+
 
 	private AwsIamAuthenticationOptions(String path, AwsCredentialsProvider credentialsProvider,
 			AwsRegionProvider regionProvider, @Nullable String role, @Nullable String serverId, URI endpointUri) {
@@ -90,12 +92,14 @@ public class AwsIamAuthenticationOptions {
 		this.endpointUri = endpointUri;
 	}
 
+
 	/**
 	 * @return a new {@link AwsIamAuthenticationOptionsBuilder}.
 	 */
 	public static AwsIamAuthenticationOptionsBuilder builder() {
 		return new AwsIamAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the aws authentication backend mount.
@@ -112,8 +116,8 @@ public class AwsIamAuthenticationOptions {
 	}
 
 	/**
-	 * @return the region provider to obtain the AWS region to be used for computing the
-	 * signature.
+	 * @return the region provider to obtain the AWS region to be used for computing
+	 * the signature.
 	 * @since 3.0
 	 */
 	public AwsRegionProvider getRegionProvider() {
@@ -129,8 +133,8 @@ public class AwsIamAuthenticationOptions {
 	}
 
 	/**
-	 * @return Server name to mitigate risk of replay attacks, preferably set to Vault
-	 * server's DNS name, may be {@literal null}. Used for
+	 * @return Server name to mitigate risk of replay attacks, preferably set to
+	 * Vault server's DNS name, may be {@literal null}. Used for
 	 * {@literal Vault-AWS-IAM-Server-ID} header.
 	 * @since 2.0
 	 */
@@ -145,6 +149,7 @@ public class AwsIamAuthenticationOptions {
 	public URI getEndpointUri() {
 		return this.endpointUri;
 	}
+
 
 	/**
 	 * Builder for {@link AwsIamAuthenticationOptions}.
@@ -166,18 +171,18 @@ public class AwsIamAuthenticationOptions {
 
 		private URI endpointUri = URI.create("https://sts.amazonaws.com/");
 
+
 		AwsIamAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path, defaults to {@literal aws}.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsIamAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -187,28 +192,24 @@ public class AwsIamAuthenticationOptions {
 		 * use static credentials or provide a
 		 * {@link #credentialsProvider(AwsCredentialsProvider) credentials provider}.
 		 * @param credentials must not be {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #credentialsProvider(AwsCredentialsProvider)
 		 */
 		public AwsIamAuthenticationOptionsBuilder credentials(AwsCredentials credentials) {
-
 			Assert.notNull(credentials, "Credentials must not be null");
-
 			return credentialsProvider(StaticCredentialsProvider.create(credentials));
 		}
 
 		/**
 		 * Configure an {@link AwsCredentialsProvider}, required to calculate the
-		 * signature. Alternatively, configure static {@link #credentials(AwsCredentials)
-		 * credentials}.
+		 * signature. Alternatively, configure static
+		 * {@link #credentials(AwsCredentials) credentials}.
 		 * @param credentialsProvider must not be {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #credentials(AwsCredentials)
 		 */
 		public AwsIamAuthenticationOptionsBuilder credentialsProvider(AwsCredentialsProvider credentialsProvider) {
-
 			Assert.notNull(credentialsProvider, "AwsCredentialsProvider must not be null");
-
 			this.credentialsProvider = credentialsProvider;
 			return this;
 		}
@@ -216,27 +217,23 @@ public class AwsIamAuthenticationOptions {
 		/**
 		 * Configure a {@link Region}, used for computing the signature.
 		 * @param region must not be {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 3.0.2
 		 */
 		public AwsIamAuthenticationOptionsBuilder region(Region region) {
-
 			Assert.notNull(region, "Region must not be null");
-
 			return regionProvider(() -> region);
 		}
 
 		/**
-		 * Configure an {@link AwsRegionProvider}, required to calculate the region to be
-		 * used for computing the signature.
+		 * Configure an {@link AwsRegionProvider}, required to calculate the region to
+		 * be used for computing the signature.
 		 * @param regionProvider must not be {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 3.0
 		 */
 		public AwsIamAuthenticationOptionsBuilder regionProvider(AwsRegionProvider regionProvider) {
-
 			Assert.notNull(regionProvider, "AwsRegionProvider must not be null");
-
 			this.regionProvider = regionProvider;
 			return this;
 		}
@@ -246,12 +243,10 @@ public class AwsIamAuthenticationOptions {
 		 * role is not specified, the friendly name (i.e., role name or username) of the
 		 * IAM principal authenticated. If a matching role is not found, login fails.
 		 * @param role must not be empty or {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsIamAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be null or empty");
-
 			this.role = role;
 			return this;
 		}
@@ -261,22 +256,20 @@ public class AwsIamAuthenticationOptions {
 		 * included in the signature to mitigate the risk of replay attacks. Preferably
 		 * use the Vault server DNS name.
 		 * @param serverId must not be {@literal null} or empty.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @since 2.1
 		 */
 		public AwsIamAuthenticationOptionsBuilder serverId(String serverId) {
-
 			Assert.hasText(serverId, "Server name must not be null or empty");
-
 			this.serverId = serverId;
 			return this;
 		}
 
 		/**
-		 * Configure a server name that is included in the signature to mitigate the risk
-		 * of replay attacks. Preferably use the Vault server DNS name.
+		 * Configure a server name that is included in the signature to mitigate the
+		 * risk of replay attacks. Preferably use the Vault server DNS name.
 		 * @param serverName must not be {@literal null} or empty.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsIamAuthenticationOptionsBuilder serverName(String serverName) {
 			return serverId(serverName);
@@ -286,12 +279,10 @@ public class AwsIamAuthenticationOptions {
 		 * Configure an endpoint URI of the STS API, defaults to
 		 * {@literal https://sts.amazonaws.com/}.
 		 * @param endpointUri must not be {@literal null}.
-		 * @return {@code this} {@link AwsIamAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public AwsIamAuthenticationOptionsBuilder endpointUri(URI endpointUri) {
-
 			Assert.notNull(endpointUri, "Endpoint URI must not be null");
-
 			this.endpointUri = endpointUri;
 			return this;
 		}
@@ -301,9 +292,7 @@ public class AwsIamAuthenticationOptions {
 		 * @return a new {@link AwsIamAuthenticationOptions}.
 		 */
 		public AwsIamAuthenticationOptions build() {
-
 			Assert.state(this.credentialsProvider != null, "Credentials or CredentialProvider must not be null");
-
 			return new AwsIamAuthenticationOptions(this.path, this.credentialsProvider, this.regionProvider, this.role,
 					this.serverId, this.endpointUri);
 		}

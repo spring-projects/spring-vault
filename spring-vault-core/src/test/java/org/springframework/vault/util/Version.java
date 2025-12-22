@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.util.ArrayList;
@@ -31,6 +32,7 @@ public class Version implements Comparable<Version> {
 
 	private static final String VERSION_PARSE_ERROR = "Invalid version string! Could not parse segment %s within %s.";
 
+
 	final int major;
 
 	final int minor;
@@ -41,22 +43,20 @@ public class Version implements Comparable<Version> {
 
 	final boolean enterprise;
 
+
 	/**
-	 * Creates a new {@link Version} from the given integer values. At least one value has
-	 * to be given but a maximum of 4.
+	 * Creates a new {@link Version} from the given integer values. At least one
+	 * value has to be given but a maximum of 4.
 	 * @param parts must not be {@literal null} or empty.
 	 */
 	private Version(boolean enterprise, int... parts) {
-
 		Assert.notNull(parts, "Parts must not be null");
 		Assert.isTrue(parts.length > 0 && parts.length < 5, "Parts must contain one to four segments");
-
 		this.major = parts[0];
 		this.minor = parts.length > 1 ? parts[1] : 0;
 		this.bugfix = parts.length > 2 ? parts[2] : 0;
 		this.build = parts.length > 3 ? parts[3] : 0;
 		this.enterprise = enterprise;
-
 		Assert.isTrue(this.major >= 0, "Major version must be greater or equal zero!");
 		Assert.isTrue(this.minor >= 0, "Minor version must be greater or equal zero!");
 		Assert.isTrue(this.bugfix >= 0, "Bugfix version must be greater or equal zero!");
@@ -64,37 +64,34 @@ public class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Parses the given string representation of a version into a {@link Version} object.
+	 * Parses the given string representation of a version into a {@link Version}
+	 * object.
 	 * @param version must not be {@literal null} or empty.
 	 * @return
 	 */
 	public static Version parse(String version) {
-
 		Assert.hasText(version, "Version must not be empty!");
-
 		String[] parts = version.trim().split("\\.");
 		int[] intParts = new int[parts.length];
 		boolean enterprise = version.endsWith("+ent");
 
 		for (int i = 0; i < parts.length; i++) {
-
 			String input = i == parts.length - 1 ? parts[i].replaceAll("\\D.*", "") : parts[i];
-
 			if (StringUtils.hasText(input)) {
 				try {
 					intParts[i] = Integer.parseInt(input);
-				}
-				catch (IllegalArgumentException o_O) {
+				} catch (IllegalArgumentException o_O) {
 					throw new IllegalArgumentException(VERSION_PARSE_ERROR.formatted(input, version), o_O);
 				}
 			}
 		}
-
 		return new Version(enterprise, intParts);
 	}
 
+
 	/**
-	 * Returns whether the current {@link Version} is greater (newer) than the given one.
+	 * Return whether the current {@link Version} is greater (newer) than the given
+	 * one.
 	 * @param version
 	 * @return
 	 */
@@ -103,8 +100,8 @@ public class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Returns whether the current {@link Version} is greater (newer) or the same as the
-	 * given one.
+	 * Return whether the current {@link Version} is greater (newer) or the same as
+	 * the given one.
 	 * @param version
 	 * @return
 	 */
@@ -113,7 +110,7 @@ public class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Returns whether the current {@link Version} is the same as the given one.
+	 * Return whether the current {@link Version} is the same as the given one.
 	 * @param version
 	 * @return
 	 */
@@ -122,7 +119,8 @@ public class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Returns whether the current {@link Version} is less (older) than the given one.
+	 * Return whether the current {@link Version} is less (older) than the given
+	 * one.
 	 * @param version
 	 * @return
 	 */
@@ -131,8 +129,8 @@ public class Version implements Comparable<Version> {
 	}
 
 	/**
-	 * Returns whether the current {@link Version} is less (older) or equal to the current
-	 * one.
+	 * Return whether the current {@link Version} is less (older) or equal to the
+	 * current one.
 	 * @param version
 	 * @return
 	 */
@@ -146,27 +144,21 @@ public class Version implements Comparable<Version> {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	public int compareTo(Version that) {
-
 		if (that == null) {
 			return 1;
 		}
-
 		if (this.major != that.major) {
 			return this.major - that.major;
 		}
-
 		if (this.minor != that.minor) {
 			return this.minor - that.minor;
 		}
-
 		if (this.bugfix != that.bugfix) {
 			return this.bugfix - that.bugfix;
 		}
-
 		if (this.build != that.build) {
 			return this.build - that.build;
 		}
-
 		return 0;
 	}
 
@@ -181,19 +173,15 @@ public class Version implements Comparable<Version> {
 	 */
 	@Override
 	public String toString() {
-
 		List<Integer> digits = new ArrayList<Integer>();
 		digits.add(this.major);
 		digits.add(this.minor);
-
 		if (this.build != 0 || this.bugfix != 0) {
 			digits.add(this.bugfix);
 		}
-
 		if (this.build != 0) {
 			digits.add(this.build);
 		}
-
 		return StringUtils.collectionToDelimitedString(digits, ".") + (isEnterprise() ? "+ent" : "");
 	}
 

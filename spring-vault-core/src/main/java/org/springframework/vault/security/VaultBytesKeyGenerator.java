@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.security;
 
 import java.util.Base64;
@@ -24,11 +25,10 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * Random byte generator using Vault's {@code transit} backend to generate high-quality
- * random bytes of the configured length.
- * <p>
- * Using Vault ensures to use a high-entropy source preventing to consume entropy of the
- * local machine.
+ * Random byte generator using Vault's {@code transit} backend to generate
+ * high-quality random bytes of the configured length.
+ * <p>Using Vault ensures to use a high-entropy source preventing to consume
+ * entropy of the local machine.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -42,8 +42,8 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	private String transitPath;
 
 	/**
-	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@code 32}
-	 * random bytes using {@code transit} for transit mount path.
+	 * Create a new {@code VaultBytesKeyGenerator} initialized to generate
+	 * {@code 32} random bytes using {@code transit} for transit mount path.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultBytesKeyGenerator(VaultOperations vaultOperations) {
@@ -51,23 +51,22 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 	}
 
 	/**
-	 * Creates a new {@link VaultBytesKeyGenerator} initialized to generate {@code length}
-	 * random bytes.
+	 * Create a new {@code VaultBytesKeyGenerator} initialized to generate
+	 * {@code length} random bytes.
 	 * @param vaultOperations must not be {@literal null}.
-	 * @param transitPath path of the transit backend, must not be {@literal null} or
-	 * empty.
+	 * @param transitPath path of the transit backend, must not be {@literal null}
+	 * or empty.
 	 * @param length number of random bytes to generate. Must be greater than zero.
 	 */
 	public VaultBytesKeyGenerator(VaultOperations vaultOperations, String transitPath, int length) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
 		Assert.hasText(transitPath, "Transit path must not be null or empty");
 		Assert.isTrue(length > 0, "Byte count must be greater zero");
-
 		this.vaultOperations = vaultOperations;
 		this.transitPath = transitPath;
 		this.length = length;
 	}
+
 
 	@Override
 	public int getKeyLength() {
@@ -76,10 +75,8 @@ public class VaultBytesKeyGenerator implements BytesKeyGenerator {
 
 	@Override
 	public byte[] generateKey() {
-
 		VaultResponse response = this.vaultOperations.write("%s/random/%d".formatted(this.transitPath, getKeyLength()),
 				Collections.singletonMap("format", "base64"));
-
 		String randomBytes = (String) response.getRequiredData().get("random_bytes");
 		return Base64.getDecoder().decode(randomBytes);
 	}

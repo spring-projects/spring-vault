@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease.event;
 
 import java.util.Map;
@@ -30,8 +31,9 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 
 	private final Lease previousLease;
 
+
 	/**
-	 * Create a new {@link SecretLeaseRotatedEvent} given {@link RequestedSecret},
+	 * Create a new {@code SecretLeaseRotatedEvent} given {@link RequestedSecret},
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param previousLease must not be {@literal null}.
@@ -39,10 +41,10 @@ public class SecretLeaseRotatedEvent extends SecretLeaseCreatedEvent {
 	 */
 	public SecretLeaseRotatedEvent(RequestedSecret requestedSecret, Lease previousLease, Lease currentLease,
 			Map<String, Object> secrets) {
-
 		super(requestedSecret, currentLease, secrets);
 		this.previousLease = previousLease;
 	}
+
 
 	public Lease getPreviousLease() {
 		return this.previousLease;

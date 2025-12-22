@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.HashMap;
@@ -37,14 +38,14 @@ public abstract class GcpJwtAuthenticationSupport {
 
 	private static final Log logger = LogFactory.getLog(GcpJwtAuthenticationSupport.class);
 
+
 	private final RestOperations restOperations;
 
 	GcpJwtAuthenticationSupport(RestOperations restOperations) {
-
 		Assert.notNull(restOperations, "Vault RestOperations must not be null");
-
 		this.restOperations = restOperations;
 	}
+
 
 	/**
 	 * Perform the actual Vault login given {@code signedJwt}.
@@ -55,43 +56,32 @@ public abstract class GcpJwtAuthenticationSupport {
 	 * @return the {@link VaultToken}.
 	 */
 	VaultToken doLogin(String authenticationName, String signedJwt, String path, String role) {
-
 		Map<String, String> login = createRequestBody(role, signedJwt);
-
 		try {
-
 			VaultResponse response = this.restOperations.postForObject(AuthenticationUtil.getLoginPath(path), login,
 					VaultResponse.class);
-
 			Assert.state(response != null && response.getAuth() != null, "Auth field must not be null");
 
 			if (logger.isDebugEnabled()) {
-
 				if (response.getAuth().get("metadata") instanceof Map) {
-
 					Map<Object, Object> metadata = (Map<Object, Object>) response.getAuth().get("metadata");
 					logger.debug("Login successful using %s authentication for user id %s".formatted(authenticationName,
 							metadata.get("service_account_email")));
-				}
-				else {
+				} else {
 					logger.debug("Login successful using " + authenticationName + " authentication");
 				}
 			}
 
 			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw VaultLoginException.create(authenticationName, e);
 		}
 	}
 
 	static Map<String, String> createRequestBody(String role, String signedJwt) {
-
 		Map<String, String> login = new HashMap<>();
-
 		login.put("role", role);
 		login.put("jwt", signedJwt);
-
 		return login;
 	}
 

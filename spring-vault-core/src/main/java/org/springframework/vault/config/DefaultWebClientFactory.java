@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import java.util.function.Consumer;
@@ -36,21 +37,20 @@ class DefaultWebClientFactory implements WebClientFactory {
 
 	private final Function<ClientHttpConnector, WebClientBuilder> builderFunction;
 
+
 	DefaultWebClientFactory(ClientHttpConnector connector,
 			Function<ClientHttpConnector, WebClientBuilder> builderFunction) {
 		this.connector = connector;
 		this.builderFunction = builderFunction;
 	}
 
+
 	@Override
 	public WebClient create(@Nullable Consumer<WebClientBuilder> customizer) {
-
 		WebClientBuilder builder = this.builderFunction.apply(this.connector);
-
 		if (customizer != null) {
 			customizer.accept(builder);
 		}
-
 		return builder.build();
 	}
 

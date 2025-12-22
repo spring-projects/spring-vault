@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.File;
@@ -43,9 +44,9 @@ class PemObjectUnitTests {
 	@BeforeEach
 	void setUp() {
 		assertThat(this.privateDir).exists()
-			.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
+				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.public.key.pem"));
 		assertThat(this.privateDir).exists()
-			.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
+				.isDirectoryContaining(file -> file.getName().equalsIgnoreCase("localhost.decrypted.key.pem"));
 	}
 
 	@Test
@@ -112,7 +113,7 @@ class PemObjectUnitTests {
 
 		assertThat(pemObject.isCertificate()).isTrue();
 		assertThat(pemObject.getCertificate().getSubjectX500Principal().getName())
-			.contains("O=spring-cloud-vault-config");
+				.contains("O=spring-cloud-vault-config");
 	}
 
 }

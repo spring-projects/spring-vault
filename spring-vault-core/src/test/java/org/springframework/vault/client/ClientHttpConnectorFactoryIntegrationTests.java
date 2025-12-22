@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.client;
 
 import java.util.ArrayList;
@@ -178,8 +179,7 @@ class ClientHttpConnectorFactoryIntegrationTests {
 		// Uninitialized and sealed can cause status 500
 		try {
 			return webClient.get().uri(this.url).retrieve().bodyToMono(String.class).block();
-		}
-		catch (WebClientResponseException e) {
+		} catch (WebClientResponseException e) {
 			return e.getResponseBodyAsString();
 		}
 	}

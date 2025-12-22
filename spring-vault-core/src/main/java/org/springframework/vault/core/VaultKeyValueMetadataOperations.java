@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import org.springframework.lang.Nullable;
@@ -46,8 +47,8 @@ public interface VaultKeyValueMetadataOperations {
 	void put(String path, VaultMetadataRequest body);
 
 	/**
-	 * Permanently delete the key metadata and all version data for the specified key. All
-	 * version history will be removed.
+	 * Permanently delete the key metadata and all version data for the specified
+	 * key. All version history will be removed.
 	 * @param path the secret path, must not be {@literal null} or empty.
 	 */
 	void delete(String path);

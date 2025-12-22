@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * {@link ObjectMapper} supplier for testing holding a singleton {@link ObjectMapper}
- * instance.
+ * {@link ObjectMapper} supplier for testing holding a singleton
+ * {@link ObjectMapper} instance.
  *
  * @author Mark Paluch
  */

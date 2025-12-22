@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import reactor.core.publisher.Mono;
@@ -20,9 +21,10 @@ import reactor.core.publisher.Mono;
 import org.springframework.vault.support.VaultToken;
 
 /**
- * {@link VaultTokenSupplier} provides a {@link VaultToken} to be used for authenticated
- * Vault access. Implementing classes usually use a login method to login and return a
- * {@link VaultToken} implementing {@link #getVaultToken()}.
+ * {@link VaultTokenSupplier} provides a {@link VaultToken} to be used for
+ * authenticated Vault access. Implementing classes usually use a login method
+ * to log in and return a {@link VaultToken} implementing
+ * {@link #getVaultToken()}.
  *
  * @author Mark Paluch
  * @since 2.0

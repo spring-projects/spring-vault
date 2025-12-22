@@ -54,16 +54,16 @@ class AppIdAuthenticationUnitTests {
 	void loginShouldObtainTokenWithStaticUserId() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-			.appId("hello") //
-			.userIdMechanism(new StaticUserId("world")) //
-			.build();
+				.appId("hello") //
+				.userIdMechanism(new StaticUserId("world")) //
+				.build();
 
 		this.mockRest.expect(requestTo("/auth/app-id/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.app_id").value("hello"))
-			.andExpect(jsonPath("$.user_id").value("world"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.app_id").value("hello"))
+				.andExpect(jsonPath("$.user_id").value("world"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
 
 		AppIdAuthentication authentication = new AppIdAuthentication(options, this.restTemplate);
 
@@ -76,15 +76,15 @@ class AppIdAuthenticationUnitTests {
 	void loginShouldFail() {
 
 		AppIdAuthenticationOptions options = AppIdAuthenticationOptions.builder()
-			.appId("hello") //
-			.userIdMechanism(new StaticUserId("world")) //
-			.build();
+				.appId("hello") //
+				.userIdMechanism(new StaticUserId("world")) //
+				.build();
 
 		this.mockRest.expect(requestTo("/auth/app-id/login")) //
-			.andRespond(withServerError());
+				.andRespond(withServerError());
 
 		assertThatExceptionOfType(VaultException.class)
-			.isThrownBy(() -> new AppIdAuthentication(options, this.restTemplate).login());
+				.isThrownBy(() -> new AppIdAuthentication(options, this.restTemplate).login());
 	}
 
 }

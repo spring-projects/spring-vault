@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
@@ -39,15 +40,15 @@ public abstract class SecretLeaseEvent extends ApplicationEvent {
 	@Nullable
 	private final Lease lease;
 
+
 	/**
-	 * Create a new {@link SecretLeaseEvent} given {@link RequestedSecret} and
+	 * Create a new {@code SecretLeaseEvent} given {@link RequestedSecret} and
 	 * {@link Lease}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease can be {@literal null}.
 	 */
 	protected SecretLeaseEvent(RequestedSecret requestedSecret, @Nullable Lease lease) {
 		super(requestedSecret);
-
 		this.lease = lease;
 	}
 

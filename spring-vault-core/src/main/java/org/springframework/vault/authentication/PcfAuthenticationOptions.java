@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Clock;
@@ -24,12 +25,11 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Authentication options for {@link PcfAuthentication}.
- * <p>
- * Authentication options provide the path, {@link Clock} and instance key/instance
- * certificate {@link Supplier}s. {@link PcfAuthenticationOptions} can be constructed
- * using {@link #builder()}. Instances of this class are immutable once constructed.
- * <p>
- * Defaults to platform-default instance certificate/key by resolving
+ * <p>Authentication options provide the path, {@link Clock} and instance
+ * key/instance certificate {@link Supplier}s. {@link PcfAuthenticationOptions}
+ * can be constructed using {@link #builder()}. Instances of this class are
+ * immutable once constructed.
+ * <p>Defaults to platform-default instance certificate/key by resolving
  * {@code CF_INSTANCE_CERT} and {@code CF_INSTANCE_KEY} env variables.
  *
  * @author Mark Paluch
@@ -40,6 +40,7 @@ import org.springframework.util.ObjectUtils;
 public class PcfAuthenticationOptions {
 
 	public static final String DEFAULT_PCF_AUTHENTICATION_PATH = "pcf";
+
 
 	/**
 	 * Path of the pcf authentication backend mount.
@@ -63,6 +64,7 @@ public class PcfAuthenticationOptions {
 	 */
 	private final Supplier<String> instanceKeySupplier;
 
+
 	private PcfAuthenticationOptions(String path, String role, Clock clock, Supplier<String> instanceCertSupplier,
 			Supplier<String> instanceKeySupplier) {
 		this.path = path;
@@ -72,12 +74,14 @@ public class PcfAuthenticationOptions {
 		this.instanceKeySupplier = instanceKeySupplier;
 	}
 
+
 	/**
 	 * @return a new {@link PcfAuthenticationOptionsBuilder}.
 	 */
 	public static PcfAuthenticationOptionsBuilder builder() {
 		return new PcfAuthenticationOptionsBuilder();
 	}
+
 
 	/**
 	 * @return the path of the pcf authentication backend mount.
@@ -114,6 +118,7 @@ public class PcfAuthenticationOptions {
 		return this.instanceKeySupplier;
 	}
 
+
 	/**
 	 * Builder for {@link PcfAuthenticationOptions}.
 	 */
@@ -132,19 +137,19 @@ public class PcfAuthenticationOptions {
 		@Nullable
 		private Supplier<String> instanceKeySupplier;
 
+
 		PcfAuthenticationOptionsBuilder() {
 		}
+
 
 		/**
 		 * Configure the mount path.
 		 * @param path must not be empty or {@literal null}.
-		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see #DEFAULT_PCF_AUTHENTICATION_PATH
 		 */
 		public PcfAuthenticationOptionsBuilder path(String path) {
-
 			Assert.hasText(path, "Path must not be empty");
-
 			this.path = path;
 			return this;
 		}
@@ -153,12 +158,10 @@ public class PcfAuthenticationOptions {
 		 * Configure the role.
 		 * @param role name of the role against which the login is being attempted, must
 		 * not be {@literal null} or empty.
-		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public PcfAuthenticationOptionsBuilder role(String role) {
-
 			Assert.hasText(role, "Role must not be empty");
-
 			this.role = role;
 			return this;
 		}
@@ -166,12 +169,10 @@ public class PcfAuthenticationOptions {
 		/**
 		 * Configure the {@link Clock}.
 		 * @param clock must not be {@literal null}.
-		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 */
 		public PcfAuthenticationOptionsBuilder clock(Clock clock) {
-
 			Assert.notNull(clock, "Clock must not be null");
-
 			this.clock = clock;
 			return this;
 		}
@@ -179,13 +180,11 @@ public class PcfAuthenticationOptions {
 		/**
 		 * Configure the {@link Supplier} to obtain the instance certificate.
 		 * @param instanceCertSupplier the supplier, must not be {@literal null}.
-		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see ResourceCredentialSupplier
 		 */
 		public PcfAuthenticationOptionsBuilder instanceCertificate(Supplier<String> instanceCertSupplier) {
-
 			Assert.notNull(instanceCertSupplier, "Instance certificate supplier must not be null");
-
 			this.instanceCertSupplier = instanceCertSupplier;
 			return this;
 		}
@@ -193,21 +192,18 @@ public class PcfAuthenticationOptions {
 		/**
 		 * Configure the {@link Supplier} to obtain the instance key.
 		 * @param instanceKeySupplier the supplier, must not be {@literal null}.
-		 * @return {@code this} {@link PcfAuthenticationOptionsBuilder}.
+		 * @return this builder.
 		 * @see ResourceCredentialSupplier
 		 */
 		public PcfAuthenticationOptionsBuilder instanceKey(Supplier<String> instanceKeySupplier) {
-
 			Assert.notNull(instanceKeySupplier, "Instance certificate supplier must not be null");
-
 			this.instanceKeySupplier = instanceKeySupplier;
 			return this;
 		}
 
 		/**
 		 * Build a new {@link PcfAuthenticationOptions} instance.
-		 * <p>
-		 * Falls back to the instance certificate at {@code CF_INSTANCE_CERT} if
+		 * <p>Falls back to the instance certificate at {@code CF_INSTANCE_CERT} if
 		 * {@link #instanceCertificate(Supplier)} is not configured respective
 		 * {@code CF_INSTANCE_KEY} if {@link #instanceKey(Supplier)} is not configured.
 		 * @return a new {@link PcfAuthenticationOptions}.
@@ -217,20 +213,15 @@ public class PcfAuthenticationOptions {
 		 * set.
 		 */
 		public PcfAuthenticationOptions build() {
-
 			Assert.notNull(this.role, "Role must not be null");
-
 			Supplier<String> instanceCertSupplier = this.instanceCertSupplier;
-
 			if (instanceCertSupplier == null) {
 				instanceCertSupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_CERT"));
 			}
-
 			Supplier<String> instanceKeySupplier = this.instanceKeySupplier;
 			if (instanceKeySupplier == null) {
 				instanceKeySupplier = new ResourceCredentialSupplier(resolveEnvVariable("CF_INSTANCE_KEY"));
 			}
-
 			return new PcfAuthenticationOptions(this.path, this.role, this.clock, instanceCertSupplier,
 					instanceKeySupplier);
 		}

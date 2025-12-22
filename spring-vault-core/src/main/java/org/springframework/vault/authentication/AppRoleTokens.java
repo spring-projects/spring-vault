@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
@@ -36,6 +37,7 @@ class AppRoleTokens {
 
 	}
 
+
 	/**
 	 * Wrapped roleId/secretId via Cubbyhole.
 	 */
@@ -53,6 +55,7 @@ class AppRoleTokens {
 
 	}
 
+
 	/**
 	 * Pull-mode.
 	 */
@@ -69,6 +72,7 @@ class AppRoleTokens {
 		}
 
 	}
+
 
 	/**
 	 * Static, provided roleId/secretId.

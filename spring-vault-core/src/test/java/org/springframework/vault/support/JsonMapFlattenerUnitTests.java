@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.util.Collections;
@@ -53,7 +54,7 @@ class JsonMapFlattenerUnitTests {
 	void shouldFlattenDeeplyNestedObject() throws Exception {
 
 		Map<String, Object> map = this.OBJECT_MAPPER
-			.readValue("{\"key\": { \"nested\": {\"anotherLevel\": \"value\"} } }", Map.class);
+				.readValue("{\"key\": { \"nested\": {\"anotherLevel\": \"value\"} } }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key.nested.anotherLevel", "value");
@@ -63,7 +64,7 @@ class JsonMapFlattenerUnitTests {
 	void shouldFlattenNestedListOfSimpleObjects() throws Exception {
 
 		Map<String, Object> map = this.OBJECT_MAPPER
-			.readValue("{\"key\": [\"one\", \"two\"], \"dotted.key\": [\"one\", \"two\"] }", Map.class);
+				.readValue("{\"key\": [\"one\", \"two\"], \"dotted.key\": [\"one\", \"two\"] }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key[0]", "one").containsEntry("key[1]", "two");
@@ -74,7 +75,7 @@ class JsonMapFlattenerUnitTests {
 	void shouldFlattenNestedListOfComplexObject() throws Exception {
 
 		Map<String, Object> map = this.OBJECT_MAPPER
-			.readValue("{\"key\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}] }", Map.class);
+				.readValue("{\"key\": [{ \"nested\":\"value\"}, { \"nested\":\"other-value\"}] }", Map.class);
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key[0].nested", "value").containsEntry("key[1].nested", "other-value");
@@ -88,7 +89,7 @@ class JsonMapFlattenerUnitTests {
 		Map<String, Object> result = JsonMapFlattener.flatten(map);
 
 		assertThat(result).containsEntry("key.level1[0].nested", "value")
-			.containsEntry("key.level1[1].nested", "other-value");
+				.containsEntry("key.level1[1].nested", "other-value");
 	}
 
 }

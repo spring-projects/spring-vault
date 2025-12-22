@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.lang.annotation.Documented;
@@ -25,21 +26,21 @@ import java.lang.annotation.Target;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
- * Annotation to guard a {@code @Test} to skip on or after the specified Vault version.
- * <p>
- * When applied at the class level, all test methods within that class are automatically
- * disabled as well.
+ * Annotation to guard a {@code @Test} to skip on or after the specified Vault
+ * version.
+ * <p>When applied at the class level, all test methods within that class are
+ * automatically disabled as well.
  *
- * <p>
- * When applied at the method level, the presence of this annotation does not prevent the
- * test class from being instantiated. Rather, it prevents the execution of the test
- * method and method-level lifecycle callbacks such as {@code @BeforeEach} methods,
- * {@code @AfterEach} methods, and corresponding extension APIs.
+ * <p>When applied at the method level, the presence of this annotation does not
+ * prevent the test class from being instantiated. Rather, it prevents the
+ * execution of the test method and method-level lifecycle callbacks such as
+ * {@code @BeforeEach} methods, {@code @AfterEach} methods, and corresponding
+ * extension APIs.
  *
  * @author Mark Paluch
  * @see VaultVersionExtension
  */
-@Target({ ElementType.TYPE, ElementType.METHOD })
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

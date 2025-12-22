@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.lease.domain;
 
 import java.time.Duration;
@@ -37,6 +38,7 @@ public class Lease {
 
 	private final boolean renewable;
 
+
 	private Lease(@Nullable String leaseId, Duration leaseDuration, boolean renewable) {
 
 		this.leaseId = leaseId;
@@ -44,37 +46,37 @@ public class Lease {
 		this.renewable = renewable;
 	}
 
+
 	/**
 	 * Create a new {@link Lease}.
 	 * @param leaseId must not be empty or {@literal null}.
-	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
+	 * @param leaseDuration the lease duration, must not be {@literal null} or
+	 * negative.
 	 * @param renewable {@literal true} if this lease is renewable.
 	 * @return the created {@link Lease}
 	 * @since 2.0
 	 */
 	public static Lease of(String leaseId, Duration leaseDuration, boolean renewable) {
-
 		Assert.hasText(leaseId, "LeaseId must not be empty");
 		Assert.notNull(leaseDuration, "Lease duration must not be null");
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
-
 		return new Lease(leaseId, leaseDuration, renewable);
 	}
 
 	/**
-	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and specified
-	 * duration.
-	 * @param leaseDuration the lease duration, must not be {@literal null} or negative.
+	 * Create a new non-renewable {@link Lease}, without a {@code leaseId} and
+	 * specified duration.
+	 * @param leaseDuration the lease duration, must not be {@literal null} or
+	 * negative.
 	 * @return the created {@link Lease}
 	 * @since 2.0
 	 */
 	public static Lease fromTimeToLive(Duration leaseDuration) {
-
 		Assert.notNull(leaseDuration, "Lease duration must not be null");
 		Assert.isTrue(!leaseDuration.isNegative(), "Lease duration must not be negative");
-
 		return new Lease(null, leaseDuration, false);
 	}
+
 
 	/**
 	 * Factory method to return a non-renewable, zero-duration {@link Lease}.
@@ -116,12 +118,10 @@ public class Lease {
 
 	@Override
 	public boolean equals(Object o) {
-
 		if (this == o)
 			return true;
 		if (!(o instanceof Lease lease))
 			return false;
-
 		if (this.leaseDuration != lease.leaseDuration)
 			return false;
 		if (this.renewable != lease.renewable)
@@ -131,7 +131,6 @@ public class Lease {
 
 	@Override
 	public int hashCode() {
-
 		int result = this.leaseId != null ? this.leaseId.hashCode() : 0;
 		result = 31 * result + this.leaseDuration.hashCode();
 		result = 31 * result + (this.renewable ? 1 : 0);
@@ -140,7 +139,6 @@ public class Lease {
 
 	@Override
 	public String toString() {
-
 		StringBuffer sb = new StringBuffer();
 		sb.append(getClass().getSimpleName());
 		sb.append(" [leaseId='").append(this.leaseId).append('\'');

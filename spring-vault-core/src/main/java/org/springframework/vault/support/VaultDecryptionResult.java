@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.springframework.lang.Nullable;
@@ -20,7 +21,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 
 /**
- * Holds the response from decryption operation and provides methods to access the result.
+ * Holds the response from decryption operation and provides methods to access
+ * the result.
  *
  * @author Praveendra Singh
  * @author Mark Paluch
@@ -30,15 +32,14 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 
 	private final @Nullable Plaintext plaintext;
 
+
 	/**
-	 * Create {@link VaultDecryptionResult} for a successfully decrypted {@link Plaintext}
-	 * .
+	 * Create {@link VaultDecryptionResult} for a successfully decrypted
+	 * {@link Plaintext} .
 	 * @param plaintext must not be {@literal null}.
 	 */
 	public VaultDecryptionResult(Plaintext plaintext) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
-
 		this.plaintext = plaintext;
 	}
 
@@ -47,14 +48,13 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultDecryptionResult(VaultException exception) {
-
 		super(exception);
 		this.plaintext = null;
 	}
 
-	@Nullable
+
 	@Override
-	protected Plaintext get0() {
+	protected @Nullable Plaintext get0() {
 		return this.plaintext;
 	}
 
@@ -67,7 +67,6 @@ public class VaultDecryptionResult extends AbstractResult<Plaintext> {
 	 */
 	@Nullable
 	public String getAsString() {
-
 		Plaintext plaintext = get();
 		return plaintext == null ? null : plaintext.asString();
 	}

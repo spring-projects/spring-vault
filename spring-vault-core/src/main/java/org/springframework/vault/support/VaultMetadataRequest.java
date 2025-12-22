@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.time.Duration;
@@ -46,22 +47,25 @@ public class VaultMetadataRequest {
 	@JsonProperty("custom_metadata")
 	private final @Nullable Map<String, String> customMetadata;
 
+
 	private VaultMetadataRequest(boolean casRequired, @Nullable Map<String, String> customMetadata,
 			@Nullable Duration deleteVersionAfter, int maxVersions) {
 		this.casRequired = casRequired;
 		this.customMetadata = customMetadata;
 		this.deleteVersionAfter = DurationParser
-			.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
+				.formatDuration(deleteVersionAfter != null ? deleteVersionAfter : Duration.ZERO);
 		this.maxVersions = maxVersions;
 	}
+
 
 	public static VaultMetadataRequestBuilder builder() {
 		return new VaultMetadataRequestBuilder();
 	}
 
+
 	/**
-	 * @return If true all keys will require the cas parameter to be set on all write
-	 * requests.
+	 * @return If true all keys will require the cas parameter to be set on all
+	 * write requests.
 	 */
 	public boolean isCasRequired() {
 		return this.casRequired;
@@ -74,7 +78,8 @@ public class VaultMetadataRequest {
 
 	/**
 	 * @return the deletion_time for all new versions written to this key. Accepts
-	 * <a href="https://golang.org/pkg/time/#ParseDuration">Go duration format string</a>.
+	 * <a href="https://golang.org/pkg/time/#ParseDuration">Go duration format
+	 * string</a>.
 	 */
 	public String getDeleteVersionAfter() {
 		return this.deleteVersionAfter;
@@ -87,6 +92,10 @@ public class VaultMetadataRequest {
 		return this.maxVersions;
 	}
 
+
+	/**
+	 * Builder for {@link VaultMetadataRequest}.
+	 */
 	public static class VaultMetadataRequestBuilder {
 
 		private boolean casRequired;
@@ -99,9 +108,14 @@ public class VaultMetadataRequest {
 
 		private int maxVersions;
 
+
+		VaultMetadataRequestBuilder() {
+		}
+
+
 		/**
-		 * Set the cas_required parameter to {@code true} to require the cas parameter to
-		 * be set on all write requests.
+		 * Set the cas_required parameter to {@code true} to require the cas parameter
+		 * to be set on all write requests.
 		 * @return {@link VaultMetadataRequest}
 		 * @since 3.1
 		 */
@@ -110,8 +124,8 @@ public class VaultMetadataRequest {
 		}
 
 		/**
-		 * Set the cas_required parameter. If true all keys will require the cas parameter
-		 * to be set on all write requests.
+		 * Set the cas_required parameter. If true all keys will require the cas
+		 * parameter to be set on all write requests.
 		 * @param casRequired
 		 * @return {@link VaultMetadataRequest}
 		 */

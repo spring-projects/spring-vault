@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.net.InetAddress;
@@ -29,9 +30,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 
 /**
- * Vault initializer to ensure a running and prepared Vault. Prepared means unsealed,
- * having a non-versioning key-value backend mounted at {@code secret/} and a
- * {@link VaultToken} with {@code root} privileges.
+ * Vault initializer to ensure a running and prepared Vault. Prepared means
+ * unsealed, having a non-versioning key-value backend mounted at
+ * {@code secret/} and a {@link VaultToken} with {@code root} privileges.
  *
  * @author Mark Paluch
  * @see Settings#token()
@@ -42,14 +43,17 @@ public class VaultInitializer {
 
 	public static final Version VERSIONING_INTRODUCED_WITH = Version.parse(VERSIONING_INTRODUCED_WITH_VALUE);
 
+
 	private final VaultEndpoint vaultEndpoint;
 
 	private final PrepareVault prepareVault;
 
 	private VaultToken token;
 
+
 	/**
-	 * Create a new {@link VaultInitializer} with default SSL configuration and endpoint.
+	 * Create a new {@link VaultInitializer} with default SSL configuration and
+	 * endpoint.
 	 *
 	 * @see Settings#createSslConfiguration()
 	 * @see VaultEndpoint
@@ -59,37 +63,30 @@ public class VaultInitializer {
 	}
 
 	/**
-	 * Create a new {@link VaultInitializer} with the given {@link SslConfiguration} and
-	 * {@link VaultEndpoint}.
+	 * Create a new {@link VaultInitializer} with the given {@link SslConfiguration}
+	 * and {@link VaultEndpoint}.
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @param vaultEndpoint must not be {@literal null}.
 	 */
 	public VaultInitializer(SslConfiguration sslConfiguration, VaultEndpoint vaultEndpoint) {
-
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 		Assert.notNull(vaultEndpoint, "VaultEndpoint must not be null");
-
 		RestTemplate restTemplate = TestRestTemplateFactory.create(sslConfiguration);
 		WebClient webClient = TestWebClientFactory.create(sslConfiguration);
-
 		VaultTemplate vaultTemplate = new VaultTemplate(TestRestTemplateFactory.TEST_VAULT_ENDPOINT,
 				restTemplate.getRequestFactory(), new PreparingSessionManager());
-
 		this.token = Settings.token();
-
 		this.prepareVault = new PrepareVault(webClient, TestRestTemplateFactory.create(sslConfiguration),
 				vaultTemplate);
 		this.vaultEndpoint = vaultEndpoint;
 	}
 
+
 	public void initialize() {
-
 		assertRunningVault();
-
 		if (!this.prepareVault.isAvailable()) {
 			this.token = this.prepareVault.initializeVault();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
-
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
 				this.prepareVault.disableGenericVersioning();
 				this.prepareVault.mountVersionedKvBackend();
@@ -98,15 +95,12 @@ public class VaultInitializer {
 	}
 
 	private void assertRunningVault() {
-
 		try (Socket socket = new Socket()) {
-
 			socket.connect(new InetSocketAddress(InetAddress.getByName("localhost"), this.vaultEndpoint.getPort()));
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			throw new IllegalStateException(
 					"Vault is not running on localhost:%d which is required to run a test using @Rule %s"
-						.formatted(this.vaultEndpoint.getPort(), getClass().getSimpleName()));
+							.formatted(this.vaultEndpoint.getPort(), getClass().getSimpleName()));
 		}
 	}
 
@@ -116,6 +110,7 @@ public class VaultInitializer {
 	public PrepareVault prepare() {
 		return this.prepareVault;
 	}
+
 
 	private class PreparingSessionManager implements SessionManager {
 

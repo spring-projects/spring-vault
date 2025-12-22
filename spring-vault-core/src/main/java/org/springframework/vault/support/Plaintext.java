@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.nio.charset.Charset;
@@ -22,8 +23,9 @@ import java.util.Objects;
 import org.springframework.util.Assert;
 
 /**
- * Value object representing plain text with an optional {@link VaultTransitContext}.
- * Plaintext is represented binary safe as {@code byte[]}.
+ * Value object representing plain text with an optional
+ * {@link VaultTransitContext}. Plaintext is represented binary safe as
+ * {@code byte[]}.
  *
  * @author Praveendra Singh
  * @author Mark Paluch
@@ -34,15 +36,17 @@ public class Plaintext {
 
 	private static final Plaintext EMPTY = new Plaintext(new byte[0], VaultTransitContext.empty());
 
+
 	private final byte[] plaintext;
 
 	private final VaultTransitContext context;
 
-	private Plaintext(byte[] plaintext, VaultTransitContext context) {
 
+	private Plaintext(byte[] plaintext, VaultTransitContext context) {
 		this.plaintext = plaintext;
 		this.context = context;
 	}
+
 
 	/**
 	 * Factory method to create an empty {@link Plaintext}.
@@ -59,21 +63,16 @@ public class Plaintext {
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
 	public static Plaintext of(byte[] plaintext) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
-
-		if (plaintext.length == 0) {
-			return empty();
-		}
-
-		return new Plaintext(plaintext, VaultTransitContext.empty());
+		return plaintext.length == 0 ? empty() : new Plaintext(plaintext, VaultTransitContext.empty());
 	}
 
 	/**
 	 * Factory method to create {@link Plaintext} using from a {@link String}.
 	 * {@link String} is encoded to {@code byte} using the default
-	 * {@link java.nio.charset.Charset}. Use {@link #of(String, java.nio.charset.Charset)}
-	 * to control the {@link java.nio.charset.Charset} to use.
+	 * {@link java.nio.charset.Charset}. Use
+	 * {@link #of(String, java.nio.charset.Charset)} to control the
+	 * {@link java.nio.charset.Charset} to use.
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 */
@@ -82,23 +81,18 @@ public class Plaintext {
 	}
 
 	/**
-	 * Factory method to create {@link Plaintext} using from a {@link String} using the
-	 * given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
+	 * Factory method to create {@link Plaintext} using from a {@link String} using
+	 * the given {@link java.nio.charset.Charset}. {@link java.nio.charset.Charset}.
 	 * @param plaintext the plaintext to encrypt, must not be {@literal null}.
 	 * @return the {@link Plaintext} for {@code plaintext}.
 	 * @since 2.3
 	 */
 	public static Plaintext of(String plaintext, Charset charset) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Assert.notNull(charset, "Charset must not be null");
-
-		if (plaintext.length() == 0) {
-			return empty();
-		}
-
-		return of(plaintext.getBytes(charset));
+		return plaintext.isEmpty() ? empty() : of(plaintext.getBytes(charset));
 	}
+
 
 	public byte[] getPlaintext() {
 		return this.plaintext;
@@ -109,8 +103,8 @@ public class Plaintext {
 	}
 
 	/**
-	 * Create a new {@link Plaintext} object from this plain text associated with the
-	 * given {@link VaultTransitContext}.
+	 * Create a new {@link Plaintext} object from this plain text associated with
+	 * the given {@link VaultTransitContext}.
 	 * @param context transit context.
 	 * @return the new {@link Plaintext} object.
 	 */
@@ -133,9 +127,7 @@ public class Plaintext {
 	 * @since 2.3
 	 */
 	public String asString(Charset charset) {
-
 		Assert.notNull(charset, "Charset must not be null");
-
 		return new String(getPlaintext(), charset);
 	}
 

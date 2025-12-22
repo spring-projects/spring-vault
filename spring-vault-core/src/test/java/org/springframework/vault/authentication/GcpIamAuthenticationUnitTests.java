@@ -69,30 +69,31 @@ class GcpIamAuthenticationUnitTests {
 	void shouldLogin() throws NoSuchAlgorithmException {
 
 		this.mockRest.expect(requestTo("/auth/gcp/login"))
-			.andExpect(method(HttpMethod.POST))
-			.andExpect(jsonPath("$.role").value("dev-role"))
-			.andExpect(jsonPath("$.jwt").value("my-jwt"))
-			.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
-				.body("{" + "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
-						+ "}"));
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role").value("dev-role"))
+				.andExpect(jsonPath("$.jwt").value("my-jwt"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{"
+								+ "\"auth\":{\"client_token\":\"my-token\", \"renewable\": true, \"lease_duration\": 10}"
+								+ "}"));
 
 		KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
 		keyGen.initialize(1024);
 		KeyPair key = keyGen.generateKeyPair();
 
 		GoogleCredential credential = new MockGoogleCredential.Builder().setServiceAccountId("hello@world")
-			.setServiceAccountProjectId("foobar")
-			.setServiceAccountPrivateKey(key.getPrivate())
-			.setServiceAccountPrivateKeyId("key-id")
-			.setJsonFactory(new GsonFactory())
-			.setTransport(new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build())
-			.build();
+				.setServiceAccountProjectId("foobar")
+				.setServiceAccountPrivateKey(key.getPrivate())
+				.setServiceAccountPrivateKeyId("key-id")
+				.setJsonFactory(new GsonFactory())
+				.setTransport(new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build())
+				.build();
 		credential.setAccessToken("foobar");
 
 		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-			.role("dev-role")
-			.credential(credential)
-			.build();
+				.role("dev-role")
+				.credential(credential)
+				.build();
 		GcpIamAuthentication authentication = new GcpIamAuthentication(options, this.restTemplate,
 				new MockHttpTransport.Builder().setLowLevelHttpResponse(createMockHttpResponse()).build());
 
@@ -118,16 +119,16 @@ class GcpIamAuthenticationUnitTests {
 
 		PrivateKey privateKeyMock = mock(PrivateKey.class);
 		GoogleCredential credential = new Builder().setServiceAccountId("hello@world")
-			.setServiceAccountProjectId("foobar")
-			.setServiceAccountPrivateKey(privateKeyMock)
-			.setServiceAccountPrivateKeyId("key-id")
-			.build();
+				.setServiceAccountProjectId("foobar")
+				.setServiceAccountPrivateKey(privateKeyMock)
+				.setServiceAccountPrivateKeyId("key-id")
+				.build();
 		credential.setAccessToken("foobar");
 
 		GcpIamAuthenticationOptions options = GcpIamAuthenticationOptions.builder()
-			.role("dev-role")
-			.credential(credential)
-			.build();
+				.role("dev-role")
+				.credential(credential)
+				.build();
 
 		new GcpIamAuthentication(options, this.restTemplate);
 	}

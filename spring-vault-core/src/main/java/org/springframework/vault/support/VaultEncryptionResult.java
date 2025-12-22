@@ -13,13 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.springframework.lang.Nullable;
 import org.springframework.vault.VaultException;
 
 /**
- * Holds the response from encryption operation and provides methods to access the result.
+ * Holds the response from encryption operation and provides methods to access
+ * the result.
  *
  * @author Praveendra Singh
  * @author Mark Paluch
@@ -28,6 +30,7 @@ import org.springframework.vault.VaultException;
 public class VaultEncryptionResult extends AbstractResult<Ciphertext> {
 
 	private final @Nullable Ciphertext cipherText;
+
 
 	/**
 	 * Create {@link VaultEncryptionResult} for a successfully encrypted
@@ -43,14 +46,13 @@ public class VaultEncryptionResult extends AbstractResult<Ciphertext> {
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultEncryptionResult(VaultException exception) {
-
 		super(exception);
 		this.cipherText = null;
 	}
 
-	@Nullable
+
 	@Override
-	protected Ciphertext get0() {
+	protected @Nullable Ciphertext get0() {
 		return this.cipherText;
 	}
 

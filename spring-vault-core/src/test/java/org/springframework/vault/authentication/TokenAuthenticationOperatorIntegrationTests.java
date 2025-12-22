@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.time.Duration;
@@ -43,10 +44,10 @@ class TokenAuthenticationOperatorIntegrationTests extends TokenAuthenticationInt
 	void shouldSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.ttl(Duration.ofSeconds(60))
-			.renewable()
-			.numUses(1)
-			.build();
+				.ttl(Duration.ofSeconds(60))
+				.renewable()
+				.numUses(1)
+				.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
@@ -69,10 +70,10 @@ class TokenAuthenticationOperatorIntegrationTests extends TokenAuthenticationInt
 	void shouldFailDuringSelfLookup() {
 
 		VaultTokenRequest tokenRequest = VaultTokenRequest.builder()
-			.ttl(Duration.ofSeconds(60))
-			.renewable()
-			.numUses(1)
-			.build();
+				.ttl(Duration.ofSeconds(60))
+				.renewable()
+				.numUses(1)
+				.build();
 
 		VaultToken token = prepare().getVaultOperations().opsForToken().create(tokenRequest).getToken();
 
@@ -81,14 +82,14 @@ class TokenAuthenticationOperatorIntegrationTests extends TokenAuthenticationInt
 
 		// first usage
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectNextCount(1) //
-			.verifyComplete();
+				.as(StepVerifier::create) //
+				.expectNextCount(1) //
+				.verifyComplete();
 
 		operator.getVaultToken() //
-			.as(StepVerifier::create) //
-			.expectError(VaultException.class) //
-			.verify();
+				.as(StepVerifier::create) //
+				.expectError(VaultException.class) //
+				.verify();
 	}
 
 }

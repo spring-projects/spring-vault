@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.util;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,9 +31,9 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Factory for {@link RestTemplate}. The template caches the
- * {@link ClientHttpRequestFactory} once it was initialized. Changes to timeouts or the
- * SSL configuration won't be applied once a {@link ClientHttpRequestFactory} was created
- * for the first time.
+ * {@link ClientHttpRequestFactory} once it was initialized. Changes to timeouts
+ * or the SSL configuration won't be applied once a
+ * {@link ClientHttpRequestFactory} was created for the first time.
  *
  * @author Mark Paluch
  */
@@ -42,11 +43,12 @@ public class TestRestTemplateFactory {
 
 	private static final AtomicReference<ClientHttpRequestFactory> factoryCache = new AtomicReference<ClientHttpRequestFactory>();
 
+
 	/**
 	 * Create a new {@link RestTemplate} using the {@link SslConfiguration}. The
 	 * underlying {@link ClientHttpRequestFactory} is cached. See
-	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for a
-	 * given {@link ClientHttpRequestFactory}.
+	 * {@link #create(ClientHttpRequestFactory)} to create {@link RestTemplate} for
+	 * a given {@link ClientHttpRequestFactory}.
 	 * @param sslConfiguration must not be {@literal null}.
 	 * @return
 	 */
@@ -57,56 +59,47 @@ public class TestRestTemplateFactory {
 		try {
 			initializeClientHttpRequestFactory(sslConfiguration);
 			return create(factoryCache.get());
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new IllegalStateException(e);
 		}
 	}
 
 	/**
-	 * Create a new {@link RestTemplate} using the {@link ClientHttpRequestFactory}. The
-	 * {@link RestTemplate} will throw
-	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in error
-	 * cases and behave in that aspect like the regular
+	 * Create a new {@link RestTemplate} using the {@link ClientHttpRequestFactory}.
+	 * The {@link RestTemplate} will throw
+	 * {@link org.springframework.web.client.HttpStatusCodeException exceptions} in
+	 * error cases and behave in that aspect like the regular
 	 * {@link org.springframework.web.client.RestTemplate}.
 	 * @param requestFactory must not be {@literal null}.
 	 * @return
 	 */
 	private static RestTemplate create(ClientHttpRequestFactory requestFactory) {
-
 		Assert.notNull(requestFactory, "ClientHttpRequestFactory must not be null!");
-
 		return VaultClients.createRestTemplate(TEST_VAULT_ENDPOINT, requestFactory);
 	}
 
 	private static void initializeClientHttpRequestFactory(SslConfiguration sslConfiguration) throws Exception {
-
 		if (factoryCache.get() != null) {
 			return;
 		}
-
 		final ClientHttpRequestFactory clientHttpRequestFactory = ClientHttpRequestFactoryFactory
-			.create(new ClientOptions(), sslConfiguration);
-
+				.create(new ClientOptions(), sslConfiguration);
 		if (factoryCache.compareAndSet(null, clientHttpRequestFactory)) {
-
 			if (clientHttpRequestFactory instanceof InitializingBean) {
 				((InitializingBean) clientHttpRequestFactory).afterPropertiesSet();
 			}
-
 			if (clientHttpRequestFactory instanceof DisposableBean) {
-
 				Runtime.getRuntime().addShutdownHook(new Thread("ClientHttpRequestFactory Shutdown Hook") {
 
 					@Override
 					public void run() {
 						try {
 							((DisposableBean) clientHttpRequestFactory).destroy();
-						}
-						catch (Exception e) {
+						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
+
 				});
 			}
 		}

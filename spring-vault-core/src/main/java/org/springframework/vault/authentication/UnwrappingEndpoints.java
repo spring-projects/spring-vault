@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.springframework.http.HttpMethod;
@@ -20,8 +21,8 @@ import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 
 /**
- * Version-specific endpoint implementations for response unwrapping. Uses either legacy
- * cubbyhole or {@code sys/wrapping} endpoints.
+ * Version-specific endpoint implementations for response unwrapping. Uses
+ * either legacy cubbyhole or {@code sys/wrapping} endpoints.
  *
  * @author Mark Paluch
  * @since 2.2
@@ -29,7 +30,8 @@ import org.springframework.vault.support.VaultResponse;
 public enum UnwrappingEndpoints {
 
 	/**
-	 * Legacy cubbyhole endpoints prior to Vault 0.6.2 ({@literal cubbyhole/response}).
+	 * Legacy cubbyhole endpoints prior to Vault 0.6.2
+	 * ({@literal cubbyhole/response}).
 	 */
 	Cubbyhole {
 
@@ -47,6 +49,7 @@ public enum UnwrappingEndpoints {
 		HttpMethod getUnwrapRequestMethod() {
 			return HttpMethod.GET;
 		}
+
 	},
 
 	/**
@@ -69,7 +72,9 @@ public enum UnwrappingEndpoints {
 		HttpMethod getUnwrapRequestMethod() {
 			return HttpMethod.POST;
 		}
+
 	};
+
 
 	/**
 	 * Retrieve the path of the unwrapping endpoint.

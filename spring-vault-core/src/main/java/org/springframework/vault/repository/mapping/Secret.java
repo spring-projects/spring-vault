@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.mapping;
 
 import java.lang.annotation.Documented;
@@ -35,13 +36,14 @@ import org.springframework.data.keyvalue.annotation.KeySpace;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = { ElementType.TYPE })
+@Target(value = {ElementType.TYPE})
 @KeySpace
 public @interface Secret {
 
 	/**
 	 * The prefix to distinguish between domain types. The attribute supports SpEL
-	 * expressions to dynamically calculate the keyspace based on a per-operation basis.
+	 * expressions to dynamically calculate the keyspace based on a per-operation
+	 * basis.
 	 *
 	 * @see KeySpace
 	 */
@@ -49,8 +51,9 @@ public @interface Secret {
 	String value() default "";
 
 	/**
-	 * Secret backend mount, defaults to {@literal secret}. The attribute supports SpEL
-	 * expressions to dynamically calculate the backend based on a per-operation basis.
+	 * Secret backend mount, defaults to {@literal secret}. The attribute supports
+	 * SpEL expressions to dynamically calculate the backend based on a
+	 * per-operation basis.
 	 */
 	String backend() default "secret";
 

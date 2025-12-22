@@ -13,20 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -56,8 +48,9 @@ import org.springframework.vault.support.Policy.PolicyDeserializer;
 import org.springframework.vault.support.Policy.PolicySerializer;
 
 /**
- * Value object representing a Vault policy associated with {@link Rule}s. Instances of
- * {@link Policy} support JSON serialization and deserialization using Jackson.
+ * Value object representing a Vault policy associated with {@link Rule}s.
+ * Instances of {@link Policy} support JSON serialization and deserialization
+ * using Jackson.
  *
  * @author Mark Paluch
  * @see Rule
@@ -70,11 +63,14 @@ public class Policy {
 
 	private static final Policy EMPTY = new Policy(Collections.emptySet());
 
+
 	private final Set<Rule> rules;
+
 
 	private Policy(Set<Rule> rules) {
 		this.rules = rules;
 	}
+
 
 	/**
 	 * Create an empty {@link Policy} without rules.
@@ -90,10 +86,8 @@ public class Policy {
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
 	public static Policy of(Rule... rules) {
-
 		Assert.notNull(rules, "Rules must not be null");
 		Assert.noNullElements(rules, "Rules must not contain null elements");
-
 		return new Policy(new LinkedHashSet<>(Arrays.asList(rules)));
 	}
 
@@ -103,28 +97,25 @@ public class Policy {
 	 * @return the {@link Policy} object containing {@code rules}.
 	 */
 	public static Policy of(Set<Rule> rules) {
-
 		Assert.notNull(rules, "Rules must not be null");
-
 		return new Policy(new LinkedHashSet<>(rules));
 	}
 
+
 	/**
-	 * Create a new {@link Policy} object containing all configured rules and add the
-	 * given {@link Rule} to the new policy object. If the given {@link Rule} matches an
-	 * existing rule path, the exiting rule will be overridden by the new rule object.
+	 * Create a new {@link Policy} object containing all configured rules and add
+	 * the given {@link Rule} to the new policy object. If the given {@link Rule}
+	 * matches an existing rule path, the exiting rule will be overridden by the new
+	 * rule object.
 	 * @param rule must not be {@literal null}.
-	 * @return the new {@link Policy} object containing all configured rules and the given
-	 * {@link Rule}.
+	 * @return the new {@link Policy} object containing all configured rules and the
+	 * given {@link Rule}.
 	 */
 	public Policy with(Rule rule) {
-
 		Assert.notNull(rule, "Rule must not be null");
-
 		Set<Rule> rules = new LinkedHashSet<>(this.rules.size() + 1);
 		rules.addAll(this.rules);
 		rules.add(rule);
-
 		return new Policy(rules);
 	}
 
@@ -133,22 +124,19 @@ public class Policy {
 	}
 
 	/**
-	 * Lookup a {@link Rule} by its path. Returns {@literal null} if the rule was not
-	 * found.
+	 * Lookup a {@link Rule} by its path. Returns {@literal null} if the rule was
+	 * not found.
 	 * @param path must not be {@literal null}.
 	 * @return the {@link Rule} or {@literal null}, if not found.
 	 */
 	@Nullable
 	public Rule getRule(String path) {
-
 		Assert.notNull(path, "Path must not be null");
-
 		for (Rule rule : this.rules) {
 			if (rule.getPath().equals(path)) {
 				return rule;
 			}
 		}
-
 		return null;
 	}
 
@@ -166,9 +154,11 @@ public class Policy {
 		return Objects.hash(this.rules);
 	}
 
+
 	/**
-	 * Value object representing a rule for a certain path. Rule equality is considered by
-	 * comparing only the path segment to guarante uniqueness within a {@link Set}.
+	 * Value object representing a rule for a certain path. Rule equality is
+	 * considered by comparing only the path segment to guarantee uniqueness within
+	 * a {@link Set}.
 	 *
 	 * @author Mark Paluch
 	 */
@@ -182,8 +172,8 @@ public class Policy {
 		private final String path;
 
 		/**
-		 * One or more capabilities which provide fine-grained control over permitted (or
-		 * denied) operations.
+		 * One or more capabilities which provide fine-grained control over permitted
+		 * (or denied) operations.
 		 */
 		@JsonSerialize(contentConverter = CapabilityToStringConverter.class)
 		@JsonDeserialize(contentConverter = StringToCapabilityConverter.class)
@@ -217,22 +207,20 @@ public class Policy {
 
 		/**
 		 * Blacklists a list of parameter and values. Any values specified here take
-		 * precedence over {@link #allowedParameters}. Setting a parameter with a value of
-		 * a populated list denies any parameter containing those values. Setting to
+		 * precedence over {@link #allowedParameters}. Setting a parameter with a value
+		 * of a populated list denies any parameter containing those values. Setting to
 		 * {@literal *} will deny any parameter.
 		 */
 		@JsonProperty("denied_parameters")
 		private final Map<String, List<String>> deniedParameters;
 
+
 		@JsonCreator
 		private Rule(@JsonProperty("capabilities") List<Capability> capabilities,
-				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(
-						converter = StringToDurationConverter.class) Duration minWrappingTtl,
-				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(
-						converter = StringToDurationConverter.class) Duration maxWrappingTtl,
+				@JsonProperty("min_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration minWrappingTtl,
+				@JsonProperty("max_wrapping_ttl") @JsonDeserialize(converter = StringToDurationConverter.class) Duration maxWrappingTtl,
 				@JsonProperty("allowed_parameters") Map<String, List<String>> allowedParameters,
 				@JsonProperty("denied_parameters") Map<String, List<String>> deniedParameters) {
-
 			this.path = "";
 			this.capabilities = capabilities;
 			this.minWrappingTtl = minWrappingTtl;
@@ -244,7 +232,6 @@ public class Policy {
 		private Rule(String path, List<Capability> capabilities, @Nullable Duration minWrappingTtl,
 				@Nullable Duration maxWrappingTtl, Map<String, List<String>> allowedParameters,
 				Map<String, List<String>> deniedParameters) {
-
 			this.path = path;
 			this.capabilities = capabilities;
 			this.minWrappingTtl = minWrappingTtl;
@@ -253,6 +240,7 @@ public class Policy {
 			this.deniedParameters = deniedParameters;
 		}
 
+
 		/**
 		 * Create a new builder for {@link Rule}.
 		 * @return a new {@link RuleBuilder}.
@@ -260,6 +248,7 @@ public class Policy {
 		public static RuleBuilder builder() {
 			return new RuleBuilder();
 		}
+
 
 		private Rule withPath(String path) {
 			return new Rule(path, this.capabilities, this.minWrappingTtl, this.maxWrappingTtl, this.allowedParameters,
@@ -306,6 +295,7 @@ public class Policy {
 			return Objects.hash(this.path);
 		}
 
+
 		/**
 		 * Builder for a {@link Rule}.
 		 */
@@ -327,15 +317,14 @@ public class Policy {
 
 			;
 
+
 			/**
 			 * Associate a {@code path} with the rule.
 			 * @param path must not be {@literal null} or empty.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder path(String path) {
-
 				Assert.hasText(path, "Path must not be empty");
-
 				this.path = path;
 				return this;
 			}
@@ -344,12 +333,10 @@ public class Policy {
 			 * Configure a {@link Capability} for the rule. Capabilities are added when
 			 * calling this method and do not replace already configured capabilities.
 			 * @param capability must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder capability(Capability capability) {
-
 				Assert.notNull(capability, "Capability must not be null");
-
 				this.capabilities.add(capability);
 				return this;
 			}
@@ -358,13 +345,11 @@ public class Policy {
 			 * Configure capabilities. Capabilities are added when calling this method and
 			 * do not replace already configured capabilities.
 			 * @param capabilities must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder capabilities(Capability... capabilities) {
-
 				Assert.notNull(capabilities, "Capabilities must not be null");
 				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
-
 				return capabilities(Arrays.asList(capabilities));
 			}
 
@@ -372,18 +357,15 @@ public class Policy {
 			 * Configure capabilities. Capabilities are added when calling this method and
 			 * do not replace already configured capabilities.
 			 * @param capabilities must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 * @since 3.1
 			 */
 			public RuleBuilder capabilities(Collection<? extends Capability> capabilities) {
-
 				Assert.notNull(capabilities, "Capabilities must not be null");
 				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
-
 				for (Capability capability : capabilities) {
 					this.capabilities.add(capability);
 				}
-
 				return this;
 			}
 
@@ -393,19 +375,15 @@ public class Policy {
 			 * added when calling this method and do not replace already configured
 			 * capabilities.
 			 * @param capabilities must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 * @throws IllegalArgumentException if the capability cannot be resolved to a
 			 * built-in {@link Capability}.
 			 */
 			public RuleBuilder capabilities(String... capabilities) {
-
 				Assert.notNull(capabilities, "Capabilities must not be null");
 				Assert.noNullElements(capabilities, "Capabilities must not contain null elements");
-
 				List<Capability> mapped = Arrays.stream(capabilities).map(value -> {
-
 					Capability capability = BuiltinCapabilities.find(value);
-
 					if (capability == null) {
 						throw new IllegalArgumentException("Cannot resolve " + value + " to a capability");
 					}
@@ -418,12 +396,10 @@ public class Policy {
 			/**
 			 * Configure a min TTL for response wrapping.
 			 * @param ttl must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder minWrappingTtl(Duration ttl) {
-
 				Assert.notNull(ttl, "TTL must not be null");
-
 				this.minWrappingTtl = ttl;
 				return this;
 			}
@@ -431,12 +407,10 @@ public class Policy {
 			/**
 			 * Configure a max TTL for response wrapping.
 			 * @param ttl must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder maxWrappingTtl(Duration ttl) {
-
 				Assert.notNull(ttl, "TTL must not be null");
-
 				this.maxWrappingTtl = ttl;
 				return this;
 			}
@@ -448,15 +422,12 @@ public class Policy {
 			 * {@code name}.
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder allowedParameter(String name, String... values) {
-
 				Assert.hasText(name, "Allowed parameter name must not be empty");
 				Assert.notNull(values, "Values must not be null");
-
 				this.allowedParameters.put(name, Arrays.asList(values));
-
 				return this;
 			}
 
@@ -466,15 +437,12 @@ public class Policy {
 			 * values. Empty {@code values} deny parameter usage.
 			 * @param name must not be {@literal null} or empty.
 			 * @param values must not be {@literal null}.
-			 * @return {@code this} {@link RuleBuilder}.
+			 * @return this builder.
 			 */
 			public RuleBuilder deniedParameter(String name, String... values) {
-
 				Assert.hasText(name, "Denied parameter name must not be empty");
 				Assert.notNull(values, "Values must not be null");
-
 				this.deniedParameters.put(name, Arrays.asList(values));
-
 				return this;
 			}
 
@@ -484,32 +452,28 @@ public class Policy {
 			 * @return the new {@link Rule} object.
 			 */
 			public Rule build() {
-
 				Assert.state(StringUtils.hasText(this.path), "Path must not be empty");
 				Assert.state(!this.capabilities.isEmpty(), "Rule must define one or more capabilities");
-
 				List<Capability> capabilities = switch (this.capabilities.size()) {
-					case 0 -> Collections.emptyList();
-					case 1 -> Collections.singletonList(this.capabilities.iterator().next());
-					default -> Collections.unmodifiableList(new ArrayList<>(this.capabilities));
+				case 0 -> Collections.emptyList();
+				case 1 -> Collections.singletonList(this.capabilities.iterator().next());
+				default -> Collections.unmodifiableList(new ArrayList<>(this.capabilities));
 				};
-
 				return new Rule(this.path, capabilities, this.minWrappingTtl, this.maxWrappingTtl,
 						createMap(this.allowedParameters), createMap(this.deniedParameters));
 			}
 
 			private Map<String, List<String>> createMap(Map<String, List<String>> source) {
-
 				if (source.isEmpty()) {
 					return Collections.emptyMap();
 				}
-
 				return Collections.unmodifiableMap(new LinkedHashMap<>(source));
 			}
 
 		}
 
 	}
+
 
 	/**
 	 * Capability interface representing capability literals.
@@ -522,6 +486,7 @@ public class Policy {
 		String name();
 
 	}
+
 
 	/**
 	 * Built-in Vault capabilities.
@@ -560,23 +525,23 @@ public class Policy {
 		DELETE,
 
 		/**
-		 * Allows listing values at the given path. Note that the keys returned by a list
-		 * operation are not filtered by policies. Do not encode sensitive information in
-		 * key names. Not all backends support listing.
+		 * Allows listing values at the given path. Note that the keys returned by a
+		 * list operation are not filtered by policies. Do not encode sensitive
+		 * information in key names. Not all backends support listing.
 		 */
 		LIST,
 
 		/**
 		 * Allows access to paths that are root-protected. Tokens are not permitted to
-		 * interact with these paths unless they are have the sudo capability (in addition
-		 * to the other necessary capabilities for performing an operation against that
-		 * path, such as read or delete).
+		 * interact with these paths unless they are have the sudo capability (in
+		 * addition to the other necessary capabilities for performing an operation
+		 * against that path, such as read or delete).
 		 */
 		SUDO,
 
 		/**
-		 * Disallows access. This always takes precedence regardless of any other defined
-		 * capabilities, including {@link #SUDO}.
+		 * Disallows access. This always takes precedence regardless of any other
+		 * defined capabilities, including {@link #SUDO}.
 		 */
 		DENY;
 
@@ -587,13 +552,11 @@ public class Policy {
 		 */
 		@Nullable
 		public static Capability find(String value) {
-
 			for (BuiltinCapabilities cap : values()) {
 				if (cap.name().equalsIgnoreCase(value)) {
 					return cap;
 				}
 			}
-
 			return null;
 		}
 
@@ -762,8 +725,7 @@ public class Policy {
 
 			try {
 				return Duration.ofSeconds(Long.parseLong(value));
-			}
-			catch (NumberFormatException e) {
+			} catch (NumberFormatException e) {
 
 				Matcher matcher = SECONDS.matcher(value);
 				if (matcher.matches()) {

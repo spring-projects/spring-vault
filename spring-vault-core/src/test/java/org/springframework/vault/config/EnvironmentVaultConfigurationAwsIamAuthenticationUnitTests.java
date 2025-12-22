@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.config;
 
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,14 @@ import org.springframework.vault.authentication.ClientAuthentication;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Unit tests for {@link EnvironmentVaultConfiguration} with AWS IAM authentication.
+ * Unit tests for {@link EnvironmentVaultConfiguration} with AWS IAM
+ * authentication.
  *
  * @author Nick Tan
  */
 @ExtendWith(SpringExtension.class)
-@TestPropertySource(
-		properties = { "vault.uri=https://localhost:8123", "vault.authentication=aws-iam", "vault.aws-iam.role=role" })
+@TestPropertySource(properties = {"vault.uri=https://localhost:8123", "vault.authentication=aws-iam",
+		"vault.aws-iam.role=role"})
 class EnvironmentVaultConfigurationAwsIamAuthenticationUnitTests {
 
 	@Configuration

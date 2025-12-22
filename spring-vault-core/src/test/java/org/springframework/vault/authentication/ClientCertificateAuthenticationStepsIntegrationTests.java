@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,7 @@ class ClientCertificateAuthenticationStepsIntegrationTests extends ClientCertifi
 		assertThatExceptionOfType(NestedRuntimeException.class).isThrownBy(
 				() -> new AuthenticationStepsExecutor(ClientCertificateAuthentication.createAuthenticationSteps(),
 						restTemplate)
-					.login());
+								.login());
 	}
 
 }

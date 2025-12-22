@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.util.List;
@@ -27,17 +28,17 @@ import org.springframework.web.client.RestClientException;
 
 /**
  * Interface that specifies a basic set of Vault operations, implemented by
- * {@link org.springframework.vault.core.VaultTemplate}. This is the main entry point to
- * interact with Vault in an authenticated and unauthenticated context.
- * <p>
- * {@link VaultOperations} allows execution of callback methods. Callbacks can execute
- * requests within a {@link #doWithSession(RestOperationsCallback) session context} and
- * the {@link #doWithVault(RestOperationsCallback) without a session}.
- * <p>
- * Paths used in this interface (and interfaces accessible from here) are considered
- * relative to the {@link VaultEndpoint}. Paths that are fully-qualified URI's can be used
- * to access Vault cluster members in an authenticated context. To prevent unwanted full
- * URI access, make sure to sanitize paths before passing them to this interface.
+ * {@link org.springframework.vault.core.VaultTemplate}. This is the main entry
+ * point to interact with Vault in an authenticated and unauthenticated context.
+ * <p>{@link VaultOperations} allows execution of callback methods. Callbacks
+ * can execute requests within a {@link #doWithSession(RestOperationsCallback)
+ * session context} and the {@link #doWithVault(RestOperationsCallback) without
+ * a session}.
+ * <p>Paths used in this interface (and interfaces accessible from here) are
+ * considered relative to the {@link VaultEndpoint}. Paths that are
+ * fully-qualified URI's can be used to access Vault cluster members in an
+ * authenticated context. To prevent unwanted full URI access, make sure to
+ * sanitize paths before passing them to this interface.
  *
  * @author Mark Paluch
  * @author Lauren Voswinkel
@@ -54,7 +55,8 @@ public interface VaultOperations {
 	 * Return {@link VaultKeyValueOperations}.
 	 * @param path the mount path, must not be empty or {@literal null}.
 	 * @param apiVersion API version to use, must not be {@literal null}.
-	 * @return the operations interface to interact with the Vault Key/Value backend.
+	 * @return the operations interface to interact with the Vault Key/Value
+	 * backend.
 	 * @since 2.1
 	 */
 	VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion);
@@ -62,8 +64,8 @@ public interface VaultOperations {
 	/**
 	 * Return {@link VaultVersionedKeyValueOperations}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the versioned Vault Key/Value
-	 * (version 2) backend.
+	 * @return the operations interface to interact with the versioned Vault
+	 * Key/Value (version 2) backend.
 	 * @since 2.1
 	 */
 	VaultVersionedKeyValueOperations opsForVersionedKeyValue(String path);
@@ -74,8 +76,8 @@ public interface VaultOperations {
 	VaultPkiOperations opsForPki();
 
 	/**
-	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a different path
-	 * than {@code pki}.
+	 * Return {@link VaultPkiOperations} if the PKI backend is mounted on a
+	 * different path than {@code pki}.
 	 * @param path the mount path
 	 * @return the operations interface to interact with the Vault PKI backend.
 	 */
@@ -92,16 +94,18 @@ public interface VaultOperations {
 	VaultTokenOperations opsForToken();
 
 	/**
-	 * @return the operations interface to interact with the Vault transform backend.
+	 * @return the operations interface to interact with the Vault transform
+	 * backend.
 	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform();
 
 	/**
-	 * Return {@link VaultTransformOperations} if the transit backend is mounted on a
-	 * different path than {@code transform}.
+	 * Return {@link VaultTransformOperations} if the transit backend is mounted on
+	 * a different path than {@code transform}.
 	 * @param path the mount path
-	 * @return the operations interface to interact with the Vault transform backend.
+	 * @return the operations interface to interact with the Vault transform
+	 * backend.
 	 * @since 2.3
 	 */
 	VaultTransformOperations opsForTransform(String path);
@@ -136,8 +140,8 @@ public interface VaultOperations {
 	VaultResponse read(String path);
 
 	/**
-	 * Read from a secret backend. Reading data using this method is suitable for secret
-	 * backends that do not require a request body.
+	 * Read from a secret backend. Reading data using this method is suitable for
+	 * secret backends that do not require a request body.
 	 * @param path must not be {@literal null}.
 	 * @param responseType must not be {@literal null}.
 	 * @return the data. May be {@literal null} if the path does not exist.
@@ -180,9 +184,9 @@ public interface VaultOperations {
 	void delete(String path);
 
 	/**
-	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault
-	 * using {@link org.springframework.web.client.RestOperations} without requiring a
-	 * session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with
+	 * Vault using {@link org.springframework.web.client.RestOperations} without
+	 * requiring a session.
 	 * @param clientCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a
@@ -194,8 +198,8 @@ public interface VaultOperations {
 	<T> T doWithVault(RestOperationsCallback<T> clientCallback) throws VaultException, RestClientException;
 
 	/**
-	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with Vault in
-	 * an authenticated session.
+	 * Executes a Vault {@link RestOperationsCallback}. Allows to interact with
+	 * Vault in an authenticated session.
 	 * @param sessionCallback the request.
 	 * @return the {@link RestOperationsCallback} return value.
 	 * @throws VaultException when a

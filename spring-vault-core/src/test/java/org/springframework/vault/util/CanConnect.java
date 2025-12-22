@@ -35,21 +35,16 @@ class CanConnect {
 	 * @return {@literal true}, if a connection can be established
 	 */
 	public static boolean to(SocketAddress socketAddress) {
-
 		Socket socket = new Socket();
 		try {
-
 			socket.connect(socketAddress, (int) TimeUnit.SECONDS.toMillis(1));
 			return true;
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			return false;
-		}
-		finally {
+		} finally {
 			try {
 				socket.close();
-			}
-			catch (IOException o_O) {
+			} catch (IOException o_O) {
 			}
 		}
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 /**
@@ -24,7 +25,8 @@ package org.springframework.vault.authentication;
 public class VaultTokenRenewalException extends VaultSessionManagerException {
 
 	/**
-	 * Create a {@code VaultTokenRenewalException} with the specified detail message.
+	 * Create a {@code VaultTokenRenewalException} with the specified detail
+	 * message.
 	 * @param msg the detail message.
 	 */
 	public VaultTokenRenewalException(String msg) {
@@ -32,8 +34,8 @@ public class VaultTokenRenewalException extends VaultSessionManagerException {
 	}
 
 	/**
-	 * Create a {@code VaultTokenRenewalException} with the specified detail message and
-	 * nested exception.
+	 * Create a {@code VaultTokenRenewalException} with the specified detail message
+	 * and nested exception.
 	 * @param msg the detail message.
 	 * @param cause the nested exception.
 	 */

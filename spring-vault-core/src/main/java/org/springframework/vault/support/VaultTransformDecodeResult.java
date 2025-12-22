@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.support;
 
 import org.springframework.lang.Nullable;
@@ -20,7 +21,8 @@ import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
 
 /**
- * Holds the response from decryption operation and provides methods to access the result.
+ * Holds the response from decryption operation and provides methods to access
+ * the result.
  *
  * @author Lauren Voswinkel
  * @since 2.3
@@ -29,15 +31,14 @@ public class VaultTransformDecodeResult extends AbstractResult<TransformPlaintex
 
 	private final @Nullable TransformPlaintext plaintext;
 
+
 	/**
 	 * Create {@link VaultTransformDecodeResult} for a successfully decrypted
 	 * {@link TransformPlaintext} .
 	 * @param plaintext must not be {@literal null}.
 	 */
 	public VaultTransformDecodeResult(TransformPlaintext plaintext) {
-
 		Assert.notNull(plaintext, "Plaintext must not be null");
-
 		this.plaintext = plaintext;
 	}
 
@@ -46,14 +47,13 @@ public class VaultTransformDecodeResult extends AbstractResult<TransformPlaintex
 	 * @param exception must not be {@literal null}.
 	 */
 	public VaultTransformDecodeResult(VaultException exception) {
-
 		super(exception);
 		this.plaintext = null;
 	}
 
-	@Nullable
+
 	@Override
-	protected TransformPlaintext get0() {
+	protected @Nullable TransformPlaintext get0() {
 		return this.plaintext;
 	}
 
@@ -66,7 +66,6 @@ public class VaultTransformDecodeResult extends AbstractResult<TransformPlaintex
 	 */
 	@Nullable
 	public String getAsString() {
-
 		TransformPlaintext plaintext = get();
 		return plaintext == null ? null : plaintext.asString();
 	}

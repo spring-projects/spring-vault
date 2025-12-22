@@ -13,18 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.vault.client;
 
-import javax.net.ssl.KeyManager;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.KeyManagerFactorySpi;
-import javax.net.ssl.ManagerFactoryParameters;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509ExtendedKeyManager;
-import javax.net.ssl.X509TrustManager;
+package org.springframework.vault.client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,6 +32,8 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.*;
+
 import okhttp3.ConnectionSpec;
 import okhttp3.OkHttpClient.Builder;
 import org.apache.commons.logging.Log;
@@ -74,9 +66,10 @@ import org.springframework.vault.support.SslConfiguration.KeyConfiguration;
 import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
- * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP Components,
- * OkHttp, Netty and the JDK HTTP client (in that order). This factory configures a
- * {@link ClientHttpRequestFactory} depending on the available dependencies.
+ * Factory for {@link ClientHttpRequestFactory} that supports Apache HTTP
+ * Components, OkHttp, Netty and the JDK HTTP client (in that order). This
+ * factory configures a {@link ClientHttpRequestFactory} depending on the
+ * available dependencies.
  *
  * @author Mark Paluch
  * @author Ryan Gow
@@ -96,30 +89,27 @@ public class ClientHttpRequestFactoryFactory {
 	private static final boolean okHttp3Present = ClassUtils.isPresent("okhttp3.OkHttpClient",
 			ClientHttpRequestFactoryFactory.class.getClassLoader());
 
+
 	/**
-	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions} and
-	 * {@link SslConfiguration}.
+	 * Create a {@link ClientHttpRequestFactory} for the given {@link ClientOptions}
+	 * and {@link SslConfiguration}.
 	 * @param options must not be {@literal null}
 	 * @param sslConfiguration must not be {@literal null}
-	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be initialized
-	 * after obtaining.
+	 * @return a new {@link ClientHttpRequestFactory}. Lifecycle beans must be
+	 * initialized after obtaining.
 	 */
 	public static ClientHttpRequestFactory create(ClientOptions options, SslConfiguration sslConfiguration) {
-
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
 
 		try {
-
 			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
 			}
-
 			if (okHttp3Present) {
 				return OkHttp3.usingOkHttp3(options, sslConfiguration);
 			}
-		}
-		catch (GeneralSecurityException | IOException e) {
+		} catch (GeneralSecurityException | IOException e) {
 			throw new IllegalStateException(e);
 		}
 
@@ -141,7 +131,8 @@ public class ClientHttpRequestFactoryFactory {
 			@Nullable TrustManager[] trustManagers) throws GeneralSecurityException, IOException {
 
 		KeyManager[] keyManagers = keyStoreConfiguration.isPresent()
-				? createKeyManagerFactory(keyStoreConfiguration, keyConfiguration).getKeyManagers() : null;
+				? createKeyManagerFactory(keyStoreConfiguration, keyConfiguration).getKeyManagers()
+				: null;
 
 		SSLContext sslContext = SSLContext.getInstance("TLS");
 		sslContext.init(keyManagers, trustManagers, null);
@@ -172,11 +163,10 @@ public class ClientHttpRequestFactoryFactory {
 		return keyManagerFactory;
 	}
 
+
 	static KeyStore getKeyStore(KeyStoreConfiguration keyStoreConfiguration)
 			throws IOException, GeneralSecurityException {
-
 		KeyStore keyStore = KeyStore.getInstance(getKeyStoreType(keyStoreConfiguration));
-
 		loadKeyStore(keyStoreConfiguration, keyStore);
 		return keyStore;
 	}
@@ -186,7 +176,8 @@ public class ClientHttpRequestFactoryFactory {
 			throws GeneralSecurityException, IOException {
 
 		return sslConfiguration.getTrustStoreConfiguration().isPresent()
-				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()).getTrustManagers() : null;
+				? createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()).getTrustManagers()
+				: null;
 	}
 
 	private static String getKeyStoreType(KeyStoreConfiguration keyStoreConfiguration) {
@@ -205,7 +196,7 @@ public class ClientHttpRequestFactoryFactory {
 		KeyStore trustStore = getKeyStore(keyStoreConfiguration);
 
 		TrustManagerFactory trustManagerFactory = TrustManagerFactory
-			.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+				.getInstance(TrustManagerFactory.getDefaultAlgorithm());
 		trustManagerFactory.init(trustStore);
 
 		return trustManagerFactory;
@@ -226,16 +217,14 @@ public class ClientHttpRequestFactoryFactory {
 
 				keyStore.load(null);
 				loadFromPem(keyStore, inputStream);
-			}
-			else {
+			} else {
 				keyStore.load(inputStream, keyStoreConfiguration.getStorePassword());
 			}
 
 			if (logger.isDebugEnabled()) {
 				logger.debug("Keystore loaded with %d entries".formatted(keyStore.size()));
 			}
-		}
-		finally {
+		} finally {
 			if (inputStream != null) {
 				inputStream.close();
 			}
@@ -265,8 +254,10 @@ public class ClientHttpRequestFactoryFactory {
 				|| sslConfiguration.getKeyStoreConfiguration().isPresent();
 	}
 
+
 	/**
-	 * Utilities to create a {@link ClientHttpRequestFactory} for Apache Http Components.
+	 * Utilities to create a {@link ClientHttpRequestFactory} for Apache Http
+	 * Components.
 	 *
 	 * @author Mark Paluch
 	 */
@@ -274,79 +265,64 @@ public class ClientHttpRequestFactoryFactory {
 
 		/**
 		 * Create a {@link ClientHttpRequestFactory} using Apache Http Components.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
 		 * @return a new and configured {@link HttpComponentsClientHttpRequestFactory}
 		 * instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static HttpComponentsClientHttpRequestFactory usingHttpComponents(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
 			HttpClientBuilder httpClientBuilder = getHttpClientBuilder(options, sslConfiguration);
-
 			return new HttpComponentsClientHttpRequestFactory(httpClientBuilder.build());
 		}
 
 		public static HttpClientBuilder getHttpClientBuilder(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
-
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
-
 			httpClientBuilder.setRoutePlanner(
 					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
-
 			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
 			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
-
 			ConnectionConfig connectionConfig = ConnectionConfig.custom()
-				.setConnectTimeout(connectTimeout) //
-				.setSocketTimeout(readTimeout) //
-				.build();
-
+					.setConnectTimeout(connectTimeout) //
+					.setSocketTimeout(readTimeout) //
+					.build();
 			RequestConfig requestConfig = RequestConfig.custom()
-				.setConnectionRequestTimeout(connectTimeout)
-				.setResponseTimeout(readTimeout)
-				.setAuthenticationEnabled(true) //
-				.setRedirectsEnabled(true)
-				.build();
-
+					.setConnectionRequestTimeout(connectTimeout)
+					.setResponseTimeout(readTimeout)
+					.setAuthenticationEnabled(true) //
+					.setRedirectsEnabled(true)
+					.build();
 			PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder //
-				.create()
-				.setDefaultConnectionConfig(connectionConfig) //
-				.setDefaultSocketConfig(SocketConfig.custom() //
-					.setSoTimeout(readTimeout)
-					.build());
+					.create()
+					.setDefaultConnectionConfig(connectionConfig) //
+					.setDefaultSocketConfig(SocketConfig.custom() //
+							.setSoTimeout(readTimeout)
+							.build());
 
 			if (hasSslConfiguration(sslConfiguration)) {
-
 				SSLContext sslContext = getSSLContext(sslConfiguration);
-
 				String[] enabledProtocols = null;
-
 				if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
 					enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
 				}
-
 				String[] enabledCipherSuites = null;
-
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
 				}
-
 				SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext,
 						enabledProtocols, enabledCipherSuites, HttpsSupport.getDefaultHostnameVerifier());
 				connectionManagerBuilder.setSSLSocketFactory(sslSocketFactory);
 			}
-
 			httpClientBuilder.setDefaultRequestConfig(requestConfig);
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
-
 			return httpClientBuilder;
 		}
 
 	}
+
 
 	/**
 	 * Utilities to create a {@link ClientHttpRequestFactory} for the
@@ -358,11 +334,12 @@ public class ClientHttpRequestFactoryFactory {
 
 		/**
 		 * Create a {@link ClientHttpRequestFactory} using {@link okhttp3.OkHttpClient}.
-		 * @param options must not be {@literal null}
-		 * @param sslConfiguration must not be {@literal null}
-		 * @return a new and configured {@link OkHttp3ClientHttpRequestFactory} instance.
-		 * @throws GeneralSecurityException
-		 * @throws IOException
+		 * @param options must not be {@literal null}.
+		 * @param sslConfiguration must not be {@literal null}.
+		 * @return a new and configured {@link OkHttp3ClientHttpRequestFactory}
+		 * instance.
+		 * @throws GeneralSecurityException in case of SSL configuration errors.
+		 * @throws IOException in case of I/O errors.
 		 */
 		public static OkHttp3ClientHttpRequestFactory usingOkHttp3(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
@@ -400,7 +377,7 @@ public class ClientHttpRequestFactoryFactory {
 
 				if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
 					sslConnectionSpecBuilder
-						.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
+							.cipherSuites(sslConfiguration.getEnabledCipherSuites().toArray(new String[0]));
 				}
 
 				sslConnectionSpec = sslConnectionSpecBuilder.build();
@@ -411,11 +388,12 @@ public class ClientHttpRequestFactoryFactory {
 			builder.connectionSpecs(Arrays.asList(sslConnectionSpec, ConnectionSpec.CLEARTEXT));
 
 			builder.connectTimeout(options.getConnectionTimeout().toMillis(), TimeUnit.MILLISECONDS)
-				.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
+					.readTimeout(options.getReadTimeout().toMillis(), TimeUnit.MILLISECONDS);
 			return builder;
 		}
 
 	}
+
 
 	/**
 	 * Utilities to create a {@link ClientHttpRequestFactory} for the
@@ -448,6 +426,7 @@ public class ClientHttpRequestFactoryFactory {
 
 		KeySelectingKeyManagerFactory(KeyManagerFactory factory, KeyConfiguration keyConfiguration) {
 			super(new KeyManagerFactorySpi() {
+
 				@Override
 				protected void engineInit(KeyStore keyStore, char[] chars)
 						throws KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
@@ -467,12 +446,13 @@ public class ClientHttpRequestFactoryFactory {
 
 					if (keyManagers.length == 1 && keyManagers[0] instanceof X509ExtendedKeyManager) {
 
-						return new KeyManager[] { new KeySelectingX509KeyManager(
-								(X509ExtendedKeyManager) keyManagers[0], keyConfiguration) };
+						return new KeyManager[] {new KeySelectingX509KeyManager(
+								(X509ExtendedKeyManager) keyManagers[0], keyConfiguration)};
 					}
 
 					return keyManagers;
 				}
+
 			}, factory.getProvider(), factory.getAlgorithm());
 		}
 

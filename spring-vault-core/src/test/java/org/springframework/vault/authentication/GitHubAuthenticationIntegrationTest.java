@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.io.IOException;
@@ -72,8 +73,8 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 	void shouldLoginSuccessfully() {
 
 		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
-			.tokenSupplier(() -> "TOKEN")
-			.build();
+				.tokenSupplier(() -> "TOKEN")
+				.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
 				gitHubTeamResponse(organizationId));
@@ -88,8 +89,8 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 	void shouldLoginUsingAuthenticationSteps() {
 
 		GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
-			.tokenSupplier(() -> "TOKEN")
-			.build();
+				.tokenSupplier(() -> "TOKEN")
+				.build();
 		RestTemplate restTemplate = TestRestTemplateFactory.create(Settings.createSslConfiguration());
 		setupGithubMockServer(gitHubUserResponse(), gitHubOrganizationResponse(organizationId),
 				gitHubTeamResponse(organizationId));
@@ -116,7 +117,7 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 				GitHubAuthenticationOptions.builder().tokenSupplier(() -> "TOKEN2").build(), restTemplate);
 
 		assertThatThrownBy(authentication::login).isInstanceOf(VaultLoginException.class)
-			.hasMessageContaining("Cannot login using GitHub: user is not part of required org");
+				.hasMessageContaining("Cannot login using GitHub: user is not part of required org");
 	}
 
 	private String gitHubUserResponse() {
@@ -161,12 +162,13 @@ class GitHubAuthenticationIntegrationTest extends IntegrationTestSupport {
 			public MockResponse dispatch(RecordedRequest request) {
 
 				return switch (request.getPath()) {
-					case "/user" -> new MockResponse().setResponseCode(200).setBody(userJson);
-					case "/user/orgs?per_page=100" -> new MockResponse().setResponseCode(200).setBody(orgJson);
-					case "/user/teams?per_page=100" -> new MockResponse().setResponseCode(200).setBody(teamJson);
-					default -> new MockResponse().setResponseCode(404);
+				case "/user" -> new MockResponse().setResponseCode(200).setBody(userJson);
+				case "/user/orgs?per_page=100" -> new MockResponse().setResponseCode(200).setBody(orgJson);
+				case "/user/teams?per_page=100" -> new MockResponse().setResponseCode(200).setBody(teamJson);
+				default -> new MockResponse().setResponseCode(404);
 				};
 			}
+
 		});
 	}
 

@@ -32,7 +32,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 public interface GcpCredentialSupplier extends Supplier<GoogleCredential> {
 
 	/**
-	 * Exception-safe helper to get {@link GoogleCredential} from {@link #getCredential}.
+	 * Exception-safe helper to get {@link GoogleCredential} from
+	 * {@link #getCredential}.
 	 * @return the GoogleCredential for JWT signing.
 	 */
 	@Override
@@ -40,8 +41,7 @@ public interface GcpCredentialSupplier extends Supplier<GoogleCredential> {
 
 		try {
 			return getCredential();
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Cannot obtain GoogleCredential", e);
 		}
 	}

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import java.io.IOException;
@@ -72,6 +73,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private static final Health HEALTH = new Health();
 
+
 	private static final ObjectMapper OBJECT_MAPPER;
 
 	static {
@@ -83,33 +85,27 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	private final VaultOperations vaultOperations;
 
+
 	/**
 	 * Create a new {@link VaultSysTemplate} with the given {@link VaultOperations}.
 	 * @param vaultOperations must not be {@literal null}.
 	 */
 	public VaultSysTemplate(VaultOperations vaultOperations) {
-
 		Assert.notNull(vaultOperations, "VaultOperations must not be null");
-
 		this.vaultOperations = vaultOperations;
-
 	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean isInitialized() {
-
 		return requireResponse(this.vaultOperations.doWithSession(restOperations -> {
-
 			try {
 				ResponseEntity<Map<String, Boolean>> body = (ResponseEntity) restOperations.exchange("sys/init",
 						HttpMethod.GET, emptyNamespace(null), Map.class);
-
 				Assert.state(body.getBody() != null, "Initialization response must not be null");
-
 				return body.getBody().get("initialized");
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		}));
@@ -117,21 +113,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultInitializationResponse initialize(VaultInitializationRequest vaultInitializationRequest) {
-
 		Assert.notNull(vaultInitializationRequest, "VaultInitialization must not be null");
-
 		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
-
 			try {
 				ResponseEntity<VaultInitializationResponseImpl> exchange = restOperations.exchange("sys/init",
 						HttpMethod.PUT, emptyNamespace(vaultInitializationRequest),
 						VaultInitializationResponseImpl.class);
-
 				Assert.state(exchange.getBody() != null, "Initialization response must not be null");
 
 				return exchange.getBody();
-			}
-			catch (HttpStatusCodeException e) {
+			} catch (HttpStatusCodeException e) {
 				throw VaultResponses.buildException(e);
 			}
 		}));
@@ -144,14 +135,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public VaultUnsealStatus unseal(String keyShare) {
-
 		return requireResponse(this.vaultOperations.doWithVault(restOperations -> {
-
 			ResponseEntity<VaultUnsealStatusImpl> response = restOperations.exchange("sys/unseal", HttpMethod.PUT,
 					new HttpEntity<Object>(Collections.singletonMap("key", keyShare)), VaultUnsealStatusImpl.class);
-
 			Assert.state(response.getBody() != null, "Unseal response must not be null");
-
 			return response.getBody();
 		}));
 	}
@@ -163,10 +150,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void mount(String path, VaultMount vaultMount) {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
-
 		this.vaultOperations.write("sys/mounts/%s".formatted(path), vaultMount);
 	}
 
@@ -177,18 +162,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void unmount(String path) {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations.delete("sys/mounts/%s".formatted(path));
 	}
 
 	@Override
 	public void authMount(String path, VaultMount vaultMount) throws VaultException {
-
 		Assert.hasText(path, "Path must not be empty");
 		Assert.notNull(vaultMount, "VaultMount must not be null");
-
 		this.vaultOperations.write("sys/auth/%s".formatted(path), vaultMount);
 	}
 
@@ -199,9 +180,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	@Override
 	public void authUnmount(String path) throws VaultException {
-
 		Assert.hasText(path, "Path must not be empty");
-
 		this.vaultOperations.delete("sys/auth/%s".formatted(path));
 	}
 
@@ -215,22 +194,15 @@ public class VaultSysTemplate implements VaultSysOperations {
 	@Nullable
 	@Override
 	public Policy getPolicy(String name) throws VaultException {
-
 		Assert.hasText(name, "Name must not be null or empty");
-
 		return this.vaultOperations.doWithSession(restOperations -> {
-
 			ResponseEntity<VaultResponse> response;
-
 			try {
 				response = restOperations.getForEntity("sys/policy/{name}", VaultResponse.class, name);
-			}
-			catch (HttpStatusCodeException e) {
-
+			} catch (HttpStatusCodeException e) {
 				if (HttpStatusUtil.isNotFound(e.getStatusCode())) {
 					return null;
 				}
-
 				throw e;
 			}
 
@@ -239,44 +211,33 @@ public class VaultSysTemplate implements VaultSysOperations {
 			if (ObjectUtils.isEmpty(rules)) {
 				return Policy.empty();
 			}
-
 			if (rules.trim().startsWith("{")) {
 				return VaultResponses.unwrap(rules, Policy.class);
 			}
-
 			throw new UnsupportedOperationException("Cannot parse policy in HCL format");
 		});
 	}
 
 	@Override
 	public void createOrUpdatePolicy(String name, Policy policy) throws VaultException {
-
 		Assert.hasText(name, "Name must not be null or empty");
 		Assert.notNull(policy, "Policy must not be null");
-
 		String rules;
-
 		try {
 			rules = OBJECT_MAPPER.writeValueAsString(policy);
-		}
-		catch (IOException e) {
+		} catch (IOException e) {
 			throw new VaultException("Cannot serialize policy to JSON", e);
 		}
-
 		this.vaultOperations.doWithSession(restOperations -> {
-
 			restOperations.exchange("sys/policy/{name}", HttpMethod.PUT,
 					new HttpEntity<>(Collections.singletonMap("rules", rules)), VaultResponse.class, name);
-
 			return null;
 		});
 	}
 
 	@Override
 	public void deletePolicy(String name) throws VaultException {
-
 		Assert.hasText(name, "Name must not be null or empty");
-
 		this.vaultOperations.delete("sys/policy/%s".formatted(name));
 	}
 
@@ -286,11 +247,10 @@ public class VaultSysTemplate implements VaultSysOperations {
 	}
 
 	private static <T> T requireResponse(@Nullable T response) {
-
 		Assert.state(response != null, "Response must not be null");
-
 		return response;
 	}
+
 
 	private static class GetUnsealStatus implements RestOperationsCallback<VaultUnsealStatus> {
 
@@ -300,6 +260,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		}
 
 	}
+
 
 	private static class Seal implements RestOperationsCallback<Void> {
 
@@ -311,6 +272,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
+
 	private record GetMounts(String path) implements RestOperationsCallback<Map<String, VaultMount>> {
 
 		private static final ParameterizedTypeReference<VaultMountsResponse> MOUNT_TYPE_REF = new ParameterizedTypeReference<VaultMountsResponse>() {
@@ -318,20 +280,16 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		@Override
 		public Map<String, VaultMount> doWithRestOperations(RestOperations restOperations) {
-
 			ResponseEntity<VaultMountsResponse> exchange = restOperations.exchange(this.path, HttpMethod.GET, null,
 					MOUNT_TYPE_REF, Collections.emptyMap());
-
 			VaultMountsResponse body = exchange.getBody();
-
 			Assert.state(body != null, "Get mounts response must not be null");
-
 			if (body.getData() != null) {
 				return body.getData();
 			}
-
 			return body.getTopLevelMounts();
 		}
+
 
 		private static class VaultMountsResponse extends VaultResponseSupport<Map<String, VaultMount>> {
 
@@ -345,25 +303,19 @@ public class VaultSysTemplate implements VaultSysOperations {
 			@SuppressWarnings("unchecked")
 			@JsonAnySetter
 			public void set(String name, Object value) {
-
 				if (!(value instanceof Map)) {
 					return;
 				}
 
 				Map<String, Object> map = (Map) value;
-
 				if (map.containsKey("type")) {
-
 					VaultMountBuilder builder = VaultMount.builder() //
-						.type((String) map.get("type")) //
-						.description((String) map.get("description"));// ;
-
+							.type((String) map.get("type")) //
+							.description((String) map.get("description"));// ;
 					if (map.containsKey("config")) {
 						builder.config((Map) map.get("config"));
 					}
-
 					VaultMount vaultMount = builder.build();
-
 					this.topLevelMounts.put(name, vaultMount);
 				}
 			}
@@ -387,19 +339,17 @@ public class VaultSysTemplate implements VaultSysOperations {
 				ResponseEntity<VaultHealthImpl> healthResponse = restOperations.exchange("sys/health", HttpMethod.GET,
 						emptyNamespace(null), VaultHealthImpl.class);
 				return healthResponse.getBody();
-			}
-			catch (RestClientResponseException responseError) {
-
+			} catch (RestClientResponseException responseError) {
 				try {
 					return OBJECT_MAPPER.readValue(responseError.getResponseBodyAsString(), VaultHealthImpl.class);
-				}
-				catch (Exception jsonError) {
+				} catch (Exception jsonError) {
 					throw responseError;
 				}
 			}
 		}
 
 	}
+
 
 	static class VaultInitializationResponseImpl implements VaultInitializationResponse {
 
@@ -408,8 +358,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@JsonProperty("root_token")
 		private String rootToken = "";
 
-		public VaultInitializationResponseImpl() {
-		}
 
 		public VaultToken getRootToken() {
 			return VaultToken.of(this.rootToken);
@@ -443,6 +391,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
+
 	static class VaultUnsealStatusImpl implements VaultUnsealStatus {
 
 		private boolean sealed;
@@ -455,8 +404,6 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private int progress;
 
-		public VaultUnsealStatusImpl() {
-		}
 
 		public boolean isSealed() {
 			return this.sealed;
@@ -507,6 +454,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 	}
 
+
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	static class VaultHealthImpl implements VaultHealth {
 
@@ -525,6 +473,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 		@Nullable
 		private final String version;
 
+
 		VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
 				@JsonProperty("performance_standby") boolean performanceStandby,
@@ -540,6 +489,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
 		}
+
 
 		public boolean isInitialized() {
 			return this.initialized;

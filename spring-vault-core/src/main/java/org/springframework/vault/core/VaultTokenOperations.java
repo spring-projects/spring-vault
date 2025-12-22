@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core;
 
 import org.springframework.vault.VaultException;
@@ -25,7 +26,8 @@ import org.springframework.vault.support.VaultTokenResponse;
  *
  * @author Mark Paluch
  * @author Nanne Baars
- * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend: Token</a>
+ * @see <a href="https://www.vaultproject.io/docs/auth/token.html">Auth Backend:
+ * Token</a>
  */
 public interface VaultTokenOperations {
 

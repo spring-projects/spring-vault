@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.env;
 
 import java.util.Collections;
@@ -46,8 +47,8 @@ class VaultPropertySourceUnitTests {
 	@Test
 	void shouldRejectEmptyPath() {
 		assertThatIllegalArgumentException()
-			.isThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
-
+				.isThrownBy(
+						() -> new VaultPropertySource("hello", this.vaultTemplate, "", PropertyTransformers.noop()));
 	}
 
 	@Test
@@ -61,8 +62,8 @@ class VaultPropertySourceUnitTests {
 
 		assertThatThrownBy(() -> new VaultPropertySource("hello", this.vaultTemplate, "secret/myapp",
 				PropertyTransformers.noop(), false))
-			.isInstanceOf(VaultPropertySourceNotFoundException.class)
-			.hasNoCause();
+						.isInstanceOf(VaultPropertySourceNotFoundException.class)
+						.hasNoCause();
 	}
 
 	@Test

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.authentication;
 
 import java.util.Collections;
@@ -43,8 +44,10 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 
 	private final RestOperations restOperations;
 
+
 	/**
-	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using
+	 * {@link RestOperations}.
 	 * @param restOperations must not be {@literal null}.
 	 */
 	public ClientCertificateAuthentication(RestOperations restOperations) {
@@ -52,23 +55,22 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Create a {@link ClientCertificateAuthentication} using {@link RestOperations}.
+	 * Create a {@link ClientCertificateAuthentication} using
+	 * {@link RestOperations}.
 	 * @param options must not be {@literal null}.
 	 * @param restOperations must not be {@literal null}.
 	 * @since 2.3
 	 */
 	public ClientCertificateAuthentication(ClientCertificateAuthenticationOptions options,
 			RestOperations restOperations) {
-
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
 		Assert.notNull(restOperations, "RestOperations must not be null");
-
 		this.restOperations = restOperations;
 		this.options = options;
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 * Create {@link AuthenticationSteps} for client certificate authentication.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.0
 	 */
@@ -77,18 +79,16 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	/**
-	 * Creates a {@link AuthenticationSteps} for client certificate authentication.
+	 * Create {@link AuthenticationSteps} for client certificate authentication.
 	 * @param options must not be {@literal null}.
 	 * @return {@link AuthenticationSteps} for client certificate authentication.
 	 * @since 2.3
 	 */
 	public static AuthenticationSteps createAuthenticationSteps(ClientCertificateAuthenticationOptions options) {
 		Assert.notNull(options, "ClientCertificateAuthenticationOptions must not be null");
-
 		Map<String, Object> body = getRequestBody(options);
-
 		return AuthenticationSteps.fromSupplier(() -> body)
-			.login(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
+				.login(post(AuthenticationUtil.getLoginPath(options.getPath())).as(VaultResponse.class));
 	}
 
 	@Override
@@ -102,26 +102,21 @@ public class ClientCertificateAuthentication implements ClientAuthentication, Au
 	}
 
 	private VaultToken createTokenUsingTlsCertAuthentication() {
-
 		try {
 			Map<String, Object> request = getRequestBody(this.options);
 			VaultResponse response = this.restOperations
-				.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), request, VaultResponse.class);
-
+					.postForObject(AuthenticationUtil.getLoginPath(this.options.getPath()), request,
+							VaultResponse.class);
 			Assert.state(response.getAuth() != null, "Auth field must not be null");
-
 			logger.debug("Login successful using TLS certificates");
-
 			return LoginTokenUtil.from(response.getAuth());
-		}
-		catch (RestClientException e) {
+		} catch (RestClientException e) {
 			throw VaultLoginException.create("TLS Certificates", e);
 		}
 	}
 
 	private static Map<String, Object> getRequestBody(ClientCertificateAuthenticationOptions options) {
 		String name = options.getRole();
-
 		return name != null ? Collections.singletonMap("name", name) : Collections.emptyMap();
 	}
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.repository.mapping;
 
 import java.util.HashSet;
@@ -24,8 +25,8 @@ import org.springframework.data.mapping.model.Property;
 import org.springframework.data.mapping.model.SimpleTypeHolder;
 
 /**
- * Vault-specific {@link KeyValuePersistentProperty}. By default, if a property is named
- * {@code id} it's used as Id property.
+ * Vault-specific {@link KeyValuePersistentProperty}. By default, if a property
+ * is named {@code id} it's used as Id property.
  *
  * @author Mark Paluch
  * @since 2.0
@@ -38,6 +39,7 @@ public class VaultPersistentProperty extends KeyValuePersistentProperty<VaultPer
 		SUPPORTED_ID_PROPERTY_NAMES.add("id");
 	}
 
+
 	/**
 	 * Create a new {@link VaultPersistentProperty}.
 	 * @param property must not be {@literal null}.
@@ -49,6 +51,7 @@ public class VaultPersistentProperty extends KeyValuePersistentProperty<VaultPer
 
 		super(property, owner, simpleTypeHolder);
 	}
+
 
 	@Override
 	public boolean isIdProperty() {
