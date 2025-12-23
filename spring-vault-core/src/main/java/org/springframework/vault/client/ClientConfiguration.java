@@ -54,6 +54,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.PemObject;
 import org.springframework.vault.support.SslConfiguration;
+import org.springframework.vault.support.SslConfiguration.KeyStoreConfiguration;
 
 /**
  * Shared utility class to provide client configuration regardless of the used
@@ -149,18 +150,14 @@ class ClientConfiguration {
 	}
 
 	private static void loadFromPem(KeyStore keyStore, InputStream inputStream) throws IOException, KeyStoreException {
-
 		List<PemObject> pemObjects = PemObject.parse(new String(FileCopyUtils.copyToByteArray(inputStream)));
-
 		for (PemObject pemObject : pemObjects) {
 			if (pemObject.isCertificate()) {
 				X509Certificate cert = pemObject.getCertificate();
 				String alias = cert.getSubjectX500Principal().getName();
-
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding certificate with alias %s".formatted(alias));
 				}
-
 				keyStore.setCertificateEntry(alias, cert);
 			}
 		}
@@ -180,8 +177,8 @@ class ClientConfiguration {
 	public static class HttpComponents {
 
 		public static ConnectionConfig getConnectionConfig(ClientOptions options) {
-			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
-			Timeout connectTimeout = Timeout.ofMilliseconds(options.getConnectionTimeout().toMillis());
+			Timeout readTimeout = Timeout.of(options.getReadTimeout());
+			Timeout connectTimeout = Timeout.of(options.getConnectionTimeout());
 			return ConnectionConfig.custom()
 					.setConnectTimeout(connectTimeout) //
 					.setSocketTimeout(readTimeout) //
@@ -189,7 +186,7 @@ class ClientConfiguration {
 		}
 
 		public static RequestConfig getRequestConfig(ClientOptions options) {
-			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			Timeout readTimeout = Timeout.of(options.getReadTimeout());
 			return RequestConfig.custom()
 					.setResponseTimeout(readTimeout)
 					.setAuthenticationEnabled(true) //
@@ -198,7 +195,7 @@ class ClientConfiguration {
 		}
 
 		public static SocketConfig getSocketConfig(ClientOptions options) {
-			Timeout readTimeout = Timeout.ofMilliseconds(options.getReadTimeout().toMillis());
+			Timeout readTimeout = Timeout.of(options.getReadTimeout());
 			return SocketConfig.custom() //
 					.setSoTimeout(readTimeout)
 					.build();
@@ -215,9 +212,7 @@ class ClientConfiguration {
 	public static class ReactorNetty {
 
 		public static HttpClient createClient(ClientOptions options, SslConfiguration sslConfiguration) {
-
 			HttpClient client = HttpClient.create();
-
 			if (hasSslConfiguration(sslConfiguration)) {
 				client = client.secure(builder -> {
 					SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
@@ -229,24 +224,22 @@ class ClientConfiguration {
 					}
 				});
 			}
-
-			client = client
+			return client = client
 					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
 							Math.toIntExact(options.getConnectionTimeout().toMillis()))
 					.proxyWithSystemProperties();
-
-			return client;
 		}
 
 		public static void configureSsl(SslConfiguration sslConfiguration, SslContextBuilder sslContextBuilder) {
-
 			try {
-				if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
+				KeyStoreConfiguration trustStore = sslConfiguration.getTrustStoreConfiguration();
+				if (trustStore.isPresent()) {
 					sslContextBuilder
-							.trustManager(createTrustManagerFactory(sslConfiguration.getTrustStoreConfiguration()));
+							.trustManager(createTrustManagerFactory(trustStore));
 				}
-				if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-					sslContextBuilder.keyManager(createKeyManagerFactory(sslConfiguration.getKeyStoreConfiguration(),
+				KeyStoreConfiguration keyStoreConfiguration = sslConfiguration.getKeyStoreConfiguration();
+				if (keyStoreConfiguration.isPresent()) {
+					sslContextBuilder.keyManager(createKeyManagerFactory(keyStoreConfiguration,
 							sslConfiguration.getKeyConfiguration()));
 				}
 				sslConfiguration.enabledProtocols(sslContextBuilder::protocols);
@@ -279,9 +272,8 @@ class ClientConfiguration {
 		public static org.eclipse.jetty.client.HttpClient getHttpClient(SslConfiguration sslConfiguration)
 				throws IOException, GeneralSecurityException {
 			if (hasSslConfiguration(sslConfiguration)) {
-				Client sslContextFactory = getSslContextFactory(sslConfiguration);
 				ClientConnector connector = new ClientConnector();
-				connector.setSslContextFactory(sslContextFactory);
+				connector.setSslContextFactory(getSslContextFactory(sslConfiguration));
 				return new org.eclipse.jetty.client.HttpClient(new HttpClientTransportOverHTTP(connector));
 			}
 			return new org.eclipse.jetty.client.HttpClient();
@@ -290,13 +282,13 @@ class ClientConfiguration {
 		public static SslContextFactory.Client getSslContextFactory(SslConfiguration sslConfiguration)
 				throws IOException, GeneralSecurityException {
 			Client sslContextFactory = new Client();
-			if (sslConfiguration.getKeyStoreConfiguration().isPresent()) {
-				KeyStore keyStore = getKeyStore(sslConfiguration.getKeyStoreConfiguration());
-				sslContextFactory.setKeyStore(keyStore);
+			KeyStoreConfiguration keyStore = sslConfiguration.getKeyStoreConfiguration();
+			if (keyStore.isPresent()) {
+				sslContextFactory.setKeyStore(getKeyStore(keyStore));
 			}
-			if (sslConfiguration.getTrustStoreConfiguration().isPresent()) {
-				KeyStore keyStore = getKeyStore(sslConfiguration.getTrustStoreConfiguration());
-				sslContextFactory.setTrustStore(keyStore);
+			KeyStoreConfiguration trustStore = sslConfiguration.getTrustStoreConfiguration();
+			if (trustStore.isPresent()) {
+				sslContextFactory.setTrustStore(getKeyStore(trustStore));
 			}
 			SslConfiguration.KeyConfiguration keyConfiguration = sslConfiguration.getKeyConfiguration();
 			if (keyConfiguration.getKeyAlias() != null) {
@@ -382,11 +374,13 @@ class ClientConfiguration {
 
 		private final SslConfiguration.KeyConfiguration keyConfiguration;
 
+
 		KeySelectingX509KeyManager(X509ExtendedKeyManager delegate,
 				SslConfiguration.KeyConfiguration keyConfiguration) {
 			this.delegate = delegate;
 			this.keyConfiguration = keyConfiguration;
 		}
+
 
 		@Override
 		public String[] getClientAliases(String keyType, Principal[] issuers) {
