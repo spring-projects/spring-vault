@@ -151,8 +151,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	private static Log logger = LogFactory.getLog(SecretLeaseContainer.class);
 
 
-	private final Clock clock = Clock.systemDefaultZone();
-
 	private final LeaseAuthenticationEventListener authenticationListener = new LeaseAuthenticationEventListener();
 
 	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
@@ -323,6 +321,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		this.taskScheduler = taskScheduler;
+	}
+
+	private TaskScheduler getRequiredTaskScheduler(){
+		Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
+		return this.taskScheduler;
 	}
 
 	/**
@@ -889,7 +892,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			};
 
 			ScheduledFuture<?> scheduledFuture = this.taskScheduler.schedule(task,
-					new OneShotTrigger(getRenewalSeconds(lease, minRenewal, expiryThreshold)));
+					new OneShotTrigger(getRenewalSeconds(lease, minRenewal, expiryThreshold), taskScheduler.getClock()));
 			this.schedules.put(lease, scheduledFuture);
 		}
 
@@ -993,18 +996,20 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			if (!isRunning()) {
 				logger.debug("Ignore token event as the container is not running");
 			}
+			TaskScheduler scheduler = getRequiredTaskScheduler();
+			Clock clock = scheduler.getClock();
 			Timeout timeout = this.timeout.get();
-			if (timeout != null && !timeout.isExpired(clock)) {
+			if (timeout != null && !timeout.isExpired(scheduler.getClock())) {
 				logger.debug("Backoff timeout not reached. Dropping event");
 				return;
 			}
 			Timeout executionToSet = new Timeout(backOff.start(), clock);
 
 			if (this.timeout.compareAndSet(timeout, executionToSet)) {
-				if (taskScheduler instanceof Executor e) {
+				if (scheduler instanceof Executor e) {
 					e.execute(SecretLeaseContainer.this::restartSecrets);
 				} else {
-					taskScheduler.schedule(SecretLeaseContainer.this::restartSecrets, Instant.now());
+					scheduler.schedule(SecretLeaseContainer.this::restartSecrets, Instant.now());
 				}
 			}
 		}
@@ -1031,8 +1036,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 */
 	static class OneShotTrigger implements Trigger {
 
-		private static final Clock CLOCK = Clock.systemDefaultZone();
-
 		private static final AtomicIntegerFieldUpdater<OneShotTrigger> UPDATER = AtomicIntegerFieldUpdater
 				.newUpdater(OneShotTrigger.class, "status");
 
@@ -1046,16 +1049,19 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 		private final long seconds;
 
+		private final Clock clock;
 
-		OneShotTrigger(long seconds) {
+
+		OneShotTrigger(long seconds, Clock clock) {
 			this.seconds = seconds;
+			this.clock = clock;
 		}
 
 
 		@Nullable
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
-			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? CLOCK.instant().plusSeconds(this.seconds)
+			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? clock.instant().plusSeconds(this.seconds)
 					: null;
 		}
 
