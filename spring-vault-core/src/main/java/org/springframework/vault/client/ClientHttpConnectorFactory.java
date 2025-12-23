@@ -72,10 +72,8 @@ public class ClientHttpConnectorFactory {
 	 * @return a new {@link ClientHttpConnector}.
 	 */
 	public static ClientHttpConnector create(ClientOptions options, SslConfiguration sslConfiguration) {
-
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
-
 		try {
 			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
@@ -136,9 +134,7 @@ public class ClientHttpConnectorFactory {
 		 */
 		public static HttpComponentsClientHttpConnector usingHttpComponents(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
-
 			HttpAsyncClientBuilder httpClientBuilder = createHttpAsyncClientBuilder(options, sslConfiguration);
-
 			return new HttpComponentsClientHttpConnector(httpClientBuilder.build());
 		}
 

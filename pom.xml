@@ -42,7 +42,6 @@
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
 		<mockk.version>1.14.6</mockk.version>
 		<mockito-core.version>5.20.0</mockito-core.version>
-		<netty.version>4.2.7.Final</netty.version>
 		<nullaway.version>0.12.12</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.0</spring.version>
@@ -232,13 +231,6 @@
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-reactive-httpclient</artifactId>
 				<version>${jetty-reactive-httpclient.version}</version>
-				<optional>true</optional>
-			</dependency>
-
-			<dependency>
-				<groupId>io.netty</groupId>
-				<artifactId>netty-all</artifactId>
-				<version>${netty.version}</version>
 				<optional>true</optional>
 			</dependency>
 

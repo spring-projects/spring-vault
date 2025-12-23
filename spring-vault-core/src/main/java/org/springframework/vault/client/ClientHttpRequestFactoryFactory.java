@@ -82,7 +82,6 @@ public class ClientHttpRequestFactoryFactory {
 	public static ClientHttpRequestFactory create(ClientOptions options, SslConfiguration sslConfiguration) {
 		Assert.notNull(options, "ClientOptions must not be null");
 		Assert.notNull(sslConfiguration, "SslConfiguration must not be null");
-
 		try {
 			if (httpComponentsPresent) {
 				return HttpComponents.usingHttpComponents(options, sslConfiguration);
@@ -191,7 +190,6 @@ public class ClientHttpRequestFactoryFactory {
 		}
 
 	}
-
 
 	/**
 	 * Utility methods to create {@link ClientHttpRequestFactory} using the Jetty
