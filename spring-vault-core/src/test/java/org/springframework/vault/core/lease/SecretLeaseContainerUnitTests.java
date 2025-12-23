@@ -16,8 +16,10 @@
 
 package org.springframework.vault.core.lease;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -28,11 +30,9 @@ import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
@@ -68,7 +68,6 @@ import static org.mockito.Mockito.*;
  * @author Steven Swor
  * @author Thomas Kåsene
  */
-@ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SecretLeaseContainerUnitTests {
 
@@ -96,6 +95,7 @@ class SecretLeaseContainerUnitTests {
 	@BeforeEach
 	void before() throws Exception {
 
+		when(this.taskScheduler.getClock()).thenReturn(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
 		this.secretLeaseContainer = new SecretLeaseContainer(this.vaultOperations, this.taskScheduler);
 		this.secretLeaseContainer.addLeaseListener(this.leaseListenerAdapter);
 		this.secretLeaseContainer.addErrorListener(this.leaseListenerAdapter);
@@ -685,6 +685,7 @@ class SecretLeaseContainerUnitTests {
 
 		this.secretLeaseContainer.start();
 
+		verify(this.taskScheduler).getClock();
 		verifyNoMoreInteractions(this.scheduledFuture);
 		verifyNoMoreInteractions(this.taskScheduler);
 	}
