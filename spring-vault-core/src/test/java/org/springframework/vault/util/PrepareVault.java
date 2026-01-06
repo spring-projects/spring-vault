@@ -201,18 +201,21 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Disable Vault versioning Key-Value secrets engine (kv version 2).
+	 * Disable Vault versioning Key-Value secrets engine (kv version 2) and mount the kv
+	 * secrets engine at {@code secret/}.
 	 */
-	public void disableGenericVersioning() {
+	public void ensureUnversionedSecretsEngine() {
 		this.vaultOperations.opsForSys().unmount("secret");
-		VaultMount kv = VaultMount.builder().type("kv").config(Collections.singletonMap("versioned", false)).build();
+		VaultMount kv = VaultMount.builder().type("kv").options(Collections.singletonMap("version", "1")).build();
 		this.vaultOperations.opsForSys().mount("secret", kv);
 	}
 
+	/**
+	 * Mount the Key-Value secrets engine (kv version 2) at {@code versioned/}.
+	 */
 	public void mountVersionedKvSecretsEngine() {
-		mountSecretsEngine("kv", "versioned", Collections.emptyMap());
-		this.vaultOperations.write("sys/mounts/versioned/tune",
-				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
+		VaultMount kv = VaultMount.builder().type("kv").options(Collections.singletonMap("version", "2")).build();
+		this.vaultOperations.opsForSys().mount("versioned", kv);
 	}
 
 	public VaultOperations getVaultOperations() {

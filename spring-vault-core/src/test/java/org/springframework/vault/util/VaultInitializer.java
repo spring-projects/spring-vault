@@ -89,7 +89,7 @@ public class VaultInitializer {
 			this.prepareVault.awaitAvailable();
 			this.prepareVault.createToken(Settings.token().getToken(), "root");
 			if (this.prepareVault.getVersion().isGreaterThanOrEqualTo(VERSIONING_INTRODUCED_WITH)) {
-				this.prepareVault.disableGenericVersioning();
+				this.prepareVault.ensureUnversionedSecretsEngine();
 				this.prepareVault.mountVersionedKvSecretsEngine();
 			}
 		}
