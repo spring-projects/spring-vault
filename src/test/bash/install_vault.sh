@@ -10,6 +10,7 @@ set -o errexit
 EDITION="${EDITION:-oss}"
 VAULT_OSS="${VAULT_OSS:-1.21.1}"
 VAULT_ENT="${VAULT_ENT:-1.21.1}"
+VAULT_ENT_TYPE="${VAULT_ENT_TYPE:-ent}" #ent, ent.hsm, ent.hsm.fips1403
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
 VAULT_DIRECTORY=vault
@@ -29,8 +30,8 @@ function verbose() {
 
 function initialize() {
   # cleanup
-  mkdir -p ${VAULT_DIRECTORY}
-  mkdir -p ${DOWNLOAD_DIRECTORY}
+  mkdir -p "${VAULT_DIRECTORY}"
+  mkdir -p "${DOWNLOAD_DIRECTORY}"
 }
 
 function usage() {
@@ -77,18 +78,18 @@ function parse_options() {
 
 function unpack() {
 
-  cd ${VAULT_DIRECTORY}
+  cd "${VAULT_DIRECTORY}"
 
   if [[ -f vault ]]; then
     rm vault
   fi
 
-  say "Unzipping ${VAULT_FILE}..."
-  verbose " unzip ../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+  say "Unzipping ${VAULT_ZIP}..."
+  verbose " unzip ../${DOWNLOAD_DIRECTORY}/${VAULT_ZIP}"
   if [[ ${VERBOSE} == true ]]; then
-    unzip "../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+    unzip "../${DOWNLOAD_DIRECTORY}/${VAULT_ZIP}" vault
   else
-    unzip -q "../${DOWNLOAD_DIRECTORY}/${VAULT_FILE}"
+    unzip -q "../${DOWNLOAD_DIRECTORY}/${VAULT_ZIP}" vault
   fi
 
   chmod a+x vault
@@ -100,17 +101,17 @@ function unpack() {
 
 function download() {
 
-  if [[ ! -f "${DOWNLOAD_DIRECTORY}/${VAULT_FILE}" ]]; then
-    cd ${DOWNLOAD_DIRECTORY}
+  if [[ ! -f "${DOWNLOAD_DIRECTORY}/${VAULT_ZIP}" ]]; then
+    cd "${DOWNLOAD_DIRECTORY}"
     # install Vault
     say "Downloading Vault from ${VAULT_URL}"
 
-    verbose "wget ${VAULT_URL} -O ${VAULT_FILE}"
+    verbose "wget ${VAULT_URL} -O ${VAULT_ZIP}"
 
     if [[ ${VERBOSE} == true ]]; then
-      wget "${VAULT_URL}" -O "${VAULT_FILE}"
+      wget "${VAULT_URL}" -O "${VAULT_ZIP}"
     else
-      wget "${VAULT_URL}" -q --show-progress -O "${VAULT_FILE}"
+      wget "${VAULT_URL}" -q -O "${VAULT_ZIP}"
     fi
 
     if [[ $? != 0 ]]; then
@@ -125,7 +126,6 @@ function download_oss() {
 
   VAULT_VER="${VAULT_VER:-${VAULT_OSS}}"
   VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_${PLATFORM}.zip"
-  VAULT_FILE=${VAULT_ZIP}
   VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
 
   download
@@ -134,10 +134,9 @@ function download_oss() {
 
 function download_enterprise() {
 
-  VAULT_VER="${VAULT_VER:-${VAULT_ENT}}"
-  VAULT_ZIP="vault_${VAULT_VER}%2Bent_${UNAME}_${PLATFORM}.zip"
-  VAULT_FILE="vault_${VAULT_VER}+ent_${UNAME}_${PLATFORM}.zip"
-  VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}%2Bent/${VAULT_ZIP}"
+  VAULT_VER="${VAULT_VER:-${VAULT_ENT}+${VAULT_ENT_TYPE}}"
+  VAULT_ZIP="vault_${VAULT_VER}_${UNAME}_${PLATFORM}.zip"
+  VAULT_URL="https://releases.hashicorp.com/vault/${VAULT_VER}/${VAULT_ZIP}"
 
   download
   unpack
@@ -147,15 +146,15 @@ function main() {
 
   initialize
   parse_options "$@"
-  if [ "$(uname -m)" == arm64 ]; then
+  if [ "$(uname -m)" == 'arm64' ]; then
     PLATFORM=arm64
   fi
-  if [ "$(uname -m)" == aarch64 ]; then
+  if [ "$(uname -m)" == 'aarch64' ]; then
     PLATFORM=arm64
   fi
-  if [[ ${EDITION} == 'oss' ]]; then
+  if [[ "${EDITION}" == 'oss' ]]; then
     download_oss
-  elif [[ ${EDITION} == 'enterprise' ]]; then
+  elif [[ "${EDITION}" == 'enterprise' ]]; then
     download_enterprise
   else
     say "Ignoring edition option: ${EDITION} - oss and enterprise supported only"
