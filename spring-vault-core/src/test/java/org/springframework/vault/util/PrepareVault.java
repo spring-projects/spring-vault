@@ -16,6 +16,7 @@
 
 package org.springframework.vault.util;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -82,6 +83,30 @@ public class PrepareVault {
 			}
 		}
 		return initialized.getRootToken();
+	}
+
+	/**
+	 * Wait until Vault is available (not standby) in case Vault uses HA mode that
+	 * requires background cluster synchronization.
+	 */
+	void awaitAvailable() {
+		int attempts = 10;
+		Duration wait = Duration.ofMillis(500);
+		for (int i = 0; i < attempts; i++) {
+			VaultHealth health = this.vaultOperations.opsForSys().health();
+			if (!health.isStandby()) {
+				return;
+			}
+			if (health.isStandby()) {
+				try {
+					Thread.sleep(wait.toMillis());
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		throw new IllegalStateException(
+				"Vault did not become available within %s seconds".formatted(wait.multipliedBy(attempts).toSeconds()));
 	}
 
 	/**
