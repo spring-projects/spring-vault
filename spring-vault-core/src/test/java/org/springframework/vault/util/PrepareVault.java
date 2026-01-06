@@ -111,9 +111,9 @@ public class PrepareVault {
 
 	/**
 	 * Create a token for the given {@code tokenId} and {@code policy}.
-	 * @param tokenId must not be {@literal null}.
-	 * @param policy must not be {@literal null}.
-	 * @return the created {@link VaultToken}.
+	 * @param tokenId the token, must not be {@literal null}.
+	 * @param policy the policy, must not be {@literal null}.
+	 * @return the token.
 	 */
 	public VaultToken createToken(String tokenId, String policy) {
 		VaultTokenRequestBuilder builder = VaultTokenRequest.builder().id(tokenId);
@@ -134,7 +134,7 @@ public class PrepareVault {
 
 	/**
 	 * Mount an auth method.
-	 * @param authMethod must not be {@literal null} or empty.
+	 * @param authMethod the authMethod must not be {@literal null}.
 	 */
 	public void mountAuth(String authMethod) {
 		Assert.hasText(authMethod, "Auth method must not be empty");
@@ -142,9 +142,9 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Check whether a auth method is enabled.
-	 * @param authMethod must not be {@literal null} or empty.
-	 * @return {@literal true} if a auth-method is enabled.
+	 * Check whether an auth-method is enabled.
+	 * @param authMethod the auth backend, must not be {@literal null}.
+	 * @return whether the backend is mounted.
 	 */
 	public boolean hasAuth(String authMethod) {
 		Assert.hasText(authMethod, "Auth method must not be empty");
@@ -152,20 +152,20 @@ public class PrepareVault {
 	}
 
 	/**
-	 * Mount a secrets engine.
-	 * @param secretsEngine must not be {@literal null} or empty.
+	 * Mount a secrets engine at its default path {@code secretsEngine}.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
 	 */
-	public void mountSecret(String secretsEngine) {
-		mountSecret(secretsEngine, secretsEngine, Collections.emptyMap());
+	public void mountSecretsEngine(String secretsEngine) {
+		mountSecretsEngine(secretsEngine, secretsEngine, Collections.emptyMap());
 	}
 
 	/**
 	 * Mount a secrets engine {@code secretsEngine} at {@code path}.
-	 * @param secretsEngine must not be {@literal null} or empty.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
 	 * @param path must not be {@literal null} or empty.
 	 * @param config must not be {@literal null}.
 	 */
-	private void mountSecret(String secretsEngine, String path, Map<String, Object> config) {
+	private void mountSecretsEngine(String secretsEngine, String path, Map<String, Object> config) {
 		Assert.hasText(secretsEngine, "Secrets engine must not be empty");
 		Assert.hasText(path, "Mount path must not be empty");
 		Assert.notNull(config, "Configuration must not be null");
@@ -175,10 +175,10 @@ public class PrepareVault {
 
 	/**
 	 * Check whether a secrets engine is enabled.
-	 * @param secretsEngine must not be {@literal null} or empty.
+	 * @param secretsEngine the secrets engine name, must not be {@literal null} or empty.
 	 * @return {@literal true} if a secrets engine is enabled.
 	 */
-	public boolean hasSecret(String secretsEngine) {
+	public boolean hasSecretsEngine(String secretsEngine) {
 		Assert.hasText(secretsEngine, "Secrets engine must not be empty");
 		return this.adminOperations.getMounts().containsKey(secretsEngine + "/");
 	}
@@ -210,7 +210,7 @@ public class PrepareVault {
 	}
 
 	public void mountVersionedKvSecretsEngine() {
-		mountSecret("kv", "versioned", Collections.emptyMap());
+		mountSecretsEngine("kv", "versioned", Collections.emptyMap());
 		this.vaultOperations.write("sys/mounts/versioned/tune",
 				Collections.singletonMap("options", Collections.singletonMap("version", "2")));
 	}

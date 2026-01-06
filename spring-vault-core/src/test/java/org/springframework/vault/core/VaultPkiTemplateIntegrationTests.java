@@ -101,8 +101,8 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 		this.pkiOperations = this.vaultOperations.opsForPki();
 
-		if (!prepare().hasSecret("pki")) {
-			prepare().mountSecret("pki");
+		if (!prepare().hasSecretsEngine("pki")) {
+			prepare().mountSecretsEngine("pki");
 		}
 
 		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
