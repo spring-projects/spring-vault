@@ -71,7 +71,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		writeForData("%s/keys/%s".formatted(this.path, keyName), null);
+		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), null);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(createKeyRequest, "VaultTransitKeyCreationRequest must not be empty");
 
-		writeForData("%s/keys/%s".formatted(this.path, keyName), createKeyRequest);
+		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), createKeyRequest);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
 
-		writeForData("%s/keys/%s/config".formatted(this.path, keyName), keyConfiguration);
+		this.vaultOperations.write("%s/keys/%s/config".formatted(this.path, keyName), keyConfiguration);
 	}
 
 	@Override
@@ -142,7 +142,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		writeForData("%s/keys/%s/rotate".formatted(this.path, keyName), null);
+		this.vaultOperations.write("%s/keys/%s/rotate".formatted(this.path, keyName), null);
 	}
 
 	@Override
