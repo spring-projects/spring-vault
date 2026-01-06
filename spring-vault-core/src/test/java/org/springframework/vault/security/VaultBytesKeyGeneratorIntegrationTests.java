@@ -35,8 +35,8 @@ class VaultBytesKeyGeneratorIntegrationTests extends IntegrationTestSupport {
 	@BeforeEach
 	void before() {
 
-		if (!prepare().hasSecret("transit")) {
-			prepare().mountSecret("transit");
+		if (!prepare().hasSecretsEngine("transit")) {
+			prepare().mountSecretsEngine("transit");
 		}
 	}
 

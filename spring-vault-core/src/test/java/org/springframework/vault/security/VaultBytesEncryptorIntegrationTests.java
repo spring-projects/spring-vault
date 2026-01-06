@@ -47,8 +47,8 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 		this.transit = prepare().getVaultOperations().opsForTransit();
 		this.vaultVersion = prepare().getVersion();
 
-		if (!prepare().hasSecret("transit")) {
-			prepare().mountSecret("transit");
+		if (!prepare().hasSecretsEngine("transit")) {
+			prepare().mountSecretsEngine("transit");
 		}
 
 		removeKeys();
