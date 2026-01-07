@@ -4,7 +4,7 @@ set -euo pipefail
 
 RAW_VERSION=`./mvnw \
   org.apache.maven.plugins:maven-help-plugin:3.5.1:evaluate \
-  -Dexpression=project.version -q -DforceStdout`
+  -Ddevelocity.scan.disabled=true -Dexpression=project.version -q -DforceStdout`
 
 # Split things up
 VERSION_PARTS=($RAW_VERSION)

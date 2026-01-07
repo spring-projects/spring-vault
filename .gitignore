@@ -25,3 +25,5 @@ work/
 node
 node_modules
 package-lock.json
+
+.mvn/.develocity
