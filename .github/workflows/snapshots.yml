@@ -13,32 +13,20 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup Java and Maven
-        uses: spring-projects/spring-data-release/actions/setup-maven@main
+        uses: spring-projects/spring-data-build/actions/setup-maven@main
         with:
           java-version: 'main'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
-      - name: Cache Vault
-        uses: actions/cache@v5.0.2
-        with:
-          path: |
-            download
-            vault
-          key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
       - name: Install and Start Vault
-        run:  src/test/bash/start.sh
+        uses: ./.github/actions/setup-vault
       - name: Capture version
         run: |
           echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
       - name: Deploy to Artifactory
         if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
-        uses: spring-projects/spring-data-release/actions/maven-artifactory-deploy@main
+        uses: spring-projects/spring-data-build/actions/maven-artifactory-deploy@main
         with:
           build-name: 'spring-vault'
           skip-tests: 'false'
           username: '${{ secrets.ARTIFACTORY_USERNAME }}'
           password: '${{ secrets.ARTIFACTORY_PASSWORD }}'
-      - name: Test Summary
-        uses: test-summary/action@v2.2
-        with:
-          paths: '**/TEST-*.xml'
-        if: always()
