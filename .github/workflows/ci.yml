@@ -2,7 +2,7 @@ name: CI Build
 
 on:
   push:
-    branches: [ main, 3.2.x, 3.1.x ]
+    branches: [ actions, main, 3.2.x, 3.1.x ]
 
 permissions: read-all
 
@@ -11,29 +11,35 @@ jobs:
     name: Build project
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - name: Set up Java
-      uses: actions/setup-java@v5
-      with:
-        java-version: '25'
-        distribution: temurin
-        cache: maven
-    - name: Cache Vault
-      uses: actions/cache@v4.3.0
-      with:
-        path: |
-          download
-          vault
-        key: ${{ runner.os }}-${{ hashFiles('src/test/bash/**') }}
-    - name: Setup Vault
-      run:  src/test/bash/start.sh
-    - name: Build
-      run: ./mvnw -B -U clean verify
-    - name: Deploy to Artifactory
-      if: ${{ github.repository == 'spring-projects/spring-vault' }}
-      env:
-        ARTIFACTORY_USR: ${{ secrets.ARTIFACTORY_USERNAME }}
-        ARTIFACTORY_PSW: ${{ secrets.ARTIFACTORY_PASSWORD }}
-        BUILD_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-        BUILD_NUMBER: "${{ github.run_number }}"
-      run: ci/deploy-artifactory.sh
+      - uses: actions/checkout@v6
+      - name: Cache Vault
+        uses: actions/cache@v5.0.1
+        with:
+          path: |
+            download
+            vault
+          key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
+      - name: Install and Start Vault
+        run:  src/test/bash/start.sh
+      - name: Setup Java and Maven
+        uses: mp911de/some-actions/setup-maven@main
+        with:
+          java-version: '25'
+          develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+      - name: Build
+        run: ./mvnw -B -U clean verify
+      - name: Test Summary
+        uses: test-summary/action@v2.2
+        with:
+          paths: '**/TEST-*.xml'
+        if: always()
+      - name: Capture version
+        run: |
+          echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+      - name: Deploy to Artifactory
+        if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
+        uses: mp911de/some-actions/maven-artifactory-deploy@main
+        with:
+          build-name: 'spring-vault'
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
