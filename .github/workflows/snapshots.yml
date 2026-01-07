@@ -1,4 +1,4 @@
-name: CI Build
+name: Build and deploy snapshots
 
 on:
   push:
@@ -7,18 +7,15 @@ on:
 permissions: read-all
 
 jobs:
-  build-java:
-    strategy:
-      matrix:
-        java-version: [ 'base', 'main' ]
-    name: Build project
+  build:
+    name: Build and deploy snapshots
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-release/actions/setup-maven@main
         with:
-          java-version: '${{ matrix.java-version }}'
+          java-version: 'base'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
       - name: Cache Vault
         uses: actions/cache@v5.0.2
@@ -29,8 +26,17 @@ jobs:
           key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
       - name: Install and Start Vault
         run:  src/test/bash/start.sh
-      - name: Build
-        run: ./mvnw -B -U clean verify
+      - name: Capture version
+        run: |
+          echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+      - name: Deploy to Artifactory
+        if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
+        uses: spring-projects/spring-data-release/actions/maven-artifactory-deploy@main
+        with:
+          build-name: 'spring-vault'
+          skip-tests: 'false'
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
       - name: Test Summary
         uses: test-summary/action@v2.2
         with:
