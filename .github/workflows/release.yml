@@ -13,20 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'spring-projects/spring-vault' }}
     steps:
-    - uses: actions/checkout@v5
-    - name: Set up Java
-      uses: actions/setup-java@v5
-      with:
-        java-version: '17'
-        distribution: temurin
-        cache: maven
-    - name: Install GPG key
-      run: |
-        echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
-        echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
-    - name: Release to Maven Central
-      env:
+      - uses: actions/checkout@v6
+      - name: Setup Java and Maven
+        uses: spring-projects/spring-data-release/actions/setup-maven@main
+        with:
+          java-version: 'base'
+          develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+      - name: Install GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
+          echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
+      - name: Release to Maven Central
+        env:
           CENTRAL_TOKEN_USR: ${{ secrets.CENTRAL_TOKEN_USERNAME }}
           CENTRAL_TOKEN_PSW: ${{ secrets.CENTRAL_TOKEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-      run: ci/deploy-maven-central.sh
+        run: ci/deploy-maven-central.sh
