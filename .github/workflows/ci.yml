@@ -16,23 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Setup Java and Maven
-        uses: spring-projects/spring-data-release/actions/setup-maven@main
+        uses: spring-projects/spring-data-build/actions/setup-maven@4.0.x
         with:
           java-version: '${{ matrix.java-version }}'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
-      - name: Cache Vault
-        uses: actions/cache@v5.0.2
-        with:
-          path: |
-            download
-            vault
-          key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
       - name: Install and Start Vault
-        run:  src/test/bash/start.sh
+        uses: ./.github/actions/setup-vault
       - name: Build
-        run: ./mvnw -B -U clean verify
-      - name: Test Summary
-        uses: test-summary/action@v2.2
-        with:
-          paths: '**/TEST-*.xml'
-        if: always()
+        uses: spring-projects/spring-data-build/actions/maven-build@4.0.x

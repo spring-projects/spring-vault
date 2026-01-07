@@ -1,0 +1,16 @@
+name: Setup and Start Vault
+description: 'Download and start a Vault server'
+
+runs:
+  using: composite
+  steps:
+    - name: Cache Vault
+      uses: actions/cache@v5.0.2
+      with:
+        path: |
+          download
+          vault
+        key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
+    - name: Install and Start Vault
+      shell: bash
+      run: src/test/bash/start.sh
