@@ -26,15 +26,6 @@ jobs:
         with:
           java-version: '25'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
-      - name: Build
-        run: ./mvnw -B -U clean verify
-      - name: Info
-        run: git status
-      - name: Test Summary
-        uses: test-summary/action@v2.2
-        with:
-          paths: '**/TEST-*.xml'
-        if: always()
       - name: Capture version
         run: |
           echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
@@ -43,5 +34,11 @@ jobs:
         uses: mp911de/some-actions/maven-artifactory-deploy@main
         with:
           build-name: 'spring-vault'
+          skip-tests: 'false'
           username: ${{ secrets.ARTIFACTORY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+      - name: Test Summary
+        uses: test-summary/action@v2.2
+        with:
+          paths: '**/TEST-*.xml'
+        if: always()
