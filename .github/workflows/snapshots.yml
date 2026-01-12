@@ -8,7 +8,7 @@ permissions: read-all
 
 jobs:
   build:
-    name: Build project
+    name: Build and deploy snapshots
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -35,3 +35,13 @@ jobs:
         with:
           paths: '**/TEST-*.xml'
         if: always()
+      - name: Capture version
+        run: |
+          echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+      - name: Deploy to Artifactory
+        if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
+        uses: mp911de/some-actions/maven-artifactory-deploy@main
+        with:
+          build-name: 'spring-vault'
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
