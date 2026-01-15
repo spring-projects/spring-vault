@@ -25,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
+import org.springframework.vault.client.VaultClients.VaultEndpointUriBuilderFactory;
 import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -42,21 +43,25 @@ class VaultClientsUnitTests {
 	VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 
 	@Test
+	void endpointUriHandlerShouldPrefixRelativeUrl() {
+		VaultEndpointUriBuilderFactory handler = new VaultEndpointUriBuilderFactory(localhost);
+		URI uri = handler.expand("/path/{bar}?list=true", "bar");
+
+		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/v1/path/bar").hasQuery("list=true");
+	}
+
+	@Test
 	void uriHandlerShouldPrefixRelativeUrl() {
-
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
+		URI uri = handler.expand("/path/{bar}?list=true", "bar");
 
-		URI uri = handler.expand("/path/{bar}", "bar");
-
-		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/v1/path/bar");
+		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/v1/path/bar").hasQuery("list=true");
 	}
 
 	@Test
 	void uriHandlerShouldNotPrefixAbsoluteUrl() {
-
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
-
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
 
 		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1).hasPath("/path/bar");
@@ -64,10 +69,8 @@ class VaultClientsUnitTests {
 
 	@Test
 	void uriBuilderShouldPrefixRelativeUrl() {
-
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
-
 		URI uri = handler.expand("/path/{bar}", "bar");
 
 		assertThat(uri).hasHost("localhost").hasPort(8200).hasPath("/v1/path/bar");
@@ -75,10 +78,8 @@ class VaultClientsUnitTests {
 
 	@Test
 	void uriBuilderShouldNotPrefixAbsoluteUrl() {
-
 		VaultEndpoint localhost = VaultEndpoint.create("localhost", 8200);
 		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
-
 		URI uri = handler.expand("https://foo/path/{bar}", "bar");
 
 		assertThat(uri).hasScheme("https").hasHost("foo").hasPort(-1).hasPath("/path/bar");
@@ -86,7 +87,6 @@ class VaultClientsUnitTests {
 
 	@Test
 	void shouldApplyNamespaceWithRestTemplate() {
-
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriBuilderFactory());
@@ -103,7 +103,6 @@ class VaultClientsUnitTests {
 
 	@Test
 	void shouldApplyNamespace() {
-
 		MockVaultClient client = MockVaultClient.create(it -> it.defaultNamespace("foo/bar")
 				.configureRestClient(rcb -> rcb.uriBuilderFactory(new PrefixAwareUriBuilderFactory())));
 
@@ -117,7 +116,6 @@ class VaultClientsUnitTests {
 
 	@Test
 	void shouldAllowNamespaceOverride() {
-
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
 		restTemplate.setUriTemplateHandler(new PrefixAwareUriBuilderFactory());

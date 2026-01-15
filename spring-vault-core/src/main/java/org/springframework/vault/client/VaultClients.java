@@ -32,6 +32,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverters;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
@@ -215,7 +216,7 @@ public class VaultClients {
 	}
 
 	static UriBuilderFactory createUriBuilderFactory(VaultEndpoint endpoint) {
-		return new VaultEndpointUriBuilderFactorySupport(endpoint);
+		return new VaultEndpointUriBuilderFactory(endpoint);
 	}
 
 	static URI expandUri(UriBuilderFactory factory, URI uri) {
@@ -236,12 +237,12 @@ public class VaultClients {
 	/**
 	 * @since 4.1
 	 */
-	public static class VaultEndpointUriBuilderFactorySupport extends DefaultUriBuilderFactory {
+	public static class VaultEndpointUriBuilderFactory extends DefaultUriBuilderFactory {
 
 		private final UriComponentsBuilder builder;
 
 
-		public VaultEndpointUriBuilderFactorySupport(VaultEndpoint endpoint) {
+		public VaultEndpointUriBuilderFactory(VaultEndpoint endpoint) {
 			super();
 			this.builder = UriComponentsBuilder.fromUriString(toBaseUri(endpoint));
 		}
@@ -254,10 +255,17 @@ public class VaultClients {
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
-			UriComponents uriComponents = builder()
-					.path(VaultEndpoint.stripLeadingSlashes(uriTemplate))
-					.build();
-			return UriComponentsBuilder.newInstance().uriComponents(uriComponents);
+			UriComponents components = parseUri(uriTemplate).build();
+			if (components.toUri().isAbsolute() || StringUtils.hasText(components.getHost())
+					|| components.getPort() != -1) {
+				return builder().path(uriTemplate);
+			}
+			return builder().uriComponents(components);
+		}
+
+		private UriComponentsBuilder parseUri(String uriTemplate) {
+			return (getParserType() != null ? UriComponentsBuilder.fromUriString(uriTemplate, getParserType())
+					: UriComponentsBuilder.fromUriString(uriTemplate));
 		}
 
 	}
