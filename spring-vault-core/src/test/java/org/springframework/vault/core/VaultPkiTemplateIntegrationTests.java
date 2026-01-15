@@ -16,7 +16,6 @@
 
 package org.springframework.vault.core;
 
-import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.security.KeyStore;
@@ -29,14 +28,10 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import org.assertj.core.util.Files;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,13 +50,12 @@ import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.support.VaultCertificateResponse;
 import org.springframework.vault.support.VaultIssuerCertificateRequestResponse;
 import org.springframework.vault.support.VaultSignCertificateRequestResponse;
-import org.springframework.vault.util.IntegrationTestSupport;
+import org.springframework.vault.util.PkiIntegrationTestSupport;
 import org.springframework.vault.util.RequiresVaultVersion;
 import org.springframework.vault.util.Version;
 import org.springframework.web.client.HttpClientErrorException;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.springframework.vault.util.Settings.*;
 
 /**
  * Integration tests for {@link VaultPkiTemplate} through
@@ -73,7 +67,7 @@ import static org.springframework.vault.util.Settings.*;
  */
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = VaultIntegrationTestConfiguration.class)
-class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
+class VaultPkiTemplateIntegrationTests extends PkiIntegrationTestSupport {
 
 	private static final String NO_TTL_UNIT_REQUIRED_FROM = "0.7.3";
 
@@ -84,51 +78,11 @@ class VaultPkiTemplateIntegrationTests extends IntegrationTestSupport {
 
 	VaultPkiOperations pkiOperations;
 
-	enum KeyType {
-
-		rsa(2048), ec(256);
-
-		private final int bits;
-
-		KeyType(int bits) {
-			this.bits = bits;
-		}
-
-	}
-
 	@BeforeEach
-	void before() {
+	public void before() {
 
 		this.pkiOperations = this.vaultOperations.opsForPki();
-
-		if (!prepare().hasSecretsEngine("pki")) {
-			prepare().mountSecretsEngine("pki");
-		}
-
-		File workDir = findWorkDir(new File(System.getProperty("user.dir")));
-		String caCert = Files.contentOf(new File(workDir, "ca/certs/ca.cert.pem"), "US-ASCII");
-		String cert = Files.contentOf(new File(workDir, "ca/certs/intermediate.cert.pem"), "US-ASCII");
-		String key = Files.contentOf(new File(workDir, "ca/private/intermediate.decrypted.key.pem"), "US-ASCII");
-
-		Map<String, String> pembundle = Collections.singletonMap("pem_bundle", cert + key + caCert);
-
-		this.vaultOperations.write("pki/config/ca", pembundle);
-
-		Map<String, String> role = new HashMap<>();
-		role.put("allowed_domains", "localhost,example.com");
-		role.put("allow_subdomains", "true");
-		role.put("allow_localhost", "true");
-		role.put("allowed_user_ids", "humanoid,robot");
-		role.put("allow_ip_sans", "true");
-		role.put("max_ttl", "72h");
-
-		this.vaultOperations.write("pki/roles/testrole", role);
-
-		for (KeyType value : KeyType.values()) {
-			role.put("key_type", value.name());
-			role.put("key_bits", "" + value.bits);
-			this.vaultOperations.write("pki/roles/testrole-" + value.name(), role);
-		}
+		super.before();
 	}
 
 	@Test

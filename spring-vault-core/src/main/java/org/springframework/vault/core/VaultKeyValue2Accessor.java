@@ -48,6 +48,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 		this.path = path;
 	}
 
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public @Nullable List<String> list(String path) {
