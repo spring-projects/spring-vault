@@ -50,6 +50,7 @@ import org.springframework.vault.core.certificate.CertificateContainer;
 import org.springframework.vault.core.certificate.CertificateRegistrar;
 import org.springframework.vault.core.certificate.VaultCertificateAuthority;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
+import org.springframework.vault.core.lease.SecretRegistrar;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
 import org.springframework.web.client.RestOperations;
@@ -202,6 +203,8 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 			multicaster.addErrorListener(secretLeaseContainer.getAuthenticationErrorListener());
 		}
 		secretLeaseContainer.start();
+		getBeanFactory().getBeanProvider(SecretRegistrar.class)
+				.forEach(it -> it.registerSecret(secretLeaseContainer));
 		return secretLeaseContainer;
 	}
 

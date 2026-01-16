@@ -16,14 +16,17 @@
 
 package org.springframework.vault.config;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.vault.core.VaultIntegrationTestConfiguration;
+import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.core.certificate.CertificateContainer;
 import org.springframework.vault.core.certificate.ManagedCertificate;
+import org.springframework.vault.core.lease.ManagedSecret;
 import org.springframework.vault.support.CertificateBundle;
 import org.springframework.vault.support.VaultCertificateRequest;
 import org.springframework.vault.util.PkiIntegrationTestSupport;
@@ -36,6 +39,31 @@ import static org.assertj.core.api.Assertions.*;
  * @author Mark Paluch
  */
 class AbstractVaultConfigurationIntegrationTests extends PkiIntegrationTestSupport {
+
+	@Test
+	void shouldRegisterManagedSecret() {
+
+		prepare().getVaultOperations().opsForKeyValue("versioned", VaultKeyValueOperationsSupport.KeyValueBackend.KV_2)
+				.put("my-secret",
+						Map.of("username", "admin", "password", "secret"));
+
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+
+			AtomicReference<String> secretRef = new AtomicReference<>();
+			context.register(VaultIntegrationTestConfiguration.class);
+			context.registerBean(ManagedSecret.class, () -> {
+				return ManagedSecret.rotating("versioned/my-secret",
+						it -> it.as(ManagedSecret.UsernamePassword::from).applyTo((username, password) -> {
+							secretRef.set(username);
+						}));
+			});
+
+			context.refresh();
+
+			assertThat(context.getBeanNamesForType(CertificateContainer.class)).contains("certificateContainer");
+			assertThat(secretRef).hasValue("admin");
+		}
+	}
 
 	@Test
 	void shouldRegisterManagedCertificate() {
@@ -58,7 +86,6 @@ class AbstractVaultConfigurationIntegrationTests extends PkiIntegrationTestSuppo
 				assertThat(actual.getX509Certificate().getSubjectX500Principal()
 						.toString()).contains("CN=www.example.com");
 			});
-
 		}
 	}
 

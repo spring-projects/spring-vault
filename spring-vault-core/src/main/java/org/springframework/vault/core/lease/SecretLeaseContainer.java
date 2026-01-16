@@ -77,8 +77,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 /**
  * Event-based container to request secrets from Vault and renew the associated
  * {@link Lease}. Secrets can be rotated, depending on the requested
- * {@link RequestedSecret#getMode()}. Usage example: <pre>
- * <code>
+ * {@link RequestedSecret#getMode()}.
+ * Usage example: <pre class="code">
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
  * RequestedSecret requestedSecret = container
@@ -96,7 +96,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * });
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
- * </code> </pre>
+ * </pre>
  * <p>This container keeps track over {@link RequestedSecret}s and requests
  * secrets upon {@link #start()}. Leases qualified for
  * {@link Lease#isRenewable() renewal} are renewed by this container applying
@@ -124,7 +124,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * @see LeaseStrategy
  */
 public class SecretLeaseContainer extends SecretLeaseEventPublisher
-		implements InitializingBean, DisposableBean, SmartLifecycle {
+		implements SecretsRegistry, InitializingBean, DisposableBean, SmartLifecycle {
 
 	private static final AtomicIntegerFieldUpdater<SecretLeaseContainer> UPDATER = AtomicIntegerFieldUpdater
 			.newUpdater(SecretLeaseContainer.class, "status");
@@ -157,6 +157,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private final Map<RequestedSecret, LeaseRenewalScheduler> renewals = new ConcurrentHashMap<>();
 
+	private final Map<RequestedSecret, ManagedSecret> managedSecrets = new ConcurrentHashMap<>();
+
 	private final VaultOperations operations;
 
 	private final KeyValueDelegate keyValueDelegate;
@@ -183,7 +185,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 
 	/**
-	 * Create a new {@link SecretLeaseContainer} given {@link VaultOperations}.
+	 * Create a new {@code SecretLeaseContainer} given {@link VaultOperations}.
 	 * @param operations must not be {@literal null}.
 	 */
 	public SecretLeaseContainer(VaultOperations operations) {
@@ -193,7 +195,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Create a new {@link SecretLeaseContainer} given {@link VaultOperations} and
+	 * Create a new {@code SecretLeaseContainer} given {@link VaultOperations} and
 	 * {@link TaskScheduler}.
 	 * @param operations must not be {@literal null}.
 	 * @param taskScheduler must not be {@literal null}.
@@ -328,6 +330,68 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		return this.taskScheduler;
 	}
 
+	@Override
+	public void register(RequestedSecret secret) {
+		Assert.notNull(secret, "RequestedSecret must not be null");
+		this.requestedSecrets.add(secret);
+
+		if (this.initialized) {
+			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
+			LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
+			this.renewals.put(secret, leaseRenewalScheduler);
+			if (this.status == STATUS_STARTED) {
+				start(secret, leaseRenewalScheduler);
+			}
+		}
+	}
+
+	@Override
+	public void register(RequestedSecret secret, LeaseListener listener) {
+		LeaseErrorListener errorListener = listener instanceof LeaseErrorListener lel ? lel
+				: (leaseEvent, exception) -> {
+				};
+
+		ManagedSecret managedSecret = new ManagedSecret(secret, leaseEvent -> {
+			if (leaseEvent.getSource().equals(secret)) {
+				listener.onLeaseEvent(leaseEvent);
+			}
+		}, (leaseEvent, exception) -> {
+			if (leaseEvent.getSource().equals(secret)) {
+				errorListener.onLeaseError(leaseEvent, exception);
+			}
+		});
+
+		ManagedSecret previous = managedSecrets.put(secret, managedSecret);
+		if (previous != null) {
+			removeLeaseListener(previous.leaseListener());
+			removeLeaseErrorListener(previous.errorListener());
+		}
+		addLeaseListener(managedSecret.leaseListener());
+		if (listener instanceof LeaseErrorListener) {
+			addErrorListener(managedSecret.errorListener());
+		}
+		register(secret);
+	}
+
+	@Override
+	public boolean unregister(RequestedSecret secret) {
+		boolean removed = false;
+		LeaseRenewalScheduler scheduler = this.renewals.get(secret);
+		if (this.requestedSecrets.remove(secret)) {
+			removed = true;
+		}
+		if (scheduler != null) {
+			stop(secret, scheduler);
+		}
+		ManagedSecret previous = managedSecrets.remove(secret);
+		if (previous != null) {
+			removeLeaseListener(previous.leaseListener());
+			removeLeaseErrorListener(previous.errorListener());
+		}
+		return removed;
+	}
+
+
 	/**
 	 * Request a renewable secret at {@code path}.
 	 * @param path must not be {@literal null} or empty.
@@ -366,7 +430,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Start the {@link SecretLeaseContainer}. Starting the container will initially
+	 * Start the {@code SecretLeaseContainer}. Starting the container will initially
 	 * obtain secrets and leases for the requested secrets. A started container
 	 * publishes events through {@link LeaseListener}. Additional secrets can be
 	 * requested at any time.
@@ -434,7 +498,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Stop the {@link SecretLeaseContainer}. Stopping the container will stop lease
+	 * Stop the {@code SecretLeaseContainer}. Stopping the container will stop lease
 	 * renewal, secrets rotation and event publishing. Active leases are not
 	 * expired.
 	 * <p>Multiple calls are synchronized to stop the container only once.
@@ -483,7 +547,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	}
 
 	/**
-	 * Shutdown this {@link SecretLeaseContainer}, disable lease renewal and revoke
+	 * Shutdown this {@code SecretLeaseContainer}, disable lease renewal and revoke
 	 * leases.
 	 *
 	 * @see #afterPropertiesSet()
@@ -495,17 +559,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		int status = this.status;
 		if (status == STATUS_INITIAL || status == STATUS_STARTED) {
 			if (UPDATER.compareAndSet(this, status, STATUS_DESTROYED)) {
-				for (Entry<RequestedSecret, LeaseRenewalScheduler> entry : this.renewals.entrySet()) {
-					Lease lease = entry.getValue().getLease();
-					Lease previousLease = entry.getValue().getPreviousLease();
-					entry.getValue().disableScheduleRenewal();
-					if (lease != null && lease.hasLeaseId()) {
-						doRevokeLease(entry.getKey(), lease);
-					}
-					if (previousLease != null && previousLease.hasLeaseId()) {
-						doRevokeLease(entry.getKey(), previousLease);
-					}
-				}
+				this.renewals.forEach(this::stop);
 				this.renewals.clear();
 				if (this.manageTaskScheduler) {
 					if (this.taskScheduler instanceof DisposableBean) {
@@ -514,6 +568,18 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 					}
 				}
 			}
+		}
+	}
+
+	private void stop(RequestedSecret secret, LeaseRenewalScheduler scheduler) {
+		Lease lease = scheduler.getLease();
+		Lease previousLease = scheduler.getPreviousLease();
+		scheduler.disableScheduleRenewal();
+		if (lease != null && lease.hasLeaseId()) {
+			doRevokeLease(secret, lease);
+		}
+		if (previousLease != null && previousLease.hasLeaseId()) {
+			doRevokeLease(secret, previousLease);
 		}
 	}
 
@@ -1080,6 +1146,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		 * @throws VaultException if lease renewal runs into problems
 		 */
 		Lease renewLease(Lease lease) throws VaultException;
+
+	}
+
+	private record ManagedSecret(RequestedSecret requestedSecret, LeaseListener leaseListener,
+			LeaseErrorListener errorListener) {
 
 	}
 
