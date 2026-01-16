@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 the original author or authors.
+ * Copyright 202-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.springframework.vault.core.certificate.domain;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.support.VaultCertificateRequest;
 
@@ -85,6 +86,28 @@ public abstract class RequestedCertificate {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof RequestedCertificate that)) {
+			return false;
+		}
+		return ObjectUtils.nullSafeEquals(name, that.name);
+	}
+
+	@Override
+	public int hashCode() {
+		return ObjectUtils.nullSafeHashCode(name);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [name='").append(this.getName()).append('\'');
+		sb.append(']');
+		return sb.toString();
 	}
 
 }

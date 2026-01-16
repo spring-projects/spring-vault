@@ -19,15 +19,16 @@ package org.springframework.vault.core.lease;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -69,6 +70,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
+import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -78,7 +80,9 @@ import org.springframework.web.client.HttpStatusCodeException;
  * Event-based container to request secrets from Vault and renew the associated
  * {@link Lease}. Secrets can be rotated, depending on the requested
  * {@link RequestedSecret#getMode()}.
- * Usage example: <pre class="code">
+ *
+ * Usage examples:
+ * <pre class="code">
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
  * RequestedSecret requestedSecret = container
@@ -86,32 +90,48 @@ import org.springframework.web.client.HttpStatusCodeException;
  * container.addLeaseListener(new LeaseListenerAdapter() {
  * 	&#64;Override
  * 	public void onLeaseEvent(SecretLeaseEvent secretLeaseEvent) {
- * 		if (requestedSecret == secretLeaseEvent.getSource()) {
+ * 		if (requestedSecret.equals(secretLeaseEvent.getSource())) {
  * 			if (secretLeaseEvent instanceof SecretLeaseCreatedEvent) {
- *            }
+ * 			}
  * 			if (secretLeaseEvent instanceof SecretLeaseExpiredEvent) {
- *            }
- *        }
- *    }
+ * 			}
+ * 		}
+ * 	}
  * });
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
  * </pre>
+ *
+ * <pre class="code">
+ * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
+ * 		taskScheduler);
+ * ManagedSecret managedSecret = ManagedSecret.rotating(rotatingGenericSecret.getPath(), secret -> secret.getRequiredString("key"));
+ * managedSecret.register(container);
+ * container.afterPropertiesSet();
+ * container.start(); // events are triggered after starting the container
+ * </pre>
+ *
  * <p>This container keeps track over {@link RequestedSecret}s and requests
  * secrets upon {@link #start()}. Leases qualified for
  * {@link Lease#isRenewable() renewal} are renewed by this container applying
  * {@code minRenewalSeconds}/{@code expiryThresholdSeconds} on a
  * {@link TaskScheduler background thread}.
+ * The container manages unique {@link #register(RequestedSecret) RequestedSecret registrations}
+ * and so multiple registrations of the same {@link RequestedSecret} are considered
+ * as one registration.
+ *
  * <p>Requests for secrets can define either renewal or rotation. The container
  * renews leases until expiry. Rotating secrets renew their associated lease
  * until expiry and request new secrets after expiry. Vault requires active
  * interaction from a caller side to determine a secret is expired. Vault does
  * not send any events. Expired secrets events can dispatch later than the
  * actual expiry.
+ *
  * <p>The container dispatches lease events to {@link LeaseListener} and
  * {@link LeaseErrorListener}. Event notifications are dispatched either on the
  * {@link #start() starting} {@link Thread} or worker threads used for
  * background renewal.
+ *
  * <p>Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
@@ -153,11 +173,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	private final LeaseAuthenticationEventListener authenticationListener = new LeaseAuthenticationEventListener();
 
-	private final List<RequestedSecret> requestedSecrets = new CopyOnWriteArrayList<>();
+	private final Set<RequestedSecret> requestedSecrets = new CopyOnWriteArraySet<>();
 
 	private final Map<RequestedSecret, LeaseRenewalScheduler> renewals = new ConcurrentHashMap<>();
 
-	private final Map<RequestedSecret, ManagedSecret> managedSecrets = new ConcurrentHashMap<>();
+	private final Map<RequestedSecret, ManagedSecret> managedSecrets = Collections.synchronizedMap(new IdentityHashMap<>());
 
 	private final VaultOperations operations;
 
@@ -333,14 +353,14 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	@Override
 	public void register(RequestedSecret secret) {
 		Assert.notNull(secret, "RequestedSecret must not be null");
-		this.requestedSecrets.add(secret);
-
-		if (this.initialized) {
-			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
-			LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
-			this.renewals.put(secret, leaseRenewalScheduler);
-			if (this.status == STATUS_STARTED) {
-				start(secret, leaseRenewalScheduler);
+		if (this.requestedSecrets.add(secret)) {
+			if (this.initialized) {
+				Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
+				LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
+				this.renewals.put(secret, leaseRenewalScheduler);
+				if (this.status == STATUS_STARTED) {
+					start(secret, leaseRenewalScheduler);
+				}
 			}
 		}
 	}
@@ -391,7 +411,6 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		return removed;
 	}
 
-
 	/**
 	 * Request a renewable secret at {@code path}.
 	 * @param path must not be {@literal null} or empty.
@@ -412,20 +431,16 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 	/**
 	 * Add a {@link RequestedSecret}.
+	 * <p>Subsequent registrations of the same {@link RequestedSecret}
+	 * are considered as a single registration and the secret will be managed only once.
+	 * A requested secret that has been already been registered and activated by the
+	 * container will not lead to emission of a new {@code SecretLeaseCreatedEvent} with
+	 * the previous secrets body but rather only to future events such as rotations
+	 * or renewals.
 	 * @param requestedSecret must not be {@literal null}.
 	 */
 	public RequestedSecret addRequestedSecret(RequestedSecret requestedSecret) {
-		Assert.notNull(requestedSecret, "RequestedSecret must not be null");
-		this.requestedSecrets.add(requestedSecret);
-
-		if (this.initialized) {
-			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
-			LeaseRenewalScheduler leaseRenewalScheduler = new LeaseRenewalScheduler(this.taskScheduler);
-			this.renewals.put(requestedSecret, leaseRenewalScheduler);
-			if (this.status == STATUS_STARTED) {
-				start(requestedSecret, leaseRenewalScheduler);
-			}
-		}
+		register(requestedSecret);
 		return requestedSecret;
 	}
 

@@ -235,7 +235,7 @@ public class ManagedCertificate implements CertificateRegistrar {
 
 	@Override
 	public String toString() {
-		return "ManagedCertificate " + getName();
+		return "ManagedCertificate [" + getName() + "]";
 	}
 
 }

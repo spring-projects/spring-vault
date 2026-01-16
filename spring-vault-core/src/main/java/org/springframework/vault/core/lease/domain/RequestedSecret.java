@@ -36,10 +36,8 @@ public class RequestedSecret {
 
 
 	private RequestedSecret(String path, Mode mode) {
-
 		Assert.hasText(path, "Path must not be null or empty");
 		Assert.isTrue(!path.startsWith("/"), "Path name must not start with a slash (/)");
-
 		this.path = path;
 		this.mode = mode;
 	}

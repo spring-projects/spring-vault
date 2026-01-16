@@ -153,7 +153,7 @@ public class ManagedSecret implements SecretRegistrar {
 
 	@Override
 	public String toString() {
-		return "ManagedSecret " + secret;
+		return "ManagedSecret [" + secret + "]";
 	}
 
 	static <T> @Nullable T get(Map<String, Object> secrets, String key, Class<T> expectedType) {

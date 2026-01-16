@@ -1,5 +1,5 @@
 /*
- * Copyright 2026 the original author or authors.
+ * Copyright 2026-present the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.certificate.domain;
 
 import org.springframework.util.ObjectUtils;
@@ -47,14 +48,6 @@ public class RequestedCertificateBundle extends RequestedCertificate {
 	}
 
 	@Override
-	public String toString() {
-		return "RequestedCertificateBundle[" +
-				"name='" + getName() + "', " +
-				"role='" + role + '\'' +
-				']';
-	}
-
-	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof RequestedCertificateBundle that)) {
 			return false;
@@ -62,12 +55,23 @@ public class RequestedCertificateBundle extends RequestedCertificate {
 		if (!super.equals(o)) {
 			return false;
 		}
-		return ObjectUtils.nullSafeEquals(role, that.role);
+		return ObjectUtils.nullSafeEquals(role, that.role) && ObjectUtils.nullSafeEquals(request.getCommonName(), that.request.getCommonName());
 	}
 
 	@Override
 	public int hashCode() {
-		return super.hashCode() * 31 + ObjectUtils.nullSafeHash(role);
+		return super.hashCode() * 31 + ObjectUtils.nullSafeHash(role, request.getCommonName());
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [name='").append(this.getName()).append("',");
+		sb.append(" role='").append(this.getRole()).append("',");
+		sb.append(" commonName='").append(this.getRequest().getCommonName()).append("'");
+		sb.append(']');
+		return sb.toString();
 	}
 
 }

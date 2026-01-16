@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -188,6 +189,47 @@ class SecretLeaseContainerUnitTests {
 		assertThat(leaseCreatedEvent.getSource()).isEqualTo(this.requestedSecret);
 		assertThat(leaseCreatedEvent.getLease()).isNotNull();
 		assertThat(leaseCreatedEvent.getSecrets()).containsKey("key");
+	}
+
+	@Test
+	void shouldConsiderDuplicatePathsAsTheSameSecret() {
+
+		VaultResponse secrets = new VaultResponse();
+		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+
+		when(this.vaultOperations.read(this.rotatingGenericSecret.getPath())).thenReturn(secrets);
+		this.secretLeaseContainer.addRequestedSecret(this.rotatingGenericSecret);
+
+		AtomicReference<String> secretRef = new AtomicReference<>();
+		ManagedSecret.rotating(rotatingGenericSecret.getPath(), secret -> secretRef.set(secret.getRequiredString("key"))).registerSecret(this.secretLeaseContainer);
+		this.secretLeaseContainer.start();
+
+		verify(this.leaseListenerAdapter).onLeaseEvent(this.captor.capture());
+		SecretLeaseCreatedEvent leaseCreatedEvent = (SecretLeaseCreatedEvent) this.captor.getValue();
+
+		assertThat(leaseCreatedEvent.getSecrets()).containsKey("key");
+		assertThat(secretRef).hasValue("value");
+	}
+
+	@Test
+	void shouldNotReEmitEventsAfterInitialRegistration() {
+
+		VaultResponse secrets = new VaultResponse();
+		secrets.setData(Collections.singletonMap("key", (Object) "value"));
+
+		when(this.vaultOperations.read(this.rotatingGenericSecret.getPath())).thenReturn(secrets);
+
+		this.secretLeaseContainer.addRequestedSecret(this.rotatingGenericSecret);
+		this.secretLeaseContainer.start();
+
+		AtomicReference<String> secretRef = new AtomicReference<>();
+		ManagedSecret.rotating(rotatingGenericSecret.getPath(), secret -> secretRef.set(secret.getRequiredString("key"))).registerSecret(this.secretLeaseContainer);
+
+		verify(this.leaseListenerAdapter).onLeaseEvent(this.captor.capture());
+		SecretLeaseCreatedEvent leaseCreatedEvent = (SecretLeaseCreatedEvent) this.captor.getValue();
+
+		assertThat(leaseCreatedEvent.getSecrets()).containsKey("key");
+		assertThat(secretRef).hasNullValue();
 	}
 
 	@Test

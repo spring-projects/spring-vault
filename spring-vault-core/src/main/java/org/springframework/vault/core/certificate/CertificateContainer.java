@@ -20,14 +20,15 @@ import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,11 +56,14 @@ import org.springframework.vault.core.certificate.domain.RequestedCertificateBun
 import org.springframework.vault.core.certificate.domain.RequestedTrustAnchor;
 import org.springframework.vault.core.certificate.event.CertificateErrorListener;
 import org.springframework.vault.core.certificate.event.CertificateListener;
+import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.support.Certificate;
 
 /**
  * Event-based container to request certificates from Vault's PKI engine and
- * rotate these on expiry. Usage example: <pre class="code">
+ * rotate these on expiry.
+ *
+ * Usage example: <pre class="code">
  * CertificateContainer container = new CertificateContainer(vaultOperations.opsForPki());
  * RequestedCertificate cert = container
  * 		.register(RequestedCertificate.trustAnchor("vault-ca"));
@@ -76,12 +80,18 @@ import org.springframework.vault.support.Certificate;
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
  * </pre>
+ *
  * <p>This container keeps track over {@link RequestedCertificate}s and
  * obtains/issues certificates upon {@link #start()}.
+ * The container manages unique {@link #register(RequestedCertificate) RequestedCertificate registrations}
+ * and so multiple registrations of the same {@link RequestedCertificate} are considered
+ * as one registration.
+ *
  * <p>The container dispatches certificate events to {@link CertificateListener}
  * and {@link CertificateErrorListener}. Event notifications are dispatched
  * either on the {@link #start() starting} {@link Thread} or worker threads used
  * for background renewal.
+ *
  * <p>Instances are thread-safe once {@link #afterPropertiesSet() initialized}.
  *
  * @author Mark Paluch
@@ -111,11 +121,12 @@ public class CertificateContainer extends CertificateEventPublisher
 
 	private Duration expiryThreshold = Duration.ofSeconds(60);
 
-	private final List<RequestedCertificate> certificateRequests = new CopyOnWriteArrayList<>();
+	private final Set<RequestedCertificate> certificateRequests = new CopyOnWriteArraySet<>();
 
 	private final Map<RequestedCertificate, CertificateRenewalScheduler> schedulers = new ConcurrentHashMap<>();
 
-	private final Map<RequestedCertificate, ManagedCertificate> managedCertificates = new ConcurrentHashMap<>();
+	private final Map<RequestedCertificate, ManagedCertificate> managedCertificates = Collections
+			.synchronizedMap(new IdentityHashMap<>());
 
 	private @Nullable TaskScheduler taskScheduler;
 
@@ -191,16 +202,16 @@ public class CertificateContainer extends CertificateEventPublisher
 	@Override
 	public void register(RequestedCertificate certificate) {
 		Assert.notNull(certificate, "RequestedCertificate must not be null");
-		this.certificateRequests.add(certificate);
+		if (this.certificateRequests.add(certificate)) {
+			if (this.initialized) {
+				Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
+				CertificateRenewalScheduler scheduler = new CertificateRenewalScheduler(certificate,
+						this.expiryThreshold);
+				this.schedulers.put(certificate, scheduler);
 
-		if (this.initialized) {
-			Assert.state(this.taskScheduler != null, "TaskScheduler must not be null");
-			CertificateRenewalScheduler scheduler = new CertificateRenewalScheduler(certificate,
-					this.expiryThreshold);
-			this.schedulers.put(certificate, scheduler);
-
-			if (this.status == STATUS_STARTED) {
-				start(certificate, scheduler);
+				if (this.status == STATUS_STARTED) {
+					start(certificate, scheduler);
+				}
 			}
 		}
 	}

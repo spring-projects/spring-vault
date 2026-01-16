@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.vault.core.certificate.domain;
 
 import org.springframework.util.ObjectUtils;
@@ -44,10 +45,12 @@ public class RequestedTrustAnchor extends RequestedCertificate {
 
 	@Override
 	public String toString() {
-		return "RequestedTrustAnchor[" +
-				"name='" + getName() + "', " +
-				"role='" + issuer + '\'' +
-				']';
+		StringBuffer sb = new StringBuffer();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [name='").append(this.getName()).append("',");
+		sb.append(" issuer='").append(this.getIssuer()).append("'");
+		sb.append(']');
+		return sb.toString();
 	}
 
 	@Override

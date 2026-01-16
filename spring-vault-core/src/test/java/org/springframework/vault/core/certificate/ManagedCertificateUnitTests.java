@@ -50,11 +50,11 @@ class ManagedCertificateUnitTests {
 
 	@Test
 	void createsIssuedCertificate() {
-
 		ManagedCertificate managed = ManagedCertificate.issue("my-cert", "some-role", VaultCertificateRequest.builder()
 				.commonName("www.example.com").build(), certificateBundle -> {
 				});
 		managed.registerCertificate(registryMock);
+
 
 		verify(registryMock).register(certCaptor.capture(), listenerCaptor.capture());
 		assertThat((RequestedCertificateBundle) certCaptor.getValue()).hasFieldOrPropertyWithValue("name", "my-cert");
@@ -63,9 +63,7 @@ class ManagedCertificateUnitTests {
 
 	@Test
 	void createsTrustAnchor() {
-
 		ManagedCertificate managed = ManagedCertificate.trust("my-cert", "my-issuer", certificate -> {
-
 		});
 		managed.registerCertificate(registryMock);
 

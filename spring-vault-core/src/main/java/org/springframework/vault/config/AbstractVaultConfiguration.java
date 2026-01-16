@@ -202,9 +202,9 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 			multicaster.addAuthenticationListener(secretLeaseContainer.getAuthenticationListener());
 			multicaster.addErrorListener(secretLeaseContainer.getAuthenticationErrorListener());
 		}
-		secretLeaseContainer.start();
 		getBeanFactory().getBeanProvider(SecretRegistrar.class)
 				.forEach(it -> it.registerSecret(secretLeaseContainer));
+		secretLeaseContainer.start();
 		return secretLeaseContainer;
 	}
 
@@ -228,9 +228,9 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		CertificateContainer certificateContainer = new CertificateContainer(certificateAuthority,
 				getVaultThreadPoolTaskScheduler());
 		certificateContainer.afterPropertiesSet();
-		certificateContainer.start();
 		getBeanFactory().getBeanProvider(CertificateRegistrar.class)
 				.forEach(it -> it.registerCertificate(certificateContainer));
+		certificateContainer.start();
 		return certificateContainer;
 	}
 

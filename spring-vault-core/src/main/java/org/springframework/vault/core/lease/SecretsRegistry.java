@@ -31,6 +31,8 @@ public interface SecretsRegistry {
 
 	/**
 	 * Register a {@link RequestedSecret} with the registry.
+	 * <p>Subsequent registrations of the same {@link RequestedSecret}
+	 * are considered as a single registration and the secret will be managed only once.
 	 * @param secret the requested secret to be managed.
 	 */
 	void register(RequestedSecret secret);
@@ -38,6 +40,12 @@ public interface SecretsRegistry {
 	/**
 	 * Register a {@link RequestedSecret} with the registry with an associated
 	 * {@link LeaseListener}.
+	 * <p>Subsequent registrations of the same {@link RequestedSecret} are
+	 * considered as a single registration and the secret will be managed only once.
+	 * A requested secret that has been already been registered and activated by the
+	 * container will not lead to emission of a new {@code SecretLeaseCreatedEvent} with
+	 * the previous secrets body but rather only to future events such as rotations
+	 * or renewals.
 	 * @param secret the requested secret to be managed.
 	 * @param listener listener to associate with the requested secret. The listener
 	 * will be notified only with events concerning the requested secret.

@@ -18,7 +18,6 @@ package org.springframework.vault.core.certificate;
 
 import org.springframework.vault.core.certificate.domain.RequestedCertificate;
 import org.springframework.vault.core.certificate.event.CertificateListener;
-import org.springframework.vault.core.lease.event.LeaseListener;
 
 /**
  * Registry to manage {@link RequestedCertificate}s (request and rotation).
@@ -30,13 +29,21 @@ public interface CertificateRegistry {
 
 	/**
 	 * Register a {@link RequestedCertificate} with the registry.
+	 * <p>Subsequent registrations of the same {@link RequestedCertificate} are
+	 * considered as a single registration and the secret will be managed only once.
 	 * @param certificate the certificate to be managed.
 	 */
 	void register(RequestedCertificate certificate);
 
 	/**
 	 * Register a {@link RequestedCertificate} with the registry with an associated
-	 * {@link LeaseListener}.
+	 * {@link CertificateListener}.
+	 * <p>Subsequent registrations of the same {@link RequestedCertificate} are
+	 * considered as a single registration and the secret will be managed only once.
+	 * A requested secret that has been already been registered and activated by the
+	 * container will not lead to emission of a new {@code SecretLeaseCreatedEvent}
+	 * with the previous secrets body but rather only to future events such as
+	 * rotations or renewals.
 	 * @param certificate the requested certificate to be managed.
 	 * @param listener listener to associate with the requested certificate. The
 	 * listener will be notified only with events concerning the requested
