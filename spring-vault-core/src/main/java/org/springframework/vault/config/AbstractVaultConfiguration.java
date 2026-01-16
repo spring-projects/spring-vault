@@ -45,6 +45,10 @@ import org.springframework.vault.client.VaultClientCustomizer;
 import org.springframework.vault.client.VaultEndpoint;
 import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.core.VaultTemplate;
+import org.springframework.vault.core.certificate.CertificateAuthority;
+import org.springframework.vault.core.certificate.CertificateContainer;
+import org.springframework.vault.core.certificate.CertificateRegistrar;
+import org.springframework.vault.core.certificate.VaultCertificateAuthority;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.support.ClientOptions;
 import org.springframework.vault.support.SslConfiguration;
@@ -199,6 +203,32 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 		}
 		secretLeaseContainer.start();
 		return secretLeaseContainer;
+	}
+
+	/**
+	 * Construct a {@link CertificateContainer} using a {@link CertificateAuthority}
+	 * bean if available and fall back to {@link #vaultTemplate()}.
+	 * @return the {@link CertificateContainer} to issue and rotate certificates.
+	 * @since 4.1
+	 * @see CertificateAuthority
+	 * @see #vaultTemplate()
+	 * @see #threadPoolTaskScheduler()
+	 */
+	@Bean
+	public CertificateContainer certificateContainer() {
+		ObjectProvider<CertificateAuthority> beanProvider = getBeanFactory()
+				.getBeanProvider(CertificateAuthority.class);
+		CertificateAuthority certificateAuthority = beanProvider.getIfAvailable(() -> {
+			return new VaultCertificateAuthority(
+					getBeanFactory().getBean("vaultTemplate", VaultTemplate.class).opsForPki());
+		});
+		CertificateContainer certificateContainer = new CertificateContainer(certificateAuthority,
+				getVaultThreadPoolTaskScheduler());
+		certificateContainer.afterPropertiesSet();
+		certificateContainer.start();
+		getBeanFactory().getBeanProvider(CertificateRegistrar.class)
+				.forEach(it -> it.registerCertificate(certificateContainer));
+		return certificateContainer;
 	}
 
 	/**
