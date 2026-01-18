@@ -65,10 +65,16 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests extends Integration
 	}
 
 	@Test
+	void shouldDetermineKeyValueBackend() {
+
+		VaultKeyValueOperations keyValueOperations = this.vaultOperations.opsForKeyValue(this.path, this.apiVersion);
+		assertThat(keyValueOperations.getApiVersion()).isEqualTo(this.apiVersion);
+	}
+
+	@Test
 	void shouldCreateSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
-
 		String key = UUID.randomUUID().toString();
 
 		this.kvOperations.put(key, secret);
@@ -80,7 +86,6 @@ abstract class AbstractVaultKeyValueTemplateIntegrationTests extends Integration
 	void shouldReadSecret() {
 
 		Map<String, String> secret = Collections.singletonMap("key", "value");
-
 		String key = UUID.randomUUID().toString();
 
 		this.kvOperations.put(key, secret);

@@ -59,7 +59,19 @@ import org.springframework.web.client.RestClientException;
 public interface VaultOperations {
 
 	/**
-	 * Return {@link VaultKeyValueOperations}.
+	 * Return {@link VaultKeyValueOperations} and determine the
+	 * {@link KeyValueBackend version} by querying Vault. Paths used with this
+	 * method must be relative to the given mount {@code path}.
+	 * @param path the mount path, must not be empty or {@literal null}.
+	 * @return the operations interface to interact with the Vault Key/Value secrets
+	 * engine.
+	 * @since 4.1
+	 */
+	VaultKeyValueOperations opsForKeyValue(String path);
+
+	/**
+	 * Return {@link VaultKeyValueOperations}. Paths used with this method must be
+	 * relative to the given mount {@code path}.
 	 * @param path the mount path, must not be empty or {@literal null}.
 	 * @param apiVersion API version to use, must not be {@literal null}.
 	 * @return the operations interface to interact with the Vault Key/Value secrets

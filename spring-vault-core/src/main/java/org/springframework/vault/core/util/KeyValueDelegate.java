@@ -117,6 +117,21 @@ public class KeyValueDelegate {
 		return MountInfo.from((String) data.get("path"), (Map) data.get("options"));
 	}
 
+	/**
+	 * Return required {@link MountInfo} for the given path or throw
+	 * {@link IllegalStateException} if the mount info is
+	 * {@link MountInfo#isAvailable() not available}.
+	 * @param path the path to introspect.
+	 * @return the required {@link MountInfo}.
+	 */
+	public MountInfo getRequiredMountInfo(String path) {
+		MountInfo mountInfo = getMountInfo(path);
+		if (mountInfo.isAvailable()) {
+			return mountInfo;
+		}
+		throw new IllegalStateException("Cannot determine MountInfo for path '%s'.".formatted(path));
+	}
+
 	public MountInfo getMountInfo(String path) {
 		MountInfo mountInfo = this.mountInfo.get(path);
 		if (mountInfo == null) {

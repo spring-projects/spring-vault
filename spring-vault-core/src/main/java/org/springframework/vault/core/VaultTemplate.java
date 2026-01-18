@@ -48,6 +48,7 @@ import org.springframework.vault.client.VaultEndpointProvider;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
+import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 import org.springframework.vault.support.VaultToken;
@@ -480,15 +481,20 @@ public class VaultTemplate implements InitializingBean, VaultOperations, Disposa
 		}
 	}
 
+	@Override
+	public VaultKeyValueOperations opsForKeyValue(String path) {
+		KeyValueDelegate delegate = new KeyValueDelegate(this);
+		delegate.getRequiredMountInfo(path);
+		return opsForKeyValue(path,
+				delegate.isVersioned(path) ? KeyValueBackend.KV_2 : KeyValueBackend.KV_1);
+	}
 
 	@Override
 	public VaultKeyValueOperations opsForKeyValue(String path, KeyValueBackend apiVersion) {
-
 		return switch (apiVersion) {
 		case KV_1 -> new VaultKeyValue1Template(this, path);
 		case KV_2 -> new VaultKeyValue2Template(this, path);
 		};
-
 	}
 
 	@Override
