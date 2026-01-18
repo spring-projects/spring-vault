@@ -70,7 +70,6 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.core.lease.domain.RequestedSecret.Mode;
 import org.springframework.vault.core.lease.event.LeaseErrorListener;
 import org.springframework.vault.core.lease.event.LeaseListener;
-import org.springframework.vault.core.lease.event.SecretLeaseCreatedEvent;
 import org.springframework.vault.core.util.KeyValueDelegate;
 import org.springframework.vault.support.LeaseStrategy;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -669,15 +668,14 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 	 * @since 2.2
 	 */
 	public void rotate(RequestedSecret secret) {
+		Assert.notNull(secret, "RequestedSecret must not be null");
 		LeaseRenewalScheduler renewalScheduler = getRenewalSchedulder(secret);
 		Lease lease = renewalScheduler.getLease();
-		if (lease == null) {
-			throw new IllegalStateException("No lease associated with secret %s".formatted(secret));
-		}
-		if (!renewalScheduler.isLeaseRenewable(lease, secret) && !renewalScheduler.isLeaseRotateOnly(lease, secret)) {
+		if (secret.getMode() != Mode.ROTATE || lease != null && !renewalScheduler.isLeaseRenewable(lease, secret)
+				&& !renewalScheduler.isLeaseRotateOnly(lease, secret)) {
 			throw new IllegalStateException("Secret is not qualified for rotation");
 		}
-		onLeaseExpired(secret, lease);
+		onLeaseExpired(secret, lease == null ? Lease.none() : lease);
 	}
 
 	private void scheduleLeaseRenewal(RequestedSecret requestedSecret, Lease lease,
@@ -1039,7 +1037,11 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		}
 
 		boolean leaseEquals(Lease lease) {
-			return getLease() == lease;
+			Lease currentLease = getLease();
+			if (currentLease == null && lease == Lease.none()) {
+				return true;
+			}
+			return currentLease == lease;
 		}
 
 	}

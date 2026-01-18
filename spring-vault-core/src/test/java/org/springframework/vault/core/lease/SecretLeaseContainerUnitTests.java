@@ -94,7 +94,7 @@ class SecretLeaseContainerUnitTests {
 	SecretLeaseContainer secretLeaseContainer;
 
 	@BeforeEach
-	void before() throws Exception {
+	void before() {
 
 		when(this.taskScheduler.getClock()).thenReturn(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
 		this.secretLeaseContainer = new SecretLeaseContainer(this.vaultOperations, this.taskScheduler);
@@ -505,6 +505,19 @@ class SecretLeaseContainerUnitTests {
 
 		ArgumentCaptor<SecretLeaseEvent> createdEvents = ArgumentCaptor.forClass(SecretLeaseEvent.class);
 		verify(this.leaseListenerAdapter, times(2)).onLeaseEvent(createdEvents.capture());
+	}
+
+	@Test
+	void renewableRotationShouldFail() {
+
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(createSecrets());
+
+		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
+		this.secretLeaseContainer.start();
+
+		assertThatIllegalStateException().isThrownBy(() -> this.secretLeaseContainer.rotate(this.requestedSecret))
+				.withMessageContaining("Secret is not qualified for rotation");
 	}
 
 	@Test

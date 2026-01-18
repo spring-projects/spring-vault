@@ -326,6 +326,16 @@ public class ManagedSecret implements SecretRegistrar {
 		 * @return the value to which the specified key is mapped, can be
 		 * {@literal null}.
 		 */
+		@Nullable
+		Object get(String key);
+
+		/**
+		 * Return the value for the given key.
+		 * @param key the key whose associated value is to be returned.
+		 * @param expectedType the expected data type.
+		 * @return the value to which the specified key is mapped, can be
+		 * {@literal null}.
+		 */
 		<T> @Nullable T get(String key, Class<T> expectedType);
 
 		/**
@@ -348,10 +358,14 @@ public class ManagedSecret implements SecretRegistrar {
 	record SimpleSecretAccessor(Map<String, Object> secrets) implements SecretAccessor {
 
 		@Override
+		public @Nullable Object get(String key) {
+			return secrets.get(key);
+		}
+
+		@Override
 		public <T> @Nullable T get(String key, Class<T> expectedType) {
 			return ManagedSecret.get(secrets, key, expectedType);
 		}
-
 	}
 
 
@@ -424,6 +438,11 @@ public class ManagedSecret implements SecretRegistrar {
 		@Override
 		public CharSequence getPassword() {
 			return password();
+		}
+
+		@Override
+		public @Nullable Object get(String key) {
+			return accessor.get(key);
 		}
 
 		@Override

@@ -62,8 +62,8 @@ class RotatingGenericSecretsIntegrationTests extends IntegrationTestSupport {
 	}
 
 	@Test
-	void name(@Autowired RotatingGenericSecretsIntegrationTestConfiguration.PropertySourceHolder holder) {
-
+	void shouldInitializePropertySource(
+			@Autowired RotatingGenericSecretsIntegrationTestConfiguration.PropertySourceHolder holder) {
 		assertThat(holder.propertySource.getProperty("generic.rotating.key")).isEqualTo("value");
 	}
 
