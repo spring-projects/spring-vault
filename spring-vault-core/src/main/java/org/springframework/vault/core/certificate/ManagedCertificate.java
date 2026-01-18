@@ -97,11 +97,7 @@ public class ManagedCertificate implements CertificateRegistrar {
 			VaultCertificateRequest certificateRequest,
 			Consumer<CertificateBundle> bundleConsumer) {
 		return issue(name, role, certificateRequest, bundleConsumer,
-				throwable -> {
-					if (logger.isErrorEnabled()) {
-						logger.error("Error occurred while processing certificate bundle: " + name, throwable);
-					}
-				});
+				throwable -> onError(name, throwable));
 	}
 
 	/**
@@ -178,9 +174,7 @@ public class ManagedCertificate implements CertificateRegistrar {
 	public static ManagedCertificate trust(String name, String issuer,
 			Consumer<Certificate> certificateConsumer) {
 		return trust(RequestedCertificate.trustAnchor(name, issuer), certificateConsumer, throwable -> {
-			if (logger.isErrorEnabled()) {
-				logger.error("Error occurred while processing certificate: " + name, throwable);
-			}
+			onError(name, throwable);
 		});
 	}
 
@@ -195,6 +189,38 @@ public class ManagedCertificate implements CertificateRegistrar {
 	 * @return the managed certificate object.
 	 */
 	public static ManagedCertificate trust(RequestedTrustAnchor trustAnchor,
+			Consumer<Certificate> certificateConsumer,
+			Consumer<Throwable> errorConsumer) {
+		return from(trustAnchor, certificateConsumer, errorConsumer);
+	}
+
+	/**
+	 * Create a {@code ManagedCertificateBundle}. The {@code certificateConsumer}
+	 * will be invoked with the issued (or obtained) {@link Certificate} on
+	 * certificate container startup and each time the certificate is rotated.
+	 *
+	 * @param requestedCertificate requested certificate definition.
+	 * @param certificateConsumer consumer for certificate access.
+	 * @return the managed certificate object.
+	 */
+	public static ManagedCertificate from(RequestedCertificate requestedCertificate,
+			Consumer<Certificate> certificateConsumer) {
+		return from(requestedCertificate, certificateConsumer, throwable -> {
+			onError(requestedCertificate.getName(), throwable);
+		});
+	}
+
+	/**
+	 * Create a {@code ManagedCertificateBundle}. The {@code certificateConsumer}
+	 * will be invoked with the issued (or obtained) {@link Certificate} on
+	 * certificate container startup and each time the certificate is rotated.
+	 *
+	 * @param requestedCertificate requested certificate definition.
+	 * @param certificateConsumer consumer for certificate access.
+	 * @param errorConsumer consumer for errors.
+	 * @return the managed certificate object.
+	 */
+	public static ManagedCertificate from(RequestedCertificate requestedCertificate,
 			Consumer<Certificate> certificateConsumer,
 			Consumer<Throwable> errorConsumer) {
 		Assert.notNull(certificateConsumer, "Certificate consumer must not be null");
@@ -220,7 +246,13 @@ public class ManagedCertificate implements CertificateRegistrar {
 
 		};
 
-		return new ManagedCertificate(trustAnchor, listener);
+		return new ManagedCertificate(requestedCertificate, listener);
+	}
+
+	private static void onError(String name, Throwable throwable) {
+		if (logger.isErrorEnabled()) {
+			logger.error("Error occurred while processing certificate: " + name, throwable);
+		}
 	}
 
 
