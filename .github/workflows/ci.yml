@@ -15,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+      - name: v1
+        run: which java
       - name: Cache Vault
         uses: actions/cache@v5.0.1
         with:
@@ -24,11 +26,17 @@ jobs:
           key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
       - name: Install and Start Vault
         run:  src/test/bash/start.sh
+      - name: v2
+        run: which java
       - name: Setup Java and Maven
         uses: mp911de/some-actions/setup-maven@main
         with:
           java-version: ${{ matrix.java-version }}
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+      - name: v3
+        run: which java
+      - name: v4
+        run: java -version
       - name: Build
         run: ./mvnw -B -U clean verify
       - name: Test Summary
