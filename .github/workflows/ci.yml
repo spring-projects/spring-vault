@@ -8,6 +8,9 @@ permissions: read-all
 
 jobs:
   build:
+    strategy:
+      matrix:
+        java-version: [ 'main', 'next' ]
     name: Build project
     runs-on: ubuntu-latest
     steps:
@@ -24,7 +27,7 @@ jobs:
       - name: Setup Java and Maven
         uses: mp911de/some-actions/setup-maven@main
         with:
-          java-version: '25'
+          java-version: ${{ matrix.java-version }}
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
       - name: Build
         run: ./mvnw -B -U clean verify
