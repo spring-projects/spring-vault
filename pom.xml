@@ -22,7 +22,7 @@
 	<properties>
 		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 		<antora.version>0.0.4</antora.version>
-		<assertj-core.version>3.27.6</assertj-core.version>
+		<assertj-core.version>3.27.7</assertj-core.version>
 		<aws-java-sdk.version>2.38.8</aws-java-sdk.version>
 		<bcpkix-jdk18on.version>1.82</bcpkix-jdk18on.version>
 		<errorprone.version>2.42.0</errorprone.version>
