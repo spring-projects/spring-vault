@@ -168,15 +168,13 @@ public abstract class JacksonCompat {
 
 		static final Jackson2 INSTANCE = new Jackson2();
 
-		static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
 		static final ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = new ObjectMapper()
 				.enable(SerializationFeature.INDENT_OUTPUT);
 
-		static final Jackson2ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(OBJECT_MAPPER);
+		static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
-		static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter(
-				OBJECT_MAPPER);
+		static final Jackson2ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(
+				converter.getObjectMapper());
 
 
 		public static boolean isAvailable() {
@@ -192,8 +190,8 @@ public abstract class JacksonCompat {
 		@Override
 		public void registerCodecs(Consumer<Object> messageConverters) {
 
-			messageConverters.accept(new Jackson2JsonDecoder(OBJECT_MAPPER));
-			messageConverters.accept(new Jackson2JsonEncoder(OBJECT_MAPPER));
+			messageConverters.accept(new Jackson2JsonDecoder(converter.getObjectMapper()));
+			messageConverters.accept(new Jackson2JsonEncoder(converter.getObjectMapper()));
 		}
 
 		@Override
@@ -275,17 +273,15 @@ public abstract class JacksonCompat {
 
 		static final Jackson3 INSTANCE = new Jackson3();
 
-		static final tools.jackson.databind.json.JsonMapper JSON_MAPPER = JsonMapper.builder().build();
-
 		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
 				.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
 				.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
 				.build();
 
-		static final Jackson3ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
+		static final Jackson3ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
 
-		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(JSON_MAPPER);
+		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
 
 
 		public static boolean isAvailable() {
@@ -301,8 +297,8 @@ public abstract class JacksonCompat {
 		@Override
 		public void registerCodecs(Consumer<Object> messageConverters) {
 
-			messageConverters.accept(new JacksonJsonDecoder(JSON_MAPPER));
-			messageConverters.accept(new JacksonJsonEncoder(JSON_MAPPER));
+			messageConverters.accept(new JacksonJsonDecoder(converter.getMapper()));
+			messageConverters.accept(new JacksonJsonEncoder(converter.getMapper()));
 		}
 
 		@Override
@@ -317,12 +313,12 @@ public abstract class JacksonCompat {
 
 		@Override
 		public ObjectMapperAccessor getObjectMapperAccessor() {
-			return new Jackson3.Jackson3ObjectMapperAccessor(JSON_MAPPER);
+			return new Jackson3.Jackson3ObjectMapperAccessor(converter.getMapper());
 		}
 
 		@Override
 		public ObjectMapperAccessor getPrettyPrintObjectMapperAccessor() {
-			return MAPPER_ACCESSOR;
+			return PRETTY_PRINT_MAPPER_ACCESSOR;
 		}
 
 		public @Nullable ObjectMapperAccessor getObjectMapperAccessor(List<HttpMessageConverter<?>> converters) {
