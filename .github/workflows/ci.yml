@@ -10,7 +10,7 @@ jobs:
   build-java:
     strategy:
       matrix:
-        java-version: [ 'base', 'main' ]
+        java-version: [ 'base' ]
     name: Build project
     runs-on: ubuntu-latest
     steps:
