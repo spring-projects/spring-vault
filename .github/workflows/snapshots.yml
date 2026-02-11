@@ -35,8 +35,8 @@ jobs:
         with:
           build-name: 'spring-vault'
           skip-tests: 'false'
-          username: ${{ secrets.ARTIFACTORY_USERNAME }}
-          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          username: '${{ secrets.ARTIFACTORY_USERNAME }}'
+          password: '${{ secrets.ARTIFACTORY_PASSWORD }}'
       - name: Test Summary
         uses: test-summary/action@v2.2
         with:
