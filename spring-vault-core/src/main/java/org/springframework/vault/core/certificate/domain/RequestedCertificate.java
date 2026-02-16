@@ -43,7 +43,7 @@ public abstract class RequestedCertificate {
 	 * renewal. The lease is no longer valid after expiry.
 	 * @param name a descriptive name for the {@code RequestedCertificate}, must not
 	 * be {@literal null} or empty.
-	 * @param role the role to issue the certificate against, must not * be
+	 * @param role the role to issue the certificate against, must not be
 	 * {@literal null} or empty.
 	 * @param certificateRequest the certificate request describing the certificate
 	 * to issue.

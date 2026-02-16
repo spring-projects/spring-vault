@@ -56,7 +56,6 @@ import org.springframework.vault.core.certificate.domain.RequestedCertificateBun
 import org.springframework.vault.core.certificate.domain.RequestedTrustAnchor;
 import org.springframework.vault.core.certificate.event.CertificateErrorListener;
 import org.springframework.vault.core.certificate.event.CertificateListener;
-import org.springframework.vault.core.lease.domain.RequestedSecret;
 import org.springframework.vault.support.Certificate;
 
 /**
@@ -67,12 +66,12 @@ import org.springframework.vault.support.Certificate;
  * CertificateContainer container = new CertificateContainer(vaultOperations.opsForPki());
  * RequestedCertificate cert = container
  * 		.register(RequestedCertificate.trustAnchor("vault-ca"));
- * container.addCertificateListener(new CertificateListenerrAdapter() {
+ * container.addCertificateListener(new CertificateListenerAdapter() {
  * 	&#64;Override
  * 	public void onCertificateEvent(CertificateEvent event) {
- * 		if (cert == event.getSource()) {
+ * 		if (cert.equals(event.getSource())) {
  * 			if (event instanceof CertificateObtainedEvent) {
- * 				// initial certificate obtained
+ * 				// certificate obtained
  *			}
  * 		}
  * 	}
@@ -82,10 +81,10 @@ import org.springframework.vault.support.Certificate;
  * </pre>
  *
  * <p>This container keeps track over {@link RequestedCertificate}s and
- * obtains/issues certificates upon {@link #start()}.
- * The container manages unique {@link #register(RequestedCertificate) RequestedCertificate registrations}
- * and so multiple registrations of the same {@link RequestedCertificate} are considered
- * as one registration.
+ * obtains/issues certificates upon {@link #start()}. The container manages
+ * unique {@link #register(RequestedCertificate) RequestedCertificate
+ * registrations} and so multiple registrations of the same
+ * {@link RequestedCertificate} are considered as one registration.
  *
  * <p>The container dispatches certificate events to {@link CertificateListener}
  * and {@link CertificateErrorListener}. Event notifications are dispatched

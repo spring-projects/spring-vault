@@ -44,7 +44,7 @@ import org.springframework.vault.support.VaultCertificateRequest;
  * <p>Example usage:
  *
  * <pre class="code">
- * ManagedCertificate managed = ManagedCertificate.issue("my-bundle", bundle -> {
+ * ManagedCertificate managed = ManagedCertificate.issue("my-bundle", "my-role", certificateRequest, bundle -> {
  *   bundle.createKeyStore("my-alias");
  * });
  * </pre>

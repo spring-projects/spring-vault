@@ -80,8 +80,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * {@link Lease}. Secrets can be rotated, depending on the requested
  * {@link RequestedSecret#getMode()}.
  *
- * Usage examples:
- * <pre class="code">
+ * Usage examples: <pre class="code">
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
  * RequestedSecret requestedSecret = container
@@ -104,7 +103,7 @@ import org.springframework.web.client.HttpStatusCodeException;
  * <pre class="code">
  * SecretLeaseContainer container = new SecretLeaseContainer(vaultOperations,
  * 		taskScheduler);
- * ManagedSecret managedSecret = ManagedSecret.rotating(rotatingGenericSecret.getPath(), secret -> secret.getRequiredString("key"));
+ * ManagedSecret managedSecret = ManagedSecret.rotating("mysql/creds/my-role", secret -> secret.getRequiredString("key"));
  * managedSecret.register(container);
  * container.afterPropertiesSet();
  * container.start(); // events are triggered after starting the container
@@ -114,10 +113,10 @@ import org.springframework.web.client.HttpStatusCodeException;
  * secrets upon {@link #start()}. Leases qualified for
  * {@link Lease#isRenewable() renewal} are renewed by this container applying
  * {@code minRenewalSeconds}/{@code expiryThresholdSeconds} on a
- * {@link TaskScheduler background thread}.
- * The container manages unique {@link #register(RequestedSecret) RequestedSecret registrations}
- * and so multiple registrations of the same {@link RequestedSecret} are considered
- * as one registration.
+ * {@link TaskScheduler background thread}. The container manages unique
+ * {@link #register(RequestedSecret) RequestedSecret registrations} and so
+ * multiple registrations of the same {@link RequestedSecret} are considered as
+ * one registration.
  *
  * <p>Requests for secrets can define either renewal or rotation. The container
  * renews leases until expiry. Rotating secrets renew their associated lease

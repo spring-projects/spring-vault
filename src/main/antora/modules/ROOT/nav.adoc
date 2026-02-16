@@ -9,6 +9,7 @@
 ** xref:vault/reactive-template.adoc[]
 ** xref:vault/vault-secret-engines.adoc[]
 ** xref:vault/propertysource.adoc[]
+** xref:vault/credential-rotation.adoc[]
 ** xref:vault/vault-repositories.adoc[]
 ** xref:vault/spring-security.adoc[]
 ** xref:vault/client-support.adoc[]
