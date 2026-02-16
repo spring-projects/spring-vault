@@ -164,6 +164,7 @@ public abstract class JacksonCompat {
 
 	}
 
+
 	static class Jackson2 extends JacksonCompat {
 
 		static final Jackson2 INSTANCE = new Jackson2();
@@ -173,8 +174,11 @@ public abstract class JacksonCompat {
 
 		static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
-		static final Jackson2ObjectMapperAccessor MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(
+		static final Jackson2ObjectMapperAccessor ACCESSOR = new Jackson2ObjectMapperAccessor(
 				converter.getObjectMapper());
+
+		static final Jackson2ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(
+				PRETTY_PRINT_OBJECT_MAPPER);
 
 
 		public static boolean isAvailable() {
@@ -206,12 +210,12 @@ public abstract class JacksonCompat {
 
 		@Override
 		public ObjectMapperAccessor getObjectMapperAccessor() {
-			return MAPPER_ACCESSOR;
+			return ACCESSOR;
 		}
 
 		@Override
 		public ObjectMapperAccessor getPrettyPrintObjectMapperAccessor() {
-			return new Jackson2ObjectMapperAccessor(PRETTY_PRINT_OBJECT_MAPPER);
+			return PRETTY_PRINT_MAPPER_ACCESSOR;
 		}
 
 		@SuppressWarnings("removal")
@@ -273,15 +277,17 @@ public abstract class JacksonCompat {
 
 		static final Jackson3 INSTANCE = new Jackson3();
 
+		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
+
 		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
 				.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
 				.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
 				.build();
 
+		static final Jackson3ObjectMapperAccessor ACCESSOR = new Jackson3ObjectMapperAccessor(converter.getMapper());
+
 		static final Jackson3ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
-
-		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
 
 
 		public static boolean isAvailable() {
@@ -313,7 +319,7 @@ public abstract class JacksonCompat {
 
 		@Override
 		public ObjectMapperAccessor getObjectMapperAccessor() {
-			return new Jackson3.Jackson3ObjectMapperAccessor(converter.getMapper());
+			return ACCESSOR;
 		}
 
 		@Override

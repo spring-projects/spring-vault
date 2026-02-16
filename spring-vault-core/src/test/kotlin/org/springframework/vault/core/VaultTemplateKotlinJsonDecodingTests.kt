@@ -39,7 +39,12 @@ class VaultTemplateKotlinJsonDecodingTests {
 
         mockVaultClient.expect(requestTo(containsString("secret/mykey")))
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("""{"data":{"secretString":"abc"}}""", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    """{"data":{"secretString":"abc"}}""",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
         val response = VaultTemplate(mockVaultClient).read<SecretData>("secret/mykey")
 
@@ -47,4 +52,5 @@ class VaultTemplateKotlinJsonDecodingTests {
     }
 
     class SecretData(val secretString: String)
+
 }
