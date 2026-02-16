@@ -18,13 +18,19 @@ package org.springframework.vault.core
 
 import org.assertj.core.api.Assertions.assertThat
 import org.hamcrest.Matchers.containsString
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
+import org.springframework.test.web.client.MockRestServiceServer
 import org.springframework.test.web.client.match.MockRestRequestMatchers.method
 import org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo
 import org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess
-import org.springframework.vault.util.MockVaultClient
+import org.springframework.vault.client.RestTemplateBuilder
+import org.springframework.vault.client.VaultClients
+import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory
+import org.springframework.vault.client.VaultEndpoint
+import org.springframework.web.client.RestTemplate
 
 /**
  * Unit tests to validate [VaultTemplate] can decode into a Kotlin class.
@@ -33,18 +39,41 @@ import org.springframework.vault.util.MockVaultClient
  */
 class VaultTemplateKotlinJsonDecodingTests {
 
+    lateinit var restTemplate: RestTemplate
+
+    lateinit var mockRest: MockRestServiceServer
+
+    @BeforeEach
+    fun setUp() {
+
+        restTemplate = VaultClients.createRestTemplate()
+        restTemplate.setUriTemplateHandler(PrefixAwareUriBuilderFactory())
+
+        mockRest = MockRestServiceServer.createServer(restTemplate)
+    }
+
     @Test
     fun `VaultTemplate read extension should decode JSON into Kotlin class`() {
-        val mockVaultClient = MockVaultClient.create()
 
-        mockVaultClient.expect(requestTo(containsString("secret/mykey")))
+        val vaultTemplate = VaultTemplate(
+            RestTemplateBuilder.builder().endpoint(VaultEndpoint())
+                .requestFactory(restTemplate.requestFactory)
+        )
+
+        mockRest.expect(requestTo(containsString("secret/mykey")))
             .andExpect(method(HttpMethod.GET))
-            .andRespond(withSuccess("""{"data":{"secretString":"abc"}}""", MediaType.APPLICATION_JSON))
+            .andRespond(
+                withSuccess(
+                    """{"data":{"secretString":"abc"}}""",
+                    MediaType.APPLICATION_JSON
+                )
+            )
 
-        val response = VaultTemplate(mockVaultClient).read<SecretData>("secret/mykey")
+        val response = vaultTemplate.read<SecretData>("secret/mykey")
 
         assertThat(response?.data?.secretString).isEqualTo("abc")
     }
 
     class SecretData(val secretString: String)
+
 }
