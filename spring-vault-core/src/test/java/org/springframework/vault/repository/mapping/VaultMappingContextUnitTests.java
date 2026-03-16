@@ -47,6 +47,11 @@ class VaultMappingContextUnitTests {
 
 		assertThat(this.context.getRequiredPersistentEntity(Credentials.class).getSecretBackend()).isEqualTo("shared");
 		assertThat(this.context.getRequiredPersistentEntity(Credentials.class).getKeySpace()).isEqualTo("shared/Email");
+
+		assertThat(this.context.getRequiredPersistentEntity(NewCredentials.class).getSecretBackend())
+				.isEqualTo("super-shared");
+		assertThat(this.context.getRequiredPersistentEntity(NewCredentials.class).getKeySpace())
+				.isEqualTo("super-shared/Email");
 	}
 
 	private static class Person {
@@ -60,6 +65,11 @@ class VaultMappingContextUnitTests {
 
 	@Secret(value = "Email", backend = "shared")
 	private static class Credentials {
+
+	}
+
+	@Secret(value = "Email", engine = "super-shared")
+	private static class NewCredentials {
 
 	}
 

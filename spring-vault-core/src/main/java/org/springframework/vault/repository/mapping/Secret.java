@@ -51,10 +51,20 @@ public @interface Secret {
 	String value() default "";
 
 	/**
-	 * Secrets engine mount, defaults to {@literal secret}. The attribute supports
-	 * SpEL expressions to dynamically calculate the secrets engine based on a
-	 * per-operation basis.
+	 * Secrets engine mount path, defaults to {@literal secret}. The attribute
+	 * supports SpEL expressions to dynamically calculate the secrets engine path
+	 * based on a per-operation basis. Alias for {@link #engine()}.
 	 */
+	@AliasFor(attribute = "engine")
 	String backend() default "secret";
+
+	/**
+	 * Secrets engine mount path, defaults to {@literal secret}. The attribute
+	 * supports SpEL expressions to dynamically calculate the secrets engine path
+	 * based on a per-operation basis. Alias for {@link #backend()}.
+	 * @since 4.1
+	 */
+	@AliasFor(attribute = "backend")
+	String engine() default "secret";
 
 }
