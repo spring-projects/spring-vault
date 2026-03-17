@@ -71,18 +71,18 @@ public abstract class JacksonCompat {
 
 		Class<?> jackson2JsonNode = null;
 		Class<?> jackson3JsonNode = null;
-		try {
+        ClassLoader classLoader = JacksonCompat.class.getClassLoader();
+        try {
 			jackson2JsonNode = ClassUtils
-					.isPresent("com.fasterxml.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
-							? ClassUtils.forName("com.fasterxml.jackson.databind.JsonNode",
-									Jackson2.class.getClassLoader())
+					.isPresent("com.fasterxml.jackson.databind.JsonNode", classLoader)
+							? ClassUtils.forName("com.fasterxml.jackson.databind.JsonNode", classLoader)
 							: null;
 		} catch (ClassNotFoundException e) {
 		}
 
 		try {
-			jackson3JsonNode = ClassUtils.isPresent("tools.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
-					? ClassUtils.forName("tools.jackson.databind.JsonNode", Jackson2.class.getClassLoader())
+			jackson3JsonNode = ClassUtils.isPresent("tools.jackson.databind.JsonNode", classLoader)
+					? ClassUtils.forName("tools.jackson.databind.JsonNode", classLoader)
 					: null;
 
 		} catch (ClassNotFoundException e) {
