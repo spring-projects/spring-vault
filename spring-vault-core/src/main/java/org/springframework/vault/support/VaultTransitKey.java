@@ -93,7 +93,7 @@ public interface VaultTransitKey {
 	/**
 	 * @return whether the key supports convergent encryption (i.e where the same
 	 * plaintext creates the same ciphertext). Requires {@link #isDerived()} to be
-	 * set to {@code true}.
+	 * set to {@literal true}.
 	 * @since 3.0.3
 	 */
 	boolean supportsConvergentEncryption();

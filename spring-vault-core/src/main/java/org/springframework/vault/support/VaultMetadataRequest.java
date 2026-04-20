@@ -110,8 +110,8 @@ public class VaultMetadataRequest {
 
 
 		/**
-		 * Set the cas_required parameter to {@code true} to require the cas parameter
-		 * to be set on all write requests.
+		 * Set the cas_required parameter to {@literal true} to require the cas
+		 * parameter to be set on all write requests.
 		 * @return {@link VaultMetadataRequest}
 		 * @since 3.1
 		 */

@@ -67,7 +67,7 @@ public class PemObject {
 	/**
 	 * Check whether the content is PEM-encoded.
 	 * @param content the content to inspect
-	 * @return {@code true} if PEM-encoded.
+	 * @return {@literal true} if PEM-encoded.
 	 */
 	public static boolean isPemEncoded(String content) {
 		return BEGIN_PATTERN.matcher(content).find() && END_PATTERN.matcher(content).find();

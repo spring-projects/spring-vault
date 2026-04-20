@@ -205,7 +205,7 @@ class PropertyMapper {
 
 		/**
 		 * Return a filtered version of the source that will only map values that are
-		 * {@code true}.
+		 * {@literal true}.
 		 * @return a new filtered source instance
 		 */
 		public Source<T> whenTrue() {
@@ -214,7 +214,7 @@ class PropertyMapper {
 
 		/**
 		 * Return a filtered version of the source that will only map values that are
-		 * {@code false}.
+		 * {@literal false}.
 		 * @return a new filtered source instance
 		 */
 		public Source<T> whenFalse() {
