@@ -4,6 +4,7 @@ run-name: "${{ format('{0} for: {1}', github.workflow, github.event.head_commit.
 on:
   push:
     branches: [ release ]
+    tags: [ '*.*.*' ]
 
 permissions: read-all
 
