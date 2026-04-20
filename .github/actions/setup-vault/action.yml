@@ -16,8 +16,6 @@ runs:
           download
           vault
         key: ${{ runner.os }}-vault-${{ inputs.vault-version != '' && inputs.vault-version || 'default' }}
-        restore-keys: |
-          ${{ runner.os }}-vault-
 
     - name: Install and Start Vault (explicit version)
       if: ${{ inputs.vault-version != '' }}
