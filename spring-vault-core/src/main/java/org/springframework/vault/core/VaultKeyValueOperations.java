@@ -63,8 +63,8 @@ public interface VaultKeyValueOperations extends VaultKeyValueOperationsSupport 
 	 * Requires a Key-Value version 2 mount to ensure an atomic update.
 	 * @param path must not be {@literal null}.
 	 * @param patch must not be {@literal null}.
-	 * @return {@code true} if the patch operation is successful, {@code false}
-	 * otherwise.
+	 * @return {@literal true} if the patch operation is successful,
+	 * {@literal false} otherwise.
 	 * @since 2.3
 	 */
 	boolean patch(String path, Map<String, ?> patch);

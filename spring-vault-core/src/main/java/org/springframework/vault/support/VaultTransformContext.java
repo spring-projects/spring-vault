@@ -89,7 +89,7 @@ public class VaultTransformContext {
 	/**
 	 * Return whether this object is an empty one. That is, transformation and tweak
 	 * are both empty.
-	 * @return {@code true} if this object is empty.
+	 * @return {@literal true} if this object is empty.
 	 */
 	public boolean isEmpty() {
 		return ObjectUtils.isEmpty(this.transformation) && ObjectUtils.isEmpty(this.tweak)

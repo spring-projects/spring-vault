@@ -48,9 +48,9 @@ import org.springframework.vault.core.VaultOperations;
 import org.springframework.web.client.RestTemplate;
 
 /**
- * Compatibility layer for Jackson 2 and Jackson 3. This class auto-detects
- * whether Jackson 3 or Jackson 2 are available prefering Jackson 3. Note that
- * Jackson 2 support will be removed in future versions.
+ * Internal compatibility facade for Jackson 2 and Jackson 3.
+ * <p>Detects the available Jackson generation at runtime and prefers Jackson 3
+ * when both are present.
  * <p>This class is intened for internal use only and will be removed in future
  * versions.
  *
@@ -69,24 +69,14 @@ public abstract class JacksonCompat {
 
 	static {
 
-		Class<?> jackson2JsonNode = null;
-		Class<?> jackson3JsonNode = null;
-        ClassLoader classLoader = JacksonCompat.class.getClassLoader();
-        try {
-			jackson2JsonNode = ClassUtils
-					.isPresent("com.fasterxml.jackson.databind.JsonNode", classLoader)
-							? ClassUtils.forName("com.fasterxml.jackson.databind.JsonNode", classLoader)
-							: null;
-		} catch (ClassNotFoundException e) {
-		}
-
-		try {
-			jackson3JsonNode = ClassUtils.isPresent("tools.jackson.databind.JsonNode", classLoader)
-					? ClassUtils.forName("tools.jackson.databind.JsonNode", classLoader)
-					: null;
-
-		} catch (ClassNotFoundException e) {
-		}
+		ClassLoader classLoader = JacksonCompat.class.getClassLoader();
+		Class<?> jackson2JsonNode = ClassUtils
+				.isPresent("com.fasterxml.jackson.databind.JsonNode", classLoader)
+						? ClassUtils.resolveClassName("com.fasterxml.jackson.databind.JsonNode", classLoader)
+						: null;
+		Class<?> jackson3JsonNode = ClassUtils.isPresent("tools.jackson.databind.JsonNode", classLoader)
+				? ClassUtils.resolveClassName("tools.jackson.databind.JsonNode", classLoader)
+				: null;
 
 		JACKSON_2_JSON_NODE = jackson2JsonNode;
 		JACKSON_3_JSON_NODE = jackson3JsonNode;
@@ -101,30 +91,67 @@ public abstract class JacksonCompat {
 
 
 	/**
-	 * Obtain the {@link JacksonCompat} instance.
-	 * @return
+	 * Return the active {@link JacksonCompat} strategy for the current classpath.
+	 * @return the active {@link JacksonCompat} strategy.
 	 */
 	public static JacksonCompat instance() {
 		return compat;
 	}
 
 
+	/**
+	 * Return whether the active strategy is backed by Jackson 3.
+	 * @return {@literal true} if Jackson 3 is active; {@literal false} otherwise.
+	 */
 	public boolean isJackson3() {
 		return this instanceof Jackson3;
 	}
 
+	/**
+	 * Create an HTTP message converter backed by the active Jackson generation.
+	 * @return a configured HTTP message converter.
+	 */
 	public abstract AbstractHttpMessageConverter<Object> createHttpMessageConverter();
 
+	/**
+	 * Register JSON encoder and decoder codecs for the active Jackson generation.
+	 * @param messageConverters a consumer receiving the codecs to register.
+	 */
 	public abstract void registerCodecs(Consumer<Object> messageConverters);
 
+	/**
+	 * Return the JSON tree model type used by the active Jackson generation.
+	 * @return the active JSON node class.
+	 */
 	public abstract Class<Object> getJsonNodeClass();
 
+	/**
+	 * Resolve a JSON pointer path against a JSON tree node.
+	 * @param jsonNode the source JSON tree node.
+	 * @param path the JSON pointer expression.
+	 * @return the value located at the given path.
+	 */
 	public abstract Object getAt(Object jsonNode, String path);
 
+	/**
+	 * Return the default JSON mapper accessor for the active Jackson generation.
+	 * @return the default {@link ObjectMapperAccessor}.
+	 */
 	public abstract ObjectMapperAccessor getObjectMapperAccessor();
 
+	/**
+	 * Return a JSON mapper accessor configured for pretty-print output.
+	 * @return the pretty-print {@link ObjectMapperAccessor}.
+	 */
 	public abstract ObjectMapperAccessor getPrettyPrintObjectMapperAccessor();
 
+	/**
+	 * Attempt to obtain an {@link ObjectMapperAccessor} from the given message
+	 * converters.
+	 * @param messageConverters the converters to inspect.
+	 * @return the matching {@link ObjectMapperAccessor}, or {@literal null} if none
+	 * can be found.
+	 */
 	public abstract @Nullable ObjectMapperAccessor getObjectMapperAccessor(
 			List<HttpMessageConverter<?>> messageConverters);
 
@@ -135,10 +162,24 @@ public abstract class JacksonCompat {
 	 */
 	public interface ObjectMapperAccessor {
 
+		/**
+		 * Create an accessor using the default mapper configuration of the active
+		 * strategy.
+		 * @return a default {@link ObjectMapperAccessor}.
+		 */
 		static ObjectMapperAccessor create() {
 			return compat.getObjectMapperAccessor();
 		}
 
+		/**
+		 * Create an accessor from the given {@link VaultOperations} context.
+		 * <p>If a {@link RestTemplate} with a compatible Jackson converter is
+		 * available, that converter's mapper is used. Otherwise, this method falls back
+		 * to {@link #create()}.
+		 * @param vaultOperations the operations used to access the current Vault
+		 * session.
+		 * @return an {@link ObjectMapperAccessor} for the current session context.
+		 */
 		static ObjectMapperAccessor from(VaultOperations vaultOperations) {
 
 			return vaultOperations.doWithSession(operations -> {
@@ -153,31 +194,39 @@ public abstract class JacksonCompat {
 		}
 
 		/**
-		 * Deserialize a {@code JsonNode} to the requested {@link Class type}.
+		 * Deserialize JSON content to the requested target type.
 		 * @param json must not be {@literal null}.
 		 * @param type must not be {@literal null}.
 		 * @return the deserialized object.
 		 */
 		<I> I deserialize(Object json, Class<I> type);
 
+		/**
+		 * Serialize the given object to its JSON string representation.
+		 * @param object the object to serialize.
+		 * @return the JSON string representation.
+		 */
 		String writeValueAsString(Object object);
 
 	}
 
 
-	static class Jackson2 extends JacksonCompat {
+	/**
+	 * Jackson 2 adapter.
+	 */
+	private static class Jackson2 extends JacksonCompat {
 
-		static final Jackson2 INSTANCE = new Jackson2();
+		private static final Jackson2 INSTANCE = new Jackson2();
 
-		static final ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = new ObjectMapper()
+		private static final ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = new ObjectMapper()
 				.enable(SerializationFeature.INDENT_OUTPUT);
 
-		static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+		private static final MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
 
-		static final Jackson2ObjectMapperAccessor ACCESSOR = new Jackson2ObjectMapperAccessor(
+		private static final Jackson2ObjectMapperAccessor ACCESSOR = new Jackson2ObjectMapperAccessor(
 				converter.getObjectMapper());
 
-		static final Jackson2ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(
+		private static final Jackson2ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson2ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
 
 
@@ -273,20 +322,24 @@ public abstract class JacksonCompat {
 	}
 
 
-	static class Jackson3 extends JacksonCompat {
+	/**
+	 * Jackson 3 adapter.
+	 */
+	private static class Jackson3 extends JacksonCompat {
 
 		static final Jackson3 INSTANCE = new Jackson3();
 
-		static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
+		private static final JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter();
 
-		static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
+		private static final tools.jackson.databind.ObjectMapper PRETTY_PRINT_OBJECT_MAPPER = JsonMapper.builder()
 				.enable(tools.jackson.databind.SerializationFeature.INDENT_OUTPUT)
 				.disable(JsonWriteFeature.ESCAPE_FORWARD_SLASHES)
 				.build();
 
-		static final Jackson3ObjectMapperAccessor ACCESSOR = new Jackson3ObjectMapperAccessor(converter.getMapper());
+		private static final Jackson3ObjectMapperAccessor ACCESSOR = new Jackson3ObjectMapperAccessor(
+				converter.getMapper());
 
-		static final Jackson3ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
+		private static final Jackson3ObjectMapperAccessor PRETTY_PRINT_MAPPER_ACCESSOR = new Jackson3ObjectMapperAccessor(
 				PRETTY_PRINT_OBJECT_MAPPER);
 
 

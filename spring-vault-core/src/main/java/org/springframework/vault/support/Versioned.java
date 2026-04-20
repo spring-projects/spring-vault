@@ -122,7 +122,7 @@ public class Versioned<T> {
 
 	/**
 	 * @return {@literal true} if this versioned object has {@link Metadata}
-	 * associated, otherwise {@code false}
+	 * associated, otherwise {@literal false}
 	 */
 	public boolean hasMetadata() {
 		return this.metadata != null;
@@ -148,7 +148,7 @@ public class Versioned<T> {
 
 	/**
 	 * @return {@literal true} if this versioned object has data associated, or
-	 * {@code false}, of the version is deleted or destroyed.
+	 * {@literal false}, of the version is deleted or destroyed.
 	 */
 	public boolean hasData() {
 		return this.data != null;
