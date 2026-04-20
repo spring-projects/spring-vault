@@ -12,16 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@4.0.x
         with:
           java-version: 'main'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+
       - name: Install and Start Vault
         uses: ./.github/actions/setup-vault
+
       - name: Capture version
         run: |
           echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+
       - name: Deploy to Artifactory
         if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
         uses: spring-projects/spring-data-build/actions/maven-artifactory-deploy@4.0.x

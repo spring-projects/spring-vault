@@ -8,8 +8,8 @@
 set -o errexit
 
 EDITION="${EDITION:-oss}"
-VAULT_OSS="${VAULT_OSS:-1.21.1}"
-VAULT_ENT="${VAULT_ENT:-1.21.1}"
+VAULT_OSS="${VAULT_OSS:-2.0.0}"
+VAULT_ENT="${VAULT_ENT:-2.0.0}"
 VAULT_ENT_TYPE="${VAULT_ENT_TYPE:-ent}" #ent, ent.hsm, ent.hsm.fips1403
 UNAME=$(uname -s | tr '[:upper:]' '[:lower:]')
 VERBOSE=false
