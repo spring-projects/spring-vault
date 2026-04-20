@@ -8,11 +8,12 @@ permissions: read-all
 
 jobs:
   build-java:
+    name: Build project (${{ matrix.java-version }}${{ matrix.vault-version != '' && format(', Vault {0}', matrix.vault-version) || '' }})
+    runs-on: ubuntu-latest
+
     strategy:
       matrix:
         java-version: [ 'base', 'next' ]
-    name: Build project
-    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Setup Java and Maven

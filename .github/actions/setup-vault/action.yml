@@ -1,16 +1,30 @@
 name: Setup and Start Vault
 description: 'Download and start a Vault server'
 
+inputs:
+  vault-version:
+    description: 'Version of Vault to download'
+    required: false
+
 runs:
   using: composite
   steps:
     - name: Cache Vault
-      uses: actions/cache@v5.0.2
+      uses: actions/cache@v5.0.5
       with:
         path: |
           download
           vault
-        key: ${{ runner.os }}-vault-${{ hashFiles('src/test/bash/**') }}
-    - name: Install and Start Vault
+        key: ${{ runner.os }}-vault-${{ inputs.vault-version != '' && inputs.vault-version || 'default' }}
+
+    - name: Install and Start Vault (explicit version)
+      if: ${{ inputs.vault-version != '' }}
+      shell: bash
+      env:
+        VAULT_OSS: ${{ inputs.vault-version }}
+      run: src/test/bash/start.sh
+
+    - name: Install and Start Vault (default version)
+      if: ${{ inputs.vault-version == '' }}
       shell: bash
       run: src/test/bash/start.sh
