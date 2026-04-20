@@ -15,15 +15,18 @@ jobs:
     if: ${{ github.repository == 'spring-projects/spring-vault' }}
     steps:
       - uses: actions/checkout@v6
+
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@main
         with:
           java-version: 'main'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+
       - name: Install GPG key
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" > gpg.asc
           echo "${{ secrets.GPG_PASSPHRASE }}" | gpg --batch --yes --passphrase-fd 0 --import gpg.asc
+
       - name: Release to Maven Central
         env:
           CENTRAL_TOKEN_USR: '${{ secrets.CENTRAL_TOKEN_USERNAME }}'
