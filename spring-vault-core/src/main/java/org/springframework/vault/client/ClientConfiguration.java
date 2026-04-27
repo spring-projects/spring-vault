@@ -38,7 +38,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
+import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
+import org.apache.hc.client5.http.routing.HttpRoutePlanner;
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
+import org.apache.hc.client5.http.ssl.HttpsSupport;
 import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.reactor.ssl.SSLBufferMode;
 import org.apache.hc.core5.util.Timeout;
 import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
@@ -199,6 +205,25 @@ class ClientConfiguration {
 			return SocketConfig.custom() //
 					.setSoTimeout(readTimeout)
 					.build();
+		}
+
+		public static HttpRoutePlanner getRoutePlanner() {
+			return new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault());
+		}
+
+		public static DefaultClientTlsStrategy getTlsStrategy(SslConfiguration sslConfiguration)
+				throws GeneralSecurityException, IOException {
+			SSLContext sslContext = getSSLContext(sslConfiguration);
+			String[] enabledProtocols = null;
+			if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
+				enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
+			}
+			String[] enabledCipherSuites = null;
+			if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
+				enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
+			}
+			return new DefaultClientTlsStrategy(sslContext, enabledProtocols,
+					enabledCipherSuites, SSLBufferMode.STATIC, HttpsSupport.getDefaultHostnameVerifier());
 		}
 
 	}

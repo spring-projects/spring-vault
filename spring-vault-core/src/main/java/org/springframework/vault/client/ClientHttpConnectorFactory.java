@@ -17,15 +17,10 @@
 package org.springframework.vault.client;
 
 import java.io.IOException;
-import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
-import javax.net.ssl.SSLContext;
 
-import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.async.HttpAsyncClientBuilder;
 import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
-import org.apache.hc.core5.http.nio.ssl.BasicClientTlsStrategy;
 import reactor.netty.http.client.HttpClient;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
@@ -139,27 +134,17 @@ public class ClientHttpConnectorFactory {
 		public static HttpAsyncClientBuilder createHttpAsyncClientBuilder(ClientOptions options,
 				SslConfiguration sslConfiguration) throws GeneralSecurityException, IOException {
 			HttpAsyncClientBuilder httpClientBuilder = HttpAsyncClientBuilder.create();
-			httpClientBuilder.setRoutePlanner(
-					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
+			httpClientBuilder.setRoutePlanner(ClientConfiguration.HttpComponents.getRoutePlanner());
 			PoolingAsyncClientConnectionManagerBuilder connectionManagerBuilder = PoolingAsyncClientConnectionManagerBuilder //
 					.create()
 					.setDefaultConnectionConfig(ClientConfiguration.HttpComponents.getConnectionConfig(options));
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
-				BasicClientTlsStrategy tlsStrategy = getTlsStrategy(sslConfiguration);
-				connectionManagerBuilder.setTlsStrategy(tlsStrategy);
+				connectionManagerBuilder
+						.setTlsStrategy(ClientConfiguration.HttpComponents.getTlsStrategy(sslConfiguration));
 			}
 			httpClientBuilder.setDefaultRequestConfig(ClientConfiguration.HttpComponents.getRequestConfig(options));
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 			return httpClientBuilder;
-		}
-
-		public static BasicClientTlsStrategy getTlsStrategy(SslConfiguration sslConfiguration)
-				throws GeneralSecurityException, IOException {
-			SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
-			return new BasicClientTlsStrategy(sslContext, (endpoint, sslEngine) -> {
-				sslConfiguration.enabledProtocols(sslEngine::setEnabledProtocols);
-				sslConfiguration.enabledCipherSuites(sslEngine::setEnabledCipherSuites);
-			}, null);
 		}
 
 	}

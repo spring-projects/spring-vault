@@ -17,19 +17,11 @@
 package org.springframework.vault.client;
 
 import java.io.IOException;
-import java.net.ProxySelector;
 import java.security.GeneralSecurityException;
-import javax.net.ssl.SSLContext;
 
-import org.apache.hc.client5.http.impl.DefaultSchemePortResolver;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
-import org.apache.hc.client5.http.impl.routing.SystemDefaultRoutePlanner;
-import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy;
-import org.apache.hc.client5.http.ssl.HttpsSupport;
-import org.apache.hc.client5.http.ssl.TlsSocketStrategy;
-import org.apache.hc.core5.reactor.ssl.SSLBufferMode;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -146,34 +138,17 @@ public class ClientHttpRequestFactoryFactory {
 		public static HttpClientBuilder getHttpClientBuilder(ClientOptions options, SslConfiguration sslConfiguration)
 				throws GeneralSecurityException, IOException {
 			HttpClientBuilder httpClientBuilder = HttpClients.custom();
-			httpClientBuilder.setRoutePlanner(
-					new SystemDefaultRoutePlanner(DefaultSchemePortResolver.INSTANCE, ProxySelector.getDefault()));
+			httpClientBuilder.setRoutePlanner(ClientConfiguration.HttpComponents.getRoutePlanner());
 			PoolingHttpClientConnectionManagerBuilder connectionManagerBuilder = PoolingHttpClientConnectionManagerBuilder //
 					.create()
 					.setDefaultConnectionConfig(ClientConfiguration.HttpComponents.getConnectionConfig(options)) //
 					.setDefaultSocketConfig(ClientConfiguration.HttpComponents.getSocketConfig(options));
 			if (ClientConfiguration.hasSslConfiguration(sslConfiguration)) {
-				connectionManagerBuilder.setTlsSocketStrategy(getTlsStrategy(sslConfiguration));
+				connectionManagerBuilder.setTlsSocketStrategy(ClientConfiguration.HttpComponents.getTlsStrategy(sslConfiguration));
 			}
 			httpClientBuilder.setDefaultRequestConfig(ClientConfiguration.HttpComponents.getRequestConfig(options));
 			httpClientBuilder.setConnectionManager(connectionManagerBuilder.build());
 			return httpClientBuilder;
-		}
-
-		public static TlsSocketStrategy getTlsStrategy(SslConfiguration sslConfiguration)
-				throws GeneralSecurityException, IOException {
-			SSLContext sslContext = ClientConfiguration.getSSLContext(sslConfiguration);
-			String[] enabledProtocols = null;
-			if (!sslConfiguration.getEnabledProtocols().isEmpty()) {
-				enabledProtocols = sslConfiguration.getEnabledProtocols().toArray(new String[0]);
-			}
-			String[] enabledCipherSuites = null;
-			if (!sslConfiguration.getEnabledCipherSuites().isEmpty()) {
-				enabledCipherSuites = sslConfiguration.getEnabledCipherSuites().toArray(new String[0]);
-			}
-			return new DefaultClientTlsStrategy(sslContext, enabledProtocols,
-					enabledCipherSuites, SSLBufferMode.STATIC,
-					HttpsSupport.getDefaultHostnameVerifier());
 		}
 
 	}
