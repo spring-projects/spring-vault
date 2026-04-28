@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           - java-version: base
-            vault-version: '1.21.5'
+            vault-version: '1.21.4'
           - java-version: base
             vault-version: '2.0.0'
           - java-version: main
