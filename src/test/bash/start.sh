@@ -4,14 +4,19 @@
 # Prepare all the things required to run Vault                            #
 ###########################################################################
 
-BASEDIR=`dirname $0`/../../..
+set -o errexit
+set -o pipefail
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+BASEDIR="${SCRIPT_DIR}/../../../"
 
 # Just in case...
-pkill vault
+pkill vault || true
 
-mkdir -p ${BASEDIR}/download
-mkdir -p ${BASEDIR}/work
-${BASEDIR}/src/test/bash/install_vault.sh
-${BASEDIR}/src/test/bash/create_certificates.sh
-${BASEDIR}/src/test/bash/env.sh
-${BASEDIR}/src/test/bash/local_run_vault.sh &
+mkdir -p "${BASEDIR}/download"
+mkdir -p "${BASEDIR}/work"
+
+"${BASEDIR}/src/test/bash/install_vault.sh"
+"${BASEDIR}/src/test/bash/create_certificates.sh"
+"${BASEDIR}/src/test/bash/env.sh"
+"${BASEDIR}/src/test/bash/local_run_vault.sh" &
