@@ -4,8 +4,9 @@
 # Start Vault on localhost:8200                                           #
 ###########################################################################
 
-BASEDIR=`dirname $0`/../../..
+set -o errexit
+set -o pipefail
 
-./vault/vault server -config=${BASEDIR}/src/test/bash/vault.conf
+BASEDIR="$(cd "$(dirname "$0")/../../.." && pwd)"
 
-exit $?
+exec "${BASEDIR}/vault/vault" server -config="${BASEDIR}/src/test/bash/vault.conf"
