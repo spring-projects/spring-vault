@@ -177,7 +177,7 @@ vault.token=00000000-0000-0000-0000-000000000000
 
 **Property keys**
 
-* Vault URI: `vault.uri`
+* Vault URI: `vault.uri` (falls back to `VAULT_ADDR`)
 * SSL Configuration
 ** Keystore resource: `vault.ssl.key-store` (optional)
 ** Keystore password: `vault.ssl.key-store-password` (optional)
