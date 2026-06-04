@@ -366,6 +366,12 @@ public class ManagedSecret implements SecretRegistrar {
 		public <T> @Nullable T get(String key, Class<T> expectedType) {
 			return ManagedSecret.get(secrets, key, expectedType);
 		}
+
+		@Override
+		public String toString() {
+			return "SimpleSecretAccessor{%d secrets}".formatted(secrets.size());
+		}
+
 	}
 
 
@@ -448,6 +454,11 @@ public class ManagedSecret implements SecretRegistrar {
 		@Override
 		public <T> @Nullable T get(String key, Class<T> expectedType) {
 			return accessor.get(key, expectedType);
+		}
+
+		@Override
+		public String toString() {
+			return "SimpleUsernamePasswordAccessor";
 		}
 
 	}

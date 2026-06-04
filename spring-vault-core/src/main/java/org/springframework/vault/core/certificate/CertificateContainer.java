@@ -400,7 +400,7 @@ public class CertificateContainer extends CertificateEventPublisher
 
 	boolean isExpired(Instant expiration) {
 		Duration expiresIn = Duration.between(getRequiredTaskScheduler().getClock().instant(), expiration);
-		return expiresIn.isNegative() || expiresIn.isZero() || expiresIn.compareTo(expiryThreshold) >= 0;
+		return expiresIn.isNegative() || expiresIn.isZero() || expiresIn.compareTo(expiryThreshold) <= 0;
 	}
 
 	static Duration getRenewalDelay(Clock clock, Instant expiration, Duration expiryThreshold) {

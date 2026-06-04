@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -32,6 +33,8 @@ import tools.jackson.databind.ObjectMapper;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.vault.core.certificate.domain.RequestedCertificate;
+import org.springframework.vault.core.certificate.event.CertificateEvent;
+import org.springframework.vault.core.certificate.event.CertificateExpiredEvent;
 import org.springframework.vault.core.certificate.event.CertificateListener;
 import org.springframework.vault.core.certificate.event.CertificateObtainedEvent;
 import org.springframework.vault.support.Certificate;
@@ -143,6 +146,56 @@ class CertificateContainerUnitTests {
 
 		verify(listener).onCertificateEvent(any(CertificateObtainedEvent.class));
 		assertThat(certificateRef).hasNullValue();
+	}
+
+	@Test
+	void isExpiredReturnsTrueWhenWithinThreshold() {
+		CertificateAuthority ca = getTrustAuthority(certificate);
+		CertificateContainer container = new CertificateContainer(ca, taskScheduler);
+		container.afterPropertiesSet();
+
+		Instant now = taskScheduler.getClock().instant();
+		assertThat(container.isExpired(now.plusSeconds(30))).isTrue();
+	}
+
+	@Test
+	void isExpiredReturnsFalseWhenBeyondThreshold() {
+		CertificateAuthority ca = getTrustAuthority(certificate);
+		CertificateContainer container = new CertificateContainer(ca, taskScheduler);
+		container.afterPropertiesSet();
+
+		Instant now = taskScheduler.getClock().instant();
+		assertThat(container.isExpired(now.plusSeconds(120))).isFalse();
+	}
+
+	@Test
+	void scheduledRotationPublishesCertificateExpiredEvent() throws Exception {
+		Instant notAfter = certificate.getX509Certificate().getNotAfter().toInstant();
+		Clock nearExpiryClock = Clock.fixed(notAfter.minusSeconds(60), ZoneId.of("Z"));
+
+		TaskScheduler nearExpiryScheduler = mock(TaskScheduler.class);
+		when(nearExpiryScheduler.getClock()).thenReturn(nearExpiryClock);
+		when(nearExpiryScheduler.schedule(any(Runnable.class), any(Trigger.class)))
+				.thenReturn(mock(ScheduledFuture.class));
+
+		CertificateAuthority ca = getTrustAuthority(certificate);
+		RequestedCertificate requestedCertificate = RequestedCertificate.trustAnchor("my-ca");
+
+		List<CertificateEvent> events = new ArrayList<>();
+		CertificateContainer container = new CertificateContainer(ca, nearExpiryScheduler);
+		container.setExpiryThreshold(Duration.ofSeconds(120));
+		container.afterPropertiesSet();
+		container.addCertificateListener(events::add);
+		container.register(requestedCertificate);
+		container.start();
+
+		// Simulate the scheduled rotation task firing for the old (near-expiry) cert.
+		container.rotate(requestedCertificate);
+
+		assertThat(events).hasAtLeastOneElementOfType(CertificateExpiredEvent.class);
+
+		container.stop();
+		container.destroy();
 	}
 
 	private static CertificateAuthority getTrustAuthority(Certificate certificate) {
