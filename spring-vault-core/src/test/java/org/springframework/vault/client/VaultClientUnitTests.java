@@ -34,10 +34,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.vault.client.VaultClients.PrefixAwareUriBuilderFactory;
 import org.springframework.vault.util.MockVaultClient;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriBuilderFactory;
 
 import static org.assertj.core.api.Assertions.*;
@@ -207,12 +209,21 @@ class VaultClientUnitTests {
 				false);
 		UriBuilderFactory extended = VaultClients.createUriBuilderFactory(() -> localhost, false);
 
+		RestTemplate templateWithEndpointProvider = VaultClients.createRestTemplate(
+				SimpleVaultEndpointProvider.of(localhost),
+				new SimpleClientHttpRequestFactory());
+
+		VaultClient clientWithEndpoint = VaultClient.builder(templateWithEndpointProvider).endpoint(localhost).build();
+		VaultClient fromRestTemplate = VaultClient.builder(templateWithEndpointProvider).build();
+
 		return Stream.of(
 				Arguments.argumentSet("Simple Endpoint", VaultClient.create(localhost)),
 				Arguments.argumentSet("Dynamic Endpoint Provider",
 						VaultClient.create(() -> localhost)),
 				Arguments.argumentSet("URL Simple", VaultClient.builder().uriBuilderFactory(simple).build()),
-				Arguments.argumentSet("URL Extended", VaultClient.builder().uriBuilderFactory(extended).build()));
+				Arguments.argumentSet("URL Extended", VaultClient.builder().uriBuilderFactory(extended).build()),
+				Arguments.argumentSet("RestTemplate-based, explicit endpoint", clientWithEndpoint),
+				Arguments.argumentSet("RestTemplate-based, auto-detected endpoint", fromRestTemplate));
 	}
 
 	static Stream<Arguments.ArgumentSet> unsafeClients() {

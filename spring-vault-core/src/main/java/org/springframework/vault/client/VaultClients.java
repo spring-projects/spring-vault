@@ -295,14 +295,20 @@ public class VaultClients {
 		}
 
 
+		@Nullable
+		VaultEndpointProvider getEndpointProvider() {
+			return this.endpointProvider;
+		}
+
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
+			VaultEndpointProvider endpointProvider = getEndpointProvider();
 			if (allowAbsolutePath || endpointProvider == null) {
 				if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
 					return UriComponentsBuilder.fromUriString(uriTemplate);
 				}
 				if (endpointProvider != null) {
-					VaultEndpoint endpoint = this.endpointProvider.getVaultEndpoint();
+					VaultEndpoint endpoint = endpointProvider.getVaultEndpoint();
 					String baseUri = toBaseUri(endpoint);
 					UriComponents uriComponents = UriComponentsBuilder
 							.fromUriString(prepareUriTemplate(baseUri, uriTemplate))

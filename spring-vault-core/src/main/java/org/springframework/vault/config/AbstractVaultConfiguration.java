@@ -144,10 +144,12 @@ public abstract class AbstractVaultConfiguration implements ApplicationContextAw
 	protected VaultClient vaultClient() {
 		ObjectProvider<VaultClientCustomizer> customizers = getBeanFactory()
 				.getBeanProvider(VaultClientCustomizer.class);
-		RestTemplate restTemplate = restTemplateBuilder(vaultEndpointProvider(),
+		VaultEndpointProvider endpointProvider = vaultEndpointProvider();
+		RestTemplate restTemplate = restTemplateBuilder(endpointProvider,
 				getClientFactoryWrapper().getClientHttpRequestFactory())
 						.build();
-		VaultClient.Builder builder = VaultClient.builder(restTemplate);
+		VaultClient.Builder builder = VaultClient.builder(restTemplate)
+				.endpoint(endpointProvider);
 		customizers.forEach(it -> it.customize(builder));
 		return builder.build();
 	}

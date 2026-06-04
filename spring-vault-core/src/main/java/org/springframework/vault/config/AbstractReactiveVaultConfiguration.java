@@ -25,7 +25,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.util.Assert;
-import org.springframework.vault.authentication.*;
+import org.springframework.vault.authentication.AuthenticationEventPublisher;
+import org.springframework.vault.authentication.AuthenticationStepsFactory;
+import org.springframework.vault.authentication.AuthenticationStepsOperator;
+import org.springframework.vault.authentication.CachingVaultTokenSupplier;
+import org.springframework.vault.authentication.ClientAuthentication;
+import org.springframework.vault.authentication.ReactiveLifecycleAwareSessionManager;
+import org.springframework.vault.authentication.ReactiveSessionManager;
+import org.springframework.vault.authentication.SessionManager;
+import org.springframework.vault.authentication.TokenAuthentication;
+import org.springframework.vault.authentication.VaultTokenSupplier;
 import org.springframework.vault.authentication.event.AuthenticationErrorEvent;
 import org.springframework.vault.authentication.event.AuthenticationErrorListener;
 import org.springframework.vault.authentication.event.AuthenticationEvent;
@@ -138,9 +147,11 @@ public abstract class AbstractReactiveVaultConfiguration extends AbstractVaultCo
 	protected ReactiveVaultClient reactiveVaultClient() {
 		ObjectProvider<ReactiveVaultClientCustomizer> customizers = getBeanFactory()
 				.getBeanProvider(ReactiveVaultClientCustomizer.class);
-		WebClient webClient = webClientBuilder(reactiveVaultEndpointProvider(),
+		ReactiveVaultEndpointProvider endpointProvider = reactiveVaultEndpointProvider();
+		WebClient webClient = webClientBuilder(endpointProvider,
 				clientHttpConnector()).build();
-		ReactiveVaultClient.Builder builder = ReactiveVaultClient.builder(webClient);
+		ReactiveVaultClient.Builder builder = ReactiveVaultClient.builder(webClient)
+				.endpoint(endpointProvider);
 		customizers.forEach(it -> it.customize(builder));
 		return builder.build();
 	}

@@ -45,6 +45,10 @@ class DefaultVaultClientBuilder implements VaultClient.Builder {
 
 	DefaultVaultClientBuilder(RestTemplate restTemplate) {
 		this.builder = RestClient.builder(restTemplate);
+		if (restTemplate.getUriTemplateHandler() instanceof VaultClients.PrefixAwareUriBuilderFactory factory
+				&& factory.getEndpointProvider() != null) {
+			uriBuilderFactory(VaultClients.createUriBuilderFactory(factory.getEndpointProvider(), false));
+		}
 	}
 
 	DefaultVaultClientBuilder(RestClient restClient) {
