@@ -105,7 +105,7 @@ public class Policy {
 	/**
 	 * Create a new {@link Policy} object containing all configured rules and add
 	 * the given {@link Rule} to the new policy object. If the given {@link Rule}
-	 * matches an existing rule path, the exiting rule will be overridden by the new
+	 * matches an existing rule path, the existing rule will be overridden by the new
 	 * rule object.
 	 * @param rule must not be {@literal null}.
 	 * @return the new {@link Policy} object containing all configured rules and the
@@ -115,6 +115,7 @@ public class Policy {
 		Assert.notNull(rule, "Rule must not be null");
 		Set<Rule> rules = new LinkedHashSet<>(this.rules.size() + 1);
 		rules.addAll(this.rules);
+		rules.remove(rule);
 		rules.add(rule);
 		return new Policy(rules);
 	}
