@@ -84,7 +84,9 @@ class VaultQueryCreatorUnitTests {
 	void in() {
 
 		VaultQuery query = createQuery("findByIdIn", Arrays.asList("2", "3"));
+		assertThat(query.getPredicate()).accepts("2", "3").rejects("4", "8");
 
+		query = createQuery("findByIdIn", Arrays.asList("3", "2"));
 		assertThat(query.getPredicate()).accepts("2", "3").rejects("4", "8");
 	}
 
@@ -92,7 +94,9 @@ class VaultQueryCreatorUnitTests {
 	void negateIn() {
 
 		VaultQuery query = createQuery("findByIdNotIn", Arrays.asList("2", "3"));
+		assertThat(query.getPredicate()).accepts("4", "8").rejects("2", "3");
 
+		query = createQuery("findByIdNotIn", Arrays.asList("3", "2"));
 		assertThat(query.getPredicate()).accepts("4", "8").rejects("2", "3");
 	}
 
