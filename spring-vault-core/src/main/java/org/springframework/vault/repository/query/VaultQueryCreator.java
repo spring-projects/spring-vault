@@ -18,7 +18,9 @@ package org.springframework.vault.repository.query;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -117,11 +119,9 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 
 			return it -> it.compareTo(from) >= 0 && it.compareTo(to) <= 0;
 		case NOT_IN:
-			return new Criteria<>(accessor.nextAsArray(parameters),
-					(value, it) -> Arrays.binarySearch(value, it) < 0);
+			return new Criteria<>(accessor.nextAsSet(parameters), (value, it) -> !value.contains(it));
 		case IN:
-			return new Criteria<>(accessor.nextAsArray(parameters),
-					(value, it) -> Arrays.binarySearch(value, it) >= 0);
+			return new Criteria<>(accessor.nextAsSet(parameters), Set::contains);
 		case STARTING_WITH:
 			return new Criteria<>(accessor.nextString(parameters), (value, it) -> it.startsWith(value));
 		case ENDING_WITH:
@@ -274,6 +274,10 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 			}
 
 		};
+
+		Set<String> nextAsSet(Iterator<Object> iterator) {
+			return new HashSet<>(Arrays.asList(nextAsArray(iterator)));
+		}
 
 		abstract String[] nextAsArray(Iterator<Object> iterator);
 
