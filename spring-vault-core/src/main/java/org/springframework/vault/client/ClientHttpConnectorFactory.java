@@ -38,6 +38,7 @@ import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.SslProvider;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -131,7 +132,7 @@ public class ClientHttpConnectorFactory {
 						.configure(it -> configureSsl(sslConfiguration, it))
 						.get();
 
-				client = client.secure(builder -> builder.sslContext(sslContextSpec));
+				client = client.secure(builder -> builder.sslContext((SslProvider.GenericSslContextSpec<?>) sslContextSpec));
 			}
 
 			client = client
