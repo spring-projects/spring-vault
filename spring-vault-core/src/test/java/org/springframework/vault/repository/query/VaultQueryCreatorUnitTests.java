@@ -18,6 +18,7 @@ package org.springframework.vault.repository.query;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 
@@ -136,8 +137,15 @@ class VaultQueryCreatorUnitTests {
 	void regex() {
 
 		VaultQuery query = createQuery("findByIdMatches", "Wa(.*)r");
-
 		assertThat(query.getPredicate()).accepts("Walter", "Water").rejects("Skyler");
+
+		query = createQuery("findByIdMatches", Pattern.compile("Wa(.*)r"));
+		assertThat(query.getPredicate()).accepts("Walter", "Water").rejects("Skyler");
+	}
+
+	@Test
+	void regexRejectsUnsupportedParameterType() {
+		assertThatIllegalArgumentException().isThrownBy(() -> createQuery("findByIdMatches", 1));
 	}
 
 	@Test
@@ -194,7 +202,7 @@ class VaultQueryCreatorUnitTests {
 				.isThrownBy(() -> createQuery("findByName", ""));
 	}
 
-	VaultQuery createQuery(String methodName, String value) {
+	VaultQuery createQuery(String methodName, Object value) {
 
 		DefaultParameters defaultParameters = new DefaultParameters(
 				ParametersSource.of(ReflectionUtils.findMethod(dummy.class, "someUnrelatedMethod", String.class)));

@@ -179,34 +179,34 @@ Given the `Credentials` type from the previous sections the default mapping is a
 NOTE: The `@Id` property must be mapped to `String`.
 
 [cols="1,2,3",options="header"]
-.Default Mapping Rules
+.Default mapping rules
 |===
 | Type
 | Sample
-| Mapped Value
+| Mapped value
 
 | Simple Type +
-(eg. String)
+(. g. String)
 | String firstname = "Walter";
 | "firstname": "Walter"
 
 | Complex Type +
-(eg. Address)
-| Address adress = new Address("308 Negra Arroyo Lane");
+(e. g. Address)
+| Address address = new Address("308 Negra Arroyo Lane");
 | "address": { "street": "308 Negra Arroyo Lane" }
 
 | List +
-of Simple Type
+of simple type
 | List<String> nicknames = asList("walt", "heisenberg");
 | "nicknames": ["walt", "heisenberg"]
 
 | Map +
-of Simple Type
+of simple type
 | Map<String, Integer> atts = asMap("age", 51)
 | "atts" : {"age" : 51}
 
 | List +
-of Complex Type
+of complex type
 | List<Address> addresses = asList(new Address("308…
 | "address": [{ "street": "308 Negra Arroyo Lane" }, …]
 
@@ -227,7 +227,7 @@ Vault has no query engine but requires direct access of HTTP context paths.
 Vault query methods translate Vault's API possibilities to queries.
 A query method execution lists children under a context path, applies filtering to the Id, optionally limits the Id stream with offset/limit and applies sorting after fetching the results.
 
-.Sample Repository Query Method
+.Sample repository query method
 ====
 [source,java]
 ----
@@ -282,7 +282,7 @@ Here's an overview of the keywords supported for Vault.
 | `findByFirstnameNotContaining(String name)`
 
 | `Regex`
-| `findByIdRegex(String id)`
+| `findByIdRegex(Pattern pattern)`
 
 | `(No keyword)`
 | `findById(String name)`
