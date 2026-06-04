@@ -17,8 +17,6 @@
 package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.vault.core.lease.domain.Lease;
@@ -48,7 +46,7 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 	 */
 	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease, Map<String, Object> secrets) {
 		super(requestedSecret, lease);
-		this.secrets = Collections.unmodifiableMap(new LinkedHashMap<>(secrets));
+		this.secrets = Map.copyOf(secrets);
 	}
 
 
