@@ -131,8 +131,18 @@ public class VaultQueryCreator extends AbstractQueryCreator<KeyValueQuery<VaultQ
 		case NOT_CONTAINING:
 			return new Criteria<>(accessor.nextString(parameters), (value, it) -> !it.contains(value));
 		case REGEX:
-			return Pattern.compile((String) parameters.next(), isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
+			Object parameter = parameters.next();
+			if (parameter instanceof Pattern pattern) {
+				return pattern.asPredicate();
+			}
+			if (parameter instanceof String str) {
+				return Pattern.compile(str, isIgnoreCase(part) ? Pattern.CASE_INSENSITIVE : 0)
 					.asPredicate();
+			}
+
+			throw new IllegalArgumentException(
+					"Unsupported regex parameter type: %s. Expected String or Pattern."
+							.formatted(parameter == null ? "null" : parameter.getClass().toString()));
 		case TRUE:
 			return it -> it.equalsIgnoreCase("true");
 		case FALSE:
