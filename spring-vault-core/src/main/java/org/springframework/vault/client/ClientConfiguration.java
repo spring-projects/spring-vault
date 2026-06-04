@@ -40,7 +40,9 @@ import org.eclipse.jetty.client.transport.HttpClientTransportOverHTTP;
 import org.eclipse.jetty.io.ClientConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jspecify.annotations.Nullable;
+import reactor.netty.http.Http11SslContextSpec;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.tcp.SslProvider;
 
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.reactive.ClientHttpConnector;
@@ -174,16 +176,16 @@ class ClientConfiguration {
 			HttpClient client = HttpClient.create();
 			if (hasSslConfiguration(sslConfiguration)) {
 				client = client.secure(builder -> {
-					SslContextBuilder sslContextBuilder = SslContextBuilder.forClient();
-					configureSsl(sslConfiguration, sslContextBuilder);
-					try {
-						builder.sslContext(sslContextBuilder.build());
-					} catch (SSLException e) {
-						throw new RuntimeException(e);
-					}
+
+					Http11SslContextSpec sslSpec = Http11SslContextSpec.forClient()
+							.configure(it -> {
+								configureSsl(sslConfiguration, it);
+							});
+
+					builder.sslContext((SslProvider.GenericSslContextSpec<?>) sslSpec);
 				});
 			}
-			return client = client
+			return client
 					.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,
 							Math.toIntExact(options.getConnectionTimeout().toMillis()))
 					.proxyWithSystemProperties();
