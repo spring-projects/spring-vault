@@ -32,15 +32,15 @@
 		<httpclient5.version>5.5.2</httpclient5.version>
 		<httpcore5.version>5.3.6</httpcore5.version>
 		<jackson-annotations.version>2.21</jackson-annotations.version>
-		<jackson-core.version>3.1.2</jackson-core.version>
-		<jackson-databind.version>3.1.2</jackson-databind.version>
-		<jackson2-databind.version>2.21.2</jackson2-databind.version>
-		<jetty-reactive-httpclient.version>4.1.4</jetty-reactive-httpclient.version>
+		<jackson-core.version>3.1.4</jackson-core.version>
+		<jackson-databind.version>3.1.4</jackson-databind.version>
+		<jackson2-databind.version>2.21.4</jackson2-databind.version>
+		<jetty-reactive-httpclient.version>4.1.5</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>6.0.3</junit.version>
 		<kotlin.version>2.2.21</kotlin.version>
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
-		<mockk.version>1.14.9</mockk.version>
+		<mockk.version>1.14.11</mockk.version>
 		<mockito-core.version>5.23.0</mockito-core.version>
 		<nullaway.version>0.13.1</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
@@ -584,19 +584,19 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-enforcer-plugin</artifactId>
-					<version>3.6.2</version>
+					<version>3.6.3</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.5</version>
+					<version>3.5.6</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.5.5</version>
+					<version>3.5.6</version>
 				</plugin>
 
 				<plugin>
@@ -664,7 +664,7 @@
 				<plugin>
 					<groupId>org.jfrog.buildinfo</groupId>
 					<artifactId>artifactory-maven-plugin</artifactId>
-					<version>3.7.0</version>
+					<version>3.7.1</version>
 				</plugin>
 
 				<plugin>
@@ -898,7 +898,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>3.7.0</version>
+							<version>3.7.1</version>
 							<executions>
 								<execution>
 									<id>build-info</id>
