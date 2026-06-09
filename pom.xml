@@ -22,25 +22,25 @@
 	<properties>
 		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 		<antora.version>0.0.4</antora.version>
-		<assertj-core.version>3.27.3</assertj-core.version>
-		<aws-java-sdk.version>2.31.29</aws-java-sdk.version>
-		<bcpkix-jdk18on.version>1.80</bcpkix-jdk18on.version>
+		<assertj-core.version>3.27.7</assertj-core.version>
+		<aws-java-sdk.version>2.31.78</aws-java-sdk.version>
+		<bcpkix-jdk18on.version>1.80.2</bcpkix-jdk18on.version>
 		<google-api-services-iam.version>v1-rev20221013-2.0.0
 		</google-api-services-iam.version>
 		<google-cloud-iamcredentials.version>2.60.0</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>1.33.1
 		</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.4.4</httpclient5.version>
-		<httpcore5.version>5.3.4</httpcore5.version>
-		<jackson-databind.version>2.19.0</jackson-databind.version>
-		<jetty-reactive-httpclient.version>4.0.9</jetty-reactive-httpclient.version>
+		<httpcore5.version>5.3.6</httpcore5.version>
+		<jackson-databind.version>2.19.4</jackson-databind.version>
+		<jetty-reactive-httpclient.version>4.0.14</jetty-reactive-httpclient.version>
 		<json-path.version>2.9.0</json-path.version>
 		<junit.version>5.12.2</junit.version>
-		<kotlin.version>1.9.22</kotlin.version>
+		<kotlin.version>1.9.25</kotlin.version>
 		<kotlin-coroutines.version>1.9.0</kotlin-coroutines.version>
 		<mockk.version>1.13.17</mockk.version>
 		<mockito-core.version>5.17.0</mockito-core.version>
-		<netty.version>4.1.121.Final</netty.version>
+		<netty.version>4.1.135.Final</netty.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>6.2.7</spring.version>
 		<spring-data-bom.version>2025.0.0</spring-data-bom.version>
@@ -520,7 +520,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.14.0</version>
+					<version>3.14.1</version>
 				</plugin>
 
 				<plugin>
@@ -556,13 +556,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>3.5.3</version>
+					<version>3.5.6</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-failsafe-plugin</artifactId>
-					<version>3.5.3</version>
+					<version>3.5.6</version>
 				</plugin>
 
 				<plugin>
@@ -574,7 +574,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
-					<version>3.11.2</version>
+					<version>3.11.3</version>
 					<configuration>
 						<locale>en_US</locale>
 						<breakiterator>true</breakiterator>
@@ -624,13 +624,13 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.2.7</version>
+					<version>3.2.8</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.jfrog.buildinfo</groupId>
 					<artifactId>artifactory-maven-plugin</artifactId>
-					<version>3.6.2</version>
+					<version>3.7.1</version>
 				</plugin>
 
 				<plugin>
@@ -648,13 +648,13 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.6.0</version>
+					<version>3.6.1</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
-					<version>1.7.0</version>
+					<version>1.7.3</version>
 				</plugin>
 
 				<plugin>
@@ -863,7 +863,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>3.6.2</version>
+							<version>3.7.1</version>
 							<executions>
 								<execution>
 									<id>build-info</id>
