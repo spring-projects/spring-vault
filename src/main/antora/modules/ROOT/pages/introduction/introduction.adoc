@@ -6,7 +6,6 @@ This section explains introductory topics such as how to get started and the new
 The Vault support contains a wide range of features which are summarized below.
 
 * Spring configuration support using Java-based @Configuration classes
-* Fluent xref:vault/vault-client.adoc[`VaultClient`] for path-oriented Vault requests serving as the foundation for the Template API.
 * xref:vault/imperative-template.adoc[`VaultTemplate`] helper class that increases productivity performing common Vault operations and its xref:vault/reactive-template.adoc[reactive variant].
 Includes integrated object mapping between Vault responses and POJOs.
 * xref:vault/propertysource.adoc[`@VaultPropertySource`] support to mount Vault secrets engines as property sources.
