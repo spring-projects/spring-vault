@@ -23,6 +23,7 @@
 				<version>${maven.antora-version}</version>
 				<extensions>true</extensions>
 				<configuration>
+					<nodeVersion>24.15</nodeVersion>
 					<options>
 						<option>--to-dir=target/antora/site</option>
 						<option>--stacktrace</option>
