@@ -2,7 +2,7 @@ name: CI Build
 
 on:
   push:
-    branches: [ main, 4.0.x, 3.2.x, 3.1.x, 'issue/**' ]
+    branches: [ main, 4.1.x, 4.0.x, 3.2.x, 3.1.x, 'issue/**' ]
 
 permissions: read-all
 
