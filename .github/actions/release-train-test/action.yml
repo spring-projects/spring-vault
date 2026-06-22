@@ -1,0 +1,9 @@
+name: Test Release
+runs:
+  using: composite
+  steps:
+    - name: Install and Start Vault
+      uses: ./.github/actions/setup-vault
+    - name: Test Release
+      shell: bash
+      run:  ./mvnw --activate-profiles releaseTrain,ci --batch-mode --settings release-train-settings.xml clean verify
