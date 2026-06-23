@@ -47,6 +47,7 @@ import org.springframework.vault.support.VaultMount.VaultMountBuilder;
  * Default implementation of {@link VaultSysOperations}.
  *
  * @author Mark Paluch
+ * @author Henk Hofs
  */
 public class VaultSysTemplate implements VaultSysOperations {
 
@@ -454,6 +455,8 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		private final boolean replicationRecoverySecondary;
 
+		private final @Nullable Boolean haConnectionHealthy;
+
 		private final int serverTimeUtc;
 
 		private final @Nullable String version;
@@ -463,6 +466,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 				@JsonProperty("standby") boolean standby,
 				@JsonProperty("performance_standby") boolean performanceStandby,
 				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
+				@Nullable @JsonProperty("ha_connection_healthy") Boolean haConnectionHealthy,
 				@JsonProperty("server_time_utc") int serverTimeUtc, @Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
@@ -471,6 +475,7 @@ public class VaultSysTemplate implements VaultSysOperations {
 			this.performanceStandby = performanceStandby;
 			this.replicationRecoverySecondary = replicationRecoverySecondary != null
 					&& !"disabled".equalsIgnoreCase(replicationRecoverySecondary);
+			this.haConnectionHealthy = haConnectionHealthy;
 			this.serverTimeUtc = serverTimeUtc;
 			this.version = version;
 		}
@@ -496,6 +501,11 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return this.replicationRecoverySecondary;
 		}
 
+		@Override
+		public @Nullable Boolean getHaConnectionHealthy() {
+			return this.haConnectionHealthy;
+		}
+
 		public int getServerTimeUtc() {
 			return this.serverTimeUtc;
 		}
@@ -513,13 +523,15 @@ public class VaultSysTemplate implements VaultSysOperations {
 			return this.initialized == that.initialized && this.sealed == that.sealed && this.standby == that.standby
 					&& this.performanceStandby == that.performanceStandby
 					&& this.replicationRecoverySecondary == that.replicationRecoverySecondary
-					&& this.serverTimeUtc == that.serverTimeUtc && Objects.equals(this.version, that.version);
+					&& this.serverTimeUtc == that.serverTimeUtc
+					&& Objects.equals(this.haConnectionHealthy, that.haConnectionHealthy)
+					&& Objects.equals(this.version, that.version);
 		}
 
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.initialized, this.sealed, this.standby, this.performanceStandby,
-					this.replicationRecoverySecondary, this.serverTimeUtc, this.version);
+					this.replicationRecoverySecondary, this.haConnectionHealthy, this.serverTimeUtc, this.version);
 		}
 
 	}
