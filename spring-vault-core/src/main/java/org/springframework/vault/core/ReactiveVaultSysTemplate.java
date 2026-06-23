@@ -22,13 +22,16 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClientResponseException;
 import org.springframework.vault.client.VaultHttpHeaders;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultHealth;
 
 /**
  * Default implementation of {@link ReactiveVaultSysOperations}.
  *
  * @author Mark Paluch
+ * @author Henk Hofs
  */
 public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 
@@ -70,8 +73,24 @@ public class ReactiveVaultSysTemplate implements ReactiveVaultSysOperations {
 					.retrieve()
 					.toEntity(VaultSysTemplate.VaultHealthImpl.class)
 					.filter(HttpEntity::hasBody)
-					.map(HttpEntity::getBody);
+					.map(HttpEntity::getBody)
+					.onErrorResume(VaultClientResponseException.class,
+							ReactiveVaultSysTemplate::deserializeHealthResponse)
+					.cast(VaultHealth.class);
 		});
+	}
+
+	private static Mono<VaultSysTemplate.VaultHealthImpl> deserializeHealthResponse(
+			VaultClientResponseException responseError) {
+
+		try {
+			return Mono.just(JacksonCompat.instance()
+					.getObjectMapperAccessor()
+					.deserialize(responseError.getResponseBodyAsString(), VaultSysTemplate.VaultHealthImpl.class));
+		}
+		catch (Exception jsonError) {
+			return Mono.error(responseError);
+		}
 	}
 
 }
