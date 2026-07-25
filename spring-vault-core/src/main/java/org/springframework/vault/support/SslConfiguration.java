@@ -289,7 +289,7 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * If enabled protocols are configured, call the {@code action} the the array of
+	 * If enabled protocols are configured, call the {@code action} the array of
 	 * enabled protocols.
 	 * @since 4.1
 	 */
@@ -338,7 +338,7 @@ public class SslConfiguration {
 	}
 
 	/**
-	 * If enabled cipher suites are configured, call the {@code action} the the
+	 * If enabled cipher suites are configured, call the {@code action} the
 	 * array of enabled cipher suites.
 	 * @since 4.1
 	 */
