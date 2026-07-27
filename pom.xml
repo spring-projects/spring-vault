@@ -23,7 +23,7 @@
 		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 		<antora.version>0.0.4</antora.version>
 		<assertj-core.version>3.27.7</assertj-core.version>
-		<aws-java-sdk.version>2.46.7</aws-java-sdk.version>
+		<aws-java-sdk.version>2.46.21</aws-java-sdk.version>
 		<bcpkix-jdk18on.version>1.84</bcpkix-jdk18on.version>
 		<errorprone.version>2.42.0</errorprone.version>
 		<google-cloud-iamcredentials.version>2.93.0</google-cloud-iamcredentials.version>
