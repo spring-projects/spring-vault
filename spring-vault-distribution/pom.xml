@@ -287,7 +287,7 @@
 						<plugin>
 							<groupId>org.jfrog.buildinfo</groupId>
 							<artifactId>artifactory-maven-plugin</artifactId>
-							<version>3.4.0</version>
+							<version>3.7.1</version>
 							<executions>
 								<execution>
 									<id>deploy-docs</id>
