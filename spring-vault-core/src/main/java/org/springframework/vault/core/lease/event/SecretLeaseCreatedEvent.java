@@ -17,6 +17,8 @@
 package org.springframework.vault.core.lease.event;
 
 import java.io.Serial;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.springframework.vault.core.lease.domain.Lease;
@@ -27,6 +29,7 @@ import org.springframework.vault.core.lease.domain.RequestedSecret;
  * {@link Lease}.
  *
  * @author Mark Paluch
+ * @author Burak KALAYCI
  */
 public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 
@@ -42,11 +45,12 @@ public class SecretLeaseCreatedEvent extends SecretLeaseEvent {
 	 * {@link Lease} and {@code secrets}.
 	 * @param requestedSecret must not be {@literal null}.
 	 * @param lease must not be {@literal null}.
-	 * @param secrets must not be {@literal null}.
+	 * @param secrets must not be {@literal null}. Values may be {@literal null}
+	 * (for example Vault AWS {@code iam_user} credentials expose a null session token).
 	 */
 	public SecretLeaseCreatedEvent(RequestedSecret requestedSecret, Lease lease, Map<String, Object> secrets) {
 		super(requestedSecret, lease);
-		this.secrets = Map.copyOf(secrets);
+		this.secrets = Collections.unmodifiableMap(new LinkedHashMap<>(secrets));
 	}
 
 
