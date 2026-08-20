@@ -2,4 +2,4 @@
 = Vault
 :page-section-summary-toc: 1
 
-This chapter points out the specialties for Vault support.
+This chapter highlights the specifics of Vault support.
