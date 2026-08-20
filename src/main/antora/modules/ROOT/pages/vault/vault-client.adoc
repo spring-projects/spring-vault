@@ -12,13 +12,13 @@ The table shows which functionality Spring takes care of when choosing a specifi
 | {spring-framework-docs}/integration/rest-clients.html#rest-restclient[*RestClient*]
 | Low-level HTTP request access with full control over URIs, headers, and message conversion.	You manually construct requests and handle responses. javadoc:org.springframework.vault.client.VaultEndpoint[] can be configured through a `UriBuilderFactory` enabling relative path usage.
 | No built-in authentication support; you must manage tokens and headers yourself. | No direct Vault domain operations; you build requests for Vault endpoints manually.
-| `4xx`/`5xx` status translated to `HttpServerErrorException` respective `HttpClientErrorException`, `onStatus` lets you register custom handlers
+| `4xx`/`5xx` status codes are translated to `HttpClientErrorException` and `HttpServerErrorException`, respectively; `onStatus` lets you register custom handlers.
 
 | <<vault-client,*VaultClient*>>
 | Vault-specific fluent HTTP client built on top of `RestClient`. Provides methods for common HTTP verbs and request construction along with javadoc:org.springframework.vault.client.VaultEndpoint[] support to decouple access to functionality through relative paths from actual Vault server configuration.
-| Convenience methods for setting tokens (`token(…)`) and namespaces (`namespace(…)`); easier to manage authentication headers and can be used with javadoc:org.springframework.vault.authentication.ClientAuthentication[] implementations to log into Vault.
-| Path-based request methods; Allows consuming Vault responses as javadoc:org.springframework.vault.support.VaultResponse[] through `ResponseSpec.body()` and `ResponseSpec.toEntity()` methods; supports response wrapping directly.
-| `4xx`/`5xx` status translated to `VaultClientResponseException`, `onStatus` lets you register custom handlers
+| Convenience methods for setting tokens (`token(…)`) and namespaces (`namespace(…)`) make it easier to manage authentication headers. They can be used with javadoc:org.springframework.vault.authentication.ClientAuthentication[] implementations to log into Vault.
+| Path-based request methods allow consuming Vault responses as javadoc:org.springframework.vault.support.VaultResponse[] through `ResponseSpec.body()` and `ResponseSpec.toEntity()` methods and support response wrapping directly.
+| `4xx`/`5xx` status codes are translated to `VaultClientResponseException`; `onStatus` lets you register custom handlers.
 
 | xref:vault/imperative-template.adoc[*VaultTemplate*]
 | High-level abstraction for Vault operations. HTTP requests can be issued through client callbacks.
@@ -135,12 +135,12 @@ Use it when your application performs secret CRUD operations and you want concis
 Spring Vault provides the following choices for making calls to Vault endpoints:
 
 * `VaultClient` -- synchronous client with a fluent API based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestClient`]
-* `ReactiveVaultClient` -- non-blocking, reactive client with fluent API  based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-webclient[`WebClient`]
+* `ReactiveVaultClient` -- non-blocking, reactive client with fluent API based on Spring Framework's {spring-framework-docs}/integration/rest-clients.html#rest-webclient[`WebClient`]
 
 `VaultClient` is a synchronous HTTP client that provides a fluent API to perform requests.
-It's reactive variant `ReactiveVaultClient` mirrors ``VaultClient``'s design for non-blocking access.
+Its reactive variant `ReactiveVaultClient` mirrors `VaultClient`'s design for non-blocking access.
 Going forward, the documentation shows `VaultClient`. Except for the reactive aspects, `ReactiveVaultClient` works the same way.
-It serves as an abstraction over HTTP libraries, and handles conversion of HTTP request and response content to and from higher level Java objects build on top of `RestClient` respective `WebClient` for its reactive variant.
+It serves as an abstraction over HTTP libraries and handles conversion of HTTP request and response content to and from higher-level Java objects. It is built on top of `RestClient` or, for its reactive variant, `WebClient`.
 
 === Create a `VaultClient`
 
@@ -236,14 +236,14 @@ Alternatively, the request body can be set using a `ParameterizedTypeReference`,
 ==== Retrieving the response
 
 Once the request has been set up, it can be sent by chaining method calls after `retrieve()`.
-For example, the response body can be accessed by using `retrieve().body(Class)` or `retrieve().body(ParameterizedTypeReference)` for parameterized types like lists. A convenience method `retrieve().body()` retuns the body using Vault's default response type javadoc:org.springframework.vault.support.VaultResponse[].
-The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, JSON can be converted into objects using Jackson.
+For example, the response body can be accessed by using `retrieve().body(Class)` or `retrieve().body(ParameterizedTypeReference)` for parameterized types like lists. A convenience method `retrieve().body()` returns the body using Vault's default response type javadoc:org.springframework.vault.support.VaultResponse[].
+The `body` method converts the response contents into various types – for instance, bytes can be converted into a `String`, and JSON can be converted into objects using Jackson.
 
-The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body, with `retrieve().toEntity(Class)`
+The response can also be converted into a `ResponseEntity`, giving access to the response headers as well as the body, with `retrieve().toEntity(Class)`.
 
 NOTE: Calling `retrieve()` by itself is a no-op and returns a `ResponseSpec`.
 Applications must invoke a terminal operation on the `ResponseSpec` to have any side effect.
-If consuming the response has no interest for your use case, you can use `retrieve().toBodilessEntity()`.
+If the response is not of interest for your use case, you can use `retrieve().toBodilessEntity()`.
 
 This sample shows how `VaultClient` can be used to perform a simple `GET` request.
 
