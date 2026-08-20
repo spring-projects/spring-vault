@@ -1,6 +1,7 @@
 name: CI Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, 4.0.x, 3.2.x, 3.1.x, 'issue/**' ]
 
@@ -9,7 +10,7 @@ permissions: read-all
 jobs:
   build-java:
     name: Build project (${{ matrix.java-version }}${{ matrix.vault-version != '' && format(', Vault {0}', matrix.vault-version) || '' }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
 
     strategy:
       matrix:
@@ -37,3 +38,10 @@ jobs:
 
       - name: Build
         uses: spring-projects/spring-data-build/actions/maven-build@4.0.x
+        env:
+          OSS_ARTIFACTORY_USR: '${{ secrets.ARTIFACTORY_USERNAME }}'
+          OSS_ARTIFACTORY_PSW: '${{ secrets.ARTIFACTORY_PASSWORD }}'
+          COMMERCIAL_ARTIFACTORY_USR: '${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}'
+          COMMERCIAL_ARTIFACTORY_PSW: '${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}'
+        with:
+          settings-xml: '${{ vars.SETTINGS_XML }}'
