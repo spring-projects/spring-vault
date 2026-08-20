@@ -33,7 +33,7 @@
 		<jackson-annotations.version>2.22</jackson-annotations.version>
 		<jackson-core.version>3.2.1</jackson-core.version>
 		<jackson-databind.version>3.2.1</jackson-databind.version>
-		<jackson2-databind.version>2.22.1</jackson2-databind.version>
+		<jackson2-databind.version>2.22.2</jackson2-databind.version>
 		<jetty-reactive-httpclient.version>4.1.5</jetty-reactive-httpclient.version>
 		<json-path.version>3.0.0</json-path.version>
 		<jspecify.version>1.0.0</jspecify.version>
