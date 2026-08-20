@@ -89,6 +89,9 @@
 												<replaceregex pattern="([\d]+\.[\d]+)(\..*)" replace="\1" />
 											</filterchain>
 										</loadresource>
+										<tstamp>
+											<format pattern="yyyy" property="current.year"/>
+										</tstamp>
 									</target>
 									<exportAntProperties>true</exportAntProperties>
 								</configuration>
@@ -129,6 +132,7 @@
 						<version>${maven.antora-version}</version>
 						<extensions>true</extensions>
 						<configuration>
+							<nodeVersion>24.15</nodeVersion>
 							<playbook>${project.basedir}/../src/main/antora/antora-playbook.yml</playbook>
 							<options>
 								<option>--to-dir=target/antora/site</option>
