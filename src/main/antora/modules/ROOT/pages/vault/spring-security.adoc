@@ -31,8 +31,8 @@ byte[] result = encryptor.decrypt(ciphertext);
 ----
 ====
 
-Vault encapsulates an entropy source that is decoupled from your JVM along with server-side key-management. This relieves the burden of proper encryption/decryption from application developers and pushes the burden onto the operators of Vault. Operators of Vault commonly include the security team at an organization, which means they can ensure that data is encrypted/decrypted properly. Additionally, since encrypt/decrypt operations must enter the audit log, any decryption event is recorded.
+Vault encapsulates an entropy source that is decoupled from your JVM along with server-side key management. This relieves the burden of proper encryption/decryption from application developers and pushes the burden onto the operators of Vault. Operators of Vault commonly include the security team at an organization, which means they can ensure that data is encrypted/decrypted properly. Additionally, since encrypt/decrypt operations must enter the audit log, any decryption event is recorded.
 The engine also supports key rotation, which allows a new version of the named key to be generated.
 All data encrypted with the key will use the newest version of the key; previously encrypted data can be decrypted using old versions of the key.
-Administrators can control which previous versions of a key are available for decryption, to prevent an attacker gaining an old copy of ciphertext to be able to successfully decrypt it.
-Vault is after all a networked service that incurs each operation with a latency. Components heavily using encryption or random bytes generation may experience a difference in throughput and performance.
+Administrators can control which previous versions of a key are available for decryption, to prevent an attacker who gains an old copy of ciphertext from successfully decrypting it.
+Vault is, after all, a networked service that adds latency to each operation. Components that heavily use encryption or random-byte generation may experience a difference in throughput and performance.

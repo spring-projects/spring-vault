@@ -5,9 +5,9 @@ Working with javadoc:org.springframework.vault.core.VaultTemplate[] and response
 Vault repositories apply Spring Data's repository concept on top of Vault.
 A Vault repository exposes basic CRUD functionality and supports query derivation with predicates constraining the identifier property, paging and sorting.
 Vault repositories use the key/value secrets engine functionality to persist and query data.
-As of version 2.4, Spring Vault can use additionally key/value version 2 secrets engine, the actual secrets engine version is discovered during runtime.
+As of version 2.4, Spring Vault can additionally use the key/value version 2 secrets engine. The actual secrets engine version is discovered at runtime.
 
-NOTE: Deletes within versioned key/value secrets engine use the `DELETE` operation. Secrets are not destroyed through `CrudRepository.delete(…)`.
+NOTE: Deletes within a versioned key/value secrets engine use the `DELETE` operation. Secrets are not destroyed through `CrudRepository.delete(…)`.
 
 NOTE: Vault Repositories determine the mount path through Vault's `sys/internal/ui/mounts/…` endpoint. Make sure that your policy allows accessing that path, otherwise you won't be able to use the repository abstraction.
 
@@ -17,7 +17,7 @@ The reference documentation will give you an introduction to Spring Data reposit
 [[vault.repositories.usage]]
 == Usage
 
-To access domain entities stored in Vault you can leverage repository support that eases implementing those quite significantly.
+To access domain entities stored in Vault, you can leverage repository support that significantly eases their implementation.
 
 .Sample Credentials Entity
 ====
@@ -33,6 +33,7 @@ class Credentials {
 }
 ----
 ====
+
 
 We have a pretty simple domain object here.
 Note that it has a property named `id` annotated with
@@ -54,13 +55,13 @@ interface CredentialsRepository extends CrudRepository<Credentials, String> {
 ----
 ====
 
-As our repository extends `CrudRepository` it provides basic CRUD and query methods.
+As our repository extends `CrudRepository`, it provides basic CRUD and query methods.
 Vault repositories require Spring Data components.
-Make sure to include `spring-data-commons` and `spring-data-keyvalue` artifacts in your class path.
+Make sure to include the `spring-data-commons` and `spring-data-keyvalue` artifacts on your classpath.
 
-The easiest way to achieve this, is by setting up dependency management and adding the artifacts to your `pom.xml`:
+The easiest way to achieve this is to set up dependency management and add the artifacts to your `pom.xml`:
 
-Then add the following to `pom.xml` dependencies section.
+Then add the following to the `<dependencies>` section of your `pom.xml`.
 
 .Using the Spring Data BOM
 ====
@@ -98,7 +99,7 @@ Then add the following to `pom.xml` dependencies section.
 ----
 ====
 
-The thing we need in between to glue things together is the according Spring configuration.
+The component that glues these pieces together is the corresponding Spring configuration.
 
 .JavaConfig for Vault Repositories
 ====
@@ -116,7 +117,7 @@ class ApplicationConfig {
 ----
 ====
 
-Given the setup above we can go on and inject `CredentialsRepository` into our components.
+Given the setup above, we can go on and inject `CredentialsRepository` into our components.
 
 .Access to Person Entities
 ====
@@ -127,7 +128,7 @@ Given the setup above we can go on and inject `CredentialsRepository` into our c
 void basicCrudOperations() {
 
   Credentials creds = new Credentials("heisenberg", "327215", "AAA-GG-SSSS");
-  rand.setAddress(new Address("308 Negra Arroyo Lane", "Albuquerque", "New Mexico", "87104"));
+  creds.setAddress(new Address("308 Negra Arroyo Lane", "Albuquerque", "New Mexico", "87104"));
 
   repo.save(creds);                                        <1>
 
@@ -139,7 +140,7 @@ void basicCrudOperations() {
 }
 ----
 
-<1> Stores properties of `Credentials` inside Vault Hash with a key pattern `keyspace/id`, in this case `credentials/heisenberg`, in the key-value secret secrets engine.
+<1> Stores properties of `Credentials` inside a Vault hash with a key pattern `keyspace/id`, in this case `credentials/heisenberg`, in the key/value secrets engine.
 <2> Uses the provided id to retrieve the object stored at `keyspace/id`.
 <3> Counts the total number of entities available within the keyspace _credentials_ defined by `@Secret` on `Credentials`.
 <4> Removes the key for the given object from Vault.
@@ -148,9 +149,9 @@ void basicCrudOperations() {
 [[vault.repositories.mapping]]
 == Object to Vault JSON Mapping
 
-Vault repositories store objects in Vault using JSON as interchange format.
+Vault repositories store objects in Vault using JSON as an interchange format.
 Object mapping between JSON and the entity is done by `VaultConverter`.
-The converter reads and writes `SecretDocument` that contains the body from a `VaultResponse`. ``VaultResponse``s are read from Vault and the body is deserialized by Jackson into a `Map` of `String` and `Object`.
+The converter reads and writes `SecretDocument` instances that contain the body of a `VaultResponse`. `VaultResponse`s are read from Vault and the body is deserialized by Jackson into a `Map` of `String` and `Object`.
 The default `VaultConverter` implementation reads the `Map` with nested values, `List` and `Map` objects and converts these to entities and vice versa.
 
 Given the `Credentials` type from the previous sections the default mapping is as follows:
@@ -171,7 +172,7 @@ Given the `Credentials` type from the previous sections the default mapping is a
 }
 ----
 
-<1> The `_class` attribute is included on root level as well as on any nested interface or abstract types.
+<1> The `_class` attribute is included at the root level as well as on any nested interface or abstract types.
 <2> Simple property values are mapped by path.
 <3> Properties of complex types are mapped as nested objects.
 ====
@@ -186,7 +187,7 @@ NOTE: The `@Id` property must be mapped to `String`.
 | Mapped value
 
 | Simple Type +
-(. g. String)
+(e.g. String)
 | String firstname = "Walter";
 | "firstname": "Walter"
 
@@ -213,17 +214,17 @@ of complex type
 |===
 
 You can customize the mapping behavior by registering a `Converter` in `VaultCustomConversions`.
-Those converters can take care of converting from/to a type such as `LocalDate` as well as `SecretDocument`
-whereas the first one is suitable for converting simple properties and the last one complex types to their JSON representation.
+Those converters can take care of converting to and from types such as `LocalDate` and `SecretDocument`,
+where the former is suitable for simple properties and the latter for complex types in their JSON representation.
 The second option offers full control over the resulting `SecretDocument`.
 Writing objects to `Vault`
-will delete the content and re-create the whole entry, so not mapped data will be lost.
+will delete the content and re-create the whole entry, so unmapped data will be lost.
 
 [[vault.repositories.queries]]
 == Queries and Query Methods
 
 Query methods allow automatic derivation of simple queries from the method name.
-Vault has no query engine but requires direct access of HTTP context paths.
+Vault has no query engine but requires direct access to HTTP context paths.
 Vault query methods translate Vault's API possibilities to queries.
 A query method execution lists children under a context path, applies filtering to the Id, optionally limits the Id stream with offset/limit and applies sorting after fetching the results.
 
@@ -242,7 +243,7 @@ NOTE: Query methods for Vault repositories support only queries with predicates 
 
 Here's an overview of the keywords supported for Vault.
 
-[cols="1,2" options="header"]
+[cols="1,2",options="header"]
 .Supported keywords for query methods
 |===
 | Keyword
@@ -306,14 +307,14 @@ Here's an overview of the keywords supported for Vault.
 [[vault.repositories.sorting.paging]]
 === Sorting and Paging
 
-Query methods support sorting and paging by selecting in memory a sublist (offset/limit) Id's retrieved from a Vault context path.
-Sorting has is not limited to a particular field, unlike query method predicates.
+Query methods support sorting and paging by selecting an in-memory sublist (offset/limit) of IDs retrieved from a Vault context path.
+Sorting is not limited to a particular field, unlike query method predicates.
 Unpaged sorting is applied after Id filtering and all resulting secrets are fetched from Vault.
 This way a query method fetches only results that are also returned as part of the result.
 
-Using paging and sorting requires secret fetching before filtering the Id's which impacts performance.
-Sorting and paging guarantees to return the same result even if the natural order of Id returned by Vault changes.
-Therefore, all Id's are fetched from Vault first, then sorting is applied and afterwards filtering and offset/limiting.
+Using paging and sorting requires secret fetching before filtering the IDs, which impacts performance.
+Sorting and paging guarantee the same result even if the natural order of IDs returned by Vault changes.
+Therefore, all IDs are fetched from Vault first, then sorting is applied and afterwards filtering and offset/limiting.
 
 .Paging and Sorting Repository
 ====
@@ -331,8 +332,8 @@ interface CredentialsRepository extends PagingAndSortingRepository<Credentials, 
 [[vault.repositories.optimistic-locking]]
 == Optimistic Locking
 
-Vaults key/value secrets engine version 2 can maintain versioned secrets.
-Spring Vault supports versioning through a version property in the domain model that are annotated with `@Version`.
+Vault's key/value secrets engine version 2 can maintain versioned secrets.
+Spring Vault supports versioning through a version property in the domain model that is annotated with `@Version`.
 Using optimistic locking makes sure updates are only applied to secrets with a matching version.
 Therefore, the actual value of the version property is added to the update request through the `cas` property.
 If another operation altered the secret in the meantime, then an OptimisticLockingFailureException is thrown and the secret isn't updated.
@@ -369,12 +370,12 @@ VersionedCredentials concurrent = repo.findById("sample-credentials").get();    
 
 credentials.setPassword("something-else");
 
-repos.save(credentials);                                                         <3>
+repo.save(credentials);                                                          <3>
 
 
 concurrent.setPassword("concurrent change");
 
-repos.save(concurrent); // throws OptimisticLockingFailureException              <4>
+repo.save(concurrent); // throws OptimisticLockingFailureException               <4>
 
 ----
 
@@ -391,7 +392,7 @@ NOTE: When deleting versioned secrets, delete by Id deletes the most recent secr
 [[vault.repositories.revision-repository]]
 == Accessing versioned secrets
 
-Key/Value version 2 secrets engine maintains versions of secrets that can be accessed by implementing https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/history/RevisionRepository.html[`RevisionRepository`] in your Vault repository interface declaration.
+The Key/Value version 2 secrets engine maintains versions of secrets that can be accessed by implementing https://docs.spring.io/spring-data/commons/docs/current/api/org/springframework/data/repository/history/RevisionRepository.html[`RevisionRepository`] in your Vault repository interface declaration.
 Revision repositories define lookup methods to obtain revisions for a particular identifier.
 Identifiers must be `String`.
 
@@ -424,5 +425,3 @@ Revisions<Integer, Credentials> revisions = repo.findRevisions("my-secret-id");
 Page<Revision<Integer, Credentials>> firstPageOfRevisions = repo.findRevisions("my-secret-id", Pageable.ofSize(4));
 ----
 ====
-
-
