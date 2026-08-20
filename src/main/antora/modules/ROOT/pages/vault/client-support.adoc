@@ -7,21 +7,21 @@ javadoc:org.springframework.vault.client.VaultClient[] as primary interface acce
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
 
-Spring Vault supports following HTTP imperative clients:
+Spring Vault supports the following HTTP imperative clients:
 
-* Java's builtin `HttpClient` (default client if no other is available)
+* Java's built-in `HttpClient` (default client if no other is available)
 * Apache Http Components
 * Reactor Netty
 * Jetty
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
-* Java's builtin reactive `HttpClient` (default client if no other is available)
+* Java's built-in reactive `HttpClient` (default client if no other is available)
 * Apache Http Components
 * Reactor Netty
 * Jetty
 
-Using a specific client requires the according dependency to be available on the classpath
+Using a specific client requires the corresponding dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
 
 == Java's built-in `HttpClient`
@@ -110,12 +110,12 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
 <1> Full configuration.
 <2> Configuring only trust store settings.
 <3> Configuring only key store settings.
-<4> Configuring only key store settings with providing a key-configuration.
+<4> Configuring only key store settings with a key configuration.
 ====
 
-Please note that providing javadoc:org.springframework.vault.support.SslConfiguration[] can be only applied when Apache Http Components is on your class-path.
+Please note that javadoc:org.springframework.vault.support.SslConfiguration[] can be used only when Apache Http Components is on your classpath.
 
-The SSL configuration supports also PEM-encoded certificates as alternative to a Java Key Store.
+The SSL configuration also supports PEM-encoded certificates as an alternative to a Java Key Store.
 
 ====
 [source,java]
@@ -127,4 +127,4 @@ SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
 ====
 
 PEM files may contain one or more certificates (blocks of `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`).
-Certificates added to the underlying `KeyStore` use the full subject name as alias.
+Certificates added to the underlying `KeyStore` use the full subject name as an alias.
