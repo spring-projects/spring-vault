@@ -1,6 +1,7 @@
 name: CI Build
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main, 4.0.x, 3.2.x, 3.1.x, 'issue/**' ]
 
@@ -9,13 +10,13 @@ permissions: read-all
 jobs:
   build-java:
     name: Build project (${{ matrix.java-version }}${{ matrix.vault-version != '' && format(', Vault {0}', matrix.vault-version) || '' }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
 
     strategy:
       matrix:
         java-version: [ 'base', 'next' ]
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@3.5.x
         with:
@@ -25,3 +26,10 @@ jobs:
         uses: ./.github/actions/setup-vault
       - name: Build
         uses: spring-projects/spring-data-build/actions/maven-build@3.5.x
+        env:
+          OSS_ARTIFACTORY_USR: '${{ secrets.ARTIFACTORY_USERNAME }}'
+          OSS_ARTIFACTORY_PSW: '${{ secrets.ARTIFACTORY_PASSWORD }}'
+          COMMERCIAL_ARTIFACTORY_USR: '${{ secrets.COMMERCIAL_ARTIFACTORY_USERNAME }}'
+          COMMERCIAL_ARTIFACTORY_PSW: '${{ secrets.COMMERCIAL_ARTIFACTORY_PASSWORD }}'
+        with:
+          settings-xml: '${{ vars.SETTINGS_XML }}'
