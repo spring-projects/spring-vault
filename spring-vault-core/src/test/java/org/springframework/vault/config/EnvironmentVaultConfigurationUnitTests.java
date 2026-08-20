@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -63,6 +64,37 @@ class EnvironmentVaultConfigurationUnitTests {
 	@Test
 	void shouldConfigureEndpoint() {
 		assertThat(this.configuration.vaultEndpoint().getPort()).isEqualTo(8123);
+	}
+
+	@Test
+	void shouldConfigureEndpointUsingVaultAddr() {
+
+		try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext()) {
+
+			context.getEnvironment()
+					.getPropertySources()
+					.addFirst(new MapPropertySource("vaultAddr",
+							Map.of("VAULT_ADDR", "https://localhost:9123", "vault.token", "my-token")));
+			context.register(ApplicationConfiguration.class);
+			context.refresh();
+
+			assertThat(context.getBean(EnvironmentVaultConfiguration.class).vaultEndpoint().getPort()).isEqualTo(9123);
+		}
+	}
+
+	@Test
+	void shouldPreferVaultUriOverVaultAddr() {
+
+		MapPropertySource propertySource = new MapPropertySource("vaultAddr",
+				Map.of("VAULT_ADDR", "https://localhost:9123"));
+		this.configurableEnvironment.getPropertySources().addFirst(propertySource);
+
+		try {
+			assertThat(this.configuration.vaultEndpoint().getPort()).isEqualTo(8123);
+		}
+		finally {
+			this.configurableEnvironment.getPropertySources().remove(propertySource.getName());
+		}
 	}
 
 	@Test
