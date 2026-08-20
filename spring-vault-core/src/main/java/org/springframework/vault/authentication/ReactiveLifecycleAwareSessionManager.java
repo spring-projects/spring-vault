@@ -308,23 +308,33 @@ public class ReactiveLifecycleAwareSessionManager extends LifecycleAwareSessionM
 	public Mono<VaultToken> getVaultToken() throws VaultException {
 		Mono<TokenWrapper> tokenWrapper = this.token.get();
 		if (tokenWrapper == EMPTY) {
-			Mono<TokenWrapper> obtainToken = this.clientAuthentication.getVaultToken()
-					.flatMap(this::doSelfLookup) //
-					.onErrorMap(it -> {
-						multicastEvent(new LoginFailedEvent(this.clientAuthentication, it));
-						return it;
-					})
-					.doOnNext(it -> {
-						if (isTokenRenewable(it.getToken())) {
-							scheduleRenewal(it.getToken());
-						}
-						multicastEvent(new AfterLoginEvent(it.getToken()));
-					});
-
-			this.token.compareAndSet(tokenWrapper, obtainToken.cache());
+			Mono<TokenWrapper> obtainToken = createLoginTokenMono();
+			this.token.compareAndSet(tokenWrapper, obtainToken);
 		}
 
 		return this.token.get().map(TokenWrapper::getToken);
+	}
+
+	private Mono<TokenWrapper> createLoginTokenMono() {
+		AtomicReference<Mono<TokenWrapper>> cachedLoginRef = new AtomicReference<>(EMPTY);
+		Mono<TokenWrapper> obtainToken = this.clientAuthentication.getVaultToken()
+				.flatMap(this::doSelfLookup) //
+				.onErrorMap(it -> {
+					multicastEvent(new LoginFailedEvent(this.clientAuthentication, it));
+					return it;
+				})
+				.doOnNext(it -> {
+					if (isTokenRenewable(it.getToken())) {
+						scheduleRenewal(it.getToken());
+					}
+					multicastEvent(new AfterLoginEvent(it.getToken()));
+				})
+				.doOnError(it -> this.token.compareAndSet(cachedLoginRef.get(), EMPTY))
+				.cache();
+
+		cachedLoginRef.set(obtainToken);
+
+		return obtainToken;
 	}
 
 	private Mono<TokenWrapper> doSelfLookup(VaultToken token) {
