@@ -10,7 +10,7 @@
 == What's new in Spring Vault 2.4
 
 * Support for xref:vault/authentication.adoc#vault.authentication.userpass[Username/Password authentication] for Username/Password, LDAP, Okta, and RADIUS authentication.
-* Support of versioned Key/Value secrets engines for Vault repositories.
+* Support for versioned Key/Value secrets engines for Vault repositories.
 * xref:vault/vault-repositories.adoc#repositories.optimistic-locking[Optimistic locking support through Vault repositories using versioned Key/Value secrets engines].
 
 [[new-features.2-3-0]]
@@ -31,8 +31,8 @@
 
 * Support for Key-Value v2 (versioned secrets engine) secrets through `@VaultPropertySource`.
 * SpEL support in `@Secret`.
-* Add support for Jetty as reactive HttpClient.
-* `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` emit now ``AuthenticationEvent``s.
+* Add support for Jetty as a reactive HttpClient.
+* `LifecycleAwareSessionManager` and `ReactiveLifecycleAwareSessionManager` now emit `AuthenticationEvent`s.
 * xref:vault/vault-secret-engines.adoc#vault.authentication.pcf[PCF Authentication].
 * Deprecation of `AppIdAuthentication`.
 Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
@@ -45,7 +45,7 @@ Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 * xref:vault/authentication.adoc#vault.authentication.gcpgce[GCP Compute], xref:vault/authentication.adoc#vault.authentication.gcpiam[GCP IAM], and xref:vault/authentication.adoc#vault.authentication.azuremsi[Azure] authentication.
 * Template API support for versioned and unversioned Key/Value secrets engines and for Vault wrapping operations.
 * Support full pull mode in reactive AppRole authentication.
-* Improved Exception hierarchy for Vault login failures.
+* Improved exception hierarchy for Vault login failures.
 
 [[new-features.2-0-0]]
 == What's new in Spring Vault 2.0
@@ -73,4 +73,3 @@ Use `AppRoleAuthentication` instead as recommended by HashiCorp Vault.
 == What's new in Spring Vault 1.0
 
 * Initial Vault support.
-

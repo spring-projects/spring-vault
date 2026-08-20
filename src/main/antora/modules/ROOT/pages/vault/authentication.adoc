@@ -3,7 +3,7 @@
 
 Different organizations have different requirements for security
 and authentication. Vault reflects that need by shipping multiple authentication
-methods. Spring Vault supports multiple authentications mechanisms.
+methods. Spring Vault supports multiple authentication mechanisms.
 
 == Externalizing login credentials
 
@@ -11,7 +11,7 @@ Obtaining first-time access to a secured system is known as secure introduction.
 Any client requires ephemeral or permanent credentials to access Vault. Externalizing credentials
 is a good pattern to keep code maintainability high but comes at a risk of increased disclosure.
 
-Disclosure of login credentials to any party allows login to Vault and access secrets that
+Disclosure of login credentials to any party allows them to log in to Vault and access secrets that
 are permitted by the underlying role. Picking the appropriate client authentication and
 injecting credentials into the application is subject to risk evaluation.
 
@@ -37,7 +37,7 @@ public class Config extends AbstractVaultConfiguration {
 ----
 ====
 
-NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultPropertySource`, injection via `@Autowired Environment environment` will not provide the `Environment` as the environment bean is still in construction and autowiring comes at a later stage. Your configuration class should rather implement `ApplicationContextAware` and obtain the `Environment` from `ApplicationContext`.
+NOTE: Spring allows multiple ways to obtain `Environment`. When using `VaultPropertySource`, injection via `@Autowired Environment environment` does not provide the `Environment` because the `Environment` bean is still being constructed and autowiring occurs at a later stage. Your configuration class should rather implement `ApplicationContextAware` and obtain the `Environment` from `ApplicationContext`.
 
 See https://github.com/spring-projects/spring-vault/blob/master/spring-vault-core/src/test/java/org/springframework/vault/demo/SecurePropertyUsage.java[`SecurePropertyUsage.java`]
 for a sample on referencing properties in components and other property sources.
@@ -49,7 +49,7 @@ Tokens are the core method for authentication within Vault.
 Token authentication requires a static token to be provided.
 
 NOTE: Token authentication is the default authentication method.
-If a token is disclosed an unintended party, it gains access to Vault and
+If a token is disclosed to an unintended party, it gains access to Vault and
 can access secrets for the intended client.
 
 Typically, Token authentication is used in scenarios in which the token is created and renewed
@@ -86,15 +86,15 @@ See also:
 NOTE: AppId authentication is deprecated by Vault. Use <<vault.authentication.approle>> instead.
 
 Vault supports https://www.vaultproject.io/docs/auth/app-id.html[AppId]
-authentication that consists of two hard to guess tokens. The AppId
+authentication that consists of two hard-to-guess tokens. The AppId
 defaults to `spring.application.name` that is statically configured.
-The second token is the UserId which is a part determined by the application,
-usually related to the runtime environment. IP address, Mac address or a
+The second token is the UserId, which is determined in part by the application
+and usually related to the runtime environment. IP address, MAC address, or a
 Docker container name are good examples. Spring Vault supports
-IP address, Mac address and static UserId's (e.g. supplied via System properties).
-The IP and Mac address are represented as Hex-encoded SHA256 hash.
+IP address, MAC address, and static UserIds (e.g. supplied via System properties).
+The IP and MAC addresses are represented as a hex-encoded SHA-256 hash.
 
-IP address-based UserId's use the local host's IP address.
+IP address-based UserIds use the local host's IP address.
 
 ====
 [source,java]
@@ -119,7 +119,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-The corresponding command to generate the IP address UserId from a command line is:
+The corresponding command to generate the IP address UserId from the command line is:
 
 ----
 $ echo -n 192.168.99.1 | sha256sum
@@ -128,11 +128,11 @@ $ echo -n 192.168.99.1 | sha256sum
 NOTE: Including the line break of `echo` leads to a different hash value
 so make sure to include the `-n` flag.
 
-Mac address-based UserId's obtain their network device from the
+MAC address-based UserIds obtain their network device from the
 localhost-bound device. The configuration also allows specifying
 a `network-interface` hint to pick the right device. The value of
 `network-interface` is optional and can be either an interface
-name or interface index (0-based).
+name or an interface index (0-based).
 
 ====
 [source,java]
@@ -158,19 +158,19 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-The corresponding command to generate the Mac address UserId from a command line is:
+The corresponding command to generate the MAC address UserId from the command line is:
 
 ----
 $ echo -n 0AFEDE1234AC | sha256sum
 ----
 
-NOTE: The Mac address is specified uppercase and without colons.
+NOTE: The MAC address is specified in uppercase and without colons.
 Including the line break of `echo` leads to a different hash value
 so make sure to include the `-n` flag.
 
 === Custom UserId
 
-A more advanced approach lets you implementing your own `AppIdUserIdMechanism`.
+A more advanced approach lets you implement your own `AppIdUserIdMechanism`.
 This class must be on your classpath and must implement
 the `org.springframework.vault.authentication.AppIdUserIdMechanism` interface
 and the `createUserId` method. Spring Vault will obtain the UserId
@@ -200,10 +200,10 @@ See also: https://www.vaultproject.io/docs/auth/app-id.html[Vault Documentation:
 
 https://www.vaultproject.io/docs/auth/app-id.html[AppRole] allows machine
 authentication, like the deprecated (since Vault 0.6.1) <<vault.authentication.appid>>.
-AppRole authentication consists of two hard to guess (secret) tokens: RoleId and SecretId.
+AppRole authentication consists of two hard-to-guess (secret) tokens: RoleId and SecretId.
 
-Spring Vault supports AppRole authentication by providing either RoleId only
-or together with a provided SecretId and fetching RoleId/SecretId from Vault
+Spring Vault supports AppRole authentication by providing a RoleId alone,
+providing a RoleId and SecretId, or fetching the RoleId and SecretId from Vault
 (push and pull modes with response unwrapping).
 
 ====
@@ -230,7 +230,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-Spring Vault also support full pull mode: If RoleId and SecretId are not provided,
+Spring Vault also supports full pull mode. If RoleId and SecretId are not provided,
 Spring Vault will retrieve them using the role name and an initial token. The
 initial token may be associated with a TTL and usage limit.
 
@@ -269,7 +269,7 @@ The https://www.vaultproject.io/docs/auth/aws-ec2.html[aws-ec2]
 auth method provides a secure introduction mechanism
 for AWS EC2 instances, allowing automated retrieval of a Vault token.
 Unlike most Vault authentication methods, this method
-does not require first-deploying, or provisioning security-sensitive
+does not require pre-deploying or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats AWS as a Trusted Third Party and uses the
 cryptographically signed dynamic metadata information that uniquely
@@ -293,12 +293,12 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-AWS-EC2 authentication enables nonce by default to follow
+AWS-EC2 authentication enables a nonce by default to follow
 the Trust On First Use (TOFU) principle. Any unintended party that
 gains access to the PKCS#7 identity metadata can authenticate
 against Vault.
 
-During the first login, Spring Vault generates a nonce that is stored in the auth method aside the instance Id.
+During the first login, Spring Vault generates a nonce that is stored in the auth method alongside the instance ID.
 Re-authentication requires the same nonce to be sent. Any other
 party does not have the nonce and can raise an alert in Vault for
 further investigation.
@@ -327,7 +327,7 @@ executed by Vault to get the identity of the signer using AWS STS
 IAM credentials can be obtained from either the runtime environment
 or supplied externally. Runtime environments such as AWS-EC2,
 Lambda and ECS with assigned IAM principals do not require client-specific
-configuration of credentials but can obtain these from its metadata source.
+configuration of credentials but can obtain them from their metadata sources.
 
 ====
 [source,java]
@@ -351,7 +351,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ----
 ====
 
-.Using AWS-EC2 instance profile as credentials source
+.Using an AWS-EC2 instance profile as a credentials source
 ====
 [source,java]
 ----
@@ -391,7 +391,7 @@ The https://www.vaultproject.io/docs/auth/azure.html[azure]
 auth method provides a secure introduction mechanism
 for Azure VM instances, allowing automated retrieval of a Vault token.
 Unlike most Vault authentication methods, this method
-does not require first-deploying, or provisioning security-sensitive
+does not require pre-deploying or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats Azure as a Trusted Third Party and uses the
 managed service identity and instance metadata information that can be
@@ -420,7 +420,7 @@ class AppConfig extends AbstractVaultConfiguration {
 ====
 
 Azure authentication requires details about the VM environment (subscription Id,
-resource group name, VM name). These details can be either configured through
+resource group name, VM name). These details can be configured through
 `AzureMsiAuthenticationOptionsBuilder`.
 If left unconfigured, `AzureMsiAuthentication` queries Azure's instance metadata service to
 obtain these details.
@@ -442,7 +442,7 @@ is obtained from the GCE  metadata service using https://cloud.google.com/comput
 This API creates a JSON Web Token that can be used to confirm the instance identity.
 
 Unlike most Vault authentication methods, this method
-does not require first-deploying, or provisioning security-sensitive
+does not require pre-deploying or provisioning security-sensitive
 credentials (tokens, username/password, client certificates, etc.).
 Instead, it treats GCP as a Trusted Third Party and uses the
 cryptographically signed dynamic metadata information that uniquely
@@ -487,13 +487,13 @@ auth method allows Vault login by using existing GCP (Google Cloud Platform) IAM
 
 GCP IAM authentication creates a signature in the form of a JSON Web Token (JWT)
 for a service account. A JWT for a service account is obtained by
-calling GCP IAM's https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM and proves thereby its identity.
+calling GCP IAM's https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[`projects.serviceAccounts.signJwt`] API. The caller authenticates against GCP IAM and thereby proves its identity.
 This Vault auth method treats GCP as a Trusted Third Party.
 
 IAM credentials can be obtained from either the runtime environment
-or supplied externally as e.g. JSON. JSON is the preferred form as it
-carries the project id and service account identifier required for calling
-``projects.serviceAccounts.signJwt``.
+or supplied externally as JSON. JSON is the preferred form because it
+carries the project ID and service account identifier required for calling
+`projects.serviceAccounts.signJwt`.
 
 ====
 [source,java]
@@ -524,11 +524,11 @@ as the authentication implementation uses Google APIs for credentials and JWT si
 
 You can configure the authentication via `GcpIamCredentialsAuthenticationOptions`.
 
-NOTE: Google credentials require an OAuth 2 token maintaining the token lifecycle. All API
-is synchronous therefore, `GcpIamCredentialsAuthentication` does not support `AuthenticationSteps` which is
+NOTE: Google credentials require an OAuth 2 token to maintain the token lifecycle. All APIs
+are synchronous; therefore, `GcpIamCredentialsAuthentication` does not support `AuthenticationSteps`, which is
 required for reactive usage.
 
-NOTE: `GcpIamCredentialsAuthentication` uses the https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[IAM Credentials API] and is a replacement using the for the deprecated `GcpIamAuthentication` using the deprecated https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/signJwt[IAM API].
+NOTE: `GcpIamCredentialsAuthentication` uses the https://cloud.google.com/iam/docs/reference/credentials/rest/v1/projects.serviceAccounts/signJwt[IAM Credentials API] and replaces the deprecated `GcpIamAuthentication`, which uses the deprecated https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts/signJwt[IAM API].
 
 See also:
 
@@ -544,8 +544,8 @@ auth method provides an authentication mechanism based on GitHub tokens.
 Vault does not support an OAuth workflow to generate GitHub tokens,
 so it does not act as a GitHub application.
 
-The authentication mechanism requires a GitHub token (or a supplier)
-to pass on the token to Vault which then authenticates against your GitHub
+The authentication mechanism requires a GitHub token, or a supplier,
+to pass the token to Vault, which then authenticates against your GitHub
 account.
 
 ====
@@ -559,7 +559,7 @@ class AppConfig extends AbstractVaultConfiguration {
     @Override
     public ClientAuthentication clientAuthentication() {
 
-        GitHubAuthentication options = GitHubAuthentication.builder()
+        GitHubAuthenticationOptions options = GitHubAuthenticationOptions.builder()
                     .token(…).build();
 
         return new GitHubAuthentication(options, restOperations());
@@ -582,10 +582,10 @@ auth method allows Vault login for PCF instances.
 It leverages https://content.pivotal.io/blog/new-in-pcf-2-1-app-container-identity-assurance-via-automatic-cert-rotation[PCF's App and Container Identity Assurance].
 
 PCF authentication uses the instance key and certificate to create a signature that is validated by Vault.
-If the signature matches, and potentially bound organization/space/application Id's match, Vault issues an appropriately-scoped token.
+If the signature and any bound organization/space/application IDs match, Vault issues an appropriately-scoped token.
 
-Instance credentials are available from files at `CF_INSTANCE_CERT` and
-`CF_INSTANCE_KEY` variables.
+Instance credentials are available from the files specified by the `CF_INSTANCE_CERT` and
+`CF_INSTANCE_KEY` environment variables.
 
 ====
 [source,java]
@@ -626,10 +626,10 @@ Using the PCF auth method]
 The `cert` auth method allows authentication using SSL/TLS client
 certificates that are either signed by a CA or self-signed.
 
-To enable `cert` authentication you need to:
+To enable `cert` authentication, you need to:
 
 1. Use SSL, see <<vault.client-ssl>>
-2. Configure a Java `Keystore` that contains the client
+2. Configure a Java `KeyStore` that contains the client
 certificate and the private key
 
 ====
@@ -660,8 +660,8 @@ See also: https://www.vaultproject.io/docs/auth/cert.html[Vault Documentation: U
 == Cubbyhole authentication
 
 Cubbyhole authentication uses Vault primitives to provide a secured authentication
-workflow. Cubbyhole authentication uses tokens as primary login method.
-An ephemeral token is used to obtain a second, login VaultToken from Vault's Cubbyhole secrets engine.
+workflow. Cubbyhole authentication uses tokens as the primary login method.
+An ephemeral token is used to obtain a second login `VaultToken` from Vault's Cubbyhole secrets engine.
 The login token is usually longer-lived and used to
 interact with Vault. The login token can be retrieved either from a wrapped
 response or from the `data` section.
@@ -670,7 +670,7 @@ response or from the `data` section.
 
 NOTE: Response Wrapping for token creation requires Vault 0.6.0 or higher.
 
-.Crating and storing tokens
+.Creating and storing tokens
 ====
 [source,shell]
 ----
@@ -712,7 +712,7 @@ class AppConfig extends AbstractVaultConfiguration {
 
 *Using stored tokens*
 
-.Crating and storing tokens
+.Creating and storing tokens
 ====
 [source,shell]
 ----
@@ -767,15 +767,15 @@ class AppConfig extends AbstractVaultConfiguration {
 
 *Remaining TTL/Renewability*
 
-Tokens retrieved from Cubbyhole associated with a non-zero TTL start their TTL at the
-time of token creation. That time is not necessarily identical with application
+Tokens retrieved from Cubbyhole that are associated with a non-zero TTL start their TTL at the
+time of token creation. That time is not necessarily identical to application
 startup. To compensate for the initial delay, Cubbyhole authentication performs a
-self lookup for tokens associated with a non-zero TTL to retrieve the remaining TTL.
+self-lookup for tokens associated with a non-zero TTL to retrieve the remaining TTL.
 Cubbyhole authentication will not self-lookup wrapped tokens without a TTL because a
 zero TTL indicates there is no TTL associated.
 
 Non-wrapped tokens do not provide details regarding renewability and TTL by just
-retrieving the token. A self-lookup will lookup renewability and the remaining TTL.
+retrieving the token. A self-lookup will look up renewability and the remaining TTL.
 
 See also:
 
@@ -789,7 +789,7 @@ See also:
 Configuring JWT authentication requires the token or a JWT supplier.
 You can configure the authentication via `JwtAuthenticationOptions`.
 
-On the Vault side you can configure the JWT auth method by enabling the JWT auth method and creating a role.
+On the Vault side, you can configure the JWT auth method by enabling the JWT auth method and creating a role.
 You can either use `oidc_discovery_url`, `jwks_url` or `jwt_validation_pubkeys` to configure the JWT auth method.
 
 ====
@@ -821,7 +821,7 @@ See also:
 [[vault.authentication.kubernetes]]
 == Kubernetes authentication
 
-Vault supports since 0.8.3 https://www.vaultproject.io/docs/auth/kubernetes.html[kubernetes]-based authentication using Kubernetes tokens.
+Since 0.8.3, Vault supports https://www.vaultproject.io/docs/auth/kubernetes.html[kubernetes]-based authentication using Kubernetes tokens.
 
 Using Kubernetes authentication requires a Kubernetes Service Account Token,
 usually mounted at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
@@ -862,16 +862,16 @@ See also:
 [[vault.authentication.userpass]]
 == Username/Password authentication
 
-Username/Password is typically a end-user authentication scheme.
+Username/Password is typically an end-user authentication scheme.
 Using username and password is supported by multiple Vault authentication methods:
 
 * Username and Password (`userpass`)
 * LDAP (`ldap`)
-* Okta (`okta`, supports additionaly time-based one-time tokens)
+* Okta (`okta`, also supports time-based one-time tokens)
 * RADIUS (`radius`)
 
-`UserPasswordAuthenticationOptions` can be used with all above mentioned authentication methods as the Login API is similar across all mechanisms.
-Please ensure to use the appropriate auth mount path when configuring `UserPasswordAuthenticationOptions`.
+`UserPasswordAuthenticationOptions` can be used with all the above-mentioned authentication methods as the Login API is similar across all mechanisms.
+Ensure that you use the appropriate auth mount path when configuring `UserPasswordAuthenticationOptions`.
 
 .Configuring `UserPasswordAuthentication`
 ====
@@ -910,13 +910,13 @@ See also:
 authentication steps. Pre-composed authentications are easy to use and to configure with
 a tight binding to synchronous execution.
 
-The composition of authentication methods and reusing common steps, such as posting login
-payload to Vault or retrieving authentication input from an HTTP source is not intended
-with `ClientAuthentication` objects.
+Composing authentication methods and reusing common steps, such as posting a login
+payload to Vault or retrieving authentication input from an HTTP source, are not supported
+by `ClientAuthentication` objects.
 
-Authentication steps provide reusability of common authentication activity.
+Authentication steps provide reusable common authentication activities.
 Steps created via `AuthenticationSteps` describe an authentication flow in a functional
-style leaving the actual authentication execution to specific executors.
+style, leaving the actual authentication execution to specific executors.
 
 .Stored token authentication flow.
 ====
@@ -928,8 +928,8 @@ AuthenticationSteps.just(VaultToken.of(…));                              <1>
 ====
 
 A single-step authentication flow can be created from a single input. Flows declaring
-multiple authentication steps start with a `Supplier` or `HttpRequest` that provide an
-authentication state object which can be used to map or post to Vault for login.
+multiple authentication steps start with a `Supplier` or `HttpRequest` that provides an
+authentication-state object which can be used to map or post to Vault for login.
 
 .AppRole authentication flow
 ====
@@ -941,10 +941,10 @@ AuthenticationSteps.fromSupplier(                                       <1>
 
     .login("auth/{mount}/login", options.getPath());                    <3>
 ----
-<1> Start declaring `AuthenticationSteps` accepting a `Supplier<T>`.
+<1> Start by declaring `AuthenticationSteps` accepting a `Supplier<T>`.
 The state object type depends on the `Supplier` response type which can be mapped in a later step.
 <2> The actual `Supplier` implementation.
-Creating a `Map` in this case.
+In this case, it creates a `Map`.
 <3> Perform a Vault login by posting the state object (`Map`) to a Vault endpoint for Vault token creation.
 Note that template variables are subject to URL escaping.
 ====
@@ -955,7 +955,7 @@ for different execution models:
 * `AuthenticationStepsExecutor` as a drop-in replacement for synchronous `ClientAuthentication`.
 * `AuthenticationStepsOperator` for reactive execution.
 
-Many ``ClientAuthentication``'s come with static factory methods to create `AuthenticationSteps`
+Many `ClientAuthentication` implementations come with static factory methods to create `AuthenticationSteps`
 for their authentication-specific options:
 
 .Synchronous `AuthenticationSteps` execution
@@ -976,17 +976,17 @@ VaultToken token = executor.login();
 [[vault.authentication.session]]
 == Token Lifecycle
 
-Vault's tokens can be associated with a time to live. Tokens obtained by an authentication method
+Vault's tokens can be associated with a time-to-live. Tokens obtained by an authentication method
 are intended to be used as long as the session is active and should not expire while the application is active.
 
-Spring Vault provides with javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] a session manager that can renew the token until it reaches its terminal TTL to then perform another login to obtain the next token which is associated with the session.
+Spring Vault provides javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[], a session manager that can renew the token until it reaches its terminal TTL and then perform another login to obtain the next token associated with the session.
 
 Depending on the authentication method, a login can create two kinds of tokens:
 
-* javadoc:org.springframework.vault.support.VaultToken[]: Generic token encapsulating the actual token.
-* javadoc:org.springframework.vault.authentication.LoginToken[]: Token associated with renewability/TTL.
+* javadoc:org.springframework.vault.support.VaultToken[]: A generic token that encapsulates the actual token.
+* javadoc:org.springframework.vault.authentication.LoginToken[]: A token associated with renewability/TTL.
 
-Authentication methods such as javadoc:org.springframework.vault.authentication.TokenAuthentication[] just create a `VaultToken` which does not carry any renewability/TTL details. javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] will run a self-lookup on the token to retrieve renewability and TTL from Vault.
-`VaultToken` are renewed periodically if self-lookup is enabled. Note that `VaultToken` are never revoked, only `LoginToken` are revoked.
+Authentication methods such as javadoc:org.springframework.vault.authentication.TokenAuthentication[] create only a `VaultToken` which does not carry any renewability/TTL details. javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[] will run a self-lookup on the token to retrieve renewability and TTL from Vault.
+`VaultToken` instances are renewed periodically if self-lookup is enabled. Note that `VaultToken` instances are never revoked; only `LoginToken` instances are revoked.
 
-Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to setup token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.
+Authentication methods creating `LoginToken` directly (all login-based authentication methods) already provide all necessary details to set up token renewal. Tokens obtained from a login are revoked by `LifecycleAwareSessionManager` if the session manager is shut down.

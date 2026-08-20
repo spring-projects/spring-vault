@@ -2,7 +2,7 @@
 = Introduction to VaultTemplate
 
 The class javadoc:org.springframework.vault.core.VaultTemplate[], located in the package `org.springframework.vault.core`,
-is the central class of the Spring's Vault support providing a rich feature set to
+is the central class of Spring's Vault support, providing a rich feature set to
 interact with Vault. The template offers convenience operations to read, write and
 delete data in Vault and provides a mapping between your domain objects and Vault data.
 
@@ -14,31 +14,30 @@ The mapping between Vault documents and domain classes is done by delegating to
 
 The javadoc:org.springframework.vault.core.VaultTemplate[] class implements the interface
 javadoc:org.springframework.vault.core.VaultOperations[].
-In as much as possible, the methods on javadoc:org.springframework.vault.core.VaultOperations[] are named after methods
+As much as possible, the methods on javadoc:org.springframework.vault.core.VaultOperations[] are named after methods
 available on the Vault API to make the API familiar to existing Vault developers
 who are used to the API and CLI. For example, you will find methods such as
 "write", "delete", "read", and "revoke".
 The design goal was to make it as easy as possible to transition between
-the use of the Vault API and `VaultOperations`. A major difference in between
-the two APIs is that `VaultOperations` can be passed domain objects instead of
+the use of the Vault API and `VaultOperations`. A major difference between
+the two APIs is that `VaultOperations` accepts domain objects instead of
 JSON Key-Value pairs.
 
 Paths used in `VaultTemplate` (and interfaces accessible from there) are considered
-relative to the `VaultEndpoint`. Paths that are fully-qualified URI's can be used
+relative to the `VaultEndpoint`. Fully qualified URIs can be used
 to access Vault cluster members in an authenticated context. To prevent unwanted
 full URI access, make sure to sanitize paths before passing them to `VaultTemplate`.
 
-NOTE: The preferred way to reference the operations on javadoc:org.springframework.vault.core.VaultTemplate[] instance
-is via its interface javadoc:org.springframework.vault.core.VaultOperations[].
+NOTE: The preferred way to reference the operations on a javadoc:org.springframework.vault.core.VaultTemplate[] instance
+is through its interface javadoc:org.springframework.vault.core.VaultOperations[].
 
-While there are many convenience methods on `VaultTemplate` to help you easily
-perform common tasks if you should need to access the Vault API directly to access
-functionality not explicitly exposed by the `VaultTemplate` you can use one of
-several execute callback methods to access underlying APIs. The execute callbacks
-will give you a reference to a `RestOperations` object.
+While many convenience methods on `VaultTemplate` help you perform common tasks,
+you can use one of several execution callback methods to access underlying APIs
+when you need Vault functionality not explicitly exposed by `VaultTemplate`.
+The execution callbacks give you a reference to a `RestOperations` object.
 Please see the section <<vault.core.executioncallback,Execution Callbacks>> for more information.
 
-Now let's look at a examples of how to work with Vault in the context of the Spring container.
+Now let's look at some examples of how to work with Vault in the context of the Spring container.
 
 [[vault.core.template.beans]]
 == Registering and configuring Spring Vault beans
@@ -46,20 +45,20 @@ Now let's look at a examples of how to work with Vault in the context of the Spr
 Using Spring Vault does not require a Spring Context. However, instances of `VaultTemplate` and
 javadoc:org.springframework.vault.authentication.SessionManager[] registered inside a managed context will participate
 in {spring-framework-docs}/core/beans/factory-nature.html[lifecycle events]
-provided by the Spring IoC container. This is useful to dispose active Vault sessions upon
+provided by the Spring IoC container. This is useful to dispose of active Vault sessions upon
 application shutdown. You also benefit from reusing the same `VaultTemplate`
 instance across your application.
 
 Spring Vault comes with a supporting configuration class that provides bean definitions
 for use inside a Spring context. Application configuration
-classes typically extend from javadoc:org.springframework.vault.config.AbstractVaultConfiguration[] and are required to
-provide additional details that are environment specific.
+classes typically extend javadoc:org.springframework.vault.config.AbstractVaultConfiguration[] and are required to
+provide additional details that are environment-specific.
 
-Extending from javadoc:org.springframework.vault.config.AbstractVaultConfiguration[] requires to implement
+Extending javadoc:org.springframework.vault.config.AbstractVaultConfiguration[] requires implementing
 `VaultEndpoint vaultEndpoint()` and `ClientAuthentication clientAuthentication()`
 methods.
 
-.Registering Spring Vault objects using Java based bean metadata
+.Registering Spring Vault objects using Java-based bean metadata
 ====
 [source,java]
 ----
@@ -90,7 +89,7 @@ public class AppConfig extends AbstractVaultConfiguration {
 See <<vault.core.authentication>> for details on supported authentication methods.
 ====
 
-.Registering Spring Vault applying injected properties
+.Registering Spring Vault by applying injected properties
 ====
 [source,java]
 ----
@@ -101,7 +100,7 @@ public class AppConfig extends AbstractVaultConfiguration {
     URI vaultUri;
 
     /**
-     * Specify an endpoint that was injected as URI.
+     * Specify an endpoint that was injected as a URI.
      */
     @Override
     public VaultEndpoint vaultEndpoint() {
@@ -132,28 +131,28 @@ in <<vault.core.environment-vault-configuration>>.
 [[vault.core.template.sessionmanagement]]
 == Session Management
 
-Spring Vault requires a `ClientAuthentication` to login and access Vault.
-See <<vault.core.authentication>> on details regarding authentication.
-Vault login should not occur on each authenticated Vault interaction but
-must be reused throughout a session. This aspect is handled by a
-`SessionManager` implementation. A `SessionManager` decides how often it
-obtains a token, about revocation and renewal. Spring Vault comes with two implementations:
+Spring Vault requires a `ClientAuthentication` to log in and access Vault.
+See <<vault.core.authentication>> for details about authentication.
+Vault login should not occur on each authenticated Vault interaction; instead,
+the session token must be reused throughout a session. This aspect is handled by a
+`SessionManager` implementation. A `SessionManager` decides how often to obtain a token
+and whether to revoke or renew it. Spring Vault comes with two implementations:
 
 * javadoc:org.springframework.vault.authentication.SimpleSessionManager[]: Just obtains tokens from the supplied
 `ClientAuthentication` without refresh and revocation
 * javadoc:org.springframework.vault.authentication.LifecycleAwareSessionManager[]: This `SessionManager` schedules token
-renewal if a token is renewable and revoke a login token on disposal.
+renewal if a token is renewable and revokes a login token on disposal.
 Renewal is scheduled with an `AsyncTaskExecutor`. `LifecycleAwareSessionManager`
 is configured by default if using `AbstractVaultConfiguration`.
 
 [[vault.core.environment-vault-configuration]]
 == Using `EnvironmentVaultConfiguration`
 
-Spring Vault includes javadoc:org.springframework.vault.config.EnvironmentVaultConfiguration[] configure the Vault client from Spring's `Environment` and a set of predefined
+Spring Vault includes javadoc:org.springframework.vault.config.EnvironmentVaultConfiguration[] to configure the Vault client from Spring's `Environment` and a set of predefined
 property keys.
 javadoc:org.springframework.vault.config.EnvironmentVaultConfiguration[] supports frequently applied configurations. Other configurations are supported by deriving from the most appropriate configuration class.
-Include javadoc:org.springframework.vault.config.EnvironmentVaultConfiguration[] with `@Import(EnvironmentVaultConfiguration.class)` to existing
-Java-based configuration classes and supply configuration properties through any of Spring's ``PropertySource``s.
+Import javadoc:org.springframework.vault.config.EnvironmentVaultConfiguration[] into existing
+Java-based configuration classes with `@Import(EnvironmentVaultConfiguration.class)` and supply configuration properties through any of Spring's `PropertySource`s.
 
 .Using EnvironmentVaultConfiguration with a property file
 ====
@@ -185,9 +184,9 @@ vault.token=00000000-0000-0000-0000-000000000000
 ** Truststore resource: `vault.ssl.trust-store` (optional)
 ** Truststore password: `vault.ssl.trust-store-password` (optional)
 ** Truststore type: `vault.ssl.trust-store-type` (optional, typically `jks`, supports also `pem`)
-** Enabled SSL/TLS protocols: `vault.ssl.enabled-protocols` (since 2.3.2, optional, protocols separated with comma)
-** Enabled SSL/TLS cipher suites: `vault.ssl.enabled-cipher-suites` (since 2.3.2, optional, cipher suites separated with comma)
-* Authentication method: `vault.authentication` (defaults to `TOKEN`, supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AWS_IAM`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
+** Enabled SSL/TLS protocols: `vault.ssl.enabled-protocols` (since 2.3.2, optional, protocols separated by commas)
+** Enabled SSL/TLS cipher suites: `vault.ssl.enabled-cipher-suites` (since 2.3.2, optional, cipher suites separated by commas)
+* Authentication method: `vault.authentication` (defaults to `TOKEN`; supported authentication methods are: `TOKEN`, `APPID`, `APPROLE`, `AWS_EC2`, `AWS_IAM`, `AZURE`, `CERT`, `CUBBYHOLE`, `KUBERNETES`)
 
 **Authentication-specific property keys**
 
@@ -199,7 +198,7 @@ vault.token=00000000-0000-0000-0000-000000000000
 
 * AppId path: `vault.app-id.app-id-path` (defaults to `app-id`)
 * AppId: `vault.app-id.app-id`
-* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use `MacAddressUserId`, respective `IpAddressUserId` user id mechanisms.
+* UserId: `vault.app-id.user-id`. `MAC_ADDRESS` and `IP_ADDRESS` use the `MacAddressUserId` and `IpAddressUserId` user ID mechanisms, respectively.
 Any other value is used with `StaticUserId`.
 
 **<<vault.authentication.approle>>**
@@ -243,8 +242,8 @@ No configuration options.
 [[vault.core.executioncallback]]
 == Execution callbacks
 
-One common design feature of all Spring template classes is that all functionality is routed into one of the templates execute callback methods.
-This helps ensure that exceptions and any resource management that maybe required are performed consistency.
+One common design feature of all Spring template classes is that all functionality is routed into one of the template classes' execution callback methods.
+This helps ensure that exceptions are handled and that any required resource management is performed consistently.
 While this was of much greater need in the case of JDBC and JMS than with Vault, it still offers a single spot for access and logging to occur.
 As such, using the execute callback is the preferred way to access the Vault API
 to perform uncommon operations that we've not exposed as methods on javadoc:org.springframework.vault.core.VaultTemplate[].
@@ -252,12 +251,12 @@ to perform uncommon operations that we've not exposed as methods on javadoc:org.
 Here is a list of execute callback methods.
 
 * `<T> T` *doWithVault* `(RestOperationsCallback<T> callback)` Executes the given
-`RestOperationsCallback`, allows to interact with Vault using  `RestOperations` without requiring a session.
+`RestOperationsCallback` and allows you to interact with Vault using `RestOperations` without requiring a session.
 
 * `<T> T` *doWithSession* `(RestOperationsCallback<T> callback)` Executes the given
-`RestOperationsCallback`, allows to interact with Vault in an authenticated session.
+`RestOperationsCallback` and allows you to interact with Vault in an authenticated session.
 
-Here is an example that uses the `ClientCallback` to initialize Vault:
+Here is an example that uses the `RestOperationsCallback` to initialize Vault:
 
 ====
 [source,java]

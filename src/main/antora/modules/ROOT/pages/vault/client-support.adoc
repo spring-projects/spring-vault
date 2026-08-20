@@ -2,40 +2,40 @@
 = Client Support
 
 Spring Vault supports various HTTP clients to access Vault's HTTP API. Spring Vault uses
-{spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestTemplate`] as primary interface accessing Vault.
+{spring-framework-docs}/integration/rest-clients.html#rest-restclient[`RestTemplate`] as the primary interface for accessing Vault.
 Dedicated client support originates from <<vault.client-ssl,customized SSL configuration>>
 that is scoped only to Spring Vault's client components.
 
-Spring Vault supports following HTTP imperative clients:
+Spring Vault supports the following HTTP imperative clients:
 
-* Java's builtin `HttpURLConnection` (default client if no other is available)
+* Java's built-in `HttpURLConnection` (default client if no other is available)
 * Apache Http Components
 * OkHttp 3
 
 Spring Vault's reactive integration supports the following reactive HTTP clients:
 
-* Java's builtin reactive `HttpClient` (default client if no other is available)
+* Java's built-in reactive `HttpClient` (default client if no other is available)
 * Reactor Netty
 * Apache Http Components
 * Jetty
 
-Using a specific client requires the according dependency to be available on the classpath
+Using a specific client requires the corresponding dependency to be available on the classpath
 so Spring Vault can use the available client for communicating with Vault.
 
-== Java's builtin `HttpURLConnection`
+== Java's built-in `HttpURLConnection`
 
-Java's builtin `HttpURLConnection` is available out-of-the-box without additional
+Java's built-in `HttpURLConnection` is available out-of-the-box without additional
 configuration. Using `HttpURLConnection` comes with a limitation regarding SSL configuration.
 Spring Vault won't apply <<vault.client-ssl,customized SSL configuration>> as it would
 require a deep reconfiguration of the JVM. This configuration would affect all
 components relying on the default SSL context. Configuring SSL settings using
-`HttpURLConnection` requires you providing these settings as System Properties. See
+`HttpURLConnection` requires you to provide these settings as system properties. See
 https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#InstallationAndCustomization[Customizing JSSE] for further details.
 
 == External Clients
 You can use external clients to access Vault's API. Simply add one of the following
 dependencies to your project. You can omit the version number if using
-<<dependencies,Spring Vault's Dependency BOM>>
+<<dependencies,Spring Vault's Dependency BOM>>.
 
 
 .Apache Http Components Dependency
@@ -125,12 +125,12 @@ SslConfiguration.forKeyStore(new FileSystemResource("keystore.jks"),    <4>
 <1> Full configuration.
 <2> Configuring only trust store settings.
 <3> Configuring only key store settings.
-<4> Configuring only key store settings with providing a key-configuration.
+<4> Configuring only key store settings with a key configuration.
 ====
 
-Please note that providing javadoc:org.springframework.vault.support.SslConfiguration[] can be only applied when either Apache Http Components or the OkHttp client is on your class-path.
+Please note that javadoc:org.springframework.vault.support.SslConfiguration[] can be used only when either Apache Http Components or the OkHttp client is on your classpath.
 
-The SSL configuration supports also PEM-encoded certificates as alternative to a Java Key Store.
+The SSL configuration also supports PEM-encoded certificates as an alternative to a Java Key Store.
 
 ====
 [source,java]
@@ -142,4 +142,4 @@ SslConfiguration configuration = SslConfiguration.forTrustStore(keystore);
 ====
 
 PEM files may contain one or more certificates (blocks of `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----`).
-Certificates added to the underlying `KeyStore` use the full subject name as alias.
+Certificates added to the underlying `KeyStore` use the full subject name as an alias.
