@@ -1,71 +1,81 @@
-name: Antora Site
+name: "[Antora] 📗 OSS Site"
+
 run-name: ${{ format('{0} ({1})', github.workflow, github.event.inputs.build-refname || 'all') }}
+
 on:
   workflow_dispatch:
     inputs:
       build-refname:
         description: Enter git refname to build (e.g., 5.7.x).
         required: false
-permissions:
-  contents: write
+
+permissions: read-all
+
 jobs:
-  build:
+  antora-oss-site:
     if: github.repository_owner == 'spring-projects'
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v7.0.1
-      with:
-        fetch-depth: 5
-    - name: Set up JDK 17
-      uses: actions/setup-java@v5.7.0
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    - name: Setup Maven Action
-      uses: s4u/setup-maven-action@v1.20.0
-      with:
-        java-version: 17
-    - name: Set up refname build
-      if: github.event.inputs.build-refname
-      run: |
-        git fetch --depth 1 https://github.com/$GITHUB_REPOSITORY ${{ github.event.inputs.build-refname }}
-        export BUILD_REFNAME=${{ github.event.inputs.build-refname }}
-        echo "BUILD_REFNAME=$BUILD_REFNAME" >> $GITHUB_ENV
-        export BUILD_VERSION=$(git cat-file --textconv FETCH_HEAD:pom.xml | python3 -c "import xml.etree.ElementTree as xml; from sys import stdin; print(xml.parse(stdin).getroot().find('{http://maven.apache.org/POM/4.0.0}version').text)")
-        echo BUILD_VERSION=$BUILD_VERSION >> $GITHUB_ENV
-    - name: Cache nodejs
-      uses: actions/cache@v6.1.0
-      with:
-        path: |
-          node
-          node_modules
-          package.json
-          package-lock.json
-        key: ${{ runner.os }}-nodejs-${{ hashFiles('pom.xml') }}
-    - name: Cache Maven
-      uses: actions/cache@v6.1.0
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-maven
-    - name: Cache Antora
-      uses: actions/cache@v6.1.0
-      with:
-        path: ~/.cache
-        key: ${{ runner.os }}-antora
-    - name: Run Antora
-      run: ./mvnw -B antora
-    - name: Publish Docs
-      uses: spring-io/spring-doc-actions/rsync-antora-reference@v0.0.22
-      with:
-        docs-username: ${{ secrets.DOCS_USERNAME }}
-        docs-host: ${{ secrets.DOCS_HOST }}
-        docs-ssh-key: ${{ secrets.DOCS_SSH_KEY }}
-        docs-ssh-host-key: ${{ secrets.DOCS_SSH_HOST_KEY }}
-        site-path: target/antora/site
-    - name: Bust Cloudflare Cache
-      uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@v0.0.22
-      with:
-        context-root: spring-vault
-        cloudflare-zone-id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-        cloudflare-cache-token: ${{ secrets.CLOUDFLARE_CACHE_TOKEN }}
+
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 5
+
+      - name: Setup Java and Maven
+        uses: spring-projects/spring-data-build/actions/setup-maven@main
+        with:
+          java-version: 'base'
+          develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+
+      - name: Set up refname build
+        if: github.event.inputs.build-refname
+        run: |
+          git fetch --depth 1 https://github.com/$GITHUB_REPOSITORY ${{ github.event.inputs.build-refname }}
+          export BUILD_REFNAME=${{ github.event.inputs.build-refname }}
+          echo "BUILD_REFNAME=$BUILD_REFNAME" >> $GITHUB_ENV
+          export BUILD_VERSION=$(git cat-file --textconv FETCH_HEAD:pom.xml | python3 -c "import xml.etree.ElementTree as xml; from sys import stdin; print(xml.parse(stdin).getroot().find('{http://maven.apache.org/POM/4.0.0}version').text)")
+          echo BUILD_VERSION=$BUILD_VERSION >> $GITHUB_ENV
+
+      - name: Cache nodejs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            antora/node
+            antora/node_modules
+            antora/package.json
+            antora/package-lock.json
+          key: ${{ runner.os }}-nodejs-${{ hashFiles('antora/package.json') }}
+
+      - name: Run Antora
+        run: |
+          MAVEN_ARGS="-B"
+          if [[ -f "settings.xml" ]]; then
+            MAVEN_ARGS+=" -s settings.xml"
+          fi
+
+          if [[ "${RUNNER_DEBUG}" == "1" || "${ACTIONS_STEP_DEBUG}" == "true" ]]; then
+            echo "::notice::transfer-progress enabled"
+          else
+            MAVEN_ARGS+=" --no-transfer-progress"
+          fi
+          export MAVEN_ARGS
+          ./mvnw antora
+      - name: Copy the cache to be included in the site
+        run: cp -rf build/antora/inject-collector-cache-config-extension/.cache target/antora/site
+
+      - name: Publish Docs
+        uses: spring-io/spring-doc-actions/rsync-antora-reference@415e2b11a766ba64799fffb5c97a4f7e17f677cf # v0.0.22
+        with:
+          docs-username: '${{ secrets.DOCS_USERNAME }}'
+          docs-host: '${{ secrets.DOCS_HOST }}'
+          docs-ssh-key: '${{ secrets.DOCS_SSH_KEY }}'
+          docs-ssh-host-key: '${{ secrets.DOCS_SSH_HOST_KEY }}'
+          site-path: 'target/antora/site'
+
+      - name: Bust Cloudflare Cache
+        uses: spring-io/spring-doc-actions/bust-cloudflare-antora-cache@415e2b11a766ba64799fffb5c97a4f7e17f677cf # v0.0.22
+        with:
+          context-root: 'spring-vault'
+          cloudflare-zone-id: '${{ secrets.CLOUDFLARE_ZONE_ID }}'
+          cloudflare-cache-token: '${{ secrets.CLOUDFLARE_CACHE_TOKEN }}'
