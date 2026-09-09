@@ -25,7 +25,9 @@ jobs:
 
       - name: Capture version
         run: |
-          echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+          PROJECT_VERSION=$(./ci/get-version.sh)
+          echo "Version: ${PROJECT_VERSION}"
+          echo "PROJECT_VERSION=${PROJECT_VERSION}" >> $GITHUB_ENV
 
       - name: Deploy to Artifactory
         if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
