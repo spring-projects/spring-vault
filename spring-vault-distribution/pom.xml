@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
 
@@ -86,7 +85,7 @@
 										<loadresource property="spring.version.short">
 											<concat>${spring.version}</concat>
 											<filterchain>
-												<replaceregex pattern="([\d]+\.[\d]+)(\..*)" replace="\1" />
+												<replaceregex pattern="([\d]+\.[\d]+)(\..*)" replace="\1"/>
 											</filterchain>
 										</loadresource>
 										<tstamp>
@@ -230,9 +229,9 @@
 										<target>
 											<copy todir="${project.build.directory}/schemas">
 												<fileset dir="${basedir}" erroronmissingdir="false">
-													<include name="**/src/main/resources/**/config/spring-*.xsd" />
+													<include name="**/src/main/resources/**/config/spring-*.xsd"/>
 												</fileset>
-												<flattenmapper />
+												<flattenmapper/>
 											</copy>
 										</target>
 									</configuration>
@@ -247,7 +246,7 @@
 									<configuration>
 										<target>
 											<copy todir="${project.root}/target/antora/modules/ROOT/assets/attachments/api/java">
-												<fileset dir="${project.root}/target/reports/apidocs" erroronmissingdir="true" />
+												<fileset dir="${project.root}/target/reports/apidocs" erroronmissingdir="true"/>
 											</copy>
 										</target>
 									</configuration>
