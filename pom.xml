@@ -39,7 +39,7 @@
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
 		<mockk.version>1.14.11</mockk.version>
 		<mockito-core.version>5.23.0</mockito-core.version>
-		<nullaway.version>0.13.1</nullaway.version>
+		<nullaway.version>0.13.8</nullaway.version>
 		<okhttp3.version>5.4.0</okhttp3.version>
 		<spring.version>7.0.8</spring.version>
 		<spring-data-bom.version>2026.0.0</spring-data-bom.version>
