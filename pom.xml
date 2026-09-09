@@ -43,7 +43,7 @@
 		<okhttp3.version>5.5.0</okhttp3.version>
 		<spring.version>7.1.0-M1</spring.version>
 		<spring-data-bom.version>2026.1.0-M1</spring-data-bom.version>
-		<spring-security-bom.version>7.1.0</spring-security-bom.version>
+		<spring-security-bom.version>7.2.0-M1</spring-security-bom.version>
 		<reactor.version>2025.0.6</reactor.version>
 		<reactive-streams.version>1.0.4</reactive-streams.version>
 
