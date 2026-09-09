@@ -79,6 +79,7 @@
 
 		<!-- Enabled only in CI and distribute profiles -->
 		<javadoc.offline-links.skip>true</javadoc.offline-links.skip>
+		<project.build.outputTimestamp>2099-12-31T23:59:59Z</project.build.outputTimestamp>
 		<!-- @formatter:on -->
 	</properties>
 
@@ -790,6 +791,7 @@
 						<header>${project.name}</header>
 						<source>${java.version}</source>
 						<disableNoFonts />
+						<notimestamp />
 						<quiet>true</quiet>
 						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
 						<overview>${shared.resources}/javadoc/overview.html</overview>
