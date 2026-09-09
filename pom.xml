@@ -40,7 +40,7 @@
 		<mockk.version>1.14.11</mockk.version>
 		<mockito-core.version>5.23.0</mockito-core.version>
 		<nullaway.version>0.14.1</nullaway.version>
-		<okhttp3.version>5.4.0</okhttp3.version>
+		<okhttp3.version>5.5.0</okhttp3.version>
 		<spring.version>7.0.8</spring.version>
 		<spring-data-bom.version>2026.0.0</spring-data-bom.version>
 		<spring-security-bom.version>7.1.0</spring-security-bom.version>
