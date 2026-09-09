@@ -44,7 +44,7 @@
 		<spring.version>7.0.9</spring.version>
 		<spring-data-bom.version>2026.0.1</spring-data-bom.version>
 		<spring-security-bom.version>7.1.1</spring-security-bom.version>
-		<reactor.version>2025.0.6</reactor.version>
+		<reactor.version>2025.0.7</reactor.version>
 		<reactive-streams.version>1.0.4</reactive-streams.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
