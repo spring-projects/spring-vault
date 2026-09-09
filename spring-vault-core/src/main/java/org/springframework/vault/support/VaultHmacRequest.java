@@ -78,8 +78,7 @@ public class VaultHmacRequest {
 	}
 
 	/**
-	 * @return version of the key used or {@literal null} to use the the latest
-	 * version.
+	 * @return version of the key used or {@literal null} to use the latest version.
 	 */
 	public @Nullable Integer getKeyVersion() {
 		return this.keyVersion;
