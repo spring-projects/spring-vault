@@ -41,7 +41,7 @@
 		<mockito-core.version>5.23.0</mockito-core.version>
 		<nullaway.version>0.13.8</nullaway.version>
 		<okhttp3.version>5.4.0</okhttp3.version>
-		<spring.version>7.0.8</spring.version>
+		<spring.version>7.0.9</spring.version>
 		<spring-data-bom.version>2026.0.0</spring-data-bom.version>
 		<spring-security-bom.version>7.1.0</spring-security-bom.version>
 		<reactor.version>2025.0.6</reactor.version>
