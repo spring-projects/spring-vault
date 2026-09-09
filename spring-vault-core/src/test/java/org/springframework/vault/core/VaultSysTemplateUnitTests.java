@@ -31,14 +31,23 @@ class VaultSysTemplateUnitTests {
 	void shouldReportRecoveryReplicationMode() {
 
 		VaultSysTemplate.VaultHealthImpl disabled = new VaultSysTemplate.VaultHealthImpl(true, true, true, true,
-				"disabled", 0, null);
+				"disabled", null, 0, null);
 
 		assertThat(disabled.isRecoveryReplicationSecondary()).isFalse();
 
 		VaultSysTemplate.VaultHealthImpl enabled = new VaultSysTemplate.VaultHealthImpl(true, true, true, true,
-				"enabled", 0, null);
+				"enabled", null, 0, null);
 
 		assertThat(enabled.isRecoveryReplicationSecondary()).isTrue();
+	}
+
+	@Test
+	void shouldReportHaConnectionHealth() {
+
+		VaultSysTemplate.VaultHealthImpl health = new VaultSysTemplate.VaultHealthImpl(true, false, true, false,
+				"disabled", true, 0, null);
+
+		assertThat(health.getHaConnectionHealthy()).isTrue();
 	}
 
 }
