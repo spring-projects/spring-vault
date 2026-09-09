@@ -81,7 +81,7 @@ import org.springframework.web.client.RestOperations;
  * Authentication-specific properties must be provided depending on the
  * authentication method.
  * <ul>
- * <li>Vault URI: {@code vault.uri}</li>
+ * <li>Vault URI: {@code vault.uri} (falls back to {@code VAULT_ADDR})</li>
  * <li>SSL Configuration
  * <ul>
  * <li>Keystore resource: {@code vault.ssl.key-store} (optional)</li>
@@ -223,10 +223,13 @@ public class EnvironmentVaultConfiguration extends AbstractVaultConfiguration im
 	@Override
 	public VaultEndpoint vaultEndpoint() {
 		String uri = getProperty("vault.uri");
+		if (uri == null) {
+			uri = getProperty("VAULT_ADDR");
+		}
 		if (uri != null) {
 			return VaultEndpoint.from(URI.create(uri));
 		}
-		throw new IllegalStateException("Vault URI (vault.uri) is null");
+		throw new IllegalStateException("Vault URI (vault.uri or VAULT_ADDR) is null");
 	}
 
 	@Override
