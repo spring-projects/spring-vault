@@ -1,7 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -23,7 +20,7 @@
 		<maven.antora-version>1.0.0-alpha.5</maven.antora-version>
 		<antora.version>0.0.4</antora.version>
 		<assertj-core.version>3.27.7</assertj-core.version>
-		<aws-java-sdk.version>2.46.21</aws-java-sdk.version>
+		<aws-java-sdk.version>2.54.14</aws-java-sdk.version>
 		<bcpkix-jdk18on.version>1.85</bcpkix-jdk18on.version>
 		<errorprone.version>2.42.0</errorprone.version>
 		<google-cloud-iamcredentials.version>2.95.0</google-cloud-iamcredentials.version>
@@ -789,7 +786,7 @@
 						<breakiterator>true</breakiterator>
 						<header>${project.name}</header>
 						<source>${java.version}</source>
-						<disableNoFonts />
+						<disableNoFonts/>
 						<quiet>true</quiet>
 						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
 						<overview>${shared.resources}/javadoc/overview.html</overview>
@@ -1002,8 +999,7 @@
 								<configuration>
 									<rules>
 										<requireReleaseDeps/>
-										<NoSnapshotDependenciesInDependencyManagementRule
-												implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
+										<NoSnapshotDependenciesInDependencyManagementRule implementation="de.smartics.maven.enforcer.rule.NoSnapshotsInDependencyManagementRule">
 											<onlyWhenRelease>true</onlyWhenRelease>
 										</NoSnapshotDependenciesInDependencyManagementRule>
 									</rules>
