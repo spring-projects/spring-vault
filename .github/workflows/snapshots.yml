@@ -1,14 +1,14 @@
-name: Build and deploy snapshots
+name: Snapshots
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main, 4.1.x, 4.0.x, 3.2.x, 3.1.x, 'issue/**', 'release/**' ]
+    branches: [ main, 'issue/**', 'release/**' ]
 
 permissions: read-all
 
 jobs:
-  build:
+  build-snapshots:
     name: Build and deploy snapshots
     if: ${{ github.repository_owner == 'spring-projects' }}
     runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
@@ -18,7 +18,6 @@ jobs:
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@main
         with:
-          java-version: 'main'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
 
       - name: Install and Start Vault
@@ -26,7 +25,9 @@ jobs:
 
       - name: Capture version
         run: |
-          echo "PROJECT_VERSION=$(./ci/get-version.sh)" >> $GITHUB_ENV
+          PROJECT_VERSION=$(./ci/get-version.sh)
+          echo "Version: ${PROJECT_VERSION}"
+          echo "PROJECT_VERSION=${PROJECT_VERSION}" >> $GITHUB_ENV
 
       - name: Deploy to Artifactory
         if: ${{ github.repository_owner == 'spring-projects' && contains(env.PROJECT_VERSION, '-SNAPSHOT') }}
