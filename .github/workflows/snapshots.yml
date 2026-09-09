@@ -1,4 +1,4 @@
-name: Build and deploy snapshots
+name: Snapshots
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
 permissions: read-all
 
 jobs:
-  build:
+  build-snapshots:
     name: Build and deploy snapshots
     if: ${{ github.repository_owner == 'spring-projects' }}
     runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
@@ -18,7 +18,6 @@ jobs:
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@main
         with:
-          java-version: 'main'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
 
       - name: Install and Start Vault
