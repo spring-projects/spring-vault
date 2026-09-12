@@ -95,7 +95,7 @@ public class CertificateBundle extends Certificate {
 		Assert.hasText(issuingCaCertificate, "Issuing CA certificate must not be empty");
 		Assert.hasText(privateKey, "Private key must not be empty");
 		return new CertificateBundle(serialNumber, certificate, issuingCaCertificate,
-				Collections.singletonList(issuingCaCertificate), privateKey, privateKey, null);
+				Collections.singletonList(issuingCaCertificate), privateKey, null, null);
 	}
 
 	/**
