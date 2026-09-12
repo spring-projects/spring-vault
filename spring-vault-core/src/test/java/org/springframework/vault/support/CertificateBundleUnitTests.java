@@ -107,7 +107,25 @@ class CertificateBundleUnitTests {
 		String privateKey = "aprivatekey";
 
 		CertificateBundle bundle = CertificateBundle.of(serialNumber, certificate, caCertificate, privateKey);
-		assertThat(bundle.getPrivateKey()).isNotNull();
+		assertThat(bundle.getPrivateKey()).isEqualTo(privateKey);
+		assertThat(bundle.getPrivateKeyType()).isNull();
+	}
+
+	@Test
+	void fourArgOfShouldNotTreatPrivateKeyAsPrivateKeyType() throws Exception {
+
+		CertificateBundle fromJson = loadCertificateBundle("certificate-response-rsa-pem.json");
+		CertificateBundle bundle = CertificateBundle.of(fromJson.getSerialNumber(), fromJson.getCertificate(),
+				fromJson.getIssuingCaCertificate(), fromJson.getPrivateKey());
+
+		assertThat(bundle.getPrivateKeyType()).isNull();
+		assertThat(bundle.getPrivateKey()).isEqualTo(fromJson.getPrivateKey());
+
+		CertificateBundle bundleWithType = CertificateBundle.of(fromJson.getSerialNumber(), fromJson.getCertificate(),
+				fromJson.getIssuingCaCertificate(), fromJson.getPrivateKey(), fromJson.getPrivateKeyType());
+		KeyFactory kf = KeyFactory.getInstance("RSA");
+		PrivateKey privateKey = kf.generatePrivate(bundleWithType.getPrivateKeySpec());
+		assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
 	}
 
 	@Test
