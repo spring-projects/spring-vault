@@ -309,6 +309,7 @@
 											<buildName>Spring Vault Docs ${project.version}</buildName>
 											<buildRetentionCount>1</buildRetentionCount>
 											<buildUrl>{{BUILD_URL}}</buildUrl>
+											<project>${artifactory.project}</project>
 										</buildInfo>
 										<publisher>
 											<contextUrl>${artifactory.server}</contextUrl>
