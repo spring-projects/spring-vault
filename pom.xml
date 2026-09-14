@@ -69,12 +69,13 @@
 		<documentation.spring-data-keyvalue-url>${documentation.baseurl}/spring-data/keyvalue/reference/api/java</documentation.spring-data-keyvalue-url>
 		<documentation.reactor-javadoc-url>https://projectreactor.io/docs/core/release/api</documentation.reactor-javadoc-url>
 		<documentation.reactive-streams-javadoc-url>https://www.reactive-streams.org/reactive-streams-${reactive-streams.version}-javadoc</documentation.reactive-streams-javadoc-url>
-		<documentation.jackson2-databind-javadoc-url>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/${jackson2-databind.version}</documentation.jackson2-databind-javadoc-url>
+		<documentation.jackson-databind-javadoc-url>https://javadoc.io/doc/com.fasterxml.jackson.core/jackson-databind/${jackson-databind.version}</documentation.jackson-databind-javadoc-url>
 		<documentation.spring-security-javadoc-url>${documentation.baseurl}/spring-security/site/docs/current/api</documentation.spring-security-javadoc-url>
 		<javadoc.offline-links.directory>${project.build.directory}/javadoc-offline-links</javadoc.offline-links.directory>
 
 		<!-- Enabled only in CI and distribute profiles -->
 		<javadoc.offline-links.skip>true</javadoc.offline-links.skip>
+		<project.build.outputTimestamp>2099-12-31T23:59:59Z</project.build.outputTimestamp>
 		<!-- @formatter:on -->
 	</properties>
 
@@ -603,10 +604,10 @@
 								<artifactItem>
 									<groupId>com.fasterxml.jackson.core</groupId>
 									<artifactId>jackson-databind</artifactId>
-									<version>${jackson2-databind.version}</version>
+									<version>${jackson-databind.version}</version>
 									<classifier>javadoc</classifier>
 									<type>jar</type>
-									<outputDirectory>${javadoc.offline-links.directory}/jackson2-databind</outputDirectory>
+									<outputDirectory>${javadoc.offline-links.directory}/jackson-databind</outputDirectory>
 								</artifactItem>
 								<artifactItem>
 									<groupId>org.springframework.security</groupId>
@@ -731,6 +732,7 @@
 						<header>${project.name}</header>
 						<source>${java.version}</source>
 						<disableNoFonts />
+						<notimestamp />
 						<quiet>true</quiet>
 						<javadocDirectory>${shared.resources}/javadoc</javadocDirectory>
 						<overview>${shared.resources}/javadoc/overview.html</overview>
@@ -793,8 +795,8 @@
 								<location>${javadoc.offline-links.directory}/reactive-streams</location>
 							</offlineLink>
 							<offlineLink>
-								<url>${documentation.jackson2-databind-javadoc-url}</url>
-								<location>${javadoc.offline-links.directory}/jackson2-databind</location>
+								<url>${documentation.jackson-databind-javadoc-url}</url>
+								<location>${javadoc.offline-links.directory}/jackson-databind</location>
 							</offlineLink>
 							<offlineLink>
 								<url>${documentation.spring-security-javadoc-url}</url>

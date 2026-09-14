@@ -17,13 +17,16 @@ jobs:
         java-version: [ 'base', 'next' ]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@3.5.x
         with:
           java-version: '${{ matrix.java-version }}'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
+
       - name: Install and Start Vault
         uses: ./.github/actions/setup-vault
+
       - name: Build
         uses: spring-projects/spring-data-build/actions/maven-build@3.5.x
         env:
