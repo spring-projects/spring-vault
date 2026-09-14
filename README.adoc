@@ -273,60 +273,6 @@ If you do that you also might need to add `-P spring` if your local Maven settin
 NOTE: Be aware that you might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`.
 We try to cover this in the `.mvn` configuration, so if you find you have to do it to make a build succeed, please raise a ticket to get the settings added to source control.
 
-For hints on how to build the project look in `.travis.yml` if there is one.
-There should be a "script" and maybe "install" command.
-Also look at the "services" section to see if any services need to be running locally (e.g. mongo or rabbit).
-Ignore the git-related bits that you might find in "before_install" since they're related to setting git credentials and you already have those.
-
-NOTE: If all else fails, build with the command from `.travis.yml` (usually
-`./mvnw install`).
-
-=== Documentation
-
-The module has a "distribute" profile, and if you switch that on it will try to build asciidoc sources from
-`src/main/asciidoc`.
-
-=== Working with the code
-
-If you don't have an IDE preference we would recommend that you use
-https://www.springsource.com/developer/sts[Spring Tools Suite] or
-https://eclipse.org[Eclipse] when working with the code.
-We use the
-https://eclipse.org/m2e/[m2eclipe] eclipse plugin for maven support.
-Other IDEs and tools should also work without issue as long as they use Maven 3.3.3 or better.
-
-==== Importing into eclipse with m2eclipse
-
-We recommend the https://eclipse.org/m2e/[m2eclipe] eclipse plugin when working with eclipse.
-If you don't already have m2eclipse installed it is available from the "eclipse marketplace".
-
-NOTE: Older versions of m2e do not support Maven 3.3, so once the projects are imported into Eclipse you will also need to tell m2eclipse to use the right profile for the projects.If you see many different errors related to the POMs in the projects, check that you have an up to date installation.
-If you can't upgrade m2e, add the "spring" profile to your `settings.xml`.
-Alternatively you can copy the repository settings from the "spring" profile of the parent pom into your `settings.xml`.
-
-==== Importing into eclipse without m2eclipse
-
-If you prefer not to use m2eclipse you can generate eclipse project metadata using the following command:
-
-[indent=0]
-----
-	$ ./mvnw eclipse:eclipse
-----
-
-The generated eclipse projects can be imported by selecting `import existing projects`
-from the `file` menu.
-
-==== Importing into IntelliJ
-
-In IntelliJ, choose `File --> Open` and select the `pom.xml` it will automatically detect it is a Maven project and starts downloading all necessary dependencies.
-
-==== Formatting code (Spring Java Format)
-
-The project uses https://github.com/spring-io/spring-javaformat[Spring Java Format] through the `spring-javaformat-maven-plugin`.
-You can run `./mvnw spring-javaformat:apply` to reformat code.
-Follow the instructions for https://github.com/spring-io/spring-javaformat#eclipse[Eclipse] or https://github.com/spring-io/spring-javaformat#intellij-idea[IntelliJ] to install a plugin to enable formatting in your favorite IDE.
-
-
 == Contributing
 
 Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard GitHub development process, using GitHub tracker for issues and merging pull requests into `main`.
