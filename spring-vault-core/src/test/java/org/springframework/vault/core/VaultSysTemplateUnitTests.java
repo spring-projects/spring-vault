@@ -41,4 +41,11 @@ class VaultSysTemplateUnitTests {
 		assertThat(enabled.isRecoveryReplicationSecondary()).isTrue();
 	}
 
+	@Test
+	void shouldSetPerformanceStandbyWithDefaultValueFalse(){
+		VaultSysTemplate.VaultHealthImpl emptyPerformanceStandby = new VaultSysTemplate.VaultHealthImpl(true, true, true, null, null, 0, null);
+
+		assertThat(emptyPerformanceStandby.isPerformanceStandby()).isFalse();
+	}
+
 }

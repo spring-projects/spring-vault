@@ -461,14 +461,14 @@ public class VaultSysTemplate implements VaultSysOperations {
 
 		VaultHealthImpl(@JsonProperty("initialized") boolean initialized, @JsonProperty("sealed") boolean sealed,
 				@JsonProperty("standby") boolean standby,
-				@JsonProperty("performance_standby") boolean performanceStandby,
+				@Nullable @JsonProperty(value = "performance_standby") Boolean performanceStandby,
 				@Nullable @JsonProperty("replication_dr_mode") String replicationRecoverySecondary,
 				@JsonProperty("server_time_utc") int serverTimeUtc, @Nullable @JsonProperty("version") String version) {
 
 			this.initialized = initialized;
 			this.sealed = sealed;
 			this.standby = standby;
-			this.performanceStandby = performanceStandby;
+			this.performanceStandby = Boolean.TRUE.equals(performanceStandby);
 			this.replicationRecoverySecondary = replicationRecoverySecondary != null
 					&& !"disabled".equalsIgnoreCase(replicationRecoverySecondary);
 			this.serverTimeUtc = serverTimeUtc;
