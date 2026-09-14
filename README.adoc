@@ -1,43 +1,26 @@
-= Spring Vault link:https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml[image:https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml/badge.svg[CI Build]]
+= Spring Vault image:https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml/badge.svg?branch=main["Build Status", link="https://github.com/spring-projects/spring-vault/actions/workflows/ci.yml?query=branch%3Amain"] image:https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A["Revved up by Develocity", link="https://ge.spring.io/scans?search.rootProjectNames=Spring%20Vault"]
+
+:docs: https://docs.spring.io/spring-vault/reference
+:github: https://github.com/spring-projects/spring-vault
 
 Spring Vault provides client-side support for accessing, storing and revoking secrets.
-With https://www.vaultproject.io[HashiCorp's Vault] you have a central place to manage external secret data for applications across all environments.
+With https://www.vaultproject.io[HashiCorp Vault] you have a central place to manage external secret data for applications across all environments.
 Vault can manage static and dynamic secrets such as application data, username/password for remote applications/resources and provide credentials for external services such as MySQL, PostgreSQL, Apache Cassandra, Consul, AWS and more.
 
-== Getting Help
+Our primary goals are:
 
-For a comprehensive treatment of all the Spring Vault features, please refer to:
+* Provide a Java configuration model for the Vault client, including {docs}/vault/client-support.html#vault.client-ssl[SSL] and proxy support.
+* Provide imperative and reactive `VaultTemplate` implementations to read, write and delete secrets and to work with {docs}/vault/vault-secret-engines.html[secrets engines] such as Key/Value, Transit and PKI.
+* Support Vault {docs}/vault/authentication.html[authentication methods] including Token, AppRole, AWS, Azure, GCP, Kubernetes, JWT, TLS certificates and Cubbyhole.
+* Expose secrets as Spring `Environment` properties through {docs}/vault/propertysource.html[`@VaultPropertySource`].
+* Renew and rotate leased secrets transparently.
 
-* the https://docs.spring.io/spring-vault/reference/[User Guide]
-* the https://docs.spring.io/spring-vault/docs/current/api/[JavaDocs] have extensive comments in them as well.
-* the home page of https://projects.spring.io/spring-vault[Spring Vault] contains links to articles and other resources.
-* for more detailed questions, use https://stackoverflow.com/questions/tagged/spring-vault[Spring Vault on Stackoverflow].
+== Installation and Getting Started
 
-== Features
-
-Specifically for Spring applications:
-
-* JavaConfig for Vault Client
-* Retrieve secrets from Vault and initialize Spring Environment with remote property sources
-* Obtain https://docs.spring.io/spring-vault/reference/vault/client-support.html#vault.client-ssl[secrets] secured with SSL
-* https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.token[Token],
-https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.appid[AppId],
-https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.approle[AppRole],
-https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.clientcert[Client Certificate],
-https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.cubbyhole[Cubbyhole], and
-https://docs.spring.io/spring-vault/reference/vault/authentication.html#vault.authentication.awsec2[AWS-EC2] authentication
-* Bootstrap application context: a parent context for the main application that can be trained to do anything
-
-Spring Boot users can benefit from https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault Config], an optimized integration with Vault to provide encrypted Vault properties inside Spring Boot applications.
-https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault] can also generate credentials for various services like MySQL, PostgreSQL, MongoDB and much more.
-
-== Quick Start
-
-=== Maven configuration
+The {docs}[reference documentation] includes a {docs}/introduction/getting-started.html[getting started] guide and describes the {docs}/introduction/dependencies.html[dependencies] to add to your build.
 
 Add the Maven dependency:
 
-====
 [source,xml]
 ----
 <dependency>
@@ -46,268 +29,114 @@ Add the Maven dependency:
   <version>${version}</version>
 </dependency>
 ----
-====
 
-If you'd rather like the latest snapshots of the upcoming major version, use our Maven snapshot repository and declare the appropriate dependency version.
+Releases and milestones are available from Maven Central.
+Snapshots of upcoming versions are available from the https://repo.spring.io/snapshot[Spring snapshot] repository.
 
-====
-[source,xml]
-----
-<dependency>
-  <groupId>org.springframework.vault</groupId>
-  <artifactId>spring-vault</artifactId>
-  <version>${version}-SNAPSHOT</version>
-</dependency>
+Here is a quick teaser of a Spring Vault configuration and a component that reads and writes secrets through `VaultTemplate`:
 
-<repository>
-  <id>spring-snapshot</id>
-  <name>Spring Snapshot Repository</name>
-  <url>https://repo.spring.io/snapshot</url>
-</repository>
-----
-====
-
-=== Vault Setup
-
-*Prerequisites*
-
-To get started with Vault and this guide you need a *NIX-like operating systems that provides:
-
-* `curl`, `openssl` and `unzip`
-* at least Java 8 and a properly configured `JAVA_HOME` environment variable
-
-[NOTE]
---
-If you use Windows Subsystem for Linux (WSL) you have to share `JAVA_HOME` between WSL and Windows. Call following command in PowerShell:
-----
-$ setx WSLENV "JAVA_HOME/p"
-----
---
-
-*Install Vault*
-
-----
-$ src/test/bash/install_vault.sh
-----
-
-*Create SSL certificates for Vault*
-
-----
-$ src/test/bash/create_certificates.sh
-----
-
-NOTE: `create_certificates.sh` creates certificates in `work/ca` and a JKS truststore `work/keystore.jsk`.
-If you want to run Spring Vault using this quickstart guide you need to configure the truststore to `file:work/keystore.jks`.
-
-*Start Vault server*
-
-----
-$ src/test/bash/local_run_vault.sh
-----
-
-Vault is started listening on `0.0.0.0:8200` using the `inmem` storage and
-`https`.
-Vault is sealed and not initialized when starting up so you need to initialize it first.
-
-----
-$ cd vault
-$ export VAULT_ADDR="https://localhost:8200"
-$ export VAULT_SKIP_VERIFY=true # Don't do this for production
-$ ./vault operator init
-----
-
-You should see something like:
-
-----
-Key 1: 7149c6a2e16b8833f6eb1e76df03e47f6113a3288b3093faf5033d44f0e70fe701
-Key 2: 901c534c7988c18c20435a85213c683bdcf0efcd82e38e2893779f152978c18c02
-Key 3: 03ff3948575b1165a20c20ee7c3e6edf04f4cdbe0e82dbff5be49c63f98bc03a03
-Key 4: 216ae5cc3ddaf93ceb8e1d15bb9fc3176653f5b738f5f3d1ee00cd7dccbe926e04
-Key 5: b2898fc8130929d569c1677ee69dc5f3be57d7c4b494a6062693ce0b1c4d93d805
-Initial Root Token: 19aefa97-cccc-bbbb-aaaa-225940e63d76
-
-Vault initialized with 5 keys and a key threshold of 3. Please
-securely distribute the above keys. When the Vault is re-sealed,
-restarted, or stopped, you must provide at least 3 of these keys
-to unseal it again.
-
-Vault does not store the master key. Without at least 3 keys,
-your Vault will remain permanently sealed.
-----
-
-Vault will initialize and return a set of unsealing keys and the root token.
-Pick 3 keys and unseal Vault.
-
-----
-$ ./vault operator unseal (Key 1)
-$ ./vault operator unseal (Key 2)
-$ ./vault operator unseal (Key 3)
-----
-
-Vault is now initialized and unsealed.
-
-=== Using VaultTemplate
-
-The class VaultTemplate, located in the package org.springframework.vault.core, is the central class of the Spring’s Vault support providing a rich feature set to interact with Vault.
-The template offers convenience operations to read, write and delete data in Vault and provides a mapping between your domain objects and Vault data.
-
-You can have Spring initializing Spring Vault by providing a JavaConfig:
-
-====
 [source,java]
 ----
 @Configuration
 public class AppConfig extends AbstractVaultConfiguration {
 
-    /**
-     * Specify an endpoint for connecting to Vault.
-     */
-    @Override
-    public VaultEndpoint vaultEndpoint() {
-        return new VaultEndpoint();
-    }
+	@Override
+	public VaultEndpoint vaultEndpoint() {
+		return VaultEndpoint.create("localhost", 8200);
+	}
 
-    /**
-     * Configure a client authentication.
-     * Please consider a more secure authentication method
-     * for production use.
-     */
-    @Override
-    public ClientAuthentication clientAuthentication() {
-        return new TokenAuthentication("…");
-    }
+	@Override
+	public ClientAuthentication clientAuthentication() {
+		return new TokenAuthentication("…");
+	}
+
 }
 ----
-====
 
-and then use `VaultTemplate` through its interface `VaultOperations`:
-
-====
 [source,java]
 ----
-public class MyApp {
+@Component
+public class SecretsClient {
 
-    @Autowired VaultOperations vaultOperations;
+	private final VaultOperations vaultOperations;
 
-    public void useVault() {
+	public SecretsClient(VaultOperations vaultOperations) {
+		this.vaultOperations = vaultOperations;
+	}
 
-        Secrets secrets = new Secrets();
-        secrets.username = "hello";
-        secrets.password = "world";
+	public void useVault() {
 
-        vaultOperations.write("secret/myapp", secrets);
+		vaultOperations.write("secret/myapp", new Secrets("hello", "world"));
 
-        VaultResponseSupport<Secrets> response = vaultOperations.read("secret/myapp", Secrets.class);
-        System.out.println(response.getData().getUsername());
+		VaultResponseSupport<Secrets> response = vaultOperations.read("secret/myapp", Secrets.class);
+		System.out.println(response.getRequiredData().username());
 
-        vaultOperations.delete("secret/myapp");
-    }
+		vaultOperations.delete("secret/myapp");
+	}
+
+	record Secrets(String username, String password) {
+	}
+
 }
 ----
-====
 
-=== @VaultPropertySource
+Spring Boot users can use https://github.com/spring-cloud/spring-cloud-vault-config[Spring Cloud Vault], which builds on Spring Vault to provide auto-configuration and Vault-backed configuration properties.
 
-`@VaultPropertySource` provides a convenient and declarative mechanism for adding a `PropertySource` to Spring’s `Environment`.
+== Getting Help
 
-To be used in conjunction with @Configuration classes.
-Example usage
+Are you having trouble with Spring Vault? We want to help!
 
-Given a Vault path `secret/my-application` containing the configuration data pair `database.password=mysecretpassword`, the following `@Configuration`
-class uses `@VaultPropertySource` to contribute `secret/my-application` to the `Environment`'s set of `PropertySources`.
+* Check the {docs}[reference documentation] and the https://docs.spring.io/spring-vault/docs/current/api/[Javadoc].
+* Learn the Vault basics -- Spring Vault builds on https://www.vaultproject.io[HashiCorp Vault]; the https://developer.hashicorp.com/vault/docs[Vault documentation] explains secrets engines, authentication methods and leases.
+* If you are upgrading, read the {github}/wiki[release notes] for upgrade instructions and "new and noteworthy" features.
+* Ask a question -- we monitor https://stackoverflow.com[stackoverflow.com] for questions tagged with https://stackoverflow.com/tags/spring-vault[`spring-vault`].
+* Report bugs with Spring Vault at {github}/issues[github.com/spring-projects/spring-vault/issues].
 
-====
-[source,java]
-----
-@Configuration
-@VaultPropertySource("secret/my-application")
-public class AppConfig {
 
-    @Autowired Environment env;
-
-    @Bean
-    public TestBean testBean() {
-        TestBean testBean = new TestBean();
-        testBean.setPassword(env.getProperty("database.password"));
-        return testBean;
-    }
-}
-----
-====
-
-== Building
-
-==== Build requirements for Vault
-
-Spring Vault requires SSL certificates and a running Vault instance listening on `localhost:8200`.
-Certificates and the Vault setup are scripted, the scripts are located in `src/test/bash`.
-
-The following scripts need to be run prior to building the project for the tests to pass.
-
-    $ ./src/test/bash/install_vault.sh
-    $ ./src/test/bash/create_certificates.sh
-    $ ./src/test/bash/env.sh
-    $ ./src/test/bash/local_run_vault.sh
-
-Alternatively you can run
-
-----
-$ ./src/test/bash/start.sh
-----
-
-Changes to the documentation should be made to the adocs found under `src/main/asciidoc/`
-
-=== Basic Compile and Test
-
-To build the source you will need to install JDK 17.
-
-Spring Vault uses Maven for most build-related activities, and you should be able to get off the ground quite quickly by cloning the project you are interested in and typing
-
-----
-$ ./mvnw install
-----
-
-NOTE: You can also install Maven (>=3.3.3) yourself and run the `mvn` command in place of `./mvnw` in the examples below.
-If you do that you also might need to add `-P spring` if your local Maven settings do not contain repository declarations for spring pre-release artifacts.
-
-NOTE: Be aware that you might need to increase the amount of memory available to Maven by setting a `MAVEN_OPTS` environment variable with a value like `-Xmx512m -XX:MaxPermSize=128m`.
-We try to cover this in the `.mvn` configuration, so if you find you have to do it to make a build succeed, please raise a ticket to get the settings added to source control.
-
-==== Formatting code (Spring Java Format)
-
-The project uses https://github.com/spring-io/spring-javaformat[Spring Java Format] through the `spring-javaformat-maven-plugin`.
-You can run `./mvnw spring-javaformat:apply` to reformat code.
-Follow the instructions for https://github.com/spring-io/spring-javaformat#eclipse[Eclipse] or https://github.com/spring-io/spring-javaformat#intellij-idea[IntelliJ] to install a plugin to enable formatting in your favorite IDE.
 
 == Contributing
 
-Spring Vault is released under the non-restrictive Apache 2.0 license, and follows a very standard GitHub development process, using GitHub tracker for issues and merging pull requests into `main`.
-If you want to contribute even something trivial please do not hesitate, but follow the guidelines below.
+We welcome contributions of all kinds!
+Please read our link:CONTRIBUTING.adoc[contribution guidelines] before submitting a pull request.
 
-== Developer Certificate of Origin (DCO)
+== Reporting Issues
 
-All commits must include a __Signed-off-by__ trailer at the end of each commit message to indicate that the contributor agrees to the Developer Certificate of Origin.
-For additional details, please refer to the blog post https://spring.io/blog/2025/01/06/hello-dco-goodbye-cla-simplifying-contributions-to-spring[Hello DCO, Goodbye CLA: Simplifying Contributions to Spring].
+Spring Vault uses GitHub's integrated issue tracking system to record bugs and feature requests.
+If you want to raise an issue, please follow the recommendations below:
 
-=== Code of Conduct
+* Before you log a bug, please search the {github}/issues[issue tracker] to see if someone has already reported the problem.
+* If the issue doesn't already exist, {github}/issues/new[create a new issue].
+* Please provide as much information as possible with the issue report.
+We like to know the Spring Vault version, the Vault server version, operating system, and JVM version you're using.
+* If you need to paste code or include a stack trace, use Markdown.
++++```+++ escapes before and after your text.
+* If possible, try to create a test case or project that replicates the problem and attach it to the issue.
 
-This project adheres to the Contributor Covenant https://github.com/spring-projects/.github/blob/3d965e94708a0014f0f9a2ab05bfc5eb6efef7e4/CODE_OF_CONDUCT.md[code of
-conduct].
-By participating, you are expected to uphold this code.
-Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+== Building from Source
 
-=== Code Conventions and Housekeeping
+You don't need to build from source to use Spring Vault.
+If you want to try out the latest and greatest, Spring Vault can be built and installed into your local Maven cache using the https://maven.apache.org/wrapper/[Maven wrapper].
+You also need JDK 17.
 
-None of these is essential for a pull request, but they will all help.
-They can also be added after the original pull request but before a merge.
+[source,shell]
+----
+$ ./mvnw install -DskipTests
+----
 
-* Spring Vault uses the Spring JavaFormat conventions.
-Formatting is applied when running the build through `$ ./mvnw compile`
-IDE plugins are available from https://github.com/spring-io/spring-javaformat.
-* Make sure all new `.java` files to have a Javadoc class comment with at least an
-`@author` tag identifying you, and preferably at least a paragraph on what the class is for.
-* Add the ASF license header comment to all new `.java` files (copy from existing files in the project)
-* Add yourself as an `@author` to the .java files that you modify substantially (more than cosmetic changes).
-* Please include unit tests.
-* If no-one else is using your branch, please rebase it against the current `main` (or other target branch in the main project).
-* When writing a commit message please follow https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html[these conventions], if you are fixing an existing issue please add `Fixes gh-XXXX` at the end of the commit message (where XXXX is the issue number).
+This command builds all modules and installs them into your local Maven cache.
+It won't run any of the tests.
+The integration tests require a Vault server listening on `localhost:8200`.
+The scripts in `src/test/bash` download, configure and start one for you.
+If you want to build everything, start Vault and run the full build:
+
+[source,shell]
+----
+$ ./src/test/bash/start.sh
+$ ./mvnw install
+----
+
+See {github}/wiki/Working-with-the-Code[Working with the Code] on the wiki for details on the Vault setup, building the documentation, and IDE configuration.
+
+== License
+
+Spring Vault is Open Source software released under the https://www.apache.org/licenses/LICENSE-2.0.html[Apache 2.0 license].
