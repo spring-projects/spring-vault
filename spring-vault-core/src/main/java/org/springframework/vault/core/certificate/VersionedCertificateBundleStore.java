@@ -18,6 +18,7 @@ package org.springframework.vault.core.certificate;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -92,10 +93,13 @@ public class VersionedCertificateBundleStore implements CertificateBundleStore {
 		Duration expiryAfter = Duration.between(now, expiry);
 		String key = pathMapper.apply(name);
 
-		Map<String, Object> data = Map.of("ca_chain", bundle.getCaChain(), "certificate", bundle.getCertificate(),
+		Map<String, Object> data = new HashMap<>(Map.of("ca_chain", bundle.getCaChain(), "certificate", bundle.getCertificate(),
 				"issuing_ca", bundle.getIssuingCaCertificate(), "private_key", bundle.getPrivateKey(),
-				"private_key_type", bundle.getPrivateKeyType(), "serial_number", bundle.getSerialNumber(), "expiration",
-				expiry.getEpochSecond());
+				"serial_number", bundle.getSerialNumber(), "expiration", expiry.getEpochSecond()));
+
+		if (bundle.getPrivateKeyType() != null) {
+			data.put("private_key_type", bundle.getPrivateKeyType());
+		}
 
 		operations.write(mountInfo.getPath() + "metadata/" + dataPath + key,
 				Map.of("delete_version_after", expiryAfter.toSeconds()));
