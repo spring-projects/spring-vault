@@ -24,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  * @author Stuart Ingram
  * @author Bill Koch
  * @author Mark Paluch
+ * @author Henk Hofs
  */
 public interface VaultHealth {
 
@@ -58,6 +59,17 @@ public interface VaultHealth {
 	 * @since 2.2
 	 */
 	boolean isRecoveryReplicationSecondary();
+
+	/**
+	 * @return {@literal true} if the standby node is connected to the active node,
+	 * {@literal false} if not, or {@literal null} if Vault did not report the HA
+	 * connection state.
+	 * @since 4.2
+	 */
+	@Nullable
+	default Boolean getHaConnectionHealthy() {
+		return null;
+	}
 
 	/**
 	 * @return the server time in seconds, UTC.
