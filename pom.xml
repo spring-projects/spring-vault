@@ -21,7 +21,7 @@
 		<antora.version>0.0.4</antora.version>
 		<assertj-core.version>3.27.7</assertj-core.version>
 		<aws-java-sdk.version>2.38.9</aws-java-sdk.version>
-		<bcpkix-jdk18on.version>1.84</bcpkix-jdk18on.version>
+		<bcpkix-jdk18on.version>1.86</bcpkix-jdk18on.version>
 		<errorprone.version>2.42.0</errorprone.version>
 		<google-cloud-iamcredentials.version>2.80.0</google-cloud-iamcredentials.version>
 		<google-auth-library-oauth2-http.version>1.40.0
