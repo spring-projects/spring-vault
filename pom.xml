@@ -45,7 +45,7 @@
 		<spring.version>7.0.10-SNAPSHOT</spring.version>
 		<spring-data-bom.version>2025.1.8-SNAPSHOT</spring-data-bom.version>
 		<spring-security-bom.version>7.0.7</spring-security-bom.version>
-		<reactor.version>2025.0.6</reactor.version>
+		<reactor.version>2025.0.8-SNAPSHOT</reactor.version>
 		<reactive-streams.version>1.0.4</reactive-streams.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
