@@ -108,6 +108,7 @@ class CertificateBundleUnitTests {
 
 		CertificateBundle bundle = CertificateBundle.of(serialNumber, certificate, caCertificate, privateKey);
 		assertThat(bundle.getPrivateKey()).isNotNull();
+		assertThat(bundle.getPrivateKeyType()).isNull();
 	}
 
 	@Test
