@@ -142,7 +142,8 @@ public class ReactiveVaultClients {
 					.host(endpoint.getHost())
 					.port(endpoint.getPort())
 					.replacePath(endpoint.getPath())
-					.path(VaultClients.normalizePath(endpoint.getPath(), uri.getPath()))
+					.path(VaultClients.normalizePath(endpoint.getPath(),
+										VaultClients.validatePathSegment(uri.getPath())))
 					.build();
 			ClientRequest requestToSend = ClientRequest.from(request).url(uriComponents.toUri()).build();
 			return next.exchange(requestToSend);

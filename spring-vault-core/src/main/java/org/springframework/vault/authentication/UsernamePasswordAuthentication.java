@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultClient;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.web.client.RestClient;
@@ -105,7 +106,8 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Map<String, Object> body = createLoginBody(options);
 		return AuthenticationSteps.fromSupplier(() -> body)
-				.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
+				.login("%s/%s".formatted(getLoginPath(options.getPath()),
+						VaultClients.concatPath(options.getUsername())));
 	}
 
 

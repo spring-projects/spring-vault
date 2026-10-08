@@ -31,6 +31,7 @@ import org.springframework.data.keyvalue.core.AbstractKeyValueAdapter;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.core.VaultKeyValueOperations;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport;
 import org.springframework.vault.core.VaultOperations;
@@ -294,7 +295,7 @@ public class VaultKeyValueAdapter extends AbstractKeyValueAdapter {
 		}
 
 		String createPath(String id) {
-			return this.pathPrefix + "/" + id;
+			return VaultClients.concatPath(this.pathPrefix, id);
 		}
 
 		@Nullable

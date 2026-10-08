@@ -32,6 +32,7 @@ import org.springframework.data.history.Revisions;
 import org.springframework.data.repository.core.EntityInformation;
 import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.core.VaultKeyValueMetadataOperations;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.core.VaultVersionedKeyValueOperations;
@@ -174,7 +175,7 @@ public class VaultRevisionRepository<T> implements RevisionRepository<T, String,
 	}
 
 	private String getPath(String id) {
-		return keyspacePath + "/" + id;
+		return VaultClients.concatPath(keyspacePath, id);
 	}
 
 	private SecretDocument createDocument(String id, Versioned<Map<String, Object>> versioned) {

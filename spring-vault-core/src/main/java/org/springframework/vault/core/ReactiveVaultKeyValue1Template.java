@@ -22,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -102,7 +103,7 @@ class ReactiveVaultKeyValue1Template extends ReactiveVaultKeyValueAccessor imple
 
 	@Override
 	String createDataPath(String path) {
-		return "%s/%s".formatted(this.path, path);
+		return VaultClients.concatPath(this.path, path);
 	}
 
 }

@@ -21,6 +21,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -72,7 +73,7 @@ class VaultKeyValueMetadataTemplate implements VaultKeyValueMetadataOperations {
 	private String getPath(String path) {
 
 		Assert.hasText(path, "Path must not be empty");
-		return this.basePath + "/metadata/" + path;
+		return VaultClients.concatPath(this.basePath, "metadata", path);
 	}
 
 }

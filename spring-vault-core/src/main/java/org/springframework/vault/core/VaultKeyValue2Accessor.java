@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -54,8 +55,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	public @Nullable List<String> list(String path) {
 		VaultListResponse read = doRead(client -> {
 			return client.get()
-					.path("%s?list=true"
-							.formatted(createEnginePath("metadata", path)))
+					.path("%s?list=true".formatted(createEnginePath("metadata", path)))
 					.retrieve()
 					.onStatus(HttpStatusUtil::isNotFound, HttpStatusUtil.proceed())
 					.toEntity(VaultListResponse.class);
@@ -82,7 +82,7 @@ abstract class VaultKeyValue2Accessor extends VaultKeyValueAccessor {
 	}
 
 	String createEnginePath(String segment, String path) {
-		return "%s/%s/%s".formatted(PathUtil.stripSlashes(this.path), PathUtil.stripSlashes(segment),
+		return VaultClients.concatPath(PathUtil.stripSlashes(this.path), PathUtil.stripSlashes(segment),
 				PathUtil.stripSlashes(path));
 	}
 

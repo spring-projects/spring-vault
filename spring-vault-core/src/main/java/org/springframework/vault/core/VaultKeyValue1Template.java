@@ -22,6 +22,7 @@ import java.util.Map;
 import org.jspecify.annotations.Nullable;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultResponseSupport;
 
@@ -108,7 +109,7 @@ class VaultKeyValue1Template extends VaultKeyValueAccessor implements VaultKeyVa
 		if (this.path.endsWith("/")) {
 			return this.path + path;
 		}
-		return "%s/%s".formatted(this.path, path);
+		return VaultClients.concatPath(this.path, path);
 	}
 
 }

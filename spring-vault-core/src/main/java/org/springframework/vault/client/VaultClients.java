@@ -19,6 +19,7 @@ package org.springframework.vault.client;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 import org.jspecify.annotations.Nullable;
@@ -255,6 +256,7 @@ public class VaultClients {
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
+			validatePathSegment(uriTemplate);
 			UriComponents components = parseUri(uriTemplate).build();
 			if (components.toUri().isAbsolute() || StringUtils.hasText(components.getHost())
 					|| components.getPort() != -1) {
@@ -268,6 +270,91 @@ public class VaultClients {
 					: UriComponentsBuilder.fromUriString(uriTemplate));
 		}
 
+	}
+
+	/**
+	 * Concatenate and validate the given path segments using {@code /} as
+	 * separator.
+	 * @param segments path segments to validate and join. Must not be
+	 * {@literal null} and must not contain {@literal null} elements.
+	 * @return the concatenated, validated path.
+	 * @throws IllegalArgumentException if any segment contains path traversal
+	 * sequences.
+	 * @since 3.1.5
+	 */
+	public static String concatPath(String... segments) {
+		Assert.notNull(segments, "Path segments must not be null");
+		StringBuilder builder = new StringBuilder();
+		for (String segment : segments) {
+			if (!builder.isEmpty()) {
+				builder.append('/');
+			}
+			builder.append(validateConcat(normalizePath(segment)));
+		}
+
+		return builder.toString();
+	}
+
+	/**
+	 * Validate the given path segment to not contain any path traversal
+	 * sequences.
+	 * @param segment path segment to validate.
+	 * @return the segment, unchanged.
+	 * @throws IllegalArgumentException if the segment violates a rule listed in
+	 * the class-level Javadoc.
+	 * @since 3.1.5
+	 */
+	public static String validatePathSegment(String segment) {
+		Assert.notNull(segment, "Path segment must not be null");
+		for (int i = 0; i < segment.length(); i++) {
+			char c = segment.charAt(i);
+			if (isControlChar(c)) {
+				throw new IllegalArgumentException(
+						"Path segment must not contain control characters: '%s'".formatted(segment));
+			}
+		}
+
+		return validateSegment(segment);
+	}
+
+	/**
+	 * Validate the given path segment to not contain any path traversal
+	 * sequences.
+	 */
+	private static String validateConcat(String segment) {
+		Assert.notNull(segment, "Path segment must not be null");
+		for (int i = 0; i < segment.length(); i++) {
+			char c = segment.charAt(i);
+			if (isControlChar(c) || c == '?' || c == '#') {
+				throw new IllegalArgumentException(
+						"Path segment must not contain control characters: '%s'".formatted(segment));
+			}
+		}
+
+		return validateSegment(segment);
+	}
+
+	private static boolean isControlChar(char c) {
+		return c < 0x20 || c == 0x7f || c == '\\';
+	}
+
+	private static String validateSegment(String segment) {
+		String lower = segment.toLowerCase(Locale.ROOT);
+		if (lower.contains("%2e")) {
+			throw new IllegalArgumentException("Encoded '.' (%%2e) is not allowed in path: '%s'".formatted(segment));
+		}
+		if (lower.contains("%2f")) {
+			throw new IllegalArgumentException("Encoded '/' (%%2f) is not allowed in path: '%s'".formatted(segment));
+		}
+		if (lower.contains("%5c")) {
+			throw new IllegalArgumentException("Encoded '\\\\' (%%5c) is not allowed in path: '%s'".formatted(segment));
+		}
+		if (lower.startsWith("../") || lower.endsWith("/..") || lower.contains("/../") || lower.equals("..")
+				|| lower.contains("..?")) {
+			throw new IllegalArgumentException("Traversal '..' is not allowed in path: '%s'".formatted(segment));
+		}
+
+		return segment;
 	}
 
 	/**
@@ -302,6 +389,7 @@ public class VaultClients {
 
 		@Override
 		public UriBuilder uriString(String uriTemplate) {
+			validatePathSegment(uriTemplate);
 			VaultEndpointProvider endpointProvider = getEndpointProvider();
 			if (allowAbsolutePath || endpointProvider == null) {
 				if (uriTemplate.startsWith("http:") || uriTemplate.startsWith("https:")) {
@@ -322,6 +410,7 @@ public class VaultClients {
 	}
 
 	static UriComponentsBuilder getUriComponents(@Nullable VaultEndpoint endpoint, String uriTemplate) {
+		validatePathSegment(uriTemplate);
 		String normalizedUriTemplate = uriTemplate.startsWith("/") ? uriTemplate : "/" + uriTemplate;
 		if (endpoint != null) {
 			UriComponents uriComponents = UriComponentsBuilder.fromUriString(toBaseUri(endpoint))
@@ -357,6 +446,17 @@ public class VaultClients {
 		} catch (IllegalArgumentException ignored) {
 		}
 		return VaultEndpoint.stripLeadingSlashes(uriTemplate);
+	}
+
+	private static String normalizePath(String path) {
+		if (path.startsWith("/")) {
+			path = path.substring(1);
+		}
+		if (path.endsWith("/")) {
+			path = path.substring(0, path.length() - 1);
+		}
+
+		return path;
 	}
 
 	/**

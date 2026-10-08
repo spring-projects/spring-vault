@@ -115,6 +115,65 @@ class VaultClientsUnitTests {
 	}
 
 	@Test
+	void uriHandlerShouldRejectTraversalInPath() {
+
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> handler.uriString("secret/../sys/mounts"));
+	}
+
+	@Test
+	void uriHandlerShouldRejectEncodedTraversalInPath() {
+
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> handler.uriString("secret/data/..%2fmetadata%2ffoo"));
+	}
+
+	@Test
+	void uriHandlerShouldAcceptLegitimateUriTemplates() {
+
+		PrefixAwareUriBuilderFactory handler = new PrefixAwareUriBuilderFactory(() -> localhost);
+
+		assertThat(handler.expand("secret/data/foo?list=true")).hasPath("/v1/secret/data/foo").hasQuery("list=true");
+		assertThat(handler.expand("auth/{provider}/login", "approle")).hasPath("/v1/auth/approle/login");
+	}
+
+	@Test
+	void endpointUriHandlerShouldRejectTraversalInPath() {
+
+		VaultEndpointUriBuilderFactory handler = new VaultEndpointUriBuilderFactory(localhost);
+
+		assertThatIllegalArgumentException().isThrownBy(() -> handler.uriString("secret/../sys/mounts"));
+		assertThatIllegalArgumentException().isThrownBy(() -> handler.uriString("secret/data/..%2fmetadata%2ffoo"));
+	}
+
+	@Test
+	void endpointUriHandlerShouldAcceptLegitimateUriTemplates() {
+
+		VaultEndpointUriBuilderFactory handler = new VaultEndpointUriBuilderFactory(localhost);
+
+		assertThat(handler.expand("secret/data/foo?list=true")).hasPath("/v1/secret/data/foo").hasQuery("list=true");
+		assertThat(handler.expand("auth/{provider}/login", "approle")).hasPath("/v1/auth/approle/login");
+	}
+
+	@Test
+	void uriComponentsShouldRejectTraversalInPath() {
+
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> VaultClients.getUriComponents(localhost, "secret/../sys/mounts"));
+		assertThatIllegalArgumentException()
+			.isThrownBy(() -> VaultClients.getUriComponents(localhost, "secret/data/..%2fmetadata%2ffoo"));
+	}
+
+	@Test
+	void uriComponentsShouldAcceptLegitimatePath() {
+
+		assertThat(VaultClients.getUriComponents(localhost, "secret/data/foo").build().toUri())
+			.hasPath("/v1/secret/data/foo");
+	}
+
+	@Test
 	void shouldAllowNamespaceOverride() {
 		RestTemplate restTemplate = VaultClients.createRestTemplate();
 		restTemplate.getInterceptors().add(VaultClients.createNamespaceInterceptor("foo/bar"));
