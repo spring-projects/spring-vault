@@ -203,12 +203,11 @@ public class VaultEndpoint implements Serializable {
 	public String createUriString(String path) {
 		Assert.notNull(path, "Path must not be null");
 		String apiPath = stripSlashes(getPath());
+		String secretPath = VaultClients.concatPath(path);
 		if (StringUtils.hasText(apiPath)) {
-			return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), apiPath,
-					stripLeadingSlashes(path));
+			return "%s://%s:%s/%s/%s".formatted(getScheme(), getHost(), getPort(), apiPath, secretPath);
 		}
-		return "%s://%s:%s/%s".formatted(getScheme(), getHost(), getPort(),
-				stripLeadingSlashes(path));
+		return "%s://%s:%s/%s".formatted(getScheme(), getHost(), getPort(), secretPath);
 	}
 
 	@Override
@@ -242,13 +241,6 @@ public class VaultEndpoint implements Serializable {
 			return stripSlashes(path.substring(0, path.length() - 1));
 		}
 		return path;
-	}
-
-	/**
-	 * Remove slashes from the beginning and the end of the given {@code path}.
-	 */
-	static String stripLeadingSlashes(String path) {
-		return path.startsWith("/") ? stripLeadingSlashes(path.substring(1)) : path;
 	}
 
 }

@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.util.Assert;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.client.VaultResponses;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
@@ -99,7 +100,8 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 		Assert.notNull(options, "UsernamePasswordAuthenticationOptions must not be null");
 		Map<String, Object> body = createLoginBody(options);
 		return AuthenticationSteps.fromSupplier(() -> body)
-				.login("%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()));
+				.login("%s/%s".formatted(getLoginPath(options.getPath()),
+						VaultClients.concatPath(options.getUsername())));
 	}
 
 	@Override
@@ -116,8 +118,9 @@ public class UsernamePasswordAuthentication implements ClientAuthentication, Aut
 	private VaultToken createTokenUsingUsernamePasswordAuthentication() {
 		try {
 			VaultResponse response = adapter.postForObject(
-					"%s/%s".formatted(getLoginPath(options.getPath()), options.getUsername()), createLoginBody(options),
-					VaultResponse.class);
+					"%s/%s".formatted(getLoginPath(options.getPath()),
+							VaultClients.concatPath(options.getUsername())),
+					createLoginBody(options), VaultResponse.class);
 			logger.debug("Login successful using username and password credentials");
 			return LoginTokenUtil.from(response.getAuth());
 		} catch (HttpStatusCodeException e) {

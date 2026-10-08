@@ -29,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.core.VaultOperations;
 import org.springframework.vault.support.VaultResponse;
@@ -95,7 +96,7 @@ public class KeyValueDelegate {
 			return requestedSecret;
 		}
 		String keyPath = requestedSecret.substring(mountPath.length());
-		return "%sdata/%s".formatted(mountPath, keyPath);
+		return "%sdata/%s".formatted(mountPath, VaultClients.concatPath(keyPath));
 	}
 
 	@SuppressWarnings("unchecked")

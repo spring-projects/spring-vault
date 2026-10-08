@@ -28,6 +28,7 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.TransformCiphertext;
 import org.springframework.vault.support.TransformPlaintext;
 import org.springframework.vault.support.VaultResponse;
@@ -71,7 +72,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("value", plaintext);
-		return (String) this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName), request)
+		return (String) this.vaultOperations.invoke(VaultClients.concatPath(this.path, "encode", roleName), request)
 				.getRequiredData()
 				.get("encoded_value");
 	}
@@ -83,7 +84,8 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("value", plaintext.asString());
 		applyTransformOptions(plaintext.getContext(), request);
-		Map<String, Object> data = this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName), request)
+		Map<String, Object> data = this.vaultOperations
+				.invoke(VaultClients.concatPath(this.path, "encode", roleName), request)
 				.getRequiredData();
 		return toCiphertext(data, plaintext.getContext());
 	}
@@ -99,7 +101,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			applyTransformOptions(request.getContext(), vaultRequest);
 			batch.add(vaultRequest);
 		}
-		VaultResponse vaultResponse = this.vaultOperations.invoke("%s/encode/%s".formatted(this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.invoke(VaultClients.concatPath(this.path, "encode", roleName),
 				Collections.singletonMap("batch_input", batch));
 		return toEncodedResults(requireResponse(vaultResponse), batchRequest);
 	}
@@ -121,7 +123,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("value", ciphertext);
 		applyTransformOptions(transformContext, request);
-		return (String) this.vaultOperations.invoke("%s/decode/%s".formatted(this.path, roleName), request)
+		return (String) this.vaultOperations.invoke(VaultClients.concatPath(this.path, "decode", roleName), request)
 				.getRequiredData()
 				.get("decoded_value");
 	}
@@ -137,7 +139,7 @@ public class VaultTransformTemplate implements VaultTransformOperations {
 			applyTransformOptions(request.getContext(), vaultRequest);
 			batch.add(vaultRequest);
 		}
-		VaultResponse vaultResponse = this.vaultOperations.invoke("%s/decode/%s".formatted(this.path, roleName),
+		VaultResponse vaultResponse = this.vaultOperations.invoke(VaultClients.concatPath(this.path, "decode", roleName),
 				Collections.singletonMap("batch_input", batch));
 		return toDecryptionResults(requireResponse(vaultResponse), batchRequest);
 	}

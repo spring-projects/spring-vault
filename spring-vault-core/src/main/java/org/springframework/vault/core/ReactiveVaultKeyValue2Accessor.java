@@ -20,6 +20,7 @@ import java.util.List;
 
 import reactor.core.publisher.Flux;
 
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.core.VaultKeyValueOperationsSupport.KeyValueBackend;
 import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultResponseSupport;
@@ -78,7 +79,7 @@ abstract class ReactiveVaultKeyValue2Accessor extends ReactiveVaultKeyValueAcces
 	}
 
 	String createEnginePath(String segment, String path) {
-		return "%s/%s/%s".formatted(this.path, segment, path);
+		return VaultClients.concatPath(this.path, segment, path);
 	}
 
 }

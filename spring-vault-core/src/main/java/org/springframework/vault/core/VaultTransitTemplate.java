@@ -32,6 +32,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.vault.VaultException;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.*;
 
 /**
@@ -71,7 +72,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), null);
+		this.vaultOperations.write(VaultClients.concatPath(this.path, "keys", keyName), null);
 	}
 
 	@Override
@@ -80,7 +81,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(createKeyRequest, "VaultTransitKeyCreationRequest must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s".formatted(this.path, keyName), createKeyRequest);
+		this.vaultOperations.write(VaultClients.concatPath(this.path, "keys", keyName), createKeyRequest);
 	}
 
 	@Override
@@ -99,7 +100,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(keyConfiguration, "VaultKeyConfiguration must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s/config".formatted(this.path, keyName), keyConfiguration);
+		this.vaultOperations.write(VaultClients.concatPath(this.path, "keys", keyName, "config"), keyConfiguration);
 	}
 
 	@Override
@@ -109,7 +110,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.notNull(type, "Key type must not be null");
 
 		VaultResponseSupport<RawTransitKeyImpl> result = this.vaultOperations
-				.read("%s/export/%s/%s".formatted(this.path, type.getValue(), keyName), RawTransitKeyImpl.class);
+				.read(VaultClients.concatPath(this.path, "export", type.getValue(), keyName), RawTransitKeyImpl.class);
 
 		return result != null ? result.getRequiredData() : null;
 	}
@@ -120,7 +121,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Assert.hasText(keyName, "Key name must not be empty");
 
 		VaultResponseSupport<VaultTransitKeyImpl> result = this.vaultOperations
-				.read("%s/keys/%s".formatted(this.path, keyName), VaultTransitKeyImpl.class);
+				.read(VaultClients.concatPath(this.path, "keys", keyName), VaultTransitKeyImpl.class);
 
 		if (result != null) {
 			return result.getRequiredData();
@@ -134,7 +135,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		this.vaultOperations.delete("%s/keys/%s".formatted(this.path, keyName));
+		this.vaultOperations.delete(VaultClients.concatPath(this.path, "keys", keyName));
 	}
 
 	@Override
@@ -142,7 +143,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Assert.hasText(keyName, "Key name must not be empty");
 
-		this.vaultOperations.write("%s/keys/%s/rotate".formatted(this.path, keyName), null);
+		this.vaultOperations.write(VaultClients.concatPath(this.path, "keys", keyName, "rotate"), null);
 	}
 
 	@Override
@@ -156,7 +157,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes()));
 
-		return (String) writeForData("%s/encrypt/%s".formatted(this.path, keyName), request).get("ciphertext");
+		return (String) writeForData(VaultClients.concatPath(this.path, "encrypt", keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -184,7 +185,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		applyTransitOptions(transitContext, request);
 
-		return (String) writeForData("%s/encrypt/%s".formatted(this.path, keyName), request).get("ciphertext");
+		return (String) writeForData(VaultClients.concatPath(this.path, "encrypt", keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -205,7 +206,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = writeForResponse("%s/encrypt/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse(VaultClients.concatPath(this.path, "encrypt", keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toBatchResults(vaultResponse, batchRequest, Plaintext::getContext);
@@ -221,7 +222,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		request.put("ciphertext", ciphertext);
 
-		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
+		String plaintext = (String) writeForData(VaultClients.concatPath(this.path, "decrypt", keyName), request)
 				.get("plaintext");
 
 		return new String(Base64.getDecoder().decode(plaintext));
@@ -251,7 +252,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		applyTransitOptions(transitContext, request);
 
-		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
+		String plaintext = (String) writeForData(VaultClients.concatPath(this.path, "decrypt", keyName), request)
 				.get("plaintext");
 
 		return Base64.getDecoder().decode(plaintext);
@@ -275,7 +276,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = writeForResponse("%s/decrypt/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse(VaultClients.concatPath(this.path, "decrypt", keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toDecryptionResults(vaultResponse, batchRequest);
@@ -291,7 +292,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		Map<String, String> request = new LinkedHashMap<>();
 		request.put("ciphertext", ciphertext);
 
-		return (String) writeForData("%s/rewrap/%s".formatted(this.path, keyName), request).get("ciphertext");
+		return (String) writeForData(VaultClients.concatPath(this.path, "rewrap", keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -304,7 +305,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, String> request = createRewrapRequest(toCiphertext(ciphertext, transitContext));
 
-		return (String) writeForData("%s/rewrap/%s".formatted(this.path, keyName), request).get("ciphertext");
+		return (String) writeForData(VaultClients.concatPath(this.path, "rewrap", keyName), request).get("ciphertext");
 	}
 
 	@Override
@@ -321,7 +322,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 			batch.add(vaultRequest);
 		}
 
-		VaultResponse vaultResponse = writeForResponse("%s/rewrap/%s".formatted(this.path, keyName),
+		VaultResponse vaultResponse = writeForResponse(VaultClients.concatPath(this.path, "rewrap", keyName),
 				Collections.singletonMap("batch_input", batch));
 
 		return toBatchResults(vaultResponse, batchRequest, Ciphertext::getContext);
@@ -347,7 +348,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(hmacRequest);
 
-		String hmac = (String) writeForData("%s/hmac/%s".formatted(this.path, keyName), request).get("hmac");
+		String hmac = (String) writeForData(VaultClients.concatPath(this.path, "hmac", keyName), request).get("hmac");
 
 		return Hmac.of(hmac);
 	}
@@ -386,7 +387,8 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(signRequest);
 
-		String signature = (String) writeForData("%s/sign/%s".formatted(this.path, keyName), request).get("signature");
+		String signature = (String) writeForData(VaultClients.concatPath(this.path, "sign", keyName), request)
+				.get("signature");
 
 		return Signature.of(signature);
 	}
@@ -425,7 +427,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, Object> request = toRequestBody(verificationRequest);
 
-		Map<String, Object> response = writeForData("%s/verify/%s".formatted(this.path, keyName), request);
+		Map<String, Object> response = writeForData(VaultClients.concatPath(this.path, "verify", keyName), request);
 
 		if (response.containsKey("valid") && Boolean.valueOf("" + response.get("valid"))) {
 			return SignatureValidation.valid();

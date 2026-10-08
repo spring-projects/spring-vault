@@ -21,6 +21,7 @@ import java.util.Map;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultMetadataRequest;
 import org.springframework.vault.support.VaultMetadataResponse;
 
@@ -69,7 +70,7 @@ class ReactiveVaultKeyValueMetadataTemplate implements ReactiveVaultKeyValueMeta
 
 	private String getMetadataPath(String path) {
 		Assert.hasText(path, "Path must not be empty");
-		return this.path + "/metadata/" + path;
+		return VaultClients.concatPath(this.path, "metadata", path);
 	}
 
 }
