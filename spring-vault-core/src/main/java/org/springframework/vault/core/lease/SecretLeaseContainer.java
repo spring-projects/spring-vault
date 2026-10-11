@@ -901,6 +901,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 
 		final Map<Lease, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
 
+		private @Nullable Instant leaseExpiresAt;
+
 
 		/**
 		 * @param taskScheduler must not be {@literal null}.
@@ -920,8 +922,8 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		 * to prevent too many renewals in a very short timeframe.
 		 * @param expiryThreshold duration to renew before {@link Lease}.
 		 */
-		void scheduleRenewal(RequestedSecret requestedSecret, RenewLease renewLease, Lease lease, Duration minRenewal,
-				Duration expiryThreshold) {
+		synchronized void scheduleRenewal(RequestedSecret requestedSecret, RenewLease renewLease, Lease lease,
+				Duration minRenewal, Duration expiryThreshold) {
 			if (logger.isDebugEnabled()) {
 				if (lease.hasLeaseId()) {
 					logger.debug("Scheduling renewal for secret %s with lease %s, lease duration %d".formatted(
@@ -933,6 +935,22 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			}
 
 			Lease currentLease = CURRENT_UPDATER.get(this);
+			Clock clock = this.taskScheduler.getClock();
+			Instant now = clock.instant();
+			Instant expiresAt = this.leaseExpiresAt;
+			Duration renewalDelay = Duration.ofSeconds(getRenewalSeconds(lease, minRenewal, expiryThreshold));
+			if (currentLease == lease && lease.hasLeaseId() && expiresAt != null) {
+				Duration remaining = Duration.between(now, expiresAt);
+				Duration minimumRetry = minRenewal.compareTo(Duration.ofSeconds(1)) < 0 ? Duration.ofSeconds(1)
+						: minRenewal;
+				if (remaining.compareTo(minimumRetry) > 0) {
+					Duration halfRemaining = remaining.dividedBy(2);
+					Duration retryDelay = renewalDelay.compareTo(halfRemaining) < 0 ? renewalDelay : halfRemaining;
+					renewalDelay = retryDelay.compareTo(minimumRetry) < 0 ? minimumRetry : retryDelay;
+				}
+			} else {
+				this.leaseExpiresAt = now.plus(lease.getLeaseDuration());
+			}
 			CURRENT_UPDATER.set(this, lease);
 			if (currentLease != null) {
 				cancelSchedule(currentLease);
@@ -961,7 +979,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 						// Renew lease may call scheduleRenewal(…) with a different lease
 						// Id to alter set up its own renewal schedule. If it's the old
 						// lease, then renewLease() outcome controls the current LeaseId.
-						CURRENT_UPDATER.compareAndSet(LeaseRenewalScheduler.this, lease, renewLease.renewLease(lease));
+						Lease renewed = renewLease.renewLease(lease);
+						synchronized (LeaseRenewalScheduler.this) {
+							if (CURRENT_UPDATER.compareAndSet(LeaseRenewalScheduler.this, lease, renewed)
+									&& Lease.none().equals(renewed)) {
+								LeaseRenewalScheduler.this.leaseExpiresAt = null;
+							}
+						}
 					} catch (Exception e) {
 						logger.error("Cannot renew lease %s".formatted(lease.getLeaseId()), e);
 					}
@@ -970,12 +994,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 			};
 
 			ScheduledFuture<?> scheduledFuture = this.taskScheduler.schedule(task,
-					new OneShotTrigger(getRenewalSeconds(lease, minRenewal, expiryThreshold), taskScheduler.getClock()));
+					new OneShotTrigger(renewalDelay, clock));
 			this.schedules.put(lease, scheduledFuture);
 		}
 
-		void associateLease(Lease lease) {
+		synchronized void associateLease(Lease lease) {
 			CURRENT_UPDATER.set(this, lease);
+			this.leaseExpiresAt = null;
 		}
 
 		private void cancelSchedule(Lease lease) {
@@ -991,9 +1016,10 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		/**
 		 * Disables schedule for already scheduled renewals.
 		 */
-		void disableScheduleRenewal() {
+		synchronized void disableScheduleRenewal() {
 			// capture the previous lease to revoke it
 			this.previousLeaseRef = CURRENT_UPDATER.getAndSet(this, null);
+			this.leaseExpiresAt = null;
 			Set<Lease> leases = new HashSet<>(this.schedules.keySet());
 			for (Lease lease : leases) {
 				cancelSchedule(lease);
@@ -1129,13 +1155,13 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		// see AtomicIntegerFieldUpdater UPDATER
 		private volatile int status = 0;
 
-		private final long seconds;
+		private final Duration delay;
 
 		private final Clock clock;
 
 
-		OneShotTrigger(long seconds, Clock clock) {
-			this.seconds = seconds;
+		OneShotTrigger(Duration delay, Clock clock) {
+			this.delay = delay;
 			this.clock = clock;
 		}
 
@@ -1143,7 +1169,7 @@ public class SecretLeaseContainer extends SecretLeaseEventPublisher
 		@Nullable
 		@Override
 		public Instant nextExecution(TriggerContext triggerContext) {
-			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? clock.instant().plusSeconds(this.seconds)
+			return UPDATER.compareAndSet(this, STATUS_ARMED, STATUS_FIRED) ? clock.instant().plus(this.delay)
 					: null;
 		}
 
