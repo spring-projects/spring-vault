@@ -6,4 +6,4 @@ runs:
       uses: ./.github/actions/setup-vault
     - name: Test Release
       shell: bash
-      run:  ./mvnw --batch-mode --settings release-train-settings.xml clean verify --activate-profiles releaseTrain,release,ci -Dgpg.skip
+      run:  ./mvnw --batch-mode --settings release-train-settings.xml clean verify --activate-profiles releaseTrain,release,ci -Dgpg.skip -Ddevelocity.cache.remote.enabled=false
