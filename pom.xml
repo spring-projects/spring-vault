@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>4.0.4-SNAPSHOT</version>
+	<version>4.0.4</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -24,8 +25,7 @@
 		<bcpkix-jdk18on.version>1.86</bcpkix-jdk18on.version>
 		<errorprone.version>2.42.0</errorprone.version>
 		<google-cloud-iamcredentials.version>2.80.0</google-cloud-iamcredentials.version>
-		<google-auth-library-oauth2-http.version>1.40.0
-		</google-auth-library-oauth2-http.version>
+		<google-auth-library-oauth2-http.version>1.40.0</google-auth-library-oauth2-http.version>
 		<httpclient5.version>5.5.2</httpclient5.version>
 		<httpcore5.version>5.3.6</httpcore5.version>
 		<jackson-annotations.version>2.21</jackson-annotations.version>
@@ -77,7 +77,7 @@
 
 		<!-- Enabled only in CI and distribute profiles -->
 		<javadoc.offline-links.skip>true</javadoc.offline-links.skip>
-		<project.build.outputTimestamp>2099-12-31T23:59:59Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2026-10-22T00:00:00Z</project.build.outputTimestamp>
 		<!-- @formatter:on -->
 	</properties>
 
@@ -744,12 +744,9 @@
 					<configuration>
 						<archive>
 							<manifestEntries>
-								<Implementation-Title>${project.name}
-								</Implementation-Title>
-								<Implementation-Version>${project.version}
-								</Implementation-Version>
-								<Automatic-Module-Name>${java-module-name}
-								</Automatic-Module-Name>
+								<Implementation-Title>${project.name}</Implementation-Title>
+								<Implementation-Version>${project.version}</Implementation-Version>
+								<Automatic-Module-Name>${java-module-name}</Automatic-Module-Name>
 							</manifestEntries>
 						</archive>
 					</configuration>
@@ -1205,13 +1202,6 @@
 
 
 	<repositories>
-		<repository>
-			<id>spring-snapshot</id>
-			<url>https://repo.spring.io/snapshot</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
 	</repositories>
 
 </project>
