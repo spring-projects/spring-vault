@@ -24,13 +24,16 @@ import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.RoleId;
 import org.springframework.vault.authentication.AppRoleAuthenticationOptions.SecretId;
 import org.springframework.vault.client.VaultHttpHeaders;
 import org.springframework.vault.support.ObjectMapperSupplier;
 import org.springframework.vault.support.VaultToken;
+import org.springframework.web.client.RestClient;
 import org.springframework.vault.util.MockVaultClient;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -75,6 +78,33 @@ class AppRoleAuthenticationUnitTests {
 
 		assertThat(login).isInstanceOf(LoginToken.class);
 		assertThat(login.getToken()).isEqualTo("my-token");
+	}
+
+	@Test
+	void loginWithRestTemplateShouldObtainToken() {
+
+		RestTemplate restTemplate = new RestTemplate();
+		MockRestServiceServer mockRest = MockRestServiceServer.bindTo(restTemplate).build();
+
+		AppRoleAuthenticationOptions options = AppRoleAuthenticationOptions.builder()
+				.roleId(RoleId.provided("hello")) //
+				.secretId(SecretId.provided("world")) //
+				.build();
+
+		mockRest.expect(requestTo("auth/approle/login"))
+				.andExpect(method(HttpMethod.POST))
+				.andExpect(jsonPath("$.role_id").value("hello"))
+				.andExpect(jsonPath("$.secret_id").value("world"))
+				.andRespond(withSuccess().contentType(MediaType.APPLICATION_JSON)
+						.body("{" + "\"auth\":{\"client_token\":\"my-token\"}" + "}"));
+
+		AppRoleAuthentication sut = new AppRoleAuthentication(options, RestClient.create(restTemplate));
+
+		VaultToken login = sut.login();
+
+		assertThat(login).isInstanceOf(LoginToken.class);
+		assertThat(login.getToken()).isEqualTo("my-token");
+		mockRest.verify();
 	}
 
 	@Test
