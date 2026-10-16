@@ -234,6 +234,8 @@ abstract class ClientAdapter {
 				}
 
 				spec = spec.headers(it -> it.putAll(entity.getHeaders()));
+			} else if (requestEntity != null) {
+				spec = spec.body(requestEntity);
 			}
 
 			return spec.retrieve().toEntity(responseType);
