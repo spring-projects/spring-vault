@@ -4,7 +4,7 @@
 
 	<groupId>org.springframework.vault</groupId>
 	<artifactId>spring-vault-parent</artifactId>
-	<version>4.1.1</version>
+	<version>4.1.2-SNAPSHOT</version>
 
 	<name>Spring Vault</name>
 	<description>Parent project for Spring Vault</description>
@@ -77,7 +77,7 @@
 
 		<!-- Enabled only in CI and distribute profiles -->
 		<javadoc.offline-links.skip>true</javadoc.offline-links.skip>
-		<project.build.outputTimestamp>2026-10-22T00:00:00Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2099-12-31T23:59:59Z</project.build.outputTimestamp>
 		<!-- @formatter:on -->
 	</properties>
 
@@ -1202,6 +1202,16 @@
 
 
 	<repositories>
+		<repository>
+			<id>spring-snapshot</id>
+			<url>https://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</repository>
 	</repositories>
 
 </project>
