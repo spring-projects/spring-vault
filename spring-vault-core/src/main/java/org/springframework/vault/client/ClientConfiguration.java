@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ProxySelector;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -158,7 +159,8 @@ class ClientConfiguration {
 	}
 
 	private static void loadFromPem(KeyStore keyStore, InputStream inputStream) throws IOException, KeyStoreException {
-		List<PemObject> pemObjects = PemObject.parse(new String(FileCopyUtils.copyToByteArray(inputStream)));
+		List<PemObject> pemObjects = PemObject
+				.parse(new String(FileCopyUtils.copyToByteArray(inputStream), StandardCharsets.US_ASCII));
 		for (PemObject pemObject : pemObjects) {
 			if (pemObject.isCertificate()) {
 				X509Certificate cert = pemObject.getCertificate();

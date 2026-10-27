@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
@@ -153,7 +154,7 @@ public abstract class VaultResponses {
 
 			Map<String, Object> map = JacksonCompat.instance()
 					.getObjectMapperAccessor()
-					.deserialize(json.getBytes(), Map.class);
+					.deserialize(json.getBytes(StandardCharsets.UTF_8), Map.class);
 			if (map.containsKey("errors")) {
 
 				Collection<String> errors = (Collection<String>) map.get("errors");
@@ -183,7 +184,7 @@ public abstract class VaultResponses {
 
 				@Override
 				public InputStream getBody() {
-					return new ByteArrayInputStream(wrappedResponse.getBytes());
+					return new ByteArrayInputStream(wrappedResponse.getBytes(StandardCharsets.UTF_8));
 				}
 
 				@Override
