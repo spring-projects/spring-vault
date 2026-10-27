@@ -16,10 +16,12 @@
 
 package org.springframework.vault.core;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.vault.support.*;
 
 /**
