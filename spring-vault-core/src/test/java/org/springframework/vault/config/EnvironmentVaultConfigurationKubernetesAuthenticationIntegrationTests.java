@@ -16,6 +16,7 @@
 
 package org.springframework.vault.config;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -55,7 +56,7 @@ class EnvironmentVaultConfigurationKubernetesAuthenticationIntegrationTests {
 
 	@BeforeAll
 	static void beforeClass() throws Exception {
-		Files.write(Paths.get("target", "token"), "token".getBytes());
+		Files.write(Paths.get("target", "token"), "token".getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Autowired

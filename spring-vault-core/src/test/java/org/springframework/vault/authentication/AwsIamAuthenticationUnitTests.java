@@ -16,7 +16,11 @@
 
 package org.springframework.vault.authentication;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,7 @@ import software.amazon.awssdk.regions.Region;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.vault.support.JacksonCompat;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.MockVaultClient;
 
@@ -36,6 +41,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Unit test for {@link AwsIamAuthentication}.
  *
  * @author Mark Paluch
+ * @author Tim Jungk
  */
 class AwsIamAuthenticationUnitTests {
 
@@ -107,6 +113,29 @@ class AwsIamAuthenticationUnitTests {
 		assertThat(login.getToken()).isEqualTo("my-token");
 		assertThat(((LoginToken) login).getLeaseDuration()).isEqualTo(Duration.ofSeconds(10));
 		assertThat(((LoginToken) login).isRenewable()).isTrue();
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void shouldEncodeIamRequestAsUtf8() {
+
+		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
+				.region(Region.US_WEST_1)
+				.credentials(AwsBasicCredentials.create("foo", "bar"))
+				.build();
+
+		Map<String, String> request = AwsIamAuthentication.createRequestBody(options);
+
+		assertThat(Base64.getDecoder().decode(request.get("iam_request_url")))
+				.isEqualTo(options.getEndpointUri().toString().getBytes(StandardCharsets.UTF_8));
+		assertThat(Base64.getDecoder().decode(request.get("iam_request_body")))
+				.isEqualTo("Action=GetCallerIdentity&Version=2011-06-15".getBytes(StandardCharsets.UTF_8));
+
+		Map<String, List<String>> headers = JacksonCompat.instance()
+				.getObjectMapperAccessor()
+				.deserialize(Base64.getDecoder().decode(request.get("iam_request_headers")), Map.class);
+		assertThat(headers.get("x-amz-content-sha256"))
+				.containsExactly("ab821ae955788b0e33ebd34c208442ccfc2d406e2edc5e7a39bd6458fbb4f843");
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.vault.authentication;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	private static final String REQUEST_BODY = "Action=GetCallerIdentity&Version=2011-06-15";
 
 	private static final String REQUEST_BODY_BASE64_ENCODED = Base64.getEncoder()
-			.encodeToString(REQUEST_BODY.getBytes());
+			.encodeToString(REQUEST_BODY.getBytes(StandardCharsets.UTF_8));
 
 
 	private final AwsIamAuthenticationOptions options;
@@ -201,10 +202,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 		Map<String, String> login = new HashMap<>();
 		login.put("iam_http_request_method", "POST");
 		login.put("iam_request_url",
-				Base64.getEncoder().encodeToString(options.getEndpointUri().toString().getBytes()));
+				Base64.getEncoder().encodeToString(options.getEndpointUri().toString().getBytes(StandardCharsets.UTF_8)));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 		String headerJson = getSignedHeaders(options, credentials, region);
-		login.put("iam_request_headers", Base64.getEncoder().encodeToString(headerJson.getBytes()));
+		login.put("iam_request_headers", Base64.getEncoder().encodeToString(headerJson.getBytes(StandardCharsets.UTF_8)));
 		if (!ObjectUtils.isEmpty(options.getRole())) {
 			login.put("role", options.getRole());
 		}
@@ -214,7 +215,8 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 	private static String getSignedHeaders(AwsIamAuthenticationOptions options, AwsCredentials credentials,
 			Region region) {
 		Map<String, List<String>> headers = createIamRequestHeaders(options);
-		ContentStreamProvider contentStreamProvider = () -> new ByteArrayInputStream(REQUEST_BODY.getBytes());
+		ContentStreamProvider contentStreamProvider = () -> new ByteArrayInputStream(
+				REQUEST_BODY.getBytes(StandardCharsets.UTF_8));
 		SdkHttpFullRequest.Builder builder = SdkHttpFullRequest.builder()
 				.contentStreamProvider(contentStreamProvider)
 				.headers(headers)
