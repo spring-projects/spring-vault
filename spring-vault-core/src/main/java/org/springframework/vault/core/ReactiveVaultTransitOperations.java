@@ -16,11 +16,13 @@
 
 package org.springframework.vault.core;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.util.Assert;
 import org.springframework.vault.support.*;
 
 /**
