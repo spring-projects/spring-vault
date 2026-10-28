@@ -148,6 +148,26 @@ class ReactiveLifecycleAwareSessionManagerUnitTests {
 	}
 
 	@Test
+	void shouldRetryLoginAfterFailure() {
+
+		when(this.tokenSupplier.getVaultToken()).thenReturn(Mono.error(new VaultLoginException("foo")),
+				Mono.just(LoginToken.of("login")));
+
+		this.sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.verifyError(VaultLoginException.class);
+
+		this.sessionManager.getSessionToken() //
+				.as(StepVerifier::create) //
+				.expectNext(LoginToken.of("login")) //
+				.verifyComplete();
+
+		verify(this.tokenSupplier, times(2)).getVaultToken();
+		verify(this.errorListener).onAuthenticationError(any(LoginFailedEvent.class));
+		verify(this.listener).onAuthenticationEvent(any(AfterLoginEvent.class));
+	}
+
+	@Test
 	@SuppressWarnings("unchecked")
 	void shouldSelfLookupToken() {
 
