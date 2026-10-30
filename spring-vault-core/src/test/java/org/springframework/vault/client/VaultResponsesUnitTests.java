@@ -17,6 +17,7 @@
 package org.springframework.vault.client;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +32,7 @@ import static org.assertj.core.api.Assertions.*;
  * Unit tests for {@link VaultResponses}.
  *
  * @author Mark Paluch
+ * @author Tim Jungk
  */
 class VaultResponsesUnitTests {
 
@@ -47,7 +49,7 @@ class VaultResponsesUnitTests {
 	void shouldBuildExceptionWithErrorMessage() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request",
-				"{\"errors\":[\"some-error\"]}".getBytes(), StandardCharsets.US_ASCII);
+				"{\"errors\":[\"some-error\"]}".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
 
 		VaultException vaultException = VaultResponses.buildException(cause);
 		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request: some-error").hasCause(cause);
@@ -66,11 +68,30 @@ class VaultResponsesUnitTests {
 	void shouldBuildExceptionWithPathAndErrorMessage() {
 
 		HttpStatusCodeException cause = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request",
-				"{\"errors\":[\"some-error\"]}".getBytes(), StandardCharsets.US_ASCII);
+				"{\"errors\":[\"some-error\"]}".getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8);
 
 		VaultException vaultException = VaultResponses.buildException(cause, "sys/path");
 		assertThat(vaultException).hasMessageContaining("Status 400 Bad Request [sys/path]: some-error")
 				.hasCause(cause);
+	}
+
+	@Test
+	void shouldPreserveUnicodeErrorDetails() {
+
+		HttpStatusCodeException cause = new HttpClientErrorException(HttpStatus.BAD_REQUEST, "Bad Request",
+				"{\"errors\":[\"Zugriff für Schlüssel verweigert\"]}".getBytes(StandardCharsets.UTF_8),
+				StandardCharsets.UTF_8);
+
+		assertThat(VaultResponses.buildException(cause)).hasMessageContaining("Zugriff für Schlüssel verweigert")
+				.hasCause(cause);
+	}
+
+	@Test
+	void shouldUnwrapUnicodeResponse() {
+
+		Map<?, ?> response = VaultResponses.unwrap("{\"value\":\"Schlüssel\"}", Map.class);
+
+		assertThat(response.get("value")).isEqualTo("Schlüssel");
 	}
 
 }

@@ -17,6 +17,7 @@
 package org.springframework.vault.authentication;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,15 +27,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.vault.VaultException;
 import org.springframework.vault.authentication.AuthenticationSteps.Node;
-import org.springframework.vault.client.VaultClients;
 import org.springframework.vault.support.VaultResponse;
 import org.springframework.vault.support.VaultToken;
 import org.springframework.vault.util.MockVaultClient;
 import org.springframework.vault.util.TestVaultClient;
-import org.springframework.web.client.RestClient;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
@@ -89,7 +87,8 @@ class AuthenticationStepsExecutorUnitTests {
 	void inputStreamResourceCredentialSupplierShouldBeLoaded() {
 
 		AuthenticationSteps steps = AuthenticationSteps
-				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes())))
+				.fromSupplier(new ResourceCredentialSupplier(
+						new ByteArrayResource("eyJhbGciOiJSUz".getBytes(StandardCharsets.UTF_8))))
 				.login(VaultToken::of);
 
 		assertThat(login(steps).getToken()).startsWith("eyJhbGciOiJSUz");

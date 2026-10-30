@@ -18,6 +18,7 @@ package org.springframework.vault.support;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.spec.RSAPrivateCrtKeySpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.List;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.*;
  * Unit tests for {@link PemObject}.
  *
  * @author Mark Paluch
+ * @author Tim Jungk
  */
 class PemObjectUnitTests {
 
@@ -53,7 +55,8 @@ class PemObjectUnitTests {
 	void shouldDecodePublicKey() throws IOException {
 
 		String content = new String(
-				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")));
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")),
+				StandardCharsets.US_ASCII);
 
 		PemObject pemObject = PemObject.parseFirst(content);
 		assertThat(pemObject.isPrivateKey()).isFalse();
@@ -65,7 +68,8 @@ class PemObjectUnitTests {
 	void shouldDecodePrivateKey() throws IOException {
 
 		String content = new String(
-				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")));
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")),
+				StandardCharsets.US_ASCII);
 
 		PemObject pemObject = PemObject.parseFirst(content);
 		assertThat(pemObject.isPrivateKey()).isTrue();
@@ -77,9 +81,11 @@ class PemObjectUnitTests {
 	void shouldDecodeConcatenatedPEMContent() throws IOException {
 
 		String content1 = new String(
-				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")));
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")),
+				StandardCharsets.US_ASCII);
 		String content2 = new String(
-				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")));
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")),
+				StandardCharsets.US_ASCII);
 
 		List<PemObject> pemObjects = PemObject.parse(content1 + content2);
 
@@ -91,11 +97,13 @@ class PemObjectUnitTests {
 	@Test
 	void keysShouldMatch() throws IOException {
 
-		PemObject publicKey = PemObject.parseFirst(
-				new String(FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem"))));
+		PemObject publicKey = PemObject.parseFirst(new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.public.key.pem")),
+				StandardCharsets.US_ASCII));
 
-		PemObject privateKey = PemObject.parseFirst(
-				new String(FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem"))));
+		PemObject privateKey = PemObject.parseFirst(new String(
+				FileCopyUtils.copyToByteArray(new File(this.privateDir, "localhost.decrypted.key.pem")),
+				StandardCharsets.US_ASCII));
 
 		RSAPublicKeySpec publicSpec = publicKey.getRSAPublicKeySpec();
 		RSAPrivateCrtKeySpec privateKeySpec = privateKey.getRSAPrivateKeySpec();
@@ -107,7 +115,8 @@ class PemObjectUnitTests {
 	@Test
 	void shouldDecodeX509Certificate() throws IOException {
 
-		String content = new String(FileCopyUtils.copyToByteArray(new File(this.workdir, "ca/certs/ca.cert.pem")));
+		String content = new String(FileCopyUtils.copyToByteArray(new File(this.workdir, "ca/certs/ca.cert.pem")),
+				StandardCharsets.US_ASCII);
 
 		PemObject pemObject = PemObject.parseFirst(content);
 

@@ -16,6 +16,7 @@
 
 package org.springframework.vault.security;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -83,12 +84,12 @@ class VaultBytesEncryptorIntegrationTests extends IntegrationTestSupport {
 
 		VaultBytesEncryptor encryptor = new VaultBytesEncryptor(this.transit, KEY_NAME);
 
-		byte[] plaintext = "foo-bar+ü¿ß~€¢".getBytes();
+		byte[] plaintext = "foo-bar+ü¿ß~€¢".getBytes(StandardCharsets.UTF_8);
 		byte[] ciphertext = encryptor.encrypt(plaintext);
 
 		byte[] result = encryptor.decrypt(ciphertext);
 
-		assertThat(ciphertext).isNotEqualTo(plaintext).startsWith("vault:v1".getBytes());
+		assertThat(ciphertext).isNotEqualTo(plaintext).startsWith("vault:v1".getBytes(StandardCharsets.UTF_8));
 		assertThat(result).isEqualTo(plaintext);
 	}
 

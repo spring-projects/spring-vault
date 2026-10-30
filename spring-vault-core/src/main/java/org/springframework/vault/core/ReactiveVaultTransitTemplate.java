@@ -16,6 +16,7 @@
 
 package org.springframework.vault.core;
 
+import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -75,7 +76,7 @@ public class ReactiveVaultTransitTemplate implements ReactiveVaultTransitOperati
 		Assert.hasText(keyName, "Key name must not be empty");
 		Assert.notNull(plaintext, "Plaintext must not be null");
 		Map<String, String> request = new LinkedHashMap<>();
-		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes()));
+		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes(Charset.defaultCharset())));
 		return this.reactiveVaultOperations.write("%s/encrypt/%s".formatted(this.path, keyName), request)
 				.map(it -> (String) it.getRequiredData().get("ciphertext"));
 	}
@@ -129,7 +130,7 @@ public class ReactiveVaultTransitTemplate implements ReactiveVaultTransitOperati
 		request.put("ciphertext", ciphertext);
 		return this.reactiveVaultOperations.write("%s/decrypt/%s".formatted(this.path, keyName), request)
 				.map(it -> (String) it.getRequiredData().get("plaintext"))
-				.map(plaintext -> new String(Base64.getDecoder().decode(plaintext)));
+				.map(plaintext -> new String(Base64.getDecoder().decode(plaintext), Charset.defaultCharset()));
 	}
 
 	@Override

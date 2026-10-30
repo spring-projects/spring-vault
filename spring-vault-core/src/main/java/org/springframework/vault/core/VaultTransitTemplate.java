@@ -16,6 +16,7 @@
 
 package org.springframework.vault.core;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
@@ -154,7 +155,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 
 		Map<String, String> request = new LinkedHashMap<>();
 
-		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes()));
+		request.put("plaintext", Base64.getEncoder().encodeToString(plaintext.getBytes(Charset.defaultCharset())));
 
 		return (String) writeForData("%s/encrypt/%s".formatted(this.path, keyName), request).get("ciphertext");
 	}
@@ -224,7 +225,7 @@ public class VaultTransitTemplate implements VaultTransitOperations {
 		String plaintext = (String) writeForData("%s/decrypt/%s".formatted(this.path, keyName), request)
 				.get("plaintext");
 
-		return new String(Base64.getDecoder().decode(plaintext));
+		return new String(Base64.getDecoder().decode(plaintext), Charset.defaultCharset());
 	}
 
 	@Override

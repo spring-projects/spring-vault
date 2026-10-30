@@ -18,6 +18,7 @@ package org.springframework.vault.authentication;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -87,7 +88,8 @@ class AuthenticationStepsOperatorUnitTests {
 	void absentFileResourceCredentialSupplierShouldFail() {
 
 		AuthenticationSteps steps = AuthenticationSteps
-				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes()) {
+				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource(
+						"eyJhbGciOiJSUz".getBytes(StandardCharsets.UTF_8)) {
 
 					@Override
 					public InputStream getInputStream() throws IOException {
@@ -105,7 +107,8 @@ class AuthenticationStepsOperatorUnitTests {
 	void inputStreamResourceCredentialSupplierShouldBeLoaded() {
 
 		AuthenticationSteps steps = AuthenticationSteps
-				.fromSupplier(new ResourceCredentialSupplier(new ByteArrayResource("eyJhbGciOiJSUz".getBytes())))
+				.fromSupplier(new ResourceCredentialSupplier(
+						new ByteArrayResource("eyJhbGciOiJSUz".getBytes(StandardCharsets.UTF_8))))
 				.login(VaultToken::of);
 
 		login(steps).as(StepVerifier::create) //
