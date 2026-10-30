@@ -23,15 +23,21 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import io.netty.util.concurrent.ScheduledFuture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import tools.jackson.databind.ObjectMapper;
 
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.vault.core.certificate.domain.RequestedCertificate;
 import org.springframework.vault.core.certificate.event.CertificateEvent;
 import org.springframework.vault.core.certificate.event.CertificateExpiredEvent;
@@ -69,6 +75,135 @@ class CertificateContainerUnitTests {
 				Map.class);
 		this.certificate = Certificate.of(data.get("serial_number"), data.get("certificate"),
 				data.get("issuing_ca"), List.of(), 0L);
+	}
+
+	@Test
+	void shouldRetryFailedRotationEvenWhenErrorListenerThrows() throws Exception {
+		CertificateAuthority ca = mock(CertificateAuthority.class);
+		Certificate replacement = Certificate.of("replacement", certificate.getCertificate(),
+				certificate.getIssuingCaCertificate());
+		IllegalStateException failure = new IllegalStateException("Vault unavailable");
+		when(ca.getIssuerCertificate("my-ca", "default"))
+				.thenReturn(certificate).thenThrow(failure).thenReturn(replacement);
+		List<Certificate> obtained = new ArrayList<>();
+		CertificateContainer container = new CertificateContainer(ca, taskScheduler);
+		container.afterPropertiesSet();
+		ManagedCertificate.trust(RequestedCertificate.trustAnchor("my-ca"), obtained::add, error -> {
+			throw (RuntimeException) error;
+		}).registerCertificate(container);
+		container.start();
+
+		ArgumentCaptor<Runnable> tasks = ArgumentCaptor.forClass(Runnable.class);
+		ArgumentCaptor<Trigger> triggers = ArgumentCaptor.forClass(Trigger.class);
+		try {
+			verify(taskScheduler).schedule(tasks.capture(), triggers.capture());
+			assertThatThrownBy(tasks.getValue()::run).isSameAs(failure);
+			assertThat(obtained).containsExactly(certificate);
+
+			verify(taskScheduler, times(2)).schedule(tasks.capture(), triggers.capture());
+			assertThat(triggers.getValue().nextExecution(new SimpleTriggerContext(taskScheduler.getClock())))
+					.isEqualTo(taskScheduler.getClock().instant().plusSeconds(1));
+			tasks.getValue().run();
+
+			assertThat(obtained).containsExactly(certificate, replacement);
+			verify(taskScheduler, times(3)).schedule(any(Runnable.class), any(Trigger.class));
+		}
+		finally {
+			container.destroy();
+		}
+	}
+
+	@Test
+	void shouldBackOffRetriesAndResetAfterSuccessfulRotation() throws Exception {
+		CertificateAuthority ca = mock(CertificateAuthority.class);
+		when(ca.getIssuerCertificate("my-ca", "default")).thenReturn(certificate);
+		CertificateContainer container = new CertificateContainer(ca, taskScheduler);
+		container.afterPropertiesSet();
+		container.addErrorListener((event, error) -> {});
+		container.register(RequestedCertificate.trustAnchor("my-ca"));
+		container.start();
+
+		ArgumentCaptor<Runnable> tasks = ArgumentCaptor.forClass(Runnable.class);
+		ArgumentCaptor<Trigger> triggers = ArgumentCaptor.forClass(Trigger.class);
+		IllegalStateException failure = new IllegalStateException("Vault unavailable");
+		try {
+			when(ca.getIssuerCertificate("my-ca", "default")).thenThrow(failure);
+			int schedules = 1;
+			verify(taskScheduler).schedule(tasks.capture(), triggers.capture());
+			for (long delay : new long[] {1, 2, 4, 8, 16, 32, 60, 60}) {
+				tasks.getValue().run();
+				verify(taskScheduler, times(++schedules)).schedule(tasks.capture(), triggers.capture());
+				assertThat(triggers.getValue().nextExecution(new SimpleTriggerContext(taskScheduler.getClock())))
+						.isEqualTo(taskScheduler.getClock().instant().plusSeconds(delay));
+			}
+
+			doReturn(certificate).when(ca).getIssuerCertificate("my-ca", "default");
+			tasks.getValue().run();
+			verify(taskScheduler, times(++schedules)).schedule(tasks.capture(), triggers.capture());
+
+			when(ca.getIssuerCertificate("my-ca", "default")).thenThrow(failure);
+			tasks.getValue().run();
+			verify(taskScheduler, times(++schedules)).schedule(tasks.capture(), triggers.capture());
+			assertThat(triggers.getValue().nextExecution(new SimpleTriggerContext(taskScheduler.getClock())))
+					.isEqualTo(taskScheduler.getClock().instant().plusSeconds(1));
+		}
+		finally {
+			container.destroy();
+		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"stop", "unregister", "destroy"})
+	void shouldCancelPendingRetry(String action) throws Exception {
+		CertificateAuthority ca = mock(CertificateAuthority.class);
+		when(ca.getIssuerCertificate("my-ca", "default")).thenReturn(certificate);
+		ScheduledFuture<?> displacedRetry = mock(ScheduledFuture.class);
+		ScheduledFuture<?> retry = mock(ScheduledFuture.class);
+		doReturn(mock(ScheduledFuture.class), displacedRetry, retry).when(taskScheduler)
+				.schedule(any(Runnable.class), any(Trigger.class));
+		CertificateContainer container = new CertificateContainer(ca, taskScheduler);
+		RequestedCertificate requested = RequestedCertificate.trustAnchor("my-ca");
+		container.afterPropertiesSet();
+		container.addErrorListener((event, error) -> {});
+		container.register(requested);
+		container.start();
+
+		CompletableFuture<Void> requestStarted = new CompletableFuture<>();
+		CompletableFuture<Void> failRequest = new CompletableFuture<>();
+		IllegalStateException failure = new IllegalStateException("Vault unavailable");
+		when(ca.getIssuerCertificate("my-ca", "default")).thenAnswer(invocation -> {
+			requestStarted.complete(null);
+			failRequest.get(5, TimeUnit.SECONDS);
+			throw failure;
+		}).thenThrow(failure);
+
+		ArgumentCaptor<Runnable> tasks = ArgumentCaptor.forClass(Runnable.class);
+		try {
+			verify(taskScheduler).schedule(tasks.capture(), any(Trigger.class));
+			CompletableFuture<Void> rotation = CompletableFuture.runAsync(tasks.getValue());
+			requestStarted.get(5, TimeUnit.SECONDS);
+			container.rotate(requested);
+			failRequest.complete(null);
+			rotation.get(5, TimeUnit.SECONDS);
+
+			verify(displacedRetry).cancel(false);
+			verify(retry, never()).cancel(anyBoolean());
+			verify(taskScheduler, times(3)).schedule(tasks.capture(), any(Trigger.class));
+			switch (action) {
+				case "stop" -> container.stop();
+				case "unregister" -> container.unregister(requested);
+				case "destroy" -> container.destroy();
+			}
+
+			verify(retry).cancel(false);
+			tasks.getAllValues().forEach(Runnable::run);
+			verify(ca, times(3)).getIssuerCertificate("my-ca", "default");
+			verify(taskScheduler, times(3)).schedule(any(Runnable.class), any(Trigger.class));
+		}
+		finally {
+			failRequest.complete(null);
+			container.destroy();
+		}
 	}
 
 	@Test

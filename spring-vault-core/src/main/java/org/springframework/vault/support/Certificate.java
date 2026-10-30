@@ -184,7 +184,7 @@ public class Certificate {
 
 	/**
 	 * Create a trust store as {@link KeyStore} from this {@code Certificate}
-	 * containing * the certificate chain.
+	 * containing the certificate chain.
 	 * @param includeCaChain whether to include the certificate authority chain
 	 * instead of just the issuer certificate.
 	 * @return the {@link KeyStore} containing the certificate and certificate
