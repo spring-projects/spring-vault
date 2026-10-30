@@ -16,10 +16,12 @@
 
 package org.springframework.vault.core;
 
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.jspecify.annotations.Nullable;
 
+import org.springframework.util.Assert;
 import org.springframework.vault.support.*;
 
 /**
@@ -107,12 +109,27 @@ public interface VaultTransitOperations {
 	 * {@link #encrypt(String, org.springframework.vault.support.Plaintext)} to
 	 * construct a {@link org.springframework.vault.support.Plaintext#of(byte[])
 	 * Plaintext} object from bytes to avoid {@link java.nio.charset.Charset}
-	 * mismatches.
+	 * mismatches, or use {@link #encrypt(String, String, Charset)} to specify the
+	 * charset directly.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param plaintext must not be empty or {@literal null}.
 	 * @return cipher text.
 	 */
 	String encrypt(String keyName, String plaintext);
+
+	/**
+	 * Encrypts the provided plain text using the named key and the given charset.
+	 * The charset applies to the plain text, independently of the JSON encoding.
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param plaintext must not be {@literal null}.
+	 * @param charset the charset to encode the plain text, must not be
+	 * {@literal null}.
+	 * @return cipher text.
+	 * @since 4.2
+	 */
+	default String encrypt(String keyName, String plaintext, Charset charset) {
+		return encrypt(keyName, Plaintext.of(plaintext, charset)).getCiphertext();
+	}
 
 	/**
 	 * Encrypts the provided {@code plaintext} using the named key.
@@ -146,16 +163,32 @@ public interface VaultTransitOperations {
 
 	/**
 	 * Decrypts the provided plain text using the named key. The decoded
-	 * {@code plaintext} is decoded into {@link String} the
+	 * {@code plaintext} is decoded into {@link String} using the
 	 * {@link java.nio.charset.Charset#defaultCharset() default charset}. Use
 	 * {@link #decrypt(String, org.springframework.vault.support.Ciphertext)} to
-	 * obtain a {@link org.springframework.vault.support.Ciphertext} object that
-	 * allows to control the {@link java.nio.charset.Charset} for later consumption.
+	 * obtain a {@link org.springframework.vault.support.Plaintext} object that
+	 * allows to control the {@link java.nio.charset.Charset} for later consumption,
+	 * or use {@link #decrypt(String, String, Charset)} to specify it directly.
 	 * @param keyName must not be empty or {@literal null}.
 	 * @param ciphertext must not be empty or {@literal null}.
 	 * @return plain text.
 	 */
 	String decrypt(String keyName, String ciphertext);
+
+	/**
+	 * Decrypts the provided cipher text using the named key and the given charset.
+	 * Use the charset that was used to encode the original plain text.
+	 * @param keyName must not be empty or {@literal null}.
+	 * @param ciphertext must not be empty or {@literal null}.
+	 * @param charset the charset to decode the plain text, must not be
+	 * {@literal null}.
+	 * @return plain text.
+	 * @since 4.2
+	 */
+	default String decrypt(String keyName, String ciphertext, Charset charset) {
+		Assert.notNull(charset, "Charset must not be null");
+		return decrypt(keyName, Ciphertext.of(ciphertext)).asString(charset);
+	}
 
 	/**
 	 * Decrypts the provided cipher text using the named key.
