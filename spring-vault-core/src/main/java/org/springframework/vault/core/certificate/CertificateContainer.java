@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
@@ -50,6 +51,8 @@ import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.backoff.BackOffExecution;
+import org.springframework.util.backoff.ExponentialBackOff;
 import org.springframework.vault.core.VaultPkiOperations;
 import org.springframework.vault.core.certificate.domain.RequestedCertificate;
 import org.springframework.vault.core.certificate.domain.RequestedCertificateBundle;
@@ -250,7 +253,7 @@ public class CertificateContainer extends CertificateEventPublisher
 			removed = true;
 		}
 		if (scheduler != null) {
-			stop(certificate, scheduler);
+			scheduler.disableScheduleRenewal();
 		}
 		ManagedCertificate previous = managedCertificates.remove(certificate);
 		if (previous != null) {
@@ -325,10 +328,6 @@ public class CertificateContainer extends CertificateEventPublisher
 		throw new IllegalStateException("Unsupported RequestedCertificate type: " + request.getClass());
 	}
 
-	private void stop(RequestedCertificate certificate, CertificateRenewalScheduler scheduler) {
-		scheduler.disableScheduleRenewal();
-	}
-
 	/**
 	 * Stop the {@link CertificateContainer}. Stopping the container will stop
 	 * certificate rotation and event publishing.
@@ -386,7 +385,9 @@ public class CertificateContainer extends CertificateEventPublisher
 		int status = this.status;
 		if (status == STATUS_INITIAL || status == STATUS_STARTED) {
 			if (UPDATER.compareAndSet(this, status, STATUS_DESTROYED)) {
-				stop();
+				for (CertificateRenewalScheduler scheduler : this.schedulers.values()) {
+					scheduler.disableScheduleRenewal();
+				}
 				this.schedulers.clear();
 				if (this.manageTaskScheduler) {
 					if (this.taskScheduler instanceof DisposableBean) {
@@ -432,17 +433,24 @@ public class CertificateContainer extends CertificateEventPublisher
 
 		private final Duration expiryThreshold;
 
+		private final ExponentialBackOff backOff;
+
 		volatile CertificateContainer.@Nullable CertificateHolder currentBundleRef;
 
 		final Map<CertificateHolder, ScheduledFuture<?>> schedules = new ConcurrentHashMap<>();
+
+		private BackOffExecution backOffExecution;
 
 		CertificateRenewalScheduler(RequestedCertificate requestedCertificate,
 				Duration expiryThreshold) {
 			this.requestedCertificate = requestedCertificate;
 			this.expiryThreshold = expiryThreshold;
+			this.backOff = new ExponentialBackOff(1000, 2);
+			this.backOff.setMaxInterval(TimeUnit.SECONDS.toMillis(60));
+			this.backOffExecution = this.backOff.start();
 		}
 
-		void scheduleRotation(CertificateHolder certificateHolder) {
+		synchronized void scheduleRotation(CertificateHolder certificateHolder) {
 
 			Duration renewalSeconds = getRenewalDelay(getRequiredTaskScheduler().getClock(), certificateHolder.expiry(),
 					expiryThreshold);
@@ -459,16 +467,22 @@ public class CertificateContainer extends CertificateEventPublisher
 				cancelSchedule(current);
 			}
 
-			Runnable task = () -> {
-				try {
-					rotate(certificateHolder);
-				} catch (Exception e) {
-					onError(requestedCertificate, e);
-				}
-			};
+			this.backOffExecution = this.backOff.start();
+			schedule(certificateHolder, renewalSeconds);
+		}
 
-			ScheduledFuture<?> scheduledFuture = getRequiredTaskScheduler().schedule(task,
-					new OneShotTrigger(renewalSeconds));
+		private synchronized void scheduleRetry(CertificateHolder certificateHolder) {
+			schedule(certificateHolder, Duration.ofMillis(this.backOffExecution.nextBackOff()));
+		}
+
+		private void schedule(CertificateHolder certificateHolder, Duration delay) {
+			if (!isRunning() || !certificateRequests.contains(this.requestedCertificate)
+					|| CURRENT_UPDATER.get(this) != certificateHolder) {
+				return;
+			}
+			cancelSchedule(certificateHolder);
+			ScheduledFuture<?> scheduledFuture = getRequiredTaskScheduler().schedule(() -> rotate(certificateHolder),
+					new OneShotTrigger(delay));
 			this.schedules.put(certificateHolder, scheduledFuture);
 		}
 
@@ -481,7 +495,8 @@ public class CertificateContainer extends CertificateEventPublisher
 		private @Nullable CertificateHolder rotate(CertificateHolder certificateHolder) {
 
 			CertificateHolder current = CURRENT_UPDATER.get(CertificateRenewalScheduler.this);
-			if (CURRENT_UPDATER.get(CertificateRenewalScheduler.this) != certificateHolder) {
+			if (!isRunning() || !certificateRequests.contains(this.requestedCertificate)
+					|| current != certificateHolder) {
 				return current;
 			}
 
@@ -491,10 +506,16 @@ public class CertificateContainer extends CertificateEventPublisher
 				logger.debug("Rotating certificate for %s…".formatted(requestedCertificate));
 			}
 
-			CertificateHolder renewedCertificate = null;
+			CertificateHolder renewedCertificate;
 			try {
 				renewedCertificate = request(requestedCertificate);
+			} catch (Exception e) {
+				scheduleRetry(certificateHolder);
+				onError(requestedCertificate, e);
+				return null;
+			}
 
+			try {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Certificate for %s rotated, serial number %s".formatted(requestedCertificate,
 							renewedCertificate.getSerialNumber()));
@@ -528,7 +549,7 @@ public class CertificateContainer extends CertificateEventPublisher
 		/**
 		 * Disables schedule for already scheduled renewals.
 		 */
-		void disableScheduleRenewal() {
+		synchronized void disableScheduleRenewal() {
 			// capture the previous lease to revoke it
 			Set<CertificateHolder> certificates = new HashSet<>(this.schedules.keySet());
 			for (CertificateHolder certificate : certificates) {
