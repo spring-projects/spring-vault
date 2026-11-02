@@ -219,12 +219,9 @@ class CubbyholeAuthenticationUnitTests {
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
-		try {
-			authentication.login();
-			fail("Missing VaultException");
-		} catch (VaultException e) {
-			assertThat(e).hasMessageContaining("does not contain a token");
-		}
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(authentication::login)
+				.withMessageContaining("does not contain a token");
 	}
 
 	@Test
@@ -244,12 +241,9 @@ class CubbyholeAuthenticationUnitTests {
 
 		CubbyholeAuthentication authentication = new CubbyholeAuthentication(options, this.client);
 
-		try {
-			authentication.login();
-			fail("Missing VaultException");
-		} catch (VaultException e) {
-			assertThat(e).hasMessageContaining("does not contain an unique token");
-		}
+		assertThatExceptionOfType(VaultException.class)
+				.isThrownBy(authentication::login)
+				.withMessageContaining("does not contain an unique token");
 	}
 
 }
