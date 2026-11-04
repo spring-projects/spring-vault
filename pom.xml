@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.springframework.vault</groupId>
@@ -44,7 +43,7 @@
 		<okhttp3.version>3.14.9</okhttp3.version>
 		<spring.version>7.0.10</spring.version>
 		<spring-data-bom.version>2025.1.8</spring-data-bom.version>
-		<spring-security-bom.version>7.0.7</spring-security-bom.version>
+		<spring-security-bom.version>7.0.8</spring-security-bom.version>
 		<reactor.version>2025.0.8</reactor.version>
 		<reactive-streams.version>1.0.4</reactive-streams.version>
 
