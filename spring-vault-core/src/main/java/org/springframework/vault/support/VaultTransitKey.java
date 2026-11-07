@@ -47,7 +47,7 @@ public interface VaultTransitKey {
 	/**
 	 * @return the version of the convergent nonce to use. Note: since version 3 the
 	 * algorithm used in {@code transit} convergent encryption returns {@code -1} as
-	 * the version is stored with the key. For backwards compatability this field
+	 * the version is stored with the key. For backwards compatibility this field
 	 * might be useful.
 	 * @since 3.0.3
 	 */
