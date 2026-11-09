@@ -79,8 +79,7 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 
 	private static final String REQUEST_BODY = "Action=GetCallerIdentity&Version=2011-06-15";
 
-	private static final String REQUEST_BODY_BASE64_ENCODED = Base64.getEncoder()
-			.encodeToString(REQUEST_BODY.getBytes(StandardCharsets.UTF_8));
+	private static final String REQUEST_BODY_BASE64_ENCODED = encodeBase64Utf8(REQUEST_BODY);
 
 
 	private final AwsIamAuthenticationOptions options;
@@ -193,11 +192,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			AwsCredentials credentials, Region region) {
 		Map<String, String> login = new HashMap<>();
 		login.put("iam_http_request_method", "POST");
-		login.put("iam_request_url",
-				Base64.getEncoder().encodeToString(options.getEndpointUri().toString().getBytes(StandardCharsets.UTF_8)));
+		login.put("iam_request_url", encodeBase64Utf8(options.getEndpointUri().toString()));
 		login.put("iam_request_body", REQUEST_BODY_BASE64_ENCODED);
 		String headerJson = getSignedHeaders(options, credentials, region);
-		login.put("iam_request_headers", Base64.getEncoder().encodeToString(headerJson.getBytes(StandardCharsets.UTF_8)));
+		login.put("iam_request_headers", encodeBase64Utf8(headerJson));
 		if (!ObjectUtils.isEmpty(options.getRole())) {
 			login.put("role", options.getRole());
 		}
@@ -234,6 +232,10 @@ public class AwsIamAuthentication implements ClientAuthentication, Authenticatio
 			headers.put("X-Vault-AWS-IAM-Server-ID", Collections.singletonList(options.getServerId()));
 		}
 		return headers;
+	}
+
+	static String encodeBase64Utf8(String str) {
+		return Base64.getEncoder().encodeToString(str.getBytes(StandardCharsets.UTF_8));
 	}
 
 }
