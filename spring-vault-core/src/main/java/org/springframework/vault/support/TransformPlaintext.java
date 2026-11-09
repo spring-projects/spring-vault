@@ -113,7 +113,7 @@ public class TransformPlaintext {
 	 * {@link java.nio.charset.Charset}.
 	 */
 	public String asString() {
-		return asString(Charset.defaultCharset());
+		return new String(getPlaintext());
 	}
 
 	/**
