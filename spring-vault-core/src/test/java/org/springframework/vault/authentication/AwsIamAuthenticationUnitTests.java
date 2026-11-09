@@ -16,6 +16,7 @@
 
 package org.springframework.vault.authentication;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -122,6 +123,7 @@ class AwsIamAuthenticationUnitTests {
 		AwsIamAuthenticationOptions options = AwsIamAuthenticationOptions.builder()
 				.region(Region.US_WEST_1)
 				.credentials(AwsBasicCredentials.create("foo", "bar"))
+				.endpointUri(URI.create("https://example.com/äöüß"))
 				.build();
 
 		Map<String, String> request = AwsIamAuthentication.createRequestBody(options);

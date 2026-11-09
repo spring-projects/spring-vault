@@ -16,14 +16,10 @@
 
 package org.springframework.vault.core;
 
-import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-
 import reactor.core.publisher.Mono;
 
 import org.springframework.vault.support.VaultResponse;
@@ -47,7 +43,7 @@ class ReactiveVaultTransitTemplateUnitTests {
 	void shouldKeepDefaultCharsetForExistingStringMethods() {
 
 		String plaintext = "Schlüssel";
-		String encoded = Base64.getEncoder().encodeToString(plaintext.getBytes(Charset.defaultCharset()));
+		String encoded = Base64.getEncoder().encodeToString(plaintext.getBytes());
 		VaultResponse response = new VaultResponse();
 		response.setData(Map.of("ciphertext", "vault:v1:encrypted", "plaintext", encoded));
 		when(this.operations.write("transit/encrypt/key", Map.of("plaintext", encoded)))
