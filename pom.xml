@@ -39,12 +39,12 @@
 		<kotlin-coroutines.version>1.11.0</kotlin-coroutines.version>
 		<mockk.version>1.14.12</mockk.version>
 		<mockito-core.version>5.23.0</mockito-core.version>
-		<nullaway.version>0.14.1</nullaway.version>
-		<okhttp3.version>5.5.0</okhttp3.version>
-		<spring.version>7.1.0-M1</spring.version>
-		<spring-data-bom.version>2026.1.0-M1</spring-data-bom.version>
-		<spring-security-bom.version>7.2.0-M1</spring-security-bom.version>
-		<reactor.version>2026.0.0-M1</reactor.version>
+		<nullaway.version>0.13.8</nullaway.version>
+		<okhttp3.version>5.4.0</okhttp3.version>
+		<spring.version>7.0.11-SNAPSHOT</spring.version>
+		<spring-data-bom.version>2026.0.2</spring-data-bom.version>
+		<spring-security-bom.version>7.1.2</spring-security-bom.version>
+		<reactor.version>2025.0.8</reactor.version>
 		<reactive-streams.version>1.0.4</reactive-streams.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
