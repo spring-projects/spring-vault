@@ -37,7 +37,7 @@
 		<junit.version>6.0.3</junit.version>
 		<kotlin.version>2.2.21</kotlin.version>
 		<kotlin-coroutines.version>1.10.2</kotlin-coroutines.version>
-		<mockk.version>1.14.11</mockk.version>
+		<mockk.version>1.14.12</mockk.version>
 		<mockito-core.version>5.23.0</mockito-core.version>
 		<nullaway.version>0.13.8</nullaway.version>
 		<okhttp3.version>3.14.9</okhttp3.version>
@@ -910,13 +910,13 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
-					<version>3.6.2</version>
+					<version>3.7.0</version>
 				</plugin>
 
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
-					<version>1.8.0</version>
+					<version>1.9.0</version>
 				</plugin>
 
 				<plugin>
