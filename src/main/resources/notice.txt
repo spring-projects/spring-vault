@@ -1,4 +1,4 @@
-Spring Vault 4.1.1 (4.1.1)
+Spring Vault 4.1.2 (4.1.2)
 Copyright (c) [2016-2026] Pivotal Software, Inc.
 
 This product is licensed to you under the Apache License, Version 2.0 (the "License").
