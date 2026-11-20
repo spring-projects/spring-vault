@@ -25,7 +25,7 @@ jobs:
       - name: Setup Java and Maven
         uses: spring-projects/spring-data-build/actions/setup-maven@main
         with:
-          java-version: 'main'
+          java-version: '17'
           develocity-access-key: '${{ secrets.DEVELOCITY_ACCESS_KEY }}'
 
       - name: Set up refname build
