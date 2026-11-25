@@ -14,7 +14,10 @@ permissions: read-all
 jobs:
   antora-oss-site:
     if: github.repository_owner == 'spring-projects'
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.ACTION_RUNNER || 'ubuntu-latest' }}
+    env:
+      OSS_ARTIFACTORY_USR: '${{ secrets.ARTIFACTORY_USERNAME }}'
+      OSS_ARTIFACTORY_PSW: '${{ secrets.ARTIFACTORY_PASSWORD }}'
     steps:
 
       - name: Checkout
@@ -47,13 +50,17 @@ jobs:
             antora/package-lock.json
           key: ${{ runner.os }}-nodejs-${{ hashFiles('antora/package.json') }}
 
+      - name: Set up Maven Settings
+        env:
+          SETTINGS_XML: '${{ vars.SETTINGS_XML }}'
+        run: |
+          mkdir -p ~/.m2
+          rm -f ~/.m2/settings.xml
+          echo "${SETTINGS_XML}" > ~/.m2/settings.xml
+
       - name: Run Antora
         run: |
           MAVEN_ARGS="-B"
-          if [[ -f "settings.xml" ]]; then
-            MAVEN_ARGS+=" -s settings.xml"
-          fi
-
           if [[ "${RUNNER_DEBUG}" == "1" || "${ACTIONS_STEP_DEBUG}" == "true" ]]; then
             echo "::notice::transfer-progress enabled"
           else
@@ -61,6 +68,7 @@ jobs:
           fi
           export MAVEN_ARGS
           ./mvnw antora
+
       - name: Copy the cache to be included in the site
         run: cp -rf build/antora/inject-collector-cache-config-extension/.cache target/antora/site
 
