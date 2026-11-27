@@ -381,6 +381,91 @@ class SecretLeaseContainerUnitTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	void retainedRenewalFailureShouldRetryBeforeLeaseExpires() {
+
+		Instant acquiredAt = Instant.parse("2026-01-01T00:00:00Z");
+		AtomicReference<Instant> now = new AtomicReference<>(acquiredAt);
+		Clock clock = mock(Clock.class);
+		when(clock.instant()).thenAnswer(invocation -> now.get());
+		when(this.taskScheduler.getClock()).thenReturn(clock);
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+
+		VaultResponse secrets = createSecrets();
+		secrets.setLeaseDuration(20);
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(secrets);
+		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenThrow(new VaultException("Renewal failure"))
+				.thenReturn(Lease.of("lease", Duration.ofSeconds(20), true));
+		this.secretLeaseContainer.setMinRenewal(Duration.ofSeconds(2));
+		this.secretLeaseContainer.setExpiryThreshold(Duration.ofSeconds(7));
+		this.secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
+		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
+		this.secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isEqualTo(acquiredAt.plusSeconds(13));
+
+		now.set(acquiredAt.plusSeconds(16)); // first renewal started at 13s and timed out after 3s
+		runnableCaptor.getValue().run();
+
+		verify(this.taskScheduler, times(2)).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isEqualTo(acquiredAt.plusSeconds(18));
+
+		now.set(acquiredAt.plusSeconds(18));
+		runnableCaptor.getValue().run();
+		verify(this.taskScheduler, times(3)).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isEqualTo(acquiredAt.plusSeconds(31));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void retainedRenewalShouldRespectMinimumDelayWhenNoSafeRetryRemains() {
+
+		Instant acquiredAt = Instant.parse("2026-01-01T00:00:00Z");
+		AtomicReference<Instant> now = new AtomicReference<>(acquiredAt);
+		Clock clock = mock(Clock.class);
+		when(clock.instant()).thenAnswer(invocation -> now.get());
+		when(this.taskScheduler.getClock()).thenReturn(clock);
+		when(this.taskScheduler.schedule(any(Runnable.class), any(Trigger.class))).thenReturn(this.scheduledFuture);
+
+		VaultResponse secrets = createSecrets();
+		secrets.setLeaseDuration(20);
+		when(this.vaultOperations.read(this.requestedSecret.getPath())).thenReturn(secrets);
+		when(this.vaultOperations.doWithSession(any(RestOperationsCallback.class)))
+				.thenThrow(new VaultException("Renewal failure"), new VaultException("Renewal failure"),
+						new HttpClientErrorException(HttpStatus.BAD_REQUEST));
+		this.secretLeaseContainer.setMinRenewal(Duration.ofSeconds(2));
+		this.secretLeaseContainer.setExpiryThreshold(Duration.ofSeconds(7));
+		this.secretLeaseContainer.setLeaseStrategy(LeaseStrategy.retainOnError());
+		this.secretLeaseContainer.addRequestedSecret(this.requestedSecret);
+		this.secretLeaseContainer.start();
+
+		ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
+		ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
+		verify(this.taskScheduler).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		triggerCaptor.getValue().nextExecution(null);
+
+		now.set(acquiredAt.plusSeconds(16));
+		runnableCaptor.getValue().run();
+		verify(this.taskScheduler, times(2)).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		triggerCaptor.getValue().nextExecution(null);
+
+		now.set(acquiredAt.plusSeconds(18));
+		runnableCaptor.getValue().run();
+		verify(this.taskScheduler, times(3)).schedule(runnableCaptor.capture(), triggerCaptor.capture());
+		assertThat(triggerCaptor.getValue().nextExecution(null)).isEqualTo(acquiredAt.plusSeconds(31));
+
+		now.set(acquiredAt.plusSeconds(31));
+		runnableCaptor.getValue().run();
+		verify(this.vaultOperations, times(3)).doWithSession(any(RestOperationsCallback.class));
+		verify(this.leaseListenerAdapter).onLeaseEvent(any(SecretLeaseExpiredEvent.class));
+		verify(this.taskScheduler, times(3)).schedule(any(Runnable.class), any(Trigger.class));
+	}
+
+	@Test
 	void shouldRotateNonRenewableLease() {
 
 		final List<SecretLeaseEvent> events = new ArrayList<SecretLeaseEvent>();
